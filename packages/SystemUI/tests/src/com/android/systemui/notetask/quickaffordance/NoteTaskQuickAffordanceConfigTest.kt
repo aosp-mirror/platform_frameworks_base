@@ -28,7 +28,6 @@ import android.os.UserManager
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.dx.mockito.inline.extended.ExtendedMockito
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -40,6 +39,7 @@ import com.android.systemui.notetask.LaunchNotesRoleSettingsTrampolineActivity.C
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
 import com.android.systemui.notetask.NoteTaskInfoResolver
+import com.android.systemui.res.R
 import com.android.systemui.stylus.StylusManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -134,12 +134,9 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
     // region lockScreenState
     @Test
     fun lockScreenState_stylusUsed_userUnlocked_isSelected_shouldEmitVisible() = runTest {
-        TestConfig()
-            .setStylusEverUsed(true)
-            .setUserUnlocked(true)
-            .setConfigSelections(mock<NoteTaskQuickAffordanceConfig>())
-
         val underTest = createUnderTest()
+        TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections(underTest)
+
         val actual by collectLastValue(underTest.lockScreenState)
 
         assertThat(actual).isEqualTo(createLockScreenStateVisible())
@@ -193,13 +190,13 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun lockScreenState_stylusUsed_userUnlocked_noSelected_shouldEmitVisible() = runTest {
+    fun lockScreenState_stylusUsed_userUnlocked_noSelected_shouldEmitHidden() = runTest {
         TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections()
 
         val underTest = createUnderTest()
         val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(createLockScreenStateVisible())
+        assertThat(actual).isEqualTo(LockScreenState.Hidden)
     }
 
     @Test
@@ -223,13 +220,13 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun lockScreenState_stylusUsed_userUnlocked_customSelections_shouldEmitVisible() = runTest {
+    fun lockScreenState_stylusUsed_userUnlocked_customSelections_shouldEmitHidden() = runTest {
         TestConfig().setStylusEverUsed(true).setUserUnlocked(true).setConfigSelections(mock())
 
         val underTest = createUnderTest()
         val actual by collectLastValue(underTest.lockScreenState)
 
-        assertThat(actual).isEqualTo(createLockScreenStateVisible())
+        assertThat(actual).isEqualTo(LockScreenState.Hidden)
     }
 
     @Test
