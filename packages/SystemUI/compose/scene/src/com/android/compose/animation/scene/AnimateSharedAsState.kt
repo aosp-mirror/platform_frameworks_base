@@ -175,11 +175,7 @@ private fun <T> computeValue(
     canOverflow: Boolean,
 ): T {
     val state = layoutImpl.state.transitionState
-    if (
-        state !is TransitionState.Transition ||
-            state.fromScene == state.toScene ||
-            !layoutImpl.isTransitionReady(state)
-    ) {
+    if (state !is TransitionState.Transition || !layoutImpl.isTransitionReady(state)) {
         return sharedValue.value
     }
 

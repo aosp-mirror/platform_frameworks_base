@@ -172,7 +172,7 @@ internal class SceneTransitionLayoutImpl(
                     val width: Int
                     val height: Int
                     val state = state.transitionState
-                    if (state !is TransitionState.Transition || state.fromScene == state.toScene) {
+                    if (state !is TransitionState.Transition) {
                         width = placeable.width
                         height = placeable.height
                     } else {
@@ -232,10 +232,7 @@ internal class SceneTransitionLayoutImpl(
                                         is TransitionState.Idle -> drawContent()
                                         is TransitionState.Transition -> {
                                             // Don't draw scenes that are not ready yet.
-                                            if (
-                                                readyScenes.containsKey(key) ||
-                                                    state.fromScene == state.toScene
-                                            ) {
+                                            if (readyScenes.containsKey(key)) {
                                                 drawContent()
                                             }
                                         }
