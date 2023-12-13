@@ -18,6 +18,7 @@ package com.android.server.location.contexthub;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.contexthub.HostEndpointInfo;
+import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.contexthub.NanSessionRequest;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
@@ -465,6 +466,11 @@ public abstract class IContextHubWrapper {
 
             public void handleNanSessionRequest(NanSessionRequest request) {
                 // TODO(271471342): Implement
+            }
+
+            public void handleMessageDeliveryStatus(char hostEndPointId,
+                    MessageDeliveryStatus messageDeliveryStatus) {
+                // TODO(b/312417087): Implement reliable message support
             }
 
             public byte[] getUuid() {
