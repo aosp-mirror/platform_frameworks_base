@@ -352,7 +352,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mLockSettingsService.deleteRepairModePersistentDataIfNeeded();
             } else if (phase == PHASE_BOOT_COMPLETED) {
                 mLockSettingsService.loadEscrowData();
-                mLockSettingsService.deleteRepairModePersistentDataIfNeeded();
             }
         }
 
