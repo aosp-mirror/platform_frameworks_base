@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Vždy povolit z tohoto počítače"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Povolit"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Ladění přes USB není povoleno"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění přes USB. Chcete-li tuto funkci používat, přepněte na administrativního uživatele."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění přes USB. Pokud chcete tuto funkci používat, přepněte na administrativního uživatele."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Změnit systémový jazyk na <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Jiné zařízení požádalo o změnu systémového jazyka"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Změnit jazyk"</string>
@@ -62,7 +62,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"V této síti vždy povolit"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Povolit"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Bezdrátové ladění není povoleno"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout bezdrátové ladění. Chcete-li tuto funkci používat, přepněte na administrativního uživatele."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout bezdrátové ladění. Pokud chcete tuto funkci používat, přepněte na administrativního uživatele."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Port USB je deaktivován"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Kvůli ochraně vašeho zařízení před tekutinami a nečistotami je port USB zakázán a nerozpozná žádné příslušenství.\n\nAž bude opět bezpečné port USB použít, budeme vás informovat."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Port USB může zjišťovat nabíječky a příslušenství"</string>
