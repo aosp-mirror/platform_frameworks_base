@@ -16,7 +16,13 @@
 
 package com.android.internal.net;
 
+import android.annotation.NonNull;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Binder;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -57,5 +63,56 @@ public class ConnectivityBlobStore {
                 .build();
         mDb = SQLiteDatabase.openDatabase(file, params);
         mDb.execSQL(CREATE_TABLE);
+    }
+
+    /**
+     * Stores the blob under the name in the database. Existing blobs by the same name will be
+     * replaced.
+     *
+     * @param name The name of the blob
+     * @param blob The blob.
+     * @return true if the blob was successfully added. False otherwise.
+     * @hide
+     */
+    public boolean put(@NonNull String name, @NonNull byte[] blob) {
+        final int ownerUid = Binder.getCallingUid();
+        final ContentValues values = new ContentValues();
+        values.put("owner", ownerUid);
+        values.put("name", name);
+        values.put("blob", blob);
+
+        // No need for try-catch since it is done within db.replace
+        // nullColumnHack is for the case where values may be empty since SQL does not allow
+        // inserting a completely empty row. Since values is never empty, set this to null.
+        final long res = mDb.replace(TABLENAME, null /* nullColumnHack */, values);
+        return res > 0;
+    }
+
+    /**
+     * Retrieves a blob by the name from the database.
+     *
+     * @param name Name of the blob to retrieve.
+     * @return The unstructured blob, that is the blob that was stored using
+     *         {@link com.android.internal.net.ConnectivityBlobStore#put}.
+     *         Returns null if no blob was found.
+     * @hide
+     */
+    public byte[] get(@NonNull String name) {
+        final int ownerUid = Binder.getCallingUid();
+        try (Cursor cursor = mDb.query(TABLENAME,
+                new String[] {"blob"} /* columns */,
+                "owner=? AND name=?" /* selection */,
+                new String[] {Integer.toString(ownerUid), name} /* selectionArgs */,
+                null /* groupBy */,
+                null /* having */,
+                null /* orderBy */)) {
+            if (cursor.moveToFirst()) {
+                return cursor.getBlob(0);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error in getting " + name + ": " + e);
+        }
+
+        return null;
     }
 }
