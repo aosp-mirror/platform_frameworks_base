@@ -226,31 +226,6 @@ final class InputMethodUtils {
             }
         }
 
-        private static List<Pair<String, ArrayList<String>>> buildInputMethodsAndSubtypeList(
-                String enabledInputMethodsStr,
-                TextUtils.SimpleStringSplitter inputMethodSplitter,
-                TextUtils.SimpleStringSplitter subtypeSplitter) {
-            ArrayList<Pair<String, ArrayList<String>>> imsList = new ArrayList<>();
-            if (TextUtils.isEmpty(enabledInputMethodsStr)) {
-                return imsList;
-            }
-            inputMethodSplitter.setString(enabledInputMethodsStr);
-            while (inputMethodSplitter.hasNext()) {
-                String nextImsStr = inputMethodSplitter.next();
-                subtypeSplitter.setString(nextImsStr);
-                if (subtypeSplitter.hasNext()) {
-                    ArrayList<String> subtypeHashes = new ArrayList<>();
-                    // The first element is ime id.
-                    String imeId = subtypeSplitter.next();
-                    while (subtypeSplitter.hasNext()) {
-                        subtypeHashes.add(subtypeSplitter.next());
-                    }
-                    imsList.add(new Pair<>(imeId, subtypeHashes));
-                }
-            }
-            return imsList;
-        }
-
         InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
                 boolean copyOnWrite) {
             mMethodMap = methodMap;
@@ -348,9 +323,30 @@ final class InputMethodUtils {
         }
 
         List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeListLocked() {
-            return buildInputMethodsAndSubtypeList(getEnabledInputMethodsStr(),
-                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR),
-                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR));
+            final String enabledInputMethodsStr = getEnabledInputMethodsStr();
+            final TextUtils.SimpleStringSplitter inputMethodSplitter =
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
+            final TextUtils.SimpleStringSplitter subtypeSplitter =
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
+            final ArrayList<Pair<String, ArrayList<String>>> imsList = new ArrayList<>();
+            if (TextUtils.isEmpty(enabledInputMethodsStr)) {
+                return imsList;
+            }
+            inputMethodSplitter.setString(enabledInputMethodsStr);
+            while (inputMethodSplitter.hasNext()) {
+                String nextImsStr = inputMethodSplitter.next();
+                subtypeSplitter.setString(nextImsStr);
+                if (subtypeSplitter.hasNext()) {
+                    ArrayList<String> subtypeHashes = new ArrayList<>();
+                    // The first element is ime id.
+                    String imeId = subtypeSplitter.next();
+                    while (subtypeSplitter.hasNext()) {
+                        subtypeHashes.add(subtypeSplitter.next());
+                    }
+                    imsList.add(new Pair<>(imeId, subtypeHashes));
+                }
+            }
+            return imsList;
         }
 
         void appendAndPutEnabledInputMethodLocked(String id) {
