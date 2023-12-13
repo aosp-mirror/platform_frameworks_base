@@ -20,6 +20,8 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 import android.content.Context
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -39,7 +42,9 @@ class SharedNotificationContainerInteractor
 constructor(
     configurationRepository: ConfigurationRepository,
     private val context: Context,
-    private val splitShadeStateController: SplitShadeStateController
+    private val splitShadeStateController: SplitShadeStateController,
+    keyguardInteractor: KeyguardInteractor,
+    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
 ) {
 
     private val _topPosition = MutableStateFlow(0f)
@@ -74,6 +79,19 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+
+    /**
+     * The notification shelf can extend over the lock icon area if:
+     * * UDFPS supported. Ambient indication will always appear below
+     * * UDFPS not supported and ambient indication not visible, which will appear above lock icon
+     */
+    val useExtraShelfSpace: Flow<Boolean> =
+        combine(
+            keyguardInteractor.ambientIndicationVisible,
+            deviceEntryUdfpsInteractor.isUdfpsSupported,
+        ) { ambientIndicationVisible, isUdfpsSupported ->
+            isUdfpsSupported || !ambientIndicationVisible
+        }
 
     val isSplitShadeEnabled: Flow<Boolean> =
         configurationBasedDimensions

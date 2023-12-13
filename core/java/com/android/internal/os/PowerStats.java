@@ -41,6 +41,7 @@ import java.util.Objects;
  * Container for power stats, acquired by various PowerStatsCollector classes. See subclasses for
  * details.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class PowerStats {
     private static final String TAG = "PowerStats";
 
@@ -67,6 +68,7 @@ public final class PowerStats {
      * This descriptor is used for storing PowerStats and can also be used by power models
      * to adjust the algorithm in accordance with the stats available on the device.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static class Descriptor {
         public static final String XML_TAG_DESCRIPTOR = "descriptor";
         private static final String XML_ATTR_ID = "id";

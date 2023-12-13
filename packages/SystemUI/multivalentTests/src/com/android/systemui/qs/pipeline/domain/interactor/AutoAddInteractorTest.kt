@@ -183,6 +183,22 @@ class AutoAddInteractorTest : SysuiTestCase() {
             assertThat(autoAddedTiles).contains(SPEC)
         }
 
+    @Test
+    fun autoAddable_removeTrackingSignal_notRemovedButUnmarked() =
+        testScope.runTest {
+            autoAddRepository.markTileAdded(USER, SPEC)
+            val autoAddedTiles by collectLastValue(autoAddRepository.autoAddedTiles(USER))
+            val fakeAutoAddable = FakeAutoAddable(SPEC, AutoAddTracking.Always)
+
+            underTest = createInteractor(setOf(fakeAutoAddable))
+
+            fakeAutoAddable.sendRemoveTrackingSignal(USER)
+            runCurrent()
+
+            verify(currentTilesInteractor, never()).removeTiles(any())
+            assertThat(autoAddedTiles).doesNotContain(SPEC)
+        }
+
     private fun createInteractor(autoAddables: Set<AutoAddable>): AutoAddInteractor {
         return AutoAddInteractor(
                 autoAddables,

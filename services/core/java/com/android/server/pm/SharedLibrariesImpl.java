@@ -731,7 +731,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                                 ? PackageManager.DELETE_KEEP_DATA : 0;
                         synchronized (mPm.mInstallLock) {
                             mDeletePackageHelper.deletePackageLIF(pkg.getPackageName(), null, true,
-                                    mPm.mUserManager.getUserIds(), flags, null,
+                                    mPm.mUserManager.getUserIds(), flags, new PackageRemovedInfo(),
                                     true);
                         }
                     }

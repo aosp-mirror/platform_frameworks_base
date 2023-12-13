@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.impl.uimodenight.domain
 
 import android.app.UiModeManager
 import android.content.res.Resources
+import android.content.res.Resources.Theme
 import android.text.TextUtils
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Main
@@ -31,15 +32,19 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 /** Maps [UiModeNightTileModel] to [QSTileState]. */
-class UiModeNightTileMapper @Inject constructor(@Main private val resources: Resources) :
-    QSTileDataToStateMapper<UiModeNightTileModel> {
+class UiModeNightTileMapper
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    private val theme: Theme,
+) : QSTileDataToStateMapper<UiModeNightTileModel> {
     companion object {
         val formatter12Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
         val formatter24Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     }
     override fun map(config: QSTileConfig, data: UiModeNightTileModel): QSTileState =
         with(data) {
-            QSTileState.build(resources, config.uiConfig) {
+            QSTileState.build(resources, theme, config.uiConfig) {
                 var shouldSetSecondaryLabel = false
 
                 if (isPowerSave) {
@@ -116,8 +121,9 @@ class UiModeNightTileMapper @Inject constructor(@Main private val resources: Res
                     if (activationState == QSTileState.ActivationState.ACTIVE)
                         R.drawable.qs_light_dark_theme_icon_on
                     else R.drawable.qs_light_dark_theme_icon_off
-                val iconResource = Icon.Resource(iconRes, null)
-                icon = { iconResource }
+                val loadedIcon =
+                    Icon.Loaded(resources.getDrawable(iconRes, theme), contentDescription = null)
+                icon = { loadedIcon }
 
                 supportedActions =
                     if (activationState == QSTileState.ActivationState.UNAVAILABLE)

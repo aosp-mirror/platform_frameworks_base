@@ -64,7 +64,6 @@ import android.window.TransitionInfo;
 import android.window.TransitionMetrics;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
-import android.window.WindowOrganizer;
 
 import androidx.annotation.BinderThread;
 
@@ -72,6 +71,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
@@ -172,7 +172,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Transition to animate task to desktop. */
     public static final int TRANSIT_MOVE_TO_DESKTOP = WindowManager.TRANSIT_FIRST_CUSTOM + 15;
 
-    private final WindowOrganizer mOrganizer;
+    private final ShellTaskOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
@@ -264,7 +264,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     public Transitions(@NonNull Context context,
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
-            @NonNull WindowOrganizer organizer,
+            @NonNull ShellTaskOrganizer organizer,
             @NonNull TransactionPool pool,
             @NonNull DisplayController displayController,
             @NonNull ShellExecutor mainExecutor,
@@ -280,7 +280,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull ShellInit shellInit,
             @Nullable ShellCommandHandler shellCommandHandler,
             @NonNull ShellController shellController,
-            @NonNull WindowOrganizer organizer,
+            @NonNull ShellTaskOrganizer organizer,
             @NonNull TransactionPool pool,
             @NonNull DisplayController displayController,
             @NonNull ShellExecutor mainExecutor,
@@ -1240,6 +1240,10 @@ public class Transitions implements RemoteCallable<Transitions>,
         }
     }
 
+    private SurfaceControl getHomeTaskOverlayContainer() {
+        return mOrganizer.getHomeTaskOverlayContainer();
+    }
+
     /**
      * Interface for a callback that must be called after a TransitionHandler finishes playing an
      * animation.
@@ -1469,6 +1473,17 @@ public class Transitions implements RemoteCallable<Transitions>,
                         transitions.mHomeTransitionObserver.setHomeTransitionListener(mTransitions,
                                 listener);
                     });
+        }
+
+        @Override
+        public SurfaceControl getHomeTaskOverlayContainer() {
+            SurfaceControl[] result = new SurfaceControl[1];
+            executeRemoteCallWithTaskPermission(mTransitions, "getHomeTaskOverlayContainer",
+                    (controller) -> {
+                        result[0] = controller.getHomeTaskOverlayContainer();
+                    }, true /* blocking */);
+            // Return a copy as writing to parcel releases the original surface
+            return new SurfaceControl(result[0], "Transitions.HomeOverlay");
         }
     }
 

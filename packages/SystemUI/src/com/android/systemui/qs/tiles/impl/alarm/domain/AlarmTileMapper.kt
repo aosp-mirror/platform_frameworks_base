@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.impl.alarm.domain
 
 import android.content.res.Resources
+import android.content.res.Resources.Theme
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.alarm.domain.model.AlarmTileModel
@@ -30,14 +31,18 @@ import java.util.TimeZone
 import javax.inject.Inject
 
 /** Maps [AlarmTileModel] to [QSTileState]. */
-class AlarmTileMapper @Inject constructor(@Main private val resources: Resources) :
-    QSTileDataToStateMapper<AlarmTileModel> {
+class AlarmTileMapper
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    private val theme: Theme,
+) : QSTileDataToStateMapper<AlarmTileModel> {
     companion object {
         val formatter12Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("E hh:mm a")
         val formatter24Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("E HH:mm")
     }
     override fun map(config: QSTileConfig, data: AlarmTileModel): QSTileState =
-        QSTileState.build(resources, config.uiConfig) {
+        QSTileState.build(resources, theme, config.uiConfig) {
             when (data) {
                 is AlarmTileModel.NextAlarmSet -> {
                     activationState = QSTileState.ActivationState.ACTIVE

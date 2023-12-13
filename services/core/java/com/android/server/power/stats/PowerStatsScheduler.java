@@ -18,7 +18,6 @@ package com.android.server.power.stats;
 
 import android.annotation.DurationMillisLong;
 import android.app.AlarmManager;
-import android.content.Context;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.util.IndentingPrintWriter;
@@ -30,6 +29,7 @@ import com.android.internal.os.MonotonicClock;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * Controls the frequency at which {@link PowerStatsSpan}'s are generated and stored in
@@ -39,7 +39,7 @@ public class PowerStatsScheduler {
     private static final long MINUTE_IN_MILLIS = TimeUnit.MINUTES.toMillis(1);
     private static final long HOUR_IN_MILLIS = TimeUnit.HOURS.toMillis(1);
 
-    private final Context mContext;
+    private final AlarmScheduler mAlarmScheduler;
     private boolean mEnablePeriodicPowerStatsCollection;
     @DurationMillisLong
     private final long mAggregatedPowerStatsSpanDuration;
@@ -49,24 +49,38 @@ public class PowerStatsScheduler {
     private final Clock mClock;
     private final MonotonicClock mMonotonicClock;
     private final Handler mHandler;
-    private final BatteryStatsImpl mBatteryStats;
+    private final Runnable mPowerStatsCollector;
+    private final Supplier<Long> mEarliestAvailableBatteryHistoryTimeMs;
     private final PowerStatsAggregator mPowerStatsAggregator;
     private long mLastSavedSpanEndMonotonicTime;
 
-    public PowerStatsScheduler(Context context, PowerStatsAggregator powerStatsAggregator,
+    /**
+     * External dependency on AlarmManager.
+     */
+    public interface AlarmScheduler {
+        /**
+         * Should use AlarmManager to schedule an inexact, non-wakeup alarm.
+         */
+        void scheduleAlarm(long triggerAtMillis, String tag,
+                AlarmManager.OnAlarmListener onAlarmListener, Handler handler);
+    }
+
+    public PowerStatsScheduler(Runnable powerStatsCollector,
+            PowerStatsAggregator powerStatsAggregator,
             @DurationMillisLong long aggregatedPowerStatsSpanDuration,
             @DurationMillisLong long powerStatsAggregationPeriod, PowerStatsStore powerStatsStore,
-            Clock clock, MonotonicClock monotonicClock, Handler handler,
-            BatteryStatsImpl batteryStats) {
-        mContext = context;
+            AlarmScheduler alarmScheduler, Clock clock, MonotonicClock monotonicClock,
+            Supplier<Long> earliestAvailableBatteryHistoryTimeMs, Handler handler) {
         mPowerStatsAggregator = powerStatsAggregator;
         mAggregatedPowerStatsSpanDuration = aggregatedPowerStatsSpanDuration;
         mPowerStatsAggregationPeriod = powerStatsAggregationPeriod;
         mPowerStatsStore = powerStatsStore;
+        mAlarmScheduler = alarmScheduler;
         mClock = clock;
         mMonotonicClock = monotonicClock;
         mHandler = handler;
-        mBatteryStats = batteryStats;
+        mPowerStatsCollector = powerStatsCollector;
+        mEarliestAvailableBatteryHistoryTimeMs = earliestAvailableBatteryHistoryTimeMs;
     }
 
     /**
@@ -81,9 +95,8 @@ public class PowerStatsScheduler {
     }
 
     private void scheduleNextPowerStatsAggregation() {
-        AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME,
-                mClock.elapsedRealtime() + mPowerStatsAggregationPeriod, "PowerStats",
+        mAlarmScheduler.scheduleAlarm(mClock.elapsedRealtime() + mPowerStatsAggregationPeriod,
+                "PowerStats",
                 () -> {
                     schedulePowerStatsAggregation();
                     mHandler.post(this::scheduleNextPowerStatsAggregation);
@@ -96,7 +109,7 @@ public class PowerStatsScheduler {
     @VisibleForTesting
     public void schedulePowerStatsAggregation() {
         // Catch up the power stats collectors
-        mBatteryStats.schedulePowerStatsSampleCollection();
+        mPowerStatsCollector.run();
         mHandler.post(this::aggregateAndStorePowerStats);
     }
 
@@ -105,7 +118,7 @@ public class PowerStatsScheduler {
         long currentMonotonicTime = mMonotonicClock.monotonicTime();
         long startTime = getLastSavedSpanEndMonotonicTime();
         if (startTime < 0) {
-            startTime = mBatteryStats.getHistory().getStartTime();
+            startTime = mEarliestAvailableBatteryHistoryTimeMs.get();
         }
         long endTimeMs = alignToWallClock(startTime + mAggregatedPowerStatsSpanDuration,
                 mAggregatedPowerStatsSpanDuration, currentMonotonicTime, currentTimeMillis);

@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.impl.airplane.domain
 
 import android.content.res.Resources
+import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
@@ -27,18 +28,25 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 
 /** Maps [AirplaneModeTileModel] to [QSTileState]. */
-class AirplaneModeMapper @Inject constructor(@Main private val resources: Resources) :
-    QSTileDataToStateMapper<AirplaneModeTileModel> {
+class AirplaneModeMapper
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    val theme: Theme,
+) : QSTileDataToStateMapper<AirplaneModeTileModel> {
 
     override fun map(config: QSTileConfig, data: AirplaneModeTileModel): QSTileState =
-        QSTileState.build(resources, config.uiConfig) {
+        QSTileState.build(resources, theme, config.uiConfig) {
             val icon =
-                Icon.Resource(
-                    if (data.isEnabled) {
-                        R.drawable.qs_airplane_icon_on
-                    } else {
-                        R.drawable.qs_airplane_icon_off
-                    },
+                Icon.Loaded(
+                    resources.getDrawable(
+                        if (data.isEnabled) {
+                            R.drawable.qs_airplane_icon_on
+                        } else {
+                            R.drawable.qs_airplane_icon_off
+                        },
+                        theme,
+                    ),
                     contentDescription = null
                 )
             this.icon = { icon }

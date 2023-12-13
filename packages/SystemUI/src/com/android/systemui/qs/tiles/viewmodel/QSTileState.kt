@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.viewmodel
 
 import android.content.res.Resources
+import android.content.res.Resources.Theme
 import android.service.quicksettings.Tile
 import android.view.View
 import android.widget.Switch
@@ -47,14 +48,17 @@ data class QSTileState(
 
         fun build(
             resources: Resources,
+            theme: Theme,
             config: QSTileUIConfig,
             build: Builder.() -> Unit
-        ): QSTileState =
-            build(
-                { Icon.Resource(config.iconRes, null) },
+        ): QSTileState {
+            val iconDrawable = resources.getDrawable(config.iconRes, theme)
+            return build(
+                { Icon.Loaded(iconDrawable, null) },
                 resources.getString(config.labelRes),
                 build,
             )
+        }
 
         fun build(icon: () -> Icon, label: CharSequence, build: Builder.() -> Unit): QSTileState =
             Builder(icon, label).apply(build).build()

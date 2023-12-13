@@ -77,6 +77,9 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             ECM_KEYS.add(AppOpsManager.OPSTR_LOADER_USAGE_STATS);
             ECM_KEYS.add(Manifest.permission.BIND_DEVICE_ADMIN);
         }
+
+        ECM_KEYS.add(AppOpsManager.OPSTR_ACCESS_NOTIFICATIONS);
+        ECM_KEYS.add(AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE);
     }
 
     /**

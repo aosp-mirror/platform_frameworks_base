@@ -74,7 +74,7 @@ Once you’ve defined your test, you can use typical commands to execute it loca
 $ atest --host MyTestsRavenwood
 ```
 
-> **Note:** There's a known bug where `atest` currently requires a connected device to run Ravenwood tests, but that device isn't used for testing. Using the `--host` argument above is a way to bypass this requirement until bug #312525698 is fixed.
+> **Note:** There's a known bug #312525698 where `atest` currently requires a connected device to run Ravenwood tests, but that device isn't used for testing. Using the `--host` argument above is a way to bypass this requirement until the bug is fixed.
 
 You can also run your new tests automatically via `TEST_MAPPING` rules like this:
 
@@ -88,6 +88,8 @@ You can also run your new tests automatically via `TEST_MAPPING` rules like this
   ]
 }
 ```
+
+> **Note:** There's a known bug #308854804 where `TEST_MAPPING` is not being applied, so we're currently planning to run all Ravenwood tests unconditionally in presubmit for changes to `frameworks/base/` and `cts/` until there is a better path forward.
 
 ## Strategies for feature flags
 
@@ -112,9 +114,9 @@ This naturally composes together well with any `RavenwoodRule` that your test ma
 
 ## Strategies for migration/bivalent tests
 
-Ravenwood aims to support tests that are written in a “bivalent” way, where the same test code can run on both a real Android device and under a Ravenwood environment.
+Ravenwood aims to support tests that are written in a “bivalent” way, where the same test code can be dual-compiled to run on both a real Android device and under a Ravenwood environment.
 
-In situations where a test method depends on API functionality not yet available under Ravenwood, we provide an annotation to quietly “ignore” that test under Ravenwood, while continuing to validate that test on real devices.  Please note that your test must declare a `RavenwoodRule` for the annotation to take effect.
+In situations where a test method depends on API functionality not yet available under Ravenwood, we provide an annotation to quietly “ignore” that test under Ravenwood, while continuing to validate that test on real devices.  The annotation can be applied to either individual methods or to an entire test class.  Please note that your test class must declare a `RavenwoodRule` for the annotation to take effect.
 
 Test authors are encouraged to provide a `blockedBy` or `reason` argument to help future maintainers understand why a test is being ignored, and under what conditions it might be supported in the future.
 
@@ -137,11 +139,39 @@ public class MyCodeTest {
 }
 ```
 
+At the moment, the `android.content.res.Resources` subsystem isn't yet supported under Ravenwood, but you may still want to dual-compile test suites that depend on references to resources.  Below is a strategy for supporting dual-compiliation, where you can "borrow" the generated resource symbols from your traditional `android_test` target:
+
+```
+android_test {
+    name: "MyTestsDevice",
+    resource_dirs: ["res"],
+...
+
+android_ravenwood_test {
+    name: "MyTestsRavenwood",
+    srcs: [
+        ":MyTestsDevice{.aapt.srcjar}",
+...
+```
+
 ## Strategies for unsupported APIs
 
 As you write tests against Ravenwood, you’ll likely discover API dependencies that aren’t supported yet.  Here’s a few strategies that can help you make progress:
 
-* Your code-under-test may benefit from subtle dependency refactoring to reduce coupling.  (For example, providing a specific `File` argument instead of deriving it internally from a `Context`.)
+* Your code-under-test may benefit from subtle dependency refactoring to reduce coupling.  (For example, providing a specific `File` argument instead of deriving paths internally from a `Context` or `Environment`.)
+    * One common use-case is providing a directory for your test to store temporary files, which can easily be accomplished using the `Files.createTempDirectory()` API which works on both physical devices and under Ravenwood:
+
+```
+import java.nio.file.Files;
+
+@RunWith(AndroidJUnit4.class)
+public class MyTest {
+    @Before
+    public void setUp() throws Exception {
+        File tempDir = Files.createTempDirectory("MyTest").toFile();
+...
+```
+
 * Although mocking code that your team doesn’t own is a generally discouraged testing practice, it can be a valuable pressure relief valve when a dependency isn’t yet supported.
 
 ## Strategies for debugging test development

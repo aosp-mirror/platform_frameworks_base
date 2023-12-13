@@ -49,3 +49,10 @@ flag {
     description: "Add support to unlock the private space using biometrics"
     bug: "312184187"
 }
+
+flag {
+    name: "support_autolock_for_private_space"
+    namespace: "profile_experiences"
+    description: "Add support to lock private space automatically after a time period"
+    bug: "303201022"
+}

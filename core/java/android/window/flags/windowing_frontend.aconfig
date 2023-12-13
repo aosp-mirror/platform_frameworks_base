@@ -16,7 +16,7 @@ flag {
 
 flag {
     name: "defer_display_updates"
-    namespace: "window_manager"
+    namespace: "windowing_frontend"
     description: "Feature flag for deferring DisplayManager updates to WindowManager if Shell transition is running"
     bug: "259220649"
     is_fixed_read_only: true

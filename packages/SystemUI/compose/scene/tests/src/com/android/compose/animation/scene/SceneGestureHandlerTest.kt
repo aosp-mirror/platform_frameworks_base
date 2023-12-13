@@ -117,8 +117,8 @@ class SceneGestureHandlerTest {
         fun nestedScrollConnection(nestedScrollBehavior: NestedScrollBehavior) =
             SceneNestedScrollHandler(
                     gestureHandler = sceneGestureHandler,
-                    startBehavior = nestedScrollBehavior,
-                    endBehavior = nestedScrollBehavior,
+                    topOrLeftBehavior = nestedScrollBehavior,
+                    bottomOrRightBehavior = nestedScrollBehavior,
                 )
                 .connection
 

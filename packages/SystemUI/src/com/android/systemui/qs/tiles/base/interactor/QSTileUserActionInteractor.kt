@@ -24,7 +24,7 @@ interface QSTileUserActionInteractor<DATA_TYPE> {
      * [QSTileInput.data]. It's guaranteed that [QSTileInput.userId] is the same as the id passed to
      * [QSTileDataInteractor] to get [QSTileInput.data].
      *
-     * It's safe to run long running computations inside this function in this.
+     * It's safe to run long running computations inside this function.
      */
     @WorkerThread suspend fun handleInput(input: QSTileInput<DATA_TYPE>)
 }

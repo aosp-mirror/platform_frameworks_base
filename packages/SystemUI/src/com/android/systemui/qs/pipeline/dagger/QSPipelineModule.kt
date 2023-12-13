@@ -20,6 +20,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.qs.pipeline.data.model.RestoreProcessor
 import com.android.systemui.qs.pipeline.data.repository.DefaultTilesQSHostRepository
 import com.android.systemui.qs.pipeline.data.repository.DefaultTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
@@ -39,13 +40,16 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import dagger.multibindings.Multibinds
 
-@Module(includes = [QSAutoAddModule::class])
+@Module(includes = [QSAutoAddModule::class, RestoreProcessorsModule::class])
 abstract class QSPipelineModule {
 
     /** Implementation for [TileSpecRepository] */
     @Binds
     abstract fun provideTileSpecRepository(impl: TileSpecSettingsRepository): TileSpecRepository
+
+    @Multibinds abstract fun provideRestoreProcessors(): Set<RestoreProcessor>
 
     @Binds
     abstract fun provideDefaultTilesRepository(

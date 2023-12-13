@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
-import android.text.format.DateFormat;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
@@ -39,7 +38,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.text.ParseException;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -60,7 +60,7 @@ public class PowerStatsAggregatorTest {
     public void setup() throws ParseException {
         mHistory = new BatteryStatsHistory(32, 1024,
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
-                mMonotonicClock);
+                mMonotonicClock, mock(BatteryStatsHistory.TraceDelegate.class));
 
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(TEST_POWER_COMPONENT)
@@ -179,9 +179,9 @@ public class PowerStatsAggregatorTest {
 
     @NonNull
     private static CharSequence formatDateTime(long timeInMillis) {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        cal.setTimeInMillis(timeInMillis);
-        return DateFormat.format("yyyy-MM-dd hh:mm:ss", cal);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        format.getCalendar().setTimeZone(TimeZone.getTimeZone("GMT"));
+        return format.format(new Date(timeInMillis));
     }
 
     @Test

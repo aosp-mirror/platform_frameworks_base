@@ -72,6 +72,7 @@ class FakeUserTracker(
         onBeforeUserSwitching()
         onUserChanging()
         onUserChanged()
+        onProfileChanged()
     }
 
     fun onBeforeUserSwitching(userId: Int = _userId) {

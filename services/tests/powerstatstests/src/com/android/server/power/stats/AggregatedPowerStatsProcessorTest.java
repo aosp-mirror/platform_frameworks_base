@@ -35,7 +35,7 @@ import java.util.Objects;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class AggregatePowerStatsProcessorTest {
+public class AggregatedPowerStatsProcessorTest {
 
     @Test
     public void createPowerEstimationPlan_allDeviceStatesPresentInUidStates() {

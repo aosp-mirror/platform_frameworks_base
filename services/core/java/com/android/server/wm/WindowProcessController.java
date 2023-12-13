@@ -66,6 +66,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Build;
+import android.os.DeadObjectException;
 import android.os.FactoryTest;
 import android.os.LocaleList;
 import android.os.Message;
@@ -1675,6 +1676,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             @NonNull ClientTransactionItem transactionItem) {
         try {
             mAtm.getLifecycleManager().scheduleTransactionItem(thread, transactionItem);
+        } catch (DeadObjectException e) {
+            // Expected if the process has been killed.
+            Slog.w(TAG_CONFIGURATION, "Failed for dead process. ClientTransactionItem="
+                    + transactionItem + " owner=" + mOwner);
         } catch (Exception e) {
             Slog.e(TAG_CONFIGURATION, "Failed to schedule ClientTransactionItem="
                     + transactionItem + " owner=" + mOwner, e);

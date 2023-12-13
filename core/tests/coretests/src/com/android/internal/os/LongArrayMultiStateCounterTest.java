@@ -57,6 +57,16 @@ public class LongArrayMultiStateCounterTest {
     }
 
     @Test
+    public void setValue() {
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
+
+        counter.setValues(0, new long[]{1, 2, 3, 4});
+        counter.setValues(1, new long[]{5, 6, 7, 8});
+        assertCounts(counter, 0, new long[]{1, 2, 3, 4});
+        assertCounts(counter, 1, new long[]{5, 6, 7, 8});
+    }
+
+    @Test
     public void setEnabled() {
         LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
         counter.setState(0, 1000);

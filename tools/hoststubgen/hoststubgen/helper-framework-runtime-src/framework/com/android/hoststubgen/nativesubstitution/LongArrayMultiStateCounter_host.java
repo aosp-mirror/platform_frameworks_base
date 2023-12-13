@@ -100,6 +100,10 @@ public class LongArrayMultiStateCounter_host {
             mLastStateChangeTimestampMs = timestampMs;
         }
 
+        public void setValue(int state, long[] values) {
+            System.arraycopy(values, 0, mStates[state].mCounter, 0, mArrayLength);
+        }
+
         public void updateValue(long[] values, long timestampMs) {
             if (mEnabled || mLastUpdateTimestampMs < mLastStateChangeTimestampMs) {
                 if (timestampMs < mLastStateChangeTimestampMs) {
@@ -304,6 +308,11 @@ public class LongArrayMultiStateCounter_host {
 
     public static int native_getArrayLength(long instanceId) {
         return getInstance(instanceId).mArrayLength;
+    }
+
+    public static void native_setValues(long instanceId, int state, long containerInstanceId) {
+        getInstance(instanceId).setValue(state,
+                LongArrayContainer_host.getInstance(containerInstanceId));
     }
 
     public static void native_updateValues(long instanceId, long containerInstanceId,

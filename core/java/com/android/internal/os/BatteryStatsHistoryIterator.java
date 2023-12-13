@@ -28,6 +28,7 @@ import java.util.Iterator;
 /**
  * An iterator for {@link BatteryStats.HistoryItem}'s.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.HistoryItem>,
         AutoCloseable {
     private static final boolean DEBUG = false;

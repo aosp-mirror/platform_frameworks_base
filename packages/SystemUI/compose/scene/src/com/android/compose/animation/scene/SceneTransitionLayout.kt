@@ -126,14 +126,24 @@ interface SceneScope {
      * Adds a [NestedScrollConnection] to intercept scroll events not handled by the scrollable
      * component.
      *
-     * @param orientation is used to determine if we handle top/bottom or left/right events.
-     * @param startBehavior when we should perform the overscroll animation at the top/left.
-     * @param endBehavior when we should perform the overscroll animation at the bottom/right.
+     * @param leftBehavior when we should perform the overscroll animation at the left.
+     * @param rightBehavior when we should perform the overscroll animation at the right.
      */
-    fun Modifier.nestedScrollToScene(
-        orientation: Orientation,
-        startBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
-        endBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+    fun Modifier.horizontalNestedScrollToScene(
+        leftBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        rightBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+    ): Modifier
+
+    /**
+     * Adds a [NestedScrollConnection] to intercept scroll events not handled by the scrollable
+     * component.
+     *
+     * @param topBehavior when we should perform the overscroll animation at the top.
+     * @param bottomBehavior when we should perform the overscroll animation at the bottom.
+     */
+    fun Modifier.verticalNestedScrollToScene(
+        topBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
     ): Modifier
 
     /**

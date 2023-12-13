@@ -229,7 +229,7 @@ constructor(
      * When expanding or when the user is interacting with the shade, keep the count stable; do not
      * emit a value.
      */
-    fun getMaxNotifications(calculateSpace: (Float) -> Int): Flow<Int> {
+    fun getMaxNotifications(calculateSpace: (Float, Boolean) -> Int): Flow<Int> {
         val showLimitedNotifications = isOnLockscreenWithoutShade
         val showUnlimitedNotifications =
             combine(
@@ -245,11 +245,17 @@ constructor(
                 shadeInteractor.isUserInteracting,
                 bounds,
                 interactor.notificationStackChanged.onStart { emit(Unit) },
-            ) { showLimitedNotifications, showUnlimitedNotifications, isUserInteracting, bounds, _
-                ->
+                interactor.useExtraShelfSpace,
+            ) { flows ->
+                val showLimitedNotifications = flows[0] as Boolean
+                val showUnlimitedNotifications = flows[1] as Boolean
+                val isUserInteracting = flows[2] as Boolean
+                val bounds = flows[3] as NotificationContainerBounds
+                val useExtraShelfSpace = flows[5] as Boolean
+
                 if (!isUserInteracting) {
                     if (showLimitedNotifications) {
-                        emit(calculateSpace(bounds.bottom - bounds.top))
+                        emit(calculateSpace(bounds.bottom - bounds.top, useExtraShelfSpace))
                     } else if (showUnlimitedNotifications) {
                         emit(-1)
                     }

@@ -25,6 +25,7 @@ import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -61,6 +62,19 @@ constructor(
      * [onSceneChanged].
      */
     val desiredScene: StateFlow<CommunalSceneKey> = communalRepository.desiredScene
+
+    /** Transition state of the hub mode. */
+    val transitionState: StateFlow<ObservableCommunalTransitionState> =
+        communalRepository.transitionState
+
+    /**
+     * Updates the transition state of the hub [SceneTransitionLayout].
+     *
+     * Note that you must call is with `null` when the UI is done or risk a memory leak.
+     */
+    fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?) {
+        communalRepository.setTransitionState(transitionState)
+    }
 
     /**
      * Flow that emits a boolean if the communal UI is showing, ie. the [desiredScene] is the
