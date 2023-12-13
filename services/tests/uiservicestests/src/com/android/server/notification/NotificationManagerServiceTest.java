@@ -211,6 +211,9 @@ import android.os.WorkSource;
 import android.permission.PermissionManager;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.platform.test.rule.DeniedDevices;
+import android.platform.test.rule.DeviceProduct;
+import android.platform.test.rule.LimitDevicesRule;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -281,6 +284,7 @@ import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -313,6 +317,7 @@ import java.util.function.Consumer;
 @RunWith(AndroidTestingRunner.class)
 @SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the service.
 @RunWithLooper
+@DeniedDevices(denied = {DeviceProduct.CF_AUTO})
 public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private static final String TEST_PACKAGE = "The.name.is.Package.Test.Package";
@@ -330,6 +335,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private final int mUid = Binder.getCallingUid();
     private final @UserIdInt int mUserId = UserHandle.getUserId(mUid);
+
+    @ClassRule
+    public static final LimitDevicesRule sLimitDevicesRule = new LimitDevicesRule();
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
