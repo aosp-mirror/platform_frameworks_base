@@ -129,4 +129,28 @@ public class ConnectivityBlobStoreTest {
         assertNull(connectivityBlobStore.get(name2));
         assertFalse(connectivityBlobStore.remove(name2));
     }
+
+    @Test
+    public void testList() throws Exception {
+        final String[] unsortedNames = new String[] {
+                TEST_NAME + "1",
+                TEST_NAME + "2",
+                TEST_NAME + "0",
+                "NON_MATCHING_PREFIX",
+                "MATCHING_SUFFIX_" + TEST_NAME
+        };
+        // Expected to match and discard the prefix and be in increasing sorted order.
+        final String[] expected = new String[] {
+                "0",
+                "1",
+                "2"
+        };
+        final ConnectivityBlobStore connectivityBlobStore = createConnectivityBlobStore();
+
+        for (int i = 0; i < unsortedNames.length; i++) {
+            assertTrue(connectivityBlobStore.put(unsortedNames[i], TEST_BLOB));
+        }
+        final String[] actual = connectivityBlobStore.list(TEST_NAME /* prefix */);
+        assertArrayEquals(expected, actual);
+    }
 }
