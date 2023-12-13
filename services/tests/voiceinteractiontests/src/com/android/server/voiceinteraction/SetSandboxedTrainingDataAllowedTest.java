@@ -120,12 +120,12 @@ public class SetSandboxedTrainingDataAllowedTest {
     }
 
     @Test
-    public void setIsReceiveSandboxedTrainingDataAllowed_currentAndPreinstalledAssistant_setsOp() {
+    public void setShouldReceiveSandboxedTrainingData_currentAndPreinstalledAssistant_setsOp() {
         // Set application info so current app is the current and preinstalled assistant.
         mApplicationInfo.uid = Process.myUid();
         mApplicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
 
-        mVoiceInteractionManagerServiceStub.setIsReceiveSandboxedTrainingDataAllowed(
+        mVoiceInteractionManagerServiceStub.setShouldReceiveSandboxedTrainingData(
                 /* allowed= */ true);
 
         verify(mAppOpsManager).setUidMode(mOpIdCaptor.capture(), mUidCaptor.capture(),
@@ -137,7 +137,7 @@ public class SetSandboxedTrainingDataAllowedTest {
     }
 
     @Test
-    public void setIsReceiveSandboxedTrainingDataAllowed_missingPermission_doesNotSetOp() {
+    public void setShouldReceiveSandboxedTrainingData_missingPermission_doesNotSetOp() {
         // Set application info so current app is the current and preinstalled assistant.
         mApplicationInfo.uid = Process.myUid();
         mApplicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
@@ -146,33 +146,33 @@ public class SetSandboxedTrainingDataAllowedTest {
         mPermissionEnforcer.revoke(Manifest.permission.MANAGE_HOTWORD_DETECTION);
 
         assertThrows(SecurityException.class,
-                () -> mVoiceInteractionManagerServiceStub.setIsReceiveSandboxedTrainingDataAllowed(
+                () -> mVoiceInteractionManagerServiceStub.setShouldReceiveSandboxedTrainingData(
                         /* allowed= */ true));
 
         verify(mAppOpsManager, never()).setUidMode(anyInt(), anyInt(), anyInt());
     }
 
     @Test
-    public void setIsReceiveSandboxedTrainingDataAllowed_notPreinstalledAssistant_doesNotSetOp() {
+    public void setShouldReceiveSandboxedTrainingData_notPreinstalledAssistant_doesNotSetOp() {
         // Set application info so current app is not preinstalled assistant.
         mApplicationInfo.uid = Process.myUid();
         mApplicationInfo.flags = ApplicationInfo.FLAG_INSTALLED; // Does not contain FLAG_SYSTEM.
 
         assertThrows(SecurityException.class,
-                () -> mVoiceInteractionManagerServiceStub.setIsReceiveSandboxedTrainingDataAllowed(
+                () -> mVoiceInteractionManagerServiceStub.setShouldReceiveSandboxedTrainingData(
                                 /* allowed= */ true));
 
         verify(mAppOpsManager, never()).setUidMode(anyInt(), anyInt(), anyInt());
     }
 
     @Test
-    public void setIsReceiveSandboxedTrainingDataAllowed_notCurrentAssistant_doesNotSetOp() {
+    public void setShouldReceiveSandboxedTrainingData_notCurrentAssistant_doesNotSetOp() {
         // Set application info so current app is not current assistant.
         mApplicationInfo.uid = Process.SHELL_UID; // Set current assistant uid to shell UID.
         mApplicationInfo.flags = ApplicationInfo.FLAG_SYSTEM;
 
         assertThrows(SecurityException.class,
-                () -> mVoiceInteractionManagerServiceStub.setIsReceiveSandboxedTrainingDataAllowed(
+                () -> mVoiceInteractionManagerServiceStub.setShouldReceiveSandboxedTrainingData(
                                 /* allowed= */ true));
 
         verify(mAppOpsManager, never()).setUidMode(anyInt(), anyInt(), anyInt());
