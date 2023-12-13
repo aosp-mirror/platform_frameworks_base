@@ -56,10 +56,10 @@ interface UdfpsModule {
                         )
                     )
                 } else {
-                    BoundingBoxOverlapDetector()
+                    BoundingBoxOverlapDetector(values[2])
                 }
             } else {
-                return BoundingBoxOverlapDetector()
+                return BoundingBoxOverlapDetector(1f)
             }
         }
     }

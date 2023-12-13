@@ -30,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -38,6 +39,7 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.concurrent.Executor;
@@ -59,6 +61,7 @@ public class ScrimView extends View {
     private float mViewAlpha = 1.0f;
     private Drawable mDrawable;
     private PorterDuffColorFilter mColorFilter;
+    private String mScrimName;
     private int mTintColor;
     private boolean mBlendWithMainColor = true;
     private Runnable mChangeRunnable;
@@ -334,6 +337,15 @@ public class ScrimView extends View {
         if (mDrawable instanceof ScrimDrawable) {
             ((ScrimDrawable) mDrawable).setBottomEdgeConcave(clipScrim);
         }
+    }
+
+    public void setScrimName(String scrimName) {
+        mScrimName = scrimName;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch(mScrimName, ev, super.dispatchTouchEvent(ev));
     }
 
     /**

@@ -64,6 +64,20 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         mHandler = handler;
     }
 
+    @Nullable
+    public static SurfaceControl.RefreshRateRange findBestMatchingRefreshRateRange(
+            @Temperature.ThrottlingStatus int currentStatus,
+            SparseArray<SurfaceControl.RefreshRateRange> throttlingMap) {
+        SurfaceControl.RefreshRateRange foundRange = null;
+        for (int status = currentStatus; status >= 0; status--) {
+            foundRange = throttlingMap.get(status);
+            if (foundRange != null) {
+                break;
+            }
+        }
+        return foundRange;
+    }
+
     void observe() {
         // if failed to register thermal service listener, don't register display listener
         if (!mInjector.registerThermalServiceListener(this)) {
@@ -226,20 +240,6 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         if (mLoggingEnabled) {
             Slog.d(TAG, "Voted: vote=" + vote + ", display =" + displayId);
         }
-    }
-
-    @Nullable
-    private SurfaceControl.RefreshRateRange findBestMatchingRefreshRateRange(
-            @Temperature.ThrottlingStatus int currentStatus,
-            SparseArray<SurfaceControl.RefreshRateRange> throttlingMap) {
-        SurfaceControl.RefreshRateRange foundRange = null;
-        for (int status = currentStatus; status >= 0; status--) {
-            foundRange = throttlingMap.get(status);
-            if (foundRange != null) {
-                break;
-            }
-        }
-        return foundRange;
     }
 
     private void fallbackReportThrottlingIfNeeded(int displayId,

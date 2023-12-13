@@ -18,31 +18,30 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class AuthMethodBouncerViewModelTest : SysuiTestCase() {
 
-    private val testScope = TestScope()
-    private val utils = SceneTestUtils(this, testScope)
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private val authenticationInteractor =
         utils.authenticationInteractor(
             utils.authenticationRepository(),
         )
     private val underTest =
         PinBouncerViewModel(
+            applicationContext = context,
             applicationScope = testScope.backgroundScope,
             interactor =
                 utils.bouncerInteractor(
@@ -55,15 +54,14 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun animateFailure() =
         testScope.runTest {
-            authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
             val animateFailure by collectLastValue(underTest.animateFailure)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(animateFailure).isFalse()
 
             // Wrong PIN:
-            underTest.onPinButtonClicked(3)
-            underTest.onPinButtonClicked(4)
-            underTest.onPinButtonClicked(5)
-            underTest.onPinButtonClicked(6)
+            FakeAuthenticationRepository.DEFAULT_PIN.drop(2).forEach { digit ->
+                underTest.onPinButtonClicked(digit)
+            }
             underTest.onAuthenticateButtonClicked()
             assertThat(animateFailure).isTrue()
 
@@ -71,10 +69,9 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
             assertThat(animateFailure).isFalse()
 
             // Correct PIN:
-            underTest.onPinButtonClicked(1)
-            underTest.onPinButtonClicked(2)
-            underTest.onPinButtonClicked(3)
-            underTest.onPinButtonClicked(4)
+            FakeAuthenticationRepository.DEFAULT_PIN.forEach { digit ->
+                underTest.onPinButtonClicked(digit)
+            }
             underTest.onAuthenticateButtonClicked()
             assertThat(animateFailure).isFalse()
         }

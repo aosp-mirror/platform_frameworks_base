@@ -76,6 +76,9 @@ public class MobileRadioPowerCalculatorTest {
                 .initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
+        // The first ModemActivityInfo doesn't count up.
+        setInitialEmptyModemActivityInfo(stats);
+
         // Scan for a cell
         stats.notePhoneStateLocked(ServiceState.STATE_OUT_OF_SERVICE,
                 TelephonyManager.SIM_STATE_READY,
@@ -192,6 +195,9 @@ public class MobileRadioPowerCalculatorTest {
         mStatsRule.setTestPowerProfile(R.xml.power_profile_test_modem_calculator_multiactive)
                 .initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        // The first ModemActivityInfo doesn't count up.
+        setInitialEmptyModemActivityInfo(stats);
 
         // Scan for a cell
         stats.notePhoneStateLocked(ServiceState.STATE_OUT_OF_SERVICE,
@@ -344,6 +350,9 @@ public class MobileRadioPowerCalculatorTest {
         mStatsRule.setTestPowerProfile(R.xml.power_profile_test_legacy_modem)
                 .initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        // The first ModemActivityInfo doesn't count up.
+        setInitialEmptyModemActivityInfo(stats);
 
         // Scan for a cell
         stats.notePhoneStateLocked(ServiceState.STATE_OUT_OF_SERVICE,
@@ -581,6 +590,9 @@ public class MobileRadioPowerCalculatorTest {
                 .initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
+        // The first ModemActivityInfo doesn't count up.
+        setInitialEmptyModemActivityInfo(stats);
+
         // Scan for a cell
         stats.notePhoneStateLocked(ServiceState.STATE_OUT_OF_SERVICE,
                 TelephonyManager.SIM_STATE_READY,
@@ -657,6 +669,9 @@ public class MobileRadioPowerCalculatorTest {
                         BatteryStatsImpl.PER_UID_MODEM_POWER_MODEL_MODEM_ACTIVITY_INFO_RX_TX)
                 .initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        // The first ModemActivityInfo doesn't count up.
+        setInitialEmptyModemActivityInfo(stats);
 
         stats.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH, 0, -1,
                 0, 0);
@@ -836,6 +851,9 @@ public class MobileRadioPowerCalculatorTest {
                         BatteryStatsImpl.PER_UID_MODEM_POWER_MODEL_MODEM_ACTIVITY_INFO_RX_TX)
                 .initMeasuredEnergyStatsLocked();
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
+
+        // The first ModemActivityInfo doesn't count up.
+        setInitialEmptyModemActivityInfo(stats);
 
         stats.noteMobileRadioPowerStateLocked(DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH, 0, -1,
                 0, 0);
@@ -1018,5 +1036,11 @@ public class MobileRadioPowerCalculatorTest {
         assertThat(uidConsumer.getConsumedPower(foreground)).isWithin(PRECISION).of(3.62064);
         assertThat(uidConsumer.getConsumedPower(background)).isWithin(PRECISION).of(2.08130);
         assertThat(uidConsumer.getConsumedPower(fgs)).isWithin(PRECISION).of(0);
+    }
+
+    public void setInitialEmptyModemActivityInfo(BatteryStatsImpl stats) {
+        // Initial empty ModemActivityInfo.
+        final ModemActivityInfo emptyMai = new ModemActivityInfo(0L, 0L, 0L, new int[5], 0L);
+        stats.noteModemControllerActivity(emptyMai, 0, 0, 0, mNetworkStatsManager);
     }
 }

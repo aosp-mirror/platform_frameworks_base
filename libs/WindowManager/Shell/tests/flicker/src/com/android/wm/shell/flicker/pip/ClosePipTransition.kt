@@ -20,14 +20,14 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.LAUNCHER
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.Test
 import org.junit.runners.Parameterized
 
 /** Base class for exiting pip (closing pip window) without returning to the app */
-abstract class ClosePipTransition(flicker: FlickerTest) : PipTransition(flicker) {
+abstract class ClosePipTransition(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = {
         setup { this.setRotation(flicker.scenario.startRotation) }
         teardown { this.setRotation(Rotation.ROTATION_0) }
@@ -74,15 +74,14 @@ abstract class ClosePipTransition(flicker: FlickerTest) : PipTransition(flicker)
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring repetitions, screen orientation
-         * and navigation modes.
+         * See [LegacyFlickerTestFactory.nonRotationTests] for configuring repetitions, screen
+         * orientation and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(Rotation.ROTATION_0)
             )
-        }
     }
 }

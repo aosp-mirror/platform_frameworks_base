@@ -385,8 +385,6 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         // We expect that we've set the surface behind to alpha = 0f since we're not interactive.
         assertEquals(0f, params.alpha)
         assertTrue(params.matrix.isIdentity)
-        assertEquals("Wallpaper surface was expected to have opacity 0",
-                0f, captorWp.getLastValue().alpha)
 
         verifyNoMoreInteractions(surfaceTransactionApplier)
     }

@@ -267,17 +267,22 @@ public final class MediaSession {
     }
 
     /**
-     * Set a pending intent for your media button receiver to allow restarting
-     * playback after the session has been stopped. If your app is started in
-     * this way an {@link Intent#ACTION_MEDIA_BUTTON} intent will be sent via
-     * the pending intent.
-     * <p>
-     * The pending intent is recommended to be explicit to follow the security recommendation of
-     * {@link PendingIntent#getActivity}.
+     * Set a pending intent for your media button receiver to allow restarting playback after the
+     * session has been stopped.
+     *
+     * <p>If your app is started in this way an {@link Intent#ACTION_MEDIA_BUTTON} intent will be
+     * sent via the pending intent.
+     *
+     * <p>The provided {@link PendingIntent} must not target an activity. Passing an activity
+     * pending intent will cause the call to be ignored. Refer to this <a
+     * href="https://developer.android.com/guide/components/activities/background-starts">guide</a>
+     * for more information.
+     *
+     * <p>The pending intent is recommended to be explicit to follow the security recommendation of
+     * {@link PendingIntent#getService}.
      *
      * @param mbr The {@link PendingIntent} to send the media button event to.
      * @see PendingIntent#getActivity
-     *
      * @deprecated Use {@link #setMediaButtonBroadcastReceiver(ComponentName)} instead.
      */
     @Deprecated
@@ -285,7 +290,7 @@ public final class MediaSession {
         try {
             mBinder.setMediaButtonReceiver(mbr);
         } catch (RemoteException e) {
-            Log.wtf(TAG, "Failure in setMediaButtonReceiver.", e);
+            e.rethrowFromSystemServer();
         }
     }
 

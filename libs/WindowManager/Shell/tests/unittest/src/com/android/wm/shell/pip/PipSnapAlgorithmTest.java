@@ -25,6 +25,8 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 
 import org.junit.Before;
 import org.junit.Test;

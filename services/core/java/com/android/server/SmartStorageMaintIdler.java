@@ -25,6 +25,7 @@ import android.content.Context;
 import android.util.Slog;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SmartStorageMaintIdler extends JobService {
     private static final String TAG = "SmartStorageMaintIdler";
@@ -34,15 +35,15 @@ public class SmartStorageMaintIdler extends JobService {
 
     private static final int SMART_MAINT_JOB_ID = 2808;
 
-    private boolean mStarted;
+    private final AtomicBoolean mStarted = new AtomicBoolean(false);
     private JobParameters mJobParams;
     private final Runnable mFinishCallback = new Runnable() {
         @Override
         public void run() {
             Slog.i(TAG, "Got smart storage maintenance service completion callback");
-            if (mStarted) {
+            if (mStarted.get()) {
                 jobFinished(mJobParams, false);
-                mStarted = false;
+                mStarted.set(false);
             }
             // ... and try again in a next period
             scheduleSmartIdlePass(SmartStorageMaintIdler.this,
@@ -52,18 +53,26 @@ public class SmartStorageMaintIdler extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        mJobParams = params;
-        StorageManagerService ms = StorageManagerService.sSelf;
-        if (ms != null) {
-            mStarted = true;
-            ms.runSmartIdleMaint(mFinishCallback);
+        final StorageManagerService ms = StorageManagerService.sSelf;
+        if (mStarted.compareAndSet(false, true)) {
+            new Thread() {
+                public void run() {
+                    mJobParams = params;
+                    if (ms != null) {
+                        ms.runSmartIdleMaint(mFinishCallback);
+                    } else {
+                        mStarted.set(false);
+                    }
+                }
+            }.start();
+            return ms != null;
         }
-        return ms != null;
+        return false;
     }
 
     @Override
     public boolean onStopJob(JobParameters params) {
-        mStarted = false;
+        mStarted.set(false);
         return false;
     }
 

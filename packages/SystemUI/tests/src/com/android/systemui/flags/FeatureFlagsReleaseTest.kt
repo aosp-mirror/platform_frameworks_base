@@ -44,7 +44,7 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     private val serverFlagReader = ServerFlagReaderFake()
 
 
-    private val flagA = ReleasedFlag(501, name = "a", namespace = "test")
+    private val flagA = ReleasedFlag(name = "a", namespace = "test")
 
     @Before
     fun setup() {
@@ -62,11 +62,10 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
 
     @Test
     fun testBooleanResourceFlag() {
-        val flagId = 213
         val flagResourceId = 3
         val flagName = "213"
         val flagNamespace = "test"
-        val flag = ResourceBooleanFlag(flagId, flagName, flagNamespace, flagResourceId)
+        val flag = ResourceBooleanFlag(flagName, flagNamespace, flagResourceId)
         whenever(mResources.getBoolean(flagResourceId)).thenReturn(true)
         assertThat(featureFlagsRelease.isEnabled(flag)).isTrue()
     }
@@ -79,33 +78,32 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         whenever(mResources.getString(1004)).thenAnswer { throw NameNotFoundException() }
 
         assertThat(featureFlagsRelease.getString(
-            ResourceStringFlag(1, "1", "test", 1001))).isEqualTo("")
+            ResourceStringFlag("1", "test", 1001))).isEqualTo("")
         assertThat(featureFlagsRelease.getString(
-            ResourceStringFlag(2, "2", "test", 1002))).isEqualTo("res2")
+            ResourceStringFlag("2", "test", 1002))).isEqualTo("res2")
 
         assertThrows(NullPointerException::class.java) {
-            featureFlagsRelease.getString(ResourceStringFlag(3, "3", "test", 1003))
+            featureFlagsRelease.getString(ResourceStringFlag("3", "test", 1003))
         }
         assertThrows(NameNotFoundException::class.java) {
-            featureFlagsRelease.getString(ResourceStringFlag(4, "4", "test", 1004))
+            featureFlagsRelease.getString(ResourceStringFlag("4", "test", 1004))
         }
     }
 
     @Test
     fun testSysPropBooleanFlag() {
-        val flagId = 213
         val flagName = "sys_prop_flag"
         val flagNamespace = "test"
         val flagDefault = true
 
-        val flag = SysPropBooleanFlag(flagId, flagName, flagNamespace, flagDefault)
+        val flag = SysPropBooleanFlag(flagName, flagNamespace, flagDefault)
         whenever(mSystemProperties.getBoolean(flagName, flagDefault)).thenReturn(flagDefault)
         assertThat(featureFlagsRelease.isEnabled(flag)).isEqualTo(flagDefault)
     }
 
     @Test
     fun serverSide_OverridesReleased_MakesFalse() {
-        val flag = ReleasedFlag(100, "100", "test")
+        val flag = ReleasedFlag("100", "test")
 
         serverFlagReader.setFlagValue(flag.namespace, flag.name, false)
 
@@ -114,7 +112,7 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
 
     @Test
     fun serverSide_OverridesUnreleased_Ignored() {
-        val flag = UnreleasedFlag(100, "100", "test")
+        val flag = UnreleasedFlag("100", "test")
 
         serverFlagReader.setFlagValue(flag.namespace, flag.name, true)
 

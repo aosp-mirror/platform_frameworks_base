@@ -20,9 +20,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -31,8 +32,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.mockito.whenever
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -55,7 +54,12 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         repository = FakeKeyguardTransitionRepository()
-        val interactor = KeyguardTransitionInteractor(repository, TestScope().backgroundScope)
+        val interactor =
+            KeyguardTransitionInteractorFactory.create(
+                    scope = TestScope().backgroundScope,
+                    repository = repository,
+                )
+                .keyguardTransitionInteractor
         underTest =
             PrimaryBouncerToGoneTransitionViewModel(
                 interactor,
@@ -70,9 +74,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun bouncerAlpha() =
         runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<Float>()
-
-            val job = underTest.bouncerAlpha.onEach { values.add(it) }.launchIn(this)
+            val values by collectValues(underTest.bouncerAlpha)
 
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             repository.sendTransitionStep(step(0.3f))
@@ -80,16 +82,12 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
             assertThat(values.size).isEqualTo(3)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
-
-            job.cancel()
         }
 
     @Test
     fun bouncerAlpha_runDimissFromKeyguard() =
         runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<Float>()
-
-            val job = underTest.bouncerAlpha.onEach { values.add(it) }.launchIn(this)
+            val values by collectValues(underTest.bouncerAlpha)
 
             whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(true)
 
@@ -99,16 +97,52 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
             assertThat(values.size).isEqualTo(3)
             values.forEach { assertThat(it).isEqualTo(0f) }
+        }
 
-            job.cancel()
+    @Test
+    fun lockscreenAlpha() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values by collectValues(underTest.lockscreenAlpha)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(1f))
+
+            assertThat(values.size).isEqualTo(2)
+            values.forEach { assertThat(it).isEqualTo(0f) }
+        }
+
+    @Test
+    fun lockscreenAlpha_runDimissFromKeyguard() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values by collectValues(underTest.lockscreenAlpha)
+
+            whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(true)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(1f))
+
+            assertThat(values.size).isEqualTo(2)
+            values.forEach { assertThat(it).isEqualTo(1f) }
+        }
+
+    @Test
+    fun lockscreenAlpha_leaveShadeOpen() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values by collectValues(underTest.lockscreenAlpha)
+
+            whenever(statusBarStateController.leaveOpenOnKeyguardHide()).thenReturn(true)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(1f))
+
+            assertThat(values.size).isEqualTo(2)
+            values.forEach { assertThat(it).isEqualTo(1f) }
         }
 
     @Test
     fun scrimAlpha_runDimissFromKeyguard() =
         runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<ScrimAlpha>()
-
-            val job = underTest.scrimAlpha.onEach { values.add(it) }.launchIn(this)
+            val values by collectValues(underTest.scrimAlpha)
 
             whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(true)
 
@@ -119,16 +153,12 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
             assertThat(values.size).isEqualTo(4)
             values.forEach { assertThat(it).isEqualTo(ScrimAlpha()) }
-
-            job.cancel()
         }
 
     @Test
     fun scrimBehindAlpha_leaveShadeOpen() =
         runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<ScrimAlpha>()
-
-            val job = underTest.scrimAlpha.onEach { values.add(it) }.launchIn(this)
+            val values by collectValues(underTest.scrimAlpha)
 
             whenever(statusBarStateController.leaveOpenOnKeyguardHide()).thenReturn(true)
 
@@ -141,16 +171,12 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             values.forEach {
                 assertThat(it).isEqualTo(ScrimAlpha(notificationsAlpha = 1f, behindAlpha = 1f))
             }
-
-            job.cancel()
         }
 
     @Test
     fun scrimBehindAlpha_doNotLeaveShadeOpen() =
         runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<ScrimAlpha>()
-
-            val job = underTest.scrimAlpha.onEach { values.add(it) }.launchIn(this)
+            val values by collectValues(underTest.scrimAlpha)
 
             whenever(statusBarStateController.leaveOpenOnKeyguardHide()).thenReturn(false)
 
@@ -164,8 +190,6 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             values.forEach { assertThat(it.frontAlpha).isEqualTo(0f) }
             values.forEach { assertThat(it.behindAlpha).isIn(Range.closed(0f, 1f)) }
             assertThat(values[3].behindAlpha).isEqualTo(0f)
-
-            job.cancel()
         }
 
     private fun step(

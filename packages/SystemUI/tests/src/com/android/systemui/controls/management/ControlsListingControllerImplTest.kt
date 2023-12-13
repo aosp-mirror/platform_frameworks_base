@@ -37,7 +37,6 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.APP_PANELS_ALL_APPS_ALLOWED
-import com.android.systemui.flags.Flags.USE_APP_PANELS
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.ActivityTaskManagerProxy
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -124,8 +123,6 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
                         arrayOf(componentName.packageName)
                 )
 
-        // Return true by default, we'll test the false path
-        `when`(featureFlags.isEnabled(USE_APP_PANELS)).thenReturn(true)
         // Return false by default, we'll test the true path
         `when`(featureFlags.isEnabled(APP_PANELS_ALL_APPS_ALLOWED)).thenReturn(false)
 
@@ -431,34 +428,6 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
                 ActivityInfo(
                         activityName,
                         enabled = false,
-                        exported = true,
-                        permission = Manifest.permission.BIND_CONTROLS
-                )
-        ))
-
-        val list = listOf(serviceInfo)
-        serviceListingCallbackCaptor.value.onServicesReloaded(list)
-
-        executor.runAllReady()
-
-        assertNull(controller.getCurrentServices()[0].panelActivity)
-    }
-
-    @Test
-    fun testActivityDefaultEnabled_flagDisabled_nullPanel() {
-        `when`(featureFlags.isEnabled(USE_APP_PANELS)).thenReturn(false)
-        val serviceInfo = ServiceInfo(
-                componentName,
-                activityName,
-        )
-
-        `when`(packageManager.getComponentEnabledSetting(eq(activityName)))
-                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
-
-        setUpQueryResult(listOf(
-                ActivityInfo(
-                        activityName,
-                        enabled = true,
                         exported = true,
                         permission = Manifest.permission.BIND_CONTROLS
                 )

@@ -29,5 +29,6 @@ const val SINGLE_APP = 1
 class ScreenShareOption(
     @ScreenShareMode val mode: Int,
     @StringRes val spinnerText: Int,
-    @StringRes val warningText: Int
+    @StringRes val warningText: Int,
+    val spinnerDisabledText: String? = null,
 )

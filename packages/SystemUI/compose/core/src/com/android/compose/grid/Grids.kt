@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import kotlin.math.ceil
 import kotlin.math.max
@@ -126,18 +125,20 @@ private fun Grid(
             ((columns - 1) * horizontalSpacing.toPx()).roundToInt()
         val totalVerticalSpacingBetweenChildren = ((rows - 1) * verticalSpacing.toPx()).roundToInt()
         val childConstraints =
-            Constraints().apply {
-                if (constraints.maxWidth != Constraints.Infinity) {
-                    constrainWidth(
+            Constraints(
+                maxWidth =
+                    if (constraints.maxWidth != Constraints.Infinity) {
                         (constraints.maxWidth - totalHorizontalSpacingBetweenChildren) / columns
-                    )
-                }
-                if (constraints.maxHeight != Constraints.Infinity) {
-                    constrainWidth(
+                    } else {
+                        Constraints.Infinity
+                    },
+                maxHeight =
+                    if (constraints.maxHeight != Constraints.Infinity) {
                         (constraints.maxHeight - totalVerticalSpacingBetweenChildren) / rows
-                    )
-                }
-            }
+                    } else {
+                        Constraints.Infinity
+                    }
+            )
 
         val placeables = buildList {
             for (cellIndex in measurables.indices) {

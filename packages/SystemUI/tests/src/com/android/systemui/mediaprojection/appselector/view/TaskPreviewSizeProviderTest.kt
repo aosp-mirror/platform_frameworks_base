@@ -26,6 +26,7 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowMetrics
 import androidx.core.view.WindowInsetsCompat.Type
+import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
@@ -41,9 +42,10 @@ import org.junit.Test
 @SmallTest
 class TaskPreviewSizeProviderTest : SysuiTestCase() {
 
-    private val mockContext: Context = mock()
-    private val resources: Resources = mock()
-    private val windowManager: WindowManager = mock()
+    private val lifecycleOwner = mock<LifecycleOwner>()
+    private val mockContext = mock<Context>()
+    private val resources = mock<Resources>()
+    private val windowManager = mock<WindowManager>()
     private val sizeUpdates = arrayListOf<Rect>()
     private val testConfigurationController = FakeConfigurationController()
 
@@ -76,7 +78,7 @@ class TaskPreviewSizeProviderTest : SysuiTestCase() {
     @Test
     fun size_phoneDisplayAndRotate_emitsSizeUpdate() {
         givenDisplay(width = 400, height = 600, isTablet = false)
-        createSizeProvider()
+        createSizeProvider().also { it.onCreate(lifecycleOwner) }
 
         givenDisplay(width = 600, height = 400, isTablet = false)
         testConfigurationController.onConfigurationChanged(Configuration())
@@ -87,12 +89,26 @@ class TaskPreviewSizeProviderTest : SysuiTestCase() {
     @Test
     fun size_phoneDisplayAndRotateConfigurationChange_returnsUpdatedSize() {
         givenDisplay(width = 400, height = 600, isTablet = false)
-        val sizeProvider = createSizeProvider()
+        val sizeProvider = createSizeProvider().also { it.onCreate(lifecycleOwner) }
 
         givenDisplay(width = 600, height = 400, isTablet = false)
         testConfigurationController.onConfigurationChanged(Configuration())
 
         assertThat(sizeProvider.size).isEqualTo(Rect(0, 0, 150, 100))
+    }
+
+    @Test
+    fun size_phoneDisplayAndRotateConfigurationChange_afterChooserDestroyed_doesNotUpdate() {
+        givenDisplay(width = 400, height = 600, isTablet = false)
+        val sizeProvider = createSizeProvider()
+        val previousSize = Rect(sizeProvider.size)
+
+        sizeProvider.onCreate(lifecycleOwner)
+        sizeProvider.onDestroy(lifecycleOwner)
+        givenDisplay(width = 600, height = 400, isTablet = false)
+        testConfigurationController.onConfigurationChanged(Configuration())
+
+        assertThat(sizeProvider.size).isEqualTo(previousSize)
     }
 
     private fun givenTaskbarSize(size: Int) {

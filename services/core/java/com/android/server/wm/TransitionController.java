@@ -150,6 +150,13 @@ class TransitionController {
     final ArrayList<ActivityRecord> mValidateActivityCompat = new ArrayList<>();
 
     /**
+     * List of display areas which were last sent as "closing"-type and haven't yet had a
+     * corresponding "opening"-type transition. A mismatch here is usually related to issues in
+     * keyguard unlock.
+     */
+    final ArrayList<DisplayArea> mValidateDisplayVis = new ArrayList<>();
+
+    /**
      * Currently playing transitions (in the order they were started). When finished, records are
      * removed from this list.
      */
@@ -477,11 +484,18 @@ class TransitionController {
         if (mCollectingTransition != null && mCollectingTransition.isInTransientHide(task)) {
             return true;
         }
-        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
-            if (mWaitingTransitions.get(i).isInTransientHide(task)) return true;
-        }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             if (mPlayingTransitions.get(i).isInTransientHide(task)) return true;
+        }
+        return false;
+    }
+
+    boolean isTransientVisible(@NonNull Task task) {
+        if (mCollectingTransition != null && mCollectingTransition.isTransientVisible(task)) {
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (mPlayingTransitions.get(i).isTransientVisible(task)) return true;
         }
         return false;
     }
@@ -551,7 +565,9 @@ class TransitionController {
             return wc.asWindowState() == null;
         }
         // Always allow WindowState to assign layers since it won't affect transition.
-        return wc.asWindowState() != null || !isPlaying();
+        return wc.asWindowState() != null || (!isPlaying()
+                // Don't assign task while collecting.
+                && !(wc.asTask() != null && isCollecting()));
     }
 
     @WindowConfiguration.WindowingMode
@@ -568,6 +584,17 @@ class TransitionController {
     @WindowManager.TransitionType
     int getCollectingTransitionType() {
         return mCollectingTransition != null ? mCollectingTransition.mType : TRANSIT_NONE;
+    }
+
+    /**
+     * Returns {@code true} if the window container is in the collecting transition, and its
+     * collected rotation is different from the target rotation.
+     */
+    boolean hasCollectingRotationChange(@NonNull WindowContainer<?> wc, int targetRotation) {
+        final Transition transition = mCollectingTransition;
+        if (transition == null || !transition.mParticipants.contains(wc)) return false;
+        final Transition.ChangeInfo changeInfo = transition.mChanges.get(wc);
+        return changeInfo != null && changeInfo.mRotation != targetRotation;
     }
 
     /**
@@ -597,15 +624,6 @@ class TransitionController {
     /** Sets the sync method for the display change. */
     private void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
             @NonNull Transition displayTransition, @NonNull DisplayContent displayContent) {
-        final int startRotation = displayChange.getStartRotation();
-        final int endRotation = displayChange.getEndRotation();
-        if (startRotation != endRotation && (startRotation + endRotation) % 2 == 0) {
-            // 180 degrees rotation change may not change screen size. So the clients may draw
-            // some frames before and after the display projection transaction is applied by the
-            // remote player. That may cause some buffers to show in different rotation. So use
-            // sync method to pause clients drawing until the projection transaction is applied.
-            mSyncEngine.setSyncMethod(displayTransition.getSyncId(), BLASTSyncEngine.METHOD_BLAST);
-        }
         final Rect startBounds = displayChange.getStartAbsBounds();
         final Rect endBounds = displayChange.getEndAbsBounds();
         if (startBounds == null || endBounds == null) return;
@@ -700,7 +718,7 @@ class TransitionController {
                 startTask.fillTaskInfo(info);
             }
             final TransitionRequestInfo request = new TransitionRequestInfo(
-                    transition.mType, info, remoteTransition, displayChange);
+                    transition.mType, info, remoteTransition, displayChange, transition.getFlags());
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
             mTransitionPlayer.requestStartTransition(transition.getToken(), request);
@@ -922,6 +940,15 @@ class TransitionController {
             ar.getSyncTransaction().setPosition(ar.getSurfaceControl(), tmpPos.x, tmpPos.y);
         }
         mValidateActivityCompat.clear();
+        for (int i = 0; i < mValidateDisplayVis.size(); ++i) {
+            final DisplayArea da = mValidateDisplayVis.get(i);
+            if (!da.isAttached() || da.getSurfaceControl() == null) continue;
+            if (da.isVisibleRequested()) {
+                Slog.e(TAG, "DisplayArea became visible outside of a transition: " + da);
+                da.getSyncTransaction().show(da.getSurfaceControl());
+            }
+        }
+        mValidateDisplayVis.clear();
     }
 
     /**
@@ -1113,14 +1140,15 @@ class TransitionController {
                         + "track #%d", transition.getSyncId(), track);
             }
         }
-        if (sync) {
+        transition.mAnimationTrack = track;
+        info.setTrack(track);
+        mTrackCount = Math.max(mTrackCount, track + 1);
+        if (sync && mTrackCount > 1) {
+            // If there are >1 tracks, mark as sync so that all tracks finish.
             info.setFlags(info.getFlags() | TransitionInfo.FLAG_SYNC);
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Marking #%d animation as SYNC.",
                     transition.getSyncId());
         }
-        transition.mAnimationTrack = track;
-        info.setTrack(track);
-        mTrackCount = Math.max(mTrackCount, track + 1);
     }
 
     void updateAnimatingState(SurfaceControl.Transaction t) {
@@ -1135,6 +1163,7 @@ class TransitionController {
             Transition.asyncTraceBegin("animating", 0x41bfaf1 /* hashcode of TAG */);
         } else if (!animatingState && mAnimatingState) {
             t.setEarlyWakeupEnd();
+            mAtm.mWindowManager.scheduleAnimationLocked();
             mSnapshotController.setPause(false);
             mAnimatingState = false;
             Transition.asyncTraceEnd(0x41bfaf1 /* hashcode of TAG */);

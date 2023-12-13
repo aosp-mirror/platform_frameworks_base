@@ -17,10 +17,13 @@
 -->
 <resources>
     <!-- gap on either side of status bar notification icons -->
-    <dimen name="status_bar_icon_padding">1dp</dimen>
+    <dimen name="status_bar_icon_horizontal_margin">1sp</dimen>
 
     <dimen name="controls_header_horizontal_padding">28dp</dimen>
     <dimen name="controls_content_margin_horizontal">40dp</dimen>
+    <dimen name="controls_content_padding">32dp</dimen>
+    <dimen name="control_list_vertical_spacing">16dp</dimen>
+    <dimen name="control_list_horizontal_spacing">16dp</dimen>
 
     <dimen name="large_screen_shade_header_height">56dp</dimen>
 

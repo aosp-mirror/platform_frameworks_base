@@ -15,6 +15,7 @@
  */
 package com.android.systemui.biometrics
 
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionStateManager
@@ -37,4 +38,14 @@ class UdfpsBpViewController(
     dumpManager
 ) {
     override val tag = "UdfpsBpViewController"
+
+    override fun shouldPauseAuth(): Boolean {
+        // Do not auth while notification shade is being dragged
+        return notificationShadeTracking
+    }
+
+    @VisibleForTesting
+    public override fun onViewAttached() {
+        super.onViewAttached()
+    }
 }

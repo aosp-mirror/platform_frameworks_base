@@ -32,7 +32,7 @@ import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.remote.RemoteResult;
-import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.backup.utils.BackupObserverUtils;
 
 import java.io.File;
@@ -65,21 +65,21 @@ public class KeyValueBackupReporter {
 
     private final UserBackupManagerService mBackupManagerService;
     private final IBackupObserver mObserver;
-    @Nullable private IBackupManagerMonitor mMonitor;
+    private final BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
     KeyValueBackupReporter(
             UserBackupManagerService backupManagerService,
             IBackupObserver observer,
-            @Nullable IBackupManagerMonitor monitor) {
+            BackupManagerMonitorEventSender backupManagerMonitorEventSender) {
         mBackupManagerService = backupManagerService;
         mObserver = observer;
-        mMonitor = monitor;
+        mBackupManagerMonitorEventSender = backupManagerMonitorEventSender;
     }
 
     /** Returns the monitor or {@code null} if we lost connection to it. */
     @Nullable
     IBackupManagerMonitor getMonitor() {
-        return mMonitor;
+        return mBackupManagerMonitorEventSender.getMonitor();
     }
 
     IBackupObserver getObserver() {
@@ -208,13 +208,11 @@ public class KeyValueBackupReporter {
     void onAgentIllegalKey(PackageInfo packageInfo, String key) {
         String packageName = packageInfo.packageName;
         EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName, "bad key");
-        mMonitor =
-                BackupManagerMonitorUtils.monitorEvent(
-                        mMonitor,
+        mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_ILLEGAL_KEY,
                         packageInfo,
                         BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                        BackupManagerMonitorUtils.putMonitoringExtra(
+                        mBackupManagerMonitorEventSender.putMonitoringExtra(
                                 null, BackupManagerMonitor.EXTRA_LOG_ILLEGAL_KEY, key));
         BackupObserverUtils.sendBackupOnPackageResult(
                 mObserver, packageName, BackupManager.ERROR_AGENT_FAILURE);
@@ -254,13 +252,11 @@ public class KeyValueBackupReporter {
         if (MORE_DEBUG) {
             Slog.i(TAG, "No backup data written, not calling transport");
         }
-        mMonitor =
-                BackupManagerMonitorUtils.monitorEvent(
-                        mMonitor,
-                        BackupManagerMonitor.LOG_EVENT_ID_NO_DATA_TO_SEND,
-                        packageInfo,
-                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                        null);
+        mBackupManagerMonitorEventSender.monitorEvent(
+                BackupManagerMonitor.LOG_EVENT_ID_NO_DATA_TO_SEND,
+                packageInfo,
+                BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                null);
     }
 
     void onPackageBackupComplete(String packageName, long size) {
@@ -291,8 +287,7 @@ public class KeyValueBackupReporter {
 
     void onPackageBackupNonIncrementalRequired(PackageInfo packageInfo) {
         Slog.i(TAG, "Transport lost data, retrying package");
-        BackupManagerMonitorUtils.monitorEvent(
-                mMonitor,
+        mBackupManagerMonitorEventSender.monitorEvent(
                 BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED,
                 packageInfo,
                 BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
@@ -335,28 +330,24 @@ public class KeyValueBackupReporter {
         EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName);
         // Time-out used to be implemented as cancel w/ cancelAll = false.
         // TODO: Change monitoring event to reflect time-out as an event itself.
-        mMonitor =
-                BackupManagerMonitorUtils.monitorEvent(
-                        mMonitor,
-                        BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
-                        packageInfo,
-                        BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
-                        BackupManagerMonitorUtils.putMonitoringExtra(
-                                null, BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL, false));
+        mBackupManagerMonitorEventSender.monitorEvent(
+                BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
+                packageInfo,
+                BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
+                mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        null, BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL, false));
     }
 
     void onAgentCancelled(@Nullable PackageInfo packageInfo) {
         String packageName = getPackageName(packageInfo);
         Slog.i(TAG, "Cancel backing up " + packageName);
         EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName);
-        mMonitor =
-                BackupManagerMonitorUtils.monitorEvent(
-                        mMonitor,
-                        BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
-                        packageInfo,
-                        BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
-                        BackupManagerMonitorUtils.putMonitoringExtra(
-                                null, BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL, true));
+        mBackupManagerMonitorEventSender.monitorEvent(
+                BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
+                packageInfo,
+                BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
+                mBackupManagerMonitorEventSender.putMonitoringExtra(
+                        null, BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL, true));
     }
 
     void onAgentResultError(@Nullable PackageInfo packageInfo) {

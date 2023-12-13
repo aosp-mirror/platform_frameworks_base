@@ -124,16 +124,16 @@ public class WindowLayout {
                     || cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)) {
                 final Insets systemBarsInsets = state.calculateInsets(
                         displayFrame, systemBars(), requestedVisibleTypes);
-                if (systemBarsInsets.left > 0) {
+                if (systemBarsInsets.left >= cutout.getSafeInsetLeft()) {
                     displayCutoutSafeExceptMaybeBars.left = MIN_X;
                 }
-                if (systemBarsInsets.top > 0) {
+                if (systemBarsInsets.top >= cutout.getSafeInsetTop()) {
                     displayCutoutSafeExceptMaybeBars.top = MIN_Y;
                 }
-                if (systemBarsInsets.right > 0) {
+                if (systemBarsInsets.right >= cutout.getSafeInsetRight()) {
                     displayCutoutSafeExceptMaybeBars.right = MAX_X;
                 }
-                if (systemBarsInsets.bottom > 0) {
+                if (systemBarsInsets.bottom >= cutout.getSafeInsetBottom()) {
                     displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
                 }
             }

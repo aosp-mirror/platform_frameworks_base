@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.Utils
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
 import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
@@ -61,13 +62,15 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
 
     private val testScope = TestScope()
+    private val fingerprintRepository = FakeFingerprintPropertyRepository()
     private val promptRepository = FakePromptRepository()
 
     private lateinit var interactor: PromptSelectorInteractor
 
     @Before
     fun setup() {
-        interactor = PromptSelectorInteractorImpl(promptRepository, lockPatternUtils)
+        interactor =
+            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
     }
 
     @Test
@@ -106,17 +109,11 @@ class PromptSelectorInteractorImplTest : SysuiTestCase() {
         val currentPrompt by collectLastValue(interactor.prompt)
         val credentialKind by collectLastValue(interactor.credentialKind)
         val isCredentialAllowed by collectLastValue(interactor.isCredentialAllowed)
-        val isExplicitConfirmationRequired by collectLastValue(interactor.isConfirmationRequested)
+        val isExplicitConfirmationRequired by collectLastValue(interactor.isConfirmationRequired)
 
         assertThat(currentPrompt).isNull()
 
-        interactor.useBiometricsForAuthentication(
-            info,
-            confirmationRequired,
-            USER_ID,
-            CHALLENGE,
-            modalities
-        )
+        interactor.useBiometricsForAuthentication(info, USER_ID, CHALLENGE, modalities)
 
         assertThat(currentPrompt).isNotNull()
         assertThat(currentPrompt?.title).isEqualTo(TITLE)

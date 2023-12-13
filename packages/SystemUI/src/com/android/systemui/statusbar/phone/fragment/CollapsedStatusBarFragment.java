@@ -14,9 +14,6 @@
 
 package com.android.systemui.statusbar.phone.fragment;
 
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.IDLE;
-import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.SHOWING_PERSISTENT_DOT;
-
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
@@ -39,6 +36,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.animation.Animator;
 
 import com.android.app.animation.Interpolators;
+import com.android.app.animation.InterpolatorsAndroidX;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -77,6 +75,8 @@ import com.android.systemui.util.CarrierConfigTracker.CarrierConfigChangedListen
 import com.android.systemui.util.CarrierConfigTracker.DefaultDataSubscriptionChangedListener;
 import com.android.systemui.util.settings.SecureSettings;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,12 +99,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private static final String EXTRA_PANEL_STATE = "panel_state";
     public static final String STATUS_BAR_ICON_MANAGER_TAG = "status_bar_icon_manager";
     public static final int FADE_IN_DURATION = 320;
+    public static final int FADE_OUT_DURATION = 160;
     public static final int FADE_IN_DELAY = 50;
+    private static final int SOURCE_SYSTEM_EVENT_ANIMATOR = 1;
+    private static final int SOURCE_OTHER = 2;
     private StatusBarFragmentComponent mStatusBarFragmentComponent;
     private PhoneStatusBarView mStatusBar;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
     private final ShadeViewController mShadeViewController;
+    private MultiSourceMinAlphaController mEndSideAlphaController;
     private LinearLayout mEndSideContent;
     private View mClockView;
     private View mOngoingCallChip;
@@ -149,7 +153,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
     };
     private OperatorNameViewController mOperatorNameViewController;
-    private StatusBarSystemEventAnimator mSystemEventAnimator;
+    private StatusBarSystemEventDefaultAnimator mSystemEventAnimator;
 
     private final CarrierConfigChangedListener mCarrierConfigCallback =
             new CarrierConfigChangedListener() {
@@ -297,14 +301,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         updateBlockedIcons();
         mStatusBarIconController.addIconGroup(mDarkIconManager);
         mEndSideContent = mStatusBar.findViewById(R.id.status_bar_end_side_content);
+        mEndSideAlphaController = new MultiSourceMinAlphaController(mEndSideContent);
         mClockView = mStatusBar.findViewById(R.id.clock);
         mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
         showEndSideContent(false);
         showClock(false);
         initOperatorName();
         initNotificationIconArea();
-        mSystemEventAnimator =
-                new StatusBarSystemEventAnimator(mEndSideContent, getResources());
+        mSystemEventAnimator = getSystemEventAnimator();
         mCarrierConfigTracker.addCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
 
@@ -593,18 +597,27 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void hideEndSideContent(boolean animate) {
-        animateHide(mEndSideContent, animate);
+        if (!animate) {
+            mEndSideAlphaController.setAlpha(/*alpha*/ 0f, SOURCE_OTHER);
+        } else {
+            mEndSideAlphaController.animateToAlpha(/*alpha*/ 0f, SOURCE_OTHER, FADE_OUT_DURATION,
+                    InterpolatorsAndroidX.ALPHA_OUT, /*startDelay*/ 0);
+        }
     }
 
     private void showEndSideContent(boolean animate) {
-        // Only show the system icon area if we are not currently animating
-        int state = mAnimationScheduler.getAnimationState();
-        if (state == IDLE || state == SHOWING_PERSISTENT_DOT) {
-            animateShow(mEndSideContent, animate);
+        if (!animate) {
+            mEndSideAlphaController.setAlpha(1f, SOURCE_OTHER);
+            return;
+        }
+        if (mKeyguardStateController.isKeyguardFadingAway()) {
+            mEndSideAlphaController.animateToAlpha(/*alpha*/ 1f, SOURCE_OTHER,
+                    mKeyguardStateController.getKeyguardFadingAwayDuration(),
+                    InterpolatorsAndroidX.LINEAR_OUT_SLOW_IN,
+                    mKeyguardStateController.getKeyguardFadingAwayDelay());
         } else {
-            // We are in the middle of a system status event animation, which will animate the
-            // alpha (but not the visibility). Allow the view to become visible again
-            mEndSideContent.setVisibility(View.VISIBLE);
+            mEndSideAlphaController.animateToAlpha(/*alpha*/ 1f, SOURCE_OTHER, FADE_IN_DURATION,
+                    InterpolatorsAndroidX.ALPHA_IN, FADE_IN_DELAY);
         }
     }
 
@@ -671,7 +684,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
         v.animate()
                 .alpha(0f)
-                .setDuration(160)
+                .setDuration(FADE_OUT_DURATION)
                 .setStartDelay(0)
                 .setInterpolator(Interpolators.ALPHA_OUT)
                 .withEndAction(() -> v.setVisibility(state));
@@ -752,6 +765,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public Animator onSystemEventAnimationFinish(boolean hasPersistentDot) {
         return mSystemEventAnimator.onSystemEventAnimationFinish(hasPersistentDot);
+    }
+
+    private StatusBarSystemEventDefaultAnimator getSystemEventAnimator() {
+        return new StatusBarSystemEventDefaultAnimator(getResources(), (alpha) -> {
+            mEndSideAlphaController.setAlpha(alpha, SOURCE_SYSTEM_EVENT_ANIMATOR);
+            return Unit.INSTANCE;
+        }, (translationX) -> {
+            mEndSideContent.setTranslationX(translationX);
+            return Unit.INSTANCE;
+        }, /*isAnimationRunning*/ false);
     }
 
     private void updateStatusBarLocation(int left, int right) {

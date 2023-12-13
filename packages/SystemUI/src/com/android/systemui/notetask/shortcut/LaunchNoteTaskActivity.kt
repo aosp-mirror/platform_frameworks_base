@@ -20,67 +20,24 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.UserHandle
-import android.os.UserManager
 import androidx.activity.ComponentActivity
-import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
-import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 
 /** Activity responsible for launching the note experience, and finish. */
-class LaunchNoteTaskActivity
-@Inject
-constructor(
-    private val controller: NoteTaskController,
-    private val userManager: UserManager,
-    private val userTracker: UserTracker,
-) : ComponentActivity() {
+class LaunchNoteTaskActivity @Inject constructor(private val controller: NoteTaskController) :
+    ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Under the hood, notes app shortcuts are shown in a floating window, called Bubble.
-        // Bubble API is only available in the main user but not work profile.
-        //
-        // On devices with work profile (WP), SystemUI provides both personal notes app shortcuts &
-        // work profile notes app shortcuts. In order to make work profile notes app shortcuts to
-        // show in Bubble, a few redirections across users are required:
-        // 1. When `LaunchNoteTaskActivity` is started in the work profile user, we launch
-        //    `LaunchNoteTaskManagedProfileProxyActivity` on the main user, which has access to the
-        //    Bubble API.
-        // 2. `LaunchNoteTaskManagedProfileProxyActivity` calls `Bubble#showOrHideAppBubble` with
-        //     the work profile user ID.
-        // 3. Bubble renders the work profile notes app activity in a floating window, which is
-        //    hosted in the main user.
-        //
-        //            WP                                main user
-        //  ------------------------          -------------------------------------------
-        // | LaunchNoteTaskActivity |   ->   | LaunchNoteTaskManagedProfileProxyActivity |
-        //  ------------------------          -------------------------------------------
-        //                                                        |
-        //                 main user                              |
-        //         ----------------------------                   |
-        //        | Bubble#showOrHideAppBubble |   <--------------
-        //        |      (with WP user ID)     |
-        //         ----------------------------
-        val mainUser: UserHandle? = userManager.mainUser
-        if (userManager.isManagedProfile) {
-            if (mainUser == null) {
-                debugLog { "Can't find the main user. Skipping the notes app launch." }
+        val entryPoint =
+            if (isInMultiWindowMode) {
+                NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE
             } else {
-                controller.startNoteTaskProxyActivityForUser(mainUser)
+                NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
             }
-        } else {
-            val entryPoint =
-                if (isInMultiWindowMode) {
-                    NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE
-                } else {
-                    NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
-                }
-            controller.showNoteTask(entryPoint)
-        }
+        controller.showNoteTaskAsUser(entryPoint, user)
         finish()
     }
 

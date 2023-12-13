@@ -243,13 +243,29 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
         private val IMMEDIATE = Dispatchers.Main.immediate
 
         private const val SUB_1_ID = 1
+        private const val SUB_1_NAME = "Carrier $SUB_1_ID"
         private val SUB_1 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
-        private val MODEL_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_1_ID)
+                whenever(it.carrierName).thenReturn(SUB_1_NAME)
+            }
+        private val MODEL_1 =
+            SubscriptionModel(
+                subscriptionId = SUB_1_ID,
+                carrierName = SUB_1_NAME,
+            )
 
         private const val SUB_2_ID = 2
+        private const val SUB_2_NAME = "Carrier $SUB_2_ID"
         private val SUB_2 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_2_ID) }
-        private val MODEL_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_2_ID)
+                whenever(it.carrierName).thenReturn(SUB_2_NAME)
+            }
+        private val MODEL_2 =
+            SubscriptionModel(
+                subscriptionId = SUB_2_ID,
+                carrierName = SUB_2_NAME,
+            )
     }
 }

@@ -323,10 +323,15 @@ final class ConversionUtils {
     static ProgramIdentifier identifierToHalProgramIdentifier(ProgramSelector.Identifier id) {
         ProgramIdentifier hwId = new ProgramIdentifier();
         hwId.type = id.getType();
-        if (hwId.type == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT) {
+        if (id.getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT) {
             hwId.type = IdentifierType.DAB_SID_EXT;
         }
-        hwId.value = id.getValue();
+        long value = id.getValue();
+        if (id.getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT) {
+            hwId.value = (value & 0xFFFF) | ((value >>> 16) << 32);
+        } else {
+            hwId.value = value;
+        }
         return hwId;
     }
 
@@ -608,6 +613,9 @@ final class ConversionUtils {
         if (isNewIdentifierInU(info.getLogicallyTunedTo())
                 || isNewIdentifierInU(info.getPhysicallyTunedTo())) {
             return false;
+        }
+        if (info.getRelatedContent() == null) {
+            return true;
         }
         Iterator<ProgramSelector.Identifier> relatedContentIt = info.getRelatedContent().iterator();
         while (relatedContentIt.hasNext()) {

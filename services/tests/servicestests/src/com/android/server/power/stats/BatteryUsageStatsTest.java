@@ -181,7 +181,7 @@ public class BatteryUsageStatsTest {
         final BatteryUsageStats stats2 = buildBatteryUsageStats2(new String[]{"FOO"}, true).build();
 
         final BatteryUsageStats sum =
-                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true)
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true, 0)
                         .add(stats1)
                         .add(stats2)
                         .build();
@@ -222,7 +222,7 @@ public class BatteryUsageStatsTest {
     @Test
     public void testAdd_customComponentMismatch() {
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true);
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true, 0);
         final BatteryUsageStats stats = buildBatteryUsageStats2(new String[]{"BAR"}, false).build();
 
         assertThrows(IllegalArgumentException.class, () -> builder.add(stats));
@@ -231,7 +231,7 @@ public class BatteryUsageStatsTest {
     @Test
     public void testAdd_processStateDataMismatch() {
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true);
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true, 0);
         final BatteryUsageStats stats = buildBatteryUsageStats2(new String[]{"FOO"}, false).build();
 
         assertThrows(IllegalArgumentException.class, () -> builder.add(stats));
@@ -260,7 +260,7 @@ public class BatteryUsageStatsTest {
         final MockBatteryStatsImpl batteryStats = new MockBatteryStatsImpl(clocks);
 
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true)
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, true, 0)
                         .setBatteryCapacity(4000)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
@@ -305,7 +305,7 @@ public class BatteryUsageStatsTest {
 
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(customPowerComponentNames, true,
-                        includeProcessStateData);
+                        includeProcessStateData, 0);
         builder.setDischargePercentage(30)
                 .setDischargedPowerRange(1234, 2345)
                 .setStatsStartTimestamp(2000)

@@ -19,6 +19,7 @@ package android.view;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.view.InsetsState;
+import android.view.ISurfaceControlViewHostParent;
 import android.window.ISurfaceSyncGroup;
 
 /**
@@ -34,4 +35,9 @@ interface ISurfaceControlViewHost {
     oneway void onDispatchDetachedFromWindow();
     oneway void onInsetsChanged(in InsetsState state, in Rect insetFrame);
     ISurfaceSyncGroup getSurfaceSyncGroup();
+    /**
+     * Attaches the parent interface so the embedded content can communicate back to the parent.
+     * If null is passed in, it will remove the parent interface and no more updates will be sent.
+     */
+    oneway void attachParentInterface(in @nullable ISurfaceControlViewHostParent parentInterface);
 }

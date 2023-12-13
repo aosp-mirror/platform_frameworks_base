@@ -19,6 +19,7 @@ package com.android.systemui.screenshot
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Process.myUserHandle
 import android.os.RemoteException
 import android.os.UserHandle
 import android.util.Log
@@ -44,10 +45,10 @@ import kotlinx.coroutines.withContext
 class ActionIntentExecutor
 @Inject
 constructor(
+    private val context: Context,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
-    private val context: Context,
-    private val displayTracker: DisplayTracker
+    private val displayTracker: DisplayTracker,
 ) {
     /**
      * Execute the given intent with startActivity while performing operations for screenshot action
@@ -58,31 +59,31 @@ constructor(
      */
     fun launchIntentAsync(
         intent: Intent,
-        bundle: Bundle,
-        userId: Int,
+        options: Bundle?,
+        user: UserHandle,
         overrideTransition: Boolean,
     ) {
-        applicationScope.launch { launchIntent(intent, bundle, userId, overrideTransition) }
+        applicationScope.launch { launchIntent(intent, options, user, overrideTransition) }
     }
 
     suspend fun launchIntent(
         intent: Intent,
-        bundle: Bundle,
-        userId: Int,
+        options: Bundle?,
+        user: UserHandle,
         overrideTransition: Boolean,
     ) {
         dismissKeyguard()
 
-        if (userId == UserHandle.myUserId()) {
-            withContext(mainDispatcher) { context.startActivity(intent, bundle) }
+        if (user == myUserHandle()) {
+            withContext(mainDispatcher) { context.startActivity(intent, options) }
         } else {
-            launchCrossProfileIntent(userId, intent, bundle)
+            launchCrossProfileIntent(user, intent, options)
         }
 
         if (overrideTransition) {
             val runner = RemoteAnimationAdapter(SCREENSHOT_REMOTE_RUNNER, 0, 0)
             try {
-                WindowManagerGlobal.getWindowManagerService()
+                checkNotNull(WindowManagerGlobal.getWindowManagerService())
                     .overridePendingAppTransitionRemote(runner, displayTracker.defaultDisplayId)
             } catch (e: Exception) {
                 Log.e(TAG, "Error overriding screenshot app transition", e)
@@ -111,17 +112,21 @@ constructor(
         completion.await()
     }
 
-    private fun getCrossProfileConnector(userId: Int): ServiceConnector<ICrossProfileService> =
+    private fun getCrossProfileConnector(user: UserHandle): ServiceConnector<ICrossProfileService> =
         ServiceConnector.Impl<ICrossProfileService>(
             context,
             Intent(context, ScreenshotCrossProfileService::class.java),
             Context.BIND_AUTO_CREATE or Context.BIND_WAIVE_PRIORITY or Context.BIND_NOT_VISIBLE,
-            userId,
+            user.identifier,
             ICrossProfileService.Stub::asInterface,
         )
 
-    private suspend fun launchCrossProfileIntent(userId: Int, intent: Intent, bundle: Bundle) {
-        val connector = getCrossProfileConnector(userId)
+    private suspend fun launchCrossProfileIntent(
+        user: UserHandle,
+        intent: Intent,
+        bundle: Bundle?
+    ) {
+        val connector = getCrossProfileConnector(user)
         val completion = CompletableDeferred<Unit>()
         connector.post {
             it.launchIntent(intent, bundle)

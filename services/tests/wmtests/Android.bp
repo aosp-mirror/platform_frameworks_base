@@ -51,6 +51,7 @@ android_test {
         "services.core",
         "androidx.test.runner",
         "androidx.test.rules",
+        "junit-params",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "servicestests-utils",
@@ -82,7 +83,10 @@ android_test {
     ],
 
     platform_apis: true,
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
 
     certificate: "platform",
 

@@ -8105,6 +8105,16 @@ public class Editor {
         private final Paint mHighlightPaint;
         private final Path mHighlightPath;
 
+        /**
+         * Whether it is in the progress of updating transformation method. It's needed because
+         * {@link TextView#setTransformationMethod(TransformationMethod)} will eventually call
+         * {@link TextView#setText(CharSequence)}.
+         * Because it normally should exit insert mode when {@link TextView#setText(CharSequence)}
+         * is called externally, we need this boolean to distinguish whether setText is triggered
+         * by setTransformation or not.
+         */
+        private boolean mUpdatingTransformationMethod;
+
         InsertModeController(@NonNull TextView textView) {
             mTextView = Objects.requireNonNull(textView);
             mIsInsertModeActive = false;
@@ -8112,16 +8122,10 @@ public class Editor {
             mHighlightPaint = new Paint();
             mHighlightPath = new Path();
 
-            // The highlight color is supposed to be 12% of the color primary40. We can't
-            // directly access Material 3 theme. But because Material 3 sets the colorPrimary to
-            // be primary40, here we hardcoded it to be 12% of colorPrimary.
-            final TypedValue typedValue = new TypedValue();
-            mTextView.getContext().getTheme()
-                    .resolveAttribute(R.attr.colorPrimary, typedValue, true);
-            final int colorPrimary = typedValue.data;
-            final int highlightColor = ColorUtils.setAlphaComponent(colorPrimary,
-                    (int) (0.12f * Color.alpha(colorPrimary)));
-            mHighlightPaint.setColor(highlightColor);
+            // Insert mode highlight color is 20% opacity of the default text color.
+            int color = mTextView.getTextColors().getDefaultColor();
+            color = ColorUtils.setAlphaComponent(color, (int) (0.2f * Color.alpha(color)));
+            mHighlightPaint.setColor(color);
         }
 
         /**
@@ -8143,7 +8147,7 @@ public class Editor {
             final boolean isSingleLine = mTextView.isSingleLine();
             mInsertModeTransformationMethod = new InsertModeTransformationMethod(offset,
                     isSingleLine, oldTransformationMethod);
-            mTextView.setTransformationMethodInternal(mInsertModeTransformationMethod);
+            setTransformationMethod(mInsertModeTransformationMethod, true);
             Selection.setSelection((Spannable) mTextView.getText(), offset);
 
             mIsInsertModeActive = true;
@@ -8151,6 +8155,10 @@ public class Editor {
         }
 
         void exitInsertMode() {
+            exitInsertMode(true);
+        }
+
+        void exitInsertMode(boolean updateText) {
             if (!mIsInsertModeActive) return;
             if (mInsertModeTransformationMethod == null
                     || mInsertModeTransformationMethod != mTextView.getTransformationMethod()) {
@@ -8163,7 +8171,7 @@ public class Editor {
             final int selectionEnd = mTextView.getSelectionEnd();
             final TransformationMethod oldTransformationMethod =
                     mInsertModeTransformationMethod.getOldTransformationMethod();
-            mTextView.setTransformationMethodInternal(oldTransformationMethod);
+            setTransformationMethod(oldTransformationMethod, updateText);
             Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
             mIsInsertModeActive = false;
         }
@@ -8184,22 +8192,55 @@ public class Editor {
         }
 
         /**
-         * Notify the {@link InsertModeController} before the TextView's
-         * {@link TransformationMethod} is updated. If it's not in the insert mode,
-         * the given method is directly returned. Otherwise, it will wrap the given transformation
-         * method with an {@link InsertModeTransformationMethod} and then return.
-         *
-         * @param oldTransformationMethod the new {@link TransformationMethod} to be set on the
-         *                             TextView.
-         * @return the updated {@link TransformationMethod} to be set on the Textview.
+         * Update the TransformationMethod on the {@link TextView}.
+         * @param method the new method to be set on the {@link TextView}/
+         * @param updateText whether to update the text during setTransformationMethod call.
          */
-        TransformationMethod updateTransformationMethod(
-                TransformationMethod oldTransformationMethod) {
-            if (!mIsInsertModeActive) return oldTransformationMethod;
+        private void setTransformationMethod(TransformationMethod method, boolean updateText) {
+            mUpdatingTransformationMethod = true;
+            mTextView.setTransformationMethodInternal(method, updateText);
+            mUpdatingTransformationMethod = false;
+        }
 
+        /**
+         * Notify the InsertMode controller that the {@link TextView} is about to set its text.
+         */
+        void beforeSetText() {
+            // TextView#setText is called because our call to
+            // TextView#setTransformationMethodInternal in enterInsertMode(), exitInsertMode() or
+            // updateTransformationMethod().
+            // Do nothing in this case.
+            if (mUpdatingTransformationMethod) {
+                return;
+            }
+            // TextView#setText is called externally. Exit InsertMode but don't update text again
+            // when calling setTransformationMethod.
+            exitInsertMode(/* updateText */ false);
+        }
+
+        /**
+         * Notify the {@link InsertModeController} that TextView#setTransformationMethod is called.
+         * If it's not in the insert mode, the given transformation method is directly set to the
+         * TextView. Otherwise, it will wrap the given transformation method with an
+         * {@link InsertModeTransformationMethod} and then set it on the TextView.
+         *
+         * @param transformationMethod the new {@link TransformationMethod} to be set on the
+         *                             TextView.
+         */
+        void updateTransformationMethod(TransformationMethod transformationMethod) {
+            if (!mIsInsertModeActive) {
+                setTransformationMethod(transformationMethod, /* updateText */ true);
+                return;
+            }
+
+            // Changing TransformationMethod will reset selection range to [0, 0), we need to
+            // manually restore the old selection range.
+            final int selectionStart = mTextView.getSelectionStart();
+            final int selectionEnd = mTextView.getSelectionEnd();
             mInsertModeTransformationMethod = mInsertModeTransformationMethod.update(
-                    oldTransformationMethod, mTextView.isSingleLine());
-            return mInsertModeTransformationMethod;
+                    transformationMethod, mTextView.isSingleLine());
+            setTransformationMethod(mInsertModeTransformationMethod, /* updateText */ true);
+            Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
         }
     }
 
@@ -8211,6 +8252,9 @@ public class Editor {
         return mInsertModeController.enterInsertMode(offset);
     }
 
+    /**
+     * Exit insert mode if this editor is in insert mode.
+     */
     void exitInsertMode() {
         if (mInsertModeController == null) return;
         mInsertModeController.exitInsertMode();
@@ -8222,18 +8266,19 @@ public class Editor {
      * @param method the {@link TransformationMethod} to be set on the TextView.
      */
     void setTransformationMethod(TransformationMethod method) {
-        if (mInsertModeController == null || !mInsertModeController.mIsInsertModeActive) {
-            mTextView.setTransformationMethodInternal(method);
+        if (mInsertModeController == null) {
+            mTextView.setTransformationMethodInternal(method, /* updateText */ true);
             return;
         }
+        mInsertModeController.updateTransformationMethod(method);
+    }
 
-        // Changing TransformationMethod will reset selection range to [0, 0), we need to
-        // manually restore the old selection range.
-        final int selectionStart = mTextView.getSelectionStart();
-        final int selectionEnd = mTextView.getSelectionEnd();
-        method = mInsertModeController.updateTransformationMethod(method);
-        mTextView.setTransformationMethodInternal(method);
-        Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
+    /**
+     * Notify that the Editor that the associated {@link TextView} is about to set its text.
+     */
+    void beforeSetText() {
+        if (mInsertModeController == null) return;
+        mInsertModeController.beforeSetText();
     }
 
     /**

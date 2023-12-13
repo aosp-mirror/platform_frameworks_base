@@ -23,9 +23,12 @@ import android.hardware.display.DisplayViewport
 import android.os.IInputConstants
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
+import android.provider.Settings
+import android.test.mock.MockContentResolver
 import android.view.Display
 import android.view.PointerIcon
 import androidx.test.InstrumentationRegistry
+import com.android.internal.util.test.FakeSettingsProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -33,6 +36,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
@@ -44,7 +49,9 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnit
+import org.mockito.stubbing.OngoingStubbing
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -58,7 +65,10 @@ import java.util.concurrent.TimeUnit
 class InputManagerServiceTests {
 
     @get:Rule
-    val rule = MockitoJUnit.rule()!!
+    val mockitoRule = MockitoJUnit.rule()!!
+
+    @get:Rule
+    val fakeSettingsProviderRule = FakeSettingsProvider.rule()!!
 
     @Mock
     private lateinit var native: NativeInputManagerService
@@ -66,17 +76,25 @@ class InputManagerServiceTests {
     @Mock
     private lateinit var wmCallbacks: InputManagerService.WindowManagerCallbacks
 
+    @Mock
+    private lateinit var uEventManager: UEventManager
+
     private lateinit var service: InputManagerService
     private lateinit var localService: InputManagerInternal
     private lateinit var context: Context
     private lateinit var testLooper: TestLooper
+    private lateinit var contentResolver: MockContentResolver
 
     @Before
     fun setup() {
         context = spy(ContextWrapper(InstrumentationRegistry.getContext()))
+        contentResolver = MockContentResolver(context)
+        contentResolver.addProvider(Settings.AUTHORITY, FakeSettingsProvider())
+        whenever(context.contentResolver).thenReturn(contentResolver)
         testLooper = TestLooper()
         service =
-            InputManagerService(object : InputManagerService.Injector(context, testLooper.looper) {
+            InputManagerService(object : InputManagerService.Injector(
+                    context, testLooper.looper, uEventManager) {
                 override fun getNativeService(
                     service: InputManagerService?
                 ): NativeInputManagerService {
@@ -92,9 +110,36 @@ class InputManagerServiceTests {
     }
 
     @Test
+    fun testStart() {
+        verifyZeroInteractions(native)
+
+        service.start()
+        verify(native).start()
+    }
+
+    @Test
+    fun testInputSettingsUpdatedOnSystemRunning() {
+        verifyZeroInteractions(native)
+
+        service.systemRunning()
+
+        verify(native).setPointerSpeed(anyInt())
+        verify(native).setTouchpadPointerSpeed(anyInt())
+        verify(native).setTouchpadNaturalScrollingEnabled(anyBoolean())
+        verify(native).setTouchpadTapToClickEnabled(anyBoolean())
+        verify(native).setTouchpadRightClickZoneEnabled(anyBoolean())
+        verify(native).setShowTouches(anyBoolean())
+        verify(native).reloadPointerIcons()
+        verify(native).notifyKeyGestureTimeoutsChanged()
+        verify(native).setMotionClassifierEnabled(anyBoolean())
+        verify(native).setMaximumObscuringOpacityForTouch(anyFloat())
+        verify(native).setStylusPointerIconEnabled(anyBoolean())
+    }
+
+    @Test
     fun testPointerDisplayUpdatesWhenDisplayViewportsChanged() {
         val displayId = 123
-        `when`(wmCallbacks.pointerDisplayId).thenReturn(displayId)
+        whenever(wmCallbacks.pointerDisplayId).thenReturn(displayId)
         val viewports = listOf<DisplayViewport>()
         localService.setDisplayViewports(viewports)
         verify(native).setDisplayViewports(any(Array<DisplayViewport>::class.java))
@@ -337,3 +382,5 @@ class InputManagerServiceTests {
         thread.join(100 /*millis*/)
     }
 }
+
+private fun <T> whenever(methodCall: T): OngoingStubbing<T> = `when`(methodCall)

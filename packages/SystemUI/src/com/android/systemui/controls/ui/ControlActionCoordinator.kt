@@ -54,9 +54,10 @@ interface ControlActionCoordinator {
     /**
      * When a ToggleRange control is interacting with, a drag event is sent.
      *
+     * @param cvh [ControlViewHolder] for the control
      * @param isEdge did the drag event reach a control edge
      */
-    fun drag(isEdge: Boolean)
+    fun drag(cvh: ControlViewHolder, isEdge: Boolean)
 
     /**
      * Send a request to update the value of a device using the [FloatAction].

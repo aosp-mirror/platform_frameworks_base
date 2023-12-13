@@ -42,17 +42,29 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
+import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
+import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewSmartspaceViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.plugins.ClockController
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.shared.clocks.DefaultClockController
 import com.android.systemui.shared.clocks.shared.model.ClockPreviewConstants
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants
+import com.android.systemui.statusbar.KeyguardIndicationController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import dagger.assisted.Assisted
@@ -71,6 +83,7 @@ constructor(
     private val clockViewModel: KeyguardPreviewClockViewModel,
     private val smartspaceViewModel: KeyguardPreviewSmartspaceViewModel,
     private val bottomAreaViewModel: KeyguardBottomAreaViewModel,
+    private val quickAffordancesCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
     displayManager: DisplayManager,
     private val windowManager: WindowManager,
     private val clockController: ClockEventController,
@@ -78,7 +91,14 @@ constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val lockscreenSmartspaceController: LockscreenSmartspaceController,
     private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
+    private val featureFlags: FeatureFlags,
+    private val falsingManager: FalsingManager,
+    private val vibratorHelper: VibratorHelper,
+    private val indicationController: KeyguardIndicationController,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
     @Assisted bundle: Bundle,
+    private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
+    private val keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
 ) {
 
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
@@ -106,14 +126,26 @@ constructor(
     private val disposables = mutableSetOf<DisposableHandle>()
     private var isDestroyed = false
 
+    private val shortcutsBindings = mutableSetOf<KeyguardQuickAffordanceViewBinder.Binding>()
+
     init {
-        bottomAreaViewModel.enablePreviewMode(
-            initiallySelectedSlotId =
-                bundle.getString(
-                    KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
-                ),
-            shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
-        )
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            keyguardRootViewModel.enablePreviewMode(
+                initiallySelectedSlotId =
+                    bundle.getString(
+                        KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
+                    ),
+                shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
+            )
+        } else {
+            bottomAreaViewModel.enablePreviewMode(
+                initiallySelectedSlotId =
+                    bundle.getString(
+                        KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
+                    ),
+                shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
+            )
+        }
         runBlocking(mainDispatcher) {
             host =
                 SurfaceControlViewHost(
@@ -130,7 +162,21 @@ constructor(
         mainHandler.post {
             val rootView = FrameLayout(context)
 
-            setUpBottomArea(rootView)
+            if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+                val keyguardRootView = KeyguardRootView(context, null)
+                rootView.addView(
+                    keyguardRootView,
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                    ),
+                )
+                setupShortcuts(keyguardRootView)
+                KeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel)
+                keyguardBlueprintInteractor.refreshBlueprint()
+            } else {
+                setUpBottomArea(rootView)
+            }
 
             setUpSmartspace(rootView)
             smartSpaceView?.let {
@@ -182,13 +228,20 @@ constructor(
     }
 
     fun onSlotSelected(slotId: String) {
-        bottomAreaViewModel.onPreviewSlotSelected(slotId = slotId)
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            quickAffordancesCombinedViewModel.onPreviewSlotSelected(slotId = slotId)
+        } else {
+            bottomAreaViewModel.onPreviewSlotSelected(slotId = slotId)
+        }
     }
 
     fun destroy() {
         isDestroyed = true
         lockscreenSmartspaceController.disconnect()
         disposables.forEach { it.dispose() }
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            shortcutsBindings.forEach { it.destroy() }
+        }
     }
 
     /**
@@ -227,8 +280,9 @@ constructor(
 
         val startPadding: Int =
             with(context.resources) {
-                getDimensionPixelSize(R.dimen.clock_padding_start) +
-                    getDimensionPixelSize(R.dimen.below_clock_padding_start)
+                getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.clock_padding_start
+                ) + getDimensionPixelSize(R.dimen.below_clock_padding_start)
             }
 
         val endPadding: Int =
@@ -250,6 +304,7 @@ constructor(
         smartSpaceView?.alpha = if (shouldHighlightSelectedAffordance) DIM_ALPHA else 1.0f
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
     private fun setUpBottomArea(parentView: ViewGroup) {
         val bottomAreaView =
             LayoutInflater.from(context)
@@ -267,6 +322,32 @@ constructor(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT,
             ),
+        )
+    }
+
+    private fun setupShortcuts(keyguardRootView: KeyguardRootView) {
+        shortcutsBindings.add(
+            KeyguardQuickAffordanceViewBinder.bind(
+                keyguardRootView.requireViewById(R.id.start_button),
+                quickAffordancesCombinedViewModel.startButton,
+                keyguardRootViewModel.alpha,
+                falsingManager,
+                vibratorHelper,
+            ) {
+                indicationController.showTransientIndication(it)
+            }
+        )
+
+        shortcutsBindings.add(
+            KeyguardQuickAffordanceViewBinder.bind(
+                keyguardRootView.requireViewById(R.id.end_button),
+                quickAffordancesCombinedViewModel.endButton,
+                keyguardRootViewModel.alpha,
+                falsingManager,
+                vibratorHelper,
+            ) {
+                indicationController.showTransientIndication(it)
+            }
         )
     }
 
@@ -375,15 +456,21 @@ constructor(
         val layoutParams =
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
-                resources.getDimensionPixelSize(R.dimen.small_clock_height)
+                resources.getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.small_clock_height
+                )
             )
         layoutParams.topMargin =
             KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
-                resources.getDimensionPixelSize(R.dimen.small_clock_padding_top)
+                resources.getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.small_clock_padding_top
+                )
         hostView.layoutParams = layoutParams
 
         hostView.setPaddingRelative(
-            resources.getDimensionPixelSize(R.dimen.clock_padding_start),
+            resources.getDimensionPixelSize(
+                com.android.systemui.customization.R.dimen.clock_padding_start
+            ),
             0,
             0,
             0

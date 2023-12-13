@@ -366,6 +366,12 @@ private:
 
     ColorMode mColorMode = ColorMode::Default;
     float mTargetSdrHdrRatio = 1.f;
+
+    struct SkippedFrameInfo {
+        int64_t vsyncId;
+        int64_t startTime;
+    };
+    std::optional<SkippedFrameInfo> mSkippedFrameInfo;
 };
 
 } /* namespace renderthread */

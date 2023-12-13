@@ -17,10 +17,12 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.platform.test.annotations.Postsubmit
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,7 +31,7 @@ import org.junit.runners.Parameterized
 /**
  * Test launching app in size compat mode.
  *
- * To run this test: `atest WMShellFlickerTests:OpenAppInSizeCompatModeTest`
+ * To run this test: `atest WMShellFlickerTestsOther:OpenAppInSizeCompatModeTest`
  *
  * Actions:
  * ```
@@ -45,7 +47,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class OpenAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flicker) {
+class OpenAppInSizeCompatModeTest(flicker: LegacyFlickerTest) : BaseAppCompat(flicker) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
@@ -70,9 +72,7 @@ class OpenAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flicker)
     @Test
     fun letterboxedAppHasRoundedCorners() = assertLetterboxAppAtEndHasRoundedCorners()
 
-    @Postsubmit
-    @Test
-    fun appIsLetterboxedAtEnd() = assertAppLetterboxedAtEnd()
+    @Postsubmit @Test fun appIsLetterboxedAtEnd() = assertAppLetterboxedAtEnd()
 
     /**
      * Checks that the [ComponentNameMatcher.ROTATION] layer appears during the transition, doesn't
@@ -88,6 +88,20 @@ class OpenAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flicker)
                 .then()
                 .isVisible(letterboxApp)
                 .isInvisible(ComponentNameMatcher.ROTATION)
+        }
+    }
+
+    companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [LegacyFlickerTestFactory.rotationTests] for configuring screen orientation and
+         * navigation modes.
+         */
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<FlickerTest> {
+            return LegacyFlickerTestFactory.rotationTests()
         }
     }
 }

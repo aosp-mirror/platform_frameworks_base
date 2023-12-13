@@ -76,6 +76,20 @@ public final class ContentCaptureOptions implements Parcelable {
     public final boolean disableFlushForViewTreeAppearing;
 
     /**
+     * Is the content capture receiver enabled.
+     *
+     * @hide
+     */
+    public final boolean enableReceiver;
+
+    /**
+     * Options for the content protection flow.
+     *
+     * @hide
+     */
+    @NonNull public final ContentProtectionOptions contentProtectionOptions;
+
+    /**
      * List of activities explicitly allowlisted for content capture (or {@code null} if allowlisted
      * for all acitivites in the package).
      */
@@ -94,52 +108,99 @@ public final class ContentCaptureOptions implements Parcelable {
      * for contexts belonging to the content capture service app.
      */
     public ContentCaptureOptions(int loggingLevel) {
-        this(/* lite= */ true, loggingLevel, /* maxBufferSize= */ 0,
-                /* idleFlushingFrequencyMs= */ 0, /* textChangeFlushingFrequencyMs= */ 0,
-                /* logHistorySize= */ 0, /* disableFlushForViewTreeAppearing= */ false,
+        this(
+                /* lite= */ true,
+                loggingLevel,
+                /* maxBufferSize= */ 0,
+                /* idleFlushingFrequencyMs= */ 0,
+                /* textChangeFlushingFrequencyMs= */ 0,
+                /* logHistorySize= */ 0,
+                /* disableFlushForViewTreeAppearing= */ false,
+                /* enableReceiver= */ false,
+                new ContentProtectionOptions(
+                        /* enableReceiver= */ false,
+                        /* bufferSize= */ 0),
                 /* whitelistedComponents= */ null);
     }
 
-    /**
-     * Default constructor.
-     */
-    public ContentCaptureOptions(int loggingLevel, int maxBufferSize, int idleFlushingFrequencyMs,
-            int textChangeFlushingFrequencyMs, int logHistorySize,
-            @SuppressLint({"ConcreteCollection", "NullableCollection"})
-            @Nullable ArraySet<ComponentName> whitelistedComponents) {
-        this(/* lite= */ false, loggingLevel, maxBufferSize, idleFlushingFrequencyMs,
-                textChangeFlushingFrequencyMs, logHistorySize,
+    /** Default constructor. */
+    public ContentCaptureOptions(
+            int loggingLevel,
+            int maxBufferSize,
+            int idleFlushingFrequencyMs,
+            int textChangeFlushingFrequencyMs,
+            int logHistorySize,
+            @SuppressLint({"ConcreteCollection", "NullableCollection"}) @Nullable
+                    ArraySet<ComponentName> whitelistedComponents) {
+        this(
+                /* lite= */ false,
+                loggingLevel,
+                maxBufferSize,
+                idleFlushingFrequencyMs,
+                textChangeFlushingFrequencyMs,
+                logHistorySize,
                 ContentCaptureManager.DEFAULT_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
+                ContentCaptureManager.DEFAULT_ENABLE_CONTENT_CAPTURE_RECEIVER,
+                new ContentProtectionOptions(
+                        ContentCaptureManager.DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER,
+                        ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE),
                 whitelistedComponents);
     }
 
     /** @hide */
-    public ContentCaptureOptions(int loggingLevel, int maxBufferSize, int idleFlushingFrequencyMs,
-            int textChangeFlushingFrequencyMs, int logHistorySize,
+    public ContentCaptureOptions(
+            int loggingLevel,
+            int maxBufferSize,
+            int idleFlushingFrequencyMs,
+            int textChangeFlushingFrequencyMs,
+            int logHistorySize,
             boolean disableFlushForViewTreeAppearing,
-            @SuppressLint({"ConcreteCollection", "NullableCollection"})
-            @Nullable ArraySet<ComponentName> whitelistedComponents) {
-        this(/* lite= */ false, loggingLevel, maxBufferSize, idleFlushingFrequencyMs,
-                textChangeFlushingFrequencyMs, logHistorySize, disableFlushForViewTreeAppearing,
+            boolean enableReceiver,
+            @NonNull ContentProtectionOptions contentProtectionOptions,
+            @SuppressLint({"ConcreteCollection", "NullableCollection"}) @Nullable
+                    ArraySet<ComponentName> whitelistedComponents) {
+        this(
+                /* lite= */ false,
+                loggingLevel,
+                maxBufferSize,
+                idleFlushingFrequencyMs,
+                textChangeFlushingFrequencyMs,
+                logHistorySize,
+                disableFlushForViewTreeAppearing,
+                enableReceiver,
+                contentProtectionOptions,
                 whitelistedComponents);
     }
 
     /** @hide */
     @VisibleForTesting
     public ContentCaptureOptions(@Nullable ArraySet<ComponentName> whitelistedComponents) {
-        this(ContentCaptureManager.LOGGING_LEVEL_VERBOSE,
+        this(
+                ContentCaptureManager.LOGGING_LEVEL_VERBOSE,
                 ContentCaptureManager.DEFAULT_MAX_BUFFER_SIZE,
                 ContentCaptureManager.DEFAULT_IDLE_FLUSHING_FREQUENCY_MS,
                 ContentCaptureManager.DEFAULT_TEXT_CHANGE_FLUSHING_FREQUENCY_MS,
                 ContentCaptureManager.DEFAULT_LOG_HISTORY_SIZE,
                 ContentCaptureManager.DEFAULT_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
+                ContentCaptureManager.DEFAULT_ENABLE_CONTENT_CAPTURE_RECEIVER,
+                new ContentProtectionOptions(
+                        ContentCaptureManager.DEFAULT_ENABLE_CONTENT_PROTECTION_RECEIVER,
+                        ContentCaptureManager.DEFAULT_CONTENT_PROTECTION_BUFFER_SIZE),
                 whitelistedComponents);
     }
 
-    private ContentCaptureOptions(boolean lite, int loggingLevel, int maxBufferSize,
-            int idleFlushingFrequencyMs, int textChangeFlushingFrequencyMs, int logHistorySize,
+    private ContentCaptureOptions(
+            boolean lite,
+            int loggingLevel,
+            int maxBufferSize,
+            int idleFlushingFrequencyMs,
+            int textChangeFlushingFrequencyMs,
+            int logHistorySize,
             boolean disableFlushForViewTreeAppearing,
-            @Nullable ArraySet<ComponentName> whitelistedComponents) {
+            boolean enableReceiver,
+            @NonNull ContentProtectionOptions contentProtectionOptions,
+            @SuppressLint({"ConcreteCollection", "NullableCollection"}) @Nullable
+                    ArraySet<ComponentName> whitelistedComponents) {
         this.lite = lite;
         this.loggingLevel = loggingLevel;
         this.maxBufferSize = maxBufferSize;
@@ -147,6 +208,8 @@ public final class ContentCaptureOptions implements Parcelable {
         this.textChangeFlushingFrequencyMs = textChangeFlushingFrequencyMs;
         this.logHistorySize = logHistorySize;
         this.disableFlushForViewTreeAppearing = disableFlushForViewTreeAppearing;
+        this.enableReceiver = enableReceiver;
+        this.contentProtectionOptions = contentProtectionOptions;
         this.whitelistedComponents = whitelistedComponents;
     }
 
@@ -191,12 +254,22 @@ public final class ContentCaptureOptions implements Parcelable {
             return "ContentCaptureOptions [loggingLevel=" + loggingLevel + " (lite)]";
         }
         final StringBuilder string = new StringBuilder("ContentCaptureOptions [");
-        string.append("loggingLevel=").append(loggingLevel)
-            .append(", maxBufferSize=").append(maxBufferSize)
-            .append(", idleFlushingFrequencyMs=").append(idleFlushingFrequencyMs)
-            .append(", textChangeFlushingFrequencyMs=").append(textChangeFlushingFrequencyMs)
-            .append(", logHistorySize=").append(logHistorySize)
-            .append(", disableFlushForViewTreeAppearing=").append(disableFlushForViewTreeAppearing);
+        string.append("loggingLevel=")
+                .append(loggingLevel)
+                .append(", maxBufferSize=")
+                .append(maxBufferSize)
+                .append(", idleFlushingFrequencyMs=")
+                .append(idleFlushingFrequencyMs)
+                .append(", textChangeFlushingFrequencyMs=")
+                .append(textChangeFlushingFrequencyMs)
+                .append(", logHistorySize=")
+                .append(logHistorySize)
+                .append(", disableFlushForViewTreeAppearing=")
+                .append(disableFlushForViewTreeAppearing)
+                .append(", enableReceiver=")
+                .append(enableReceiver)
+                .append(", contentProtectionOptions=")
+                .append(contentProtectionOptions);
         if (whitelistedComponents != null) {
             string.append(", whitelisted=").append(whitelistedComponents);
         }
@@ -210,11 +283,21 @@ public final class ContentCaptureOptions implements Parcelable {
             pw.print(", lite");
             return;
         }
-        pw.print(", bufferSize="); pw.print(maxBufferSize);
-        pw.print(", idle="); pw.print(idleFlushingFrequencyMs);
-        pw.print(", textIdle="); pw.print(textChangeFlushingFrequencyMs);
-        pw.print(", logSize="); pw.print(logHistorySize);
-        pw.print(", disableFlushForViewTreeAppearing="); pw.print(disableFlushForViewTreeAppearing);
+        pw.print(", bufferSize=");
+        pw.print(maxBufferSize);
+        pw.print(", idle=");
+        pw.print(idleFlushingFrequencyMs);
+        pw.print(", textIdle=");
+        pw.print(textChangeFlushingFrequencyMs);
+        pw.print(", logSize=");
+        pw.print(logHistorySize);
+        pw.print(", disableFlushForViewTreeAppearing=");
+        pw.print(disableFlushForViewTreeAppearing);
+        pw.print(", enableReceiver=");
+        pw.print(enableReceiver);
+        pw.print(", contentProtectionOptions=[");
+        contentProtectionOptions.dumpShort(pw);
+        pw.print("]");
         if (whitelistedComponents != null) {
             pw.print(", whitelisted="); pw.print(whitelistedComponents);
         }
@@ -236,6 +319,8 @@ public final class ContentCaptureOptions implements Parcelable {
         parcel.writeInt(textChangeFlushingFrequencyMs);
         parcel.writeInt(logHistorySize);
         parcel.writeBoolean(disableFlushForViewTreeAppearing);
+        parcel.writeBoolean(enableReceiver);
+        contentProtectionOptions.writeToParcel(parcel);
         parcel.writeArraySet(whitelistedComponents);
     }
 
@@ -254,12 +339,22 @@ public final class ContentCaptureOptions implements Parcelable {
                     final int textChangeFlushingFrequencyMs = parcel.readInt();
                     final int logHistorySize = parcel.readInt();
                     final boolean disableFlushForViewTreeAppearing = parcel.readBoolean();
+                    final boolean enableReceiver = parcel.readBoolean();
+                    final ContentProtectionOptions contentProtectionOptions =
+                            ContentProtectionOptions.createFromParcel(parcel);
                     @SuppressWarnings("unchecked")
                     final ArraySet<ComponentName> whitelistedComponents =
                             (ArraySet<ComponentName>) parcel.readArraySet(null);
-                    return new ContentCaptureOptions(loggingLevel, maxBufferSize,
-                            idleFlushingFrequencyMs, textChangeFlushingFrequencyMs, logHistorySize,
-                            disableFlushForViewTreeAppearing, whitelistedComponents);
+                    return new ContentCaptureOptions(
+                            loggingLevel,
+                            maxBufferSize,
+                            idleFlushingFrequencyMs,
+                            textChangeFlushingFrequencyMs,
+                            logHistorySize,
+                            disableFlushForViewTreeAppearing,
+                            enableReceiver,
+                            contentProtectionOptions,
+                            whitelistedComponents);
                 }
 
                 @Override
@@ -267,4 +362,62 @@ public final class ContentCaptureOptions implements Parcelable {
                     return new ContentCaptureOptions[size];
                 }
     };
+
+    /**
+     * Content protection options for a given package.
+     *
+     * <p>Does not implement {@code Parcelable} since it is an inner class without a matching AIDL.
+     *
+     * @hide
+     */
+    public static class ContentProtectionOptions {
+
+        /**
+         * Is the content protection receiver enabled.
+         *
+         * @hide
+         */
+        public final boolean enableReceiver;
+
+        /**
+         * Size of the in-memory ring buffer for the content protection flow.
+         *
+         * @hide
+         */
+        public final int bufferSize;
+
+        public ContentProtectionOptions(boolean enableReceiver, int bufferSize) {
+            this.enableReceiver = enableReceiver;
+            this.bufferSize = bufferSize;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder stringBuilder = new StringBuilder("ContentProtectionOptions [");
+            stringBuilder
+                    .append("enableReceiver=")
+                    .append(enableReceiver)
+                    .append(", bufferSize=")
+                    .append(bufferSize);
+            return stringBuilder.append(']').toString();
+        }
+
+        private void dumpShort(@NonNull PrintWriter pw) {
+            pw.print("enableReceiver=");
+            pw.print(enableReceiver);
+            pw.print(", bufferSize=");
+            pw.print(bufferSize);
+        }
+
+        private void writeToParcel(Parcel parcel) {
+            parcel.writeBoolean(enableReceiver);
+            parcel.writeInt(bufferSize);
+        }
+
+        private static ContentProtectionOptions createFromParcel(Parcel parcel) {
+            boolean enableReceiver = parcel.readBoolean();
+            int bufferSize = parcel.readInt();
+            return new ContentProtectionOptions(enableReceiver, bufferSize);
+        }
+    }
 }

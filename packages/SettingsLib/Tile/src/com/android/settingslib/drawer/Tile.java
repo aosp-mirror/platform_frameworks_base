@@ -19,8 +19,10 @@ package com.android.settingslib.drawer;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_NEW_TASK;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_GROUP_KEY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SEARCHABLE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SWITCH_URI;
@@ -29,6 +31,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITL
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ComponentInfo;
@@ -47,6 +50,7 @@ import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * Description of a single dashboard tile that the user can select.
@@ -59,6 +63,8 @@ public abstract class Tile implements Parcelable {
      * Optional list of user handles which the intent should be launched on.
      */
     public ArrayList<UserHandle> userHandle = new ArrayList<>();
+
+    public HashMap<UserHandle, PendingIntent> pendingIntentMap = new HashMap<>();
 
     @VisibleForTesting
     long mLastUpdateTime;
@@ -174,7 +180,8 @@ public abstract class Tile implements Parcelable {
      * Check whether tile has order.
      */
     public boolean hasOrder() {
-        return mMetaData.containsKey(META_DATA_KEY_ORDER)
+        return mMetaData != null
+                && mMetaData.containsKey(META_DATA_KEY_ORDER)
                 && mMetaData.get(META_DATA_KEY_ORDER) instanceof Integer;
     }
 
@@ -186,13 +193,20 @@ public abstract class Tile implements Parcelable {
     }
 
     /**
+     * Check whether tile has a pending intent.
+     */
+    public boolean hasPendingIntent() {
+        return !pendingIntentMap.isEmpty();
+    }
+
+    /**
      * Title of the tile that is shown to the user.
      */
     public CharSequence getTitle(Context context) {
         CharSequence title = null;
         ensureMetadataNotStale(context);
         final PackageManager packageManager = context.getPackageManager();
-        if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+        if (mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
             if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE_URI)) {
                 // If has as uri to provide dynamic title, skip loading here. UI will later load
                 // at tile binding time.
@@ -272,10 +286,10 @@ public abstract class Tile implements Parcelable {
      * Optional key to use for this tile.
      */
     public String getKey(Context context) {
+        ensureMetadataNotStale(context);
         if (!hasKey()) {
             return null;
         }
-        ensureMetadataNotStale(context);
         if (mMetaData.get(META_DATA_PREFERENCE_KEYHINT) instanceof Integer) {
             return context.getResources().getString(mMetaData.getInt(META_DATA_PREFERENCE_KEYHINT));
         } else {
@@ -393,6 +407,83 @@ public abstract class Tile implements Parcelable {
                 ? metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
         profile = (profile != null ? profile : PROFILE_ALL);
         return TextUtils.equals(profile, PROFILE_PRIMARY);
+    }
+
+    /**
+     * Returns whether the tile belongs to another group / category.
+     */
+    public boolean hasGroupKey() {
+        return mMetaData != null
+                && !TextUtils.isEmpty(mMetaData.getString(META_DATA_PREFERENCE_GROUP_KEY));
+    }
+
+    /**
+     * Returns the group / category key this tile belongs to.
+     */
+    public String getGroupKey() {
+        return (mMetaData == null) ? null : mMetaData.getString(META_DATA_PREFERENCE_GROUP_KEY);
+    }
+
+    /**
+     * Returns if this is searchable.
+     */
+    public boolean isSearchable() {
+        return mMetaData == null || mMetaData.getBoolean(META_DATA_PREFERENCE_SEARCHABLE, true);
+    }
+
+    /**
+     * The type of the tile.
+     */
+    public enum Type {
+        /**
+         * A preference that can be tapped on to open a new page.
+         */
+        ACTION,
+
+        /**
+         * A preference that can be tapped on to open an external app.
+         */
+        EXTERNAL_ACTION,
+
+        /**
+         * A preference that shows an on / off switch that can be toggled by the user.
+         */
+        SWITCH,
+
+        /**
+         * A preference with both an on / off switch, and a tappable area that can perform an
+         * action.
+         */
+        SWITCH_WITH_ACTION,
+
+        /**
+         * A preference category with a title that can be used to group multiple preferences
+         * together.
+         */
+        GROUP;
+    }
+
+    /**
+     * Returns the type of the tile.
+     *
+     * @see Type
+     */
+    public Type getType() {
+        boolean hasExternalAction = hasPendingIntent();
+        boolean hasAction = hasExternalAction || this instanceof ActivityTile;
+        boolean hasSwitch = hasSwitch();
+
+        if (hasSwitch && hasAction) {
+            return Type.SWITCH_WITH_ACTION;
+        } else if (hasSwitch) {
+            return Type.SWITCH;
+        } else if (hasExternalAction) {
+            return Type.EXTERNAL_ACTION;
+        } else if (hasAction) {
+            return Type.ACTION;
+        } else {
+            return Type.GROUP;
+        }
     }
 
     public static final Comparator<Tile> TILE_COMPARATOR =

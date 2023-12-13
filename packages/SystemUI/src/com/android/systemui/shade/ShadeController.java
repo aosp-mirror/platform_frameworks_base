@@ -18,6 +18,8 @@ package com.android.systemui.shade;
 
 import android.view.MotionEvent;
 
+import com.android.systemui.CoreStartable;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -30,7 +32,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
  * these are coordinated with {@link StatusBarKeyguardViewManager} via
  * {@link com.android.systemui.keyguard.KeyguardViewMediator} and others.
  */
-public interface ShadeController {
+public interface ShadeController extends CoreStartable {
 
     /** Make our window larger and the shade expanded */
     void instantExpandShade();
@@ -38,23 +40,49 @@ public interface ShadeController {
     /** Collapse the shade instantly with no animation. */
     void instantCollapseShade();
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
-    void animateCollapseShade();
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
+    default void animateCollapseShade() {
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE);
+    }
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
-    void animateCollapseShade(int flags);
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
+    default void animateCollapseShade(int flags) {
+        animateCollapseShade(flags, false, false, 1.0f);
+    }
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
-    void animateCollapseShadeForced();
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
+    default void animateCollapseShadeForced() {
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE, true, false, 1.0f);
+    }
 
-    /** See {@link #animateCollapsePanels(int, boolean, boolean, float)}. */
-    void animateCollapseShadeDelayed();
+    /** See {@link #animateCollapseShade(int, boolean, boolean, float)}. */
+    default void animateCollapseShadeForcedDelayed() {
+        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true, true, 1.0f);
+    }
 
     /**
      * Collapse the shade animated, showing the bouncer when on {@link StatusBarState#KEYGUARD} or
      * dismissing status bar when on {@link StatusBarState#SHADE}.
      */
-    void animateCollapsePanels(int flags, boolean force, boolean delayed, float speedUpFactor);
+    void animateCollapseShade(int flags, boolean force, boolean delayed, float speedUpFactor);
+
+    /** Expand the shade with an animation. */
+    void animateExpandShade();
+
+    /** Expand the shade with quick settings expanded with an animation. */
+    void animateExpandQs();
+
+    /** Posts a request to collapse the shade. */
+    void postAnimateCollapseShade();
+
+    /** Posts a request to force collapse the shade. */
+    void postAnimateForceCollapseShade();
+
+    /** Posts a request to expand the shade to quick settings. */
+    void postAnimateExpandQs();
+
+    /** Cancels any ongoing expansion touch handling and collapses the shade. */
+    void cancelExpansionAndCollapseShade();
 
     /**
      * If the shade is not fully expanded, collapse it animated.
@@ -115,6 +143,9 @@ public interface ShadeController {
      */
     void collapseShade(boolean animate);
 
+    /** Calls #collapseShade if already on the main thread. If not, posts a call to it. */
+    void collapseOnMainThread();
+
     /** Makes shade expanded but not visible. */
     void makeExpandedInvisible();
 
@@ -127,22 +158,21 @@ public interface ShadeController {
     /** Handle status bar touch event. */
     void onStatusBarTouch(MotionEvent event);
 
-    /** Called when the shade finishes collapsing. */
-    void onClosingFinished();
+    /** Called when a launch animation was cancelled. */
+    void onLaunchAnimationCancelled(boolean isLaunchForActivity);
+
+    /** Called when a launch animation ends. */
+    void onLaunchAnimationEnd(boolean launchIsFullScreen);
 
     /** Sets the listener for when the visibility of the shade changes. */
-    void setVisibilityListener(ShadeVisibilityListener listener);
+    default void setVisibilityListener(ShadeVisibilityListener listener) {}
 
     /** */
-    void setNotificationPresenter(NotificationPresenter presenter);
+    default void setNotificationPresenter(NotificationPresenter presenter) {}
 
     /** */
-    void setNotificationShadeWindowViewController(
-            NotificationShadeWindowViewController notificationShadeWindowViewController);
-
-    /** */
-    void setNotificationPanelViewController(
-            NotificationPanelViewController notificationPanelViewController);
+    default void setNotificationShadeWindowViewController(
+            NotificationShadeWindowViewController notificationShadeWindowViewController) {}
 
     /** Listens for shade visibility changes. */
     interface ShadeVisibilityListener {

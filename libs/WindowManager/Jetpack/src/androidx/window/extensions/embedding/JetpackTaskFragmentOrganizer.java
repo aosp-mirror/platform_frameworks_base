@@ -17,7 +17,9 @@
 package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_ISOLATED_NAVIGATION;
 
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
@@ -338,6 +340,20 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     void deleteTaskFragment(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken) {
         wct.deleteTaskFragment(fragmentToken);
+    }
+
+    void reorderTaskFragmentToFront(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken) {
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_REORDER_TO_FRONT).build();
+        wct.addTaskFragmentOperation(fragmentToken, operation);
+    }
+
+    void setTaskFragmentIsolatedNavigation(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, boolean isolatedNav) {
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_ISOLATED_NAVIGATION).setIsolatedNav(isolatedNav).build();
+        wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 
     void updateTaskFragmentInfo(@NonNull TaskFragmentInfo taskFragmentInfo) {

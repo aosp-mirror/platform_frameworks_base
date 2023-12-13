@@ -99,7 +99,6 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.AttributeCache;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
@@ -182,7 +181,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 /* broadcastPermission = */ null,
                 mMainHandler);
 
-        AttributeCache.init(mContext);
+        TransitionAnimation.initAttributeCache(mContext, mMainHandler);
     }
 
     private void updateEnterpriseThumbnailDrawable() {
@@ -300,7 +299,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         // immediately finishes since there is no animation for screen-wake.
         if (info.getType() == WindowManager.TRANSIT_WAKE && !info.isKeyguardGoingAway()) {
             startTransaction.apply();
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
             return true;
         }
 
@@ -309,7 +308,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 || (info.getFlags() & WindowManager.TRANSIT_FLAG_INVISIBLE) != 0) {
             startTransaction.apply();
             finishTransaction.apply();
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
             return true;
         }
 
@@ -323,7 +322,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final Runnable onAnimFinish = () -> {
             if (!animations.isEmpty()) return;
             mAnimations.remove(transition);
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
         };
 
         final List<Consumer<SurfaceControl.Transaction>> postStartTransactionCallbacks =
@@ -407,7 +406,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             change.getEndAbsBounds().width(), change.getEndAbsBounds().height());
                 }
                 // Rotation change of independent non display window container.
-                if (change.getParent() == null
+                if (change.getParent() == null && !change.hasFlags(FLAG_IS_DISPLAY)
                         && change.getStartRotation() != change.getEndRotation()) {
                     startRotationAnimation(startTransaction, change, info,
                             ROTATION_ANIMATION_ROTATE, animations, onAnimFinish);

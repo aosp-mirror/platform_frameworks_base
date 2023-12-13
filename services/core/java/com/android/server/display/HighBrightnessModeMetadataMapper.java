@@ -41,6 +41,9 @@ class HighBrightnessModeMetadataMapper {
                     + display.getDisplayIdLocked());
             return null;
         }
+        if (device.getDisplayDeviceConfig().getHighBrightnessModeData() == null) {
+            return null;
+        }
 
         final String uniqueId = device.getUniqueId();
 

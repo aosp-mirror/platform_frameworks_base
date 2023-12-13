@@ -17,12 +17,16 @@
 package com.android.systemui.biometrics.dagger
 
 import com.android.settingslib.udfps.UdfpsUtils
+import com.android.systemui.biometrics.data.repository.FacePropertyRepository
+import com.android.systemui.biometrics.data.repository.FacePropertyRepositoryImpl
+import com.android.systemui.biometrics.data.repository.FaceSettingsRepository
+import com.android.systemui.biometrics.data.repository.FaceSettingsRepositoryImpl
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepositoryImpl
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.data.repository.PromptRepositoryImpl
-import com.android.systemui.biometrics.data.repository.RearDisplayStateRepository
-import com.android.systemui.biometrics.data.repository.RearDisplayStateRepositoryImpl
+import com.android.systemui.biometrics.data.repository.DisplayStateRepository
+import com.android.systemui.biometrics.data.repository.DisplayStateRepositoryImpl
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
@@ -47,15 +51,24 @@ interface BiometricsModule {
 
     @Binds
     @SysUISingleton
+    fun faceSettings(impl: FaceSettingsRepositoryImpl): FaceSettingsRepository
+
+    @Binds
+    @SysUISingleton
+    fun faceSensors(impl: FacePropertyRepositoryImpl): FacePropertyRepository
+
+    @Binds
+    @SysUISingleton
     fun biometricPromptRepository(impl: PromptRepositoryImpl): PromptRepository
 
     @Binds
     @SysUISingleton
     fun fingerprintRepository(impl: FingerprintPropertyRepositoryImpl):
             FingerprintPropertyRepository
+
     @Binds
     @SysUISingleton
-    fun rearDisplayStateRepository(impl: RearDisplayStateRepositoryImpl): RearDisplayStateRepository
+    fun displayStateRepository(impl: DisplayStateRepositoryImpl): DisplayStateRepository
 
     @Binds
     @SysUISingleton

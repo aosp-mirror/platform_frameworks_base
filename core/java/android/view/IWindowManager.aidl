@@ -471,8 +471,21 @@ interface IWindowManager
      * Requests Keyboard Shortcuts from the displayed window.
      *
      * @param receiver The receiver to deliver the results to.
+     * @param deviceId The deviceId of KeyEvent by which this request is triggered, or -1 if it's
+     *                 not triggered by a KeyEvent.
+     * @see #requestImeKeyboardShortcuts(IResultReceiver, int)
      */
     void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId);
+
+    /**
+     * Requests Keyboard Shortcuts from currently selected IME.
+     *
+     * @param receiver The receiver to deliver the results to.
+     * @param deviceId The deviceId of KeyEvent by which this request is triggered, or -1 if it's
+     *                 not triggered by a KeyEvent.
+     * @see #requestAppKeyboardShortcuts(IResultReceiver, int)
+     */
+    void requestImeKeyboardShortcuts(IResultReceiver receiver, int deviceId);
 
     /**
      * Retrieves the current stable insets from the primary display.

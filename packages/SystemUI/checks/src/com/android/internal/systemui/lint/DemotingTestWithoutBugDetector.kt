@@ -43,7 +43,9 @@ class DemotingTestWithoutBugDetector : Detector(), SourceCodeScanner {
                 if (node.qualifiedName in DEMOTING_ANNOTATION_BUG_ID) {
                     if (!containsBugId(node)) {
                         val location = context.getLocation(node)
-                        val message = "Please attach a bug id to track demoted test"
+                        val message =
+                            """Please attach a bug id to track demoted test, """ +
+                                """e.g. @FlakyTest(bugId = 123)"""
                         context.report(ISSUE, node, location, message)
                     }
                 }
@@ -51,7 +53,8 @@ class DemotingTestWithoutBugDetector : Detector(), SourceCodeScanner {
                 if (node.qualifiedName == DEMOTING_ANNOTATION_IGNORE) {
                     if (!containsBugString(node)) {
                         val location = context.getLocation(node)
-                        val message = "Please attach a bug (e.g. b/123) to track demoted test"
+                        val message =
+                            """Please attach a bug to track demoted test, e.g. @Ignore("b/123")"""
                         context.report(ISSUE, node, location, message)
                     }
                 }

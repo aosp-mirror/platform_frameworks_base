@@ -853,7 +853,7 @@ public class WallpaperManager {
     private static boolean isLockscreenLiveWallpaperEnabledHelper() {
         if (sGlobals == null) {
             sIsLockscreenLiveWallpaperEnabled = SystemProperties.getBoolean(
-                    "persist.wm.debug.lockscreen_live_wallpaper", false);
+                    "persist.wm.debug.lockscreen_live_wallpaper", true);
         }
         if (sIsLockscreenLiveWallpaperEnabled == null) {
             try {
@@ -2429,19 +2429,38 @@ public class WallpaperManager {
     }
 
     /**
-     * Reset all wallpaper to the factory default.
+     * Reset all wallpaper to the factory default. As opposed to {@link #clear()}, if the device
+     * is configured to have a live wallpaper by default, apply it.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      */
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public void clearWallpaper() {
+        if (isLockscreenLiveWallpaperEnabled()) {
+            clearWallpaper(FLAG_LOCK | FLAG_SYSTEM, mContext.getUserId());
+            return;
+        }
         clearWallpaper(FLAG_LOCK, mContext.getUserId());
         clearWallpaper(FLAG_SYSTEM, mContext.getUserId());
     }
 
     /**
-     * Clear the wallpaper for a specific user.  The caller must hold the
+     * Clear the wallpaper for a specific user.
+     * <ul>
+     *     <li> When called with {@code which=}{@link #FLAG_LOCK}, clear the lockscreen wallpaper.
+     *     The home screen wallpaper will become visible on the lock screen. </li>
+     *
+     *     <li> When called with {@code which=}{@link #FLAG_SYSTEM}, revert the home screen
+     *     wallpaper to default. The lockscreen wallpaper will be unchanged: if the previous
+     *     wallpaper was shared between home and lock screen, it will become lock screen only. </li>
+     *
+     *     <li> When called with {@code which=}({@link #FLAG_LOCK} | {@link #FLAG_SYSTEM}), put the
+     *     default wallpaper on both home and lock screen, removing any user defined wallpaper.</li>
+     * </ul>
+     * </p>
+     *
+     * The caller must hold the
      * INTERACT_ACROSS_USERS_FULL permission to clear another user's
      * wallpaper, and must hold the SET_WALLPAPER permission in all
      * circumstances.
@@ -2746,8 +2765,9 @@ public class WallpaperManager {
 
     /**
      * Remove any currently set system wallpaper, reverting to the system's built-in
-     * wallpaper. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
-     * is broadcast.
+     * wallpaper. As opposed to {@link #clearWallpaper()}, this method always set a static wallpaper
+     * with the default image, even if the device is configured to have a live wallpaper by default.
+     * On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
@@ -2762,9 +2782,14 @@ public class WallpaperManager {
 
     /**
      * Remove one or more currently set wallpapers, reverting to the system default
-     * display for each one.  If {@link #FLAG_SYSTEM} is set in the {@code which}
-     * parameter, the intent {@link Intent#ACTION_WALLPAPER_CHANGED} will be broadcast
-     * upon success.
+     * display for each one. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
+     * is broadcast.
+     * <ul>
+     *     <li> If {@link #FLAG_SYSTEM} is set in the {@code which} parameter, put the default
+     *     wallpaper on both home and lock screen, removing any user defined wallpaper. </li>
+     *     <li> When called with {@code which=}{@link #FLAG_LOCK}, clear the lockscreen wallpaper.
+     *     The home screen wallpaper will become visible on the lock screen. </li>
+     * </ul>
      *
      * @param which A bitwise combination of {@link #FLAG_SYSTEM} or
      *   {@link #FLAG_LOCK}
@@ -2774,6 +2799,7 @@ public class WallpaperManager {
     public void clear(@SetWallpaperFlags int which) throws IOException {
         if ((which & FLAG_SYSTEM) != 0) {
             clear();
+            if (isLockscreenLiveWallpaperEnabled()) return;
         }
         if ((which & FLAG_LOCK) != 0) {
             clearWallpaper(FLAG_LOCK, mContext.getUserId());
@@ -2886,19 +2912,60 @@ public class WallpaperManager {
             }
         }
 
-        // Check if the package exists
-        if (cn != null) {
-            try {
-                final PackageManager packageManager = context.getPackageManager();
-                packageManager.getPackageInfo(cn.getPackageName(),
-                        PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
-            } catch (PackageManager.NameNotFoundException e) {
-                cn = null;
-            }
+        if (!isComponentExist(context, cn)) {
+            cn = null;
         }
 
         return cn;
+    }
+
+    /**
+     * Return {@link ComponentName} of the CMF default wallpaper, or
+     * {@link #getDefaultWallpaperComponent(Context)} if none is defined.
+     *
+     * @hide
+     */
+    public static ComponentName getCmfDefaultWallpaperComponent(Context context) {
+        ComponentName cn = null;
+        String[] cmfWallpaperMap = context.getResources().getStringArray(
+                com.android.internal.R.array.default_wallpaper_component_per_device_color);
+        if (cmfWallpaperMap == null || cmfWallpaperMap.length == 0) {
+            Log.d(TAG, "No CMF wallpaper config");
+            return getDefaultWallpaperComponent(context);
+        }
+
+        for (String entry : cmfWallpaperMap) {
+            String[] cmfWallpaper;
+            if (!TextUtils.isEmpty(entry)) {
+                cmfWallpaper = entry.split(",");
+                if (cmfWallpaper != null && cmfWallpaper.length == 2 && VALUE_CMF_COLOR.equals(
+                        cmfWallpaper[0]) && !TextUtils.isEmpty(cmfWallpaper[1])) {
+                    cn = ComponentName.unflattenFromString(cmfWallpaper[1]);
+                    break;
+                }
+            }
+        }
+
+        if (!isComponentExist(context, cn)) {
+            cn = null;
+        }
+
+        return cn;
+    }
+
+    private static boolean isComponentExist(Context context, ComponentName cn) {
+        if (cn == null) {
+            return false;
+        }
+        try {
+            final PackageManager packageManager = context.getPackageManager();
+            packageManager.getPackageInfo(cn.getPackageName(),
+                    PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -23,12 +23,14 @@ import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
 
 import java.io.PrintWriter;
@@ -126,6 +128,11 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
             super.measureChildWithMargins(child, parentWidthMeasureSpec, widthUsed,
                     parentHeightMeasureSpec, heightUsed);
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch("QS", ev, super.dispatchTouchEvent(ev));
     }
 
     @Override

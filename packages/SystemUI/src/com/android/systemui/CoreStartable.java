@@ -53,6 +53,11 @@ public interface CoreStartable extends Dumpable {
     default void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
     }
 
+    /** Called to determine if the dumpable should be registered as critical or normal priority */
+    default boolean isDumpCritical() {
+        return true;
+    }
+
     /** Called immediately after the system broadcasts
      * {@link android.content.Intent#ACTION_LOCKED_BOOT_COMPLETED} or during SysUI startup if the
      * property {@code sys.boot_completed} is already set to 1. The latter typically occurs when

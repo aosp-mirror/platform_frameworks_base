@@ -64,6 +64,7 @@ import com.android.internal.os.IResultReceiver;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -391,11 +392,12 @@ public final class PendingIntent implements Parcelable {
         void onMarshaled(PendingIntent intent, Parcel parcel, int flags);
     }
 
-    private static final ThreadLocal<OnMarshaledListener> sOnMarshaledListener
-            = new ThreadLocal<>();
+    private static final ThreadLocal<List<OnMarshaledListener>> sOnMarshaledListener =
+            ThreadLocal.withInitial(ArrayList::new);
 
     /**
-     * Registers an listener for pending intents being written to a parcel.
+     * Registers an listener for pending intents being written to a parcel. This replaces any
+     * listeners previously added.
      *
      * @param listener The listener, null to clear.
      *
@@ -403,7 +405,27 @@ public final class PendingIntent implements Parcelable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static void setOnMarshaledListener(OnMarshaledListener listener) {
-        sOnMarshaledListener.set(listener);
+        final List<OnMarshaledListener> listeners = sOnMarshaledListener.get();
+        listeners.clear();
+        if (listener != null) {
+            listeners.add(listener);
+        }
+    }
+
+    /**
+     * Adds a listener for pending intents being written to a parcel.
+     * @hide
+     */
+    static void addOnMarshaledListener(OnMarshaledListener listener) {
+        sOnMarshaledListener.get().add(listener);
+    }
+
+    /**
+     * Removes a listener for pending intents being written to a parcel.
+     * @hide
+     */
+    static void removeOnMarshaledListener(OnMarshaledListener listener) {
+        sOnMarshaledListener.get().remove(listener);
     }
 
     private static void checkPendingIntent(int flags, @NonNull Intent intent,
@@ -1451,11 +1473,11 @@ public final class PendingIntent implements Parcelable {
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeStrongBinder(mTarget.asBinder());
-        OnMarshaledListener listener = sOnMarshaledListener.get();
-        if (listener != null) {
-            listener.onMarshaled(this, out, flags);
+        final List<OnMarshaledListener> listeners = sOnMarshaledListener.get();
+        final int numListeners = listeners.size();
+        for (int i = 0; i < numListeners; i++) {
+            listeners.get(i).onMarshaled(this, out, flags);
         }
-
     }
 
     public static final @NonNull Creator<PendingIntent> CREATOR = new Creator<PendingIntent>() {
@@ -1483,9 +1505,10 @@ public final class PendingIntent implements Parcelable {
             @NonNull Parcel out) {
         out.writeStrongBinder(sender != null ? sender.mTarget.asBinder() : null);
         if (sender != null) {
-            OnMarshaledListener listener = sOnMarshaledListener.get();
-            if (listener != null) {
-                listener.onMarshaled(sender, out, 0 /* flags */);
+            final List<OnMarshaledListener> listeners = sOnMarshaledListener.get();
+            final int numListeners = listeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                listeners.get(i).onMarshaled(sender, out, 0 /* flags */);
             }
         }
     }

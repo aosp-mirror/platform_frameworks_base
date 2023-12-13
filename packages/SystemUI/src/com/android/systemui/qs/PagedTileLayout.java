@@ -7,6 +7,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -549,10 +550,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         return mPages.get(0).mRecords.size();
     }
 
-    public void startTileReveal(Set<String> tileSpecs, final Runnable postAnimation) {
-        if (tileSpecs.isEmpty() || mPages.size() < 2 || getScrollX() != 0 || !beginFakeDrag()) {
-            // Do not start the reveal animation unless there are tiles to animate, multiple
-            // TileLayouts available and the user has not already started dragging.
+    public void startTileReveal(Set<String> tilesToReveal, final Runnable postAnimation) {
+        if (shouldNotRunAnimation(tilesToReveal)) {
+            return;
+        }
+        // This method has side effects (beings the fake drag, if it returns true). If we have
+        // decided that we want to do a tile reveal, we do a last check to verify that we can
+        // actually perform a fake drag.
+        if (!beginFakeDrag()) {
             return;
         }
 
@@ -560,13 +565,13 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         final TileLayout lastPage = mPages.get(lastPageNumber);
         final ArrayList<Animator> bounceAnims = new ArrayList<>();
         for (TileRecord tr : lastPage.mRecords) {
-            if (tileSpecs.contains(tr.tile.getTileSpec())) {
+            if (tilesToReveal.contains(tr.tile.getTileSpec())) {
                 bounceAnims.add(setupBounceAnimator(tr.tileView, bounceAnims.size()));
             }
         }
 
         if (bounceAnims.isEmpty()) {
-            // All tileSpecs are on the first page. Nothing to do.
+            // All tilesToReveal are on the first page. Nothing to do.
             // TODO: potentially show a bounce animation for first page QS tiles
             endFakeDrag();
             return;
@@ -586,6 +591,18 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx : dx, 0,
                 REVEAL_SCROLL_DURATION_MILLIS);
         postInvalidateOnAnimation();
+    }
+
+    private boolean shouldNotRunAnimation(Set<String> tilesToReveal) {
+        // None of these have side effects. That way, we don't need to rely on short-circuiting
+        // behavior
+        boolean noAnimationNeeded = tilesToReveal.isEmpty() || mPages.size() < 2;
+        boolean scrollingInProgress = getScrollX() != 0 || !isFakeDragging();
+        // isRunningInTestHarness() to disable animation in functional testing as it caused
+        // flakiness and is not needed there. Alternative solutions were more complex and would
+        // still be either potentially flaky or modify internal data.
+        // For more info see b/253493927 and b/293234595
+        return noAnimationNeeded || scrollingInProgress || ActivityManager.isRunningInTestHarness();
     }
 
     private int sanitizePageAction(int action) {

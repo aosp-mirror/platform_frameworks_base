@@ -92,7 +92,7 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
                 .build();
         final Animator animator = mAnimRunner.createAnimator(
                 info, mStartTransaction, mFinishTransaction,
-                () -> mFinishCallback.onTransitionFinished(null /* wct */, null /* wctCB */),
+                () -> mFinishCallback.onTransitionFinished(null /* wct */),
                 new ArrayList());
 
         // The animation should be empty when it is behind starting window.

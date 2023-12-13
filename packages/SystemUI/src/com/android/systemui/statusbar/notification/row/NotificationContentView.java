@@ -41,6 +41,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.annotation.MainThread;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
@@ -65,7 +67,6 @@ import com.android.systemui.statusbar.policy.SmartReplyStateInflaterKt;
 import com.android.systemui.statusbar.policy.SmartReplyView;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.Compile;
-import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -134,6 +135,7 @@ public class NotificationContentView extends FrameLayout implements Notification
     private PeopleNotificationIdentifier mPeopleIdentifier;
     private RemoteInputViewSubcomponent.Factory mRemoteInputSubcomponentFactory;
     private IStatusBarService mStatusBarService;
+    private boolean mBubblesEnabledForUser;
 
     /**
      * List of listeners for when content views become inactive (i.e. not the showing view).
@@ -208,6 +210,23 @@ public class NotificationContentView extends FrameLayout implements Notification
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
         mStatusBarService = statusBarService;
+        // We set root namespace so that we avoid searching children for id. Notification  might
+        // contain custom view and their ids may clash with ids already existing in shade or
+        // notification panel
+        setIsRootNamespace(true);
+    }
+
+    @Override
+    public View focusSearch(View focused, int direction) {
+        // This implementation is copied from ViewGroup but with removed special handling of
+        // setIsRootNamespace. This view is set as tree root using setIsRootNamespace and it
+        // causes focus to be stuck inside of it. We need to be root to avoid id conflicts
+        // but we don't want to behave like root when it comes to focusing.
+        if (mParent != null) {
+            return mParent.focusSearch(focused, direction);
+        }
+        Log.wtf(TAG, "NotificationContentView doesn't have parent");
+        return null;
     }
 
     public void reinflate() {
@@ -1423,12 +1442,20 @@ public class NotificationContentView extends FrameLayout implements Notification
         }
     }
 
+    @MainThread
+    public void setBubblesEnabledForUser(boolean enabled) {
+        mBubblesEnabledForUser = enabled;
+
+        applyBubbleAction(mExpandedChild, mNotificationEntry);
+        applyBubbleAction(mHeadsUpChild, mNotificationEntry);
+    }
+
     @VisibleForTesting
     boolean shouldShowBubbleButton(NotificationEntry entry) {
         boolean isPersonWithShortcut =
                 mPeopleIdentifier.getPeopleNotificationType(entry)
                         >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
-        return BubblesManager.areBubblesEnabled(mContext, entry.getSbn().getUser())
+        return mBubblesEnabledForUser
                 && isPersonWithShortcut
                 && entry.getBubbleMetadata() != null;
     }
@@ -2062,6 +2089,7 @@ public class NotificationContentView extends FrameLayout implements Notification
             pw.print("null");
         }
         pw.println();
+        pw.println("mBubblesEnabledForUser: " + mBubblesEnabledForUser);
 
         pw.print("RemoteInputViews { ");
         pw.print(" visibleType: " + mVisibleType);

@@ -1926,6 +1926,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
                 SecureSettingsProto.Assist.LONG_PRESS_HOME_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
+                SecureSettingsProto.Assist.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
+                SecureSettingsProto.Assist.SEARCH_LONG_PRESS_HOME_ENABLED);
         p.end(assistToken);
 
         final long assistHandlesToken = p.start(SecureSettingsProto.ASSIST_HANDLES);

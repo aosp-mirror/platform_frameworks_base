@@ -68,7 +68,6 @@ import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScrollCaptureResponse;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -123,7 +122,6 @@ public class ScreenshotView extends FrameLayout implements
     public static final long SCREENSHOT_ACTIONS_EXPANSION_DURATION_MS = 400;
     private static final long SCREENSHOT_ACTIONS_ALPHA_DURATION_MS = 100;
     private static final float SCREENSHOT_ACTIONS_START_SCALE_X = .7f;
-    private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
 
     private final Resources mResources;
     private final Interpolator mFastOutSlowIn;
@@ -284,17 +282,22 @@ public class ScreenshotView extends FrameLayout implements
         Region swipeRegion = new Region();
 
         final Rect tmpRect = new Rect();
+        int swipePadding = (int) FloatingWindowUtil.dpToPx(
+                mDisplayMetrics, DraggableConstraintLayout.SWIPE_PADDING_DP * -1);
         mScreenshotPreview.getBoundsOnScreen(tmpRect);
-        tmpRect.inset((int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP),
-                (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP));
+        tmpRect.inset(swipePadding, swipePadding);
         swipeRegion.op(tmpRect, Region.Op.UNION);
         mActionsContainerBackground.getBoundsOnScreen(tmpRect);
-        tmpRect.inset((int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP),
-                (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP));
+        tmpRect.inset(swipePadding, swipePadding);
         swipeRegion.op(tmpRect, Region.Op.UNION);
         mDismissButton.getBoundsOnScreen(tmpRect);
         swipeRegion.op(tmpRect, Region.Op.UNION);
 
+        View messageContainer = findViewById(R.id.screenshot_message_container);
+        if (messageContainer != null) {
+            messageContainer.getBoundsOnScreen(tmpRect);
+            swipeRegion.op(tmpRect, Region.Op.UNION);
+        }
         View messageDismiss = findViewById(R.id.message_dismiss_button);
         if (messageDismiss != null) {
             messageDismiss.getBoundsOnScreen(tmpRect);
@@ -377,16 +380,6 @@ public class ScreenshotView extends FrameLayout implements
         mShareChip = requireNonNull(mActionsContainer.findViewById(R.id.screenshot_share_chip));
         mEditChip = requireNonNull(mActionsContainer.findViewById(R.id.screenshot_edit_chip));
         mScrollChip = requireNonNull(mActionsContainer.findViewById(R.id.screenshot_scroll_chip));
-
-        int swipePaddingPx = (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, SWIPE_PADDING_DP);
-        TouchDelegate previewDelegate = new TouchDelegate(
-                new Rect(swipePaddingPx, swipePaddingPx, swipePaddingPx, swipePaddingPx),
-                mScreenshotPreview);
-        mScreenshotPreview.setTouchDelegate(previewDelegate);
-        TouchDelegate actionsDelegate = new TouchDelegate(
-                new Rect(swipePaddingPx, swipePaddingPx, swipePaddingPx, swipePaddingPx),
-                mActionsContainerBackground);
-        mActionsContainerBackground.setTouchDelegate(actionsDelegate);
 
         setFocusable(true);
         mActionsContainer.setScrollX(0);
@@ -801,31 +794,31 @@ public class ScreenshotView extends FrameLayout implements
             Intent shareIntent;
             if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && mScreenshotData != null
                     && mScreenshotData.getContextUrl() != null) {
-                shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithExtraText(
+                shareIntent = ActionIntentCreator.INSTANCE.createShareWithText(
                         imageData.uri, mScreenshotData.getContextUrl().toString());
             } else {
-                shareIntent = ActionIntentCreator.INSTANCE.createShareIntentWithSubject(
+                shareIntent = ActionIntentCreator.INSTANCE.createShareWithSubject(
                         imageData.uri, imageData.subject);
             }
             mActionExecutor.launchIntentAsync(shareIntent,
                     imageData.shareTransition.get().bundle,
-                    imageData.owner.getIdentifier(), false);
+                    imageData.owner, false);
         });
         mEditChip.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED, 0, mPackageName);
             prepareSharedTransition();
             mActionExecutor.launchIntentAsync(
-                    ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
+                    ActionIntentCreator.INSTANCE.createEdit(imageData.uri, mContext),
                     imageData.editTransition.get().bundle,
-                    imageData.owner.getIdentifier(), true);
+                    imageData.owner, true);
         });
         mScreenshotPreview.setOnClickListener(v -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED, 0, mPackageName);
             prepareSharedTransition();
             mActionExecutor.launchIntentAsync(
-                    ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
+                    ActionIntentCreator.INSTANCE.createEdit(imageData.uri, mContext),
                     imageData.editTransition.get().bundle,
-                    imageData.owner.getIdentifier(), true);
+                    imageData.owner, true);
         });
         if (mQuickShareChip != null) {
             if (imageData.quickShareAction != null) {

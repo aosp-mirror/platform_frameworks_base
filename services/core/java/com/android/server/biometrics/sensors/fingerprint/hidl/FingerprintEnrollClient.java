@@ -27,7 +27,6 @@ import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.ISidefpsController;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -69,19 +68,24 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
             @Nullable ISidefpsController sidefpsController,
-            @Nullable IUdfpsOverlay udfpsOverlay,
             @FingerprintManager.EnrollReason int enrollReason) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, sensorId, true /* shouldVibrate */, biometricLogger,
                 biometricContext);
         setRequestId(requestId);
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController,
-                sidefpsController, udfpsOverlay);
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
 
         mEnrollReason = enrollReason;
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
             getLogger().disableMetrics();
         }
+    }
+
+    @Override
+    public void start(@NonNull ClientMonitorCallback callback) {
+        super.start(callback);
+
+        BiometricNotificationUtils.cancelFingerprintEnrollNotification(getContext());
     }
 
     @NonNull
@@ -186,7 +190,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     }
 
     @Override
-    public void onUiReady() {
+    public void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event) {
         // Unsupported in HIDL.
     }
 }

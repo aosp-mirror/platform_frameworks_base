@@ -23,6 +23,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowStateProto.IDENTIFIER;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -134,19 +135,6 @@ class EmbeddedWindowController {
         return mWindowsByWindowToken.get(windowToken);
     }
 
-    void onActivityRemoved(ActivityRecord activityRecord) {
-        for (int i = mWindows.size() - 1; i >= 0; i--) {
-            final EmbeddedWindow window = mWindows.valueAt(i);
-            if (window.mHostActivityRecord == activityRecord) {
-                final WindowProcessController processController =
-                        mAtmService.getProcessController(window.mOwnerPid, window.mOwnerUid);
-                if (processController != null) {
-                    processController.removeHostActivity(activityRecord);
-                }
-            }
-        }
-    }
-
     static class EmbeddedWindow implements InputTarget {
         final IWindow mClient;
         @Nullable final WindowState mHostWindowState;
@@ -217,10 +205,10 @@ class EmbeddedWindowController {
                     mHostWindowState.mInputWindowHandle.getInputApplicationHandle());
         }
 
-        InputChannel openInputChannel() {
+        void openInputChannel(@NonNull InputChannel outInputChannel) {
             final String name = toString();
             mInputChannel = mWmService.mInputManager.createInputChannel(name);
-            return mInputChannel;
+            mInputChannel.copyTo(outInputChannel);
         }
 
         void onRemoved() {
@@ -228,6 +216,13 @@ class EmbeddedWindowController {
                 mWmService.mInputManager.removeInputChannel(mInputChannel.getToken());
                 mInputChannel.dispose();
                 mInputChannel = null;
+            }
+            if (mHostActivityRecord != null) {
+                final WindowProcessController wpc =
+                        mWmService.mAtmService.getProcessController(mOwnerPid, mOwnerUid);
+                if (wpc != null) {
+                    wpc.removeHostActivity(mHostActivityRecord);
+                }
             }
         }
 

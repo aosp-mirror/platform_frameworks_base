@@ -42,6 +42,7 @@ import android.view.DisplayInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
+import com.android.server.utils.FoldSettingProvider;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -142,6 +143,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final Listener mListener;
     private final DisplayManagerService.SyncRoot mSyncRoot;
     private final LogicalDisplayMapperHandler mHandler;
+    private final FoldSettingProvider mFoldSettingProvider;
     private final PowerManager mPowerManager;
 
     /**
@@ -187,15 +189,17 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private boolean mBootCompleted = false;
     private boolean mInteractive;
 
-    LogicalDisplayMapper(@NonNull Context context, @NonNull DisplayDeviceRepository repo,
+    LogicalDisplayMapper(@NonNull Context context, FoldSettingProvider foldSettingProvider,
+            @NonNull DisplayDeviceRepository repo,
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
             @NonNull Handler handler) {
-        this(context, repo, listener, syncRoot, handler,
+        this(context, foldSettingProvider, repo, listener, syncRoot, handler,
                 new DeviceStateToLayoutMap((isDefault) -> isDefault ? DEFAULT_DISPLAY
                         : sNextNonDefaultDisplayId++));
     }
 
-    LogicalDisplayMapper(@NonNull Context context, @NonNull DisplayDeviceRepository repo,
+    LogicalDisplayMapper(@NonNull Context context, FoldSettingProvider foldSettingProvider,
+            @NonNull DisplayDeviceRepository repo,
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
             @NonNull Handler handler, @NonNull DeviceStateToLayoutMap deviceStateToLayoutMap) {
         mSyncRoot = syncRoot;
@@ -204,6 +208,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         mHandler = new LogicalDisplayMapperHandler(handler.getLooper());
         mDisplayDeviceRepo = repo;
         mListener = listener;
+        mFoldSettingProvider = foldSettingProvider;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mSupportsConcurrentInternalDisplays = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportsConcurrentInternalDisplays);
@@ -475,10 +480,13 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 });
             } else if (sleepDevice) {
                 // Send the device to sleep when required.
+                int goToSleepFlag =
+                        mFoldSettingProvider.shouldSleepOnFold() ? 0
+                                : PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP;
                 mHandler.post(() -> {
                     mPowerManager.goToSleep(SystemClock.uptimeMillis(),
                             PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD,
-                            PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
+                            goToSleepFlag);
                 });
             }
         }
@@ -531,9 +539,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
      * Returns if the device should be put to sleep or not.
      *
      * Includes a check to verify that the device state that we are moving to, {@code pendingState},
-     * is the same as the physical state of the device, {@code baseState}. Different values for
-     * these parameters indicate a device state override is active, and we shouldn't put the device
-     * to sleep to provide a better user experience.
+     * is the same as the physical state of the device, {@code baseState}. Also if the
+     * 'Stay Awake On Fold' is not enabled. Different values for these parameters indicate a device
+     * state override is active, and we shouldn't put the device to sleep to provide a better user
+     * experience.
      *
      * @param pendingState device state we are moving to
      * @param currentState device state we are currently in
@@ -551,7 +560,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 && mDeviceStatesOnWhichToSleep.get(pendingState)
                 && !mDeviceStatesOnWhichToSleep.get(currentState)
                 && !isOverrideActive
-                && isInteractive && isBootCompleted;
+                && isInteractive && isBootCompleted
+                && !mFoldSettingProvider.shouldStayAwakeOnFold();
     }
 
     private boolean areAllTransitioningDisplaysOffLocked() {

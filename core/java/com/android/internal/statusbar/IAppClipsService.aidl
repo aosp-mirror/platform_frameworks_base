@@ -23,4 +23,6 @@ package com.android.internal.statusbar;
  */
 interface IAppClipsService {
     boolean canLaunchCaptureContentActivityForNote(in int taskId);
+
+    int canLaunchCaptureContentActivityForNoteInternal(in int taskId);
 }

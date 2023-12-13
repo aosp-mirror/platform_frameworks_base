@@ -17,3 +17,4 @@
 package android.widget;
 
 parcelable RemoteViews;
+parcelable RemoteViews.RemoteCollectionItems;

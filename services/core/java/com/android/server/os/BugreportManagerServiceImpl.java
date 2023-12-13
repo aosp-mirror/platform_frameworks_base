@@ -22,6 +22,7 @@ import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -64,6 +65,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private static final int LOCAL_LOG_SIZE = 20;
     private static final String TAG = "BugreportManagerService";
     private static final boolean DEBUG = false;
+    private static final String ROLE_SYSTEM_AUTOMOTIVE_PROJECTION =
+            "android.app.role.SYSTEM_AUTOMOTIVE_PROJECTION";
 
     private static final String BUGREPORT_SERVICE = "bugreportd";
     private static final long DEFAULT_BUGREPORT_SERVICE_TIMEOUT_MILLIS = 30 * 1000;
@@ -326,11 +329,22 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         // To gain access through the DUMP permission, the OEM has to allow this package explicitly
         // via sysconfig and privileged permissions.
-        if (mBugreportAllowlistedPackages.contains(callingPackage)
-                && mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
-                        == PackageManager.PERMISSION_GRANTED) {
+        boolean allowlisted = mBugreportAllowlistedPackages.contains(callingPackage);
+        if (!allowlisted) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                allowlisted = mContext.getSystemService(RoleManager.class).getRoleHolders(
+                        ROLE_SYSTEM_AUTOMOTIVE_PROJECTION).contains(callingPackage);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        if (allowlisted && mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.DUMP) == PackageManager.PERMISSION_GRANTED) {
             return;
         }
+
         // For carrier privileges, this can include user-installed apps. This is essentially a
         // function of the current active SIM(s) in the device to let carrier apps through.
         final long token = Binder.clearCallingIdentity();
@@ -346,7 +360,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         String message =
                 callingPackage
-                        + " does not hold the DUMP permission or is not bugreport-whitelisted "
+                        + " does not hold the DUMP permission or is not bugreport-whitelisted or "
+                        + "does not have an allowed role "
                         + (checkCarrierPrivileges ? "and does not have carrier privileges " : "")
                         + "to request a bugreport";
         Slog.w(TAG, message);
