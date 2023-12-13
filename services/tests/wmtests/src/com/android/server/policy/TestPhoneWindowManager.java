@@ -166,6 +166,9 @@ class TestPhoneWindowManager {
     @Mock
     private PhoneWindowManager.ButtonOverridePermissionChecker mButtonOverridePermissionChecker;
 
+    @Mock private IBinder mInputToken;
+    @Mock private IBinder mImeTargetWindowToken;
+
     private StaticMockitoSession mMockitoSession;
     private OffsettableClock mClock = new OffsettableClock();
     private TestLooper mTestLooper = new TestLooper(() -> mClock.now());
@@ -327,6 +330,9 @@ class TestPhoneWindowManager {
         doNothing().when(mPhoneWindowManager).finishedWakingUp(anyInt(), anyInt());
         doNothing().when(mPhoneWindowManager).lockNow(any());
 
+        doReturn(mImeTargetWindowToken)
+                .when(mWindowManagerInternal).getTargetWindowTokenFromInputToken(mInputToken);
+
         mPhoneWindowManager.init(new TestInjector(mContext, mWindowManagerFuncsImpl));
         mPhoneWindowManager.systemReady();
         mPhoneWindowManager.systemBooted();
@@ -365,12 +371,12 @@ class TestPhoneWindowManager {
     }
 
     long interceptKeyBeforeDispatching(KeyEvent event) {
-        return mPhoneWindowManager.interceptKeyBeforeDispatching(null /*focusedToken*/,
-                event, FLAG_INTERACTIVE);
+        return mPhoneWindowManager.interceptKeyBeforeDispatching(mInputToken, event,
+                FLAG_INTERACTIVE);
     }
 
     void dispatchUnhandledKey(KeyEvent event) {
-        mPhoneWindowManager.dispatchUnhandledKey(null /*focusedToken*/, event, FLAG_INTERACTIVE);
+        mPhoneWindowManager.dispatchUnhandledKey(mInputToken, event, FLAG_INTERACTIVE);
     }
 
     long getCurrentTime() {
@@ -646,14 +652,16 @@ class TestPhoneWindowManager {
         verify(mStatusBarManagerInternal).startAssist(any());
     }
 
-    void assertSwitchKeyboardLayout(int direction) {
+    void assertSwitchKeyboardLayout(int direction, int displayId) {
         mTestLooper.dispatchAll();
         if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
-            verify(mInputMethodManagerInternal).switchKeyboardLayout(eq(direction));
+            verify(mInputMethodManagerInternal).onSwitchKeyboardLayoutShortcut(eq(direction),
+                    eq(displayId), eq(mImeTargetWindowToken));
             verify(mWindowManagerFuncsImpl, never()).switchKeyboardLayout(anyInt(), anyInt());
         } else {
             verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), eq(direction));
-            verify(mInputMethodManagerInternal, never()).switchKeyboardLayout(anyInt());
+            verify(mInputMethodManagerInternal, never())
+                    .onSwitchKeyboardLayoutShortcut(anyInt(), anyInt(), any());
         }
     }
 
