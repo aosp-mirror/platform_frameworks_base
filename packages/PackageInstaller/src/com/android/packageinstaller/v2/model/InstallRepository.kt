@@ -60,6 +60,10 @@ import com.android.packageinstaller.v2.model.PackageUtil.isInstallPermissionGran
 import com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted
 import java.io.File
 import java.io.IOException
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class InstallRepository(private val context: Context) {
 
@@ -242,6 +246,7 @@ class InstallRepository(private val context: Context) {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun stageForInstall() {
         val uri = intent.data
         if (stagedSessionId != SessionInfo.INVALID_ID
@@ -290,13 +295,14 @@ class InstallRepository(private val context: Context) {
                     return
                 }
             }
-            val listener: SessionStageListener = object : SessionStageListener {
-                override fun onStagingSuccess(info: SessionInfo?) {
-                    //TODO: Verify if the returned sessionInfo should be used anywhere
-                    _stagingResult.value = InstallReady()
-                }
 
-                override fun onStagingFailure() {
+            sessionStager = SessionStager(context, uri, stagedSessionId)
+            GlobalScope.launch(Dispatchers.Main) {
+                val wasFileStaged = sessionStager!!.execute()
+
+                if (wasFileStaged) {
+                    _stagingResult.value = InstallReady()
+                } else {
                     cleanupStagingSession()
                     _stagingResult.value = InstallAborted(
                         ABORT_REASON_INTERNAL_ERROR,
@@ -307,9 +313,6 @@ class InstallRepository(private val context: Context) {
                     )
                 }
             }
-            sessionStager?.cancel(true)
-            sessionStager = SessionStager(context, uri, stagedSessionId, listener)
-            sessionStager?.execute()
         }
     }
 
@@ -845,21 +848,14 @@ class InstallRepository(private val context: Context) {
         return generateConfirmationSnippet()
     }
 
-    val stagingProgress: MutableLiveData<Int>
-        get() = if (sessionStager != null) {
-            sessionStager?.progress ?: MutableLiveData(0)
-        } else MutableLiveData(0)
+    val stagingProgress: LiveData<Int>
+        get() = sessionStager?.progress ?: MutableLiveData(0)
 
     companion object {
         const val EXTRA_STAGED_SESSION_ID = "com.android.packageinstaller.extra.STAGED_SESSION_ID"
         const val SCHEME_PACKAGE = "package"
         const val BROADCAST_ACTION = "com.android.packageinstaller.ACTION_INSTALL_COMMIT"
         private val LOG_TAG = InstallRepository::class.java.simpleName
-    }
-
-    interface SessionStageListener {
-        fun onStagingSuccess(info: SessionInfo?)
-        fun onStagingFailure()
     }
 
     data class CallerInfo(val packageName: String?, val uid: Int)

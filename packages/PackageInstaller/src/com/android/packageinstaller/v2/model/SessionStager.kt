@@ -20,55 +20,53 @@ import android.content.Context
 import android.content.pm.PackageInstaller
 import android.content.res.AssetFileDescriptor
 import android.net.Uri
-import android.os.AsyncTask
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.android.packageinstaller.v2.model.InstallRepository.SessionStageListener
 import java.io.IOException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class SessionStager internal constructor(
     private val context: Context,
     private val uri: Uri,
-    private val stagedSessionId: Int,
-    private val listener: SessionStageListener,
-) : AsyncTask<Void, Int, PackageInstaller.SessionInfo?>() {
+    private val stagedSessionId: Int
+) {
 
     companion object {
         private val LOG_TAG = SessionStager::class.java.simpleName
     }
 
-    val progress = MutableLiveData(0)
+    private val _progress = MutableLiveData(0)
+    val progress: LiveData<Int>
+        get() = _progress
 
-    override fun doInBackground(vararg params: Void): PackageInstaller.SessionInfo? {
-        val pi = context.packageManager.packageInstaller
+    suspend fun execute(): Boolean = withContext(Dispatchers.IO) {
+        val pi: PackageInstaller = context.packageManager.packageInstaller
+        var sessionInfo: PackageInstaller.SessionInfo?
         try {
             val session = pi.openSession(stagedSessionId)
             context.contentResolver.openInputStream(uri).use { instream ->
                 session.setStagingProgress(0f)
 
                 if (instream == null) {
-                    return null
+                    return@withContext false
                 }
 
                 val sizeBytes = getContentSizeBytes()
-                progress.postValue(if (sizeBytes > 0) 0 else -1)
+                publishProgress(if (sizeBytes > 0) 0 else -1)
 
                 var totalRead: Long = 0
                 session.openWrite("PackageInstaller", 0, sizeBytes).use { out ->
                     val buffer = ByteArray(1024 * 1024)
                     while (true) {
                         val numRead = instream.read(buffer)
-
                         if (numRead == -1) {
                             session.fsync(out)
                             break
                         }
-
-                        if (isCancelled) {
-                            break
-                        }
-
                         out.write(buffer, 0, numRead)
+
                         if (sizeBytes > 0) {
                             totalRead += numRead.toLong()
                             val fraction = totalRead.toFloat() / sizeBytes.toFloat()
@@ -77,12 +75,21 @@ class SessionStager internal constructor(
                         }
                     }
                 }
-                return pi.getSessionInfo(stagedSessionId)!!
+                sessionInfo = pi.getSessionInfo(stagedSessionId)
             }
-
         } catch (e: Exception) {
             Log.w(LOG_TAG, "Error staging apk from content URI", e)
-            return null
+            sessionInfo = null
+        }
+
+        return@withContext if (sessionInfo == null
+            || !sessionInfo?.isActive!!
+            || sessionInfo?.resolvedBaseApkPath == null
+        ) {
+            Log.w(LOG_TAG, "Session info is invalid: $sessionInfo")
+            false
+        } else {
+            true
         }
     }
 
@@ -97,21 +104,7 @@ class SessionStager internal constructor(
         }
     }
 
-    override fun onPostExecute(sessionInfo: PackageInstaller.SessionInfo?) {
-        if ((sessionInfo == null)
-            || !sessionInfo.isActive
-            || (sessionInfo.resolvedBaseApkPath == null)
-        ) {
-            Log.w(LOG_TAG, "Session info is invalid: $sessionInfo")
-            listener.onStagingFailure()
-            return
-        }
-        listener.onStagingSuccess(sessionInfo)
-    }
-
-    override fun onProgressUpdate(vararg progressVal: Int?) {
-        if (progressVal.isNotEmpty()) {
-            progress.value = progressVal[0]
-        }
+    private suspend fun publishProgress(progressValue: Int) = withContext(Dispatchers.Main) {
+        _progress.value = progressValue
     }
 }

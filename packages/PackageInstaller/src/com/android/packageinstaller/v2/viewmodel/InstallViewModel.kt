@@ -19,6 +19,7 @@ package com.android.packageinstaller.v2.viewmodel
 import android.app.Application
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.packageinstaller.v2.model.InstallRepository
@@ -56,7 +57,7 @@ class InstallViewModel(application: Application, val repository: InstallReposito
         }
     }
 
-    val stagingProgress: MutableLiveData<Int>
+    val stagingProgress: LiveData<Int>
         get() = repository.stagingProgress
 
     private fun checkIfAllowedAndInitiateInstall() {
