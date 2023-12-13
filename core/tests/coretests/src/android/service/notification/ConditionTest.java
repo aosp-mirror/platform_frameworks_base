@@ -21,9 +21,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
+import static org.junit.Assert.assertThrows;
+
 import android.app.Flags;
 import android.net.Uri;
 import android.os.Parcel;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -36,6 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -193,5 +197,60 @@ public class ConditionTest {
 
         Condition fromParcel = new Condition(parcel);
         assertThat(fromParcel).isEqualTo(cond);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void constructor_unspecifiedSource_succeeds() {
+        new Condition(Uri.parse("id"), "Summary", Condition.STATE_TRUE);
+        // No exception.
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void constructor_validSource_succeeds() {
+        new Condition(Uri.parse("id"), "Summary", Condition.STATE_TRUE, Condition.SOURCE_CONTEXT);
+        // No exception.
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void constructor_invalidSource_throws() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Condition(Uri.parse("uri"), "Summary", Condition.STATE_TRUE, 1000));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void constructor_parcelWithInvalidSource_throws() {
+        Condition original = new Condition(Uri.parse("condition"), "Summary", Condition.STATE_TRUE,
+                Condition.SOURCE_SCHEDULE);
+        Parcel parcel = Parcel.obtain();
+        original.writeToParcel(parcel, 0);
+
+        // Tweak the parcel to contain and invalid source value.
+        parcel.setDataPosition(parcel.dataPosition() - 8); // going back two int fields.
+        parcel.writeInt(100);
+        parcel.setDataPosition(0);
+
+        assertThrows(IllegalArgumentException.class, () -> new Condition(parcel));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void validate_invalidSource_throws() throws Exception {
+        Condition condition = new Condition(Uri.parse("condition"), "Summary", Condition.STATE_TRUE,
+                Condition.SOURCE_SCHEDULE);
+
+        Field typeField = Condition.class.getDeclaredField("source");
+
+        // Reflection on reflection (ugh) to make a final field non-final
+        Field fieldAccessFlagsField = Field.class.getDeclaredField("accessFlags");
+        fieldAccessFlagsField.setAccessible(true);
+        fieldAccessFlagsField.setInt(typeField, typeField.getModifiers() & ~Modifier.FINAL);
+
+        typeField.setInt(condition, 30);
+
+        assertThrows(IllegalArgumentException.class, condition::validate);
     }
 }
