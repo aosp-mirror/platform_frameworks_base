@@ -1449,7 +1449,7 @@
     <string name="ext_media_status_checking" msgid="159013362442090347">"Текшерилүүдө…"</string>
     <string name="ext_media_status_mounted" msgid="3459448555811203459">"Даяр"</string>
     <string name="ext_media_status_mounted_ro" msgid="1974809199760086956">"Окуу үчүн гана"</string>
-    <string name="ext_media_status_bad_removal" msgid="508448566481406245">"Коопсуз өчүрүлгөн жок"</string>
+    <string name="ext_media_status_bad_removal" msgid="508448566481406245">"Коопсуз өчкөн жок"</string>
     <string name="ext_media_status_unmountable" msgid="7043574843541087748">"Бузулган"</string>
     <string name="ext_media_status_unsupported" msgid="5460509911660539317">"Колдоого алынбайт"</string>
     <string name="ext_media_status_ejecting" msgid="7532403368044013797">"Чыгарылууда…"</string>

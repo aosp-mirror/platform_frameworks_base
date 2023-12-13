@@ -484,7 +484,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"přístup k poloze na pozadí"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Tato aplikace má kdykoliv přístup k poloze (i když ji zrovna nepoužíváte)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"změna nastavení zvuku"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro výstup zvuku."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro zvukový výstup."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"nahrávání zvuku"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Tato aplikace může pomocí mikrofonu během svého používání zaznamenat zvuk."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"zaznamenávat zvuk na pozadí"</string>
