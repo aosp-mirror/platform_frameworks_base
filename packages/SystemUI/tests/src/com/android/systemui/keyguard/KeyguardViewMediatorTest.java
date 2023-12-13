@@ -93,6 +93,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.SystemPropertiesHelper;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -190,6 +191,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ShadeInteractor mShadeInteractor;
     private @Mock ShadeWindowLogger mShadeWindowLogger;
     private @Mock SelectedUserInteractor mSelectedUserInteractor;
+    private @Mock KeyguardInteractor mKeyguardInteractor;
     private @Captor ArgumentCaptor<KeyguardStateController.Callback>
             mKeyguardStateControllerCallback;
     private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
@@ -1131,7 +1133,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 () -> mDreamingToLockscreenTransitionViewModel,
                 mSystemPropertiesHelper,
                 () -> mock(WindowManagerLockscreenVisibilityManager.class),
-                mSelectedUserInteractor);
+                mSelectedUserInteractor,
+                mKeyguardInteractor);
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);

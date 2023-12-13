@@ -304,14 +304,14 @@ constructor(
     }
 
     private fun observeFaceAuthResettingConditions() {
-        // Clear auth status when keyguard is going away or when the user is switching or device
-        // starts going to sleep.
+        // Clear auth status when keyguard done animations finished or when the user is switching
+        // or device starts going to sleep.
         merge(
                 powerInteractor.isAsleep,
                 if (featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
                     keyguardTransitionInteractor.isInTransitionToState(KeyguardState.GONE)
                 } else {
-                    keyguardRepository.isKeyguardGoingAway
+                    keyguardRepository.keyguardDoneAnimationsFinished.map { true }
                 },
                 userRepository.selectedUser.map {
                     it.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
