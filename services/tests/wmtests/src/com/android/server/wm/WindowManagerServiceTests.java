@@ -239,6 +239,22 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTrackOverlayWindow() {
+        final WindowProcessController wpc = mSystemServicesTestRule.addProcess(
+                "pkgName", "processName", 1000 /* pid */, Process.SYSTEM_UID);
+        final Session session = createTestSession(mAtm, wpc.getPid(), wpc.mUid);
+        spyOn(session);
+        assertTrue(session.mCanAddInternalSystemWindow);
+        final WindowSurfaceController winSurface = mock(WindowSurfaceController.class);
+        session.onWindowSurfaceVisibilityChanged(winSurface, true /* visible */,
+                LayoutParams.TYPE_PHONE);
+        verify(session).setHasOverlayUi(true);
+        session.onWindowSurfaceVisibilityChanged(winSurface, false /* visible */,
+                LayoutParams.TYPE_PHONE);
+        verify(session).setHasOverlayUi(false);
+    }
+
+    @Test
     public void testRelayoutExitingWindow() {
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
         final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);

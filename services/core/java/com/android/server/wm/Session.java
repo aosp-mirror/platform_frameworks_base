@@ -109,9 +109,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private final String mStringName;
     SurfaceSession mSurfaceSession;
     private final ArrayList<WindowState> mAddedWindows = new ArrayList<>();
-    // Set of visible application overlay window surfaces connected to this session.
-    private final ArraySet<WindowSurfaceController> mAppOverlaySurfaces = new ArraySet<>();
-    // Set of visible alert window surfaces connected to this session.
+    /** Set of visible alert/app-overlay window surfaces connected to this session. */
     private final ArraySet<WindowSurfaceController> mAlertWindowSurfaces = new ArraySet<>();
     private final DragDropController mDragDropController;
     final boolean mCanAddInternalSystemWindow;
@@ -795,46 +793,45 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
 
         boolean changed;
-
-        if (!mCanAddInternalSystemWindow && !mCanCreateSystemApplicationOverlay) {
-            // We want to track non-system apps adding alert windows so we can post an
-            // on-going notification for the user to control their visibility.
-            if (visible) {
-                changed = mAlertWindowSurfaces.add(surfaceController);
-                MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, changed, type, true);
-            } else {
-                changed = mAlertWindowSurfaces.remove(surfaceController);
-                MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, changed, type, true);
+        // Track non-system apps adding overlay/alert windows, so a notification can post for the
+        // user to control their visibility.
+        final boolean noSystemOverlayPermission =
+                !mCanAddInternalSystemWindow && !mCanCreateSystemApplicationOverlay;
+        if (visible) {
+            changed = mAlertWindowSurfaces.add(surfaceController);
+            if (type == TYPE_APPLICATION_OVERLAY) {
+                MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, changed, type,
+                        false /* set false to only log for TYPE_APPLICATION_OVERLAY */);
+            } else if (noSystemOverlayPermission) {
+                MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, changed, type,
+                        true /* only log for non-TYPE_APPLICATION_OVERLAY */);
             }
+        } else {
+            changed = mAlertWindowSurfaces.remove(surfaceController);
+            if (type == TYPE_APPLICATION_OVERLAY) {
+                MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, changed, type,
+                        false /* set false to only log for TYPE_APPLICATION_OVERLAY */);
+            } else if (noSystemOverlayPermission) {
+                MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, changed, type,
+                        true /* only log for non-TYPE_APPLICATION_OVERLAY */);
+            }
+        }
 
-            if (changed) {
-                if (mAlertWindowSurfaces.isEmpty()) {
-                    cancelAlertWindowNotification();
-                } else if (mAlertWindowNotification == null){
-                    mAlertWindowNotification = new AlertWindowNotification(mService, mPackageName);
-                    if (mShowingAlertWindowNotificationAllowed) {
-                        mAlertWindowNotification.post();
-                    }
+        if (changed && noSystemOverlayPermission) {
+            if (mAlertWindowSurfaces.isEmpty()) {
+                cancelAlertWindowNotification();
+            } else if (mAlertWindowNotification == null) {
+                mAlertWindowNotification = new AlertWindowNotification(mService, mPackageName);
+                if (mShowingAlertWindowNotificationAllowed) {
+                    mAlertWindowNotification.post();
                 }
             }
         }
 
-        if (type != TYPE_APPLICATION_OVERLAY) {
-            return;
-        }
-
-        if (visible) {
-            changed = mAppOverlaySurfaces.add(surfaceController);
-            MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, changed, type, false);
-        } else {
-            changed = mAppOverlaySurfaces.remove(surfaceController);
-            MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, changed, type, false);
-        }
-
-        if (changed) {
-            // Notify activity manager of changes to app overlay windows so it can adjust the
-            // importance score for the process.
-            setHasOverlayUi(!mAppOverlaySurfaces.isEmpty());
+        if (changed && mPid != WindowManagerService.MY_PID) {
+            // Notify activity manager that the process contains overlay/alert windows, so it can
+            // adjust the importance score for the process.
+            setHasOverlayUi(!mAlertWindowSurfaces.isEmpty());
         }
     }
 
@@ -869,12 +866,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         mSurfaceSession = null;
         mAddedWindows.clear();
         mAlertWindowSurfaces.clear();
-        mAppOverlaySurfaces.clear();
         setHasOverlayUi(false);
         cancelAlertWindowNotification();
     }
 
-    private void setHasOverlayUi(boolean hasOverlayUi) {
+    @VisibleForTesting
+    void setHasOverlayUi(boolean hasOverlayUi) {
         mService.mH.obtainMessage(H.SET_HAS_OVERLAY_UI, mPid, hasOverlayUi ? 1 : 0).sendToTarget();
     }
 
@@ -889,7 +886,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("numWindow="); pw.print(mAddedWindows.size());
                 pw.print(" mCanAddInternalSystemWindow="); pw.print(mCanAddInternalSystemWindow);
-                pw.print(" mAppOverlaySurfaces="); pw.print(mAppOverlaySurfaces);
                 pw.print(" mAlertWindowSurfaces="); pw.print(mAlertWindowSurfaces);
                 pw.print(" mClientDead="); pw.print(mClientDead);
                 pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
