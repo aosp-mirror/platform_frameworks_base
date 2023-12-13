@@ -145,7 +145,17 @@ public class FontScaleConverterFactory {
             // them a straight linear table instead.
             // This works because when FontScaleConverter encounters a size beyond its bounds, it
             // calculates a linear fontScale factor using the ratio of the last element pair.
-            return new FontScaleConverterImpl(new float[] {1f}, new float[] {fontScale});
+            FontScaleConverterImpl converter = new FontScaleConverterImpl(
+                    new float[]{1f},
+                    new float[]{fontScale}
+            );
+
+            if (Flags.fontScaleConverterPublic()) {
+                // Cache for next time.
+                put(fontScale, converter);
+            }
+
+            return converter;
         } else {
             float startScale = getScaleFromKey(LOOKUP_TABLES.keyAt(lowerIndex));
             float endScale = getScaleFromKey(LOOKUP_TABLES.keyAt(higherIndex));
@@ -156,10 +166,18 @@ public class FontScaleConverterFactory {
                     endScale,
                     fontScale
             );
-            return createInterpolatedTableBetween(
+            FontScaleConverter converter = createInterpolatedTableBetween(
                     LOOKUP_TABLES.valueAt(lowerIndex),
                     LOOKUP_TABLES.valueAt(higherIndex),
-                    interpolationPoint);
+                    interpolationPoint
+            );
+
+            if (Flags.fontScaleConverterPublic()) {
+                // Cache for next time.
+                put(fontScale, converter);
+            }
+
+            return converter;
         }
     }
 

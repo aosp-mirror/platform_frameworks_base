@@ -16,14 +16,17 @@
 
 package android.content.res
 
-
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.CheckFlagsRule
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import androidx.core.util.forEach
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import org.junit.Rule
 import kotlin.math.ceil
 import kotlin.math.floor
 import org.junit.Test
@@ -38,6 +41,9 @@ import kotlin.random.Random.Default.nextFloat
 @Presubmit
 @RunWith(AndroidJUnit4::class)
 class FontScaleConverterFactoryTest {
+
+    @get:Rule
+    val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
     @Test
     fun scale200IsTwiceAtSmallSizes() {
@@ -86,6 +92,28 @@ class FontScaleConverterFactoryTest {
         assertThat(table.convertSpToDp(100F)).isLessThan(100f * 1.6F)
         assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(5f * 1.6F)
         assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
+    fun missingLookupTable_cachesInterpolated() {
+        val table = FontScaleConverterFactory.forScale(1.6F)!!
+
+        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.6F * 100).toInt())).isTrue()
+        // Double check known existing values
+        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.5F * 100).toInt())).isTrue()
+        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.7F * 100).toInt())).isFalse()
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
+    fun missingLookupTablePastEnd_cachesLinear() {
+        val table = FontScaleConverterFactory.forScale(3F)!!
+
+        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((3F * 100).toInt())).isTrue()
+        // Double check known existing values
+        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.5F * 100).toInt())).isTrue()
+        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.7F * 100).toInt())).isFalse()
     }
 
     @SmallTest
