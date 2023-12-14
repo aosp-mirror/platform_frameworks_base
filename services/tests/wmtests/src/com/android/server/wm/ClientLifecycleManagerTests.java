@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -52,14 +54,12 @@ import org.mockito.MockitoAnnotations;
  * Build/Install/Run:
  *  atest WmTests:ClientLifecycleManagerTests
  */
-// Suppress GuardedBy warning on unit tests
-@SuppressWarnings("GuardedBy")
 @SmallTest
 @Presubmit
 public class ClientLifecycleManagerTests {
 
     @Rule(order = 0)
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     @Rule(order = 1)
     public final SystemServicesTestRule mSystemServices = new SystemServicesTestRule();
@@ -224,5 +224,31 @@ public class ClientLifecycleManagerTests {
         assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());
         verify(mTransaction).schedule();
         verify(mTransaction).recycle();
+    }
+
+    @Test
+    public void testLayoutDeferred() throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+        spyOn(mWms.mWindowPlacerLocked);
+        doReturn(false).when(mWms.mWindowPlacerLocked).isInLayout();
+        doReturn(false).when(mWms.mWindowPlacerLocked).isTraversalScheduled();
+        doReturn(true).when(mWms.mWindowPlacerLocked).isLayoutDeferred();
+
+        // Queue transactions during layout deferred.
+        mLifecycleManager.scheduleTransactionItem(mNonBinderClient, mLifecycleItem);
+
+        verify(mLifecycleManager, never()).scheduleTransaction(any());
+
+        // Continue queueing when there are multi-level defer.
+        mLifecycleManager.onLayoutContinued();
+
+        verify(mLifecycleManager, never()).scheduleTransaction(any());
+
+        // Immediately dispatch when layout continue without ongoing/scheduled layout.
+        doReturn(false).when(mWms.mWindowPlacerLocked).isLayoutDeferred();
+
+        mLifecycleManager.onLayoutContinued();
+
+        verify(mLifecycleManager).scheduleTransaction(any());
     }
 }
