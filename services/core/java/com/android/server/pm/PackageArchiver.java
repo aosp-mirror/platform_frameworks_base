@@ -132,6 +132,11 @@ public class PackageArchiver {
     private static final String EXTRA_INSTALLER_TITLE =
             "com.android.content.pm.extra.UNARCHIVE_INSTALLER_TITLE";
 
+    private static final PorterDuffColorFilter OPACITY_LAYER_FILTER =
+            new PorterDuffColorFilter(
+                    Color.argb(0.5f /* alpha */, 0f /* red */, 0f /* green */, 0f /* blue */),
+                    PorterDuff.Mode.SRC_ATOP);
+
     private final Context mContext;
     private final PackageManagerService mPm;
 
@@ -709,11 +714,7 @@ public class PackageArchiver {
             return bitmap;
         }
         BitmapDrawable appIconDrawable = new BitmapDrawable(mContext.getResources(), bitmap);
-        PorterDuffColorFilter colorFilter =
-                new PorterDuffColorFilter(
-                        Color.argb(0.32f /* alpha */, 0f /* red */, 0f /* green */, 0f /* blue */),
-                        PorterDuff.Mode.SRC_ATOP);
-        appIconDrawable.setColorFilter(colorFilter);
+        appIconDrawable.setColorFilter(OPACITY_LAYER_FILTER);
         appIconDrawable.setBounds(
                 0 /* left */,
                 0 /* top */,
