@@ -165,11 +165,11 @@ public:
     bool prepareForFunctorPresence(bool willHaveFunctor, bool ancestorDictatesFunctorsNeedLayer) {
         // parent may have already dictated that a descendant layer is needed
         bool functorsNeedLayer =
-                ancestorDictatesFunctorsNeedLayer
-                || CC_UNLIKELY(isClipMayBeComplex())
+                ancestorDictatesFunctorsNeedLayer ||
+                CC_UNLIKELY(isClipMayBeComplex())
 
                 // Round rect clipping forces layer for functors
-                || CC_UNLIKELY(getOutline().willRoundRectClip()) ||
+                || CC_UNLIKELY(getOutline().willComplexClip()) ||
                 CC_UNLIKELY(getRevealClip().willClip())
 
                 // Complex matrices forces layer, due to stencil clipping
