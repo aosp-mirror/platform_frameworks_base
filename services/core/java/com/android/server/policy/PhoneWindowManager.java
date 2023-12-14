@@ -4007,15 +4007,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_SYSRQ:
                 if (down && repeatCount == 0) {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
+                    return true;
                 }
-                return true;
+                break;
             case KeyEvent.KEYCODE_ESCAPE:
                 if (down
                         && KeyEvent.metaStateHasNoModifiers(metaState)
                         && repeatCount == 0) {
                     mContext.closeSystemDialogs();
+                    return true;
                 }
-                return true;
+                break;
             case KeyEvent.KEYCODE_STEM_PRIMARY:
                 handleUnhandledSystemKey(event);
                 sendSystemKeyToStatusBarAsync(event);
