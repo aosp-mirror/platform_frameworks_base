@@ -76,7 +76,6 @@ import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
-import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_WEAR_TRIPLE_PRESS_GESTURE;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
@@ -97,7 +96,6 @@ import static com.android.server.wm.WindowManagerPolicyProto.SCREEN_ON_FULLY;
 import static com.android.server.wm.WindowManagerPolicyProto.WINDOW_MANAGER_DRAW_COMPLETE;
 
 import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -124,7 +122,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -204,8 +201,6 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
-import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
-import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.display.BrightnessUtils;
@@ -385,8 +380,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public static final String TRACE_WAIT_FOR_ALL_WINDOWS_DRAWN_METHOD = "waitForAllWindowsDrawn";
 
-    private static final String TALKBACK_LABEL = "TalkBack";
-
     private static final int POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS = 800;
 
     /**
@@ -476,6 +469,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** Controller that supports enabling an AccessibilityService by holding down the volume keys */
     private AccessibilityShortcutController mAccessibilityShortcutController;
+
+    private TalkbackShortcutController mTalkbackShortcutController;
 
     boolean mSafeMode;
 
@@ -813,7 +808,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     handleScreenShot(msg.arg1);
                     break;
                 case MSG_SWITCH_KEYBOARD_LAYOUT:
-                    handleSwitchKeyboardLayout(msg.arg1, msg.arg2);
+                    SwitchKeyboardLayoutMessageObject object =
+                            (SwitchKeyboardLayoutMessageObject) msg.obj;
+                    handleSwitchKeyboardLayout(object.keyEvent, object.direction,
+                            object.focusedToken);
                     break;
                 case MSG_LOG_KEYBOARD_SYSTEM_EVENT:
                     handleKeyboardSystemEvent(KeyboardLogEvent.from(msg.arg1), (KeyEvent) msg.obj);
@@ -932,6 +930,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         }
+    }
+
+    private record SwitchKeyboardLayoutMessageObject(KeyEvent keyEvent, IBinder focusedToken,
+                                                     int direction) {
     }
 
     final IPersistentVrStateCallbacks mPersistentVrModeListener =
@@ -1602,19 +1604,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_INPUT) {
                     Slog.d(TAG, "Executing stem primary triple press action behavior.");
                 }
-
-                if (Settings.System.getIntForUser(mContext.getContentResolver(),
-                        Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED,
-                        /* def= */ 0, UserHandle.USER_CURRENT) == 1) {
-                    /** Toggle talkback begin */
-                    ComponentName componentName = getTalkbackComponent();
-                    if (componentName != null && toggleTalkBack(componentName)) {
-                        /** log stem triple press telemetry if it's a talkback enabled event */
-                        logStemTriplePressAccessibilityTelemetry(componentName);
-                    }
-                    performHapticFeedback(HapticFeedbackConstants.CONFIRM, /* always = */ false,
-                        /* reason = */ "Stem primary - Triple Press - Toggle Accessibility");
-                    /** Toggle talkback end */
+                mTalkbackShortcutController.toggleTalkback(mCurrentUserId);
+                if (mTalkbackShortcutController.isTalkBackShortcutGestureEnabled()) {
+                    performHapticFeedback(HapticFeedbackConstants.CONFIRM, /* always = */
+                            false, /* reason = */
+                            "Stem primary - Triple Press - Toggle Accessibility");
                 }
                 break;
         }
@@ -1637,61 +1631,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         AssistUtils.INVOCATION_TYPE_UNKNOWN);
                 break;
         }
-    }
-
-    /**
-     * A function that toggles talkback service
-     *
-     * @return {@code true} if talkback is enabled, {@code false} if talkback is disabled
-     */
-    private boolean toggleTalkBack(ComponentName componentName) {
-        final Set<ComponentName> enabledServices =
-                AccessibilityUtils.getEnabledServicesFromSettings(mContext, mCurrentUserId);
-
-        boolean isTalkbackAlreadyEnabled = enabledServices.contains(componentName);
-        AccessibilityUtils.setAccessibilityServiceState(mContext, componentName,
-                !isTalkbackAlreadyEnabled);
-        /** if isTalkbackAlreadyEnabled is true, then it's a disabled event so return false
-         * and if isTalkbackAlreadyEnabled is false, return true as it's an enabled event */
-        return !isTalkbackAlreadyEnabled;
-    }
-
-    /**
-     * A function that logs stem triple press accessibility telemetry
-     * If the user setup (Oobe) is not completed, set the
-     * WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE
-     * setting which will be later logged via Settings Snapshot
-     * else, log ACCESSIBILITY_SHORTCUT_REPORTED atom
-     */
-    private void logStemTriplePressAccessibilityTelemetry(ComponentName componentName) {
-        if (!AccessibilityUtils.isUserSetupCompleted(mContext)) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE, 1);
-        } else {
-            AccessibilityStatsLogUtils.logAccessibilityShortcutActivated(mContext, componentName,
-                    ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_WEAR_TRIPLE_PRESS_GESTURE,
-                    /* serviceEnabled= */ true);
-        }
-    }
-
-    private ComponentName getTalkbackComponent() {
-        AccessibilityManager accessibilityManager = mContext.getSystemService(
-                AccessibilityManager.class);
-        List<AccessibilityServiceInfo> serviceInfos =
-                accessibilityManager.getInstalledAccessibilityServiceList();
-
-        for (AccessibilityServiceInfo service : serviceInfos) {
-            final ServiceInfo serviceInfo = service.getResolveInfo().serviceInfo;
-            if (isTalkback(serviceInfo)) {
-                return new ComponentName(serviceInfo.packageName, serviceInfo.name);
-            }
-        }
-        return null;
-    }
-
-    private boolean isTalkback(ServiceInfo info) {
-        String label = info.loadLabel(mPackageManager).toString();
-        return label.equals(TALKBACK_LABEL);
     }
 
     /**
@@ -1731,12 +1670,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TRIPLE_PRESS_PRIMARY_NOTHING:
                 break;
             case TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY:
-                if (Settings.System.getIntForUser(
-                                mContext.getContentResolver(),
-                                Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED,
-                                /* def= */ 0,
-                                UserHandle.USER_CURRENT)
-                        == 1) {
+                if (mTalkbackShortcutController.isTalkBackShortcutGestureEnabled()) {
                     return 3;
                 }
                 break;
@@ -2252,6 +2186,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         ButtonOverridePermissionChecker getButtonOverridePermissionChecker() {
             return new ButtonOverridePermissionChecker();
         }
+
+        TalkbackShortcutController getTalkbackShortcutController() {
+            return new TalkbackShortcutController(mContext);
+        }
     }
 
     /** {@inheritDoc} */
@@ -2515,6 +2453,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mKeyguardDrawnTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_keyguardDrawnTimeout);
         mKeyguardDelegate = injector.getKeyguardServiceDelegate();
+        mTalkbackShortcutController = injector.getTalkbackShortcutController();
         initKeyCombinationRules();
         initSingleKeyGestureRules(injector.getLooper());
         mButtonOverridePermissionChecker = injector.getButtonOverridePermissionChecker();
@@ -3709,7 +3648,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_LANGUAGE_SWITCH:
                 if (firstDown) {
                     int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
-                    sendSwitchKeyboardLayout(event, direction);
+                    sendSwitchKeyboardLayout(event, focusedToken, direction);
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.LANGUAGE_SWITCH);
                     return true;
                 }
@@ -3978,7 +3917,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + ", policyFlags=" + policyFlags);
         }
 
-        if (interceptUnhandledKey(event)) {
+        if (interceptUnhandledKey(event, focusedToken)) {
             return null;
         }
 
@@ -4036,7 +3975,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return fallbackEvent;
     }
 
-    private boolean interceptUnhandledKey(KeyEvent event) {
+    private boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken) {
         final int keyCode = event.getKeyCode();
         final int repeatCount = event.getRepeatCount();
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
@@ -4049,7 +3988,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (KeyEvent.metaStateHasModifiers(metaState & ~KeyEvent.META_SHIFT_MASK,
                             KeyEvent.META_CTRL_ON)) {
                         int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
-                        sendSwitchKeyboardLayout(event, direction);
+                        sendSwitchKeyboardLayout(event, focusedToken, direction);
                         return true;
                     }
                 }
@@ -4105,16 +4044,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void sendSwitchKeyboardLayout(@NonNull KeyEvent event, int direction) {
-        mHandler.obtainMessage(MSG_SWITCH_KEYBOARD_LAYOUT, event.getDeviceId(),
-                direction).sendToTarget();
+    private void sendSwitchKeyboardLayout(@NonNull KeyEvent event,
+            @Nullable IBinder focusedToken, int direction) {
+        SwitchKeyboardLayoutMessageObject object =
+                new SwitchKeyboardLayoutMessageObject(event, focusedToken, direction);
+        mHandler.obtainMessage(MSG_SWITCH_KEYBOARD_LAYOUT, object).sendToTarget();
     }
 
-    private void handleSwitchKeyboardLayout(int deviceId, int direction) {
+    private void handleSwitchKeyboardLayout(@NonNull KeyEvent event, int direction,
+            IBinder focusedToken) {
         if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
-            InputMethodManagerInternal.get().switchKeyboardLayout(direction);
+            IBinder targetWindowToken =
+                    mWindowManagerInternal.getTargetWindowTokenFromInputToken(focusedToken);
+            InputMethodManagerInternal.get().onSwitchKeyboardLayoutShortcut(direction,
+                    event.getDisplayId(), targetWindowToken);
         } else {
-            mWindowManagerFuncs.switchKeyboardLayout(deviceId, direction);
+            mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
         }
     }
 
@@ -4124,7 +4069,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             long delayMillis = interceptKeyBeforeDispatching(
                     focusedToken, fallbackEvent, policyFlags);
-            if (delayMillis == 0 && !interceptUnhandledKey(fallbackEvent)) {
+            if (delayMillis == 0 && !interceptUnhandledKey(fallbackEvent, focusedToken)) {
                 return true;
             }
         }

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
@@ -702,5 +703,18 @@ public class WindowlessWindowManager implements IWindowSession {
             } catch (RemoteException e) {
             }
         }
+    }
+
+    boolean forwardBackKeyToParent(@NonNull KeyEvent keyEvent) {
+        if (mParentInterface == null) {
+            return false;
+        }
+        try {
+            mParentInterface.forwardBackKeyToParent(keyEvent);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to forward back key To Parent: ", e);
+            return false;
+        }
+        return true;
     }
 }

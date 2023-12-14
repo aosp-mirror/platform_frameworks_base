@@ -43,3 +43,11 @@ flag {
   description: "Enable the `setFrameRate` callback"
   bug: "299946220"
 }
+
+flag {
+    name: "toolkit_metrics_for_frame_rate_decision"
+    namespace: "toolkit"
+    description: "Feature flag for toolkit metrics collecting for frame rate decision"
+    bug: "301343249"
+    is_fixed_read_only: true
+}

@@ -46,6 +46,7 @@ android_test {
         "testng",
         "flag-junit",
         "notification_flags_lib",
+        "platform-test-rules",
     ],
 
     libs: [

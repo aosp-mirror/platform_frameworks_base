@@ -63,6 +63,7 @@ interface BaseComposeFacade {
         activity: ComponentActivity,
         viewModel: BaseCommunalViewModel,
         onOpenWidgetPicker: () -> Unit,
+        onEditDone: () -> Unit,
     )
 
     /** Create a [View] to represent [viewModel] on screen. */

@@ -51,6 +51,7 @@ object ComposeFacade : BaseComposeFacade {
         activity: ComponentActivity,
         viewModel: BaseCommunalViewModel,
         onOpenWidgetPicker: () -> Unit,
+        onEditDone: () -> Unit,
     ) {
         throwComposeUnavailableError()
     }

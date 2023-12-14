@@ -532,9 +532,10 @@ public class UserManagerService extends IUserManager.Stub {
             }
             final IntentSender target = intent.getParcelableExtra(Intent.EXTRA_INTENT, android.content.IntentSender.class);
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_NULL);
+            final String callingPackage = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
             // Call setQuietModeEnabled on bg thread to avoid ANR
             BackgroundThread.getHandler().post(() ->
-                    setQuietModeEnabled(userId, false, target, /* callingPackage */ null));
+                    setQuietModeEnabled(userId, false, target, callingPackage));
         }
     };
 
@@ -1410,7 +1411,7 @@ public class UserManagerService extends IUserManager.Stub {
                     if (onlyIfCredentialNotRequired) {
                         return false;
                     }
-                    showConfirmCredentialToDisableQuietMode(userId, target);
+                    showConfirmCredentialToDisableQuietMode(userId, target, callingPackage);
                     return false;
                 }
             }
@@ -1434,7 +1435,7 @@ public class UserManagerService extends IUserManager.Stub {
                 if (onlyIfCredentialNotRequired) {
                     return false;
                 }
-                showConfirmCredentialToDisableQuietMode(userId, target);
+                showConfirmCredentialToDisableQuietMode(userId, target, callingPackage);
                 return false;
             }
             setQuietModeEnabled(userId, false /* enableQuietMode */, target, callingPackage);
@@ -1604,7 +1605,7 @@ public class UserManagerService extends IUserManager.Stub {
      * Show confirm credential screen to unlock user in order to turn off quiet mode.
      */
     private void showConfirmCredentialToDisableQuietMode(
-            @UserIdInt int userId, @Nullable IntentSender target) {
+            @UserIdInt int userId, @Nullable IntentSender target, @Nullable String callingPackage) {
         if (android.app.admin.flags.Flags.quietModeCredentialBugFix()) {
             // TODO (b/308121702) It may be brittle to rely on user states to check profile state
             int state;
@@ -1635,6 +1636,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         callBackIntent.putExtra(Intent.EXTRA_USER_ID, userId);
         callBackIntent.setPackage(mContext.getPackageName());
+        callBackIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, callingPackage);
         callBackIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 mContext,

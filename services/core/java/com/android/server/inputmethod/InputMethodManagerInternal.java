@@ -215,10 +215,20 @@ public abstract class InputMethodManagerInternal {
     /**
      * Switch the keyboard layout in response to a keyboard shortcut.
      *
-     * @param direction {@code 1} to switch to the next subtype, {@code -1} to switch to the
-     *                  previous subtype
+     * @param direction         {@code 1} to switch to the next subtype, {@code -1} to switch to the
+     *                          previous subtype
+     * @param displayId         the display to which the keyboard layout switch shortcut is
+     *                          dispatched. Note that there is no guarantee that an IME is
+     *                          associated with this display. This is more or less than a hint for
+     *                          cases when no IME is running for the given targetWindowToken. There
+     *                          is a longstanding discussion whether we should allow users to
+     *                          rotate keyboard layout even when there is no edit field, and this
+     *                          displayID would be helpful for such a situation.
+     * @param targetWindowToken the window token to which other keys are being sent while handling
+     *                          this shortcut.
      */
-    public abstract void switchKeyboardLayout(int direction);
+    public abstract void onSwitchKeyboardLayoutShortcut(int direction, int displayId,
+            IBinder targetWindowToken);
 
     /**
      * Returns true if any InputConnection is currently active.
@@ -314,7 +324,8 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void switchKeyboardLayout(int direction) {
+                public void onSwitchKeyboardLayoutShortcut(int direction, int displayId,
+                        IBinder targetWindowToken) {
                 }
 
                 @Override

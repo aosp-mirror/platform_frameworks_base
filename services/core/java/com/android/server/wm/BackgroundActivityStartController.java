@@ -20,6 +20,7 @@ import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 import static android.os.Process.SYSTEM_UID;
 import static android.provider.DeviceConfig.NAMESPACE_WINDOW_MANAGER;
 
@@ -49,7 +50,6 @@ import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -86,7 +86,7 @@ public class BackgroundActivityStartController {
     private static final int NO_PROCESS_UID = -1;
     /** If enabled the creator will not allow BAL on its behalf by default. */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @EnabledAfter(targetSdkVersion = UPSIDE_DOWN_CAKE)
     private static final long DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_CREATOR =
             296478951;
     public static final ActivityOptions ACTIVITY_OPTIONS_SYSTEM_DEFINED =
@@ -228,6 +228,7 @@ public class BackgroundActivityStartController {
         private final Intent mIntent;
         private final WindowProcessController mCallerApp;
         private final WindowProcessController mRealCallerApp;
+        private final boolean mIsCallForResult;
 
         private BalState(int callingUid, int callingPid, final String callingPackage,
                  int realCallingUid, int realCallingPid,
@@ -247,8 +248,10 @@ public class BackgroundActivityStartController {
             mOriginatingPendingIntent = originatingPendingIntent;
             mIntent = intent;
             mRealCallingPackage = mService.getPackageNameIfUnique(realCallingUid, realCallingPid);
-            if (originatingPendingIntent == null // not a PendingIntent
-                    || resultRecord != null // sent for result
+            mIsCallForResult = resultRecord != null;
+            if (balRequireOptInByPendingIntentCreator() // auto-opt in introduced with this feature
+                    && (originatingPendingIntent == null // not a PendingIntent
+                    || mIsCallForResult) // sent for result
             ) {
                 // grant BAL privileges unless explicitly opted out
                 mBalAllowedByPiCreatorWithHardening = mBalAllowedByPiCreator =
@@ -351,6 +354,19 @@ public class BackgroundActivityStartController {
             return name + "[debugOnly]";
         }
 
+        /** @return valid targetSdk or <code>-1</code> */
+        private int getTargetSdk(String packageName) {
+            if (packageName == null) {
+                return -1;
+            }
+            try {
+                PackageManager pm = mService.mContext.getPackageManager();
+                return pm.getTargetSdkVersion(packageName);
+            } catch (Exception e) {
+                return -1;
+            }
+        }
+
         private boolean hasRealCaller() {
             return mRealCallingUid != NO_PROCESS_UID;
         }
@@ -368,6 +384,7 @@ public class BackgroundActivityStartController {
             StringBuilder sb = new StringBuilder(2048);
             sb.append("[callingPackage: ")
                     .append(getDebugPackageName(mCallingPackage, mCallingUid));
+            sb.append("; callingPackageTargetSdk: ").append(getTargetSdk(mCallingPackage));
             sb.append("; callingUid: ").append(mCallingUid);
             sb.append("; callingPid: ").append(mCallingPid);
             sb.append("; appSwitchState: ").append(mAppSwitchState);
@@ -387,10 +404,13 @@ public class BackgroundActivityStartController {
                     .append(mBalAllowedByPiCreatorWithHardening);
             sb.append("; resultIfPiCreatorAllowsBal: ").append(resultIfPiCreatorAllowsBal);
             sb.append("; hasRealCaller: ").append(hasRealCaller());
+            sb.append("; isCallForResult: ").append(mIsCallForResult);
             sb.append("; isPendingIntent: ").append(isPendingIntent());
             if (hasRealCaller()) {
                 sb.append("; realCallingPackage: ")
                         .append(getDebugPackageName(mRealCallingPackage, mRealCallingUid));
+                sb.append("; realCallingPackageTargetSdk: ")
+                        .append(getTargetSdk(mRealCallingPackage));
                 sb.append("; realCallingUid: ").append(mRealCallingUid);
                 sb.append("; realCallingPid: ").append(mRealCallingPid);
                 sb.append("; realCallingUidHasAnyVisibleWindow: ")

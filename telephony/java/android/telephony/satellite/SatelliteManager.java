@@ -34,6 +34,7 @@ import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceSpecificException;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyFrameworkInitializer;
@@ -1919,7 +1920,6 @@ public final class SatelliteManager {
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    @NonNull
     public void requestNtnSignalStrength(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<NtnSignalStrength, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -1962,6 +1962,8 @@ public final class SatelliteManager {
 
     /**
      * Registers for NTN signal strength changed from satellite modem.
+     * If the registration operation is not successful, a {@link SatelliteException} that contains
+     * {@link SatelliteResult} will be thrown.
      *
      * <p>
      * Note: This API is specifically designed for OEM enabled satellite connectivity only.
@@ -1973,16 +1975,14 @@ public final class SatelliteManager {
      * @param executor The executor on which the callback will be called.
      * @param callback The callback to handle the NTN signal strength changed event.
      *
-     * @return The {@link SatelliteResult} result of the operation.
-     *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws SatelliteException if the callback registration operation fails.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    @SatelliteResult public int registerForNtnSignalStrengthChanged(
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull NtnSignalStrengthCallback callback) {
+    public void registerForNtnSignalStrengthChanged(@NonNull @CallbackExecutor Executor executor,
+            @NonNull NtnSignalStrengthCallback callback) throws SatelliteException {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -1999,16 +1999,18 @@ public final class SatelliteManager {
                                                 ntnSignalStrength)));
                             }
                         };
+                telephony.registerForNtnSignalStrengthChanged(mSubId, internalCallback);
                 sNtnSignalStrengthCallbackMap.put(callback, internalCallback);
-                return telephony.registerForNtnSignalStrengthChanged(mSubId, internalCallback);
             } else {
                 throw new IllegalStateException("Telephony service is null.");
             }
+        } catch (ServiceSpecificException ex) {
+            logd("registerForNtnSignalStrengthChanged() registration fails: " + ex.errorCode);
+            throw new SatelliteException(ex.errorCode);
         } catch (RemoteException ex) {
             loge("registerForNtnSignalStrengthChanged() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_RESULT_REQUEST_FAILED;
     }
 
     /**
@@ -2025,6 +2027,8 @@ public final class SatelliteManager {
      * {@link #registerForNtnSignalStrengthChanged(Executor, NtnSignalStrengthCallback)}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalArgumentException if the callback is not valid or has already been
+     * unregistered.
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
@@ -2041,6 +2045,7 @@ public final class SatelliteManager {
                     telephony.unregisterForNtnSignalStrengthChanged(mSubId, internalCallback);
                 } else {
                     loge("unregisterForNtnSignalStrengthChanged: No internal callback.");
+                    throw new IllegalArgumentException("callback is not valid");
                 }
             } else {
                 throw new IllegalStateException("Telephony service is null.");

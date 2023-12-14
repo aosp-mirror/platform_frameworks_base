@@ -39,11 +39,6 @@ class SceneTransitionLayoutState(initialScene: SceneKey) {
     fun isTransitioning(from: SceneKey? = null, to: SceneKey? = null): Boolean {
         val transition = transitionState as? TransitionState.Transition ?: return false
 
-        // TODO(b/310915136): Remove this check.
-        if (transition.fromScene == transition.toScene) {
-            return false
-        }
-
         return (from == null || transition.fromScene == from) &&
             (to == null || transition.toScene == to)
     }
@@ -71,32 +66,30 @@ sealed interface TransitionState {
     /** No transition/animation is currently running. */
     data class Idle(override val currentScene: SceneKey) : TransitionState
 
-    /**
-     * There is a transition animating between two scenes.
-     *
-     * Important note: [fromScene] and [toScene] might be the same, in which case this [Transition]
-     * should be treated the same as [Idle]. This is designed on purpose so that a [Transition] can
-     * be started without knowing in advance where it is transitioning to, making the logic of
-     * [swipeToScene] easier to reason about.
-     */
-    interface Transition : TransitionState {
-        /** The scene this transition is starting from. */
-        val fromScene: SceneKey
+    /** There is a transition animating between two scenes. */
+    abstract class Transition(
+        /** The scene this transition is starting from. Can't be the same as toScene */
+        val fromScene: SceneKey,
 
-        /** The scene this transition is going to. */
+        /** The scene this transition is going to. Can't be the same as fromScene */
         val toScene: SceneKey
+    ) : TransitionState {
+
+        init {
+            check(fromScene != toScene)
+        }
 
         /**
          * The progress of the transition. This is usually in the `[0; 1]` range, but it can also be
          * less than `0` or greater than `1` when using transitions with a spring AnimationSpec or
          * when flinging quickly during a swipe gesture.
          */
-        val progress: Float
+        abstract val progress: Float
 
         /** Whether the transition was triggered by user input rather than being programmatic. */
-        val isInitiatedByUserInput: Boolean
+        abstract val isInitiatedByUserInput: Boolean
 
         /** Whether user input is currently driving the transition. */
-        val isUserInputOngoing: Boolean
+        abstract val isUserInputOngoing: Boolean
     }
 }

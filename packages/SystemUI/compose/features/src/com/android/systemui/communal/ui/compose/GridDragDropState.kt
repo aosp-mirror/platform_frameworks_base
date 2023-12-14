@@ -48,12 +48,18 @@ import kotlinx.coroutines.launch
 @Composable
 fun rememberGridDragDropState(
     gridState: LazyGridState,
-    contentListState: ContentListState
+    contentListState: ContentListState,
+    updateDragPositionForRemove: (offset: Offset) -> Boolean,
 ): GridDragDropState {
     val scope = rememberCoroutineScope()
     val state =
         remember(gridState, contentListState) {
-            GridDragDropState(state = gridState, contentListState = contentListState, scope = scope)
+            GridDragDropState(
+                state = gridState,
+                contentListState = contentListState,
+                scope = scope,
+                updateDragPositionForRemove = updateDragPositionForRemove
+            )
         }
     LaunchedEffect(state) {
         while (true) {
@@ -67,23 +73,30 @@ fun rememberGridDragDropState(
 /**
  * Handles drag and drop cards in the glanceable hub. While dragging to move, other items that are
  * affected will dynamically get positioned and the state is tracked by [ContentListState]. When
- * dragging to remove, affected cards will be moved and [ContentListState.onRemove] is called to
- * remove the dragged item. On dragging ends, call [ContentListState.onSaveList] to persist the
- * change.
+ * dragging to remove, affected cards will be moved and [updateDragPositionForRemove] is called to
+ * check whether the dragged item can be removed. On dragging ends, call [ContentListState.onRemove]
+ * to remove the dragged item if condition met and call [ContentListState.onSaveList] to persist any
+ * change in ordering.
  */
 class GridDragDropState
 internal constructor(
     private val state: LazyGridState,
     private val contentListState: ContentListState,
     private val scope: CoroutineScope,
+    private val updateDragPositionForRemove: (offset: Offset) -> Boolean
 ) {
     var draggingItemIndex by mutableStateOf<Int?>(null)
+        private set
+
+    var isDraggingToRemove by mutableStateOf(false)
         private set
 
     internal val scrollChannel = Channel<Float>()
 
     private var draggingItemDraggedDelta by mutableStateOf(Offset.Zero)
     private var draggingItemInitialOffset by mutableStateOf(Offset.Zero)
+    private var dragStartPointerOffset by mutableStateOf(Offset.Zero)
+
     internal val draggingItemOffset: Offset
         get() =
             draggingItemLayoutInfo?.let { item ->
@@ -94,27 +107,36 @@ internal constructor(
     private val draggingItemLayoutInfo: LazyGridItemInfo?
         get() = state.layoutInfo.visibleItemsInfo.firstOrNull { it.index == draggingItemIndex }
 
-    internal fun onDragStart(offset: Offset) {
+    internal fun onDragStart(offset: Offset, contentOffset: Offset) {
         state.layoutInfo.visibleItemsInfo
             .firstOrNull { item ->
+                // grid item offset is based off grid content container so we need to deduct
+                // before content padding from the initial pointer position
                 item.isEditable &&
-                    offset.x.toInt() in item.offset.x..item.offsetEnd.x &&
-                    offset.y.toInt() in item.offset.y..item.offsetEnd.y
+                    (offset.x - contentOffset.x).toInt() in item.offset.x..item.offsetEnd.x &&
+                    (offset.y - contentOffset.y).toInt() in item.offset.y..item.offsetEnd.y
             }
             ?.apply {
+                dragStartPointerOffset = offset - this.offset.toOffset()
                 draggingItemIndex = index
                 draggingItemInitialOffset = this.offset.toOffset()
             }
     }
 
     internal fun onDragInterrupted() {
-        if (draggingItemIndex != null) {
+        draggingItemIndex?.let {
+            if (isDraggingToRemove) {
+                contentListState.onRemove(it)
+                isDraggingToRemove = false
+                updateDragPositionForRemove(Offset.Zero)
+            }
             // persist list editing changes on dragging ends
             contentListState.onSaveList()
             draggingItemIndex = null
         }
         draggingItemDraggedDelta = Offset.Zero
         draggingItemInitialOffset = Offset.Zero
+        dragStartPointerOffset = Offset.Zero
     }
 
     internal fun onDrag(offset: Offset) {
@@ -152,18 +174,13 @@ internal constructor(
                 contentListState.onMove(draggingItem.index, targetItem.index)
             }
             draggingItemIndex = targetItem.index
+            isDraggingToRemove = false
         } else {
             val overscroll = checkForOverscroll(startOffset, endOffset)
             if (overscroll != 0f) {
                 scrollChannel.trySend(overscroll)
             }
-            val removeOffset = checkForRemove(startOffset)
-            if (removeOffset != 0f) {
-                draggingItemIndex?.let {
-                    contentListState.onRemove(it)
-                    draggingItemIndex = null
-                }
-            }
+            isDraggingToRemove = checkForRemove(startOffset)
         }
     }
 
@@ -185,14 +202,11 @@ internal constructor(
         }
     }
 
-    // TODO(b/309968801): a temporary solution to decide whether to remove card when it's dragged up
-    //  and out of grid. Once we have a taskbar, calculate the intersection of the dragged item with
-    //  the Remove button.
-    private fun checkForRemove(startOffset: Offset): Float {
+    /** Calls the callback with the updated drag position and returns whether to remove the item. */
+    private fun checkForRemove(startOffset: Offset): Boolean {
         return if (draggingItemDraggedDelta.y < 0)
-            (startOffset.y + Dimensions.CardHeightHalf.value - state.layoutInfo.viewportStartOffset)
-                .coerceAtMost(0f)
-        else 0f
+            updateDragPositionForRemove(startOffset + dragStartPointerOffset)
+        else false
     }
 }
 
@@ -204,14 +218,22 @@ private operator fun Offset.plus(size: Size): Offset {
     return Offset(x + size.width, y + size.height)
 }
 
-fun Modifier.dragContainer(dragDropState: GridDragDropState): Modifier {
-    return pointerInput(dragDropState) {
+fun Modifier.dragContainer(
+    dragDropState: GridDragDropState,
+    beforeContentPadding: ContentPaddingInPx
+): Modifier {
+    return pointerInput(dragDropState, beforeContentPadding) {
         detectDragGesturesAfterLongPress(
             onDrag = { change, offset ->
                 change.consume()
                 dragDropState.onDrag(offset = offset)
             },
-            onDragStart = { offset -> dragDropState.onDragStart(offset) },
+            onDragStart = { offset ->
+                dragDropState.onDragStart(
+                    offset,
+                    Offset(beforeContentPadding.startPadding, beforeContentPadding.topPadding)
+                )
+            },
             onDragEnd = { dragDropState.onDragInterrupted() },
             onDragCancel = { dragDropState.onDragInterrupted() }
         )
@@ -237,6 +259,7 @@ fun LazyGridItemScope.DraggableItem(
             Modifier.zIndex(1f).graphicsLayer {
                 translationX = dragDropState.draggingItemOffset.x
                 translationY = dragDropState.draggingItemOffset.y
+                alpha = if (dragDropState.isDraggingToRemove) 0.5f else 1f
             }
         } else {
             Modifier.animateItemPlacement()

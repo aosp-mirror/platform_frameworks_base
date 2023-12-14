@@ -231,7 +231,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_PERMISSIONS} was set.  Each value matches
      * the corresponding entry in {@link #requestedPermissions}, and will have
-     * the flags {@link #REQUESTED_PERMISSION_GRANTED} and
+     * the flags {@link #REQUESTED_PERMISSION_GRANTED}, {@link #REQUESTED_PERMISSION_IMPLICIT}, and
      * {@link #REQUESTED_PERMISSION_NEVER_FOR_LOCATION} set as appropriate.
      */
     @Nullable

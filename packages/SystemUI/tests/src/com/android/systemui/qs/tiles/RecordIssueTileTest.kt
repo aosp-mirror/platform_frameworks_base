@@ -23,6 +23,7 @@ import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -30,12 +31,19 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil
+import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.ArgumentMatchers.isA
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 /**
@@ -53,15 +61,22 @@ class RecordIssueTileTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var qsLogger: QSLogger
+    @Mock private lateinit var keyguardDismissUtil: KeyguardDismissUtil
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var dialogLauncherAnimator: DialogLaunchAnimator
+    @Mock private lateinit var dialogFactory: SystemUIDialog.Factory
+    @Mock private lateinit var dialog: SystemUIDialog
 
+    private lateinit var testableLooper: TestableLooper
     private lateinit var tile: RecordIssueTile
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(host.context).thenReturn(mContext)
+        whenever(dialogFactory.create(any())).thenReturn(dialog)
 
-        val testableLooper = TestableLooper.get(this)
+        testableLooper = TestableLooper.get(this)
         tile =
             RecordIssueTile(
                 host,
@@ -72,7 +87,11 @@ class RecordIssueTileTest : SysuiTestCase() {
                 metricsLogger,
                 statusBarStateController,
                 activityStarter,
-                qsLogger
+                qsLogger,
+                keyguardDismissUtil,
+                keyguardStateController,
+                dialogLauncherAnimator,
+                dialogFactory
             )
     }
 
@@ -118,5 +137,19 @@ class RecordIssueTileTest : SysuiTestCase() {
         tile.handleUpdateState(testState, null)
 
         assertThat(testState.state).isEqualTo(Tile.STATE_ACTIVE)
+    }
+
+    @Test
+    fun showPrompt_shouldUseKeyguardDismissUtil_ToShowDialog() {
+        tile.isRecording = false
+        tile.handleClick(null)
+        testableLooper.processAllMessages()
+
+        verify(keyguardDismissUtil)
+            .executeWhenUnlocked(
+                isA(ActivityStarter.OnDismissAction::class.java),
+                eq(false),
+                eq(true)
+            )
     }
 }

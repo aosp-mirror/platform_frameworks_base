@@ -80,6 +80,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.notNull;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -265,10 +266,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .thenReturn(CUSTOM_PKG_UID);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
                 new String[] {pkg});
-        ApplicationInfo mockAppInfo = mock(ApplicationInfo.class);
-        when(mockAppInfo.loadLabel(any())).thenReturn(CUSTOM_APP_LABEL);
+
+        ApplicationInfo appInfoSpy = spy(new ApplicationInfo());
+        appInfoSpy.icon = ICON_RES_ID;
+        when(appInfoSpy.loadLabel(any())).thenReturn(CUSTOM_APP_LABEL);
         when(mPackageManager.getApplicationInfo(eq(CUSTOM_PKG_NAME), anyInt()))
-                .thenReturn(mockAppInfo);
+                .thenReturn(appInfoSpy);
         mZenModeHelper.mPm = mPackageManager;
 
         mZenModeEventLogger.reset();
@@ -3753,6 +3756,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         rule.zenPolicy = policy;
         rule.pkg = ownerPkg;
         rule.name = CUSTOM_APP_LABEL;
+        rule.iconResName = ICON_RES_NAME;
+        rule.triggerDescription = mContext.getString(R.string.zen_mode_implicit_trigger_description,
+                CUSTOM_APP_LABEL);
+        rule.type = AutomaticZenRule.TYPE_OTHER;
         rule.enabled = true;
         return rule;
     }

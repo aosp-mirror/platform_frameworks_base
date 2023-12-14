@@ -114,7 +114,7 @@ class ShortcutKeyTestBase {
         }
     }
 
-    void sendKeyCombination(int[] keyCodes, long durationMillis, boolean longPress) {
+    void sendKeyCombination(int[] keyCodes, long durationMillis, boolean longPress, int displayId) {
         final long downTime = mPhoneWindowManager.getCurrentTime();
         final int count = keyCodes.length;
         int metaState = 0;
@@ -124,7 +124,7 @@ class ShortcutKeyTestBase {
             final KeyEvent event = new KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN, keyCode,
                     0 /*repeat*/, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
                     0 /*flags*/, InputDevice.SOURCE_KEYBOARD);
-            event.setDisplayId(DEFAULT_DISPLAY);
+            event.setDisplayId(displayId);
             interceptKey(event);
             // The order is important here, metaState could be updated and applied to the next key.
             metaState |= MODIFIER.getOrDefault(keyCode, 0);
@@ -142,7 +142,7 @@ class ShortcutKeyTestBase {
                         KeyEvent.ACTION_DOWN, keyCode, 1 /*repeat*/, metaState,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
                         KeyEvent.FLAG_LONG_PRESS /*flags*/, InputDevice.SOURCE_KEYBOARD);
-                nextDownEvent.setDisplayId(DEFAULT_DISPLAY);
+                nextDownEvent.setDisplayId(displayId);
                 interceptKey(nextDownEvent);
             }
         }
@@ -153,18 +153,23 @@ class ShortcutKeyTestBase {
             final KeyEvent upEvent = new KeyEvent(downTime, eventTime, KeyEvent.ACTION_UP, keyCode,
                     0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
                     InputDevice.SOURCE_KEYBOARD);
-            upEvent.setDisplayId(DEFAULT_DISPLAY);
+            upEvent.setDisplayId(displayId);
             interceptKey(upEvent);
             metaState &= ~MODIFIER.getOrDefault(keyCode, 0);
         }
     }
 
     void sendKeyCombination(int[] keyCodes, long durationMillis) {
-        sendKeyCombination(keyCodes, durationMillis, false /* longPress */);
+        sendKeyCombination(keyCodes, durationMillis, false /* longPress */, DEFAULT_DISPLAY);
+    }
+
+    void sendKeyCombination(int[] keyCodes, long durationMillis, int displayId) {
+        sendKeyCombination(keyCodes, durationMillis, false /* longPress */, displayId);
     }
 
     void sendLongPressKeyCombination(int[] keyCodes) {
-        sendKeyCombination(keyCodes, ViewConfiguration.getLongPressTimeout(), true /* longPress */);
+        sendKeyCombination(keyCodes, ViewConfiguration.getLongPressTimeout(), true /* longPress */,
+                DEFAULT_DISPLAY);
     }
 
     void sendKey(int keyCode) {
@@ -172,7 +177,7 @@ class ShortcutKeyTestBase {
     }
 
     void sendKey(int keyCode, boolean longPress) {
-        sendKeyCombination(new int[]{keyCode}, 0 /*durationMillis*/, longPress);
+        sendKeyCombination(new int[]{keyCode}, 0 /*durationMillis*/, longPress, DEFAULT_DISPLAY);
     }
 
     private void interceptKey(KeyEvent keyEvent) {

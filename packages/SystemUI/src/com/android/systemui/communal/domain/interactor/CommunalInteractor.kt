@@ -122,7 +122,7 @@ constructor(
         if (!smartspaceRepository.isSmartspaceRemoteViewsEnabled) {
             flowOf(emptyList())
         } else {
-            smartspaceRepository.lockscreenSmartspaceTargets.map { targets ->
+            smartspaceRepository.communalSmartspaceTargets.map { targets ->
                 targets
                     .filter { target ->
                         target.featureType == SmartspaceTarget.FEATURE_TIMER &&

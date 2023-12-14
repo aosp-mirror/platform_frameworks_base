@@ -1053,6 +1053,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mWindowManager = wm;
             mRootWindowContainer = wm.mRoot;
             mWindowOrganizerController.mTransitionController.setWindowManager(wm);
+            mLifecycleManager.setWindowManager(wm);
             mTempConfig.setToDefaults();
             mTempConfig.setLocales(LocaleList.getDefault());
             mConfigurationSeq = mTempConfig.seq = 1;
@@ -1274,7 +1275,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @Nullable String callingFeatureId, Intent intent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
             ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
-
         final SafeActivityOptions opts = SafeActivityOptions.fromBundle(bOptions);
 
         assertPackageMatchesCallingUid(callingPackage);
@@ -1315,7 +1315,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setActivityOptions(opts)
                 .setUserId(userId)
                 .execute();
-
     }
 
     @Override

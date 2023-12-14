@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -319,8 +320,8 @@ public final class BackgroundJobsController extends StateController {
             final boolean isStopped = mPackageManagerInternal.isPackageStopped(packageName, uid);
             mPackageStoppedState.add(uid, packageName, isStopped);
             return isStopped;
-        } catch (IllegalArgumentException e) {
-            Slog.d(TAG, "Couldn't determine stopped state for unknown package: " + packageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Couldn't determine stopped state for unknown package: " + packageName);
             return false;
         }
     }

@@ -1103,9 +1103,51 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final ActivityMetricsLaunchObserver mActivityLaunchObserver =
             new ActivityMetricsLaunchObserver() {
+
         @Override
-        public void onActivityLaunched(long id, ComponentName name, int temperature) {
+        public void onIntentStarted(@NonNull Intent intent, long timestampNanos) {
+            synchronized (this) {
+                mProcessList.getAppStartInfoTracker().onIntentStarted(intent, timestampNanos);
+            }
+        }
+
+        @Override
+        public void onIntentFailed(long id) {
+            mProcessList.getAppStartInfoTracker().onIntentFailed(id);
+        }
+
+        @Override
+        public void onActivityLaunched(long id, ComponentName name, int temperature, int userId) {
             mAppProfiler.onActivityLaunched();
+            synchronized (ActivityManagerService.this) {
+                ProcessRecord record = null;
+                try {
+                    record = getProcessRecordLocked(name.getPackageName(), mContext
+                            .getPackageManager().getPackageUidAsUser(name.getPackageName(), 0,
+                            userId));
+                } catch (NameNotFoundException nnfe) {
+                    // Ignore, record will be lost.
+                }
+                mProcessList.getAppStartInfoTracker().onActivityLaunched(id, name, temperature,
+                        record);
+            }
+        }
+
+        @Override
+        public void onActivityLaunchCancelled(long id) {
+            mProcessList.getAppStartInfoTracker().onActivityLaunchCancelled(id);
+        }
+
+        @Override
+        public void onActivityLaunchFinished(long id, ComponentName name, long timestampNanos,
+                int launchMode) {
+            mProcessList.getAppStartInfoTracker().onActivityLaunchFinished(id, name,
+                    timestampNanos, launchMode);
+        }
+
+        @Override
+        public void onReportFullyDrawn(long id, long timestampNanos) {
+            mProcessList.getAppStartInfoTracker().onReportFullyDrawn(id, timestampNanos);
         }
     };
 
@@ -4488,13 +4530,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     private void attachApplicationLocked(@NonNull IApplicationThread thread,
             int pid, int callingUid, long startSeq) {
-
         // Find the application record that is being attached...  either via
         // the pid if we are running in multiple processes, or just pull the
         // next app record if we are emulating process with anonymous threads.
         ProcessRecord app;
         long startTime = SystemClock.uptimeMillis();
         long bindApplicationTimeMillis;
+        long bindApplicationTimeNanos;
         if (pid != MY_PID && pid >= 0) {
             synchronized (mPidsSelfLocked) {
                 app = mPidsSelfLocked.get(pid);
@@ -4698,6 +4740,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             bindApplicationTimeMillis = SystemClock.uptimeMillis();
+            bindApplicationTimeNanos = SystemClock.elapsedRealtimeNanos();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (mPlatformCompat != null) {
@@ -4754,6 +4797,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             app.setBindApplicationTime(bindApplicationTimeMillis);
+            mProcessList.getAppStartInfoTracker()
+                    .reportBindApplicationTimeNanos(app, bindApplicationTimeNanos);
 
             // Make app active after binding application or client may be running requests (e.g
             // starting activities) before it is ready.
@@ -9799,12 +9844,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             final int uid = enforceDumpPermissionForPackage(packageName, userId, callingUid,
                         "getHistoricalProcessStartReasons");
             if (uid != INVALID_UID) {
-                mProcessList.mAppStartInfoTracker.getStartInfo(
+                mProcessList.getAppStartInfoTracker().getStartInfo(
                         packageName, userId, callingPid, maxNum, results);
             }
         } else {
             // If no package name is given, use the caller's uid as the filter uid.
-            mProcessList.mAppStartInfoTracker.getStartInfo(
+            mProcessList.getAppStartInfoTracker().getStartInfo(
                     packageName, callingUid, callingPid, maxNum, results);
         }
         return new ParceledListSlice<ApplicationStartInfo>(results);
@@ -9822,7 +9867,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final int callingUid = Binder.getCallingUid();
-        mProcessList.mAppStartInfoTracker.addStartInfoCompleteListener(listener, callingUid);
+        mProcessList.getAppStartInfoTracker().addStartInfoCompleteListener(listener, callingUid);
     }
 
 
@@ -9836,7 +9881,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final int callingUid = Binder.getCallingUid();
-        mProcessList.mAppStartInfoTracker.clearStartInfoCompleteListener(callingUid, true);
+        mProcessList.getAppStartInfoTracker().clearStartInfoCompleteListener(callingUid, true);
     }
 
     @Override
@@ -10138,7 +10183,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
-                mProcessList.mAppStartInfoTracker.dumpHistoryProcessStartInfo(pw, dumpPackage);
+                mProcessList.getAppStartInfoTracker().dumpHistoryProcessStartInfo(pw, dumpPackage);
                 pw.println("-------------------------------------------------------------------------------");
                 mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
             }
@@ -10541,7 +10586,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     dumpPackage = args[opti];
                     opti++;
                 }
-                mProcessList.mAppStartInfoTracker.dumpHistoryProcessStartInfo(pw, dumpPackage);
+                mProcessList.getAppStartInfoTracker().dumpHistoryProcessStartInfo(pw, dumpPackage);
             } else if ("exit-info".equals(cmd)) {
                 if (opti < args.length) {
                     dumpPackage = args[opti];
@@ -13831,6 +13876,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // activity manager to announce its creation.
     public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId,
             @BackupDestination int backupDestination) {
+        long startTimeNs = SystemClock.elapsedRealtimeNanos();
         if (DEBUG_BACKUP) {
             Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
                     + " targetUserId=" + targetUserId + " callingUid = " + Binder.getCallingUid()
@@ -13906,15 +13952,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ? new ComponentName(app.packageName, app.backupAgentName)
                             : new ComponentName("android", "FullBackupAgent");
 
-            // startProcessLocked() returns existing proc's record if it's already running
-            ProcessRecord proc = startProcessLocked(app.processName, app,
-                    false, 0,
-                    new HostingRecord(HostingRecord.HOSTING_TYPE_BACKUP, hostingName),
-                    ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS, false, false);
+            ProcessRecord proc = getProcessRecordLocked(app.processName, app.uid);
+            boolean isProcessStarted = proc != null;
+            if (!isProcessStarted) {
+                proc = startProcessLocked(app.processName, app,
+                  false, 0,
+                  new HostingRecord(HostingRecord.HOSTING_TYPE_BACKUP, hostingName),
+                  ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS, false, false);
+            }
             if (proc == null) {
                 Slog.e(TAG, "Unable to start backup agent process " + r);
                 return false;
             }
+            mProcessList.getAppStartInfoTracker().handleProcessBackupStart(startTimeNs, proc, r,
+                    !isProcessStarted);
 
             // If the app is a regular app (uid >= 10000) and not the system server or phone
             // process, etc, then mark it as being in full backup so that certain calls to the
@@ -18741,8 +18792,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // If the process is known as top app, set a hint so when the process is
                     // started, the top priority can be applied immediately to avoid cpu being
                     // preempted by other processes before attaching the process of top app.
-                    startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
-                            new HostingRecord(hostingType, hostingName, isTop),
+                    final long startTimeNs = SystemClock.elapsedRealtimeNanos();
+                    HostingRecord hostingRecord =
+                            new HostingRecord(hostingType, hostingName, isTop);
+                    ProcessRecord rec = getProcessRecordLocked(processName, info.uid);
+                    ProcessRecord app = startProcessLocked(processName, info, knownToBeDead,
+                            0 /* intentFlags */, hostingRecord,
                             ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE, false /* allowWhileBooting */,
                             false /* isolated */);
                 }

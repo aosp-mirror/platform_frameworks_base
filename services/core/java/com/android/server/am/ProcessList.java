@@ -498,7 +498,7 @@ public final class ProcessList {
 
     /** Manages the {@link android.app.ApplicationStartInfo} records. */
     @GuardedBy("mAppStartInfoTracker")
-    final AppStartInfoTracker mAppStartInfoTracker = new AppStartInfoTracker();
+    private final AppStartInfoTracker mAppStartInfoTracker = new AppStartInfoTracker();
 
     /**
      * The currently running SDK sandbox processes for a uid.
@@ -1521,6 +1521,10 @@ public final class ProcessList {
      */
     long getCachedRestoreThresholdKb() {
         return mCachedRestoreLevel;
+    }
+
+    AppStartInfoTracker getAppStartInfoTracker() {
+        return mAppStartInfoTracker;
     }
 
     /**
@@ -2572,6 +2576,7 @@ public final class ProcessList {
             boolean isSdkSandbox, int sdkSandboxUid, String sdkSandboxClientAppPackage,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         long startTime = SystemClock.uptimeMillis();
+        final long startTimeNs = SystemClock.elapsedRealtimeNanos();
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(processName, info.uid);

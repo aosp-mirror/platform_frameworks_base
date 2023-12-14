@@ -323,6 +323,7 @@ public class PackageArchiver {
         PackageStateInternal ps = getPackageState(packageName, snapshot,
                 Binder.getCallingUid(), userId);
         verifyNotSystemApp(ps.getFlags());
+        verifyInstalled(ps, userId);
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
         verifyInstaller(responsibleInstallerPackage, userId);
         ApplicationInfo installerInfo = snapshot.getApplicationInfo(
@@ -476,6 +477,14 @@ public class PackageArchiver {
         }
     }
 
+    private void verifyInstalled(PackageStateInternal ps, int userId)
+            throws PackageManager.NameNotFoundException {
+        if (!ps.getUserStateOrDefault(userId).isInstalled()) {
+            throw new PackageManager.NameNotFoundException(
+                    TextUtils.formatSimple("%s is not installed.", ps.getPackageName()));
+        }
+    }
+
     /**
      * Returns true if the app is archivable.
      */
@@ -519,11 +528,11 @@ public class PackageArchiver {
     /**
      * Returns true if user has opted the app out of archiving through system settings.
      */
-    // TODO(b/304256918) Switch this to a separate OP code for archiving.
     private boolean isAppOptedOutOfArchiving(String packageName, int uid) {
         return Binder.withCleanCallingIdentity(() ->
-                getAppOpsManager().checkOp(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
-                        uid, packageName) == MODE_IGNORED);
+                getAppOpsManager().checkOpNoThrow(
+                        AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, uid, packageName)
+                        == MODE_IGNORED);
     }
 
     private void verifyOptOutStatus(String packageName, int uid)
@@ -676,23 +685,51 @@ public class PackageArchiver {
         PackageStateInternal ps;
         try {
             ps = getPackageState(packageName, snapshot, callingUid, userId);
-            snapshot.enforceCrossUserPermission(callingUid, userId, true, false,
-                    "getArchivedAppIcon");
-            verifyArchived(ps, userId);
         } catch (PackageManager.NameNotFoundException e) {
-            throw new ParcelableException(e);
+            Slog.e(TAG, TextUtils.formatSimple("Package %s couldn't be found.", packageName), e);
+            return null;
         }
 
-        List<ArchiveActivityInfo> activityInfos = ps.getUserStateOrDefault(
-                userId).getArchiveState().getActivityInfos();
-        if (activityInfos.size() == 0) {
+        ArchiveState archiveState = getAnyArchiveState(ps, userId);
+        if (archiveState == null || archiveState.getActivityInfos().size() == 0) {
             return null;
         }
 
         // TODO(b/298452477) Handle monochrome icons.
         // In the rare case the archived app defined more than two launcher activities, we choose
         // the first one arbitrarily.
-        return includeCloudOverlay(decodeIcon(activityInfos.get(0)));
+        return includeCloudOverlay(decodeIcon(archiveState.getActivityInfos().get(0)));
+    }
+
+    /**
+     * This method first checks the ArchiveState for the provided userId and then tries to fallback
+     * to other users if the current user is not archived.
+     *
+     * <p> This fallback behaviour is required for archived apps to fit into the multi-user world
+     * where APKs are shared across users. E.g. current ways of fetching icons for apps that are
+     * only installed on the work profile also work when executed on the personal profile if you're
+     * using {@link PackageManager#MATCH_UNINSTALLED_PACKAGES}. Resource fetching from APKs is for
+     * the most part userId-agnostic, which we need to mimic here in order for existing methods
+     * like {@link PackageManager#getApplicationIcon} to continue working.
+     *
+     * @return {@link ArchiveState} for {@code userId} if present. If not present, false back to an
+     * arbitrary userId. If no user is archived, returns null.
+     */
+    @Nullable
+    private ArchiveState getAnyArchiveState(PackageStateInternal ps, int userId) {
+        PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
+        if (isArchived(userState)) {
+            return userState.getArchiveState();
+        }
+
+        for (int i = 0; i < ps.getUserStates().size(); i++) {
+            userState = ps.getUserStates().valueAt(i);
+            if (isArchived(userState)) {
+                return userState.getArchiveState();
+            }
+        }
+
+        return null;
     }
 
     @VisibleForTesting

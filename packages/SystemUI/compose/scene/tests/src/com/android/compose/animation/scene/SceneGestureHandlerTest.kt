@@ -58,16 +58,22 @@ class SceneGestureHandlerTest {
         private val layoutState: SceneTransitionLayoutState =
             SceneTransitionLayoutState(internalCurrentScene)
 
+        val mutableUserActionsA: MutableMap<UserAction, SceneKey> =
+            mutableMapOf(Swipe.Up to SceneB, Swipe.Down to SceneC)
+
+        val mutableUserActionsB: MutableMap<UserAction, SceneKey> =
+            mutableMapOf(Swipe.Up to SceneC, Swipe.Down to SceneA)
+
         private val scenesBuilder: SceneTransitionLayoutScope.() -> Unit = {
             scene(
                 key = SceneA,
-                userActions = mapOf(Swipe.Up to SceneB, Swipe.Down to SceneC),
+                userActions = mutableUserActionsA,
             ) {
                 Text("SceneA")
             }
             scene(
                 key = SceneB,
-                userActions = mapOf(Swipe.Up to SceneC, Swipe.Down to SceneA),
+                userActions = mutableUserActionsB,
             ) {
                 Text("SceneB")
             }
@@ -409,6 +415,70 @@ class SceneGestureHandlerTest {
         // wait for the stop animation
         advanceUntilIdle()
         assertIdle(currentScene = SceneC)
+    }
+
+    @Test
+    fun onAccelaratedScrollBothTargetsBecomeNull_settlesToIdle() = runGestureTest {
+        draggable.onDragStarted()
+        draggable.onDelta(up(0.2f))
+
+        draggable.onDelta(up(0.2f))
+        draggable.onDragStopped(velocity = -velocityThreshold)
+        assertTransition(currentScene = SceneB, fromScene = SceneA, toScene = SceneB)
+
+        mutableUserActionsA.remove(Swipe.Up)
+        mutableUserActionsA.remove(Swipe.Down)
+        mutableUserActionsB.remove(Swipe.Up)
+        mutableUserActionsB.remove(Swipe.Down)
+
+        // start accelaratedScroll and scroll over to B -> null
+        draggable.onDragStarted()
+        draggable.onDelta(up(0.5f))
+        draggable.onDelta(up(0.5f))
+
+        // here onDragStopped is already triggered, but subsequent onDelta/onDragStopped calls may
+        // still be called. Make sure that they don't crash or change the scene
+        draggable.onDelta(up(0.5f))
+        draggable.onDragStopped(0f)
+
+        advanceUntilIdle()
+        assertIdle(SceneB)
+
+        // These events can still come in after the animation has settled
+        draggable.onDelta(up(0.5f))
+        draggable.onDragStopped(0f)
+        assertIdle(SceneB)
+    }
+
+    @Test
+    fun onDragTargetsChanged_targetStaysTheSame() = runGestureTest {
+        draggable.onDragStarted(up(0.1f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.1f)
+
+        mutableUserActionsA[Swipe.Up] = SceneC
+        draggable.onDelta(up(0.1f))
+        // target stays B even though UserActions changed
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.2f)
+        draggable.onDragStopped(down(0.1f))
+        advanceUntilIdle()
+
+        // now target changed to C for new drag
+        draggable.onDragStarted(up(0.1f))
+        assertTransition(fromScene = SceneA, toScene = SceneC, progress = 0.1f)
+    }
+
+    @Test
+    fun onDragTargetsChanged_targetsChangeWhenStartingNewDrag() = runGestureTest {
+        draggable.onDragStarted(up(0.1f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.1f)
+
+        mutableUserActionsA[Swipe.Up] = SceneC
+        draggable.onDelta(up(0.1f))
+        draggable.onDragStopped(down(0.1f))
+
+        // now target changed to C for new drag that started before previous drag settled to Idle
+        draggable.onDragStarted(up(0.1f))
+        assertTransition(fromScene = SceneA, toScene = SceneC, progress = 0.3f)
     }
 
     @Test

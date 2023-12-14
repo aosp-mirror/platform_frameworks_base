@@ -62,6 +62,7 @@ import android.os.ParcelableException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.text.TextUtils;
+import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -174,6 +175,7 @@ public class PackageArchiverTest {
         mUserState = new PackageUserStateImpl().setInstalled(true);
         mPackageSetting.setUserState(mUserId, mUserState);
         when(mPackageState.getUserStateOrDefault(eq(mUserId))).thenReturn(mUserState);
+        when(mPackageState.getUserStates()).thenReturn(new SparseArray<>());
 
         when(mContext.getSystemService(LauncherApps.class)).thenReturn(mLauncherApps);
         when(mContext.getSystemService(AppOpsManager.class)).thenReturn(
@@ -343,7 +345,7 @@ public class PackageArchiverTest {
 
     @Test
     public void archiveApp_appOptedOutOfArchiving() {
-        when(mAppOpsManager.checkOp(
+        when(mAppOpsManager.checkOpNoThrow(
                 eq(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED),
                 anyInt(), eq(PACKAGE))).thenReturn(MODE_IGNORED);
 
@@ -430,7 +432,7 @@ public class PackageArchiverTest {
     @Test
     public void isAppArchivable_appOptedOutOfArchiving()
             throws PackageManager.NameNotFoundException {
-        when(mAppOpsManager.checkOp(
+        when(mAppOpsManager.checkOpNoThrow(
                 eq(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED),
                 anyInt(), eq(PACKAGE))).thenReturn(MODE_IGNORED);
 
@@ -551,22 +553,12 @@ public class PackageArchiverTest {
         when(mComputer.getPackageStateFiltered(eq(PACKAGE), anyInt(), anyInt())).thenReturn(
                 null);
 
-        Exception e = assertThrows(
-                ParcelableException.class,
-                () -> mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT));
-        assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
-        assertThat(e.getCause()).hasMessageThat().isEqualTo(
-                String.format("Package %s not found.", PACKAGE));
+        assertThat(mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT)).isNull();
     }
 
     @Test
     public void getArchivedAppIcon_notArchived() {
-        Exception e = assertThrows(
-                ParcelableException.class,
-                () -> mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT));
-        assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
-        assertThat(e.getCause()).hasMessageThat().isEqualTo(
-                String.format("Package %s is not currently archived.", PACKAGE));
+        assertThat(mArchiveManager.getArchivedAppIcon(PACKAGE, UserHandle.CURRENT)).isNull();
     }
 
     @Test

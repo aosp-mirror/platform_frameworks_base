@@ -47,12 +47,6 @@ internal fun CoroutineScope.animateToScene(
     when (state) {
         is TransitionState.Idle -> animate(layoutImpl, target)
         is TransitionState.Transition -> {
-            if (state.toScene == state.fromScene) {
-                // Same as idle.
-                animate(layoutImpl, target)
-                return
-            }
-
             // A transition is currently running: first check whether `transition.toScene` or
             // `transition.fromScene` is the same as our target scene, in which case the transition
             // can be accelerated or reversed to end up in the target state.
@@ -153,13 +147,13 @@ private fun CoroutineScope.animate(
 }
 
 private class OneOffTransition(
-    override val fromScene: SceneKey,
-    override val toScene: SceneKey,
+    fromScene: SceneKey,
+    toScene: SceneKey,
     override val currentScene: SceneKey,
     override val isInitiatedByUserInput: Boolean,
     override val isUserInputOngoing: Boolean,
     private val animatable: Animatable<Float, AnimationVector1D>,
-) : TransitionState.Transition {
+) : TransitionState.Transition(fromScene, toScene) {
     override val progress: Float
         get() = animatable.value
 }

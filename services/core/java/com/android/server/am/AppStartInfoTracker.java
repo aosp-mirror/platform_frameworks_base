@@ -22,11 +22,12 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
-import android.app.ActivityOptions;
+import android.annotation.NonNull;
 import android.app.ApplicationStartInfo;
 import android.app.Flags;
 import android.app.IApplicationStartInfoCompleteListener;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -138,6 +139,15 @@ public final class AppStartInfoTracker {
     /** The path to the historical proc start info file, persisted in the storage. */
     @VisibleForTesting File mProcStartInfoFile;
 
+
+    /**
+     * Temporary list of records that have not been completed.
+     *
+     * Key is timestamp of launch from {@link #ActivityMetricsLaunchObserver}.
+     */
+    @GuardedBy("mLock")
+    private ArrayMap<Long, ApplicationStartInfo> mInProgRecords = new ArrayMap<>();
+
     AppStartInfoTracker() {
         mCallbacks = new SparseArray<>();
         mData = new ProcessMap<AppStartInfoContainer>();
@@ -174,68 +184,99 @@ public final class AppStartInfoTracker {
         });
     }
 
-    void handleProcessColdStarted(long startTimeNs, HostingRecord hostingRecord,
-            ProcessRecord app) {
-        synchronized (mLock) {
-            if (!mEnabled) {
-                return;
-            }
-            ApplicationStartInfo start = new ApplicationStartInfo();
-            addBaseFieldsFromProcessRecord(start, app);
-            start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
-            start.addStartupTimestamp(
-                    ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
-            start.addStartupTimestamp(
-                    ApplicationStartInfo.START_TIMESTAMP_FORK, app.getStartElapsedTime());
-            start.setStartType(ApplicationStartInfo.START_TYPE_COLD);
-            start.setReason(ApplicationStartInfo.START_REASON_OTHER);
-            addStartInfoLocked(start);
-        }
-    }
-
-    public void handleProcessActivityWarmOrHotStarted(long startTimeNs,
-            ActivityOptions activityOptions, Intent intent) {
+    void onIntentStarted(@NonNull Intent intent, long timestampNanos) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
             }
             ApplicationStartInfo start = new ApplicationStartInfo();
             start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
-            start.addStartupTimestamp(
-                    ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
             start.setIntent(intent);
-            start.setReason(ApplicationStartInfo.START_REASON_LAUNCHER);
-            if (activityOptions != null) {
-                start.setProcessName(activityOptions.getPackageName());
-            }
-            start.setStartType(ApplicationStartInfo.START_TYPE_WARM);
+            start.setStartType(ApplicationStartInfo.START_TYPE_UNSET);
+            start.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_LAUNCH, timestampNanos);
             if (intent != null && intent.getCategories() != null
                     && intent.getCategories().contains(Intent.CATEGORY_LAUNCHER)) {
                 start.setReason(ApplicationStartInfo.START_REASON_LAUNCHER);
             } else {
                 start.setReason(ApplicationStartInfo.START_REASON_START_ACTIVITY);
             }
-            addStartInfoLocked(start);
+            mInProgRecords.put(timestampNanos, start);
         }
     }
 
-    public void handleProcessActivityStartedFromRecents(long startTimeNs,
-            ActivityOptions activityOptions) {
+    void onIntentFailed(long id) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
             }
-            ApplicationStartInfo start = new ApplicationStartInfo();
-            start.setStartupState(ApplicationStartInfo.STARTUP_STATE_STARTED);
-            start.addStartupTimestamp(
-                    ApplicationStartInfo.START_TIMESTAMP_LAUNCH, startTimeNs);
-            if (activityOptions != null) {
-                start.setIntent(activityOptions.getResultData());
-                start.setProcessName(activityOptions.getPackageName());
+            if (!mInProgRecords.containsKey(id)) {
+                return;
             }
-            start.setReason(ApplicationStartInfo.START_REASON_LAUNCHER_RECENTS);
-            start.setStartType(ApplicationStartInfo.START_TYPE_WARM);
-            addStartInfoLocked(start);
+            mInProgRecords.get(id).setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
+            mInProgRecords.remove(id);
+        }
+    }
+
+    void onActivityLaunched(long id, ComponentName name, long temperature, ProcessRecord app) {
+        synchronized (mLock) {
+            if (!mEnabled) {
+                return;
+            }
+            if (!mInProgRecords.containsKey(id)) {
+                return;
+            }
+            if (app != null) {
+                ApplicationStartInfo info = mInProgRecords.get(id);
+                info.setStartType((int) temperature);
+                addBaseFieldsFromProcessRecord(info, app);
+                addStartInfoLocked(info);
+            } else {
+                mInProgRecords.remove(id);
+            }
+        }
+    }
+
+    void onActivityLaunchCancelled(long id) {
+        synchronized (mLock) {
+            if (!mEnabled) {
+                return;
+            }
+            if (!mInProgRecords.containsKey(id)) {
+                return;
+            }
+            ApplicationStartInfo info = mInProgRecords.get(id);
+            info.setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
+            mInProgRecords.remove(id);
+        }
+    }
+
+    void onActivityLaunchFinished(long id, ComponentName name, long timestampNanos,
+            int launchMode) {
+        synchronized (mLock) {
+            if (!mEnabled) {
+                return;
+            }
+            if (!mInProgRecords.containsKey(id)) {
+                return;
+            }
+            ApplicationStartInfo info = mInProgRecords.get(id);
+            info.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
+            info.setLaunchMode(launchMode);
+        }
+    }
+
+    void onReportFullyDrawn(long id, long timestampNanos) {
+        synchronized (mLock) {
+            if (!mEnabled) {
+                return;
+            }
+            if (!mInProgRecords.containsKey(id)) {
+                return;
+            }
+            ApplicationStartInfo info = mInProgRecords.get(id);
+            info.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN,
+                    timestampNanos);
+            mInProgRecords.remove(id);
         }
     }
 
@@ -347,7 +388,8 @@ public final class AppStartInfoTracker {
                 ApplicationStartInfo.START_TIMESTAMP_APPLICATION_ONCREATE);
     }
 
-    void reportBindApplicationTimeNanos(ProcessRecord app, long timeNs) {
+    /** Report a bind application timestamp to add to {@link ApplicationStartInfo}. */
+    public void reportBindApplicationTimeNanos(ProcessRecord app, long timeNs) {
         addTimestampToStart(app, timeNs,
                 ApplicationStartInfo.START_TIMESTAMP_BIND_APPLICATION);
     }

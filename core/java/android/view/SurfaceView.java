@@ -37,6 +37,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.RenderNode;
+import android.hardware.input.InputManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -158,6 +159,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private static final String TAG = "SurfaceView";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_POSITION = false;
+
+    private static final long FORWARD_BACK_KEY_TOLERANCE_MS = 100;
 
     @UnsupportedAppUsage(
             maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
@@ -325,6 +328,41 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     }
                 });
             }
+        }
+
+        @Override
+        public void forwardBackKeyToParent(@NonNull KeyEvent keyEvent) {
+                runOnUiThread(() -> {
+                    if (!isAttachedToWindow() || keyEvent.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+                        return;
+                    }
+                    final ViewRootImpl vri = getViewRootImpl();
+                    if (vri == null) {
+                        return;
+                    }
+                    final InputManager inputManager = mContext.getSystemService(InputManager.class);
+                    if (inputManager == null) {
+                        return;
+                    }
+                    // Check that the event was created recently.
+                    final long timeDiff = SystemClock.uptimeMillis() - keyEvent.getEventTime();
+                    if (timeDiff > FORWARD_BACK_KEY_TOLERANCE_MS) {
+                        Log.e(TAG, "Ignore the input event that exceed the tolerance time, "
+                                + "exceed " + timeDiff + "ms");
+                        return;
+                    }
+                    if (inputManager.verifyInputEvent(keyEvent) == null) {
+                        Log.e(TAG, "Received invalid input event");
+                        return;
+                    }
+                    try {
+                        vri.processingBackKey(true);
+                        vri.enqueueInputEvent(keyEvent, null /* receiver */, 0 /* flags */,
+                                true /* processImmediately */);
+                    } finally {
+                        vri.processingBackKey(false);
+                    }
+                });
         }
     };
 
