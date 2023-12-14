@@ -14965,6 +14965,16 @@ public final class Settings {
                 "foreground_service_starts_logging_enabled";
 
         /**
+         * Describes whether AM's AppProfiler should collect PSS even if RSS is the default. This
+         * can be set by a user in developer settings.
+         * Default: 0
+         * @hide
+         */
+        @Readable
+        public static final String FORCE_ENABLE_PSS_PROFILING =
+                "force_enable_pss_profiling";
+
+        /**
          * @hide
          * @see com.android.server.appbinding.AppBindingConstants
          */

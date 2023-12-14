@@ -326,7 +326,6 @@ import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FactoryTest;
 import android.os.FileUtils;
-import android.os.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IDeviceIdentifiersPolicyService;
@@ -8563,7 +8562,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         final long initialIdlePssOrRss, lastPssOrRss, lastSwapPss;
                         synchronized (mAppProfiler.mProfilerLock) {
                             initialIdlePssOrRss = pr.getInitialIdlePssOrRss();
-                            lastPssOrRss = !Flags.removeAppProfilerPssCollection()
+                            lastPssOrRss = mAppProfiler.isProfilingPss()
                                     ? pr.getLastPss() : pr.getLastRss();
                             lastSwapPss = pr.getLastSwapPss();
                         }
@@ -8573,14 +8572,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                             final StringBuilder sb2 = new StringBuilder(128);
                             sb2.append("Kill");
                             sb2.append(proc.processName);
-                            if (!Flags.removeAppProfilerPssCollection()) {
+                            if (mAppProfiler.isProfilingPss()) {
                                 sb2.append(" in idle maint: pss=");
                             } else {
                                 sb2.append(" in idle maint: rss=");
                             }
                             sb2.append(lastPssOrRss);
 
-                            if (!Flags.removeAppProfilerPssCollection()) {
+                            if (mAppProfiler.isProfilingPss()) {
                                 sb2.append(", swapPss=");
                                 sb2.append(lastSwapPss);
                                 sb2.append(", initialPss=");
@@ -8595,7 +8594,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             Slog.wtfQuiet(TAG, sb2.toString());
                             mHandler.post(() -> {
                                 synchronized (ActivityManagerService.this) {
-                                    proc.killLocked(!Flags.removeAppProfilerPssCollection()
+                                    proc.killLocked(mAppProfiler.isProfilingPss()
                                             ? "idle maint (pss " : "idle maint (rss " + lastPssOrRss
                                             + " from " + initialIdlePssOrRss + ")",
                                             ApplicationExitInfo.REASON_OTHER,

@@ -94,7 +94,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
-import android.os.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -4726,7 +4725,7 @@ public final class ProcessList {
                 pw.print("state: cur="); pw.print(makeProcStateString(state.getCurProcState()));
                 pw.print(" set="); pw.print(makeProcStateString(state.getSetProcState()));
                 // These values won't be collected if the flag is enabled.
-                if (!Flags.removeAppProfilerPssCollection()) {
+                if (service.mAppProfiler.isProfilingPss()) {
                     pw.print(" lastPss=");
                     DebugUtils.printSizeValue(pw, r.mProfile.getLastPss() * 1024);
                     pw.print(" lastSwapPss=");
