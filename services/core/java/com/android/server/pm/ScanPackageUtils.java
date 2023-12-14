@@ -37,6 +37,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM_EXT;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VIRTUAL_PRELOAD;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
+import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
 import static com.android.server.pm.PackageManagerService.SCAN_MOVE;
 import static com.android.server.pm.PackageManagerService.SCAN_NEW_INSTALL;
@@ -227,6 +228,7 @@ final class ScanPackageUtils {
             // make a deep copy to avoid modifying any existing system state.
             pkgSetting = new PackageSetting(pkgSetting);
             pkgSetting.setPkg(parsedPackage);
+            final boolean isDontKill = (scanFlags & SCAN_DONT_KILL_APP) != 0;
 
             // REMOVE SharedUserSetting from method; update in a separate call.
             //
@@ -244,7 +246,8 @@ final class ScanPackageUtils {
                     parsedPackage.getUsesSdkLibrariesOptional(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
                     parsedPackage.getMimeGroups(), newDomainSetId,
-                    parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
+                    parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash(),
+                    isDontKill);
         }
 
         if (createNewPackage && originalPkgSetting != null) {
