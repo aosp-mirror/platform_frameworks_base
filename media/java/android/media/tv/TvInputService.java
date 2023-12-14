@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioPresentation;
 import android.media.PlaybackParams;
+import android.media.tv.interactive.TvInteractiveAppService;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -1531,6 +1532,32 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Called when the application requests playback of the Audio, Video, and CC streams to be
+         * stopped, but the metadata should continue to be filtered.
+         *
+         * <p>The metadata that will continue to be filtered includes the PSI
+         * (Program specific information) and SI (Service Information), part of ISO/IEC 13818-1.
+         *
+         * <p> Note that this is different form {@link #timeShiftPause()} as should release the
+         * stream, making it impossible to resume from this position again.
+         * @param mode
+         * @hide
+         */
+        public void onStopPlayback(@TvInteractiveAppService.PlaybackCommandStopMode int mode) {
+        }
+
+        /**
+         * Starts playback of the Audio, Video, and CC streams.
+         *
+         * <p> Note that this is different form {@link #timeShiftResume()} as this is intended to be
+         * used after stopping playback. This is used to restart playback from the current position
+         * in the live broadcast.
+         * @hide
+         */
+        public void onStartPlayback() {
+        }
+
+        /**
          * Called when the application requests to play a given recorded TV program.
          *
          * @param recordedProgramUri The URI of a recorded TV program.
@@ -1990,6 +2017,20 @@ public abstract class TvInputService extends Service {
                 mOverlayViewContainer = null;
                 mWindowParams = null;
             }
+        }
+
+        /**
+         * Calls {@link #onStopPlayback(int)}.
+         */
+        void stopPlayback(int mode) {
+            onStopPlayback(mode);
+        }
+
+        /**
+         * Calls {@link #onStartPlayback()}.
+         */
+        void startPlayback() {
+            onStartPlayback();
         }
 
         /**
