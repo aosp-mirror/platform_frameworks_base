@@ -46,8 +46,6 @@ cc_library_shared_for_libandroid_runtime {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
-
-        "-DNAMESPACE_FOR_HASH_FUNCTIONS=farmhash",
     ],
 
     cppflags: ["-Wno-conversion-null"],
@@ -278,8 +276,6 @@ cc_library_shared_for_libandroid_runtime {
                 "libscrypt_static",
                 "libstatssocket_lazy",
                 "libskia",
-                "libtextclassifier_hash_static",
-                "libexpresslog_jni",
             ],
 
             shared_libs: [
@@ -366,7 +362,6 @@ cc_library_shared_for_libandroid_runtime {
                 "bionic_libc_platform_headers",
                 "dnsproxyd_protocol_headers",
                 "flatbuffer_headers",
-                "libtextclassifier_hash_headers",
                 "tensorflow_headers",
             ],
             runtime_libs: [
