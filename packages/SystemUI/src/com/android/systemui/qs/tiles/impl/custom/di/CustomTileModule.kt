@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.impl.custom.di
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
+import com.android.systemui.qs.tiles.base.viewmodel.QSTileCoroutineScopeFactory
 import com.android.systemui.qs.tiles.impl.custom.CustomTileInteractor
 import com.android.systemui.qs.tiles.impl.custom.CustomTileMapper
 import com.android.systemui.qs.tiles.impl.custom.CustomTileUserActionInteractor
@@ -26,13 +27,15 @@ import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefau
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepositoryImpl
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileRepository
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileRepositoryImpl
-import com.android.systemui.qs.tiles.impl.custom.di.bound.CustomTileBoundComponent
 import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
+import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
 
 /** Provides bindings for QSTile interfaces */
-@Module(subcomponents = [CustomTileBoundComponent::class])
+@Module
 interface CustomTileModule {
 
     @Binds
@@ -54,4 +57,13 @@ interface CustomTileModule {
     ): CustomTileDefaultsRepository
 
     @Binds fun bindCustomTileRepository(impl: CustomTileRepositoryImpl): CustomTileRepository
+
+    companion object {
+
+        @Provides
+        @QSTileScope
+        fun provideCustomTileCoroutineScope(
+            scopeFactory: QSTileCoroutineScopeFactory
+        ): CoroutineScope = scopeFactory.create()
+    }
 }
