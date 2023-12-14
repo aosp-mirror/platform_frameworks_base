@@ -564,6 +564,13 @@ object Flags {
     val ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS =
         unreleasedFlag("enable_unfold_status_bar_animations")
 
+    // TODO(b/316157842): Tracking Bug
+    // Adds extra delay to notifications measure
+    @Keep
+    @JvmField
+    val ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE =
+        unreleasedFlag("enable_notifications_simulate_slow_measure")
+
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag("exp_flag_release")
 

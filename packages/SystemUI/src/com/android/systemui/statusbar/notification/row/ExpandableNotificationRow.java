@@ -38,6 +38,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -271,6 +272,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private Path mExpandingClipPath;
     private final RefactorFlag mInlineReplyAnimation =
             RefactorFlag.forView(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION);
+
+    private static final boolean mSimulateSlowMeasure = Compile.IS_DEBUG && RefactorFlag.forView(
+            Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE).isEnabled();
+    private static final String SLOW_MEASURE_SIMULATE_DELAY_PROPERTY =
+            "persist.notifications.extra_measure_delay_ms";
+    private static final int SLOW_MEASURE_SIMULATE_DELAY_MS = mSimulateSlowMeasure ?
+            SystemProperties.getInt(SLOW_MEASURE_SIMULATE_DELAY_PROPERTY, 150) : 0;
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -1879,7 +1887,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     + "heightMeasureSpec=" + MeasureSpec.toString(heightMeasureSpec) + ")");
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        if (Compile.IS_DEBUG && mSimulateSlowMeasure) {
+            simulateExtraMeasureDelay();
+        }
         Trace.endSection();
+    }
+
+    private void simulateExtraMeasureDelay() {
+        // Add extra delay in a notification row instead of NotificationStackScrollLayout
+        // to make sure that when the measure cache is used we won't add this delay
+        try {
+            Trace.beginSection("ExtraDebugMeasureDelay");
+            Thread.sleep(SLOW_MEASURE_SIMULATE_DELAY_MS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            Trace.endSection();
+        }
     }
 
     /**
