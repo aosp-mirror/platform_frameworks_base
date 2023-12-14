@@ -27,7 +27,6 @@ import static org.junit.Assert.assertTrue;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.SuspendDialogInfo;
-import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
@@ -90,7 +89,7 @@ public class PackageUserStateTest {
         assertThat(testUserState.equals(oldUserState), is(false));
 
         oldUserState = new PackageUserStateImpl();
-        oldUserState.putSuspendParams(UserPackage.of(0, "suspendingPackage"),
+        oldUserState.putSuspendParams("suspendingPackage",
                 new SuspendParams(null, new PersistableBundle(), null));
         assertThat(testUserState.equals(oldUserState), is(false));
 
@@ -221,8 +220,6 @@ public class PackageUserStateTest {
         final PersistableBundle launcherExtras2 = createPersistableBundle(null, 0, "name",
                 "launcherExtras2", null, 0);
 
-        final int suspendingUser1 = 0;
-        final int suspendingUser2 = 10;
         final String suspendingPackage1 = "package1";
         final String suspendingPackage2 = "package2";
 
@@ -233,12 +230,12 @@ public class PackageUserStateTest {
                 .setMessage("dialogMessage2")
                 .build();
 
-        final ArrayMap<UserPackage, SuspendParams> paramsMap1 = new ArrayMap<>();
-        paramsMap1.put(UserPackage.of(suspendingUser1, suspendingPackage1),
-                createSuspendParams(dialogInfo1, appExtras1, launcherExtras1));
-        final ArrayMap<UserPackage, SuspendParams> paramsMap2 = new ArrayMap<>();
-        paramsMap2.put(UserPackage.of(suspendingUser2, suspendingPackage2),
-                createSuspendParams(dialogInfo2, appExtras2, launcherExtras2));
+        final ArrayMap<String, SuspendParams> paramsMap1 = new ArrayMap<>();
+        paramsMap1.put(suspendingPackage1, createSuspendParams(dialogInfo1, appExtras1,
+                launcherExtras1));
+        final ArrayMap<String, SuspendParams> paramsMap2 = new ArrayMap<>();
+        paramsMap2.put(suspendingPackage2, createSuspendParams(dialogInfo2,
+                appExtras2, launcherExtras2));
 
 
         final PackageUserStateImpl testUserState1 = new PackageUserStateImpl();

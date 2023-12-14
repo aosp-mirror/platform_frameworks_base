@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.util.ArraySet;
 
@@ -350,7 +349,7 @@ public class PackageStateMutator {
 
             @NonNull
             @Override
-            public PackageUserStateWrite putSuspendParams(@NonNull UserPackage suspendingPackage,
+            public PackageUserStateWrite putSuspendParams(@NonNull String suspendingPackage,
                     @Nullable SuspendParams suspendParams) {
                 if (mUserState != null) {
                     mUserState.putSuspendParams(suspendingPackage, suspendParams);
@@ -360,7 +359,7 @@ public class PackageStateMutator {
 
             @NonNull
             @Override
-            public PackageUserStateWrite removeSuspension(@NonNull UserPackage suspendingPackage) {
+            public PackageUserStateWrite removeSuspension(@NonNull String suspendingPackage) {
                 if (mUserState != null) {
                     mUserState.removeSuspension(suspendingPackage);
                 }

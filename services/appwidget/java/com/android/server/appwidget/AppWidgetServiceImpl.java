@@ -72,7 +72,6 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.UserPackage;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -560,11 +559,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(appUserId);
             } else if (provider.maskedBySuspendedPackage) {
                 showBadge = mUserManager.hasBadge(appUserId);
-                final UserPackage suspendingPackage = mPackageManagerInternal.getSuspendingPackage(
+                final String suspendingPackage = mPackageManagerInternal.getSuspendingPackage(
                         appInfo.packageName, appUserId);
                 // TODO(b/281839596): don't rely on platform always meaning suspended by admin.
-                if (suspendingPackage != null
-                        && PLATFORM_PACKAGE_NAME.equals(suspendingPackage.packageName)) {
+                if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
                     onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
                             appUserId, true);
                 } else {

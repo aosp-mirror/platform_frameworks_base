@@ -32,7 +32,6 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
@@ -953,7 +952,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     void setUserState(int userId, long ceDataInode, long deDataInode, int enabled,
                       boolean installed, boolean stopped, boolean notLaunched, boolean hidden,
-                      int distractionFlags, ArrayMap<UserPackage, SuspendParams> suspendParams,
+                      int distractionFlags, ArrayMap<String, SuspendParams> suspendParams,
                       boolean instantApp, boolean virtualPreload, String lastDisableAppCaller,
                       ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
                       int installReason, int uninstallReason,
@@ -1183,7 +1182,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             if (state.isSuspended()) {
                 for (int j = 0; j < state.getSuspendParams().size(); j++) {
                     proto.write(PackageProto.UserInfoProto.SUSPENDING_PACKAGE,
-                            state.getSuspendParams().keyAt(j).packageName);
+                            state.getSuspendParams().keyAt(j));
                 }
             }
             proto.write(PackageProto.UserInfoProto.IS_STOPPED, state.isStopped());

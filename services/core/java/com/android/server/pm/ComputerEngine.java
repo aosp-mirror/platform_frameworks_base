@@ -96,7 +96,6 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.UserPackage;
 import android.content.pm.VersionedPackage;
 import android.os.Binder;
 import android.os.Build;
@@ -5013,13 +5012,11 @@ public class ComputerEngine implements Computer {
 
     @Override
     public boolean isSuspendingAnyPackages(@NonNull String suspendingPackage,
-            @UserIdInt int suspendingUserId, int targetUserId) {
-        final UserPackage suspender = UserPackage.of(suspendingUserId, suspendingPackage);
+            @UserIdInt int userId) {
         for (final PackageStateInternal packageState : getPackageStates().values()) {
-            final PackageUserStateInternal state =
-                    packageState.getUserStateOrDefault(targetUserId);
+            final PackageUserStateInternal state = packageState.getUserStateOrDefault(userId);
             if (state.getSuspendParams() != null
-                    && state.getSuspendParams().containsKey(suspender)) {
+                    && state.getSuspendParams().containsKey(suspendingPackage)) {
                 return true;
             }
         }
