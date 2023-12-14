@@ -179,7 +179,7 @@ public class DisplayModeDirector {
 
     private final boolean mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled;
 
-    private final boolean mVsyncProximityVoteEnabled;
+    private final boolean mDvrrSupported;
 
 
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler,
@@ -190,6 +190,8 @@ public class DisplayModeDirector {
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler,
             @NonNull Injector injector,
             @NonNull DisplayManagerFlags displayManagerFlags) {
+        mDvrrSupported = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_supportsDvrr);
         mIsDisplayResolutionRangeVotingEnabled = displayManagerFlags
                 .isDisplayResolutionRangeVotingEnabled();
         mIsUserPreferredModeVoteEnabled = displayManagerFlags.isUserPreferredModeVoteEnabled();
@@ -199,7 +201,6 @@ public class DisplayModeDirector {
             .isDisplaysRefreshRatesSynchronizationEnabled();
         mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled = displayManagerFlags
                 .isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled();
-        mVsyncProximityVoteEnabled = displayManagerFlags.isVsyncProximityVoteEnabled();
         mContext = context;
         mHandler = new DisplayModeDirectorHandler(handler.getLooper());
         mInjector = injector;
@@ -208,7 +209,8 @@ public class DisplayModeDirector {
         mAppRequestObserver = new AppRequestObserver();
         mConfigParameterProvider = new DeviceConfigParameterProvider(injector.getDeviceConfig());
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
-        mSettingsObserver = new SettingsObserver(context, handler);
+        mSettingsObserver = new SettingsObserver(context, handler, mDvrrSupported,
+                displayManagerFlags);
         mBrightnessObserver = new BrightnessObserver(context, handler, injector);
         mDefaultDisplayDeviceConfig = null;
         mUdfpsObserver = new UdfpsObserver();
@@ -290,7 +292,7 @@ public class DisplayModeDirector {
             List<Display.Mode> availableModes = new ArrayList<>();
             availableModes.add(defaultMode);
             VoteSummary primarySummary = new VoteSummary(mIsDisplayResolutionRangeVotingEnabled,
-                    mVsyncProximityVoteEnabled, mLoggingEnabled, mSupportsFrameRateOverride);
+                    mDvrrSupported, mLoggingEnabled, mSupportsFrameRateOverride);
             int lowestConsideredPriority = Vote.MIN_PRIORITY;
             int highestConsideredPriority = Vote.MAX_PRIORITY;
 
@@ -330,7 +332,7 @@ public class DisplayModeDirector {
             }
 
             VoteSummary appRequestSummary = new VoteSummary(mIsDisplayResolutionRangeVotingEnabled,
-                    mVsyncProximityVoteEnabled, mLoggingEnabled, mSupportsFrameRateOverride);
+                    mDvrrSupported, mLoggingEnabled, mSupportsFrameRateOverride);
 
             appRequestSummary.applyVotes(votes,
                     Vote.APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF,
@@ -818,13 +820,17 @@ public class DisplayModeDirector {
         private final Uri mMatchContentFrameRateSetting =
                 Settings.Secure.getUriFor(Settings.Secure.MATCH_CONTENT_FRAME_RATE);
 
+        private final boolean mVsynLowPowerVoteEnabled;
+
         private final Context mContext;
         private float mDefaultPeakRefreshRate;
         private float mDefaultRefreshRate;
 
-        SettingsObserver(@NonNull Context context, @NonNull Handler handler) {
+        SettingsObserver(@NonNull Context context, @NonNull Handler handler, boolean dvrrSupported,
+                DisplayManagerFlags flags) {
             super(handler);
             mContext = context;
+            mVsynLowPowerVoteEnabled = dvrrSupported && flags.isVsyncLowPowerVoteEnabled();
             // We don't want to load from the DeviceConfig while constructing since this leads to
             // a spike in the latency of DisplayManagerService startup. This happens because
             // reading from the DeviceConfig is an intensive IO operation and having it in the
@@ -936,7 +942,14 @@ public class DisplayModeDirector {
             boolean inLowPowerMode = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.LOW_POWER_MODE, 0 /*default*/) != 0;
             final Vote vote;
-            if (inLowPowerMode) {
+            if (inLowPowerMode && mVsynLowPowerVoteEnabled) {
+                vote = Vote.forSupportedModes(List.of(
+                        new SupportedModesVote.SupportedMode(/* peakRefreshRate= */ 60f,
+                                /* vsyncRate= */ 240f),
+                        new SupportedModesVote.SupportedMode(/* peakRefreshRate= */ 60f,
+                                /* vsyncRate= */ 60f)
+                ));
+            } else if (inLowPowerMode) {
                 vote = Vote.forRenderFrameRates(0f, 60f);
             } else {
                 vote = null;
