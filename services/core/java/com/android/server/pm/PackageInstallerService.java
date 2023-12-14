@@ -821,6 +821,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags &= ~PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
         }
 
+        params.installFlags &= ~PackageManager.INSTALL_UNARCHIVE;
+        if (Flags.archiving() && params.appPackageName != null) {
+            PackageStateInternal ps = mPm.snapshotComputer().getPackageStateInternal(
+                    params.appPackageName, SYSTEM_UID);
+            if (ps != null
+                    && PackageArchiver.isArchived(ps.getUserStateOrDefault(userId))
+                    && PackageArchiver.getResponsibleInstallerPackage(ps)
+                            .equals(requestedInstallerPackageName)) {
+                params.installFlags |= PackageManager.INSTALL_UNARCHIVE;
+            }
+        }
+
         if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0
                 && !PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)
                 && (snapshot.getFlagsForUid(callingUid) & ApplicationInfo.FLAG_SYSTEM)

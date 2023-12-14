@@ -1517,6 +1517,7 @@ public abstract class PackageManager {
             INSTALL_REQUEST_UPDATE_OWNERSHIP,
             INSTALL_IGNORE_DEXOPT_PROFILE,
             INSTALL_UNARCHIVE_DRAFT,
+            INSTALL_UNARCHIVE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -1764,11 +1765,20 @@ public abstract class PackageManager {
      * If set, then the session is a draft session created for an upcoming unarchival by its
      * installer.
      *
-     * @see PackageInstaller#requestUnarchive(String)
+     * @see PackageInstaller#requestUnarchive
      *
      * @hide
      */
     public static final int INSTALL_UNARCHIVE_DRAFT = 1 << 29;
+
+    /**
+     * If set, then the {@link PackageInstaller.Session} is an unarchival.
+     *
+     * @see PackageInstaller#requestUnarchive
+     *
+     * @hide
+     */
+    public static final int INSTALL_UNARCHIVE = 1 << 30;
 
     /**
      * Flag parameter for {@link #installPackage} to force a non-staged update of an APEX. This is
