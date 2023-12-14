@@ -251,6 +251,7 @@ import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.ConversationChannelWrapper;
+import android.service.notification.DeviceEffectsApplier;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.IStatusBarNotificationHolder;
@@ -6963,6 +6964,18 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
             }
+        }
+
+        @Override
+        public void setDeviceEffectsApplier(DeviceEffectsApplier applier) {
+            if (!android.app.Flags.modesApi()) {
+                return;
+            }
+            if (mZenModeHelper == null) {
+                throw new IllegalStateException("ZenModeHelper is not yet ready!");
+            }
+            // This can also throw IllegalStateException if called too late.
+            mZenModeHelper.setDeviceEffectsApplier(applier);
         }
     };
 
