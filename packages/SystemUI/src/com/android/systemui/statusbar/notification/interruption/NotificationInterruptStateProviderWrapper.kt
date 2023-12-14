@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar.notification.interruption
 
+import com.android.app.tracing.traceSection
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.RefactorFlagUtils
@@ -82,20 +83,33 @@ class NotificationInterruptStateProviderWrapper(
     }
 
     override fun makeUnloggedHeadsUpDecision(entry: NotificationEntry): Decision =
-        wrapped.checkHeadsUp(entry, /* log= */ false).let { DecisionImpl.of(it) }
+        traceSection("NotificationInterruptStateProviderWrapper#makeUnloggedHeadsUpDecision") {
+            wrapped.checkHeadsUp(entry, /* log= */ false).let { DecisionImpl.of(it) }
+        }
 
     override fun makeAndLogHeadsUpDecision(entry: NotificationEntry): Decision =
-        wrapped.checkHeadsUp(entry, /* log= */ true).let { DecisionImpl.of(it) }
+        traceSection("NotificationInterruptStateProviderWrapper#makeAndLogHeadsUpDecision") {
+            wrapped.checkHeadsUp(entry, /* log= */ true).let { DecisionImpl.of(it) }
+        }
 
     override fun makeUnloggedFullScreenIntentDecision(entry: NotificationEntry) =
-        wrapped.getFullScreenIntentDecision(entry).let { FullScreenIntentDecisionImpl(entry, it) }
-
-    override fun logFullScreenIntentDecision(decision: FullScreenIntentDecision) {
-        (decision as FullScreenIntentDecisionImpl).let {
-            wrapped.logFullScreenIntentDecision(it.originalEntry, it.originalDecision)
+        traceSection(
+            "NotificationInterruptStateProviderWrapper#makeUnloggedFullScreenIntentDecision"
+        ) {
+            wrapped.getFullScreenIntentDecision(entry).let {
+                FullScreenIntentDecisionImpl(entry, it)
+            }
         }
-    }
+
+    override fun logFullScreenIntentDecision(decision: FullScreenIntentDecision) =
+        traceSection("NotificationInterruptStateProviderWrapper#logFullScreenIntentDecision") {
+            (decision as FullScreenIntentDecisionImpl).let {
+                wrapped.logFullScreenIntentDecision(it.originalEntry, it.originalDecision)
+            }
+        }
 
     override fun makeAndLogBubbleDecision(entry: NotificationEntry): Decision =
-        wrapped.shouldBubbleUp(entry).let { DecisionImpl.of(it) }
+        traceSection("NotificationInterruptStateProviderWrapper#makeAndLogBubbleDecision") {
+            wrapped.shouldBubbleUp(entry).let { DecisionImpl.of(it) }
+        }
 }
