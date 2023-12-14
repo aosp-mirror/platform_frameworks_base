@@ -34,6 +34,7 @@ import java.util.List;
  * If we are stripping and/or replacing the actions from a window, we need to intercept the
  * nodes heading back to the service and swap out the actions.
  */
+@SuppressWarnings("MissingPermissionAnnotation")
 public class ActionReplacingCallback extends IAccessibilityInteractionConnectionCallback.Stub {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "ActionReplacingCallback";
