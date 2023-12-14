@@ -27,6 +27,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.logging.KeyguardLogger
+import com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FeatureFlags
@@ -40,6 +41,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.leak.RotationUtils
 import com.android.systemui.util.mockito.any
+import javax.inject.Provider
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -51,14 +53,14 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.MockitoSession
 import org.mockito.quality.Strictness
-import javax.inject.Provider
+
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -246,6 +248,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     @RunWithLooper(setAsMainLooper = true)
     fun testAnimatorRunWhenWakeAndUnlock_fingerprint() {
+        mSetFlagsRule.disableFlags(FLAG_LIGHT_REVEAL_MIGRATION)
         val fpsLocation = Point(5, 5)
         `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
@@ -266,6 +269,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Test
     @RunWithLooper(setAsMainLooper = true)
     fun testAnimatorRunWhenWakeAndUnlock_faceUdfpsFingerDown() {
+        mSetFlagsRule.disableFlags(FLAG_LIGHT_REVEAL_MIGRATION)
         val faceLocation = Point(5, 5)
         `when`(authController.faceSensorLocation).thenReturn(faceLocation)
         controller.onViewAttached()
