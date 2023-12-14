@@ -974,6 +974,7 @@ public final class BatteryService extends SystemService {
                 unplugBattery(/* forceUpdate= */ (opts & OPTION_FORCE_UPDATE) != 0, pw);
             } break;
             case "get": {
+                final int opts = parseOptions(shell);
                 final String key = shell.getNextArg();
                 if (key == null) {
                     pw.println("No property specified");
@@ -1007,11 +1008,17 @@ public final class BatteryService extends SystemService {
                         break;
                     case "current_now":
                         if (batteryServiceSupportCurrentAdbCommand()) {
+                            if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                                updateHealthInfo();
+                            }
                             pw.println(mHealthInfo.batteryCurrentMicroamps);
                         }
                         break;
                     case "current_average":
                         if (batteryServiceSupportCurrentAdbCommand()) {
+                            if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                                updateHealthInfo();
+                            }
                             pw.println(mHealthInfo.batteryCurrentAverageMicroamps);
                         }
                         break;
@@ -1123,6 +1130,14 @@ public final class BatteryService extends SystemService {
                 return shell.handleDefaultCommands(cmd);
         }
         return 0;
+    }
+
+    private void updateHealthInfo() {
+        try {
+            mHealthServiceWrapper.scheduleUpdate();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to update health service data.", e);
+        }
     }
 
     private void setChargerAcOnline(boolean online, boolean forceUpdate) {
