@@ -16,10 +16,18 @@
 
 package com.android.settingslib.spa.widget.card
 
+import android.content.Context
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -30,6 +38,8 @@ import org.junit.runner.RunWith
 class SettingsCardTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun settingsCard_titleDisplayed() {
@@ -94,6 +104,27 @@ class SettingsCardTest {
         composeTestRule.onNodeWithText(TEXT).performClick()
 
         assertThat(buttonClicked).isTrue()
+    }
+
+    @Test
+    fun settingsCard_dismiss() {
+        composeTestRule.setContent {
+            var isVisible by remember { mutableStateOf(true) }
+            SettingsCard(
+                CardModel(
+                    title = TITLE,
+                    text = "",
+                    isVisible = { isVisible },
+                    onDismiss = { isVisible = false },
+                )
+            )
+        }
+
+        composeTestRule.onNodeWithContentDescription(
+            context.getString(androidx.compose.material3.R.string.m3c_snackbar_dismiss)
+        ).performClick()
+
+        composeTestRule.onNodeWithText(TEXT).isNotDisplayed()
     }
 
     private companion object {
