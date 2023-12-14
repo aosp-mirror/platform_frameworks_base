@@ -2570,7 +2570,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     outPs.getUsesSdkLibraries(), libName));
             outPs.setUsesSdkLibrariesVersionsMajor(ArrayUtils.appendLong(
                     outPs.getUsesSdkLibrariesVersionsMajor(), libVersion));
-            outPs.setUsesSdkLibrariesOptional(PackageImpl.appendBoolean(
+            outPs.setUsesSdkLibrariesOptional(ArrayUtils.appendBoolean(
                     outPs.getUsesSdkLibrariesOptional(), optional));
         }
 
