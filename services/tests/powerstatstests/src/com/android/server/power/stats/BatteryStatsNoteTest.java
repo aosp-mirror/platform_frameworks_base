@@ -58,6 +58,7 @@ import android.view.Display;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
 import com.android.server.power.stats.BatteryStatsImpl.DualTimer;
@@ -270,7 +271,8 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 220;
         bi.noteLongPartialWakelockFinish(name, historyName, ISOLATED_UID);
 
-        final BatteryStatsHistoryIterator iterator =  bi.iterateBatteryStatsHistory(0, 0);
+        final BatteryStatsHistoryIterator iterator =
+                bi.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
 
         BatteryStats.HistoryItem item;
 
@@ -327,7 +329,8 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 220;
         bi.noteLongPartialWakelockFinish(name, historyName, ISOLATED_UID);
 
-        final BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory(0, 0);
+        final BatteryStatsHistoryIterator iterator =
+                bi.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
 
         BatteryStats.HistoryItem item;
 
@@ -941,7 +944,8 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 5000;
         bi.noteAlarmFinishLocked("foo", null, UID);
 
-        BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory(0, 0);
+        BatteryStatsHistoryIterator iterator =
+                bi.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
         HistoryItem item;
 
         assertThat(item = iterator.next()).isNotNull();
@@ -980,7 +984,8 @@ public class BatteryStatsNoteTest extends TestCase {
         clocks.realtime = clocks.uptime = 5000;
         bi.noteAlarmFinishLocked("foo", ws, UID);
 
-        BatteryStatsHistoryIterator iterator = bi.iterateBatteryStatsHistory(0, 0);
+        BatteryStatsHistoryIterator iterator =
+                bi.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
         HistoryItem item;
 
         assertThat(item = iterator.next()).isNotNull();

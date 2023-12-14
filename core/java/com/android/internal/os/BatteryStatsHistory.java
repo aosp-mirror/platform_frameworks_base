@@ -629,7 +629,7 @@ public class BatteryStatsHistory {
      * @param startTimeMs monotonic time (the HistoryItem.time field) to start iterating from,
      *                    inclusive
      * @param endTimeMs monotonic time to stop iterating, exclusive.
-     *                  Pass 0 to indicate current time.
+     *                  Pass {@link MonotonicClock#UNDEFINED} to indicate current time.
      */
     @NonNull
     public BatteryStatsHistoryIterator iterate(long startTimeMs, long endTimeMs) {

@@ -56,6 +56,7 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.CpuScalingPolicies;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerStats;
 
 import com.google.android.collect.Lists;
@@ -7484,7 +7485,8 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
+        try (BatteryStatsHistoryIterator iterator =
+                     iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 try {
@@ -8409,7 +8411,8 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
+        try (BatteryStatsHistoryIterator iterator =
+                     iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 lastTime = rec.time;

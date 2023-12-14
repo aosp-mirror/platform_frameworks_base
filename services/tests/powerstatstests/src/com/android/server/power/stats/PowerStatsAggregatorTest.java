@@ -120,7 +120,7 @@ public class PowerStatsAggregatorTest {
         powerStats.uidStats.put(TEST_UID, new long[]{4444});
         mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
 
-        mAggregator.aggregatePowerStats(0, 0, stats -> {
+        mAggregator.aggregatePowerStats(0, MonotonicClock.UNDEFINED, stats -> {
             assertThat(mAggregatedStatsCount++).isEqualTo(0);
             assertThat(stats.getStartTime()).isEqualTo(START_TIME);
 
@@ -220,7 +220,7 @@ public class PowerStatsAggregatorTest {
 
         mHistory.recordBatteryState(mClock.realtime, mClock.uptime, 50, /* plugged */ true);
 
-        mAggregator.aggregatePowerStats(0, 0, stats -> {
+        mAggregator.aggregatePowerStats(0, MonotonicClock.UNDEFINED, stats -> {
             long[] values = new long[1];
 
             PowerComponentAggregatedPowerStats powerComponentStats =

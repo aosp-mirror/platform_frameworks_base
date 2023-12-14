@@ -11744,8 +11744,14 @@ public class BatteryStatsImpl extends BatteryStats {
         // start time
         long monotonicStartTime =
                 mMonotonicClock.monotonicTime() - batteryUsageStats.getStatsDuration();
-        mHandler.post(() ->
-                mPowerStatsStore.storeBatteryUsageStats(monotonicStartTime, batteryUsageStats));
+        mHandler.post(() -> {
+            mPowerStatsStore.storeBatteryUsageStats(monotonicStartTime, batteryUsageStats);
+            try {
+                batteryUsageStats.close();
+            } catch (IOException e) {
+                Log.e(TAG, "Cannot close BatteryUsageStats", e);
+            }
+        });
     }
 
     @GuardedBy("this")
@@ -15903,6 +15909,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mEndPlatformVersion = Build.ID;
 
+        mMonotonicEndTime = MonotonicClock.UNDEFINED;
         mHistory.continueRecordingHistory();
 
         recordDailyStatsIfNeededLocked(false, mClock.currentTimeMillis());
