@@ -56,6 +56,8 @@ public:
     // Hard-ends all animators. May only be called on the UI thread.
     void endAllStagingAnimators();
 
+    void forceEndAnimators();
+
     // Hard-ends all animators that have been pushed. Used for cleanup if
     // the ActivityContext is being destroyed
     void endAllActiveAnimators();
@@ -71,6 +73,8 @@ private:
     // To improve the efficiency of resizing & removing from the vector
     std::vector<sp<BaseRenderNodeAnimator> > mNewAnimators;
     std::vector<sp<BaseRenderNodeAnimator> > mAnimators;
+
+    bool mCancelAllAnimators;
 };
 
 } /* namespace uirenderer */
