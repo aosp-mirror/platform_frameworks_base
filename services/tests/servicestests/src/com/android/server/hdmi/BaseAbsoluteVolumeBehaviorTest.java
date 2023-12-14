@@ -456,6 +456,14 @@ public abstract class BaseAbsoluteVolumeBehaviorTest {
     }
 
     @Test
+    public void avbEnabled_standby_avbDisabled() {
+        enableAbsoluteVolumeBehavior();
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+    }
+
+    @Test
     public void avbEnabled_cecVolumeDisabled_avbDisabled() {
         enableAbsoluteVolumeBehavior();
 

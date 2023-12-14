@@ -1331,7 +1331,6 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(OneTouchRecordAction.class);
         removeAction(TimerRecordingAction.class);
         removeAction(NewDeviceAction.class);
-        removeAction(AbsoluteVolumeAudioStatusAction.class);
         // Remove pending actions.
         removeAction(RequestActiveSourceAction.class);
 
