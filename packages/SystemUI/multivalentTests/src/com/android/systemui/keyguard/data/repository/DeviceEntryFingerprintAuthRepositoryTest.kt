@@ -304,4 +304,34 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
             )
             assertThat(authenticationStatus).isNull()
         }
+
+    @Test
+    fun onBiometricRunningStateChanged_shouldUpdateIndicatorVisibility() =
+        testScope.runTest {
+            val shouldUpdateIndicatorVisibility by
+                collectLastValue(underTest.shouldUpdateIndicatorVisibility)
+            runCurrent()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            assertThat(shouldUpdateIndicatorVisibility).isFalse()
+
+            invokeOnCallback {
+                it.onBiometricRunningStateChanged(false, BiometricSourceType.FINGERPRINT)
+            }
+            assertThat(shouldUpdateIndicatorVisibility).isTrue()
+        }
+
+    @Test
+    fun onStrongAuthStateChanged_shouldUpdateIndicatorVisibility() =
+        testScope.runTest {
+            val shouldUpdateIndicatorVisibility by
+                collectLastValue(underTest.shouldUpdateIndicatorVisibility)
+            runCurrent()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            assertThat(shouldUpdateIndicatorVisibility).isFalse()
+
+            invokeOnCallback { it.onStrongAuthStateChanged(0) }
+            assertThat(shouldUpdateIndicatorVisibility).isTrue()
+        }
 }

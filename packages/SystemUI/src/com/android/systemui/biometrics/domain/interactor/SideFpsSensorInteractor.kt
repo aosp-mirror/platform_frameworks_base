@@ -141,7 +141,6 @@ constructor(
                             }
                         }
                     }
-
                 SideFpsSensorLocation(
                     left = sensorLeft,
                     top = sensorTop,
@@ -149,7 +148,15 @@ constructor(
                     isSensorVerticalInDefaultOrientation = isSensorVerticalInDefaultOrientation
                 )
             }
-            .distinctUntilChanged()
+            .distinctUntilChanged(
+                areEquivalent = { old: SideFpsSensorLocation, new: SideFpsSensorLocation ->
+                    old.left == new.left &&
+                        old.top == new.top &&
+                        old.length == new.length &&
+                        old.isSensorVerticalInDefaultOrientation ==
+                            new.isSensorVerticalInDefaultOrientation
+                }
+            )
             .onEach {
                 logger.sensorLocationStateChanged(
                     it.left,

@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.biometrics
 
-import android.content.Context
-import android.util.AttributeSet
-import com.android.systemui.util.wrapper.LottieViewWrapper
+package com.android.systemui.biometrics.shared.model
 
-class SideFpsLottieViewWrapper
-@JvmOverloads
-constructor(context: Context, attrs: AttributeSet? = null) : LottieViewWrapper(context, attrs)
+import com.airbnb.lottie.model.KeyPath
+
+/** Represents properties of a LottieAnimationView callback */
+data class LottieCallback(val keypath: KeyPath, val color: Int)

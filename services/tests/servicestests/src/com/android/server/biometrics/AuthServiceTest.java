@@ -23,6 +23,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_SUCCESS;
 
+import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
+
 import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertThrows;
@@ -41,6 +43,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
@@ -108,6 +111,7 @@ public class AuthServiceTest {
     @Mock
     IFaceService mFaceService;
     @Mock
+
     AppOpsManager mAppOpsManager;
     @Mock
     private VirtualDeviceManagerInternal mVdmInternal;
@@ -404,6 +408,23 @@ public class AuthServiceTest {
                 eq(TEST_OP_PACKAGE_NAME));
     }
 
+    @Test
+    public void testRegisterAuthenticationStateListener_callsFingerprintService()
+            throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
+        setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final AuthenticationStateListener listener = mock(AuthenticationStateListener.class);
+
+        mAuthService.mImpl.registerAuthenticationStateListener(listener);
+
+        waitForIdle();
+        verify(mFingerprintService).registerAuthenticationStateListener(
+                eq(listener));
+    }
 
     @Test
     public void testRegisterKeyguardCallback_callsBiometricServiceRegisterKeyguardCallback()

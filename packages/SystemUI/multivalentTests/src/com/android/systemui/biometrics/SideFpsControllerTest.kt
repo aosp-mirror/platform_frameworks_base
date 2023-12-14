@@ -22,9 +22,9 @@ import android.app.ActivityTaskManager
 import android.content.ComponentName
 import android.graphics.Insets
 import android.graphics.Rect
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTINGS
+import android.hardware.biometrics.BiometricRequestConstants.REASON_UNKNOWN
 import android.hardware.biometrics.SensorLocationInternal
 import android.hardware.biometrics.SensorProperties
 import android.hardware.display.DisplayManager
@@ -65,6 +65,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
+import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -144,6 +145,7 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         displayRepository = FakeDisplayRepository()
         displayStateRepository = FakeDisplayStateRepository()
         keyguardBouncerRepository = FakeKeyguardBouncerRepository()

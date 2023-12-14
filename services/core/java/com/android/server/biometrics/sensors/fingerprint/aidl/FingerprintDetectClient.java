@@ -16,10 +16,12 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -66,7 +68,12 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
                 true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController*/);
+        if (sidefpsControllerRefactor()) {
+            mSensorOverlays = new SensorOverlays(udfpsOverlayController);
+        } else {
+            mSensorOverlays = new SensorOverlays(
+                    udfpsOverlayController, null /* sideFpsController */);
+        }
         mOptions = options;
     }
 
@@ -93,7 +100,7 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
+        mSensorOverlays.show(getSensorId(), BiometricRequestConstants.REASON_AUTH_KEYGUARD,
                 this);
 
         try {
