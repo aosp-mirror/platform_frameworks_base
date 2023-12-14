@@ -468,7 +468,6 @@ private:
                      borrowed_fd incomingFd, bool waitOnEof, std::vector<char>* buffer,
                      std::vector<IncFsDataBlock>* blocks) {
         IncFsSize remaining = size;
-        IncFsSize totalSize = 0;
         IncFsBlockIndex blockIdx = 0;
         while (remaining > 0) {
             constexpr auto capacity = BUFFER_SIZE;
@@ -502,7 +501,6 @@ private:
 
             buffer->resize(size + read);
             remaining -= read;
-            totalSize += read;
         }
         if (!buffer->empty() && !flashToIncFs(incfsFd, kind, true, &blockIdx, buffer, blocks)) {
             return false;
