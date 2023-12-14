@@ -17,23 +17,36 @@
 package com.android.systemui.controls.panels
 
 import android.content.ComponentName
+import android.os.UserHandle
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.flags.Flags
+import kotlinx.coroutines.flow.Flow
 
 /** Stores user-selected preferred component. */
 interface SelectedComponentRepository {
 
-    /**
-     * Returns currently set preferred component, or null when nothing is set. Consider using
-     * [ControlsUiController.getPreferredSelectedItem] to get domain specific data
-     */
-    fun getSelectedComponent(): SelectedComponent?
+    /** Returns current set preferred component for the specified user. */
+    fun selectedComponentFlow(userHandle: UserHandle): Flow<SelectedComponent?>
 
-    /** Sets preferred component. Use [getSelectedComponent] to get current one */
+    /**
+     * Returns the current set preferred component for the specified user, or null when nothing is
+     * set. If no user is specified, the current user's preference is used. This method by default
+     * operates in the context of the current user unless another user is explicitly specified.
+     * Consider using [ControlsUiController.getPreferredSelectedItem] to get domain specific data.
+     */
+    fun getSelectedComponent(userHandle: UserHandle = UserHandle.CURRENT): SelectedComponent?
+
+    /**
+     * Sets the preferred component for the current user. Use [getSelectedComponent] to retrieve the
+     * currently set preferred component. This method applies to the current user's settings.
+     */
     fun setSelectedComponent(selectedComponent: SelectedComponent)
 
-    /** Clears current preferred component. [getSelectedComponent] will return null afterwards */
+    /**
+     * Clears the current user's preferred component. After this operation, [getSelectedComponent]
+     * will return null for the current user.
+     */
     fun removeSelectedComponent()
 
     /**
