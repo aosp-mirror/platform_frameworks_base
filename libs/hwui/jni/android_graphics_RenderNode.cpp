@@ -541,6 +541,12 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
     renderNode->animators().endAllStagingAnimators();
 }
 
+static void android_view_RenderNode_forceEndAnimators(JNIEnv* env, jobject clazz,
+                                                      jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->animators().forceEndAnimators();
+}
+
 // ----------------------------------------------------------------------------
 // SurfaceView position callback
 // ----------------------------------------------------------------------------
@@ -752,6 +758,7 @@ static const JNINativeMethod gMethods[] = {
         {"nGetAllocatedSize", "(J)I", (void*)android_view_RenderNode_getAllocatedSize},
         {"nAddAnimator", "(JJ)V", (void*)android_view_RenderNode_addAnimator},
         {"nEndAllAnimators", "(J)V", (void*)android_view_RenderNode_endAllAnimators},
+        {"nForceEndAnimators", "(J)V", (void*)android_view_RenderNode_forceEndAnimators},
         {"nRequestPositionUpdates", "(JLandroid/graphics/RenderNode$PositionUpdateListener;)V",
          (void*)android_view_RenderNode_requestPositionUpdates},
 
