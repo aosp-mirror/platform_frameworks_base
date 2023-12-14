@@ -589,8 +589,8 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Kreiranje novog korisnika nije uspjelo"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Kreiranje novog gosta nije uspjelo"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nadimak"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Dodajte korisnika"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Dodajte gosta"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Dodavanje korisnika"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Dodavanje gosta"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Poništi sesiju gosta"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Poništiti sesiju gosta?"</string>

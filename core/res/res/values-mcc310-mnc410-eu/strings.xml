@@ -21,6 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="mmcc_imsi_unknown_in_hlr" msgid="8861901652350883183">"Ez dago SIMik MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="2604694337529846283">"Ez da onartzen SIM txartela MM#3"</string>
+    <string name="mmcc_illegal_ms" msgid="2604694337529846283">"Ez da onartzen SIMa MM#3"</string>
     <string name="mmcc_illegal_me" msgid="3099618295079374317">"Telefonoa ez da onartzen MM#6"</string>
 </resources>

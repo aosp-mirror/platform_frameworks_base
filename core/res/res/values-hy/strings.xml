@@ -299,7 +299,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Բացել աշխատանքային պրոֆիլը"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Կոնտակտներ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"օգտագործել ձեր կոնտակտները"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղորոշում"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղադրություն"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"տեղորոշել այս սարքը"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Օրացույց"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"օգտագործել օրացույցը"</string>
@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Փորձեք մեկ այլ մատնահետք"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Շատ լուսավոր է"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Փորձեք փոխել մատի դիրքը"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ամեն անգամ թեթևա­­կի փոխեք մատի դիրքը"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Թեթևակի փոխեք մատի դիրքն ամեն անգամ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Մատնահետքը չի ճանաչվել"</string>
@@ -639,10 +639,10 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Շատ մութ է։ Փորձեք ավելի պայծառ լուսավորություն։"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Փոքր-ինչ հեռու պահեք հեռախոսը։"</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Մոտեցրեք հեռախոսը։"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Բարձրացրեք հեռախոսը։"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Իջեցրեք հեռախոսը։"</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Տեղափոխեք հեռախոսը ձախ:"</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Տեղափոխեք հեռախոսը աջ:"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Պահեք հեռախոսն ավելի վերև։"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Պահեք հեռախոսն ավելի ներքև։"</string>
+    <string name="face_acquired_too_right" msgid="2513391513020932655">"Հեռախոսը շարժեք դեպի ձախ:"</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Հեռախոսը շարժեք դեպի աջ:"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Նայեք ուղիղ էկրանին։"</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Պահեք ձեր դեմքն անմիջապես հեռախոսի էկրանի դիմաց:"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Գլուխն ուղիղ պահեք։"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Գլուխը մի փոքր իջեցրեք։"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Գլուխն ուղիղ պահեք։"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Հեռացրեք այն ամենը, ինչը թաքցնում է ձեր երեսը:"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Հեռացրեք այն ամենը, ինչը փակում է ձեր դեմքը։"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Մաքրեք էկրանի վերևի մասը, ներառյալ սև գոտին"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1358,7 +1358,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Հայտնաբերված է անալոգային աուդիո լրասարք"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Կցված սարքը համատեղելի չէ այս հեռախոսի հետ: Հպեք` ավելին իմանալու համար:"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-ով վրիպազերծումը միացված է"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Հպեք՝ USB-ով վրիպազերծումն անջատելու համար"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Հպեք անջատելու համար"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Սեղմեք՝ USB-ով վրիպազերծումն անջատելու համար:"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Անլար վրիպազերծումը միացված է"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Հպեք՝ անլար վրիպազերծումն անջատելու համար"</string>

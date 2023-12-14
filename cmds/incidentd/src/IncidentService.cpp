@@ -500,9 +500,13 @@ status_t IncidentService::onTransact(uint32_t code, const Parcel& data, Parcel* 
 
     switch (code) {
         case SHELL_COMMAND_TRANSACTION: {
-            int in = data.readFileDescriptor();
-            int out = data.readFileDescriptor();
-            int err = data.readFileDescriptor();
+            unique_fd in, out, err;
+            if (status_t status = data.readUniqueFileDescriptor(&in); status != OK) return status;
+
+            if (status_t status = data.readUniqueFileDescriptor(&out); status != OK) return status;
+
+            if (status_t status = data.readUniqueFileDescriptor(&err); status != OK) return status;
+
             int argc = data.readInt32();
             Vector<String8> args;
             for (int i = 0; i < argc && data.dataAvail() > 0; i++) {
@@ -512,15 +516,15 @@ status_t IncidentService::onTransact(uint32_t code, const Parcel& data, Parcel* 
             sp<IResultReceiver> resultReceiver =
                     IResultReceiver::asInterface(data.readStrongBinder());
 
-            FILE* fin = fdopen(in, "r");
-            FILE* fout = fdopen(out, "w");
-            FILE* ferr = fdopen(err, "w");
+            FILE* fin = fdopen(in.release(), "r");
+            FILE* fout = fdopen(out.release(), "w");
+            FILE* ferr = fdopen(err.release(), "w");
 
             if (fin == NULL || fout == NULL || ferr == NULL) {
                 resultReceiver->send(NO_MEMORY);
             } else {
-                err = command(fin, fout, ferr, args);
-                resultReceiver->send(err);
+                status_t result = command(fin, fout, ferr, args);
+                resultReceiver->send(result);
             }
 
             if (fin != NULL) {

@@ -391,11 +391,11 @@
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
     <string name="monitoring_subtitle_network_logging" msgid="2444199331891219596">"Network logging"</string>
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA certificates"</string>
-    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"View Policies"</string>
+    <string name="monitoring_button_view_policies" msgid="3869724835853502410">"View policies"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"View controls"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> may be able to access data associated with this device, manage apps, and change this devices settings.\n\nIf you have questions, contact <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"This device belongs to your organization.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"This device belongs to your organization.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Your organization installed a certificate authority on this device. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Your organization installed a certificate authority in your work profile. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"A certificate authority is installed on this device. Your secure network traffic may be monitored or modified."</string>
@@ -820,6 +820,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Open <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Play <xliff:g id="SONG_NAME">%1$s</xliff:g> by <xliff:g id="ARTIST_NAME">%2$s</xliff:g> from <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Play <xliff:g id="SONG_NAME">%1$s</xliff:g> from <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> is running"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Undo"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Move closer to play on <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Move closer to <xliff:g id="DEVICENAME">%1$s</xliff:g> to play here"</string>

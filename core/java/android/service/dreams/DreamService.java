@@ -1192,8 +1192,17 @@ public class DreamService extends Service implements Window.Callback {
         if (!flattenedString.contains("/")) {
             return new ComponentName(serviceInfo.packageName, flattenedString);
         }
-
-        return ComponentName.unflattenFromString(flattenedString);
+        // Ensure that the component is from the same package as the dream service. If not,
+        // treat the component as invalid and return null instead.
+        final ComponentName cn = ComponentName.unflattenFromString(flattenedString);
+        if (cn == null) return null;
+        if (!cn.getPackageName().equals(serviceInfo.packageName)) {
+            Log.w(TAG,
+                    "Inconsistent package name in component: " + cn.getPackageName()
+                            + ", should be: " + serviceInfo.packageName);
+            return null;
+        }
+        return cn;
     }
 
     /**

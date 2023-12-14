@@ -108,7 +108,7 @@ status_t CursorWindow::maybeInflate() {
 
     {
         // Migrate existing contents into new ashmem region
-        uint32_t slotsSize = mSize - mSlotsOffset;
+        uint32_t slotsSize = sizeOfSlots();
         uint32_t newSlotsOffset = mInflatedSize - slotsSize;
         memcpy(static_cast<uint8_t*>(newData),
                 static_cast<uint8_t*>(mData), mAllocOffset);
@@ -216,11 +216,9 @@ status_t CursorWindow::writeToParcel(Parcel* parcel) {
         if (parcel->writeDupFileDescriptor(mAshmemFd)) goto fail;
     } else {
         // Since we know we're going to be read-only on the remote side,
-        // we can compact ourselves on the wire, with just enough padding
-        // to ensure our slots stay aligned
-        size_t slotsSize = mSize - mSlotsOffset;
-        size_t compactedSize = mAllocOffset + slotsSize;
-        compactedSize = (compactedSize + 3) & ~3;
+        // we can compact ourselves on the wire.
+        size_t slotsSize = sizeOfSlots();
+        size_t compactedSize = sizeInUse();
         if (parcel->writeUint32(compactedSize)) goto fail;
         if (parcel->writeBool(false)) goto fail;
         void* dest = parcel->writeInplace(compactedSize);

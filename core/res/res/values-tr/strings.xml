@@ -1358,7 +1358,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analog ses aksesuarı algılandı"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Takılan cihaz bu telefonla uyumlu değil. Daha fazla bilgi edinmek için dokunun."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB hata ayıklaması bağlandı"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB hata ayıklama işlevini kapatmak için dokunun"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB hata ayıklamayı kapatmak için dokunun"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB hata ayıklamasını devre dışı bırakmak için seçin."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Kablosuz hata ayıklama bağlı"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Kablosuz hata ayıklamayı kapatmak için dokunun"</string>

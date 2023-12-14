@@ -446,14 +446,14 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"Accessibilità"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Attiva suoneria"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Attiva vibrazione"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Disattiva suoneria"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Silenzia"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tocca per riattivare l\'audio."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tocca per attivare la vibrazione. L\'audio dei servizi di accessibilità può essere disattivato."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tocca per disattivare l\'audio. L\'audio dei servizi di accessibilità può essere disattivato."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Tocca per attivare la vibrazione."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Tocca per disattivare l\'audio."</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Tocca per cambiare la modalità della suoneria"</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"disattiva l\'audio"</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"silenzia"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"riattiva l\'audio"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrazione"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Controlli del volume %s"</string>
@@ -668,13 +668,13 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu del tasto di accensione"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> di <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Schermata di blocco"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Il telefono si è spento perché surriscaldato"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ora il telefono funziona normalmente.\nTocca per ulteriori informazioni"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Il telefono era surriscaldato e si è spento per raffreddarsi. Ora funziona normalmente.\n\nIl telefono può surriscaldarsi se:\n	• Utilizzi app che consumano molte risorse (ad esempio app di navigazione, giochi o video)\n	• Scarichi o carichi grandi file\n	• Lo utilizzi in presenza di alte temperature"</string>
+    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Lo smartphone si è spento per il calore"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ora lo smartphone funziona normalmente.\nTocca per maggiori informazioni"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Lo smartphone era surriscaldato e si è spento per raffreddarsi. Ora funziona normalmente.\n\nLo smartphone può surriscaldarsi se:\n	• Utilizzi app che consumano molte risorse (ad esempio app di navigazione, giochi o video)\n	• Scarichi o carichi grandi file\n	• Lo utilizzi in presenza di alte temperature"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Leggi le misure da adottare"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Il telefono si sta scaldando"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Alcune funzionalità limitate durante il raffreddamento del telefono.\nTocca per ulteriori informazioni"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Il telefono cercherà automaticamente di raffreddarsi. Puoi comunque usarlo, ma potrebbe essere più lento.\n\nUna volta raffreddato, il telefono funzionerà normalmente."</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Alcune funzionalità sono state limitate durante il raffreddamento dello smartphone.\nTocca per maggiori informazioni"</string>
+    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Lo smartphone cercherà automaticamente di raffreddarsi. Puoi comunque usarlo, ma potrebbe essere più lento.\n\nUna volta raffreddato, lo smartphone funzionerà normalmente."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Leggi le misure da adottare"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Scollega il caricabatterie"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Si è verificato un problema durante la ricarica del dispositivo. Scollega l\'alimentatore e presta attenzione perché il cavo potrebbe essere caldo."</string>
@@ -826,6 +826,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Apri <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Riproduci <xliff:g id="SONG_NAME">%1$s</xliff:g> di <xliff:g id="ARTIST_NAME">%2$s</xliff:g> da <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Riproduci <xliff:g id="SONG_NAME">%1$s</xliff:g> da <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> è in esecuzione"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Annulla"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Avvicinati per riprodurre su <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Avvicinati a <xliff:g id="DEVICENAME">%1$s</xliff:g> per riprodurre i contenuti qui"</string>
@@ -932,7 +933,7 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Non aggiungerlo"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleziona utente"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> app attive</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> di app attive</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> app attive</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app attiva</item>
     </plurals>

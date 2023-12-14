@@ -113,7 +113,7 @@ public final class UiAutomation {
 
     private static final int CONNECTION_ID_UNDEFINED = -1;
 
-    private static final long CONNECT_TIMEOUT_MILLIS = 5000;
+    private static final long CONNECT_TIMEOUT_MILLIS = 60000;
 
     /** Rotation constant: Unfreeze rotation (rotating the device changes its rotation state). */
     public static final int ROTATION_UNFREEZE = -2;

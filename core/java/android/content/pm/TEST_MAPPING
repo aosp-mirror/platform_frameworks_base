@@ -53,20 +53,6 @@
   ],
   "presubmit-large": [
     {
-      "name": "CtsContentTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "include-filter": "android.content.pm.cts"
-        }
-      ]
-    },
-    {
       "name": "CtsUsesNativeLibraryTest",
       "options": [
         {
@@ -151,6 +137,20 @@
     }
   ],
   "postsubmit": [
+    {
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "include-filter": "android.content.pm.cts"
+        }
+      ]
+    },
     {
       "name": "CtsAppSecurityHostTestCases",
       "options": [

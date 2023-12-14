@@ -5058,7 +5058,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Refresh strong auth timeout
         verify(getServices().lockSettingsInternal).refreshStrongAuthTimeout(UserHandle.USER_SYSTEM);
         // Refresh screen capture
-        verify(getServices().iwindowManager).refreshScreenCaptureDisabled();
+        verify(getServices().iwindowManager, times(2)).refreshScreenCaptureDisabled();
         // Unsuspend personal apps
         verify(getServices().packageManagerInternal)
                 .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, UserHandle.USER_SYSTEM);

@@ -667,7 +667,7 @@
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefonen fungerar nu som vanligt.\nTryck för mer information"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Mobilen var för varm och stängdes av för att kylas ned. Den fungerar nu som vanligt.\n\nMobilen kan bli för varm om du\n	• använder resurskrävande appar (till exempel spel-, video- eller navigeringsappar)\n	• laddar ned eller laddar upp stora filer\n	• använder mobilen vid höga temperaturer."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Visa alla skötselråd"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Mobilen börjar bli varm"</string>
+    <string name="high_temp_title" msgid="2218333576838496100">"Telefonen börjar bli varm"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Vissa funktioner är begränsade medan telefonen svalnar.\nTryck för mer information"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Mobilen försöker svalna automatiskt. Du kan fortfarande använda mobilen, men den kan vara långsammare än vanligt.\n\nMobilen fungerar som vanligt när den har svalnat."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Visa alla skötselråd"</string>
@@ -820,6 +820,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Öppna <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Spela upp <xliff:g id="SONG_NAME">%1$s</xliff:g> med <xliff:g id="ARTIST_NAME">%2$s</xliff:g> från <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Spela upp <xliff:g id="SONG_NAME">%1$s</xliff:g> från <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> körs"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Ångra"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Flytta närmare för att spela upp på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Flytta dig närmare <xliff:g id="DEVICENAME">%1$s</xliff:g> om du vill spela upp här"</string>

@@ -788,7 +788,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Ya nyumbani"</item>
     <item msgid="7740243458912727194">"Simu ya mkononi"</item>
-    <item msgid="8526146065496663766">"Ya kazini"</item>
+    <item msgid="8526146065496663766">"Kazini"</item>
     <item msgid="8150904584178569699">"Pepesi ya Kazini"</item>
     <item msgid="4537253139152229577">"Pepesi ya Nyumbani"</item>
     <item msgid="6751245029698664340">"Kurasa anwani"</item>
@@ -831,7 +831,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Maalum"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Ya nyumbani"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"Simu ya mkononi"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"Ya kazini"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"Kazini"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Pepesi ya Kazini"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Pepesi ya Nyumbani"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"Peja"</string>

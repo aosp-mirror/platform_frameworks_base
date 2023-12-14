@@ -58,7 +58,7 @@
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Idatzi \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIM txartelaren PINa."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Desgaitu eSIM txartela gailua zerbitzu mugikorrik gabe erabiltzeko."</string>
     <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. Xehetasunak lortzeko, jarri operadorearekin harremanetan."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Desgaitu egin da \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIM txartela. Aurrera egiteko, idatzi PUK kodea. Xehetasunak jakiteko, jarri operadorearekin harremanetan."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Desgaitu egin da \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIMa. Aurrera egiteko, idatzi PUK kodea. Xehetasunak jakiteko, jarri operadorearekin harremanetan."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Idatzi erabili nahi duzun PIN kodea"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Berretsi erabili nahi duzun PIN kodea"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"SIM txartela desblokeatzen…"</string>
@@ -90,14 +90,14 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratzaileak blokeatu egin du gailua"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Eskuz blokeatu da gailua"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ez da ezagutu"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Aurpegi bidez desblokeatzeko aukera erabiltzeko, aktibatu "<b>"kamera erabiltzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Aurpegi bidez desblokeatzeko eginbidea erabiltzeko, aktibatu "<b>"kamera erabiltzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Idatzi SIMaren PINa. <xliff:g id="NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu.</item>
       <item quantity="one">Idatzi SIMaren PINa. <xliff:g id="NUMBER_0">%d</xliff:g> saiakera geratzen zaizu; oker idatziz gero, operadoreari eskatu beharko diozu gailua desblokeatzeko.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="other">Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. <xliff:g id="_NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu SIM txartela betiko erabilgaitz geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.</item>
-      <item quantity="one">Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. <xliff:g id="_NUMBER_0">%d</xliff:g> saiakera geratzen zaizu SIM txartela betiko erabilgaitz geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.</item>
+      <item quantity="other">Desgaitu egin da SIMa . Aurrera egiteko, idatzi PUK kodea. <xliff:g id="_NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu SIMa betiko erabilgaitz geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.</item>
+      <item quantity="one">Desgaitu egin da SIMa. Aurrera egiteko, idatzi PUK kodea. <xliff:g id="_NUMBER_0">%d</xliff:g> saiakera geratzen zaizu SIMa betiko erabilgaitz geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.</item>
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Lehenetsia"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Puxikak"</string>

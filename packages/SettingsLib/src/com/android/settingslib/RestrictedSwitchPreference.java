@@ -243,7 +243,9 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         return mHelper != null ? mHelper.packageName : null;
     }
 
-    public void updateState(@NonNull String packageName, int uid, boolean isEnabled) {
+    /** Updates enabled state based on associated package. */
+    public void updateState(
+            @NonNull String packageName, int uid, boolean isEnableAllowed, boolean isEnabled) {
         mHelper.updatePackageDetails(packageName, uid);
         if (mAppOpsManager == null) {
             mAppOpsManager = getContext().getSystemService(AppOpsManager.class);
@@ -254,7 +256,9 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         final boolean ecmEnabled = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enhancedConfirmationModeEnabled);
         final boolean appOpsAllowed = !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
-        if (isEnabled) {
+        if (!isEnableAllowed && !isEnabled) {
+            setEnabled(false);
+        } else if (isEnabled) {
             setEnabled(true);
         } else if (appOpsAllowed && isDisabledByAppOps()) {
             setEnabled(true);
