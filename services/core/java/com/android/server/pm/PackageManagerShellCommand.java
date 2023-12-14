@@ -2872,16 +2872,16 @@ class PackageManagerShellCommand extends ShellCommand {
                 UserHandle.USER_NULL, "runGrantRevokePermission"));
 
         List<PackageInfo> packageInfos;
+        PackageManager pm = mContext.createContextAsUser(translatedUser, 0).getPackageManager();
         if (pkg == null) {
-            packageInfos = mContext.getPackageManager().getInstalledPackages(
-                    PackageManager.GET_PERMISSIONS);
+            packageInfos = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS);
         } else {
             try {
-                packageInfos = Collections.singletonList(
-                        mContext.getPackageManager().getPackageInfo(pkg,
-                                PackageManager.GET_PERMISSIONS));
+                packageInfos = Collections.singletonList(pm.getPackageInfo(pkg,
+                        PackageManager.GET_PERMISSIONS));
             } catch (NameNotFoundException e) {
                 getErrPrintWriter().println("Error: package not found");
+                getOutPrintWriter().println("Failure [package not found]");
                 return 1;
             }
         }
