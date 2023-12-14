@@ -204,6 +204,12 @@ final class OverrideRequestController {
         }
 
         if (mRequest != null && mRequest.getPid() == pid) {
+            if (mRequest.getRequestedDeviceState().hasFlag(
+                    DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)) {
+                cancelCurrentRequestLocked();
+                return;
+            }
+
             if (mStickyRequestsAllowed) {
                 // Do not cancel the requests now because sticky requests are allowed. These
                 // requests will be cancelled on a call to cancelStickyRequests().
@@ -219,7 +225,7 @@ final class OverrideRequestController {
      * listener of all changes to request status as a result of this change.
      */
     void handleBaseStateChanged(int state) {
-        if (mBaseStateRequest != null && state != mBaseStateRequest.getRequestedState()) {
+        if (mBaseStateRequest != null && state != mBaseStateRequest.getRequestedStateIdentifier()) {
             cancelBaseStateOverrideRequest();
         }
         if (mRequest == null) {
@@ -246,11 +252,12 @@ final class OverrideRequestController {
         flags |= isThermalCritical ? FLAG_THERMAL_CRITICAL : 0;
         flags |= isPowerSaveEnabled ? FLAG_POWER_SAVE_ENABLED : 0;
         if (mBaseStateRequest != null && !contains(newSupportedStates,
-                mBaseStateRequest.getRequestedState())) {
+                mBaseStateRequest.getRequestedStateIdentifier())) {
             cancelCurrentBaseStateRequestLocked(flags);
         }
 
-        if (mRequest != null && !contains(newSupportedStates, mRequest.getRequestedState())) {
+        if (mRequest != null && !contains(newSupportedStates,
+                mRequest.getRequestedStateIdentifier())) {
             cancelCurrentRequestLocked(flags);
         }
     }
@@ -262,7 +269,7 @@ final class OverrideRequestController {
         pw.println("Override Request active: " + requestActive);
         if (requestActive) {
             pw.println("Request: mPid=" + overrideRequest.getPid()
-                    + ", mRequestedState=" + overrideRequest.getRequestedState()
+                    + ", mRequestedState=" + overrideRequest.getRequestedStateIdentifier()
                     + ", mFlags=" + overrideRequest.getFlags()
                     + ", mStatus=" + statusToString(STATUS_ACTIVE));
         }
