@@ -608,7 +608,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
     }
 
     @Override
-    public void onPulseExpansionChanged(boolean expandingChanged) {
+    public void onPulseExpansionAmountChanged(boolean expandingChanged) {
         if (expandingChanged) {
             updateAodIconsVisibility(true /* animate */, false /* force */);
         }

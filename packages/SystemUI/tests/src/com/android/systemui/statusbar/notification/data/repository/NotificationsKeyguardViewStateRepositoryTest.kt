@@ -80,7 +80,7 @@ class NotificationsKeyguardViewStateRepositoryTest : SysuiTestCase() {
             assertThat(isPulseExpanding).isFalse()
 
             withArgCaptor { verify(mockWakeUpCoordinator).addListener(capture()) }
-                .onPulseExpansionChanged(true)
+                .onPulseExpandingChanged(true)
             runCurrent()
 
             assertThat(isPulseExpanding).isTrue()
