@@ -964,6 +964,7 @@ class MediaRouter2ServiceImpl {
         disposeUserIfNeededLocked(userRecord); // since router removed from user
     }
 
+    @GuardedBy("mLock")
     private void setDiscoveryRequestWithRouter2Locked(@NonNull RouterRecord routerRecord,
             @NonNull RouteDiscoveryPreference discoveryRequest) {
         if (routerRecord.mDiscoveryPreference.equals(discoveryRequest)) {
@@ -1016,6 +1017,7 @@ class MediaRouter2ServiceImpl {
                         routeListingPreference));
     }
 
+    @GuardedBy("mLock")
     private void setRouteVolumeWithRouter2Locked(@NonNull IMediaRouter2 router,
             @NonNull MediaRoute2Info route, int volume) {
         final IBinder binder = router.asBinder();
@@ -1035,6 +1037,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     private void requestCreateSessionWithRouter2Locked(int requestId, long managerRequestId,
             @NonNull IMediaRouter2 router, @NonNull RoutingSessionInfo oldSession,
             @NonNull MediaRoute2Info route, @Nullable Bundle sessionHints) {
@@ -1117,6 +1120,7 @@ class MediaRouter2ServiceImpl {
                         sessionHints));
     }
 
+    @GuardedBy("mLock")
     private void selectRouteWithRouter2Locked(@NonNull IMediaRouter2 router,
             @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
         final IBinder binder = router.asBinder();
@@ -1138,6 +1142,7 @@ class MediaRouter2ServiceImpl {
                         DUMMY_REQUEST_ID, routerRecord, uniqueSessionId, route));
     }
 
+    @GuardedBy("mLock")
     private void deselectRouteWithRouter2Locked(@NonNull IMediaRouter2 router,
             @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
         final IBinder binder = router.asBinder();
@@ -1159,6 +1164,7 @@ class MediaRouter2ServiceImpl {
                         DUMMY_REQUEST_ID, routerRecord, uniqueSessionId, route));
     }
 
+    @GuardedBy("mLock")
     private void transferToRouteWithRouter2Locked(@NonNull IMediaRouter2 router,
             @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
         final IBinder binder = router.asBinder();
@@ -1191,6 +1197,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
+    @GuardedBy("mLock")
     private void setSessionVolumeWithRouter2Locked(@NonNull IMediaRouter2 router,
             @NonNull String uniqueSessionId, int volume) {
         final IBinder binder = router.asBinder();
@@ -1215,6 +1222,7 @@ class MediaRouter2ServiceImpl {
                         DUMMY_REQUEST_ID, uniqueSessionId, volume));
     }
 
+    @GuardedBy("mLock")
     private void releaseSessionWithRouter2Locked(@NonNull IMediaRouter2 router,
             @NonNull String uniqueSessionId) {
         final IBinder binder = router.asBinder();
@@ -1240,6 +1248,7 @@ class MediaRouter2ServiceImpl {
 
     // Start of locked methods that are used by MediaRouter2Manager.
 
+    @GuardedBy("mLock")
     private List<RoutingSessionInfo> getRemoteSessionsLocked(
             @NonNull IMediaRouter2Manager manager) {
         final IBinder binder = manager.asBinder();
@@ -1330,6 +1339,7 @@ class MediaRouter2ServiceImpl {
                         UserHandler::notifyInitialRoutesToManager, userRecord.mHandler, manager));
     }
 
+    @GuardedBy("mLock")
     private void unregisterManagerLocked(@NonNull IMediaRouter2Manager manager, boolean died) {
         ManagerRecord managerRecord = mAllManagerRecords.remove(manager.asBinder());
         if (managerRecord == null) {
@@ -1355,6 +1365,7 @@ class MediaRouter2ServiceImpl {
         disposeUserIfNeededLocked(userRecord); // since manager removed from user
     }
 
+    @GuardedBy("mLock")
     private void startScanLocked(@NonNull IMediaRouter2Manager manager) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
@@ -1368,6 +1379,7 @@ class MediaRouter2ServiceImpl {
         managerRecord.startScan();
     }
 
+    @GuardedBy("mLock")
     private void stopScanLocked(@NonNull IMediaRouter2Manager manager) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
@@ -1381,6 +1393,7 @@ class MediaRouter2ServiceImpl {
         managerRecord.stopScan();
     }
 
+    @GuardedBy("mLock")
     private void setRouteVolumeWithManagerLocked(int requestId,
             @NonNull IMediaRouter2Manager manager,
             @NonNull MediaRoute2Info route, int volume) {
@@ -1402,6 +1415,7 @@ class MediaRouter2ServiceImpl {
                         uniqueRequestId, route, volume));
     }
 
+    @GuardedBy("mLock")
     private void requestCreateSessionWithManagerLocked(int requestId,
             @NonNull IMediaRouter2Manager manager, @NonNull RoutingSessionInfo oldSession,
             @NonNull MediaRoute2Info route) {
@@ -1455,6 +1469,7 @@ class MediaRouter2ServiceImpl {
                         uniqueRequestId, routerRecord, managerRecord, oldSession, route));
     }
 
+    @GuardedBy("mLock")
     private void selectRouteWithManagerLocked(int requestId, @NonNull IMediaRouter2Manager manager,
             @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
         final IBinder binder = manager.asBinder();
@@ -1479,6 +1494,7 @@ class MediaRouter2ServiceImpl {
                         uniqueRequestId, routerRecord, uniqueSessionId, route));
     }
 
+    @GuardedBy("mLock")
     private void deselectRouteWithManagerLocked(int requestId,
             @NonNull IMediaRouter2Manager manager,
             @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
@@ -1504,6 +1520,7 @@ class MediaRouter2ServiceImpl {
                         uniqueRequestId, routerRecord, uniqueSessionId, route));
     }
 
+    @GuardedBy("mLock")
     private void transferToRouteWithManagerLocked(int requestId,
             @NonNull IMediaRouter2Manager manager,
             @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
@@ -1529,6 +1546,7 @@ class MediaRouter2ServiceImpl {
                         uniqueRequestId, routerRecord, uniqueSessionId, route));
     }
 
+    @GuardedBy("mLock")
     private void setSessionVolumeWithManagerLocked(int requestId,
             @NonNull IMediaRouter2Manager manager,
             @NonNull String uniqueSessionId, int volume) {
@@ -1550,6 +1568,7 @@ class MediaRouter2ServiceImpl {
                         uniqueRequestId, uniqueSessionId, volume));
     }
 
+    @GuardedBy("mLock")
     private void releaseSessionWithManagerLocked(int requestId,
             @NonNull IMediaRouter2Manager manager, @NonNull String uniqueSessionId) {
         final IBinder binder = manager.asBinder();
@@ -1652,6 +1671,7 @@ class MediaRouter2ServiceImpl {
 
         // TODO: This assumes that only one router exists in a package.
         //       Do this in Android S or later.
+        @GuardedBy("mLock")
         RouterRecord findRouterRecordLocked(String packageName) {
             for (RouterRecord routerRecord : mRouterRecords) {
                 if (TextUtils.equals(routerRecord.mPackageName, packageName)) {
@@ -1739,6 +1759,7 @@ class MediaRouter2ServiceImpl {
             return mHasModifyAudioRoutingPermission || mHasBluetoothRoutingPermission.get();
         }
 
+        @GuardedBy("mLock")
         public void maybeUpdateSystemRoutingPermissionLocked() {
             boolean oldSystemRoutingPermissionValue = hasSystemRoutingPermission();
             mHasBluetoothRoutingPermission.set(checkCallerHasBluetoothPermissions(mPid, mUid));
@@ -2063,6 +2084,7 @@ class MediaRouter2ServiceImpl {
                     this, provider, uniqueRequestId, reason));
         }
 
+        @GuardedBy("mLock")
         @Nullable
         public RouterRecord findRouterWithSessionLocked(@NonNull String uniqueSessionId) {
             return mSessionToRouterMap.get(uniqueSessionId);
