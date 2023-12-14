@@ -75,6 +75,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -612,11 +613,14 @@ public class WallpaperManager {
                 ColorManagementProxy cmProxy) {
             if (mService != null) {
                 try {
+                    Trace.beginSection("WPMS.isWallpaperSupported");
                     if (!mService.isWallpaperSupported(context.getOpPackageName())) {
                         return null;
                     }
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
+                } finally {
+                    Trace.endSection();
                 }
             }
             synchronized (this) {
@@ -627,6 +631,7 @@ public class WallpaperManager {
                 mCachedWallpaper = null;
                 Bitmap currentWallpaper = null;
                 try {
+                    Trace.beginSection("WPMS.getCurrentWallpaperLocked");
                     currentWallpaper = getCurrentWallpaperLocked(
                             context, which, userId, hardware, cmProxy);
                 } catch (OutOfMemoryError e) {
@@ -652,6 +657,8 @@ public class WallpaperManager {
                         // Post-O apps really most sincerely need the permission.
                         throw e;
                     }
+                } finally {
+                    Trace.endSection();
                 }
                 if (currentWallpaper != null) {
                     mCachedWallpaper = new CachedWallpaper(currentWallpaper, userId, which);
@@ -730,9 +737,11 @@ public class WallpaperManager {
 
             try {
                 Bundle params = new Bundle();
+                Trace.beginSection("WPMS.getWallpaperWithFeature_" + which);
                 ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
                         context.getOpPackageName(), context.getAttributionTag(), this, which,
                         params, userId, /* getCropped = */ true);
+                Trace.endSection();
 
                 if (pfd != null) {
                     try (BufferedInputStream bis = new BufferedInputStream(
@@ -762,13 +771,18 @@ public class WallpaperManager {
         }
 
         private Bitmap getDefaultWallpaper(Context context, @SetWallpaperFlags int which) {
+            Trace.beginSection("WPMS.getDefaultWallpaper_" + which);
             Bitmap defaultWallpaper = mDefaultWallpaper;
             if (defaultWallpaper == null || defaultWallpaper.isRecycled()) {
                 defaultWallpaper = null;
+                Trace.beginSection("WPMS.openDefaultWallpaper");
                 try (InputStream is = openDefaultWallpaper(context, which)) {
+                    Trace.endSection();
                     if (is != null) {
                         BitmapFactory.Options options = new BitmapFactory.Options();
+                        Trace.beginSection("WPMS.decodeStream");
                         defaultWallpaper = BitmapFactory.decodeStream(is, null, options);
+                        Trace.endSection();
                     }
                 } catch (OutOfMemoryError | IOException e) {
                     Log.w(TAG, "Can't decode stream", e);
@@ -777,6 +791,7 @@ public class WallpaperManager {
             synchronized (this) {
                 mDefaultWallpaper = defaultWallpaper;
             }
+            Trace.endSection();
             return defaultWallpaper;
         }
 
