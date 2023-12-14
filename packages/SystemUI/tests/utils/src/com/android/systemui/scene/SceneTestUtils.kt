@@ -387,7 +387,7 @@ class SceneTestUtils(
     }
 
     fun selectedUserInteractor(): SelectedUserInteractor {
-        return SelectedUserInteractor(userRepository, featureFlags)
+        return SelectedUserInteractor(userRepository)
     }
 
     fun bouncerActionButtonInteractor(

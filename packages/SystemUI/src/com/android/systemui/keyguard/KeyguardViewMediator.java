@@ -38,7 +38,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
-import static com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER;
+import static com.android.systemui.Flags.refactorGetCurrentUser;
 import static com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel.DREAMING_ANIMATION_DURATION_MS;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -617,7 +617,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         public void onUserSwitching(int userId) {
             if (DEBUG) Log.d(TAG, String.format("onUserSwitching %d", userId));
             synchronized (KeyguardViewMediator.this) {
-                if (mFeatureFlags.isEnabled(REFACTOR_GETCURRENTUSER)) {
+                if (refactorGetCurrentUser()) {
                     notifyTrustedChangedLocked(mUpdateMonitor.getUserHasTrust(userId));
                 }
                 resetKeyguardDonePendingLocked();
@@ -1502,7 +1502,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
-        if (!mFeatureFlags.isEnabled(REFACTOR_GETCURRENTUSER)) {
+        if (!refactorGetCurrentUser()) {
             KeyguardUpdateMonitor.setCurrentUser(mUserTracker.getUserId());
         }
 
