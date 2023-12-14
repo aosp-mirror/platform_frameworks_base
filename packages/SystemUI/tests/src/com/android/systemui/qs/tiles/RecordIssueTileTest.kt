@@ -31,6 +31,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.res.R
+import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -66,6 +67,7 @@ class RecordIssueTileTest : SysuiTestCase() {
     @Mock private lateinit var dialogLauncherAnimator: DialogLaunchAnimator
     @Mock private lateinit var dialogFactory: SystemUIDialog.Factory
     @Mock private lateinit var dialog: SystemUIDialog
+    @Mock private lateinit var userContextProvider: UserContextProvider
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: RecordIssueTile
@@ -91,7 +93,8 @@ class RecordIssueTileTest : SysuiTestCase() {
                 keyguardDismissUtil,
                 keyguardStateController,
                 dialogLauncherAnimator,
-                dialogFactory
+                dialogFactory,
+                userContextProvider,
             )
     }
 

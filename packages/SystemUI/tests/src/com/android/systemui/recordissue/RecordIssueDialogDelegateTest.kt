@@ -65,7 +65,8 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
             )
 
         latch = CountDownLatch(1)
-        dialog = RecordIssueDialogDelegate(dialogFactory) { latch.countDown() }.createDialog()
+        dialog =
+            RecordIssueDialogDelegate(dialogFactory, mock()) { latch.countDown() }.createDialog()
         dialog.show()
     }
 
