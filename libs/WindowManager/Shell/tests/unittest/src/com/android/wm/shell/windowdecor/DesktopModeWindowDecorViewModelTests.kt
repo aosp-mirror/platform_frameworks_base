@@ -27,7 +27,6 @@ import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.os.Handler
-import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Choreographer
@@ -40,8 +39,6 @@ import android.view.SurfaceControl
 import android.view.SurfaceView
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
-import android.view.WindowManager
-import android.window.TransitionInfo
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
@@ -53,8 +50,6 @@ import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopTasksController
-import com.android.wm.shell.recents.RecentsTransitionHandler
-import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.sysui.KeyguardChangeListener
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
@@ -100,7 +95,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockShellController: ShellController
     @Mock private lateinit var mockShellExecutor: ShellExecutor
     @Mock private lateinit var mockRootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
-    @Mock private lateinit var mockRecentsTransitionHandler: RecentsTransitionHandler
     @Mock private lateinit var mockShellCommandHandler: ShellCommandHandler
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
@@ -127,7 +121,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockSyncQueue,
                 mockTransitions,
                 Optional.of(mockDesktopTasksController),
-                mockRecentsTransitionHandler,
                 mockDesktopModeWindowDecorFactory,
                 mockInputMonitorFactory,
                 transactionFactory,
@@ -274,48 +267,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
     }
 
-    @Test
-    fun testRelayoutBlockedDuringRecentsTransition() {
-        val recentsCaptor = argumentCaptor<RecentsTransitionStateListener>()
-        verify(mockRecentsTransitionHandler).addTransitionStateListener(recentsCaptor.capture())
-
-        val transition = mock(IBinder::class.java)
-        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
-        val decoration = setUpMockDecorationForTask(task)
-
-        // Make sure a window decorations exists first by launching a freeform task.
-        onTaskOpening(task)
-        // Now call back when a Recents transition starts.
-        recentsCaptor.firstValue.onTransitionStarted(transition)
-
-        verify(decoration).incrementRelayoutBlock()
-        verify(decoration).addTransitionPausingRelayout(transition)
-    }
-
-    @Test
-    fun testRelayoutBlockedDuringKeyguardTransition() {
-        val transition = mock(IBinder::class.java)
-        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
-        val decoration = setUpMockDecorationForTask(task)
-        val transitionInfo = mock(TransitionInfo::class.java)
-        val transitionChange = mock(TransitionInfo.Change::class.java)
-        val taskInfo = mock(RunningTaskInfo()::class.java)
-
-        // Replicate a keyguard going away transition for a task
-        whenever(transitionInfo.getFlags())
-                .thenReturn(WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY)
-        whenever(transitionChange.getMode()).thenReturn(WindowManager.TRANSIT_TO_FRONT)
-        whenever(transitionChange.getTaskInfo()).thenReturn(taskInfo)
-
-        // Make sure a window decorations exists first by launching a freeform task.
-        onTaskOpening(task)
-        // OnTransition ready is called when a keyguard going away transition happens
-        desktopModeWindowDecorViewModel
-                .onTransitionReady(transition, transitionInfo, transitionChange)
-
-        verify(decoration).incrementRelayoutBlock()
-        verify(decoration).addTransitionPausingRelayout(transition)
-    }
     @Test
     fun testRelayoutRunsWhenStatusBarsInsetsSourceVisibilityChanges() {
         val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
