@@ -166,6 +166,15 @@ public class AutomaticZenRuleTest {
 
     @Test
     @EnableFlags(Flags.FLAG_MODES_API)
+    public void builderConstructor_nullInputs_throws() {
+        assertThrows(NullPointerException.class,
+                () -> new AutomaticZenRule.Builder(null, Uri.parse("condition")));
+        assertThrows(NullPointerException.class,
+                () -> new AutomaticZenRule.Builder("name", null));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
     public void validate_builderWithValidType_succeeds() throws Exception {
         AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
                 .setType(AutomaticZenRule.TYPE_BEDTIME)

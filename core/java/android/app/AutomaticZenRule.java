@@ -645,8 +645,8 @@ public final class AutomaticZenRule implements Parcelable {
         }
 
         public Builder(@NonNull String name, @NonNull Uri conditionId) {
-            mName = name;
-            mConditionId = conditionId;
+            mName = Objects.requireNonNull(name);
+            mConditionId = Objects.requireNonNull(conditionId);
         }
 
         /**
