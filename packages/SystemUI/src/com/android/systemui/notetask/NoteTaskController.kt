@@ -263,7 +263,11 @@ constructor(
      * If the shortcut entry `android:enabled` is set to `true`, the shortcut will be visible in the
      * Widget Picker to all users.
      */
+    // TODO(b/316332684)
+    @Suppress("UNREACHABLE_CODE")
     fun setNoteTaskShortcutEnabled(value: Boolean, user: UserHandle) {
+        return // shortcut should not be enabled until additional features are implemented.
+
         if (!userManager.isUserUnlocked(user)) {
             debugLog { "setNoteTaskShortcutEnabled call but user locked: user=$user" }
             return
