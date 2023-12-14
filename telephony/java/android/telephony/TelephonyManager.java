@@ -47,6 +47,7 @@ import android.app.role.RoleManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -419,6 +420,14 @@ public class TelephonyManager {
 
     /** @hide */
     public static final String PROPERTY_ENABLE_NULL_CIPHER_TOGGLE = "enable_null_cipher_toggle";
+
+    /**
+     * To apply the enforcement telephony feature and API
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long ENABLE_FEATURE_MAPPING = 297989574L;
 
     private final Context mContext;
     private final int mSubId;
