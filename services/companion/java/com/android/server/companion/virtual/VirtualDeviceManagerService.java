@@ -439,6 +439,12 @@ public class VirtualDeviceManagerService extends SystemService {
             if (associationInfo == null) {
                 throw new IllegalArgumentException("No association with ID " + associationId);
             }
+            if (!VIRTUAL_DEVICE_COMPANION_DEVICE_PROFILES
+                    .contains(associationInfo.getDeviceProfile())
+                    && Flags.persistentDeviceIdApi()) {
+                throw new IllegalArgumentException("Unsupported CDM Association device profile "
+                        + associationInfo.getDeviceProfile() + " for virtual device creation.");
+            }
             Objects.requireNonNull(params);
             Objects.requireNonNull(activityListener);
             Objects.requireNonNull(soundEffectListener);
