@@ -30,7 +30,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
-import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.IVpnManager;
 import android.net.Network;
@@ -89,8 +88,6 @@ public class VpnManagerService extends IVpnManager.Stub {
     private final Context mUserAllContext;
 
     private final Dependencies mDeps;
-
-    private final ConnectivityManager mCm;
     private final VpnProfileStore mVpnProfileStore;
     private final INetworkManagementService mNMS;
     private final INetd mNetd;
@@ -164,7 +161,6 @@ public class VpnManagerService extends IVpnManager.Stub {
         mHandler = mHandlerThread.getThreadHandler();
         mVpnProfileStore = mDeps.getVpnProfileStore();
         mUserAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
-        mCm = mContext.getSystemService(ConnectivityManager.class);
         mNMS = mDeps.getINetworkManagementService();
         mNetd = mDeps.getNetd();
         mUserManager = mContext.getSystemService(UserManager.class);
