@@ -223,6 +223,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private boolean mExitSplitScreenOnHide;
     private boolean mIsDividerRemoteAnimating;
     private boolean mIsDropEntering;
+    private boolean mSkipEvictingMainStageChildren;
     private boolean mIsExiting;
     private boolean mIsRootTranslucent;
     @VisibleForTesting
@@ -468,6 +469,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         // Due to drag already pip task entering split by this method so need to reset flag here.
         mIsDropEntering = false;
+        mSkipEvictingMainStageChildren = false;
         return true;
     }
 
@@ -572,6 +574,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return;
         }
 
+        // Don't evict the main stage children as this can race and happen after the activity is
+        // started into that stage
+        if (!isSplitScreenVisible()) {
+            mSkipEvictingMainStageChildren = true;
+            // Starting the split task without evicting children will bring the single root task
+            // container forward, so ensure that we hide the divider before we start animate it
+            setDividerVisibility(false, null);
+        }
+
         // If split screen is not activated, we're expecting to open a pair of apps to split.
         final int extraTransitType = mMainStage.isActive()
                 ? TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE : TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
@@ -598,6 +609,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mMixedHandler != null && mMixedHandler.shouldSplitEnterMixed(intent)) {
             mTaskOrganizer.applyTransaction(wct);
             return;
+        }
+
+        // Don't evict the main stage children as this can race and happen after the activity is
+        // started into that stage
+        if (!isSplitScreenVisible()) {
+            mSkipEvictingMainStageChildren = true;
+            // Starting the split task without evicting children will bring the single root task
+            // container forward, so ensure that we hide the divider before we start animate it
+            setDividerVisibility(false, null);
         }
 
         // If split screen is not activated, we're expecting to open a pair of apps to split.
@@ -1618,7 +1638,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Ensure to evict old splitting tasks because the new split pair might be composed by
             // one of the splitting tasks, evicting the task when finishing entering transition
             // won't guarantee to put the task to the indicated new position.
-            if (!mIsDropEntering) {
+            if (!mSkipEvictingMainStageChildren) {
                 mMainStage.evictAllChildren(wct);
             }
             mMainStage.reparentTopTask(wct);
@@ -1680,6 +1700,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         finishT.show(mRootTaskLeash);
         setSplitsVisible(true);
         mIsDropEntering = false;
+        mSkipEvictingMainStageChildren = false;
         mSplitRequest = null;
         updateRecentTasksSplitPair();
         if (!mLogger.hasStartedSession()) {
@@ -1929,6 +1950,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (mIsDropEntering) {
                     updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
                     mIsDropEntering = false;
+                    mSkipEvictingMainStageChildren = false;
                 } else {
                     mShowDecorImmediately = true;
                     mSplitLayout.flingDividerToCenter();
@@ -2123,6 +2145,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (mIsDropEntering) {
                     updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
                     mIsDropEntering = false;
+                    mSkipEvictingMainStageChildren = false;
                 } else {
                     mShowDecorImmediately = true;
                     mSplitLayout.flingDividerToCenter();
@@ -3245,6 +3268,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     public void onDroppedToSplit(@SplitPosition int position, InstanceId dragSessionId) {
         if (!isSplitScreenVisible()) {
             mIsDropEntering = true;
+            mSkipEvictingMainStageChildren = true;
         }
         if (!isSplitScreenVisible() && !ENABLE_SHELL_TRANSITIONS) {
             // If split running background, exit split first.
