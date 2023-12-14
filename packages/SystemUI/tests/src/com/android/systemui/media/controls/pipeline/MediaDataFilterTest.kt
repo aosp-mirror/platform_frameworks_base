@@ -55,6 +55,7 @@ private const val KEY = "TEST_KEY"
 private const val KEY_ALT = "TEST_KEY_2"
 private const val USER_MAIN = 0
 private const val USER_GUEST = 10
+private const val PRIVATE_PROFILE = 12
 private const val PACKAGE = "PKG"
 private val INSTANCE_ID = InstanceId.fakeInstanceId(123)!!
 private const val APP_UID = 99
@@ -82,6 +83,7 @@ class MediaDataFilterTest : SysuiTestCase() {
     private lateinit var mediaDataFilter: MediaDataFilter
     private lateinit var dataMain: MediaData
     private lateinit var dataGuest: MediaData
+    private lateinit var dataPrivateProfile: MediaData
     private val clock = FakeSystemClock()
 
     @Before
@@ -115,6 +117,7 @@ class MediaDataFilterTest : SysuiTestCase() {
                 appUid = APP_UID
             )
         dataGuest = dataMain.copy(userId = USER_GUEST)
+        dataPrivateProfile = dataMain.copy(userId = PRIVATE_PROFILE)
 
         whenever(smartspaceData.targetId).thenReturn(SMARTSPACE_KEY)
         whenever(smartspaceData.isActive).thenReturn(true)
@@ -130,8 +133,19 @@ class MediaDataFilterTest : SysuiTestCase() {
 
     private fun setUser(id: Int) {
         whenever(lockscreenUserManager.isCurrentProfile(anyInt())).thenReturn(false)
+        whenever(lockscreenUserManager.isProfileAvailable(anyInt())).thenReturn(false)
         whenever(lockscreenUserManager.isCurrentProfile(eq(id))).thenReturn(true)
-        mediaDataFilter.handleUserSwitched(id)
+        whenever(lockscreenUserManager.isProfileAvailable(eq(id))).thenReturn(true)
+        whenever(lockscreenUserManager.isProfileAvailable(eq(PRIVATE_PROFILE))).thenReturn(true)
+        mediaDataFilter.handleUserSwitched()
+    }
+
+    private fun setPrivateProfileUnavailable() {
+        whenever(lockscreenUserManager.isCurrentProfile(anyInt())).thenReturn(false)
+        whenever(lockscreenUserManager.isCurrentProfile(eq(USER_MAIN))).thenReturn(true)
+        whenever(lockscreenUserManager.isCurrentProfile(eq(PRIVATE_PROFILE))).thenReturn(true)
+        whenever(lockscreenUserManager.isProfileAvailable(eq(PRIVATE_PROFILE))).thenReturn(false)
+        mediaDataFilter.handleProfileChanged()
     }
 
     @Test
@@ -203,6 +217,20 @@ class MediaDataFilterTest : SysuiTestCase() {
         // but not the main user's
         verify(listener, never())
             .onMediaDataLoaded(eq(KEY), any(), eq(dataMain), anyBoolean(), anyInt(), anyBoolean())
+    }
+
+    @Test
+    fun testOnProfileChanged_profileUnavailable_loadControls() {
+        // GIVEN that we had some media for both profiles
+        mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
+        mediaDataFilter.onMediaDataLoaded(KEY_ALT, null, dataPrivateProfile)
+        reset(listener)
+
+        // and we change profile status
+        setPrivateProfileUnavailable()
+
+        // THEN we should add the private profile media
+        verify(listener).onMediaDataRemoved(eq(KEY_ALT))
     }
 
     @Test
