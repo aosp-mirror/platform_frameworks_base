@@ -37,6 +37,10 @@ data class BiometricModalities(
     val hasSfps: Boolean
         get() = hasFingerprint && fingerprintProperties!!.isAnySidefpsType
 
+    /** If UDFPS authentication is available. */
+    val hasUdfps: Boolean
+        get() = hasFingerprint && fingerprintProperties!!.isAnyUdfpsType
+
     /** If fingerprint authentication is available (and [faceProperties] is non-null). */
     val hasFace: Boolean
         get() = faceProperties != null

@@ -47,12 +47,14 @@ import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorI
 import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.events.ANIMATING_OUT
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -101,6 +103,12 @@ open class AuthContainerViewTest : SysuiTestCase() {
     lateinit var interactionJankMonitor: InteractionJankMonitor
     @Mock
     lateinit var vibrator: VibratorHelper
+    @Mock
+    lateinit var udfpsUtils: UdfpsUtils
+    @Mock
+    lateinit var authController: AuthController
+    @Mock
+    lateinit var selectedUserInteractor: SelectedUserInteractor
 
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
@@ -123,6 +131,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     private lateinit var displayRepository: FakeDisplayRepository
     private lateinit var displayStateInteractor: DisplayStateInteractor
+    private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
 
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
 
@@ -140,6 +149,12 @@ open class AuthContainerViewTest : SysuiTestCase() {
                     displayStateRepository,
                     displayRepository,
             )
+        udfpsOverlayInteractor =
+                UdfpsOverlayInteractor(
+                        authController,
+                        selectedUserInteractor,
+                        testScope.backgroundScope,
+                )
     }
 
     @After
@@ -532,6 +547,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
             displayStateInteractor,
             promptSelectorInteractor,
             context,
+            udfpsOverlayInteractor,
+            udfpsUtils
         ),
         { credentialViewModel },
         Handler(TestableLooper.get(this).looper),

@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.res.Configuration
+import android.graphics.Point
 import android.hardware.biometrics.PromptInfo
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
@@ -25,7 +26,10 @@ import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.Flags.FLAG_BP_TALKBACK
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
@@ -33,6 +37,7 @@ import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.extractAuthenticatorTypes
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
@@ -45,8 +50,10 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -77,7 +84,9 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
-    @Mock private lateinit var vibrator: VibratorHelper
+    @Mock private lateinit var authController: AuthController
+    @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
+    @Mock private lateinit var udfpsUtils: UdfpsUtils
 
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope()
@@ -87,6 +96,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private lateinit var displayStateRepository: FakeDisplayStateRepository
     private lateinit var displayRepository: FakeDisplayRepository
     private lateinit var displayStateInteractor: DisplayStateInteractor
+    private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
 
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
@@ -116,11 +126,24 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 displayStateRepository,
                 displayRepository,
             )
+        udfpsOverlayInteractor =
+            UdfpsOverlayInteractor(
+                authController,
+                selectedUserInteractor,
+                testScope.backgroundScope
+            )
         selector =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
 
-        viewModel = PromptViewModel(displayStateInteractor, selector, mContext)
+        viewModel =
+            PromptViewModel(
+                displayStateInteractor,
+                selector,
+                mContext,
+                udfpsOverlayInteractor,
+                udfpsUtils
+            )
         iconViewModel = viewModel.iconViewModel
     }
 
@@ -1153,6 +1176,29 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(size).isEqualTo(PromptSize.LARGE)
     }
 
+    @Test
+    fun hint_for_talkback_guidance() = runGenericTest {
+        mSetFlagsRule.enableFlags(FLAG_BP_TALKBACK)
+        val hint by collectLastValue(viewModel.accessibilityHint)
+
+        // Touches should fall outside of sensor area
+        whenever(udfpsUtils.getTouchInNativeCoordinates(any(), any(), any()))
+            .thenReturn(Point(0, 0))
+        whenever(udfpsUtils.onTouchOutsideOfSensorArea(any(), any(), any(), any(), any()))
+            .thenReturn("Direction")
+
+        viewModel.onAnnounceAccessibilityHint(
+            obtainMotionEvent(MotionEvent.ACTION_HOVER_ENTER),
+            true
+        )
+
+        if (testCase.modalities.hasUdfps) {
+            assertThat(hint?.isNotBlank()).isTrue()
+        } else {
+            assertThat(hint.isNullOrBlank()).isTrue()
+        }
+    }
+
     /** Asserts that the selected buttons are visible now. */
     private suspend fun TestScope.assertButtonsVisible(
         tryAgain: Boolean = false,
@@ -1220,14 +1266,19 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     authenticatedModality = BiometricModality.Face,
                 ),
                 TestCase(
-                    fingerprint = fingerprintSensorPropertiesInternal(strong = true).first(),
+                    fingerprint =
+                        fingerprintSensorPropertiesInternal(
+                                strong = true,
+                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                            )
+                            .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
                 ),
                 TestCase(
                     fingerprint =
                         fingerprintSensorPropertiesInternal(
                                 strong = true,
-                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                                sensorType = FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
                             )
                             .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
@@ -1264,19 +1315,29 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 TestCase(
                     face = faceSensorPropertiesInternal(strong = true).first(),
                     fingerprint = fingerprintSensorPropertiesInternal(strong = true).first(),
-                    authenticatedModality = BiometricModality.Fingerprint,
-                ),
-                TestCase(
-                    face = faceSensorPropertiesInternal(strong = true).first(),
-                    fingerprint = fingerprintSensorPropertiesInternal(strong = true).first(),
                     authenticatedModality = BiometricModality.Face,
                     confirmationRequested = true,
                 ),
                 TestCase(
                     face = faceSensorPropertiesInternal(strong = true).first(),
-                    fingerprint = fingerprintSensorPropertiesInternal(strong = true).first(),
+                    fingerprint =
+                        fingerprintSensorPropertiesInternal(
+                                strong = true,
+                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                            )
+                            .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
                     confirmationRequested = true,
+                ),
+                TestCase(
+                    face = faceSensorPropertiesInternal(strong = true).first(),
+                    fingerprint =
+                        fingerprintSensorPropertiesInternal(
+                                strong = true,
+                                sensorType = FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
+                            )
+                            .first(),
+                    authenticatedModality = BiometricModality.Fingerprint,
                 ),
             )
     }
@@ -1308,6 +1369,9 @@ internal data class TestCase(
             isFaceOnly -> confirmationRequested
             else -> false
         }
+
+    val modalities: BiometricModalities
+        get() = BiometricModalities(fingerprint, face)
 
     val authenticatedByFingerprint: Boolean
         get() = authenticatedModality == BiometricModality.Fingerprint

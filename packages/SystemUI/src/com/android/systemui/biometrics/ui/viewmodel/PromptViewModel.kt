@@ -21,9 +21,12 @@ import android.hardware.biometrics.BiometricPrompt
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import com.android.systemui.Flags.bpTalkback
+import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.DisplayRotation
@@ -35,7 +38,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -49,7 +54,9 @@ class PromptViewModel
 constructor(
     displayStateInteractor: DisplayStateInteractor,
     promptSelectorInteractor: PromptSelectorInteractor,
-    @Application context: Context,
+    @Application private val context: Context,
+    private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
+    private val udfpsUtils: UdfpsUtils
 ) {
     /** The set of modalities available for this prompt */
     val modalities: Flow<BiometricModalities> =
@@ -68,6 +75,11 @@ constructor(
         context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_face_icon_size)
     val faceIconHeight: Int =
         context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_face_icon_size)
+
+    private val _accessibilityHint = MutableSharedFlow<String>()
+
+    /** Hint for talkback directional guidance */
+    val accessibilityHint: Flow<String> = _accessibilityHint.asSharedFlow()
 
     private val _isAuthenticating: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -512,6 +524,40 @@ constructor(
             return true
         } else if (event.actionMasked == MotionEvent.ACTION_UP) {
             _isOverlayTouched.value = false
+        }
+        return false
+    }
+
+    /** Sets the message used for UDFPS directional guidance */
+    suspend fun onAnnounceAccessibilityHint(
+        event: MotionEvent,
+        touchExplorationEnabled: Boolean,
+    ): Boolean {
+        if (bpTalkback() && modalities.first().hasUdfps && touchExplorationEnabled) {
+            // TODO(b/315184924): Remove uses of UdfpsUtils
+            val scaledTouch =
+                udfpsUtils.getTouchInNativeCoordinates(
+                    event.getPointerId(0),
+                    event,
+                    udfpsOverlayInteractor.udfpsOverlayParams.value
+                )
+            if (
+                !udfpsUtils.isWithinSensorArea(
+                    event.getPointerId(0),
+                    event,
+                    udfpsOverlayInteractor.udfpsOverlayParams.value
+                )
+            ) {
+                _accessibilityHint.emit(
+                    udfpsUtils.onTouchOutsideOfSensorArea(
+                        touchExplorationEnabled,
+                        context,
+                        scaledTouch.x,
+                        scaledTouch.y,
+                        udfpsOverlayInteractor.udfpsOverlayParams.value
+                    )
+                )
+            }
         }
         return false
     }
