@@ -188,7 +188,8 @@ public class BubbleTaskViewHelper {
                         + " bubble=" + getBubbleKey());
             }
             if (mBubble != null) {
-                mController.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+                mController.removeBarBubbleAfterTaskRemoval(
+                        mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
             }
         }
 

@@ -313,7 +313,8 @@ public class BubbleExpandedView extends LinearLayout {
                         + " bubble=" + getBubbleKey());
             }
             if (mBubble != null) {
-                mController.removeBubble(mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+                mController.removeFloatingBubbleAfterTaskRemoval(
+                        mBubble.getKey(), Bubbles.DISMISS_TASK_FINISHED);
             }
             if (mTaskView != null) {
                 // Release the surface
