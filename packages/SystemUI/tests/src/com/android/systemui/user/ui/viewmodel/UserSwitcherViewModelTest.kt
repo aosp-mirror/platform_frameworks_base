@@ -170,6 +170,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                         broadcastDispatcher = fakeBroadcastDispatcher,
                         keyguardUpdateMonitor = keyguardUpdateMonitor,
                         backgroundDispatcher = testDispatcher,
+                        mainDispatcher = testDispatcher,
                         activityManager = activityManager,
                         refreshUsersScheduler = refreshUsersScheduler,
                         guestUserInteractor = guestUserInteractor,

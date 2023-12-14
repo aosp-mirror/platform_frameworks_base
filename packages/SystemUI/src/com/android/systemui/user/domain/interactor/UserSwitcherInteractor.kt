@@ -45,6 +45,7 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -101,6 +102,7 @@ constructor(
     broadcastDispatcher: BroadcastDispatcher,
     keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     private val activityManager: ActivityManager,
     private val refreshUsersScheduler: RefreshUsersScheduler,
     private val guestUserInteractor: GuestUserInteractor,
@@ -340,7 +342,11 @@ constructor(
             }
             .launchIn(applicationScope)
         restartSecondaryService(repository.getSelectedUserInfo().id)
-        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        applicationScope.launch {
+            withContext(mainDispatcher) {
+                keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+            }
+        }
     }
 
     fun addCallback(callback: UserCallback) {

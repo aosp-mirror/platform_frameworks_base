@@ -1115,6 +1115,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
                 broadcastDispatcher = fakeBroadcastDispatcher,
                 keyguardUpdateMonitor = keyguardUpdateMonitor,
                 backgroundDispatcher = utils.testDispatcher,
+                mainDispatcher = utils.testDispatcher,
                 activityManager = activityManager,
                 refreshUsersScheduler = refreshUsersScheduler,
                 guestUserInteractor =
