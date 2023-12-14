@@ -37,6 +37,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.UserIcons
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags.switchUserOnBg
 import com.android.systemui.SystemUISecondaryUserService
 import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -593,10 +594,18 @@ constructor(
     private fun switchUser(userId: Int) {
         // TODO(b/246631653): track jank and latency like in the old impl.
         refreshUsersScheduler.pause()
-        try {
-            activityManager.switchUser(userId)
-        } catch (e: RemoteException) {
-            Log.e(TAG, "Couldn't switch user.", e)
+        val runnable = Runnable {
+            try {
+                activityManager.switchUser(userId)
+            } catch (e: RemoteException) {
+                Log.e(TAG, "Couldn't switch user.", e)
+            }
+        }
+
+        if (switchUserOnBg()) {
+            applicationScope.launch { withContext(backgroundDispatcher) { runnable.run() } }
+        } else {
+            runnable.run()
         }
     }
 

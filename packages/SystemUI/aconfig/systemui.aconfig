@@ -241,10 +241,16 @@ flag {
 }
 
 flag {
+   name: "switch_user_on_bg"
+   namespace: "systemui"
+   description: "Does user switching on a background thread"
+   bug: "284095720"
+}
+
+flag {
     name: "status_bar_static_inout_indicators"
     namespace: "systemui"
     description: "(Upstream request) Always show the network activity inout indicators and "
         "prefer using alpha to distinguish network activity."
     bug: "310715220"
 }
-
