@@ -41,6 +41,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
@@ -49,6 +50,7 @@ import dagger.Lazy;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -210,23 +212,33 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private void notifyKeyguardChanged() {
         Trace.beginSection("KeyguardStateController#notifyKeyguardChanged");
         // Copy the list to allow removal during callback.
-        new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
+        invokeForEachCallback(Callback::onKeyguardShowingChanged);
         Trace.endSection();
     }
 
     private void notifyKeyguardFaceAuthEnabledChanged() {
+        invokeForEachCallback(Callback::onFaceEnrolledChanged);
+    }
+
+    private void invokeForEachCallback(Consumer<Callback> consumer) {
         // Copy the list to allow removal during callback.
-        new ArrayList<>(mCallbacks).forEach(callback -> {
+        ArrayList<Callback> copyOfCallbacks = new ArrayList<>(mCallbacks);
+        for (int i = 0; i < copyOfCallbacks.size(); i++) {
+            Callback callback = copyOfCallbacks.get(i);
+            // Temporary fix for b/315731775, callback is null even though only non-null callbacks
+            // are added to the list by addCallback
             if (callback != null) {
-                callback.onFaceEnrolledChanged();
+                consumer.accept(callback);
+            } else {
+                mLogger.log("KeyguardStateController callback is null", LogLevel.DEBUG);
             }
-        });
+        }
     }
 
     private void notifyUnlockedChanged() {
         Trace.beginSection("KeyguardStateController#notifyUnlockedChanged");
         // Copy the list to allow removal during callback.
-        new ArrayList<>(mCallbacks).forEach(Callback::onUnlockedChanged);
+        invokeForEachCallback(Callback::onUnlockedChanged);
         Trace.endSection();
     }
 
@@ -242,10 +254,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
             Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguardFadingAway",
                     keyguardFadingAway ? 1 : 0);
             mKeyguardFadingAway = keyguardFadingAway;
-            ArrayList<Callback> callbacks = new ArrayList<>(mCallbacks);
-            for (int i = 0; i < callbacks.size(); i++) {
-                callbacks.get(i).onKeyguardFadingAwayChanged();
-            }
+            invokeForEachCallback(Callback::onKeyguardFadingAwayChanged);
         }
     }
 
@@ -359,7 +368,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
             Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguardGoingAway",
                     keyguardGoingAway ? 1 : 0);
             mKeyguardGoingAway = keyguardGoingAway;
-            new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardGoingAwayChanged);
+            invokeForEachCallback(Callback::onKeyguardGoingAwayChanged);
         }
     }
 
@@ -368,7 +377,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         if (mPrimaryBouncerShowing != showing) {
             mPrimaryBouncerShowing = showing;
 
-            new ArrayList<>(mCallbacks).forEach(Callback::onPrimaryBouncerShowingChanged);
+            invokeForEachCallback(Callback::onPrimaryBouncerShowingChanged);
         }
     }
 
@@ -392,13 +401,13 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
             boolean dismissingFromTouch) {
         mDismissAmount = dismissAmount;
         mDismissingFromTouch = dismissingFromTouch;
-        new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardDismissAmountChanged);
+        invokeForEachCallback(Callback::onKeyguardDismissAmountChanged);
     }
 
     @Override
     public void setLaunchTransitionFadingAway(boolean fadingAway) {
         mLaunchTransitionFadingAway = fadingAway;
-        new ArrayList<>(mCallbacks).forEach(Callback::onLaunchTransitionFadingAwayChanged);
+        invokeForEachCallback(Callback::onLaunchTransitionFadingAwayChanged);
     }
 
     @Override

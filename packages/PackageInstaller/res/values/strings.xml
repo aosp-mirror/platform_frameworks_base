@@ -202,11 +202,6 @@
     <!-- Dialog attributes to indicate parse errors -->
     <string name="Parse_error_dlg_text">There was a problem parsing the package.</string>
 
-    <!-- Title of dialog telling users that Install/Uninstall action is not supported on Android Wear. [CHAR LIMIT=30] -->
-    <string name="wear_not_allowed_dlg_title">Android Wear</string>
-    <!-- Title of dialog telling users that Install/Uninstall action is not supported on Android Wear. [CHAR LIMIT=none] -->
-    <string name="wear_not_allowed_dlg_text">Install/Uninstall actions not supported on Wear.</string>
-
     <!-- Message that the app to be installed is being staged [CHAR LIMIT=50] -->
     <string name="message_staging">Staging app&#8230;</string>
 

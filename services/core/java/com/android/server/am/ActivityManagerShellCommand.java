@@ -1362,7 +1362,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
             userId = user.id;
         }
-        mInternal.mProcessList.mAppStartInfoTracker
+        mInternal.mProcessList.getAppStartInfoTracker()
                 .clearHistoryProcessStartInfo(packageName, userId);
         return 0;
     }

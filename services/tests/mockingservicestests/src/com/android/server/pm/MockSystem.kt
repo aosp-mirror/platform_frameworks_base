@@ -56,8 +56,10 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.spy
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder
 import com.android.internal.R
+import com.android.internal.pm.parsing.pkg.PackageImpl
 import com.android.internal.pm.parsing.pkg.ParsedPackage
 import com.android.internal.pm.pkg.parsing.ParsingPackage
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.LocalManagerRegistry
 import com.android.server.LocalServices
 import com.android.server.LockGuard
@@ -68,10 +70,8 @@ import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.pm.dex.DexManager
 import com.android.server.pm.dex.DynamicCodeLogger
 import com.android.server.pm.parsing.PackageParser2
-import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.AndroidPackage
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.snapshot.PackageDataSnapshot
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
@@ -81,14 +81,6 @@ import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
 import com.android.server.testutils.whenever
 import com.android.server.utils.WatchedArrayMap
-import libcore.util.HexEncoding
-import org.junit.Assert
-import org.junit.rules.TestRule
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
-import org.mockito.AdditionalMatchers.or
-import org.mockito.Mockito
-import org.mockito.quality.Strictness
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -97,6 +89,14 @@ import java.security.cert.CertificateException
 import java.util.Arrays
 import java.util.Random
 import java.util.concurrent.FutureTask
+import libcore.util.HexEncoding
+import org.junit.Assert
+import org.junit.rules.TestRule
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
+import org.mockito.AdditionalMatchers.or
+import org.mockito.Mockito
+import org.mockito.quality.Strictness
 
 /**
  * A utility for mocking behavior of the system and dependencies when testing PackageManagerService

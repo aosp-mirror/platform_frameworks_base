@@ -1216,7 +1216,7 @@ public abstract class CameraMetadata<TKey> {
      * <ul>
      * <li>Profile {@link android.hardware.camera2.params.DynamicRangeProfiles#HLG10 }</li>
      * <li>All mandatory stream combinations for this specific capability as per
-     *   <a href="CameraDevice#10-bit-output-additional-guaranteed-configurations">documentation</a></li>
+     *   <a href="https://developer.android.com/reference/android/hardware/camera2/CameraDevice#10-bit-output-additional-guaranteed-configurations">documentation</a></li>
      * <li>In case the device is not able to capture some combination of supported
      *   standard 8-bit and/or 10-bit dynamic range profiles within the same capture request,
      *   then those constraints must be listed in

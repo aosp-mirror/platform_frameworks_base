@@ -64,6 +64,7 @@ interface ILauncherApps {
     PendingIntent getActivityLaunchIntent(String callingPackage, in ComponentName component,
             in UserHandle user);
     LauncherUserInfo getLauncherUserInfo(in UserHandle user);
+    List<String> getPreInstalledSystemPackages(in UserHandle user);
     void showAppDetailsAsUser(in IApplicationThread caller, String callingPackage,
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);

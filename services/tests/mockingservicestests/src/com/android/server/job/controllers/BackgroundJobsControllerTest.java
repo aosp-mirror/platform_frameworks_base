@@ -25,6 +25,7 @@ import static com.android.server.job.controllers.JobStatus.CONSTRAINT_BACKGROUND
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -167,8 +168,12 @@ public class BackgroundJobsControllerTest {
     }
 
     private void setStoppedState(int uid, String pkgName, boolean stopped) {
-        doReturn(stopped).when(mPackageManagerInternal).isPackageStopped(pkgName, uid);
-        sendPackageStoppedBroadcast(uid, pkgName, stopped);
+        try {
+            doReturn(stopped).when(mPackageManagerInternal).isPackageStopped(pkgName, uid);
+            sendPackageStoppedBroadcast(uid, pkgName, stopped);
+        } catch (PackageManager.NameNotFoundException e) {
+            fail("Unable to set stopped state for unknown package: " + pkgName);
+        }
     }
 
     private void sendPackageStoppedBroadcast(int uid, String pkgName, boolean stopped) {

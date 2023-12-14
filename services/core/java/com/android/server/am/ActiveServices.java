@@ -5175,6 +5175,8 @@ public final class ActiveServices {
             return null;
         }
 
+        final long startTimeNs = SystemClock.elapsedRealtimeNanos();
+
         if (DEBUG_SERVICE) {
             Slog.v(TAG_SERVICE, "Bringing up " + r + " " + r.intent + " fg=" + r.fgRequired);
         }
@@ -5333,9 +5335,14 @@ public final class ActiveServices {
                 bringDownServiceLocked(r, enqueueOomAdj);
                 return msg;
             }
+            mAm.mProcessList.getAppStartInfoTracker().handleProcessServiceStart(startTimeNs, app, r,
+                    hostingRecord, true);
             if (isolated) {
                 r.isolationHostProc = app;
             }
+        } else {
+            mAm.mProcessList.getAppStartInfoTracker().handleProcessServiceStart(startTimeNs, app, r,
+                    hostingRecord, false);
         }
 
         if (r.fgRequired) {

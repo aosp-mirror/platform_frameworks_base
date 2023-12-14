@@ -897,10 +897,23 @@ public class LockPatternUtils {
     }
 
     /**
-     * Returns true if {@code userHandle} is a managed profile with separate challenge.
+     * Returns true if {@code userHandle} is a profile with separate challenge.
+     * <p>
+     * Returns false if {@code userHandle} is a profile with unified challenge, a profile whose
+     * credential is not shareable with its parent, or a non-profile user.
      */
     public boolean isSeparateProfileChallengeEnabled(int userHandle) {
         return isCredentialSharableWithParent(userHandle) && hasSeparateChallenge(userHandle);
+    }
+
+    /**
+     * Returns true if {@code userHandle} is a profile with unified challenge.
+     * <p>
+     * Returns false if {@code userHandle} is a profile with separate challenge, a profile whose
+     * credential is not shareable with its parent, or a non-profile user.
+     */
+    public boolean isProfileWithUnifiedChallenge(int userHandle) {
+        return isCredentialSharableWithParent(userHandle) && !hasSeparateChallenge(userHandle);
     }
 
     /**

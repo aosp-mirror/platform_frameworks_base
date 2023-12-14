@@ -45,14 +45,15 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -67,6 +68,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @SmallTest
 @Presubmit
@@ -105,6 +107,18 @@ public class ApexManagerTest {
             @Override
             public boolean hasFeature(String feature) {
                 return true;
+            }
+
+            @androidx.annotation.NonNull
+            @Override
+            public Set<String> getHiddenApiWhitelistedApps() {
+                return new ArraySet<>();
+            }
+
+            @androidx.annotation.NonNull
+            @Override
+            public Set<String> getInstallConstraintsAllowlist() {
+                return new ArraySet<>();
             }
         });
 
@@ -385,7 +399,7 @@ public class ApexManagerTest {
                 findFactory(results, "test.apex.rebootless").apexInfo);
         assertThat(factoryPkg.getBaseApkPath()).isEqualTo(activeApexInfo.modulePath);
         assertThat(factoryPkg.getLongVersionCode()).isEqualTo(1);
-        assertThat(AndroidPackageUtils.isSystem(factoryPkg)).isTrue();
+        assertThat(AndroidPackageLegacyUtils.isSystem(factoryPkg)).isTrue();
     }
 
     @Test
@@ -416,7 +430,7 @@ public class ApexManagerTest {
                 findFactory(results, "test.apex.rebootless").apexInfo);
         assertThat(factoryPkg.getBaseApkPath()).isEqualTo(factoryApexInfo.modulePath);
         assertThat(factoryPkg.getLongVersionCode()).isEqualTo(1);
-        assertThat(AndroidPackageUtils.isSystem(factoryPkg)).isTrue();
+        assertThat(AndroidPackageLegacyUtils.isSystem(factoryPkg)).isTrue();
     }
 
     @Test

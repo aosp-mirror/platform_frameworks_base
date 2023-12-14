@@ -123,6 +123,7 @@ import android.app.ICompatCameraControlCallback;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.WindowStateResizeItem;
@@ -169,6 +170,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -260,8 +262,18 @@ public class ActivityRecordTests extends WindowTestsBase {
         final MutableBoolean pauseFound = new MutableBoolean(false);
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final ClientTransaction transaction = invocationOnMock.getArgument(0);
-            if (transaction.getLifecycleStateRequest() instanceof PauseActivityItem) {
-                pauseFound.value = true;
+            final List<ClientTransactionItem> items = transaction.getTransactionItems();
+            if (items != null) {
+                for (ClientTransactionItem item : items) {
+                    if (item instanceof PauseActivityItem) {
+                        pauseFound.value = true;
+                        break;
+                    }
+                }
+            } else {
+                if (transaction.getLifecycleStateRequest() instanceof PauseActivityItem) {
+                    pauseFound.value = true;
+                }
             }
             return null;
         }).when(mClientLifecycleManager).scheduleTransaction(any());
@@ -279,6 +291,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // If the activity is not focusable, it should move to paused.
         activity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
+        mClientLifecycleManager.dispatchPendingTransactions();
+
         assertTrue(activity.isState(PAUSING));
         assertTrue(pauseFound.value);
 
@@ -1239,7 +1253,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testFinishActivityIfPossible_sendResultImmediately() {
+    public void testFinishActivityIfPossible_sendResultImmediately() throws RemoteException {
         // Create activity representing the source of the activity result.
         final ComponentName sourceComponent = ComponentName.createRelative(
                 DEFAULT_COMPONENT_PACKAGE_NAME, ".SourceActivity");
@@ -1270,12 +1284,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         targetActivity.finishIfPossible(0, new Intent(), null, "test", false /* oomAdj */);
 
-        try {
-            verify(mClientLifecycleManager, atLeastOnce()).scheduleTransaction(
-                    any(ClientTransaction.class));
-        } catch (RemoteException ignored) {
-        }
-
+        verify(mClientLifecycleManager, atLeastOnce()).scheduleTransactionItem(
+                any(), any(ClientTransactionItem.class));
         assertNull(targetActivity.results);
     }
 

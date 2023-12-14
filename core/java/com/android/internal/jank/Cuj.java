@@ -109,6 +109,7 @@ public class Cuj {
      * eg: Exit the app using back gesture.
      */
     public static final int CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK = 78;
+    // 79 is reserved.
     public static final int CUJ_IME_INSETS_SHOW_ANIMATION = 80;
     public static final int CUJ_IME_INSETS_HIDE_ANIMATION = 81;
 
@@ -119,10 +120,11 @@ public class Cuj {
     public static final int CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY = 84;
     public static final int CUJ_PREDICTIVE_BACK_CROSS_TASK = 85;
     public static final int CUJ_PREDICTIVE_BACK_HOME = 86;
+    public static final int CUJ_LAUNCHER_SEARCH_QSB_OPEN = 87;
 
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
     @VisibleForTesting
-    static final int LAST_CUJ = CUJ_PREDICTIVE_BACK_HOME;
+    static final int LAST_CUJ = CUJ_LAUNCHER_SEARCH_QSB_OPEN;
 
     /** @hide */
     @IntDef({
@@ -204,6 +206,7 @@ public class Cuj {
             CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY,
             CUJ_PREDICTIVE_BACK_CROSS_TASK,
             CUJ_PREDICTIVE_BACK_HOME,
+            CUJ_LAUNCHER_SEARCH_QSB_OPEN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -295,6 +298,8 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_CROSS_ACTIVITY;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PREDICTIVE_BACK_CROSS_TASK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_CROSS_TASK;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_PREDICTIVE_BACK_HOME] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PREDICTIVE_BACK_HOME;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_SEARCH_QSB_OPEN] =
+            FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_SEARCH_QSB_OPEN;
     }
 
     private Cuj() {
@@ -467,6 +472,8 @@ public class Cuj {
                 return "PREDICTIVE_BACK_CROSS_TASK";
             case CUJ_PREDICTIVE_BACK_HOME:
                 return "PREDICTIVE_BACK_HOME";
+            case CUJ_LAUNCHER_SEARCH_QSB_OPEN:
+                return "LAUNCHER_SEARCH_QSB_OPEN";
         }
         return "UNKNOWN";
     }

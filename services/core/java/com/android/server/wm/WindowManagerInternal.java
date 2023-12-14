@@ -866,6 +866,11 @@ public abstract class WindowManagerInternal {
     public abstract ImeTargetInfo onToggleImeRequested(boolean show,
             @NonNull IBinder focusedToken, @NonNull IBinder requestToken, int displayId);
 
+    /**
+     * Returns the token to identify the target window that the IME is associated with.
+     */
+    public abstract @Nullable IBinder getTargetWindowTokenFromInputToken(IBinder inputToken);
+
     /** The information of input method target when IME is requested to show or hide. */
     public static class ImeTargetInfo {
         public final String focusedWindowName;

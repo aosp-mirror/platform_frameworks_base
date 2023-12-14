@@ -17,13 +17,15 @@
 package com.android.server.wm;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.window.flags.Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 
@@ -31,12 +33,15 @@ import android.app.IApplicationThread;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -47,14 +52,26 @@ import org.mockito.MockitoAnnotations;
  * Build/Install/Run:
  *  atest WmTests:ClientLifecycleManagerTests
  */
+// Suppress GuardedBy warning on unit tests
+@SuppressWarnings("GuardedBy")
 @SmallTest
 @Presubmit
 public class ClientLifecycleManagerTests {
 
+    @Rule(order = 0)
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Rule(order = 1)
+    public final SystemServicesTestRule mSystemServices = new SystemServicesTestRule();
+
+    @Mock
+    private IBinder mClientBinder;
     @Mock
     private IApplicationThread mClient;
     @Mock
     private IApplicationThread.Stub mNonBinderClient;
+    @Mock
+    private ClientTransaction mTransaction;
     @Mock
     private ClientTransactionItem mTransactionItem;
     @Mock
@@ -62,15 +79,20 @@ public class ClientLifecycleManagerTests {
     @Captor
     private ArgumentCaptor<ClientTransaction> mTransactionCaptor;
 
+    private WindowManagerService mWms;
     private ClientLifecycleManager mLifecycleManager;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        mWms = mSystemServices.getWindowManagerService();
         mLifecycleManager = spy(new ClientLifecycleManager());
+        mLifecycleManager.setWindowManager(mWms);
 
         doReturn(true).when(mLifecycleItem).isActivityLifecycleItem();
+        doReturn(mClientBinder).when(mClient).asBinder();
+        doReturn(mNonBinderClient).when(mNonBinderClient).asBinder();
     }
 
     @Test
@@ -92,9 +114,11 @@ public class ClientLifecycleManagerTests {
     }
 
     @Test
-    public void testScheduleTransactionItem() throws RemoteException {
-        doNothing().when(mLifecycleManager).scheduleTransaction(any());
-        mLifecycleManager.scheduleTransactionItem(mClient, mTransactionItem);
+    public void testScheduleTransactionItem_notBundle() throws RemoteException {
+        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
+        // Use non binder client to get non-recycled ClientTransaction.
+        mLifecycleManager.scheduleTransactionItem(mNonBinderClient, mTransactionItem);
 
         verify(mLifecycleManager).scheduleTransaction(mTransactionCaptor.capture());
         ClientTransaction transaction = mTransactionCaptor.getValue();
@@ -104,7 +128,7 @@ public class ClientLifecycleManagerTests {
         assertNull(transaction.getTransactionItems());
 
         clearInvocations(mLifecycleManager);
-        mLifecycleManager.scheduleTransactionItem(mClient, mLifecycleItem);
+        mLifecycleManager.scheduleTransactionItem(mNonBinderClient, mLifecycleItem);
 
         verify(mLifecycleManager).scheduleTransaction(mTransactionCaptor.capture());
         transaction = mTransactionCaptor.getValue();
@@ -113,9 +137,54 @@ public class ClientLifecycleManagerTests {
     }
 
     @Test
-    public void testScheduleTransactionAndLifecycleItems() throws RemoteException {
-        doNothing().when(mLifecycleManager).scheduleTransaction(any());
-        mLifecycleManager.scheduleTransactionAndLifecycleItems(mClient, mTransactionItem,
+    public void testScheduleTransactionItem() throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+        spyOn(mWms.mWindowPlacerLocked);
+        doReturn(true).when(mWms.mWindowPlacerLocked).isTraversalScheduled();
+
+        // Use non binder client to get non-recycled ClientTransaction.
+        mLifecycleManager.scheduleTransactionItem(mNonBinderClient, mTransactionItem);
+
+        // When there is traversal scheduled, add transaction items to pending.
+        assertEquals(1, mLifecycleManager.mPendingTransactions.size());
+        ClientTransaction transaction =
+                mLifecycleManager.mPendingTransactions.get(mNonBinderClient);
+        assertEquals(1, transaction.getTransactionItems().size());
+        assertEquals(mTransactionItem, transaction.getTransactionItems().get(0));
+        assertNull(transaction.getCallbacks());
+        assertNull(transaction.getLifecycleStateRequest());
+        verify(mLifecycleManager, never()).scheduleTransaction(any());
+
+        // Add new transaction item to the existing pending.
+        clearInvocations(mLifecycleManager);
+        mLifecycleManager.scheduleTransactionItem(mNonBinderClient, mLifecycleItem);
+
+        assertEquals(1, mLifecycleManager.mPendingTransactions.size());
+        transaction = mLifecycleManager.mPendingTransactions.get(mNonBinderClient);
+        assertEquals(2, transaction.getTransactionItems().size());
+        assertEquals(mTransactionItem, transaction.getTransactionItems().get(0));
+        assertEquals(mLifecycleItem, transaction.getTransactionItems().get(1));
+        assertNull(transaction.getCallbacks());
+        assertNull(transaction.getLifecycleStateRequest());
+        verify(mLifecycleManager, never()).scheduleTransaction(any());
+    }
+
+    @Test
+    public void testScheduleTransactionItemUnlocked() throws RemoteException {
+        // Use non binder client to get non-recycled ClientTransaction.
+        mLifecycleManager.scheduleTransactionItemUnlocked(mNonBinderClient, mTransactionItem);
+
+        // Dispatch immediately.
+        assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());
+        verify(mLifecycleManager).scheduleTransaction(any());
+    }
+
+    @Test
+    public void testScheduleTransactionAndLifecycleItems_notBundle() throws RemoteException {
+        mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
+        // Use non binder client to get non-recycled ClientTransaction.
+        mLifecycleManager.scheduleTransactionAndLifecycleItems(mNonBinderClient, mTransactionItem,
                 mLifecycleItem);
 
         verify(mLifecycleManager).scheduleTransaction(mTransactionCaptor.capture());
@@ -123,5 +192,37 @@ public class ClientLifecycleManagerTests {
         assertEquals(1, transaction.getCallbacks().size());
         assertEquals(mTransactionItem, transaction.getCallbacks().get(0));
         assertEquals(mLifecycleItem, transaction.getLifecycleStateRequest());
+    }
+
+    @Test
+    public void testScheduleTransactionAndLifecycleItems() throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+        spyOn(mWms.mWindowPlacerLocked);
+        doReturn(true).when(mWms.mWindowPlacerLocked).isTraversalScheduled();
+
+        // Use non binder client to get non-recycled ClientTransaction.
+        mLifecycleManager.scheduleTransactionAndLifecycleItems(mNonBinderClient, mTransactionItem,
+                mLifecycleItem);
+
+        assertEquals(1, mLifecycleManager.mPendingTransactions.size());
+        final ClientTransaction transaction =
+                mLifecycleManager.mPendingTransactions.get(mNonBinderClient);
+        assertEquals(2, transaction.getTransactionItems().size());
+        assertEquals(mTransactionItem, transaction.getTransactionItems().get(0));
+        assertEquals(mLifecycleItem, transaction.getTransactionItems().get(1));
+        assertNull(transaction.getCallbacks());
+        assertNull(transaction.getLifecycleStateRequest());
+        verify(mLifecycleManager, never()).scheduleTransaction(any());
+    }
+
+    @Test
+    public void testDispatchPendingTransactions() throws RemoteException {
+        mLifecycleManager.mPendingTransactions.put(mClientBinder, mTransaction);
+
+        mLifecycleManager.dispatchPendingTransactions();
+
+        assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());
+        verify(mTransaction).schedule();
+        verify(mTransaction).recycle();
     }
 }

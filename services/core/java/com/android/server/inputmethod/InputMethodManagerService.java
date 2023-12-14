@@ -5763,7 +5763,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void switchKeyboardLayout(int direction) {
+        public void onSwitchKeyboardLayoutShortcut(int direction, int displayId,
+                IBinder targetWindowToken) {
             synchronized (ImfLock.class) {
                 switchKeyboardLayoutLocked(direction);
             }

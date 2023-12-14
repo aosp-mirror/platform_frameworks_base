@@ -56,6 +56,7 @@ import com.google.common.util.concurrent.Futures;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -138,6 +139,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("b/315848285")
     public void screenshotDisplayed_userConsented_screenshotExportedSuccessfully() {
         ResultReceiver resultReceiver = createResultReceiver((resultCode, data) -> {
             assertThat(resultCode).isEqualTo(RESULT_OK);

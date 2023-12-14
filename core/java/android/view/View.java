@@ -28340,6 +28340,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 IBinder token = mAttachInfo.mSession.performDrag(
                         mAttachInfo.mWindow, flags, null,
                         mAttachInfo.mViewRootImpl.getLastTouchSource(),
+                        mAttachInfo.mViewRootImpl.getLastTouchDeviceId(),
+                        mAttachInfo.mViewRootImpl.getLastTouchPointerId(),
                         0f, 0f, 0f, 0f, data);
                 if (ViewDebug.DEBUG_DRAG) {
                     Log.d(VIEW_LOG_TAG, "startDragAndDrop via a11y action returned " + token);
@@ -28414,7 +28416,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             token = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, flags, surfaceControl,
-                    root.getLastTouchSource(), lastTouchPoint.x, lastTouchPoint.y,
+                    root.getLastTouchSource(), root.getLastTouchDeviceId(),
+                    root.getLastTouchPointerId(), lastTouchPoint.x, lastTouchPoint.y,
                     shadowTouchPoint.x, shadowTouchPoint.y, data);
             if (ViewDebug.DEBUG_DRAG) {
                 Log.d(VIEW_LOG_TAG, "performDrag returned " + token);

@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static com.android.internal.util.Preconditions.checkArgument;
+
 import android.annotation.DrawableRes;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -390,7 +392,7 @@ public final class AutomaticZenRule implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public void setType(@Type int type) {
-        mType = type;
+        mType = checkValidType(type);
     }
 
     /**
@@ -449,6 +451,24 @@ public final class AutomaticZenRule implements Parcelable {
     @FlaggedApi(Flags.FLAG_MODES_API)
     public void setManualInvocationAllowed(boolean allowManualInvocation) {
         mAllowManualInvocation = allowManualInvocation;
+    }
+
+    /** @hide */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public void validate() {
+        if (Flags.modesApi()) {
+            checkValidType(mType);
+        }
+    }
+
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @Type
+    private static int checkValidType(@Type int type) {
+        checkArgument(type >= TYPE_UNKNOWN && type <= TYPE_MANAGED,
+                "Rule type must be one of TYPE_UNKNOWN, TYPE_OTHER, TYPE_SCHEDULE_TIME, "
+                        + "TYPE_SCHEDULE_CALENDAR, TYPE_BEDTIME, TYPE_DRIVING, TYPE_IMMERSIVE, "
+                        + "TYPE_THEATER, or TYPE_MANAGED");
+        return type;
     }
 
     @Override
@@ -703,10 +723,10 @@ public final class AutomaticZenRule implements Parcelable {
         }
 
         /**
-         * Sets the type of the rule
+         * Sets the type of the rule.
          */
         public @NonNull Builder setType(@Type int type) {
-            mType = type;
+            mType = checkValidType(type);
             return this;
         }
 
@@ -714,7 +734,7 @@ public final class AutomaticZenRule implements Parcelable {
          * Sets a user visible description of when this rule will be active
          * (see {@link Condition#STATE_TRUE}).
          *
-         * A description should be a (localized) string like "Mon-Fri, 9pm-7am" or
+         * <p>A description should be a (localized) string like "Mon-Fri, 9pm-7am" or
          * "When connected to [Car Name]".
          */
         public @NonNull Builder setTriggerDescription(@Nullable String description) {

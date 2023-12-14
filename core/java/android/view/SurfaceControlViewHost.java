@@ -447,6 +447,7 @@ public class SurfaceControlViewHost {
         addWindowToken(attrs);
         view.setLayoutParams(attrs);
         mViewRoot.setView(view, attrs, null);
+        mViewRoot.setBackKeyCallbackForWindowlessWindow(mWm::forwardBackKeyToParent);
     }
 
     /**

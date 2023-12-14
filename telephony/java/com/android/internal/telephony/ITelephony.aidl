@@ -3101,16 +3101,21 @@ interface ITelephony {
     void requestNtnSignalStrength(int subId, in ResultReceiver receiver);
 
     /**
-     * Registers for NTN signal strength changed from satellite modem.
+     * Registers for NTN signal strength changed from satellite modem. If the registration operation
+     * is not successful, a {@link SatelliteException} that contains {@link SatelliteResult} will be
+     * thrown.
      *
      * @param subId The subId of the subscription to request for.
-     * @param callback The callback to handle the NTN signal strength changed event.
-     *
-     * @return The {@link SatelliteResult} result of the operation.
+     * @param callback The callback to handle the NTN signal strength changed event. If the
+     * operation is successful, {@link NtnSignalStrengthCallback#onNtnSignalStrengthChanged(
+     * NtnSignalStrength)} will return an instance of {@link NtnSignalStrength} with a value of
+     * {@link NtnSignalStrength.NtnSignalStrengthLevel} when the signal strength of non-terrestrial
+     * network has changed.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForNtnSignalStrengthChanged(int subId, in INtnSignalStrengthCallback callback);
+    void registerForNtnSignalStrengthChanged(int subId,
+            in INtnSignalStrengthCallback callback);
 
     /**
      * Unregisters for NTN signal strength changed from satellite modem.

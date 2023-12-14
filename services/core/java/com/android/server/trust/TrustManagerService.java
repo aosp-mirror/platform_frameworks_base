@@ -1608,14 +1608,12 @@ public class TrustManagerService extends SystemService {
                     user.name, user.id, user.flags);
             if (!user.supportsSwitchToByUser()) {
                 final boolean locked;
-                if (user.isProfile()) {
-                    if (mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id)) {
-                        fout.print(" (profile with separate challenge)");
-                        locked = isDeviceLockedInner(user.id);
-                    } else {
-                        fout.print(" (profile with unified challenge)");
-                        locked = isDeviceLockedInner(resolveProfileParent(user.id));
-                    }
+                if (mLockPatternUtils.isProfileWithUnifiedChallenge(user.id)) {
+                    fout.print(" (profile with unified challenge)");
+                    locked = isDeviceLockedInner(resolveProfileParent(user.id));
+                } else if (mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id)) {
+                    fout.print(" (profile with separate challenge)");
+                    locked = isDeviceLockedInner(user.id);
                 } else {
                     fout.println(" (user that cannot be switched to)");
                     locked = isDeviceLockedInner(user.id);

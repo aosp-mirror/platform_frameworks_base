@@ -27,3 +27,10 @@ flag {
   description: "Mitigation for view state reset to empty causing no save dialog to show issue"
   bug: "297976948"
 }
+
+flag {
+  name: "ignore_invisible_view_group_in_assist_structure"
+  namespace: "autofill"
+  description: "Mitigation for autofill providers miscalculating view visibility"
+  bug: "291795358"
+}

@@ -59,6 +59,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
@@ -70,6 +71,7 @@ import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -420,7 +422,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public void init() {
         if (mInitialized) return;
         mInitialized = true;
-        mSplitWindowManager.init(this, mInsetsState);
+        mSplitWindowManager.init(this, mInsetsState, false /* isRestoring */);
         mDisplayImeController.addPositionProcessor(mImePositionProcessor);
     }
 
@@ -442,14 +444,19 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /** Releases and re-inflates {@link DividerView} on the root surface. */
-    public void update(SurfaceControl.Transaction t) {
+    public void update(SurfaceControl.Transaction t, boolean resetImePosition) {
         if (!mInitialized) {
             init();
             return;
         }
         mSplitWindowManager.release(t);
-        mImePositionProcessor.reset();
-        mSplitWindowManager.init(this, mInsetsState);
+        if (resetImePosition) {
+            mImePositionProcessor.reset();
+        }
+        mSplitWindowManager.init(this, mInsetsState, true /* isRestoring */);
+        // Update the surface positions again after recreating the divider in case nothing else
+        // triggers it
+        mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
     }
 
     @Override
@@ -868,6 +875,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         pw.println(prefix + TAG + ":");
         pw.println(innerPrefix + "mAllowLeftRightSplitInPortrait=" + mAllowLeftRightSplitInPortrait);
         pw.println(innerPrefix + "mIsLeftRightSplit=" + mIsLeftRightSplit);
+        pw.println(innerPrefix + "mFreezeDividerWindow=" + mFreezeDividerWindow);
+        pw.println(innerPrefix + "mDimNonImeSide=" + mDimNonImeSide);
+        pw.println(innerPrefix + "mDividerPosition=" + mDividerPosition);
         pw.println(innerPrefix + "bounds1=" + mBounds1.toShortString());
         pw.println(innerPrefix + "dividerBounds=" + mDividerBounds.toShortString());
         pw.println(innerPrefix + "bounds2=" + mBounds2.toShortString());
@@ -1151,14 +1161,16 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             mTargetYOffset = needOffset ? getTargetYOffset() : 0;
 
             if (mTargetYOffset != mLastYOffset) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Split IME animation starting, fromY=%d toY=%d",
+                        mLastYOffset, mTargetYOffset);
                 // Freeze the configuration size with offset to prevent app get a configuration
                 // changed or relaunch. This is required to make sure client apps will calculate
                 // insets properly after layout shifted.
                 if (mTargetYOffset == 0) {
                     mSplitLayoutHandler.setLayoutOffsetTarget(0, 0, SplitLayout.this);
                 } else {
-                    mSplitLayoutHandler.setLayoutOffsetTarget(0, mTargetYOffset - mLastYOffset,
-                            SplitLayout.this);
+                    mSplitLayoutHandler.setLayoutOffsetTarget(0, mTargetYOffset, SplitLayout.this);
                 }
             }
 
@@ -1183,6 +1195,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         public void onImeEndPositioning(int displayId, boolean cancel,
                 SurfaceControl.Transaction t) {
             if (displayId != mDisplayId || !mHasImeFocus || cancel) return;
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "Split IME animation ending, canceled=%b", cancel);
             onProgress(1.0f);
             mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
         }

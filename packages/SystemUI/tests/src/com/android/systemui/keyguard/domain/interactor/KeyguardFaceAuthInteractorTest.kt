@@ -137,7 +137,6 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 mContext,
                 testScope.backgroundScope,
                 dispatcher,
-                dispatcher,
                 faceAuthRepository,
                 {
                     PrimaryBouncerInteractor(

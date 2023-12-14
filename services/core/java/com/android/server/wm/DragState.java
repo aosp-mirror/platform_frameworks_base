@@ -416,6 +416,13 @@ class DragState {
         return mInputInterceptor == null ? null : mInputInterceptor.mDragWindowHandle;
     }
 
+    IBinder getInputToken() {
+        if (mInputInterceptor == null || mInputInterceptor.mClientChannel == null) {
+            return null;
+        }
+        return mInputInterceptor.mClientChannel.getToken();
+    }
+
     /**
      * @param display The Display that the window being dragged is on.
      */

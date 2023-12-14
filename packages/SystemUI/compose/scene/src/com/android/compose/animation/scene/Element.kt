@@ -288,7 +288,6 @@ private fun shouldDrawElement(
     // Always draw the element if there is no ongoing transition or if the element is not shared.
     if (
         state !is TransitionState.Transition ||
-            state.fromScene == state.toScene ||
             !layoutImpl.isTransitionReady(state) ||
             state.fromScene !in element.sceneValues ||
             state.toScene !in element.sceneValues
@@ -374,7 +373,7 @@ private fun isElementOpaque(
 ): Boolean {
     val state = layoutImpl.state.transitionState
 
-    if (state !is TransitionState.Transition || state.fromScene == state.toScene) {
+    if (state !is TransitionState.Transition) {
         return true
     }
 
@@ -611,7 +610,7 @@ private inline fun <T> computeValue(
     val state = layoutImpl.state.transitionState
 
     // There is no ongoing transition.
-    if (state !is TransitionState.Transition || state.fromScene == state.toScene) {
+    if (state !is TransitionState.Transition) {
         // Even if this element SceneTransitionLayout is not animated, the layout itself might be
         // animated (e.g. by another parent SceneTransitionLayout), in which case this element still
         // need to participate in the layout phase.
