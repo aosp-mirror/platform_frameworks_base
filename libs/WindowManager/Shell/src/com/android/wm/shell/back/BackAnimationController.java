@@ -111,6 +111,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     /** Tracks if we should start the back gesture on the next motion move event */
     private boolean mShouldStartOnNextMoveEvent = false;
+    private boolean mOnBackStartDispatched = false;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
 
@@ -304,6 +305,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
 
         @Override
+        public void onPilferPointers() {
+            BackAnimationController.this.onPilferPointers();
+        }
+
+        @Override
         public void setTriggerBack(boolean triggerBack) {
             mShellExecutor.execute(() -> BackAnimationController.this.setTriggerBack(triggerBack));
         }
@@ -382,6 +388,16 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (mCurrentTracker.isActive()) return mCurrentTracker;
         if (mQueuedTracker.isActive()) return mQueuedTracker;
         return null;
+    }
+
+    @VisibleForTesting
+    void onPilferPointers() {
+        mCurrentTracker.updateStartLocation();
+        // Dispatch onBackStarted, only to app callbacks.
+        // System callbacks will receive onBackStarted when the remote animation starts.
+        if (!shouldDispatchToAnimator()) {
+            tryDispatchOnBackStarted(mActiveCallback, mCurrentTracker.createStartEvent(null));
+        }
     }
 
     /**
@@ -483,12 +499,15 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             mActiveCallback = mBackNavigationInfo.getOnBackInvokedCallback();
             // App is handling back animation. Cancel system animation latency tracking.
             cancelLatencyTracking();
-            dispatchOnBackStarted(mActiveCallback, touchTracker.createStartEvent(null));
+            tryDispatchOnBackStarted(mActiveCallback, touchTracker.createStartEvent(null));
         }
     }
 
     private void onMove() {
-        if (!mBackGestureStarted || mBackNavigationInfo == null || mActiveCallback == null) {
+        if (!mBackGestureStarted
+                || mBackNavigationInfo == null
+                || mActiveCallback == null
+                || !mOnBackStartDispatched) {
             return;
         }
         // Skip dispatching if the move corresponds to the queued instead of the current gesture
@@ -524,13 +543,14 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 && mBackNavigationInfo.isPrepareRemoteAnimation();
     }
 
-    private void dispatchOnBackStarted(IOnBackInvokedCallback callback,
+    private void tryDispatchOnBackStarted(IOnBackInvokedCallback callback,
             BackMotionEvent backEvent) {
-        if (callback == null) {
+        if (callback == null || mOnBackStartDispatched) {
             return;
         }
         try {
             callback.onBackStarted(backEvent);
+            mOnBackStartDispatched = true;
         } catch (RemoteException e) {
             Log.e(TAG, "dispatchOnBackStarted error: ", e);
         }
@@ -828,6 +848,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     void finishBackNavigation(boolean triggerBack) {
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: finishBackNavigation()");
         mActiveCallback = null;
+        mShouldStartOnNextMoveEvent = false;
+        mOnBackStartDispatched = false;
         mShellBackAnimationRegistry.resetDefaultCrossActivity();
         cancelLatencyTracking();
         if (mBackNavigationInfo != null) {
@@ -909,7 +931,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                                                                     ::onBackAnimationFinished));
 
                                     if (apps.length >= 1) {
-                                        dispatchOnBackStarted(
+                                        mCurrentTracker.updateStartLocation();
+                                        tryDispatchOnBackStarted(
                                                 mActiveCallback,
                                                 mCurrentTracker.createStartEvent(apps[0]));
                                     }
