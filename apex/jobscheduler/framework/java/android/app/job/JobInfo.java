@@ -288,12 +288,16 @@ public class JobInfo implements Parcelable {
     public static final int PRIORITY_HIGH = 400;
 
     /**
-     * This task should be run ahead of all other tasks. Only Expedited Jobs
-     * {@link Builder#setExpedited(boolean)} can have this priority and as such,
-     * are subject to the same execution time details noted in
-     * {@link Builder#setExpedited(boolean)}.
-     * A sample task of max priority: receiving a text message and processing it to
-     * show a notification
+     * This task is critical to user experience or functionality
+     * and should be run ahead of all other tasks. Only
+     * {@link Builder#setExpedited(boolean) expedited jobs} and
+     * {@link Builder#setUserInitiated(boolean) user-initiated jobs} can have this priority.
+     * <p>
+     * Example tasks of max priority:
+     * <ul>
+     *     <li>Receiving a text message and processing it to show a notification</li>
+     *     <li>Downloading or uploading some content the user requested to transfer immediately</li>
+     * </ul>
      */
     public static final int PRIORITY_MAX = 500;
 
@@ -1969,6 +1973,9 @@ public class JobInfo implements Parcelable {
          * </ol>
          *
          * <p>
+         * Expedited jobs are given {@link #PRIORITY_MAX} by default.
+         *
+         * <p>
          * Since these jobs have stronger guarantees than regular jobs, they will be subject to
          * stricter quotas. As long as an app has available expedited quota, jobs scheduled with
          * this set to true will run with these guarantees. If an app has run out of available
@@ -2059,6 +2066,7 @@ public class JobInfo implements Parcelable {
          * <p>
          * These jobs will not be subject to quotas and will be started immediately once scheduled
          * if all constraints are met and the device system health allows for additional tasks.
+         * They are also given {@link #PRIORITY_MAX} by default, and the priority cannot be changed.
          *
          * @see JobInfo#isUserInitiated()
          */
