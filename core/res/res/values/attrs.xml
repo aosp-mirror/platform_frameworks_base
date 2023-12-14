@@ -9802,6 +9802,17 @@
         <attr name="supportedTypes" format="reference" />
     </declare-styleable>
 
+    <!-- Use <code>tv-ad-service</code> as the root tag of the XML resource that describes a
+         android.media.tv.ad.TvAdService, which is referenced from its
+         android.media.tv.ad.TvAdService#SERVICE_META_DATA meta-data entry. Described here
+         are the attributes that can be included in that tag. -->
+    <declare-styleable name="TvAdService">
+        <!-- The advertisement types that the TV ad service supports.
+             Reference to a string array resource that describes the supported types,
+             e.g. linear, overlay. -->
+        <attr name="adServiceTypes" format="reference" />
+    </declare-styleable>
+
 
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
          XML resource that describes TV content rating of a {@link android.media.tv.TvInputService},
