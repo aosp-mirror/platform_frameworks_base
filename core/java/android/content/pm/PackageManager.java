@@ -2518,6 +2518,7 @@ public abstract class PackageManager {
             USER_MIN_ASPECT_RATIO_16_9,
             USER_MIN_ASPECT_RATIO_3_2,
             USER_MIN_ASPECT_RATIO_FULLSCREEN,
+            USER_MIN_ASPECT_RATIO_APP_DEFAULT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserMinAspectRatio {}
@@ -2570,6 +2571,16 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int USER_MIN_ASPECT_RATIO_FULLSCREEN = 6;
+
+    /**
+     * Aspect ratio override code: user sets to app's default aspect ratio.
+     * This resets both the user-forced aspect ratio, and the device manufacturer
+     * per-app override {@link ActivityInfo#OVERRIDE_ANY_ORIENTATION_TO_USER}.
+     * It is different from {@link #USER_MIN_ASPECT_RATIO_UNSET} as the latter may
+     * apply the device manufacturer per-app orientation override if any,
+     * @hide
+     */
+    public static final int USER_MIN_ASPECT_RATIO_APP_DEFAULT = 7;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
