@@ -179,7 +179,8 @@ final class ReconcilePackageUtils {
                         removeAppKeySetData = true;
                     }
 
-                    if (!isSystemPackage && !isApex && signingDetails != null
+                    if (!installRequest.isInstallSystem() && !isSystemPackage && !isApex
+                            && signingDetails != null
                             && systemPackage != null && systemPackage.getSigningDetails() != null
                             && systemPackage.getSigningDetails().checkCapability(
                                     signingDetails,
