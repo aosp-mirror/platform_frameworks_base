@@ -28,5 +28,14 @@ data class CardModel(
     val title: String,
     val text: String,
     val imageVector: ImageVector? = null,
+    val isVisible: () -> Boolean = { true },
+
+    /**
+     * A dismiss button will be displayed if this is not null.
+     *
+     * And this callback will be called when user clicks the button.
+     */
+    val onDismiss: (() -> Unit)? = null,
+
     val buttons: List<CardButton> = emptyList(),
 )

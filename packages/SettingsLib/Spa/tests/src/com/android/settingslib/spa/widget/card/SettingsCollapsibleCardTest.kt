@@ -16,12 +16,20 @@
 
 package com.android.settingslib.spa.widget.card
 
+import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Error
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -31,6 +39,8 @@ import org.junit.runner.RunWith
 class SettingsCollapsibleCardTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun settingsCollapsibleCard_titleDisplayed() {
@@ -62,8 +72,22 @@ class SettingsCollapsibleCardTest {
         composeTestRule.onNodeWithText(CARD_TEXT).assertIsDisplayed()
     }
 
+    @Test
+    fun settingsCollapsibleCard_dismiss() {
+        setContent()
+        composeTestRule.onNodeWithText(TITLE).performClick()
+
+        composeTestRule.onNodeWithContentDescription(
+            context.getString(androidx.compose.material3.R.string.m3c_snackbar_dismiss)
+        ).performClick()
+
+        composeTestRule.onNodeWithText(CARD_TEXT).isNotDisplayed()
+        composeTestRule.onNodeWithText("0").assertIsDisplayed()
+    }
+
     private fun setContent() {
         composeTestRule.setContent {
+            var isVisible by rememberSaveable { mutableStateOf(true) }
             SettingsCollapsibleCard(
                 title = TITLE,
                 imageVector = Icons.Outlined.Error,
@@ -71,6 +95,8 @@ class SettingsCollapsibleCardTest {
                     CardModel(
                         title = "",
                         text = CARD_TEXT,
+                        isVisible = { isVisible },
+                        onDismiss = { isVisible = false },
                     )
                 ),
             )

@@ -58,7 +58,7 @@ fun SettingsCollapsibleCard(
     var expanded by rememberSaveable { mutableStateOf(false) }
     SettingsCard {
         SettingsCardContent {
-            Header(title, imageVector, models.size, expanded) { expanded = it }
+            Header(title, imageVector, models.count { it.isVisible() }, expanded) { expanded = it }
         }
         AnimatedVisibility(expanded) {
             Column {
