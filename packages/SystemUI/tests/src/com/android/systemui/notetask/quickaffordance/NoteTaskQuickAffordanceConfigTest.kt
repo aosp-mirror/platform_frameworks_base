@@ -145,10 +145,11 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun lockScreenState_stylusUsed_userUnlocked_isSelected_noDefaultNotesAppSet_shouldEmitHidden() =
         runTest {
+            val underTest = createUnderTest()
             TestConfig()
                 .setStylusEverUsed(true)
                 .setUserUnlocked(true)
-                .setConfigSelections(mock<NoteTaskQuickAffordanceConfig>())
+                .setConfigSelections(underTest)
             whenever(
                     roleManager.getRoleHoldersAsUser(
                         eq(RoleManager.ROLE_NOTES),
@@ -157,7 +158,6 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
                 )
                 .thenReturn(emptyList())
 
-            val underTest = createUnderTest()
             val actual by collectLastValue(underTest.lockScreenState)
 
             assertThat(actual).isEqualTo(LockScreenState.Hidden)
@@ -165,12 +165,9 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Test
     fun lockScreenState_stylusUnused_userUnlocked_isSelected_shouldEmitHidden() = runTest {
-        TestConfig()
-            .setStylusEverUsed(false)
-            .setUserUnlocked(true)
-            .setConfigSelections(mock<NoteTaskQuickAffordanceConfig>())
-
         val underTest = createUnderTest()
+        TestConfig().setStylusEverUsed(false).setUserUnlocked(true).setConfigSelections(underTest)
+
         val actual by collectLastValue(underTest.lockScreenState)
 
         assertThat(actual).isEqualTo(LockScreenState.Hidden)
@@ -178,12 +175,9 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Test
     fun lockScreenState_stylusUsed_userLocked_isSelected_shouldEmitHidden() = runTest {
-        TestConfig()
-            .setStylusEverUsed(true)
-            .setUserUnlocked(false)
-            .setConfigSelections(mock<NoteTaskQuickAffordanceConfig>())
-
         val underTest = createUnderTest()
+        TestConfig().setStylusEverUsed(true).setUserUnlocked(false).setConfigSelections(underTest)
+
         val actual by collectLastValue(underTest.lockScreenState)
 
         assertThat(actual).isEqualTo(LockScreenState.Hidden)
