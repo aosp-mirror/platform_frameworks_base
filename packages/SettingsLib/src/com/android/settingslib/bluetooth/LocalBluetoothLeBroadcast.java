@@ -28,7 +28,9 @@ import android.bluetooth.BluetoothLeBroadcast;
 import android.bluetooth.BluetoothLeBroadcastAssistant;
 import android.bluetooth.BluetoothLeBroadcastMetadata;
 import android.bluetooth.BluetoothLeBroadcastReceiveState;
+import android.bluetooth.BluetoothLeBroadcastSettings;
 import android.bluetooth.BluetoothLeBroadcastSubgroup;
+import android.bluetooth.BluetoothLeBroadcastSubgroupSettings;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfile.ServiceListener;
 import android.content.ContentResolver;
@@ -42,9 +44,12 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.R;
+
+import com.google.common.collect.ImmutableList;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -374,6 +379,77 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         mServiceBroadcast.startBroadcast(
                 mBluetoothLeAudioContentMetadata,
                 (mBroadcastCode != null && mBroadcastCode.length > 0) ? mBroadcastCode : null);
+    }
+
+    /**
+     * Start the private Broadcast for personal audio sharing or qr code sharing.
+     *
+     * <p>The broadcast will use random string for both broadcast name and subgroup program info;
+     * The broadcast will use random string for broadcast code; The broadcast will only have one
+     * subgroup due to system limitation; The subgroup language will be null.
+     *
+     * <p>If the system started the LE Broadcast, then the system calls the corresponding callback
+     * {@link BluetoothLeBroadcast.Callback}.
+     */
+    public void startPrivateBroadcast(int quality) {
+        mNewAppSourceName = "Sharing audio";
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "The BluetoothLeBroadcast is null when starting the private broadcast.");
+            return;
+        }
+        if (mServiceBroadcast.getAllBroadcastMetadata().size()
+                >= mServiceBroadcast.getMaximumNumberOfBroadcasts()) {
+            Log.d(TAG, "Skip starting the broadcast due to number limit.");
+            return;
+        }
+        String programInfo = getProgramInfo();
+        if (DEBUG) {
+            Log.d(TAG, "startBroadcast: language = null ,programInfo = " + programInfo);
+        }
+        // Current broadcast framework only support one subgroup
+        BluetoothLeBroadcastSubgroupSettings subgroupSettings =
+                buildBroadcastSubgroupSettings(/* language= */ null, programInfo, quality);
+        BluetoothLeBroadcastSettings settings =
+                buildBroadcastSettings(
+                        true, // TODO: set to false after framework fix
+                        TextUtils.isEmpty(programInfo) ? null : programInfo,
+                        (mBroadcastCode != null && mBroadcastCode.length > 0)
+                                ? mBroadcastCode
+                                : null,
+                        ImmutableList.of(subgroupSettings));
+        mServiceBroadcast.startBroadcast(settings);
+    }
+
+    private BluetoothLeBroadcastSettings buildBroadcastSettings(
+            boolean isPublic,
+            @Nullable String broadcastName,
+            @Nullable byte[] broadcastCode,
+            List<BluetoothLeBroadcastSubgroupSettings> subgroupSettingsList) {
+        BluetoothLeBroadcastSettings.Builder builder =
+                new BluetoothLeBroadcastSettings.Builder()
+                        .setPublicBroadcast(isPublic)
+                        .setBroadcastName(broadcastName)
+                        .setBroadcastCode(broadcastCode);
+        for (BluetoothLeBroadcastSubgroupSettings subgroupSettings : subgroupSettingsList) {
+            builder.addSubgroupSettings(subgroupSettings);
+        }
+        return builder.build();
+    }
+
+    private BluetoothLeBroadcastSubgroupSettings buildBroadcastSubgroupSettings(
+            @Nullable String language, @Nullable String programInfo, int quality) {
+        BluetoothLeAudioContentMetadata metadata =
+                new BluetoothLeAudioContentMetadata.Builder()
+                        .setLanguage(language)
+                        .setProgramInfo(programInfo)
+                        .build();
+        // Current broadcast framework only support one subgroup, thus we still maintain the latest
+        // metadata to keep legacy UI working.
+        mBluetoothLeAudioContentMetadata = metadata;
+        return new BluetoothLeBroadcastSubgroupSettings.Builder()
+                .setPreferredQuality(quality)
+                .setContentMetadata(mBluetoothLeAudioContentMetadata)
+                .build();
     }
 
     public String getProgramInfo() {
