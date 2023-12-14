@@ -324,7 +324,8 @@ public class BtHelper {
         // AUDIO_FORMAT_DEFAULT as native audio policy manager expects a specific audio format
         // only if audio HW module selection based on format is supported for the device type.
         if (!(profile == BluetoothProfile.A2DP
-                || (profile == BluetoothProfile.LE_AUDIO && isLeOutput))) {
+                || (isLeOutput && ((profile == BluetoothProfile.LE_AUDIO)
+                        || (profile == BluetoothProfile.LE_AUDIO_BROADCAST))))) {
             return AudioSystem.AUDIO_FORMAT_DEFAULT;
         }
         @AudioSystem.AudioFormatNativeEnumForBtCodec int codec =
