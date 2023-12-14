@@ -837,13 +837,11 @@ public final class BroadcastHelper {
         }
 
         final String removedPackage = packageRemovedInfo.mRemovedPackage;
-        final int removedAppId = packageRemovedInfo.mRemovedAppId;
-        final int uid = packageRemovedInfo.mUid;
         final String installerPackageName = packageRemovedInfo.mInstallerPackageName;
         final SparseArray<int[]> broadcastAllowList = packageRemovedInfo.mBroadcastAllowList;
 
         Bundle extras = new Bundle(2);
-        extras.putInt(Intent.EXTRA_UID, removedAppId >= 0 ? removedAppId : uid);
+        extras.putInt(Intent.EXTRA_UID, packageRemovedInfo.mUid);
         extras.putBoolean(Intent.EXTRA_REPLACING, true);
         sendPackageBroadcastAndNotify(Intent.ACTION_PACKAGE_ADDED, removedPackage, extras,
                 0, null /*targetPackage*/, null, null, null, broadcastAllowList, null);
@@ -888,8 +886,6 @@ public final class BroadcastHelper {
             boolean removedBySystem,
             boolean isArchived) {
         final String removedPackage = packageRemovedInfo.mRemovedPackage;
-        final int removedAppId = packageRemovedInfo.mRemovedAppId;
-        final int uid = packageRemovedInfo.mUid;
         final String installerPackageName = packageRemovedInfo.mInstallerPackageName;
         final int[] broadcastUserIds = packageRemovedInfo.mBroadcastUsers;
         final int[] instantUserIds = packageRemovedInfo.mInstantUserIds;
@@ -902,8 +898,7 @@ public final class BroadcastHelper {
         final boolean isStaticSharedLib = packageRemovedInfo.mIsStaticSharedLib;
 
         Bundle extras = new Bundle();
-        final int removedUid = removedAppId >= 0  ? removedAppId : uid;
-        extras.putInt(Intent.EXTRA_UID, removedUid);
+        extras.putInt(Intent.EXTRA_UID, packageRemovedInfo.mUid);
         extras.putBoolean(Intent.EXTRA_DATA_REMOVED, dataRemoved);
         extras.putBoolean(Intent.EXTRA_SYSTEM_UPDATE_UNINSTALL, isRemovedPackageSystemUpdate);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
@@ -940,10 +935,10 @@ public final class BroadcastHelper {
                 sendPackageBroadcastAndNotify(Intent.ACTION_PACKAGE_FULLY_REMOVED,
                         removedPackage, extras, Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, null,
                         null, broadcastUserIds, instantUserIds, broadcastAllowList, null);
-                packageSender.notifyPackageRemoved(removedPackage, removedUid);
+                packageSender.notifyPackageRemoved(removedPackage, packageRemovedInfo.mUid);
             }
         }
-        if (removedAppId >= 0) {
+        if (packageRemovedInfo.mIsAppIdRemoved) {
             // If a system app's updates are uninstalled the UID is not actually removed. Some
             // services need to know the package name affected.
             if (isReplace) {

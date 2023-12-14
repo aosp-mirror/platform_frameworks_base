@@ -510,7 +510,10 @@ final class DeletePackageHelper {
             }
             if (clearPackageStateAndReturn) {
                 mRemovePackageHelper.clearPackageStateForUserLIF(ps, userId, flags);
-                outInfo.mRemovedAppId = ps.getAppId();
+                // Legacy behavior to report appId as UID here.
+                // The final broadcasts will contain a per-user UID.
+                outInfo.mUid = ps.getAppId();
+                outInfo.mIsAppIdRemoved = true;
                 mPm.scheduleWritePackageRestrictions(user);
                 return;
             }
@@ -555,6 +558,7 @@ final class DeletePackageHelper {
             boolean deleteCodeAndResources, int flags, @NonNull int[] allUserHandles,
             @NonNull PackageRemovedInfo outInfo, boolean writeSettings) {
         synchronized (mPm.mLock) {
+            // Since the package is being deleted in all users, report appId as the uid
             outInfo.mUid = ps.getAppId();
             outInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
                     mPm.snapshotComputer(), ps, allUserHandles,

@@ -25,7 +25,7 @@ final class PackageRemovedInfo {
     String mRemovedPackage;
     String mInstallerPackageName;
     int mUid = -1;
-    int mRemovedAppId = -1;
+    boolean mIsAppIdRemoved = false;
     int[] mOrigUsers;
     int[] mRemovedUsers = null;
     int[] mBroadcastUsers = null;

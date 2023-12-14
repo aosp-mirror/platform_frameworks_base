@@ -2912,7 +2912,8 @@ final class InstallPackageHelper {
                 info.mInstallerPackageName = request.getInstallerPackageName();
                 info.mRemovedUsers = firstUserIds;
                 info.mBroadcastUsers = firstUserIds;
-                info.mRemovedAppId = request.getAppId();
+                info.mUid = request.getAppId();
+                info.mIsAppIdRemoved = true;
                 info.mRemovedPackageVersionCode = request.getPkg().getLongVersionCode();
                 info.mRemovedForAllUsers = true;
 
