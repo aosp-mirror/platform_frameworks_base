@@ -1335,7 +1335,11 @@ public class NotificationManager {
     }
 
     /** @hide */
-    public String addAutomaticZenRule(AutomaticZenRule automaticZenRule, boolean fromUser) {
+    @TestApi
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @NonNull
+    public String addAutomaticZenRule(@NonNull AutomaticZenRule automaticZenRule,
+            boolean fromUser) {
         INotificationManager service = getService();
         try {
             return service.addAutomaticZenRule(automaticZenRule,
@@ -1363,8 +1367,10 @@ public class NotificationManager {
     }
 
     /** @hide */
-    public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule,
-            boolean fromUser) {
+    @TestApi
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public boolean updateAutomaticZenRule(@NonNull String id,
+            @NonNull AutomaticZenRule automaticZenRule, boolean fromUser) {
         INotificationManager service = getService();
         try {
             return service.updateAutomaticZenRule(id, automaticZenRule, fromUser);
@@ -1421,7 +1427,9 @@ public class NotificationManager {
     }
 
     /** @hide */
-    public boolean removeAutomaticZenRule(String id, boolean fromUser) {
+    @TestApi
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public boolean removeAutomaticZenRule(@NonNull String id, boolean fromUser) {
         INotificationManager service = getService();
         try {
             return service.removeAutomaticZenRule(id, fromUser);
