@@ -329,15 +329,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private @Surface.Rotation int mCurrentRotation;
 
     /**
-     * An optional overlay used to mask content changing between an app in/out of PiP, only set if
-     * {@link PipTransitionState#getInSwipePipToHomeTransition()} is true, only in gesture nav.
-     */
-    @Nullable
-    SurfaceControl mSwipePipToHomeOverlay;
-
-    /**
-     * An optional overlay used to mask content changing between an app in/out of PiP, only set if
-     * {@link PipTransitionState#getInSwipePipToHomeTransition()} is false.
+     * An optional overlay used to mask content changing between an app in/out of PiP.
      */
     @Nullable
     SurfaceControl mPipOverlay;
@@ -480,7 +472,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
         mPipBoundsState.setBounds(destinationBounds);
-        mSwipePipToHomeOverlay = overlay;
+        mPipOverlay = overlay;
         if (ENABLE_SHELL_TRANSITIONS && overlay != null) {
             // With Shell transition, the overlay was attached to the remote transition leash, which
             // will be removed when the current transition is finished, so we need to reparent it
@@ -892,7 +884,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         final Rect destinationBounds = mPipBoundsState.getBounds();
-        final SurfaceControl swipeToHomeOverlay = mSwipePipToHomeOverlay;
+        final SurfaceControl swipeToHomeOverlay = mPipOverlay;
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
                 .resetScale(tx, mLeash, destinationBounds)
@@ -911,7 +903,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             }
         }, tx);
         mPipTransitionState.setInSwipePipToHomeTransition(false);
-        mSwipePipToHomeOverlay = null;
+        mPipOverlay = null;
     }
 
     private void applyEnterPipSyncTransaction(Rect destinationBounds, Runnable runnable,
@@ -1126,9 +1118,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         clearWaitForFixedRotation();
-        if (mSwipePipToHomeOverlay != null) {
-            removeContentOverlay(mSwipePipToHomeOverlay, null /* callback */);
-            mSwipePipToHomeOverlay = null;
+        if (mPipOverlay != null) {
+            removeContentOverlay(mPipOverlay, null /* callback */);
+            mPipOverlay = null;
         }
         resetShadowRadius();
         mPipTransitionState.setInSwipePipToHomeTransition(false);

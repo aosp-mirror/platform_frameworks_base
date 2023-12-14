@@ -67,15 +67,6 @@ public abstract class PipContentOverlay {
     public abstract void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
             Rect currentBounds, float fraction);
 
-    /**
-     * Callback when reaches the end of animation on the internal {@link #mLeash}.
-     * @param atomicTx {@link SurfaceControl.Transaction} to operate, you should not explicitly
-     *                 call apply on this transaction, it should be applied on the caller side.
-     * @param destinationBounds {@link Rect} of the final bounds.
-     */
-    public abstract void onAnimationEnd(SurfaceControl.Transaction atomicTx,
-            Rect destinationBounds);
-
     /** A {@link PipContentOverlay} uses solid color. */
     public static final class PipColorOverlay extends PipContentOverlay {
         private static final String TAG = PipColorOverlay.class.getSimpleName();
@@ -105,11 +96,6 @@ public abstract class PipContentOverlay {
         public void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
                 Rect currentBounds, float fraction) {
             atomicTx.setAlpha(mLeash, fraction < 0.5f ? 0 : (fraction - 0.5f) * 2);
-        }
-
-        @Override
-        public void onAnimationEnd(SurfaceControl.Transaction atomicTx, Rect destinationBounds) {
-            // Do nothing. Color overlay should be fully opaque by now, ready for fade out.
         }
 
         private float[] getContentOverlayColor(Context context) {
@@ -163,11 +149,6 @@ public abstract class PipContentOverlay {
         public void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
                 Rect currentBounds, float fraction) {
             // Do nothing. Keep the snapshot till animation ends.
-        }
-
-        @Override
-        public void onAnimationEnd(SurfaceControl.Transaction atomicTx, Rect destinationBounds) {
-            // Do nothing. Snapshot overlay should be fully opaque by now, ready for fade out.
         }
     }
 
@@ -252,11 +233,6 @@ public abstract class PipContentOverlay {
                     appBoundsCenterY);
             atomicTx.setMatrix(mLeash, mTmpTransform, mTmpFloat9)
                     .setAlpha(mLeash, fraction < 0.5f ? 0 : (fraction - 0.5f) * 2);
-        }
-
-        @Override
-        public void onAnimationEnd(SurfaceControl.Transaction atomicTx, Rect destinationBounds) {
-            // Do nothing. Icon overlay should be fully opaque by now, ready for fade out.
         }
 
         @Override
