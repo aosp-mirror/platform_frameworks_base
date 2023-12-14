@@ -3906,17 +3906,20 @@ public abstract class Layout {
     // Getters of parameters that is used for building Layout instance
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    // TODO(316208691): Revive following removed API docs.
+    // @see Layout.Builder
     /**
      * Return the text used for creating this layout.
      *
      * @return the text used for creating this layout.
-     * @see Layout.Builder
      */
     @NonNull
     public final CharSequence getText() {
         return mText;
     }
 
+    // TODO(316208691): Revive following removed API docs.
+    // @see Layout.Builder
     /**
      * Return the paint used for creating this layout.
      *
@@ -3924,29 +3927,30 @@ public abstract class Layout {
      * drawing/measuring text.
      *
      * @return the paint used for creating this layout.
-     * @see Layout.Builder
      */
     @NonNull
     public final TextPaint getPaint() {
         return mPaint;
     }
 
+    // TODO(316208691): Revive following removed API docs.
+    // @see Layout.Builder
     /**
      * Return the width used for creating this layout in pixels.
      *
      * @return the width used for creating this layout in pixels.
-     * @see Layout.Builder
      */
     @IntRange(from = 0)
     public final int getWidth() {
         return mWidth;
     }
 
+    // TODO(316208691): Revive following removed API docs.
+    // @see Layout.Builder#setAlignment(Alignment)
     /**
      * Returns the alignment used for creating this layout in pixels.
      *
      * @return the alignment used for creating this layout.
-     * @see Layout.Builder#setAlignment(Alignment)
      * @see StaticLayout.Builder#setAlignment(Alignment)
      */
     @NonNull
@@ -3967,15 +3971,15 @@ public abstract class Layout {
         return mTextDir;
     }
 
+    // TODO(316208691): Revive following removed API docs.
+    // This is an alias of {@link #getLineSpacingMultiplier}.
+    // @see Layout.Builder#setLineSpacingMultiplier(float)
+    // @see Layout#getLineSpacingMultiplier()
     /**
      * Returns the multiplier applied to the line height.
      *
-     * This is an alias of {@link #getLineSpacingMultiplier}.
-     *
      * @return the line height multiplier.
-     * @see Layout.Builder#setLineSpacingMultiplier(float)
      * @see StaticLayout.Builder#setLineSpacing(float, float)
-     * @see Layout#getLineSpacingMultiplier()
      */
     public final float getSpacingMultiplier() {
         return getLineSpacingMultiplier();
@@ -3994,15 +3998,15 @@ public abstract class Layout {
         return mSpacingMult;
     }
 
+    // TODO(316208691): Revive following removed API docs.
+    // This is an alias of {@link #getLineSpacingAmount()}.
+    // @see Layout.Builder#setLineSpacingAmount(float)
+    // @see Layout#getLineSpacingAmount()
     /**
      * Returns the amount added to the line height.
      *
-     * This is an alias of {@link #getLineSpacingAmount()}.
-     *
      * @return the line height additional amount.
-     * @see Layout.Builder#setLineSpacingAmount(float)
      * @see StaticLayout.Builder#setLineSpacing(float, float)
-     * @see Layout#getLineSpacingAmount()
      */
     public final float getSpacingAdd() {
         return getLineSpacingAmount();
@@ -4033,11 +4037,12 @@ public abstract class Layout {
         return mIncludePad;
     }
 
+    // TODO(316208691): Revive following removed API docs.
+    // @see Layout.Builder#setFallbackLineSpacingEnabled(boolean)
     /**
      * Return true if the fallback line space is enabled in this Layout.
      *
      * @return true if the fallback line space is enabled. Otherwise, returns false.
-     * @see Layout.Builder#setFallbackLineSpacingEnabled(boolean)
      * @see StaticLayout.Builder#setUseLineSpacingFromFallbacks(boolean)
      */
     // not being final because of already published API.
@@ -4045,17 +4050,18 @@ public abstract class Layout {
         return mFallbackLineSpacing;
     }
 
+    // TODO(316208691): Revive following removed API docs.
+    // @see Layout.Builder#setEllipsizedWidth(int)
+    // @see Layout.Builder#setEllipsize(TextUtils.TruncateAt)
+    // @see Layout#getEllipsize()
     /**
      * Return the width to which this layout is ellipsized.
      *
      * If no ellipsize is applied, the same amount of {@link #getWidth} is returned.
      *
      * @return the amount of ellipsized width in pixels.
-     * @see Layout.Builder#setEllipsizedWidth(int)
      * @see StaticLayout.Builder#setEllipsizedWidth(int)
-     * @see Layout.Builder#setEllipsize(TextUtils.TruncateAt)
      * @see StaticLayout.Builder#setEllipsize(TextUtils.TruncateAt)
-     * @see Layout#getEllipsize()
      */
     @IntRange(from = 0)
     public int getEllipsizedWidth() {  // not being final because of already published API.
