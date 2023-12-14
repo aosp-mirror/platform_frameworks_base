@@ -164,6 +164,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.ProcessList.ProcStartHandler;
+import static com.android.server.flags.Flags.disableSystemCompaction;
 import static com.android.server.net.NetworkPolicyManagerInternal.updateBlockedReasonsWithProcState;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.UserManagerInternal.USER_START_MODE_BACKGROUND;
@@ -8564,8 +8565,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long now = SystemClock.uptimeMillis();
             final long timeSinceLastIdle = now - mLastIdleTime;
 
-            // Compact all non-zygote processes to freshen up the page cache.
-            mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
+            if (!disableSystemCompaction()) {
+                // Compact all non-zygote processes to freshen up the page cache.
+                mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
+            }
 
             final long lowRamSinceLastIdle = mAppProfiler.getLowRamTimeSinceIdleLPr(now);
             mLastIdleTime = now;
