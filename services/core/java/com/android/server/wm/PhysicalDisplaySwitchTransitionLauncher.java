@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH;
 
 import static com.android.internal.R.bool.config_unfoldTransitionEnabled;
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
@@ -110,15 +111,6 @@ public class PhysicalDisplaySwitchTransitionLauncher {
             return;
         }
 
-        final TransitionRequestInfo.DisplayChange displayChange =
-                new TransitionRequestInfo.DisplayChange(displayId);
-
-        final Rect startAbsBounds = new Rect(0, 0, oldDisplayWidth, oldDisplayHeight);
-        displayChange.setStartAbsBounds(startAbsBounds);
-        final Rect endAbsBounds = new Rect(0, 0, newDisplayWidth, newDisplayHeight);
-        displayChange.setEndAbsBounds(endAbsBounds);
-        displayChange.setPhysicalDisplayChanged(true);
-
         mTransition = null;
 
         if (mTransitionController.isCollecting()) {
@@ -128,10 +120,20 @@ public class PhysicalDisplaySwitchTransitionLauncher {
 
             // Make sure that transition is not ready until we finish the remote display change
             mTransition.setReady(mDisplayContent, false);
+            mTransition.addFlag(TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH);
 
             ProtoLog.d(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Adding display switch to existing collecting transition");
         } else {
+            final TransitionRequestInfo.DisplayChange displayChange =
+                    new TransitionRequestInfo.DisplayChange(displayId);
+
+            final Rect startAbsBounds = new Rect(0, 0, oldDisplayWidth, oldDisplayHeight);
+            displayChange.setStartAbsBounds(startAbsBounds);
+            final Rect endAbsBounds = new Rect(0, 0, newDisplayWidth, newDisplayHeight);
+            displayChange.setEndAbsBounds(endAbsBounds);
+            displayChange.setPhysicalDisplayChanged(true);
+
             mTransition = mTransitionController.requestTransitionIfNeeded(TRANSIT_CHANGE,
                     0 /* flags */,
                     mDisplayContent, mDisplayContent, null /* remoteTransition */,
