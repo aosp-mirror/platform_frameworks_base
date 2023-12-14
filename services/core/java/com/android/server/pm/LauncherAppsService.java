@@ -1599,6 +1599,33 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        public @Nullable IntentSender getAppMarketActivityIntent(@NonNull String callingPackage,
+                @Nullable String packageName, @NonNull UserHandle user) {
+            // Only system launchers, which have access to recents should have access to this API.
+            // TODO(b/303803157): Update access control for this API to default Launcher app.
+            if (!mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
+                throw new SecurityException("Caller is not the recents app");
+            }
+            if (!canAccessProfile(user.getIdentifier(),
+                    "Can't access AppMarketActivity for another user")) {
+                return null;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                // TODO(b/316118005): Add code to launch the app installer for the packageName.
+                Intent appMarketIntent = new Intent(Intent.ACTION_MAIN);
+                appMarketIntent.addCategory(Intent.CATEGORY_APP_MARKET);
+                final PendingIntent pi = PendingIntent.getActivityAsUser(
+                        mContext, /* requestCode */ 0, appMarketIntent, PendingIntent.FLAG_ONE_SHOT
+                                | PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT,
+                        /* options */ null, user);
+                return pi == null ? null : pi.getIntentSender();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void startActivityAsUser(IApplicationThread caller, String callingPackage,
                 String callingFeatureId, ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {

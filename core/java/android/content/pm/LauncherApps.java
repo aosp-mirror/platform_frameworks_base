@@ -799,6 +799,55 @@ public class LauncherApps {
         }
     }
 
+
+    /**
+     * Returns an intent sender which can be used to start the App Market activity (Installer
+     * Activity).
+     * This method is primarily used to get an intent sender which starts App Market activity for
+     * another profile, if the caller is not otherwise allowed to start activity in that profile.
+     *
+     * <p>When packageName is set, intent sender to start the App Market Activity which installed
+     * the package in calling user will be returned, but for the profile passed.
+     *
+     * <p>When packageName is not set, intent sender to launch the default App Market Activity for
+     * the profile will be returned. In case there are multiple App Market Activities available for
+     * the profile, IntentPicker will be started, allowing user to choose the preferred activity.
+     *
+     * <p>The method will fall back to the behaviour of not having the packageName set, in case:
+     * <ul>
+     *     <li>No activity for the packageName is found in calling user-space.</li>
+     *     <li>The App Market Activity which installed the package in calling user-space is not
+     *         present.</li>
+     *     <li>The App Market Activity which installed the package in calling user-space is not
+     *         present in the profile passed.</li>
+     * </ul>
+     * </p>
+     *
+     *
+     *
+     * @param packageName the package for which intent sender to launch App Market Activity is
+     *                    required.
+     * @param user the profile for which intent sender to launch App Market Activity is required.
+     * @return {@link IntentSender} object which launches the App Market Activity, null in case
+     *         there is no such activity.
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    public IntentSender getAppMarketActivityIntent(@Nullable String packageName,
+            @NonNull UserHandle user) {
+        if (DEBUG) {
+            Log.i(TAG, "getAppMarketActivityIntent for package: " + packageName
+                    + " user: " + user);
+        }
+        try {
+            return mService.getAppMarketActivityIntent(mContext.getPackageName(),
+                    packageName, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Returns the list of the system packages that are installed at user creation.
      *
