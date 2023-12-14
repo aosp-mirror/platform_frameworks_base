@@ -274,9 +274,7 @@ public class CompanionTransportManager {
     }
 
     private boolean isSecureTransportEnabled() {
-        boolean enabled = !Build.IS_DEBUGGABLE || mSecureTransportEnabled;
-
-        return enabled;
+        return mSecureTransportEnabled;
     }
 
     private void addMessageListenersToTransport(Transport transport) {
