@@ -882,6 +882,9 @@
     <!-- Permissions required for CTS test - CtsAccessibilityServiceTestCases-->
     <uses-permission android:name="android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING" />
 
+    <!-- Permission required for Cts test - CtsNotificationTestCases -->
+    <uses-permission android:name="android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
