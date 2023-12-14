@@ -89,6 +89,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -162,6 +163,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
     @NonNull private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
+    @NonNull private final ShadeInteractor mShadeInteractor;
     @Nullable private final TouchProcessor mTouchProcessor;
     @NonNull private final SessionTracker mSessionTracker;
     @NonNull private final Lazy<DeviceEntryUdfpsTouchOverlayViewModel>
@@ -290,7 +292,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         mKeyguardTransitionInteractor,
                         mSelectedUserInteractor,
                         mDeviceEntryUdfpsTouchOverlayViewModel,
-                        mDefaultUdfpsTouchOverlayViewModel
+                        mDefaultUdfpsTouchOverlayViewModel,
+                        mShadeInteractor
                     )));
         }
 
@@ -656,6 +659,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull ActivityLaunchAnimator activityLaunchAnimator,
             @NonNull @BiometricsBackground Executor biometricsExecutor,
             @NonNull PrimaryBouncerInteractor primaryBouncerInteractor,
+            @NonNull ShadeInteractor shadeInteractor,
             @NonNull SinglePointerTouchProcessor singlePointerTouchProcessor,
             @NonNull SessionTracker sessionTracker,
             @NonNull AlternateBouncerInteractor alternateBouncerInteractor,
@@ -705,6 +709,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
         mBiometricExecutor = biometricsExecutor;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
+        mShadeInteractor = shadeInteractor;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mInputManager = inputManager;
         mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;

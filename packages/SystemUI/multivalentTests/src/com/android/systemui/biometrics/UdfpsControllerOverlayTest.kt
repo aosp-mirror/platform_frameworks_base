@@ -47,6 +47,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
@@ -54,7 +55,6 @@ import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
-import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
@@ -101,7 +101,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock
     private lateinit var unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController
     @Mock private lateinit var udfpsDisplayMode: UdfpsDisplayModeProvider
-    @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var controllerCallback: IUdfpsOverlayControllerCallback
     @Mock private lateinit var udfpsController: UdfpsController
     @Mock private lateinit var udfpsView: UdfpsView
@@ -117,6 +116,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock
     private lateinit var udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Captor private lateinit var layoutParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
     private val onTouch = { _: View, _: MotionEvent, _: Boolean -> true }
@@ -174,6 +174,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 { deviceEntryUdfpsTouchOverlayViewModel },
                 { defaultUdfpsTouchOverlayViewModel },
+                shadeInteractor
             )
         block()
     }
