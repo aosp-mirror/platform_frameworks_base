@@ -1907,6 +1907,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Week-end"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Événement"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sommeil"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activé"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Désactivé"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> coupe certains sons"</string>
@@ -2342,8 +2344,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Duplication impossible"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Utilisez un autre câble et réessayez"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Votre appareil est trop chaud et ne peut pas se dupliquer sur l\'écran tant qu\'il n\'a pas refroidi."</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Le câble n\'est peut-être pas compatible avec les écrans"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Votre câble USB-C n\'est peut-être pas connecté correctement à l\'écran"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen activé"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> utilise les deux écrans pour afficher du contenu"</string>

@@ -1906,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"आठवड्याच्या शेवटी"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"इव्‍हेंट"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"झोपताना"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"सुरू आहे"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"बंद आहे"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> काही ध्‍वनी म्‍यूट करत आहे"</string>
@@ -2341,8 +2343,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"डिस्प्लेवर मिरर करू शकत नाही"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"वेगळी केबल वापरून पुन्हा प्रयत्न करा"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"तुमचे डिव्हाइस खूप गरम आहे आणि ते थंड होईपर्यंत डिस्प्लेमध्ये मिरर करू शकत नाही"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"केबल कदाचित डिस्प्लेना सपोर्ट करणार नाही"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"तुमची USB-C केबल कदाचित डिस्प्लेना योग्यरीत्या कनेक्ट होणार नाही"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen सुरू आहे"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"आशय दाखवण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> दोन्ही डिस्प्ले वापरत आहे"</string>

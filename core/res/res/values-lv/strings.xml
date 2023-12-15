@@ -1907,6 +1907,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Nedēļas nogalē"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Pasākums"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Gulēšana"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Ieslēgta"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Izslēgta"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> izslēdz noteiktas skaņas"</string>
@@ -2342,8 +2344,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nevar spoguļot displeju"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Izmantojiet citu vadu un mēģiniet vēlreiz."</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Jūsu ierīce ir pārāk silta, un to nevar spoguļot displejā, kamēr tā nav atdzisusi."</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Iespējams, vads neatbalsta displejus"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Iespējams, jūsu USB-C vads nevarēs nodrošināt pareizu savienojumu ar displejiem."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen režīms"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Ieslēgts Dual Screen režīms"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> satura rādīšanai izmanto abus displejus."</string>

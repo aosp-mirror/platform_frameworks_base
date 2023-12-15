@@ -1907,6 +1907,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fine settimana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Notte"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"On"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Off"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> sta disattivando alcuni suoni"</string>
@@ -2342,8 +2344,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Impossibile eseguire il mirroring al display"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Usa un altro cavo e riprova"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Il tuo dispositivo è troppo caldo e non può eseguire il mirroring al display finché non si raffredda"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Il cavo potrebbe non supportare i display"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Il cavo USB-C potrebbe non collegarsi correttamente ai display"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Doppio schermo"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Doppio schermo attivo"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> sta usando entrambi i display per mostrare contenuti"</string>

@@ -1906,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Həftə sonu"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Tədbir"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Yuxu vaxtı"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aktiv"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Deaktiv"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> bəzi səsləri səssiz rejimə salır"</string>
@@ -2341,8 +2343,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Displeydə əks etdirmək olmur"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Başqa kabel istifadə edin və yenidən cəhd edin"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Cihaz çox isinib və soyuyana qədər displeydə əks etdirmək olmur"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kabel displeyləri dəstəkləməyə bilər"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C kabeli displeylərə düzgün qoşulmaya bilər"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"İkili ekran"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"İkili ekran aktivdir"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> məzmunu göstərmək üçün hər iki displeydən istifadə edir"</string>

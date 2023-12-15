@@ -1906,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Ngempelasonto"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Umcimbi"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Ulele"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Kuvuliwe"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Kuvaliwe"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ithulisa eminye imisindo"</string>
@@ -2341,8 +2343,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Ayikwazi ukufanisa nesibonisi"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Sebenzisa ikhebuli ehlukile bese uyazama futhi"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Idivayisi yakho ifudumele kakhulu futhi ayikwazi ukwenza isibuko kusibonisi size siphole"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Ikhebuli ingase ingasekeli iziboniso"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Ikhebuli yakho ye-USB-C ingase ingaxhumi kahle kuzibonisi"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Isikrini esikabili"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Isikrini esikabili sivuliwe"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> isebenzisa zombili izibonisi ukukhombisa okuqukethwe"</string>
