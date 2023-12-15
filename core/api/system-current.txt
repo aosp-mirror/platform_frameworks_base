@@ -13516,6 +13516,7 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccount> getAllPhoneAccounts();
     method public int getAllPhoneAccountsCount();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts(boolean);
+    method @FlaggedApi("com.android.internal.telephony.flags.work_profile_api_split") @NonNull @RequiresPermission(allOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.INTERACT_ACROSS_PROFILES}) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccountsAcrossProfiles(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}, conditional=true) public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCurrentTtyMode();
