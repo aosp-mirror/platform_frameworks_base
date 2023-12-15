@@ -146,6 +146,14 @@ flag {
 }
 
 flag {
+    name: "enable_vsync_low_light_vote"
+    namespace: "display_manager"
+    description: "Feature flag for vsync low light vote"
+    bug: "314921657"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "brightness_wear_bedtime_mode_clamper"
     namespace: "display_manager"
     description: "Feature flag for the Wear Bedtime mode brightness clamper"

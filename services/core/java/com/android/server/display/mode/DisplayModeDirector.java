@@ -216,7 +216,8 @@ public class DisplayModeDirector {
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mSettingsObserver = new SettingsObserver(context, handler, mDvrrSupported,
                 displayManagerFlags);
-        mBrightnessObserver = new BrightnessObserver(context, handler, injector);
+        mBrightnessObserver = new BrightnessObserver(context, handler, injector, mDvrrSupported,
+                displayManagerFlags);
         mDefaultDisplayDeviceConfig = null;
         mUdfpsObserver = new UdfpsObserver();
         mVotesStorage = new VotesStorage(this::notifyDesiredDisplayModeSpecsChangedLocked,
@@ -1473,6 +1474,8 @@ public class DisplayModeDirector {
         private final Injector mInjector;
         private final Handler mHandler;
 
+        private final boolean mVsyncLowLightBlockingVoteEnabled;
+
         private final IThermalEventListener.Stub mThermalListener =
                 new IThermalEventListener.Stub() {
                     @Override
@@ -1507,7 +1510,8 @@ public class DisplayModeDirector {
         @GuardedBy("mLock")
         private @Temperature.ThrottlingStatus int mThermalStatus = Temperature.THROTTLING_NONE;
 
-        BrightnessObserver(Context context, Handler handler, Injector injector) {
+        BrightnessObserver(Context context, Handler handler, Injector injector,
+                boolean dvrrSupported , DisplayManagerFlags flags) {
             mContext = context;
             mHandler = handler;
             mInjector = injector;
@@ -1515,6 +1519,7 @@ public class DisplayModeDirector {
                 /* attemptReadFromFeatureParams= */ false);
             mRefreshRateInHighZone = context.getResources().getInteger(
                     R.integer.config_fixedRefreshRateInHighZone);
+            mVsyncLowLightBlockingVoteEnabled = dvrrSupported && flags.isVsyncLowLightVoteEnabled();
         }
 
         /**
@@ -2094,7 +2099,17 @@ public class DisplayModeDirector {
                                 Vote.forPhysicalRefreshRates(range.min, range.max);
                     }
                 }
-                refreshRateSwitchingVote = Vote.forDisableRefreshRateSwitching();
+
+                if (mVsyncLowLightBlockingVoteEnabled) {
+                    refreshRateSwitchingVote = Vote.forSupportedModesAndDisableRefreshRateSwitching(
+                            List.of(
+                                    new SupportedModesVote.SupportedMode(
+                                            /* peakRefreshRate= */ 60f, /* vsyncRate= */ 60f),
+                                    new SupportedModesVote.SupportedMode(
+                                            /* peakRefreshRate= */120f, /* vsyncRate= */ 120f)));
+                } else {
+                    refreshRateSwitchingVote = Vote.forDisableRefreshRateSwitching();
+                }
             }
 
             boolean insideHighZone = hasValidHighZone()
