@@ -39,21 +39,22 @@ public final class HearingAidAudioRoutingConstants {
     public static final int[] MEDIA_ROUTING_ATTRIBUTES = new int[] {
             // Stands for STRATEGY_MEDIA, including USAGE_GAME, USAGE_ASSISTANT,
             // USAGE_ASSISTANCE_NAVIGATION_GUIDANCE, USAGE_ASSISTANCE_SONIFICATION
-            AudioAttributes.USAGE_MEDIA
-    };
-
-    public static final int[] RINGTONE_ROUTING_ATTRIBUTE = new int[] {
-            // Stands for STRATEGY_SONIFICATION, including USAGE_ALARM
-            AudioAttributes.USAGE_NOTIFICATION_RINGTONE
-    };
-
-    public static final int[] SYSTEM_SOUNDS_ROUTING_ATTRIBUTES = new int[] {
-            // Stands for STRATEGY_SONIFICATION_RESPECTFUL, including USAGE_NOTIFICATION_EVENT
-            AudioAttributes.USAGE_NOTIFICATION,
+            AudioAttributes.USAGE_MEDIA,
             // Stands for STRATEGY_ACCESSIBILITY
             AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY,
             // Stands for STRATEGY_DTMF
             AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING,
+    };
+
+    public static final int[] RINGTONE_ROUTING_ATTRIBUTES = new int[] {
+            // Stands for STRATEGY_SONIFICATION, including USAGE_ALARM
+            AudioAttributes.USAGE_NOTIFICATION_RINGTONE
+    };
+
+    public static final int[] NOTIFICATION_ROUTING_ATTRIBUTES = new int[] {
+            // Stands for STRATEGY_SONIFICATION_RESPECTFUL, including USAGE_NOTIFICATION_EVENT
+            AudioAttributes.USAGE_NOTIFICATION,
+
     };
 
     @Retention(RetentionPolicy.SOURCE)
