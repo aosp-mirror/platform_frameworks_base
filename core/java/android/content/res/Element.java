@@ -308,7 +308,7 @@ public class Element {
                 initializeCounter(TAG_USES_LIBRARY, 1000);
                 initializeCounter(TAG_ACTIVITY_ALIAS, 4000);
                 initializeCounter(TAG_PROVIDER, 8000);
-                initializeCounter(TAG_ACTIVITY, 40000);
+                initializeCounter(TAG_ACTIVITY, 30000);
                 break;
             case TAG_COMPATIBLE_SCREENS:
                 initializeCounter(TAG_SCREEN, 4000);
