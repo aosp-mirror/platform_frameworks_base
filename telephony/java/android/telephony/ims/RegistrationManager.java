@@ -84,7 +84,7 @@ public interface RegistrationManager {
                 SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
                 SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
                 SUGGESTED_ACTION_TRIGGER_RAT_BLOCK,
-                SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCK
+                SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCKS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SuggestedAction {}
@@ -116,9 +116,10 @@ public interface RegistrationManager {
 
     /**
      * Indicates that the IMS registration on current RAT failed multiple times.
-     * The radio shall block the current RAT and search for other available RATs in the
-     * background. If no other RAT is available that meets the carrier requirements, the
-     * radio may remain on the current RAT for internet service. The radio clears all
+     * The radio shall block the {@link ImsRegistrationImplBase.ImsRegistrationTech}
+     * included with this and search for other available RATs in the background.
+     * If no other RAT is available that meets the carrier requirements, the
+     * radio may remain on the blocked RAT for internet service. The radio clears all
      * RATs marked as unavailable if the IMS service is registered to the carrier network.
      * @hide
      */
@@ -133,7 +134,7 @@ public interface RegistrationManager {
      */
     @SystemApi
     @FlaggedApi(Flags.FLAG_ADD_RAT_RELATED_SUGGESTED_ACTION_TO_IMS_REGISTRATION)
-    int SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCK = 4;
+    int SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCKS = 4;
 
     /**@hide*/
     // Translate ImsRegistrationImplBase API to new AccessNetworkConstant because WLAN
