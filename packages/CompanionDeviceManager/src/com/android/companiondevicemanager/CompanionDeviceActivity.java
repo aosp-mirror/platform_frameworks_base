@@ -527,6 +527,15 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         final Drawable profileIcon = getIcon(this, PROFILE_ICONS.get(deviceProfile));
 
+        // No need to show permission consent dialog if it is a isSkipPrompt(true)
+        // AssociationRequest. See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
+        if (mRequest.isSkipPrompt()) {
+            Log.d(TAG, "Skipping the permission consent dialog.");
+            mSingleDeviceSpinner.setVisibility(View.GONE);
+            onUserSelectedDevice(mSelectedDevice);
+            return;
+        }
+
         updatePermissionUi();
 
         mProfileIcon.setImageDrawable(profileIcon);
@@ -598,6 +607,14 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         Log.d(TAG, "onDeviceClicked(): " + mSelectedDevice.toShortString());
 
+        // No need to show permission consent dialog if it is a isSkipPrompt(true)
+        // AssociationRequest. See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
+        if (mRequest.isSkipPrompt()) {
+            Log.d(TAG, "Skipping the permission consent dialog.");
+            onUserSelectedDevice(mSelectedDevice);
+            return;
+        }
+
         updatePermissionUi();
 
         mSummary.setVisibility(View.VISIBLE);
@@ -614,14 +631,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         final Spanned title = getHtmlFromResources(
                 this, PROFILE_TITLES.get(deviceProfile), mAppLabel, remoteDeviceName);
         final Spanned summary;
-
-        // No need to show permission consent dialog if it is a isSkipPrompt(true)
-        // AssociationRequest. See AssociationRequestsProcessor#mayAssociateWithoutPrompt.
-        if (mRequest.isSkipPrompt()) {
-            mSingleDeviceSpinner.setVisibility(View.GONE);
-            onUserSelectedDevice(mSelectedDevice);
-            return;
-        }
 
         if (deviceProfile == null && mRequest.isSingleDevice()) {
             summary = getHtmlFromResources(this, summaryResourceId, remoteDeviceName);

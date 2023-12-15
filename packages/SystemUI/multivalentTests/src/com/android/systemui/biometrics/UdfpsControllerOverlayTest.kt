@@ -17,12 +17,12 @@
 package com.android.systemui.biometrics
 
 import android.graphics.Rect
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
-import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_BP
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_OTHER
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTINGS
+import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
+import android.hardware.biometrics.BiometricRequestConstants.RequestReason
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
@@ -135,7 +135,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     }
 
     private fun withReason(
-        @ShowReason reason: Int,
+        @RequestReason reason: Int,
         isDebuggable: Boolean = false,
         enableDeviceEntryUdfpsRefactor: Boolean = false,
         block: () -> Unit,

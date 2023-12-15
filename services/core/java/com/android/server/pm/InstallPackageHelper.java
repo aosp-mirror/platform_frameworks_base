@@ -154,12 +154,16 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.F2fsUtils;
+import com.android.internal.pm.parsing.PackageParserException;
+import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.ComponentMutateUtils;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.pm.pkg.component.ParsedPermission;
 import com.android.internal.pm.pkg.component.ParsedPermissionGroup;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.security.VerityUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -181,8 +185,6 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedLibraryWrapper;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.utils.WatchedArrayMap;
@@ -1165,7 +1167,7 @@ final class InstallPackageHelper {
                         parseFlags);
                 archivedPackage = request.getPackageLite().getArchivedPackage();
             }
-        } catch (PackageManagerException e) {
+        } catch (PackageManagerException | PackageParserException e) {
             throw new PrepareFailure("Failed parse during installPackageLI", e);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -2910,7 +2912,8 @@ final class InstallPackageHelper {
                 info.mInstallerPackageName = request.getInstallerPackageName();
                 info.mRemovedUsers = firstUserIds;
                 info.mBroadcastUsers = firstUserIds;
-                info.mRemovedAppId = request.getAppId();
+                info.mUid = request.getAppId();
+                info.mIsAppIdRemoved = true;
                 info.mRemovedPackageVersionCode = request.getPkg().getLongVersionCode();
                 info.mRemovedForAllUsers = true;
 
@@ -3856,7 +3859,7 @@ final class InstallPackageHelper {
 
         synchronized (mPm.mLock) {
             platformPackage = mPm.getPlatformPackage();
-            var isSystemApp = AndroidPackageUtils.isSystem(parsedPackage);
+            var isSystemApp = AndroidPackageLegacyUtils.isSystem(parsedPackage);
             final String renamedPkgName = mPm.mSettings.getRenamedPackageLPr(
                     AndroidPackageUtils.getRealPackageOrNull(parsedPackage, isSystemApp));
             realPkgName = ScanPackageUtils.getRealPackageName(parsedPackage, renamedPkgName,
@@ -4574,7 +4577,7 @@ final class InstallPackageHelper {
 
     private void assertPackageWithSharedUserIdIsPrivileged(AndroidPackage pkg)
             throws PackageManagerException {
-        if (!AndroidPackageUtils.isPrivileged(pkg) && (pkg.getSharedUserId() != null)) {
+        if (!AndroidPackageLegacyUtils.isPrivileged(pkg) && (pkg.getSharedUserId() != null)) {
             SharedUserSetting sharedUserSetting = null;
             try {
                 synchronized (mPm.mLock) {
@@ -4612,7 +4615,7 @@ final class InstallPackageHelper {
         final boolean skipVendorPrivilegeScan = ((scanFlags & SCAN_AS_VENDOR) != 0)
                 && ScanPackageUtils.getVendorPartitionVersion() < 28;
         if (((scanFlags & SCAN_AS_PRIVILEGED) == 0)
-                && !AndroidPackageUtils.isPrivileged(pkg)
+                && !AndroidPackageLegacyUtils.isPrivileged(pkg)
                 && (pkg.getSharedUserId() != null)
                 && !skipVendorPrivilegeScan) {
             SharedUserSetting sharedUserSetting = null;

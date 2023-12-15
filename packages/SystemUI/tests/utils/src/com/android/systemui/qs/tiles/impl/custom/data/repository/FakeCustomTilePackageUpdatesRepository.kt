@@ -16,17 +16,20 @@
 
 package com.android.systemui.qs.tiles.impl.custom.data.repository
 
+import android.os.UserHandle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 class FakeCustomTilePackageUpdatesRepository : CustomTilePackageUpdatesRepository {
 
-    private val mutablePackageChanges = MutableSharedFlow<Unit>()
+    private val mutablePackageChangesForUser = MutableSharedFlow<UserHandle>()
 
-    override val packageChanges: Flow<Unit>
-        get() = mutablePackageChanges
+    override fun getPackageChangesForUser(user: UserHandle): Flow<Unit> =
+        mutablePackageChangesForUser.filter { it == user }.map {}
 
-    suspend fun emitPackageChange() {
-        mutablePackageChanges.emit(Unit)
+    suspend fun emitPackageChange(user: UserHandle) {
+        mutablePackageChangesForUser.emit(user)
     }
 }

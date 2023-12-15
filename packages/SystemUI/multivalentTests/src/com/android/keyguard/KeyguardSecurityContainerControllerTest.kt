@@ -18,7 +18,7 @@
 package com.android.keyguard
 
 import android.content.res.Configuration
-import android.hardware.biometrics.BiometricOverlayConstants
+import android.hardware.biometrics.BiometricRequestConstants
 import android.media.AudioManager
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper.RunWithLooper
@@ -59,6 +59,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -235,6 +236,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
             )
 
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         underTest =
             KeyguardSecurityContainerController(
                 view,
@@ -763,16 +765,18 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun sideFpsControllerShow() {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         underTest.updateSideFpsVisibility(/* isVisible= */ true)
         verify(sideFpsController)
             .show(
                 SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+                BiometricRequestConstants.REASON_AUTH_KEYGUARD
             )
     }
 
     @Test
     fun sideFpsControllerHide() {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         underTest.updateSideFpsVisibility(/* isVisible= */ false)
         verify(sideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER)
     }

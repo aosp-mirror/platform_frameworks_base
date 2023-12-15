@@ -2,9 +2,8 @@ package com.android.systemui.user.domain.interactor
 
 import android.annotation.UserIdInt
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags.refactorGetCurrentUser
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER
 import com.android.systemui.user.data.repository.UserRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -12,12 +11,7 @@ import kotlinx.coroutines.flow.map
 
 /** Encapsulates business logic to interact the selected user */
 @SysUISingleton
-class SelectedUserInteractor
-@Inject
-constructor(
-    private val repository: UserRepository,
-    private val flags: FeatureFlagsClassic,
-) {
+class SelectedUserInteractor @Inject constructor(private val repository: UserRepository) {
 
     /** Flow providing the ID of the currently selected user. */
     val selectedUser = repository.selectedUserInfo.map { it.id }.distinctUntilChanged()
@@ -34,7 +28,7 @@ constructor(
     @UserIdInt
     @JvmOverloads
     fun getSelectedUserId(bypassFlag: Boolean = false): Int {
-        return if (bypassFlag || flags.isEnabled(REFACTOR_GETCURRENTUSER)) {
+        return if (bypassFlag || refactorGetCurrentUser()) {
             repository.getSelectedUserInfo().id
         } else {
             KeyguardUpdateMonitor.getCurrentUser()

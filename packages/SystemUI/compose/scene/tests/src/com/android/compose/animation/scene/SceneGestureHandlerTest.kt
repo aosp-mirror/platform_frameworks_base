@@ -55,8 +55,8 @@ class SceneGestureHandlerTest {
     ) {
         private var internalCurrentScene: SceneKey by mutableStateOf(SceneA)
 
-        private val layoutState: SceneTransitionLayoutState =
-            SceneTransitionLayoutState(internalCurrentScene)
+        private val layoutState =
+            SceneTransitionLayoutStateImpl(internalCurrentScene, EmptyTestTransitions)
 
         val mutableUserActionsA: MutableMap<UserAction, SceneKey> =
             mutableMapOf(Swipe.Up to SceneB, Swipe.Down to SceneC)
@@ -93,36 +93,24 @@ class SceneGestureHandlerTest {
 
         private val layoutImpl =
             SceneTransitionLayoutImpl(
-                    onChangeScene = { internalCurrentScene = it },
-                    builder = scenesBuilder,
-                    transitions = EmptyTestTransitions,
                     state = layoutState,
+                    onChangeScene = { internalCurrentScene = it },
                     density = Density(1f),
                     edgeDetector = DefaultEdgeDetector,
                     transitionInterceptionThreshold = transitionInterceptionThreshold,
+                    builder = scenesBuilder,
                     coroutineScope = coroutineScope,
                 )
                 .apply { setScenesTargetSizeForTest(LAYOUT_SIZE) }
 
-        val sceneGestureHandler =
-            SceneGestureHandler(
-                layoutImpl = layoutImpl,
-                orientation = Orientation.Vertical,
-                coroutineScope = coroutineScope,
-            )
-
-        val horizontalSceneGestureHandler =
-            SceneGestureHandler(
-                layoutImpl = layoutImpl,
-                orientation = Orientation.Horizontal,
-                coroutineScope = coroutineScope,
-            )
-
+        val sceneGestureHandler = layoutImpl.gestureHandler(Orientation.Vertical)
+        val horizontalSceneGestureHandler = layoutImpl.gestureHandler(Orientation.Horizontal)
         val draggable = sceneGestureHandler.draggable
 
         fun nestedScrollConnection(nestedScrollBehavior: NestedScrollBehavior) =
             SceneNestedScrollHandler(
-                    gestureHandler = sceneGestureHandler,
+                    layoutImpl,
+                    orientation = sceneGestureHandler.orientation,
                     topOrLeftBehavior = nestedScrollBehavior,
                     bottomOrRightBehavior = nestedScrollBehavior,
                 )

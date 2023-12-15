@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -173,7 +174,7 @@ class PackageUserStateDefault implements PackageUserStateInternal {
 
     @Nullable
     @Override
-    public WatchedArrayMap<String, SuspendParams> getSuspendParams() {
+    public WatchedArrayMap<UserPackage, SuspendParams> getSuspendParams() {
         return null;
     }
 

@@ -51,12 +51,12 @@ import android.util.ExceptionUtils;
 import android.util.Slog;
 
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -818,7 +818,8 @@ final class InstallRequest {
 
     public void setRemovedAppId(int appId) {
         if (mRemovedInfo != null) {
-            mRemovedInfo.mRemovedAppId = appId;
+            mRemovedInfo.mUid = appId;
+            mRemovedInfo.mIsAppIdRemoved = true;
         }
     }
 

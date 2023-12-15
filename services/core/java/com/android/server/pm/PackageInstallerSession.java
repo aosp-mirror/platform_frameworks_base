@@ -168,6 +168,7 @@ import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.security.VerityUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -181,7 +182,6 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;

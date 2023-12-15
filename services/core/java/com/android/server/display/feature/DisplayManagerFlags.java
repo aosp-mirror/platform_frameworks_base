@@ -93,6 +93,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_EXTERNAL_VSYNC_PROXIMITY_VOTE,
             Flags::enableExternalVsyncProximityVote);
 
+    private final FlagState mVsyncLowPowerVote = new FlagState(
+            Flags.FLAG_ENABLE_VSYNC_LOW_POWER_VOTE,
+            Flags::enableVsyncLowPowerVote);
+
     private final FlagState mBrightnessWearBedtimeModeClamperFlagState = new FlagState(
             Flags.FLAG_BRIGHTNESS_WEAR_BEDTIME_MODE_CLAMPER,
             Flags::brightnessWearBedtimeModeClamper);
@@ -124,7 +128,6 @@ public class DisplayManagerFlags {
     public boolean isPowerThrottlingClamperEnabled() {
         return mPowerThrottlingClamperFlagState.isEnabled();
     }
-
 
     /**
      * Returns whether adaptive tone improvements are enabled
@@ -196,6 +199,10 @@ public class DisplayManagerFlags {
 
     public boolean isVsyncProximityVoteEnabled() {
         return mVsyncProximityVote.isEnabled();
+    }
+
+    public boolean isVsyncLowPowerVoteEnabled() {
+        return mVsyncLowPowerVote.isEnabled();
     }
 
     public boolean isBrightnessWearBedtimeModeClamperEnabled() {

@@ -92,9 +92,10 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     int userId = getNextIntArgRequired();
                     String packageName = getNextArgRequired();
                     String address = getNextArgRequired();
+                    String deviceProfile = getNextArg();
                     final MacAddress macAddress = MacAddress.fromString(address);
                     mService.createNewAssociation(userId, packageName, macAddress,
-                            null, null, false);
+                            null, deviceProfile, false);
                 }
                 break;
 
@@ -350,7 +351,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
         pw.println("      Print this help text.");
         pw.println("  list USER_ID");
         pw.println("      List all Associations for a user.");
-        pw.println("  associate USER_ID PACKAGE MAC_ADDRESS");
+        pw.println("  associate USER_ID PACKAGE MAC_ADDRESS [DEVICE_PROFILE]");
         pw.println("      Create a new Association.");
         pw.println("  disassociate USER_ID PACKAGE MAC_ADDRESS");
         pw.println("      Remove an existing Association.");

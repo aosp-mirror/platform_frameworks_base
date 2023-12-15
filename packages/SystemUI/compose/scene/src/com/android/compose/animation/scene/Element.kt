@@ -181,15 +181,11 @@ private data class ElementModifier(
 }
 
 internal class ElementNode(
-    layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
-    element: Element,
-    sceneValues: Element.TargetValues,
+    private var layoutImpl: SceneTransitionLayoutImpl,
+    private var scene: Scene,
+    private var element: Element,
+    private var sceneValues: Element.TargetValues,
 ) : Modifier.Node(), DrawModifierNode {
-    private var layoutImpl: SceneTransitionLayoutImpl = layoutImpl
-    private var scene: Scene = scene
-    private var element: Element = element
-    private var sceneValues: Element.TargetValues = sceneValues
 
     override fun onAttach() {
         super.onAttach()
@@ -283,26 +279,27 @@ private fun shouldDrawElement(
     scene: Scene,
     element: Element,
 ): Boolean {
-    val state = layoutImpl.state.transitionState
+    val transition = layoutImpl.state.currentTransition
 
     // Always draw the element if there is no ongoing transition or if the element is not shared.
     if (
-        state !is TransitionState.Transition ||
-            !layoutImpl.isTransitionReady(state) ||
-            state.fromScene !in element.sceneValues ||
-            state.toScene !in element.sceneValues
+        transition == null ||
+            !layoutImpl.isTransitionReady(transition) ||
+            transition.fromScene !in element.sceneValues ||
+            transition.toScene !in element.sceneValues
     ) {
         return true
     }
 
-    val sharedTransformation = sharedElementTransformation(layoutImpl, state, element.key)
+    val sharedTransformation =
+        sharedElementTransformation(layoutImpl.state, transition, element.key)
     if (sharedTransformation?.enabled == false) {
         return true
     }
 
     return shouldDrawOrComposeSharedElement(
         layoutImpl,
-        state,
+        transition,
         scene.key,
         element.key,
         sharedTransformation,
@@ -331,21 +328,21 @@ internal fun shouldDrawOrComposeSharedElement(
 }
 
 private fun isSharedElementEnabled(
-    layoutImpl: SceneTransitionLayoutImpl,
+    layoutState: SceneTransitionLayoutStateImpl,
     transition: TransitionState.Transition,
     element: ElementKey,
 ): Boolean {
-    return sharedElementTransformation(layoutImpl, transition, element)?.enabled ?: true
+    return sharedElementTransformation(layoutState, transition, element)?.enabled ?: true
 }
 
 internal fun sharedElementTransformation(
-    layoutImpl: SceneTransitionLayoutImpl,
+    layoutState: SceneTransitionLayoutStateImpl,
     transition: TransitionState.Transition,
     element: ElementKey,
 ): SharedElementTransformation? {
-    val spec = layoutImpl.transitions.transitionSpec(transition.fromScene, transition.toScene)
-    val sharedInFromScene = spec.transformations(element, transition.fromScene).shared
-    val sharedInToScene = spec.transformations(element, transition.toScene).shared
+    val transformationSpec = layoutState.transformationSpec
+    val sharedInFromScene = transformationSpec.transformations(element, transition.fromScene).shared
+    val sharedInToScene = transformationSpec.transformations(element, transition.toScene).shared
 
     // The sharedElement() transformation must either be null or be the same in both scenes.
     if (sharedInFromScene != sharedInToScene) {
@@ -371,13 +368,9 @@ private fun isElementOpaque(
     scene: Scene,
     sceneValues: Element.TargetValues,
 ): Boolean {
-    val state = layoutImpl.state.transitionState
+    val transition = layoutImpl.state.currentTransition ?: return true
 
-    if (state !is TransitionState.Transition) {
-        return true
-    }
-
-    if (!layoutImpl.isTransitionReady(state)) {
+    if (!layoutImpl.isTransitionReady(transition)) {
         val lastValue =
             sceneValues.lastValues.alpha.takeIf { it != Element.AlphaUnspecified }
                 ?: element.lastSharedValues.alpha.takeIf { it != Element.AlphaUnspecified } ?: 1f
@@ -385,8 +378,8 @@ private fun isElementOpaque(
         return lastValue == 1f
     }
 
-    val fromScene = state.fromScene
-    val toScene = state.toScene
+    val fromScene = transition.fromScene
+    val toScene = transition.toScene
     val fromValues = element.sceneValues[fromScene]
     val toValues = element.sceneValues[toScene]
 
@@ -395,14 +388,11 @@ private fun isElementOpaque(
     }
 
     val isSharedElement = fromValues != null && toValues != null
-    if (isSharedElement && isSharedElementEnabled(layoutImpl, state, element.key)) {
+    if (isSharedElement && isSharedElementEnabled(layoutImpl.state, transition, element.key)) {
         return true
     }
 
-    return layoutImpl.transitions
-        .transitionSpec(fromScene, toScene)
-        .transformations(element.key, scene.key)
-        .alpha == null
+    return layoutImpl.state.transformationSpec.transformations(element.key, scene.key).alpha == null
 }
 
 /**
@@ -607,24 +597,22 @@ private inline fun <T> computeValue(
     lastValue: () -> T,
     lerp: (T, T, Float) -> T,
 ): T {
-    val state = layoutImpl.state.transitionState
-
-    // There is no ongoing transition.
-    if (state !is TransitionState.Transition) {
-        // Even if this element SceneTransitionLayout is not animated, the layout itself might be
-        // animated (e.g. by another parent SceneTransitionLayout), in which case this element still
-        // need to participate in the layout phase.
-        return currentValue()
-    }
+    val transition =
+        layoutImpl.state.currentTransition
+        // There is no ongoing transition. Even if this element SceneTransitionLayout is not
+        // animated, the layout itself might be animated (e.g. by another parent
+        // SceneTransitionLayout), in which case this element still need to participate in the
+        // layout phase.
+        ?: return currentValue()
 
     // A transition was started but it's not ready yet (not all elements have been composed/laid
     // out yet). Use the last value that was set, to make sure elements don't unexpectedly jump.
-    if (!layoutImpl.isTransitionReady(state)) {
+    if (!layoutImpl.isTransitionReady(transition)) {
         return lastValue()
     }
 
-    val fromScene = state.fromScene
-    val toScene = state.toScene
+    val fromScene = transition.fromScene
+    val toScene = transition.toScene
     val fromValues = element.sceneValues[fromScene]
     val toValues = element.sceneValues[toScene]
 
@@ -638,21 +626,17 @@ private inline fun <T> computeValue(
     // TODO(b/290184746): Support non linear shared paths as well as a way to make sure that shared
     // elements follow the finger direction.
     val isSharedElement = fromValues != null && toValues != null
-    if (isSharedElement && isSharedElementEnabled(layoutImpl, state, element.key)) {
+    if (isSharedElement && isSharedElementEnabled(layoutImpl.state, transition, element.key)) {
         val start = sceneValue(fromValues!!)
         val end = sceneValue(toValues!!)
 
         // Make sure we don't read progress if values are the same and we don't need to interpolate,
         // so we don't invalidate the phase where this is read.
-        return if (start == end) start else lerp(start, end, state.progress)
+        return if (start == end) start else lerp(start, end, transition.progress)
     }
 
     val transformation =
-        transformation(
-            layoutImpl.transitions
-                .transitionSpec(fromScene, toScene)
-                .transformations(element.key, scene.key)
-        )
+        transformation(layoutImpl.state.transformationSpec.transformations(element.key, scene.key))
         // If there is no transformation explicitly associated to this element value, let's use
         // the value given by the system (like the current position and size given by the layout
         // pass).
@@ -675,7 +659,7 @@ private inline fun <T> computeValue(
             scene,
             element,
             sceneValues,
-            state,
+            transition,
             idleValue,
         )
 
@@ -685,7 +669,7 @@ private inline fun <T> computeValue(
         return targetValue
     }
 
-    val progress = state.progress
+    val progress = transition.progress
     // TODO(b/290184746): Make sure that we don't overflow transformations associated to a range.
     val rangeProgress = transformation.range?.progress(progress) ?: progress
 

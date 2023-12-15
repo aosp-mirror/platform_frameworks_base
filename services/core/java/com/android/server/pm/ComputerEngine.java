@@ -96,6 +96,7 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.content.pm.VersionedPackage;
 import android.os.Binder;
 import android.os.Build;
@@ -3864,19 +3865,15 @@ public class ComputerEngine implements Computer {
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
-
-                var usingSharedLibraryPair =
-                        getPackagesUsingSharedLibrary(libInfo, flags, callingUid, userId);
                 SharedLibraryInfo resLibInfo = new SharedLibraryInfo(libInfo.getPath(),
                         libInfo.getPackageName(), libInfo.getAllCodePaths(),
                         libInfo.getName(), libInfo.getLongVersion(),
                         libInfo.getType(), declaringPackage,
-                        usingSharedLibraryPair.first,
                         (libInfo.getDependencies() == null
                                 ? null
                                 : new ArrayList<>(libInfo.getDependencies())),
-                        libInfo.isNative());
-
+                        libInfo.isNative(),
+                        getPackagesUsingSharedLibrary(libInfo, flags, callingUid, userId));
                 if (result == null) {
                     result = new ArrayList<>();
                 }
@@ -5012,11 +5009,13 @@ public class ComputerEngine implements Computer {
 
     @Override
     public boolean isSuspendingAnyPackages(@NonNull String suspendingPackage,
-            @UserIdInt int userId) {
+            @UserIdInt int suspendingUserId, int targetUserId) {
+        final UserPackage suspender = UserPackage.of(suspendingUserId, suspendingPackage);
         for (final PackageStateInternal packageState : getPackageStates().values()) {
-            final PackageUserStateInternal state = packageState.getUserStateOrDefault(userId);
+            final PackageUserStateInternal state =
+                    packageState.getUserStateOrDefault(targetUserId);
             if (state.getSuspendParams() != null
-                    && state.getSuspendParams().containsKey(suspendingPackage)) {
+                    && state.getSuspendParams().containsKey(suspender)) {
                 return true;
             }
         }

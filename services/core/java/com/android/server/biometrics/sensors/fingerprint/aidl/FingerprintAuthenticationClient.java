@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskStackListener;
@@ -48,6 +50,7 @@ import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -84,6 +87,7 @@ public class FingerprintAuthenticationClient
     private final int mSkipWaitForPowerVendorAcquireMessage;
     private final long mFingerUpIgnoresPower = 500;
     private final AuthSessionCoordinator mAuthSessionCoordinator;
+    @NonNull private final AuthenticationStateListeners mAuthenticationStateListeners;
     @Nullable
     private ICancellationSignal mCancellationSignal;
     private boolean mIsPointerDown;
@@ -110,7 +114,9 @@ public class FingerprintAuthenticationClient
             boolean isStrongBiometric,
             @Nullable TaskStackListener taskStackListener,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
+            // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
             @Nullable ISidefpsController sidefpsController,
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
             boolean allowBackgroundAuthentication,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull Handler handler,
@@ -136,7 +142,12 @@ public class FingerprintAuthenticationClient
                 false /* shouldVibrate */,
                 biometricStrength);
         setRequestId(requestId);
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
+        if (sidefpsControllerRefactor()) {
+            mSensorOverlays = new SensorOverlays(udfpsOverlayController);
+        } else {
+            mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
+        }
+        mAuthenticationStateListeners = authenticationStateListeners;
         mSensorProps = sensorProps;
         mALSProbeCallback = getLogger().getAmbientLightProbe(false /* startWithClient */);
         mHandler = handler;
@@ -216,6 +227,9 @@ public class FingerprintAuthenticationClient
         if (authenticated) {
             mState = STATE_STOPPED;
             mSensorOverlays.hide(getSensorId());
+            if (sidefpsControllerRefactor()) {
+                mAuthenticationStateListeners.onAuthenticationStopped();
+            }
         } else {
             mState = STATE_STARTED_PAUSED_ATTEMPTED;
         }
@@ -241,6 +255,9 @@ public class FingerprintAuthenticationClient
                 // controlled by the HAL, the framework must stop the sensor before finishing the
                 // client.
                 mSensorOverlays.hide(getSensorId());
+                if (sidefpsControllerRefactor()) {
+                    mAuthenticationStateListeners.onAuthenticationStopped();
+                }
                 onErrorInternal(errorCode, 0 /* vendorCode */, false /* finish */);
                 cancel();
             }
@@ -266,11 +283,17 @@ public class FingerprintAuthenticationClient
         }
 
         mSensorOverlays.hide(getSensorId());
+        if (sidefpsControllerRefactor()) {
+            mAuthenticationStateListeners.onAuthenticationStopped();
+        }
     }
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), getShowOverlayReason(), this);
+        mSensorOverlays.show(getSensorId(), getRequestReason(), this);
+        if (sidefpsControllerRefactor()) {
+            mAuthenticationStateListeners.onAuthenticationStarted(getRequestReason());
+        }
 
         try {
             mCancellationSignal = doAuthenticate();
@@ -280,6 +303,9 @@ public class FingerprintAuthenticationClient
                     BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
             mSensorOverlays.hide(getSensorId());
+            if (sidefpsControllerRefactor()) {
+                mAuthenticationStateListeners.onAuthenticationStopped();
+            }
             mCallback.onClientFinished(this, false /* success */);
         }
     }
@@ -323,6 +349,9 @@ public class FingerprintAuthenticationClient
     @Override
     protected void stopHalOperation() {
         mSensorOverlays.hide(getSensorId());
+        if (sidefpsControllerRefactor()) {
+            mAuthenticationStateListeners.onAuthenticationStopped();
+        }
         unsubscribeBiometricContext();
 
         if (mCancellationSignal != null) {
@@ -423,6 +452,9 @@ public class FingerprintAuthenticationClient
         }
 
         mSensorOverlays.hide(getSensorId());
+        if (sidefpsControllerRefactor()) {
+            mAuthenticationStateListeners.onAuthenticationStopped();
+        }
         mCallback.onClientFinished(this, false /* success */);
     }
 
@@ -450,6 +482,9 @@ public class FingerprintAuthenticationClient
         }
 
         mSensorOverlays.hide(getSensorId());
+        if (sidefpsControllerRefactor()) {
+            mAuthenticationStateListeners.onAuthenticationStopped();
+        }
         mCallback.onClientFinished(this, false /* success */);
     }
 

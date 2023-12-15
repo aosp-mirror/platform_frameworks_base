@@ -41,13 +41,8 @@ internal class SceneGestureHandler(
     internal val orientation: Orientation,
     private val coroutineScope: CoroutineScope,
 ) {
+    private val layoutState = layoutImpl.state
     val draggable: DraggableHandler = SceneDraggableHandler(this)
-
-    internal var transitionState
-        get() = layoutImpl.state.transitionState
-        set(value) {
-            layoutImpl.state.transitionState = value
-        }
 
     private var _swipeTransition: SwipeTransition? = null
     internal var swipeTransition: SwipeTransition
@@ -57,27 +52,26 @@ internal class SceneGestureHandler(
         }
 
     private fun updateTransition(newTransition: SwipeTransition, force: Boolean = false) {
-        if (isDrivingTransition || force) transitionState = newTransition
+        if (isDrivingTransition || force) layoutState.startTransition(newTransition)
         swipeTransition = newTransition
     }
 
-    internal val currentScene: Scene
-        get() = layoutImpl.scene(transitionState.currentScene)
-
     internal val isDrivingTransition
-        get() = transitionState == _swipeTransition
+        get() = layoutState.transitionState == _swipeTransition
 
     /**
      * The velocity threshold at which the intent of the user is to swipe up or down. It is the same
      * as SwipeableV2Defaults.VelocityThreshold.
      */
-    internal val velocityThreshold = with(layoutImpl.density) { 125.dp.toPx() }
+    internal val velocityThreshold: Float
+        get() = with(layoutImpl.density) { 125.dp.toPx() }
 
     /**
      * The positional threshold at which the intent of the user is to swipe to the next scene. It is
      * the same as SwipeableV2Defaults.PositionalThreshold.
      */
-    private val positionalThreshold = with(layoutImpl.density) { 56.dp.toPx() }
+    private val positionalThreshold
+        get() = with(layoutImpl.density) { 56.dp.toPx() }
 
     internal var gestureWithPriority: Any? = null
 
@@ -98,18 +92,18 @@ internal class SceneGestureHandler(
             return
         }
 
-        val transition = transitionState
-        if (transition is TransitionState.Transition) {
+        val transitionState = layoutState.transitionState
+        if (transitionState is TransitionState.Transition) {
             // TODO(b/290184746): Better handle interruptions here if state != idle.
             Log.w(
                 TAG,
                 "start from TransitionState.Transition is not fully supported: from" +
-                    " ${transition.fromScene} to ${transition.toScene} " +
-                    "(progress ${transition.progress})"
+                    " ${transitionState.fromScene} to ${transitionState.toScene} " +
+                    "(progress ${transitionState.progress})"
             )
         }
 
-        val fromScene = currentScene
+        val fromScene = layoutImpl.scene(transitionState.currentScene)
         setCurrentActions(fromScene, startedPosition, pointersDown)
 
         val (targetScene, distance) =
@@ -364,7 +358,7 @@ internal class SceneGestureHandler(
                     findTargetSceneAndDistanceStrict(fromScene, velocity)
                         ?: run {
                             // We will not animate
-                            transitionState = TransitionState.Idle(fromScene.key)
+                            layoutState.finishTransition(swipeTransition, idleScene = fromScene.key)
                             return
                         }
 
@@ -439,14 +433,7 @@ internal class SceneGestureHandler(
                 )
 
                 swipeTransition.finishOffsetAnimation()
-
-                // Now that the animation is done, the state should be idle. Note that if the state
-                // was changed since this animation started, some external code changed it and we
-                // shouldn't do anything here. Note also that this job will be cancelled in the case
-                // where the user intercepts this swipe.
-                if (isDrivingTransition) {
-                    transitionState = TransitionState.Idle(targetScene)
-                }
+                layoutState.finishTransition(swipeTransition, targetScene)
             }
         }
     }
@@ -539,10 +526,14 @@ private class SceneDraggableHandler(
 }
 
 internal class SceneNestedScrollHandler(
-    private val gestureHandler: SceneGestureHandler,
+    private val layoutImpl: SceneTransitionLayoutImpl,
+    private val orientation: Orientation,
     private val topOrLeftBehavior: NestedScrollBehavior,
     private val bottomOrRightBehavior: NestedScrollBehavior,
 ) : NestedScrollHandler {
+    private val layoutState = layoutImpl.state
+    private val gestureHandler = layoutImpl.gestureHandler(orientation)
+
     override val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
     private fun nestedScrollConnection(): PriorityNestedScrollConnection {
@@ -553,7 +544,7 @@ internal class SceneNestedScrollHandler(
         val actionUpOrLeft =
             Swipe(
                 direction =
-                    when (gestureHandler.orientation) {
+                    when (orientation) {
                         Orientation.Horizontal -> SwipeDirection.Left
                         Orientation.Vertical -> SwipeDirection.Up
                     },
@@ -563,7 +554,7 @@ internal class SceneNestedScrollHandler(
         val actionDownOrRight =
             Swipe(
                 direction =
-                    when (gestureHandler.orientation) {
+                    when (orientation) {
                         Orientation.Horizontal -> SwipeDirection.Right
                         Orientation.Vertical -> SwipeDirection.Down
                     },
@@ -571,7 +562,7 @@ internal class SceneNestedScrollHandler(
             )
 
         fun hasNextScene(amount: Float): Boolean {
-            val fromScene = gestureHandler.currentScene
+            val fromScene = layoutImpl.scene(layoutState.transitionState.currentScene)
             val nextScene =
                 when {
                     amount < 0f -> fromScene.userActions[actionUpOrLeft]
@@ -582,7 +573,7 @@ internal class SceneNestedScrollHandler(
         }
 
         return PriorityNestedScrollConnection(
-            orientation = gestureHandler.orientation,
+            orientation = orientation,
             canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
                 canChangeScene = offsetBeforeStart == 0f
 
@@ -590,8 +581,9 @@ internal class SceneNestedScrollHandler(
                     canChangeScene && gestureHandler.isDrivingTransition && offsetAvailable != 0f
                 if (!canInterceptSwipeTransition) return@PriorityNestedScrollConnection false
 
-                val progress = gestureHandler.swipeTransition.progress
-                val threshold = gestureHandler.layoutImpl.transitionInterceptionThreshold
+                val swipeTransition = gestureHandler.swipeTransition
+                val progress = swipeTransition.progress
+                val threshold = layoutImpl.transitionInterceptionThreshold
                 fun isProgressCloseTo(value: Float) = (progress - value).absoluteValue <= threshold
 
                 // The transition is always between 0 and 1. If it is close to either of these
@@ -599,9 +591,8 @@ internal class SceneNestedScrollHandler(
                 // The progress value can go beyond this range in the case of overscroll.
                 val shouldSnapToIdle = isProgressCloseTo(0f) || isProgressCloseTo(1f)
                 if (shouldSnapToIdle) {
-                    gestureHandler.swipeTransition.cancelOffsetAnimation()
-                    gestureHandler.transitionState =
-                        TransitionState.Idle(gestureHandler.swipeTransition.currentScene)
+                    swipeTransition.cancelOffsetAnimation()
+                    layoutState.finishTransition(swipeTransition, swipeTransition.currentScene)
                 }
 
                 // Start only if we cannot consume this event

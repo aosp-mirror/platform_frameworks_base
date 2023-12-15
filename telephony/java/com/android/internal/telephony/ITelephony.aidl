@@ -3182,7 +3182,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
         + "android.Manifest.permission.MODIFY_PHONE_STATE)")
-    void enableCellularIdentifierDisclosureNotifications(boolean enable);
+    void setEnableCellularIdentifierDisclosureNotifications(boolean enable);
 
     /**
      * Get whether or not cellular identifier disclosure notifications are enabled.
@@ -3196,5 +3196,5 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
         + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
-    boolean isCellularIdentifierDisclosureNotificationEnabled();
+    boolean isCellularIdentifierDisclosureNotificationsEnabled();
 }

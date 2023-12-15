@@ -1517,6 +1517,7 @@ public abstract class PackageManager {
             INSTALL_REQUEST_UPDATE_OWNERSHIP,
             INSTALL_IGNORE_DEXOPT_PROFILE,
             INSTALL_UNARCHIVE_DRAFT,
+            INSTALL_UNARCHIVE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -1764,11 +1765,20 @@ public abstract class PackageManager {
      * If set, then the session is a draft session created for an upcoming unarchival by its
      * installer.
      *
-     * @see PackageInstaller#requestUnarchive(String)
+     * @see PackageInstaller#requestUnarchive
      *
      * @hide
      */
     public static final int INSTALL_UNARCHIVE_DRAFT = 1 << 29;
+
+    /**
+     * If set, then the {@link PackageInstaller.Session} is an unarchival.
+     *
+     * @see PackageInstaller#requestUnarchive
+     *
+     * @hide
+     */
+    public static final int INSTALL_UNARCHIVE = 1 << 30;
 
     /**
      * Flag parameter for {@link #installPackage} to force a non-staged update of an APEX. This is
@@ -9990,6 +10000,9 @@ public abstract class PackageManager {
      * device administrators or apps holding {@link android.Manifest.permission#MANAGE_USERS} or
      * {@link android.Manifest.permission#SUSPEND_APPS}.
      *
+     * <p>
+     * <strong>Note:</strong>This API doesn't support cross user suspension and should only be used
+     * for testing.
      * @param suspendedPackage The package that has been suspended.
      * @return Name of the package that suspended the given package. Returns {@code null} if the
      * given package is not currently suspended and the platform package name - i.e.

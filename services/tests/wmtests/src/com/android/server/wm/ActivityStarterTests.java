@@ -117,6 +117,7 @@ import androidx.test.filters.SmallTest;
 import com.android.compatibility.common.util.DeviceConfigStateHelper;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.pm.PackageArchiver;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
@@ -421,6 +422,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         doNothing().when(mMockPackageManager).grantImplicitAccess(
                 anyInt(), any(), anyInt(), anyInt(), anyBoolean());
         doNothing().when(mMockPackageManager).notifyPackageUse(anyString(), anyInt());
+        doReturn(mock(PackageArchiver.class)).when(mMockPackageManager).getPackageArchiver();
 
         final Intent intent = new Intent();
         intent.addFlags(launchFlags);

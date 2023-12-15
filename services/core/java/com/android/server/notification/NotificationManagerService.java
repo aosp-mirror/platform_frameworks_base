@@ -251,6 +251,7 @@ import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.ConversationChannelWrapper;
+import android.service.notification.DeviceEffectsApplier;
 import android.service.notification.IConditionProvider;
 import android.service.notification.INotificationListener;
 import android.service.notification.IStatusBarNotificationHolder;
@@ -5406,6 +5407,7 @@ public class NotificationManagerService extends SystemService {
         private void validateAutomaticZenRule(AutomaticZenRule rule) {
             Objects.requireNonNull(rule, "automaticZenRule is null");
             Objects.requireNonNull(rule.getName(), "Name is null");
+            rule.validate();
             if (rule.getOwner() == null
                     && rule.getConfigurationActivity() == null) {
                 throw new NullPointerException(
@@ -5463,6 +5465,7 @@ public class NotificationManagerService extends SystemService {
         public void setAutomaticZenRuleState(String id, Condition condition) {
             Objects.requireNonNull(id, "id is null");
             Objects.requireNonNull(condition, "Condition is null");
+            condition.validate();
 
             enforcePolicyAccess(Binder.getCallingUid(), "setAutomaticZenRuleState");
 
@@ -6961,6 +6964,18 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
             }
+        }
+
+        @Override
+        public void setDeviceEffectsApplier(DeviceEffectsApplier applier) {
+            if (!android.app.Flags.modesApi()) {
+                return;
+            }
+            if (mZenModeHelper == null) {
+                throw new IllegalStateException("ZenModeHelper is not yet ready!");
+            }
+            // This can also throw IllegalStateException if called too late.
+            mZenModeHelper.setDeviceEffectsApplier(applier);
         }
     };
 

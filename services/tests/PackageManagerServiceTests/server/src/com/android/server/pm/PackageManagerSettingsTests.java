@@ -45,15 +45,19 @@ import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.os.BaseBundle;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -63,10 +67,11 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
-import com.android.server.pm.parsing.pkg.PackageImpl;
+import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.ArchiveState;
@@ -85,6 +90,7 @@ import com.google.common.truth.Truth;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -109,6 +115,9 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PackageManagerSettingsTests {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     private static final String PACKAGE_NAME_1 = "com.android.app1";
     private static final String PACKAGE_NAME_2 = "com.android.app2";
     private static final String PACKAGE_NAME_3 = "com.android.app3";
@@ -140,6 +149,7 @@ public class PackageManagerSettingsTests {
     public void setup() {
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
+
     }
 
     @Before
@@ -159,6 +169,107 @@ public class PackageManagerSettingsTests {
     @After
     public void tearDown() throws Exception {
         deleteFolder(InstrumentationRegistry.getContext().getFilesDir());
+    }
+
+    @Test
+    public void testApplicationInfoForUseSdkOptionalEnabled() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_SDK_LIB_INDEPENDENCE);
+
+        // Create basic information for SDK lib
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        ps1.setPkg(((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed())
+                .setUid(ps1.getAppId())
+                .setSystem(true)
+                .hideAsFinal());
+        ps1.setUsesSdkLibraries(new String[] { "com.example.sdk.one" });
+        ps1.setUsesSdkLibrariesVersionsMajor(new long[] { 12 });
+        ps1.setUsesSdkLibrariesOptional(new boolean[] {true});
+        ps1.addUsesLibraryInfo(new SharedLibraryInfo("path1",
+                "packageName1",
+                Collections.emptyList(),
+                "com.example.sdk.one",
+                12 /*version*/,
+                SharedLibraryInfo.TYPE_SDK_PACKAGE,
+                null /*declaringPackage*/,
+                null /*dependentPackages*/,
+                null /*dependencies*/,
+                false /*isNative*/));
+        ps1.addUsesLibraryInfo(new SharedLibraryInfo("path11",
+                "packageName11",
+                Collections.emptyList(),
+                "com.example.sdk.oneone",
+                1212 /*version*/,
+                SharedLibraryInfo.TYPE_STATIC,
+                null /*declaringPackage*/,
+                null /*dependentPackages*/,
+                null /*dependencies*/,
+                false /*isNative*/));
+        ApplicationInfo appInfo1 = PackageInfoUtils.generateApplicationInfo(ps1.getAndroidPackage(),
+                0 /*flags*/, ps1.getUserStateOrDefault(0), 0 /*userId*/,
+                ps1);
+        assertThat(appInfo1, notNullValue());
+        assertThat(appInfo1.sharedLibraryInfos, notNullValue());
+        assertThat(appInfo1.optionalSharedLibraryInfos, notNullValue());
+        assertEquals(appInfo1.sharedLibraryInfos.get(0).getName(), "com.example.sdk.one");
+        assertEquals(appInfo1.optionalSharedLibraryInfos.get(0).getName(), "com.example.sdk.one");
+
+        final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
+        ps2.setPkg(((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_2).hideAsParsed())
+                .setUid(ps2.getAppId())
+                .setSystem(true)
+                .hideAsFinal());
+        ps2.setUsesSdkLibraries(new String[] { "com.example.sdk.two" });
+        ps2.setUsesSdkLibrariesVersionsMajor(new long[] { 34 });
+        ps2.setUsesSdkLibrariesOptional(new boolean[] {false});
+        ps2.addUsesLibraryInfo(new SharedLibraryInfo("path2",
+                "packageName2",
+                Collections.emptyList(),
+                "com.example.sdk.two",
+                34 /*version*/,
+                SharedLibraryInfo.TYPE_SDK_PACKAGE,
+                null /*declaringPackage*/,
+                null /*dependentPackages*/,
+                null /*dependencies*/,
+                false /*isNative*/));
+        ApplicationInfo appInfo2 = PackageInfoUtils.generateApplicationInfo(ps2.getAndroidPackage(),
+                0 /*flags*/, ps2.getUserStateOrDefault(0), 0 /*userId*/,
+                ps2);
+        assertThat(appInfo2, notNullValue());
+        assertThat(appInfo2.sharedLibraryInfos, notNullValue());
+        assertThat(appInfo2.optionalSharedLibraryInfos, nullValue());
+        assertEquals(appInfo2.sharedLibraryInfos.get(0).getName(), "com.example.sdk.two");
+    }
+
+    @Test
+    public void testApplicationInfoForUseSdkOptionalDisabled() throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_SDK_LIB_INDEPENDENCE);
+
+        // Create basic information for SDK lib
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        ps1.setPkg(((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed())
+                .setUid(ps1.getAppId())
+                .setSystem(true)
+                .hideAsFinal());
+        ps1.setUsesSdkLibraries(new String[] { "com.example.sdk.one" });
+        ps1.setUsesSdkLibrariesVersionsMajor(new long[] { 12 });
+        ps1.setUsesSdkLibrariesOptional(new boolean[] {true});
+        ps1.addUsesLibraryInfo(new SharedLibraryInfo("path1",
+                "packageName1",
+                Collections.emptyList(),
+                "com.example.sdk.one",
+                12 /*version*/,
+                SharedLibraryInfo.TYPE_SDK_PACKAGE,
+                null /*declaringPackage*/,
+                null /*dependentPackages*/,
+                null /*dependencies*/,
+                false /*isNative*/));
+        ApplicationInfo appInfo1 = PackageInfoUtils.generateApplicationInfo(ps1.getAndroidPackage(),
+                0 /*flags*/, ps1.getUserStateOrDefault(0), 0 /*userId*/,
+                ps1);
+        assertThat(appInfo1, notNullValue());
+        assertThat(appInfo1.sharedLibraryInfos, notNullValue());
+        assertThat(appInfo1.optionalSharedLibraryInfos, nullValue());
+        assertEquals(appInfo1.sharedLibraryInfos.get(0).getName(), "com.example.sdk.one");
     }
 
     /** make sure our initialized KeySetManagerService metadata matches packages.xml */
@@ -315,7 +426,7 @@ public class PackageManagerSettingsTests {
         PackageUserStateInternal packageUserState1 = ps1.readUserState(0);
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
-        assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(UserPackage.of(0, "android")));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getAppExtras(), is(nullValue()));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getDialogInfo(),
                 is(nullValue()));
@@ -327,7 +438,7 @@ public class PackageManagerSettingsTests {
         packageUserState1 = ps1.readUserState(0);
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
-        assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(UserPackage.of(0, "android")));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getAppExtras(), is(nullValue()));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getDialogInfo(),
                 is(nullValue()));
@@ -362,7 +473,8 @@ public class PackageManagerSettingsTests {
         watcher.verifyNoChangeReported("readUserState");
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
-        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(PACKAGE_NAME_3));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0),
+                is(UserPackage.of(0, PACKAGE_NAME_3)));
         final SuspendParams params = packageUserState1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("fetch user state");
         assertThat(params, is(notNullValue()));
@@ -413,19 +525,24 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND)
                 .build();
 
-        ps1.modifyUserState(0).putSuspendParams("suspendingPackage1",
+        UserPackage suspender1 = UserPackage.of(0, "suspendingPackage1");
+        UserPackage suspender2 = UserPackage.of(0, "suspendingPackage2");
+        UserPackage suspender3 = UserPackage.of(0, "suspendingPackage3");
+        UserPackage irrelevantSuspender = UserPackage.of(0, "irrelevant");
+
+        ps1.modifyUserState(0).putSuspendParams(suspender1,
                 new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
-        ps1.modifyUserState(0).putSuspendParams("suspendingPackage2",
+        ps1.modifyUserState(0).putSuspendParams(suspender2,
                 new SuspendParams(dialogInfo2, appExtras2, launcherExtras2));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
         watcher.verifyChangeReported("put package 1");
 
-        ps2.modifyUserState(0).putSuspendParams("suspendingPackage3",
+        ps2.modifyUserState(0).putSuspendParams(suspender3,
                 new SuspendParams(null, appExtras1, null));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
         watcher.verifyChangeReported("put package 2");
 
-        ps3.modifyUserState(0).removeSuspension("irrelevant");
+        ps3.modifyUserState(0).removeSuspension(irrelevantSuspender);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
         watcher.verifyChangeReported("put package 3");
 
@@ -450,7 +567,7 @@ public class PackageManagerSettingsTests {
         assertThat(readPus1.getSuspendParams().size(), is(2));
         watcher.verifyNoChangeReported("read package param");
 
-        assertThat(readPus1.getSuspendParams().keyAt(0), is("suspendingPackage1"));
+        assertThat(readPus1.getSuspendParams().keyAt(0), is(suspender1));
         final SuspendParams params11 = readPus1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("read package param");
         assertThat(params11, is(notNullValue()));
@@ -460,7 +577,7 @@ public class PackageManagerSettingsTests {
                 is(true));
         watcher.verifyNoChangeReported("read package param");
 
-        assertThat(readPus1.getSuspendParams().keyAt(1), is("suspendingPackage2"));
+        assertThat(readPus1.getSuspendParams().keyAt(1), is(suspender2));
         final SuspendParams params12 = readPus1.getSuspendParams().valueAt(1);
         assertThat(params12, is(notNullValue()));
         assertThat(params12.getDialogInfo(), is(dialogInfo2));
@@ -473,7 +590,7 @@ public class PackageManagerSettingsTests {
                 .readUserState(0);
         assertThat(readPus2.isSuspended(), is(true));
         assertThat(readPus2.getSuspendParams().size(), is(1));
-        assertThat(readPus2.getSuspendParams().keyAt(0), is("suspendingPackage3"));
+        assertThat(readPus2.getSuspendParams().keyAt(0), is(suspender3));
         final SuspendParams params21 = readPus2.getSuspendParams().valueAt(0);
         assertThat(params21, is(notNullValue()));
         assertThat(params21.getDialogInfo(), is(nullValue()));
@@ -1024,7 +1141,8 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonText(0x11220003)
                 .setNeutralButtonAction(BUTTON_ACTION_MORE_DETAILS)
                 .build();
-        origPkgSetting01.modifyUserState(0).putSuspendParams("suspendingPackage1",
+        origPkgSetting01.modifyUserState(0).putSuspendParams(
+                UserPackage.of(0, "suspendingPackage1"),
                 new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
         origPkgSetting01.setPkg(mockAndroidPackage(origPkgSetting01));
         final PackageSetting testPkgSetting01 = new PackageSetting(

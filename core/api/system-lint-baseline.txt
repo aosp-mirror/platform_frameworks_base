@@ -1909,6 +1909,8 @@ SamShouldBeLast: android.view.accessibility.AccessibilityManager#addAccessibilit
     SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addAccessibilityStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addTouchExplorationStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.inputmethod.InputMethodInfo#dump(android.util.Printer, String):
+    SAM-compatible parameters (such as parameter 1, "pw", in android.view.inputmethod.InputMethodInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.webkit.WebChromeClient#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams):
     SAM-compatible parameters (such as parameter 2, "filePathCallback", in android.webkit.WebChromeClient.onShowFileChooser) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 

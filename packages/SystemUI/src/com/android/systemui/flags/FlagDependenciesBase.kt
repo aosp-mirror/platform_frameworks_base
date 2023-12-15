@@ -25,7 +25,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.Compile
 import com.android.systemui.util.asIndenting
-import com.android.systemui.util.withIncreasedIndent
+import com.android.systemui.util.printCollection
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -59,10 +59,8 @@ abstract class FlagDependenciesBase(
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.asIndenting().run {
-            println("allDependencies: ${allDependencies.size}")
-            withIncreasedIndent { allDependencies.forEach(::println) }
-            println("unmetDependencies: ${unmetDependencies.size}")
-            withIncreasedIndent { unmetDependencies.forEach(::println) }
+            printCollection("allDependencies", allDependencies)
+            printCollection("unmetDependencies", unmetDependencies)
         }
     }
 

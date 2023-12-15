@@ -306,7 +306,6 @@ public final class UserTypeFactory {
                 .setDarkThemeBadgeColors(
                         R.color.white)
                 .setDefaultRestrictions(getDefaultProfileRestrictions())
-                .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
                         .setCredentialShareableWithParent(true)

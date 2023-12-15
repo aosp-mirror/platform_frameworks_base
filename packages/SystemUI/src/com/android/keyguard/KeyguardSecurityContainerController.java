@@ -38,7 +38,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
 import android.media.AudioManager;
 import android.metrics.LogMaker;
 import android.os.SystemClock;
@@ -74,6 +74,7 @@ import com.android.systemui.Gefingerpoken;
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate;
 import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.biometrics.SideFpsUiRequestSource;
+import com.android.systemui.biometrics.shared.SideFpsControllerRefactor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
@@ -486,7 +487,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mSceneContainerFlags = sceneContainerFlags;
         mGlobalSettings = globalSettings;
         mSessionTracker = sessionTracker;
-        mSideFpsController = sideFpsController;
+        if (SideFpsControllerRefactor.isEnabled()) {
+            mSideFpsController = Optional.empty();
+        } else {
+            mSideFpsController = sideFpsController;
+        }
         mFalsingA11yDelegate = falsingA11yDelegate;
         mTelephonyManager = telephonyManager;
         mViewMediatorCallback = viewMediatorCallback;
@@ -569,12 +574,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.clearFocus();
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /**
      * Shows and hides the side finger print sensor animation.
      *
      * @param isVisible sets whether we show or hide the side fps animation
      */
     public void updateSideFpsVisibility(boolean isVisible) {
+        SideFpsControllerRefactor.assertInLegacyMode();
         if (!mSideFpsController.isPresent()) {
             return;
         }
@@ -582,7 +589,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (isVisible) {
             mSideFpsController.get().show(
                     SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                    BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+                    BiometricRequestConstants.REASON_AUTH_KEYGUARD
             );
         } else {
             mSideFpsController.get().hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);

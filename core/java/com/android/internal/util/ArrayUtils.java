@@ -623,6 +623,21 @@ public class ArrayUtils {
      * Adds value to given array if not already present, providing set-like
      * behavior.
      */
+    public static boolean[] appendBoolean(@Nullable boolean[] cur, boolean val) {
+        if (cur == null) {
+            return new boolean[] { val };
+        }
+        final int N = cur.length;
+        boolean[] ret = new boolean[N + 1];
+        System.arraycopy(cur, 0, ret, 0, N);
+        ret[N] = val;
+        return ret;
+    }
+
+    /**
+     * Adds value to given array if not already present, providing set-like
+     * behavior.
+     */
     public static @NonNull long[] appendLong(@Nullable long[] cur, long val) {
         return appendLong(cur, val, false);
     }

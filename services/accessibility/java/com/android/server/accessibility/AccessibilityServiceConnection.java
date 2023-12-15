@@ -65,6 +65,7 @@ import java.util.Set;
  * passed to the service it represents as soon it is bound. It also serves as the
  * connection for the service.
  */
+@SuppressWarnings("MissingPermissionAnnotation")
 class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnection {
     private static final String LOG_TAG = "AccessibilityServiceConnection";
 

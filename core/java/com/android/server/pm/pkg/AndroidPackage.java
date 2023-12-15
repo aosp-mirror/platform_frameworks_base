@@ -58,6 +58,7 @@ import com.android.internal.pm.pkg.component.ParsedProcess;
 import com.android.internal.pm.pkg.component.ParsedProvider;
 import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.internal.pm.pkg.component.ParsedUsesPermission;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.security.PublicKey;
 import java.util.List;
@@ -690,7 +691,7 @@ public interface AndroidPackage {
 
     /**
      * The names of packages to adopt ownership of permissions from, parsed under {@link
-     * com.android.server.pm.pkg.parsing.ParsingPackageUtils#TAG_ADOPT_PERMISSIONS}.
+     * ParsingPackageUtils#TAG_ADOPT_PERMISSIONS}.
      *
      * @see R.styleable#AndroidManifestOriginalPackage_name
      * @hide
@@ -795,7 +796,7 @@ public interface AndroidPackage {
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in {@link
-     * com.android.server.pm.pkg.parsing.ParsingPackageUtils#TAG_KEY_SETS}.
+     * ParsingPackageUtils#TAG_KEY_SETS}.
      *
      * @see R.styleable#AndroidManifestKeySet
      * @see R.styleable#AndroidManifestPublicKey
@@ -1266,7 +1267,7 @@ public interface AndroidPackage {
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in {@link
-     * com.android.server.pm.pkg.parsing.ParsingPackageUtils#TAG_KEY_SETS}.
+     * ParsingPackageUtils#TAG_KEY_SETS}.
      *
      * @see R.styleable#AndroidManifestUpgradeKeySet
      * @hide

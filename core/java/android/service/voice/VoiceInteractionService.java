@@ -1042,13 +1042,13 @@ public class VoiceInteractionService extends Service {
     @SystemApi
     @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
     @RequiresPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION)
-    public void setIsReceiveSandboxedTrainingDataAllowed(boolean allowed) {
-        Log.i(TAG, "setIsReceiveSandboxedTrainingDataAllowed to " + allowed);
+    public void setShouldReceiveSandboxedTrainingData(boolean allowed) {
+        Log.i(TAG, "setShouldReceiveSandboxedTrainingData to " + allowed);
         if (mSystemService == null) {
             throw new IllegalStateException("Not available until onReady() is called");
         }
         try {
-            mSystemService.setIsReceiveSandboxedTrainingDataAllowed(allowed);
+            mSystemService.setShouldReceiveSandboxedTrainingData(allowed);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

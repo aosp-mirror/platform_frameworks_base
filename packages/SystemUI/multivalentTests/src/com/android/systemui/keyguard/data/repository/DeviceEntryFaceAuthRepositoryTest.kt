@@ -827,25 +827,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun isAuthenticatedIsResetToFalseWhenKeyguardIsGoingAway() =
-        testScope.runTest {
-            initCollectors()
-            allPreconditionsToRunFaceAuthAreTrue()
-
-            triggerFaceAuth(false)
-
-            authenticationCallback.value.onAuthenticationSucceeded(
-                mock(FaceManager.AuthenticationResult::class.java)
-            )
-
-            assertThat(authenticated()).isTrue()
-
-            keyguardRepository.setKeyguardGoingAway(true)
-
-            assertThat(authenticated()).isFalse()
-        }
-
-    @Test
     fun isAuthenticatedIsResetToFalseWhenDeviceStartsGoingToSleep() =
         testScope.runTest {
             initCollectors()
@@ -901,6 +882,25 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 primaryUser,
                 SelectionStatus.SELECTION_IN_PROGRESS
             )
+
+            assertThat(authenticated()).isFalse()
+        }
+
+    @Test
+    fun isAuthenticatedIsResetToFalseWhenKeyguardDoneAnimationsFinished() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+
+            triggerFaceAuth(false)
+
+            authenticationCallback.value.onAuthenticationSucceeded(
+                mock(FaceManager.AuthenticationResult::class.java)
+            )
+
+            assertThat(authenticated()).isTrue()
+
+            keyguardRepository.keyguardDoneAnimationsFinished()
 
             assertThat(authenticated()).isFalse()
         }

@@ -391,7 +391,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
-    public void setTiles_differentTiles_allTilesRemovedAndNewTilesAdded() {
+    public void setTiles_differentTiles_extraTileRemoved() {
         when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
         mController.setTiles();
 
@@ -400,8 +400,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mQSHost.getTiles()).thenReturn(List.of(mQSTile));
         mController.setTiles();
 
-        verify(mQSPanel, times(2)).removeTile(any());
-        verify(mQSPanel).addTile(any());
+        verify(mQSPanel, times(1)).removeTile(any());
+        verify(mQSPanel, never()).addTile(any());
     }
 
     @Test
@@ -418,7 +418,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     }
 
     @Test
-    public void setTiles_sameTilesDifferentOrder_removesAndReadds() {
+    public void setTiles_sameTilesDifferentOrder_removesAndReads() {
         when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
         mController.setTiles();
 

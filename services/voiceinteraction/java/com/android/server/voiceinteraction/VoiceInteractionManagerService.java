@@ -1569,13 +1569,13 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         @EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
-        public void setIsReceiveSandboxedTrainingDataAllowed(boolean allowed) {
-            super.setIsReceiveSandboxedTrainingDataAllowed_enforcePermission();
+        public void setShouldReceiveSandboxedTrainingData(boolean allowed) {
+            super.setShouldReceiveSandboxedTrainingData_enforcePermission();
 
             synchronized (this) {
                 if (mImpl == null) {
                     throw new IllegalStateException(
-                            "setIsReceiveSandboxedTrainingDataAllowed without running voice "
+                            "setShouldReceiveSandboxedTrainingData without running voice "
                                     + "interaction service");
                 }
 

@@ -18025,16 +18025,16 @@ public class TelephonyManager {
     @FlaggedApi(Flags.FLAG_ENABLE_IDENTIFIER_DISCLOSURE_TRANSPARENCY)
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
-    public void enableCellularIdentifierDisclosureNotifications(boolean enable) {
+    public void setEnableCellularIdentifierDisclosureNotifications(boolean enable) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.enableCellularIdentifierDisclosureNotifications(enable);
+                telephony.setEnableCellularIdentifierDisclosureNotifications(enable);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "enableCellularIdentifierDisclosureNotifications RemoteException", ex);
+            Rlog.e(TAG, "setEnableCellularIdentifierDisclosureNotifications RemoteException", ex);
             ex.rethrowFromSystemServer();
         }
     }
@@ -18051,16 +18051,16 @@ public class TelephonyManager {
     @FlaggedApi(Flags.FLAG_ENABLE_IDENTIFIER_DISCLOSURE_TRANSPARENCY)
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @SystemApi
-    public boolean isCellularIdentifierDisclosureNotificationEnabled() {
+    public boolean isCellularIdentifierDisclosureNotificationsEnabled() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.isCellularIdentifierDisclosureNotificationEnabled();
+                return telephony.isCellularIdentifierDisclosureNotificationsEnabled();
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "isCellularIdentifierDisclosureNotificationEnabled RemoteException", ex);
+            Rlog.e(TAG, "isCellularIdentifierDisclosureNotificationsEnabled RemoteException", ex);
             ex.rethrowFromSystemServer();
         }
         return false;

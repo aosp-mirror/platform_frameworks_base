@@ -896,7 +896,8 @@ public class AudioDeviceInventory {
             if (event == BtHelper.EVENT_DEVICE_CONFIG_CHANGE) {
                 boolean codecChange = false;
                 if (btInfo.mProfile == BluetoothProfile.A2DP
-                        || btInfo.mProfile == BluetoothProfile.LE_AUDIO) {
+                        || btInfo.mProfile == BluetoothProfile.LE_AUDIO
+                        || btInfo.mProfile == BluetoothProfile.LE_AUDIO_BROADCAST) {
                     if (di.mDeviceCodecFormat != codec) {
                         di.mDeviceCodecFormat = codec;
                         mConnectedDevices.replace(key, di);

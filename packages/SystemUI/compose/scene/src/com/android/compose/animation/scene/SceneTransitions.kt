@@ -18,11 +18,9 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.snap
-import androidx.compose.runtime.Stable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastMap
 import com.android.compose.animation.scene.transformation.AnchoredSize
 import com.android.compose.animation.scene.transformation.AnchoredTranslate
 import com.android.compose.animation.scene.transformation.DrawScale
@@ -36,16 +34,17 @@ import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.Translate
 
 /** The transitions configuration of a [SceneTransitionLayout]. */
-class SceneTransitions(
-    internal val transitionSpecs: List<TransitionSpec>,
+class SceneTransitions
+internal constructor(
+    internal val transitionSpecs: List<TransitionSpecImpl>,
 ) {
-    private val cache = mutableMapOf<SceneKey, MutableMap<SceneKey, TransitionSpec>>()
+    private val cache = mutableMapOf<SceneKey, MutableMap<SceneKey, TransitionSpecImpl>>()
 
-    internal fun transitionSpec(from: SceneKey, to: SceneKey): TransitionSpec {
+    internal fun transitionSpec(from: SceneKey, to: SceneKey): TransitionSpecImpl {
         return cache.getOrPut(from) { mutableMapOf() }.getOrPut(to) { findSpec(from, to) }
     }
 
-    private fun findSpec(from: SceneKey, to: SceneKey): TransitionSpec {
+    private fun findSpec(from: SceneKey, to: SceneKey): TransitionSpecImpl {
         val spec = transition(from, to) { it.from == from && it.to == to }
         if (spec != null) {
             return spec
@@ -53,7 +52,7 @@ class SceneTransitions(
 
         val reversed = transition(from, to) { it.from == to && it.to == from }
         if (reversed != null) {
-            return reversed.reverse()
+            return reversed.reversed()
         }
 
         val relaxedSpec =
@@ -67,16 +66,16 @@ class SceneTransitions(
         return transition(from, to) {
                 (it.from == to && it.to == null) || (it.to == from && it.from == null)
             }
-            ?.reverse()
+            ?.reversed()
             ?: defaultTransition(from, to)
     }
 
     private fun transition(
         from: SceneKey,
         to: SceneKey,
-        filter: (TransitionSpec) -> Boolean,
-    ): TransitionSpec? {
-        var match: TransitionSpec? = null
+        filter: (TransitionSpecImpl) -> Boolean,
+    ): TransitionSpecImpl? {
+        var match: TransitionSpecImpl? = null
         transitionSpecs.fastForEach { spec ->
             if (filter(spec)) {
                 if (match != null) {
@@ -89,27 +88,87 @@ class SceneTransitions(
     }
 
     private fun defaultTransition(from: SceneKey, to: SceneKey) =
-        TransitionSpec(from, to, emptyList(), snap())
+        TransitionSpecImpl(from, to, TransformationSpec.EmptyProvider)
+
+    companion object {
+        val Empty = SceneTransitions(transitionSpecs = emptyList())
+    }
 }
 
 /** The definition of a transition between [from] and [to]. */
-@Stable
-data class TransitionSpec(
-    val from: SceneKey?,
-    val to: SceneKey?,
-    val transformations: List<Transformation>,
-    val spec: AnimationSpec<Float>,
-) {
-    // TODO(b/302300957): Make sure this cache does not infinitely grow.
-    private val cache = mutableMapOf<ElementKey, MutableMap<SceneKey, ElementTransformations>>()
+interface TransitionSpec {
+    /**
+     * The scene we are transitioning from. If `null`, this spec can be used to animate from any
+     * scene.
+     */
+    val from: SceneKey?
 
-    internal fun reverse(): TransitionSpec {
-        return copy(
+    /**
+     * The scene we are transitioning to. If `null`, this spec can be used to animate from any
+     * scene.
+     */
+    val to: SceneKey?
+
+    /**
+     * Return a reversed version of this [TransitionSpec] for a transition going from [to] to
+     * [from].
+     */
+    fun reversed(): TransitionSpec
+
+    /*
+     * The [TransformationSpec] associated to this [TransitionSpec].
+     *
+     * Note that this is called once every a transition associated to this [TransitionSpec] is
+     * started.
+     */
+    fun transformationSpec(): TransformationSpec
+}
+
+interface TransformationSpec {
+    /** The [AnimationSpec] used to animate the associated transition progress. */
+    val progressSpec: AnimationSpec<Float>
+
+    /** The list of [Transformation] applied to elements during this transition. */
+    val transformations: List<Transformation>
+
+    companion object {
+        internal val Empty =
+            TransformationSpecImpl(progressSpec = snap(), transformations = emptyList())
+        internal val EmptyProvider = { Empty }
+    }
+}
+
+internal class TransitionSpecImpl(
+    override val from: SceneKey?,
+    override val to: SceneKey?,
+    private val transformationSpec: () -> TransformationSpecImpl,
+) : TransitionSpec {
+    override fun reversed(): TransitionSpecImpl {
+        return TransitionSpecImpl(
             from = to,
             to = from,
-            transformations = transformations.fastMap { it.reverse() },
+            transformationSpec = {
+                val reverse = transformationSpec.invoke()
+                TransformationSpecImpl(
+                    progressSpec = reverse.progressSpec,
+                    transformations = reverse.transformations.map { it.reversed() }
+                )
+            }
         )
     }
+
+    override fun transformationSpec(): TransformationSpecImpl = this.transformationSpec.invoke()
+}
+
+/**
+ * An implementation of [TransformationSpec] that allows the quick retrieval of an element
+ * [ElementTransformations].
+ */
+internal class TransformationSpecImpl(
+    override val progressSpec: AnimationSpec<Float>,
+    override val transformations: List<Transformation>,
+) : TransformationSpec {
+    private val cache = mutableMapOf<ElementKey, MutableMap<SceneKey, ElementTransformations>>()
 
     internal fun transformations(element: ElementKey, scene: SceneKey): ElementTransformations {
         return cache

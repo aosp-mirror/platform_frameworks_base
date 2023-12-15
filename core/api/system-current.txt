@@ -12930,6 +12930,7 @@ package android.service.voice {
     field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
     field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
     field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
+    field @FlaggedApi("android.service.voice.flags.allow_hotword_bump_egress") public static final int CONFIDENCE_LEVEL_VERY_HIGH = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordRejectedResult> CREATOR;
   }
 
@@ -13051,7 +13052,7 @@ package android.service.voice {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.HotwordDetector.Callback);
     method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.VisualQueryDetector createVisualQueryDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.VisualQueryDetector.Callback);
-    method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public void setIsReceiveSandboxedTrainingDataAllowed(boolean);
+    method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public void setShouldReceiveSandboxedTrainingData(boolean);
   }
 
 }
@@ -13701,6 +13702,7 @@ package android.telephony {
     method @NonNull public java.util.List<java.lang.Boolean> areCarrierIdentifiersAllowed(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
     method public int describeContents();
     method @NonNull public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers();
+    method @FlaggedApi("com.android.internal.telephony.flags.carrier_restriction_status") public int getCarrierRestrictionStatus();
     method public int getDefaultCarrierRestriction();
     method @NonNull public java.util.List<android.service.carrier.CarrierIdentifier> getExcludedCarriers();
     method public int getMultiSimPolicy();
@@ -14523,7 +14525,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void clearRadioPowerOffForReason(int);
     method public void dial(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean disableDataConnectivity();
-    method @FlaggedApi("com.android.internal.telephony.flags.enable_identifier_disclosure_transparency") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void enableCellularIdentifierDisclosureNotifications(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean enableDataConnectivity();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean enableModemForSlot(int, boolean);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void enableVideoCalling(boolean);
@@ -14596,7 +14597,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAnyRadioPoweredOn();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApnMetered(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
-    method @FlaggedApi("com.android.internal.telephony.flags.enable_identifier_disclosure_transparency") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCellularIdentifierDisclosureNotificationEnabled();
+    method @FlaggedApi("com.android.internal.telephony.flags.enable_identifier_disclosure_transparency") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCellularIdentifierDisclosureNotificationsEnabled();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
@@ -14644,6 +14645,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataActivationState(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataRoamingEnabled(boolean);
+    method @FlaggedApi("com.android.internal.telephony.flags.enable_identifier_disclosure_transparency") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setEnableCellularIdentifierDisclosureNotifications(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult setIccLockEnabled(boolean, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMobileDataPolicyEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
