@@ -100,7 +100,6 @@ import android.util.Pair;
 import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -111,6 +110,7 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -577,7 +577,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testBoundWidgetPackageExempt() throws Exception {
         assumeTrue(mInjector.getContext().getSystemService(AppWidgetManager.class) != null);
         waitAndAssertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_EXEMPTED_1);
@@ -658,7 +657,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testIsAppIdle_Charging() throws Exception {
         TestParoleListener paroleListener = new TestParoleListener();
         mController.addListener(paroleListener);
@@ -691,7 +689,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testIsAppIdle_Enabled() throws Exception {
         setChargingState(mController, false);
         TestParoleListener paroleListener = new TestParoleListener();
@@ -828,7 +825,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testBuckets() throws Exception {
         assertTimeout(mController, 0, STANDBY_BUCKET_NEVER);
 
@@ -861,7 +857,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testSetAppStandbyBucket() throws Exception {
         // For a known package, standby bucket should be set properly
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
@@ -881,7 +876,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testAppStandbyBucketOnInstallAndUninstall() throws Exception {
         // On package install, standby bucket should be ACTIVE
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_UNKNOWN);
@@ -900,7 +894,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testScreenTimeAndBuckets() throws Exception {
         mInjector.setDisplayOn(false);
 
@@ -924,7 +917,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testForcedIdle() throws Exception {
         mController.forceIdleState(PACKAGE_1, USER_ID, true);
         waitAndAssertBucket(STANDBY_BUCKET_RARE, PACKAGE_1);
@@ -974,7 +966,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testNotificationEvent_quotaBump() throws Exception {
         mInjector.mSettingsBuilder
                 .setBoolean("trigger_quota_bump_on_notification_seen", true);
@@ -997,7 +988,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testSlicePinnedEvent() throws Exception {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         waitAndAssertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_1);
@@ -1011,7 +1001,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testSlicePinnedPrivEvent() throws Exception {
         mController.forceIdleState(PACKAGE_1, USER_ID, true);
         reportEvent(mController, SLICE_PINNED_PRIV, mInjector.mElapsedRealtime, PACKAGE_1);
@@ -1019,7 +1008,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testPredictionTimedOut() throws Exception {
         // Set it to timeout or usage, so that prediction can override it
         mInjector.mElapsedRealtime = HOUR_MS;
@@ -1050,7 +1038,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
+    @Ignore("b/317086276")
     public void testOverrides() throws Exception {
         // Can force to NEVER
         mInjector.mElapsedRealtime = HOUR_MS;
@@ -1161,7 +1149,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testTimeout() throws Exception {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         waitAndAssertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_1);
@@ -1186,7 +1173,6 @@ public class AppStandbyControllerTests {
 
     /** Test that timeouts still work properly even if invalid configuration values are set. */
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testTimeout_InvalidThresholds() throws Exception {
         mInjector.mSettingsBuilder
                 .setLong("screen_threshold_active", -1)
@@ -1224,7 +1210,7 @@ public class AppStandbyControllerTests {
      * timeout has passed.
      */
     @Test
-    @FlakyTest(bugId = 185169504)
+    @Ignore("b/317086276")
     public void testTimeoutBeforeRestricted() throws Exception {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         waitAndAssertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_1);
@@ -1251,7 +1237,6 @@ public class AppStandbyControllerTests {
      * Test that an app is put into the RESTRICTED bucket after enough time has passed.
      */
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testRestrictedDelay() throws Exception {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         waitAndAssertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_1);
@@ -1274,7 +1259,6 @@ public class AppStandbyControllerTests {
      * Test that an app is put into the RESTRICTED bucket after enough time has passed.
      */
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testRestrictedDelay_DelayChange() throws Exception {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         waitAndAssertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_1);
@@ -1299,7 +1283,6 @@ public class AppStandbyControllerTests {
      * a low bucket after the RESTRICTED timeout.
      */
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testRestrictedTimeoutOverridesRestoredLowBucketPrediction() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
         waitAndAssertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_1);
@@ -1336,7 +1319,6 @@ public class AppStandbyControllerTests {
      * a low bucket after the RESTRICTED timeout.
      */
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testRestrictedTimeoutOverridesPredictionLowBucket() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
 
@@ -1364,7 +1346,6 @@ public class AppStandbyControllerTests {
      * interaction.
      */
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testSystemInteractionOverridesRestrictedTimeout() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
         waitAndAssertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_1);
@@ -1391,7 +1372,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testPredictionRaiseFromRestrictedTimeout_highBucket() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
 
@@ -1409,7 +1389,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testPredictionRaiseFromRestrictedTimeout_lowBucket() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
 
@@ -1427,7 +1406,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testCascadingTimeouts() throws Exception {
         mInjector.mPropertiesChangedListener
                 .onPropertiesChanged(mInjector.getDeviceConfigProperties());
@@ -1454,7 +1432,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testOverlappingTimeouts() throws Exception {
         mInjector.mPropertiesChangedListener
                 .onPropertiesChanged(mInjector.getDeviceConfigProperties());
@@ -1489,7 +1466,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testSystemInteractionTimeout() throws Exception {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         // Fast forward to RARE
@@ -1513,7 +1489,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testInitialForegroundServiceTimeout() throws Exception {
         mInjector.mElapsedRealtime = 1 * RARE_THRESHOLD + 100;
         // Make sure app is in NEVER bucket
@@ -1547,7 +1522,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testPredictionNotOverridden() throws Exception {
         mInjector.mPropertiesChangedListener
                 .onPropertiesChanged(mInjector.getDeviceConfigProperties());
@@ -1577,7 +1551,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testPredictionStrikesBack() throws Exception {
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         waitAndAssertBucket(STANDBY_BUCKET_ACTIVE, PACKAGE_1);
@@ -1603,7 +1576,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testSystemForcedFlags_NotAddedForUserForce() throws Exception {
         final int expectedReason = REASON_MAIN_FORCED_BY_USER;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
@@ -1618,7 +1590,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testSystemForcedFlags_AddedForSystemForce() throws Exception {
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
                 REASON_MAIN_DEFAULT);
@@ -1641,7 +1612,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testSystemForcedFlags_SystemForceChangesBuckets() throws Exception {
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
                 REASON_MAIN_DEFAULT);
@@ -1679,7 +1649,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testRestrictApp_MainReason() throws Exception {
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
                 REASON_MAIN_DEFAULT);
@@ -1767,7 +1736,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testUserInteraction_CrossProfile() throws Exception {
         mInjector.mRunningUsers = new int[] {USER_ID, USER_ID2, USER_ID3};
         mInjector.mCrossProfileTargets = Arrays.asList(USER_HANDLE_USER2);
@@ -1792,7 +1760,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testUnexemptedSyncScheduled() throws Exception {
         rearmLatch(PACKAGE_1);
         mController.addListener(mListener);
@@ -1815,7 +1782,6 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 185169504)
     public void testExemptedSyncScheduled() throws Exception {
         setAndAssertBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE, REASON_MAIN_FORCED_BY_SYSTEM);
         mInjector.mDeviceIdleMode = true;
