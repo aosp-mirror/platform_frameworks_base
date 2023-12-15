@@ -29,6 +29,9 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
+static constexpr auto P3_XRB = static_cast<android_dataspace>(
+        ADATASPACE_STANDARD_DCI_P3 | ADATASPACE_TRANSFER_SRGB | ADATASPACE_RANGE_EXTENDED);
+
 static int InvertTransform(int transform) {
     switch (transform) {
         case ANATIVEWINDOW_TRANSFORM_ROTATE_90:
@@ -214,8 +217,7 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
     outWindowInfo->colorMode = colorMode;
 
     if (colorMode == ColorMode::Hdr || colorMode == ColorMode::Hdr10) {
-        outWindowInfo->dataspace =
-                static_cast<android_dataspace>(STANDARD_DCI_P3 | TRANSFER_SRGB | RANGE_EXTENDED);
+        outWindowInfo->dataspace = P3_XRB;
     } else {
         outWindowInfo->dataspace = ColorSpaceToADataSpace(colorSpace.get(), colorType);
     }
@@ -541,8 +543,7 @@ void VulkanSurface::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
     }
 
     if (mWindowInfo.colorMode == ColorMode::Hdr || mWindowInfo.colorMode == ColorMode::Hdr10) {
-        mWindowInfo.dataspace =
-                static_cast<android_dataspace>(STANDARD_DCI_P3 | TRANSFER_SRGB | RANGE_EXTENDED);
+        mWindowInfo.dataspace = P3_XRB;
     } else {
         mWindowInfo.dataspace = ColorSpaceToADataSpace(
                 mWindowInfo.colorspace.get(), BufferFormatToColorType(mWindowInfo.bufferFormat));
