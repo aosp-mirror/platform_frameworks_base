@@ -39,3 +39,11 @@ flag {
     description: "Whether the interactive divider feature is enabled"
     bug: "293654166"
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "activity_window_info_flag"
+    description: "To dispatch ActivityWindowInfo through ClientTransaction"
+    bug: "287582673"
+    is_fixed_read_only: true
+}
