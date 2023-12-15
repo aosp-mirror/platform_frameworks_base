@@ -1262,7 +1262,7 @@ jint android_os_Process_killProcessGroup(JNIEnv* env, jobject clazz, jint uid, j
     return killProcessGroup(uid, pid, SIGKILL);
 }
 
-jint android_os_Process_sendSignalToProcessGroup(JNIEnv* env, jobject clazz, jint uid, jint pid,
+jboolean android_os_Process_sendSignalToProcessGroup(JNIEnv* env, jobject clazz, jint uid, jint pid,
                                                  jint signal) {
     if (uid < 0) {
         return jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
@@ -1344,7 +1344,7 @@ static const JNINativeMethod methods[] = {
         //{"setApplicationObject", "(Landroid/os/IBinder;)V",
         //(void*)android_os_Process_setApplicationObject},
         {"killProcessGroup", "(II)I", (void*)android_os_Process_killProcessGroup},
-        {"sendSignalToProcessGroup", "(III)I", (void*)android_os_Process_sendSignalToProcessGroup},
+        {"sendSignalToProcessGroup", "(III)Z", (void*)android_os_Process_sendSignalToProcessGroup},
         {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
         {"nativePidFdOpen", "(II)I", (void*)android_os_Process_nativePidFdOpen},
         {"freezeCgroupUid", "(IZ)V", (void*)android_os_Process_freezeCgroupUID},
