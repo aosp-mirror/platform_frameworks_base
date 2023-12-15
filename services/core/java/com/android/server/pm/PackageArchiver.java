@@ -50,6 +50,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ArchivedActivityParcel;
 import android.content.pm.ArchivedPackageParcel;
+import android.content.pm.Flags;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInstaller;
@@ -73,6 +74,7 @@ import android.os.IBinder;
 import android.os.ParcelableException;
 import android.os.Process;
 import android.os.SELinux;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ExceptionUtils;
@@ -154,6 +156,10 @@ public class PackageArchiver {
     /** Returns whether a package is archived for a user. */
     public static boolean isArchived(PackageUserState userState) {
         return userState.getArchiveState() != null && !userState.isInstalled();
+    }
+
+    public static boolean isArchivingEnabled() {
+        return Flags.archiving() || SystemProperties.getBoolean("pm.archiving.enabled", false);
     }
 
     void requestArchive(

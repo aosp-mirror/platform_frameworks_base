@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.ResolveInfo
+import android.os.SystemProperties
 import com.android.internal.R
 import com.android.settingslib.spaprivileged.framework.common.userManager
 import kotlinx.coroutines.async
@@ -110,7 +111,7 @@ class AppListRepositoryImpl(
     ): List<ApplicationInfo> {
         val disabledComponentsFlag = (PackageManager.MATCH_DISABLED_COMPONENTS or
             PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
-        val archivedPackagesFlag: Long = if (featureFlags.archiving())
+        val archivedPackagesFlag: Long = if (isArchivingEnabled(featureFlags))
             PackageManager.MATCH_ARCHIVED_PACKAGES else 0L
         val regularFlags = ApplicationInfoFlags.of(
             disabledComponentsFlag or
@@ -147,6 +148,9 @@ class AppListRepositoryImpl(
             }
         }
     }
+
+    private fun isArchivingEnabled(featureFlags: FeatureFlags) =
+            featureFlags.archiving() || SystemProperties.getBoolean("pm.archiving.enabled", false)
 
     override fun showSystemPredicate(
         userIdFlow: Flow<Int>,

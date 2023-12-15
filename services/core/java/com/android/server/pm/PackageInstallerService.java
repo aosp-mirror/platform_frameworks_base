@@ -29,6 +29,7 @@ import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 
+import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -822,7 +823,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         params.installFlags &= ~PackageManager.INSTALL_UNARCHIVE;
-        if (Flags.archiving() && params.appPackageName != null) {
+        if (isArchivingEnabled() && params.appPackageName != null) {
             PackageStateInternal ps = mPm.snapshotComputer().getPackageStateInternal(
                     params.appPackageName, SYSTEM_UID);
             if (ps != null
@@ -1030,7 +1031,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private int getExistingDraftSessionIdInternal(int installerUid,
             SessionParams sessionParams, int userId) {
         String appPackageName = sessionParams.appPackageName;
-        if (!Flags.archiving() || installerUid == INVALID_UID || appPackageName == null) {
+        if (!isArchivingEnabled() || installerUid == INVALID_UID || appPackageName == null) {
             return SessionInfo.INVALID_ID;
         }
 
