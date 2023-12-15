@@ -2747,6 +2747,14 @@ static void nativeSetAccessibilityBounceKeysThreshold(JNIEnv* env, jobject nativ
     }
 }
 
+static void nativeSetAccessibilityStickyKeysEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                    jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    if (ENABLE_INPUT_FILTER_RUST) {
+        im->getInputManager()->getInputFilter().setAccessibilityStickyKeysEnabled(enabled);
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2848,6 +2856,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setStylusPointerIconEnabled", "(Z)V", (void*)nativeSetStylusPointerIconEnabled},
         {"setAccessibilityBounceKeysThreshold", "(I)V",
          (void*)nativeSetAccessibilityBounceKeysThreshold},
+        {"setAccessibilityStickyKeysEnabled", "(Z)V",
+         (void*)nativeSetAccessibilityStickyKeysEnabled},
 };
 
 #define FIND_CLASS(var, className) \

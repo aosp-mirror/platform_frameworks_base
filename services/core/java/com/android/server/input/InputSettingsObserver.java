@@ -87,7 +87,9 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_ROTARY_INPUT),
                         (reason) -> updateShowRotaryInput()),
                 Map.entry(Settings.System.getUriFor(Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS),
-                        (reason) -> updateAccessibilityBounceKeys()));
+                        (reason) -> updateAccessibilityBounceKeys()),
+                Map.entry(Settings.System.getUriFor(Settings.Secure.ACCESSIBILITY_STICKY_KEYS),
+                        (reason) -> updateAccessibilityStickyKeys()));
     }
 
     /**
@@ -222,5 +224,10 @@ class InputSettingsObserver extends ContentObserver {
     private void updateAccessibilityBounceKeys() {
         mService.setAccessibilityBounceKeysThreshold(
                 InputSettings.getAccessibilityBounceKeysThreshold(mContext));
+    }
+
+    private void updateAccessibilityStickyKeys() {
+        mService.setAccessibilityStickyKeysEnabled(
+                InputSettings.isAccessibilityStickyKeysEnabled(mContext));
     }
 }
