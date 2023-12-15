@@ -3045,8 +3045,8 @@ interface ITelephony {
      *
      * @param handoverType The type of handover from emergency call to satellite messaging. Use one
      *                     of the following values to enable the override:
-     *                     0 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS
-     *                     1 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911
+     *                     1 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS
+     *                     2 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911
      *                     To disable the override, use -1 for handoverType.
      * @param delaySeconds The event EVENT_DISPLAY_EMERGENCY_MESSAGE will be sent to Dialer
      *                     delaySeconds after the emergency call starts.

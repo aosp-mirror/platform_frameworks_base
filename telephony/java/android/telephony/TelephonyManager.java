@@ -1207,7 +1207,8 @@ public class TelephonyManager {
      * The dialer app receives this event via
      * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
      * <p>
-     * The {@link Bundle} parameter is expected to include the following extras:
+     * The {@link Bundle} parameter is guaranteed to include the following extras if the below
+     * conditions are met:
      * <ul>
      *     <li>{@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE} - the recommending handover
      *         type.</li>
