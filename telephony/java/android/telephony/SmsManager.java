@@ -3556,4 +3556,29 @@ public final class SmsManager {
         }
         return smscUri;
     }
+
+    /**
+     * Gets the message size of a WAP from the cache.
+     *
+     * @param locationUrl the location to use as a key for looking up the size in the cache.
+     * The locationUrl may or may not have the transactionId appended to the url.
+     *
+     * @return long representing the message size
+     * @throws java.util.NoSuchElementException if the WAP push doesn't exist in the cache
+     * @throws IllegalArgumentException if the locationUrl is empty
+     *
+     * @hide
+     */
+    public long getWapMessageSize(@NonNull String locationUrl) {
+        try {
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                return iSms.getWapMessageSize(locationUrl);
+            } else {
+                throw new RuntimeException("Could not acquire ISms service.");
+            }
+        } catch (RemoteException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 }
