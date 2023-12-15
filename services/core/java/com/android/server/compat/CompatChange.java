@@ -252,9 +252,6 @@ public final class CompatChange extends CompatibilityChangeInfo {
             // If the change is gated by a platform version newer than the one currently installed
             // on the device, disregard the app's target sdk version.
             int compareSdk = Math.min(app.targetSdkVersion, buildClassifier.platformTargetSdk());
-            if (compareSdk != app.targetSdkVersion) {
-                compareSdk = app.targetSdkVersion;
-            }
             return compareSdk >= getEnableSinceTargetSdk();
         }
         return true;
