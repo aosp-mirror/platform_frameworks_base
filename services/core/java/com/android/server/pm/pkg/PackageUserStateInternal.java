@@ -19,7 +19,6 @@ package com.android.server.pm.pkg;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
-import android.content.pm.UserPackage;
 import android.content.pm.pkg.FrameworkPackageUserState;
 import android.util.Pair;
 
@@ -39,7 +38,7 @@ public interface PackageUserStateInternal extends PackageUserState, FrameworkPac
 
     // TODO: Make non-null with emptyMap()
     @Nullable
-    WatchedArrayMap<UserPackage, SuspendParams> getSuspendParams();
+    WatchedArrayMap<String, SuspendParams> getSuspendParams();
 
     @Nullable
     WatchedArraySet<String> getDisabledComponentsNoCopy();

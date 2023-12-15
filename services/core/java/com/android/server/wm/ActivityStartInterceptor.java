@@ -48,7 +48,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.UserPackage;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -336,19 +335,19 @@ class ActivityStartInterceptor {
             return false;
         }
         final String suspendedPackage = mAInfo.applicationInfo.packageName;
-        final UserPackage suspender = pmi.getSuspendingPackage(suspendedPackage, mUserId);
-        if (suspender != null && PLATFORM_PACKAGE_NAME.equals(suspender.packageName)) {
+        final String suspendingPackage = pmi.getSuspendingPackage(suspendedPackage, mUserId);
+        if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
             return interceptSuspendedByAdminPackage();
         }
         final SuspendDialogInfo dialogInfo = pmi.getSuspendedDialogInfo(suspendedPackage,
-                suspender, mUserId);
+                suspendingPackage, mUserId);
         final Bundle crossProfileOptions = hasCrossProfileAnimation()
                 ? ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle()
                 : null;
         final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_IMMUTABLE);
         mIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(suspendedPackage,
-                suspender, dialogInfo, crossProfileOptions, target, mUserId);
+                suspendingPackage, dialogInfo, crossProfileOptions, target, mUserId);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;

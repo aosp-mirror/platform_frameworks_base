@@ -289,11 +289,11 @@ public abstract class PackageManagerInternal {
      *
      * @param suspendedPackage The package that has been suspended.
      * @param userId The user for which to check.
-     * @return User id and package name of the package that suspended the given package. Returns
-     * {@code null} if the given package is not currently suspended and the platform package name
-     * - i.e. {@code "android"} - if the package was suspended by a device admin.
+     * @return Name of the package that suspended the given package. Returns {@code null} if the
+     * given package is not currently suspended and the platform package name - i.e.
+     * {@code "android"} - if the package was suspended by a device admin.
      */
-    public abstract UserPackage getSuspendingPackage(String suspendedPackage, int userId);
+    public abstract String getSuspendingPackage(String suspendedPackage, int userId);
 
     /**
      * Suspend or unsuspend packages upon admin request.
@@ -312,13 +312,13 @@ public abstract class PackageManagerInternal {
      * suspended application.
      *
      * @param suspendedPackage The package that has been suspended.
-     * @param suspendingPackage The package responsible for suspension.
+     * @param suspendingPackage
      * @param userId The user for which to check.
      * @return A {@link SuspendDialogInfo} object describing the dialog to be shown.
      */
     @Nullable
     public abstract SuspendDialogInfo getSuspendedDialogInfo(String suspendedPackage,
-            UserPackage suspendingPackage, int userId);
+            String suspendingPackage, int userId);
 
     /**
      * Gets any distraction flags set via
@@ -1168,14 +1168,14 @@ public abstract class PackageManagerInternal {
     public abstract void clearBlockUninstallForUser(@UserIdInt int userId);
 
     /**
-     * Unsuspends all packages suspended by an admin for the user.
+     * Unsuspends all packages suspended by the given package for the user.
      */
-    public abstract void unsuspendAdminSuspendedPackages(int userId);
+    public abstract void unsuspendForSuspendingPackage(String suspendingPackage, int userId);
 
     /**
-     * Returns {@code true} if an admin is suspending any packages for the user.
+     * Returns {@code true} if the package is suspending any packages for the user.
      */
-    public abstract boolean isAdminSuspendingAnyPackages(int userId);
+    public abstract boolean isSuspendingAnyPackages(String suspendingPackage, int userId);
 
     /**
      * Register to listen for loading progress of an installed package.

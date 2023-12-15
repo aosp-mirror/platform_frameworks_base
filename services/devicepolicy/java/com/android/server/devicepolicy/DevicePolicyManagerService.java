@@ -2469,7 +2469,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void migratePersonalAppSuspensionLocked(
             int doUserId, int poUserId, ActiveAdmin poAdmin) {
         final PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
-        if (!pmi.isAdminSuspendingAnyPackages(doUserId)) {
+        if (!pmi.isSuspendingAnyPackages(PLATFORM_PACKAGE_NAME, doUserId)) {
             Slogf.i(LOG_TAG, "DO is not suspending any apps.");
             return;
         }
@@ -2480,7 +2480,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             poAdmin.mSuspendPersonalApps = true;
         } else {
             Slogf.i(LOG_TAG, "PO isn't targeting R+, unsuspending personal apps.");
-            pmi.unsuspendAdminSuspendedPackages(doUserId);
+            pmi.unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, doUserId);
         }
     }
 

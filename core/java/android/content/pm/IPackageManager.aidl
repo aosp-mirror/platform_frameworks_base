@@ -300,8 +300,7 @@ interface IPackageManager {
 
     String[] setPackagesSuspendedAsUser(in String[] packageNames, boolean suspended,
             in PersistableBundle appExtras, in PersistableBundle launcherExtras,
-            in SuspendDialogInfo dialogInfo, int flags, String suspendingPackage,
-            int suspendingUserId, int targetUserId);
+            in SuspendDialogInfo dialogInfo, int flags, String callingPackage, int userId);
 
     String[] getUnsuspendablePackagesForUser(in String[] packageNames, int userId);
 

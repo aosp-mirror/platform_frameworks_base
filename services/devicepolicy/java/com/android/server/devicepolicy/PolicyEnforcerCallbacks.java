@@ -16,6 +16,8 @@
 
 package com.android.server.devicepolicy;
 
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
@@ -285,7 +287,7 @@ final class PolicyEnforcerCallbacks {
                 suspendPersonalAppsInPackageManager(context, userId);
             } else {
                 LocalServices.getService(PackageManagerInternal.class)
-                        .unsuspendAdminSuspendedPackages(userId);
+                        .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, userId);
             }
         });
         return true;

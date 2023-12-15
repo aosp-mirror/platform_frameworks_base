@@ -10000,9 +10000,6 @@ public abstract class PackageManager {
      * device administrators or apps holding {@link android.Manifest.permission#MANAGE_USERS} or
      * {@link android.Manifest.permission#SUSPEND_APPS}.
      *
-     * <p>
-     * <strong>Note:</strong>This API doesn't support cross user suspension and should only be used
-     * for testing.
      * @param suspendedPackage The package that has been suspended.
      * @return Name of the package that suspended the given package. Returns {@code null} if the
      * given package is not currently suspended and the platform package name - i.e.
