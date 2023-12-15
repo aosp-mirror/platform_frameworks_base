@@ -19,6 +19,8 @@ package com.android.settingslib.wifi;
 import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_ENABLED;
 import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.getMaxNetworkSelectionDisableReason;
 
+import static com.android.settingslib.flags.Flags.newStatusBarIcons;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -88,21 +90,49 @@ public class WifiUtils {
     public static final String KEY_CHOSEN_WIFIENTRY_KEY = "key_chosen_wifientry_key";
     public static final String EXTRA_SHOW_FRAGMENT_ARGUMENTS = ":settings:show_fragment_args";
 
-    static final int[] WIFI_PIE = {
-            com.android.internal.R.drawable.ic_wifi_signal_0,
-            com.android.internal.R.drawable.ic_wifi_signal_1,
-            com.android.internal.R.drawable.ic_wifi_signal_2,
-            com.android.internal.R.drawable.ic_wifi_signal_3,
-            com.android.internal.R.drawable.ic_wifi_signal_4
-    };
+    static final int[] WIFI_PIE = getIconsBasedOnFlag();
 
-    static final int[] NO_INTERNET_WIFI_PIE = {
-            R.drawable.ic_no_internet_wifi_signal_0,
-            R.drawable.ic_no_internet_wifi_signal_1,
-            R.drawable.ic_no_internet_wifi_signal_2,
-            R.drawable.ic_no_internet_wifi_signal_3,
-            R.drawable.ic_no_internet_wifi_signal_4
-    };
+    private static int[] getIconsBasedOnFlag() {
+        if (newStatusBarIcons()) {
+            return new int[] {
+                    R.drawable.ic_wifi_0,
+                    R.drawable.ic_wifi_1,
+                    R.drawable.ic_wifi_2,
+                    R.drawable.ic_wifi_3,
+                    R.drawable.ic_wifi_4
+            };
+        } else {
+            return new int[] {
+                    com.android.internal.R.drawable.ic_wifi_signal_0,
+                    com.android.internal.R.drawable.ic_wifi_signal_1,
+                    com.android.internal.R.drawable.ic_wifi_signal_2,
+                    com.android.internal.R.drawable.ic_wifi_signal_3,
+                    com.android.internal.R.drawable.ic_wifi_signal_4
+            };
+        }
+    }
+
+    static final int[] NO_INTERNET_WIFI_PIE = getErrorIconsBasedOnFlag();
+
+    private static int [] getErrorIconsBasedOnFlag() {
+        if (newStatusBarIcons()) {
+            return new int[] {
+                    R.drawable.ic_wifi_0_error,
+                    R.drawable.ic_wifi_1_error,
+                    R.drawable.ic_wifi_2_error,
+                    R.drawable.ic_wifi_3_error,
+                    R.drawable.ic_wifi_4_error
+            };
+        } else {
+            return new int[] {
+                    R.drawable.ic_no_internet_wifi_signal_0,
+                    R.drawable.ic_no_internet_wifi_signal_1,
+                    R.drawable.ic_no_internet_wifi_signal_2,
+                    R.drawable.ic_no_internet_wifi_signal_3,
+                    R.drawable.ic_no_internet_wifi_signal_4
+            };
+        }
+    }
 
     public static String buildLoggingSummary(AccessPoint accessPoint, WifiConfiguration config) {
         final StringBuilder summary = new StringBuilder();
