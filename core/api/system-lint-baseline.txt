@@ -1995,8 +1995,12 @@ UnflaggedApi: android.Manifest.permission#ALWAYS_UPDATE_WALLPAPER:
     New API must be flagged with @FlaggedApi: field android.Manifest.permission.ALWAYS_UPDATE_WALLPAPER
 UnflaggedApi: android.Manifest.permission#CAMERA_HEADLESS_SYSTEM_USER:
     New API must be flagged with @FlaggedApi: field android.Manifest.permission.CAMERA_HEADLESS_SYSTEM_USER
+UnflaggedApi: android.Manifest.permission#KEYPHRASE_ENROLLMENT_APPLICATION:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.KEYPHRASE_ENROLLMENT_APPLICATION
 UnflaggedApi: android.Manifest.permission#LAUNCH_PERMISSION_SETTINGS:
     New API must be flagged with @FlaggedApi: field android.Manifest.permission.LAUNCH_PERMISSION_SETTINGS
+UnflaggedApi: android.Manifest.permission#MANAGE_VOICE_KEYPHRASES:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.MANAGE_VOICE_KEYPHRASES
 UnflaggedApi: android.Manifest.permission#READ_INSTALLED_SESSION_PATHS:
     New API must be flagged with @FlaggedApi: field android.Manifest.permission.READ_INSTALLED_SESSION_PATHS
 UnflaggedApi: android.Manifest.permission#REGISTER_NSD_OFFLOAD_ENGINE:

@@ -2132,7 +2132,7 @@ package android.media.tv.tuner {
 package android.media.voice {
 
   public final class KeyphraseModelManager {
-    method @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public void setModelDatabaseForTestEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public void setModelDatabaseForTestEnabled(boolean);
   }
 
 }
