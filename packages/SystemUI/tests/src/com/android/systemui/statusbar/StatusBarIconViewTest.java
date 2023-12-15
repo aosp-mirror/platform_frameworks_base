@@ -54,6 +54,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.NotificationContentDescription;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -183,7 +184,7 @@ public class StatusBarIconViewTest extends SysuiTestCase {
                 .build();
         // should be ApplicationInfo
         n.extras.putParcelable(Notification.EXTRA_BUILDER_APPLICATION_INFO, new Bundle());
-        StatusBarIconView.contentDescForNotification(mContext, n);
+        NotificationContentDescription.contentDescForNotification(mContext, n);
 
         // no crash, good
     }

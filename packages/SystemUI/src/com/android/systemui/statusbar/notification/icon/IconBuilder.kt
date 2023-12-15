@@ -20,6 +20,7 @@ import android.app.Notification
 import android.content.Context
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.contentDescForNotification
 import javax.inject.Inject
 
 /**
@@ -36,6 +37,6 @@ class IconBuilder @Inject constructor(
     }
 
     fun getIconContentDescription(n: Notification): CharSequence {
-        return StatusBarIconView.contentDescForNotification(context, n)
+        return contentDescForNotification(context, n)
     }
 }
