@@ -34,6 +34,7 @@ import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.zIndex
+import com.android.compose.animation.scene.modifiers.noResizeDuringTransitions
 
 /** A scene in a [SceneTransitionLayout]. */
 @Stable
@@ -152,4 +153,8 @@ private class SceneScopeImpl(
         bounds: ElementKey,
         shape: Shape
     ): Modifier = punchHole(layoutImpl, element, bounds, shape)
+
+    override fun Modifier.noResizeDuringTransitions(): Modifier {
+        return noResizeDuringTransitions(layoutState = layoutImpl.state)
+    }
 }

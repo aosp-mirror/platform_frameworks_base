@@ -205,6 +205,12 @@ interface SceneScope {
      * the result.
      */
     fun Modifier.punchHole(element: ElementKey, bounds: ElementKey, shape: Shape): Modifier
+
+    /**
+     * Don't resize during transitions. This can for instance be used to make sure that scrollable
+     * lists keep a constant size during transitions even if its elements are growing/shrinking.
+     */
+    fun Modifier.noResizeDuringTransitions(): Modifier
 }
 
 // TODO(b/291053742): Add animateSharedValueAsState(targetValue) without any ValueKey and ElementKey
