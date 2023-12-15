@@ -601,10 +601,6 @@ object Flags {
     @JvmField
     val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION = unreleasedFlag("split_shade_subpixel_optimization")
 
-    // TODO(b/288868056): Tracking Bug
-    @JvmField
-    val PARTIAL_SCREEN_SHARING_TASK_SWITCHER = unreleasedFlag("pss_task_switcher")
-
     // TODO(b/278761837): Tracking Bug
     @JvmField val USE_NEW_ACTIVITY_STARTER = releasedFlag(name = "use_new_activity_starter")
 
