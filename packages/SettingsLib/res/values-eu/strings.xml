@@ -346,7 +346,7 @@
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Araztutako aplikazioak araztailea erantsi arte itxaroten du exekutatu aurretik"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Sarrera"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Marrazketa"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hardware bidez bizkortutako errendatzea"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hardware bidez azeleratutako errendatzea"</string>
     <string name="media_category" msgid="8122076702526144053">"Multimedia-edukia"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Kontrola"</string>
     <string name="strict_mode" msgid="889864762140862437">"Modu zorrotza gaituta"</string>
