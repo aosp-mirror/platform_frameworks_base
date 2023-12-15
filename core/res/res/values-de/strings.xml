@@ -1252,7 +1252,7 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android wird gestartet…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Tablet wird gestartet…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Gerät wird gestartet…"</string>
-    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Systemupdate wird beendet…"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Systemupdate wird abgeschlossen…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Für <xliff:g id="APPLICATION">%1$s</xliff:g> wird gerade ein Upgrade ausgeführt…"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> wird vorbereitet"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
