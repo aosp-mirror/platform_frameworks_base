@@ -44,6 +44,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"이 사용자는 알 수 없는 앱을 설치할 수 없습니다."</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"이 사용자는 앱을 설치할 권한이 없습니다."</string>
     <string name="ok" msgid="7871959885003339302">"확인"</string>
+    <!-- no translation found for archive (4447791830199354721) -->
+    <skip />
     <string name="update_anyway" msgid="8792432341346261969">"업데이트"</string>
     <string name="manage_applications" msgid="5400164782453975580">"앱 관리"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"여유 공간이 없음"</string>
@@ -58,6 +60,16 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"업데이트 제거"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>은(는) 다음 앱의 일부입니다."</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"이 앱을 제거하시겠습니까?"</string>
+    <!-- no translation found for archive_application_text (8482325710714386348) -->
+    <skip />
+    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
+    <skip />
+    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
+    <skip />
     <string name="uninstall_application_text_all_users" msgid="575491774380227119"><b>"모든"</b>" 사용자에 대해 이 앱을 제거하시겠습니까? 기기를 사용하는 "<b>"모든"</b>" 사용자에 대해 애플리케이션 및 데이터가 삭제됩니다."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g>님의 기기에 설치된 앱을 제거하시겠습니까?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"직장 프로필에서 이 앱을 제거하시겠습니까?"</string>
@@ -86,8 +98,6 @@
     <string name="manage_users" msgid="1243995386982560813">"사용자 관리"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 제거할 수 없습니다."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"패키지를 파싱하는 중 문제가 발생했습니다."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear에서 지원되지 않는 설치/제거 작업"</string>
     <string name="message_staging" msgid="8032722385658438567">"앱 준비 중…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"알 수 없음"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"보안상의 이유로 이 출처의 알 수 없는 앱을 태블릿에 설치할 수 없습니다. 설정에서 변경할 수 있습니다."</string>
@@ -98,6 +108,8 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"태블릿과 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 태블릿 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV와 개인 데이터는 알 수 없는 앱의 공격에 더욱 취약합니다. 이 앱을 설치하면 앱 사용으로 인해 발생할 수 있는 모든 TV 손상이나 데이터 손실에 사용자가 책임을 진다는 것에 동의하게 됩니다."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 복제"</string>
+    <!-- no translation found for archiving_app_label (1127085259724124725) -->
+    <skip />
     <string name="anonymous_source_continue" msgid="4375745439457209366">"계속"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"설정"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear 앱 설치/제거"</string>
@@ -116,8 +128,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"조치 필요"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"이 앱을 복원하려면 다음 단계를 따르세요"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> 사용 중지됨"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"이 앱을 복원하려면 설정에서 설치 프로그램(<xliff:g id="INSTALLERNAME">%1$s</xliff:g>)을 사용 설정해야 합니다."</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> 제거됨"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"이 앱을 복원하려면 <xliff:g id="INSTALLERNAME">%1$s</xliff:g>를 설치해야 합니다"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"계속"</string>

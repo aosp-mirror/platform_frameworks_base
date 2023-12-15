@@ -44,6 +44,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Questo utente non può installare app sconosciute"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"L\'utente non è autorizzato a installare app"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <!-- no translation found for archive (4447791830199354721) -->
+    <skip />
     <string name="update_anyway" msgid="8792432341346261969">"Aggiorna comunque"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Gestisci app"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Spazio esaurito"</string>
@@ -58,6 +60,16 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Disinstalla aggiornamento"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> fa parte della seguente applicazione:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Vuoi disinstallare questa app?"</string>
+    <!-- no translation found for archive_application_text (8482325710714386348) -->
+    <skip />
+    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
+    <skip />
+    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
+    <skip />
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Vuoi disinstallare questa applicazione per "<b>"tutti"</b>" gli utenti? L\'applicazione e i relativi dati verranno rimossi da "<b>"tutti"</b>" gli utenti configurati sul dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Disinstallare l\'app per l\'utente <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Vuoi disinstallare questa app dal tuo profilo di lavoro?"</string>
@@ -86,8 +98,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Gestisci utenti"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Impossibile disinstallare <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Errore durante l\'analisi del pacchetto."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Le azioni di installazione/disinstallazione non sono supportate su Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"App in preparazione…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Sconosciuto"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Per motivi di sicurezza, il tuo tablet non è attualmente autorizzato a installare app sconosciute da questa origine. Puoi modificare questa opzione nelle Impostazioni."</string>
@@ -98,6 +108,8 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"I dati del tablet e i dati personali sono più vulnerabili agli attacchi di app sconosciute. Se installi questa app, accetti di essere responsabile degli eventuali danni al tablet o dell\'eventuale perdita di dati derivanti dall\'uso dell\'app."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"I dati della TV e i dati personali sono più vulnerabili agli attacchi di app sconosciute. Se installi questa app, accetti di essere responsabile degli eventuali danni alla TV o dell\'eventuale perdita di dati derivanti dall\'uso dell\'app."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Clone di <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for archiving_app_label (1127085259724124725) -->
+    <skip />
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Continua"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Impostazioni"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Installazione/disinstallazione app Wear"</string>
@@ -116,8 +128,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Azione richiesta"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Segui i passaggi successivi per ripristinare quest\'app"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> non è attivo"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Per ripristinare quest\'app, abilita <xliff:g id="INSTALLERNAME">%1$s</xliff:g> in Impostazioni"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> è stato disinstallato"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Per ripristinare quest\'app, dovrai installare <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Continua"</string>

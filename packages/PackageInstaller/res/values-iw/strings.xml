@@ -44,6 +44,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"למשתמש הזה אין הרשאה להתקין אפליקציות שאינן מוכרות"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"למשתמש הזה אין הרשאה להתקין אפליקציות"</string>
     <string name="ok" msgid="7871959885003339302">"אישור"</string>
+    <!-- no translation found for archive (4447791830199354721) -->
+    <skip />
     <string name="update_anyway" msgid="8792432341346261969">"אני רוצה לעדכן בכל זאת"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ניהול אפליקציות"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"אין מספיק מקום"</string>
@@ -58,6 +60,16 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"הסרת התקנה של עדכון"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"הפעילות <xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> היא חלק מהאפליקציה הבאה:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"להסיר את ההתקנה של האפליקציה הזו?"</string>
+    <!-- no translation found for archive_application_text (8482325710714386348) -->
+    <skip />
+    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
+    <skip />
+    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
+    <skip />
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"להסיר את האפליקציה הזו עבור "<b>"כל"</b>" המשתמשים? האפליקציה והנתונים שלה יוסרו עבור "<b>"כל"</b>" המשתמשים במכשיר."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"להסיר את ההתקנה של האפליקציה הזו עבור <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"רוצה להסיר את האפליקציה הזו מפרופיל העבודה?"</string>
@@ -86,8 +98,6 @@
     <string name="manage_users" msgid="1243995386982560813">"ניהול משתמשים"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"לא ניתן להסיר את ההתקנה של <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"אירעה בעיה בניתוח החבילה."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"‏פעולות התקנה/הסרת התקנה אינן נתמכות ב-Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"בתהליך הכנת האפליקציה להתקנה…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"לא ידוע"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"לצורכי אבטחה, הטאבלט שלך חסום להתקנת אפליקציות לא מוכרות מהמקור הזה. אפשר לשנות זאת ב\'הגדרות\'."</string>
@@ -98,6 +108,8 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"נתוני הטאבלט והנתונים האישיים שלך חשופים יותר בפני התקפות על ידי אפליקציות ממקורות לא ידועים. התקנת האפליקציה הזו מהווה את הסכמתך לכך שהאחריות הבלעדית היא שלך במקרה של אובדן נתונים או גרימת נזק לטאבלט בעקבות השימוש באפליקציה."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"נתוני הטלוויזיה והנתונים האישיים שלך חשופים יותר בפני התקפות על ידי אפליקציות ממקורות לא ידועים. התקנת האפליקציה הזו מהווה את הסכמתך לכך שהאחריות הבלעדית היא שלך במקרה של אובדן נתונים או גרימת נזק לטלוויזיה שלך בעקבות השימוש באפליקציה."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"שכפול של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for archiving_app_label (1127085259724124725) -->
+    <skip />
     <string name="anonymous_source_continue" msgid="4375745439457209366">"המשך"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"הגדרות"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"‏תהליך התקנה/הסרת התקנה של אפליקציות Wear"</string>
@@ -116,8 +128,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"נדרשת פעולה"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"כדי לשחזר את האפליקציה הזו יש לפעול לפי השלבים הבאים"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> במצב מושבת"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"כדי לשחזר את האפליקציה הזו, צריך להפעיל את <xliff:g id="INSTALLERNAME">%1$s</xliff:g> בהגדרות"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"ההתקנה של <xliff:g id="INSTALLERNAME">%1$s</xliff:g> הוסרה"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"כדי לשחזר את האפליקציה הזו, צריך להתקין את <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"המשך"</string>
