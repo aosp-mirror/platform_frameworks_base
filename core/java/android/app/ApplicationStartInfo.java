@@ -26,10 +26,18 @@ import android.icu.text.SimpleDateFormat;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Xml;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.WireTypeMismatchException;
+
+import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,6 +48,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Describes information related to an application process's startup.
@@ -215,6 +224,11 @@ public final class ApplicationStartInfo implements Parcelable {
     private int mDefiningUid;
 
     /**
+     * @see #getPackageName
+     */
+    private String mPackageName;
+
+    /**
      * @see #getProcessName
      */
     private String mProcessName;
@@ -349,6 +363,14 @@ public final class ApplicationStartInfo implements Parcelable {
     }
 
     /**
+     * @see #getPackageName
+     * @hide
+     */
+    public void setPackageName(final String packageName) {
+        mPackageName = intern(packageName);
+    }
+
+    /**
      * @see #getProcessName
      * @hide
      */
@@ -461,6 +483,15 @@ public final class ApplicationStartInfo implements Parcelable {
     }
 
     /**
+     * Name of first package running in this process;
+     *
+     * @hide
+     */
+    public String getPackageName() {
+        return mPackageName;
+    }
+
+    /**
      * The actual process name it was running with.
      *
      * <p class="note"> Note: field will be set for any {@link #getStartupState} value.</p>
@@ -555,6 +586,7 @@ public final class ApplicationStartInfo implements Parcelable {
         dest.writeInt(mRealUid);
         dest.writeInt(mPackageUid);
         dest.writeInt(mDefiningUid);
+        dest.writeString(mPackageName);
         dest.writeString(mProcessName);
         dest.writeInt(mReason);
         dest.writeInt(mStartupTimestampsNs == null ? 0 : mStartupTimestampsNs.size());
@@ -579,6 +611,7 @@ public final class ApplicationStartInfo implements Parcelable {
         mRealUid = other.mRealUid;
         mPackageUid = other.mPackageUid;
         mDefiningUid = other.mDefiningUid;
+        mPackageName = other.mPackageName;
         mProcessName = other.mProcessName;
         mReason = other.mReason;
         mStartupTimestampsNs = other.mStartupTimestampsNs;
@@ -593,6 +626,7 @@ public final class ApplicationStartInfo implements Parcelable {
         mRealUid = in.readInt();
         mPackageUid = in.readInt();
         mDefiningUid = in.readInt();
+        mPackageName = intern(in.readString());
         mProcessName = intern(in.readString());
         mReason = in.readInt();
         int starupTimestampCount = in.readInt();
@@ -624,6 +658,11 @@ public final class ApplicationStartInfo implements Parcelable {
                 }
             };
 
+    private static final String PROTO_SERIALIZER_ATTRIBUTE_TIMESTAMPS = "timestamps";
+    private static final String PROTO_SERIALIZER_ATTRIBUTE_TIMESTAMP = "timestamp";
+    private static final String PROTO_SERIALIZER_ATTRIBUTE_KEY = "key";
+    private static final String PROTO_SERIALIZER_ATTRIBUTE_TS = "ts";
+
     /**
      * Write to a protocol buffer output stream. Protocol buffer message definition at {@link
      * android.app.ApplicationStartInfoProto}
@@ -644,9 +683,22 @@ public final class ApplicationStartInfo implements Parcelable {
         if (mStartupTimestampsNs != null && mStartupTimestampsNs.size() > 0) {
             ByteArrayOutputStream timestampsBytes = new ByteArrayOutputStream();
             ObjectOutputStream timestampsOut = new ObjectOutputStream(timestampsBytes);
-            timestampsOut.writeObject(mStartupTimestampsNs);
+            TypedXmlSerializer serializer = Xml.resolveSerializer(timestampsOut);
+            serializer.startDocument(null, true);
+            serializer.startTag(null, PROTO_SERIALIZER_ATTRIBUTE_TIMESTAMPS);
+            for (int i = 0; i < mStartupTimestampsNs.size(); i++) {
+                serializer.startTag(null, PROTO_SERIALIZER_ATTRIBUTE_TIMESTAMP);
+                serializer.attributeInt(null, PROTO_SERIALIZER_ATTRIBUTE_KEY,
+                        mStartupTimestampsNs.keyAt(i));
+                serializer.attributeLong(null, PROTO_SERIALIZER_ATTRIBUTE_TS,
+                        mStartupTimestampsNs.valueAt(i));
+                serializer.endTag(null, PROTO_SERIALIZER_ATTRIBUTE_TIMESTAMP);
+            }
+            serializer.endTag(null, PROTO_SERIALIZER_ATTRIBUTE_TIMESTAMPS);
+            serializer.endDocument();
             proto.write(ApplicationStartInfoProto.STARTUP_TIMESTAMPS,
                     timestampsBytes.toByteArray());
+            timestampsOut.close();
         }
         proto.write(ApplicationStartInfoProto.START_TYPE, mStartType);
         if (mStartIntent != null) {
@@ -697,7 +749,24 @@ public final class ApplicationStartInfo implements Parcelable {
                     ByteArrayInputStream timestampsBytes = new ByteArrayInputStream(proto.readBytes(
                             ApplicationStartInfoProto.STARTUP_TIMESTAMPS));
                     ObjectInputStream timestampsIn = new ObjectInputStream(timestampsBytes);
-                    mStartupTimestampsNs = (ArrayMap<Integer, Long>) timestampsIn.readObject();
+                    mStartupTimestampsNs = new ArrayMap<Integer, Long>();
+                    try {
+                        TypedXmlPullParser parser = Xml.resolvePullParser(timestampsIn);
+                        XmlUtils.beginDocument(parser, PROTO_SERIALIZER_ATTRIBUTE_TIMESTAMPS);
+                        int depth = parser.getDepth();
+                        while (XmlUtils.nextElementWithin(parser, depth)) {
+                            if (PROTO_SERIALIZER_ATTRIBUTE_TIMESTAMP.equals(parser.getName())) {
+                                int key = parser.getAttributeInt(null,
+                                        PROTO_SERIALIZER_ATTRIBUTE_KEY);
+                                long ts = parser.getAttributeLong(null,
+                                        PROTO_SERIALIZER_ATTRIBUTE_TS);
+                                mStartupTimestampsNs.put(key, ts);
+                            }
+                        }
+                    } catch (XmlPullParserException e) {
+                        // Timestamps lost
+                    }
+                    timestampsIn.close();
                     break;
                 case (int) ApplicationStartInfoProto.START_TYPE:
                     mStartType = proto.readInt(ApplicationStartInfoProto.START_TYPE);
@@ -734,6 +803,7 @@ public final class ApplicationStartInfo implements Parcelable {
                 .append(" definingUid=").append(mDefiningUid)
                 .append(" user=").append(UserHandle.getUserId(mPackageUid))
                 .append('\n')
+                .append(" package=").append(mPackageName)
                 .append(" process=").append(mProcessName)
                 .append(" startupState=").append(mStartupState)
                 .append(" reason=").append(reasonToString(mReason))
@@ -781,5 +851,36 @@ public final class ApplicationStartInfo implements Parcelable {
             case START_TYPE_HOT -> "HOT";
             default -> "";
         };
+    }
+
+    /** @hide */
+    @Override
+    public boolean equals(@Nullable Object other) {
+        if (other == null || !(other instanceof ApplicationStartInfo)) {
+            return false;
+        }
+        final ApplicationStartInfo o = (ApplicationStartInfo) other;
+        return mPid == o.mPid && mRealUid == o.mRealUid && mPackageUid == o.mPackageUid
+            && mDefiningUid == o.mDefiningUid && mReason == o.mReason
+            && mStartupState == o.mStartupState && mStartType == o.mStartType
+            && mLaunchMode == o.mLaunchMode && TextUtils.equals(mProcessName, o.mProcessName)
+            && timestampsEquals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPid, mRealUid, mPackageUid, mDefiningUid, mReason, mStartupState,
+                mStartType, mLaunchMode, mProcessName,
+                mStartupTimestampsNs);
+    }
+
+    private boolean timestampsEquals(@NonNull ApplicationStartInfo other) {
+        if (mStartupTimestampsNs == null && other.mStartupTimestampsNs == null) {
+            return true;
+        }
+        if (mStartupTimestampsNs == null || other.mStartupTimestampsNs == null) {
+            return false;
+        }
+        return mStartupTimestampsNs.equals(other.mStartupTimestampsNs);
     }
 }
