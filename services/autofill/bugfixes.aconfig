@@ -29,7 +29,7 @@ flag {
 }
 
 flag {
-  name: "ignore_invisible_view_group_in_assist_structure"
+  name: "include_invisible_view_group_in_assist_structure"
   namespace: "autofill"
   description: "Mitigation for autofill providers miscalculating view visibility"
   bug: "291795358"

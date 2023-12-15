@@ -41,7 +41,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -2073,6 +2072,45 @@ public final class TvInputManagerService extends SystemService {
                                 .removeOverlayView();
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in removeOverlayView", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void stopPlayback(IBinder sessionToken, int mode, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "stopPlayback");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).stopPlayback(
+                                mode);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in stopPlayback(mode)", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void startPlayback(IBinder sessionToken, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "stopPlayback");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).startPlayback();
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in startPlayback()", e);
                     }
                 }
             } finally {

@@ -64,6 +64,7 @@ import java.util.Set;
  *
  * TODO(241429275): Initialize this when a proxy is registered.
  */
+@SuppressWarnings("MissingPermissionAnnotation")
 public class ProxyAccessibilityServiceConnection extends AccessibilityServiceConnection {
     private static final String LOG_TAG = "ProxyAccessibilityServiceConnection";
 

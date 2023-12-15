@@ -23,31 +23,32 @@ import androidx.compose.runtime.setValue
 
 /** The state of a [SceneTransitionLayout]. */
 @Stable
-class SceneTransitionLayoutState(initialScene: SceneKey) {
+sealed interface SceneTransitionLayoutState {
     /**
      * The current [TransitionState]. All values read here are backed by the Snapshot system.
      *
      * To observe those values outside of Compose/the Snapshot system, use
      * [SceneTransitionLayoutState.observableTransitionState] instead.
      */
-    var transitionState: TransitionState by mutableStateOf(TransitionState.Idle(initialScene))
+    val transitionState: TransitionState
+
+    /** The current transition, or `null` if we are idle. */
+    val currentTransition: TransitionState.Transition?
+        get() = transitionState as? TransitionState.Transition
 
     /**
-     * Whether we are transitioning, optionally restricting the check to the transition between
-     * [from] and [to].
+     * Whether we are transitioning. If [from] or [to] is empty, we will also check that they match
+     * the scenes we are animating from and/or to.
      */
-    fun isTransitioning(from: SceneKey? = null, to: SceneKey? = null): Boolean {
-        val transition = transitionState as? TransitionState.Transition ?: return false
-
-        return (from == null || transition.fromScene == from) &&
-            (to == null || transition.toScene == to)
-    }
+    fun isTransitioning(from: SceneKey? = null, to: SceneKey? = null): Boolean
 
     /** Whether we are transitioning from [scene] to [other], or from [other] to [scene]. */
-    fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
-        return isTransitioning(from = scene, to = other) ||
-            isTransitioning(from = other, to = scene)
-    }
+    fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean
+}
+
+/** Create a new [SceneTransitionLayoutState] that is currently idle at scene [currentScene]. */
+fun SceneTransitionLayoutState(currentScene: SceneKey): SceneTransitionLayoutState {
+    return SceneTransitionLayoutStateImpl(currentScene, SceneTransitions.Empty)
 }
 
 @Stable
@@ -91,5 +92,52 @@ sealed interface TransitionState {
 
         /** Whether user input is currently driving the transition. */
         abstract val isUserInputOngoing: Boolean
+    }
+}
+
+internal class SceneTransitionLayoutStateImpl(
+    initialScene: SceneKey,
+    internal var transitions: SceneTransitions,
+) : SceneTransitionLayoutState {
+    override var transitionState: TransitionState by
+        mutableStateOf(TransitionState.Idle(initialScene))
+        private set
+
+    /**
+     * The current [transformationSpec] associated to [transitionState]. Accessing this value makes
+     * sense only if [transitionState] is a [TransitionState.Transition].
+     */
+    internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
+
+    override fun isTransitioning(from: SceneKey?, to: SceneKey?): Boolean {
+        val transition = currentTransition ?: return false
+        return (from == null || transition.fromScene == from) &&
+            (to == null || transition.toScene == to)
+    }
+
+    override fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
+        return isTransitioning(from = scene, to = other) ||
+            isTransitioning(from = other, to = scene)
+    }
+
+    /** Start a new [transition], instantly interrupting any ongoing transition if there was one. */
+    internal fun startTransition(transition: TransitionState.Transition) {
+        // Compute the [TransformationSpec] when the transition starts.
+        transformationSpec =
+            transitions
+                .transitionSpec(transition.fromScene, transition.toScene)
+                .transformationSpec()
+
+        transitionState = transition
+    }
+
+    /**
+     * Notify that [transition] was finished and that we should settle to [idleScene]. This will do
+     * nothing if [transition] was interrupted since it was started.
+     */
+    internal fun finishTransition(transition: TransitionState.Transition, idleScene: SceneKey) {
+        if (transitionState == transition) {
+            transitionState = TransitionState.Idle(idleScene)
+        }
     }
 }

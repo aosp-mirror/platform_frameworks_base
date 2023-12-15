@@ -42,7 +42,7 @@ sealed interface Transformation {
      * Reverse this transformation. This is called when we use Transition(from = A, to = B) when
      * animating from B to A and there is no Transition(from = B, to = A) defined.
      */
-    fun reverse(): Transformation = this
+    fun reversed(): Transformation = this
 }
 
 internal class SharedElementTransformation(
@@ -77,10 +77,10 @@ internal class RangedPropertyTransformation<T>(
     val delegate: PropertyTransformation<T>,
     override val range: TransformationRange,
 ) : PropertyTransformation<T> by delegate {
-    override fun reverse(): Transformation {
+    override fun reversed(): Transformation {
         return RangedPropertyTransformation(
-            delegate.reverse() as PropertyTransformation<T>,
-            range.reverse()
+            delegate.reversed() as PropertyTransformation<T>,
+            range.reversed()
         )
     }
 }
@@ -102,7 +102,7 @@ data class TransformationRange(
     }
 
     /** Reverse this range. */
-    fun reverse() = TransformationRange(start = reverseBound(end), end = reverseBound(start))
+    fun reversed() = TransformationRange(start = reverseBound(end), end = reverseBound(start))
 
     /** Get the progress of this range given the global [transitionProgress]. */
     fun progress(transitionProgress: Float): Float {

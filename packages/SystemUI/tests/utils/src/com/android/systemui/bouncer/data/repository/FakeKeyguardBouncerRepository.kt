@@ -1,5 +1,6 @@
 package com.android.systemui.bouncer.data.repository
 
+import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.dagger.SysUISingleton
@@ -113,7 +114,9 @@ class FakeKeyguardBouncerRepository @Inject constructor() : KeyguardBouncerRepos
         _isBackButtonEnabled.value = isBackButtonEnabled
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     override fun setSideFpsShowing(isShowing: Boolean) {
+        SideFpsControllerRefactor.assertInLegacyMode()
         _sideFpsShowing.value = isShowing
     }
 }

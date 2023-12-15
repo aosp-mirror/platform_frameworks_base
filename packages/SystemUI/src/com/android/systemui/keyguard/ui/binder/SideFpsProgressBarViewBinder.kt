@@ -21,6 +21,7 @@ import android.graphics.Point
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags
 import com.android.systemui.biometrics.SideFpsController
+import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.ui.view.SideFpsProgressBar
@@ -46,6 +47,7 @@ constructor(
     private val viewModel: SideFpsProgressBarViewModel,
     private val view: SideFpsProgressBar,
     @Application private val applicationScope: CoroutineScope,
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     private val sfpsController: dagger.Lazy<SideFpsController>,
     private val logger: SideFpsLogger,
     private val commandRegistry: CommandRegistry,
@@ -109,12 +111,14 @@ constructor(
         view.updateView(visible, location, length, thickness, rotation)
         // We have to hide the SFPS indicator as the progress bar will
         // be shown at the same location
-        if (visible) {
-            logger.hidingSfpsIndicator()
-            sfpsController.get().hideIndicator()
-        } else if (fpDetectRunning) {
-            logger.showingSfpsIndicator()
-            sfpsController.get().showIndicator()
+        if (!SideFpsControllerRefactor.isEnabled) {
+            if (visible) {
+                logger.hidingSfpsIndicator()
+                sfpsController.get().hideIndicator()
+            } else if (fpDetectRunning) {
+                logger.showingSfpsIndicator()
+                sfpsController.get().showIndicator()
+            }
         }
     }
 

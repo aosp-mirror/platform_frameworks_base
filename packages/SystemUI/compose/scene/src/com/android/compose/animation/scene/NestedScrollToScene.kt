@@ -179,7 +179,8 @@ private fun scenePriorityNestedScrollConnection(
     bottomOrRightBehavior: NestedScrollBehavior,
 ) =
     SceneNestedScrollHandler(
-            gestureHandler = layoutImpl.gestureHandler(orientation = orientation),
+            layoutImpl = layoutImpl,
+            orientation = orientation,
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
         )

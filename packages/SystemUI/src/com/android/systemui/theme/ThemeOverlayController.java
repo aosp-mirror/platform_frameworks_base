@@ -18,8 +18,8 @@ package com.android.systemui.theme;
 
 import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
 
-import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.Flags.themeOverlayControllerWakefulnessDeprecation;
+import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.theme.ThemeOverlayApplier.COLOR_SOURCE_HOME;
 import static com.android.systemui.theme.ThemeOverlayApplier.COLOR_SOURCE_LOCK;
 import static com.android.systemui.theme.ThemeOverlayApplier.COLOR_SOURCE_PRESET;
@@ -364,13 +364,21 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean newWorkProfile = Intent.ACTION_MANAGED_PROFILE_ADDED.equals(intent.getAction());
-            boolean isManagedProfile = mUserManager.isManagedProfile(
-                    intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-            if (newWorkProfile) {
-                if (!mDeviceProvisionedController.isCurrentUserSetup() && isManagedProfile) {
+            boolean newProfile = Intent.ACTION_PROFILE_ADDED.equals(intent.getAction());
+            if (newProfile) {
+                UserHandle newUserHandle = intent.getParcelableExtra(Intent.EXTRA_USER,
+                        android.os.UserHandle.class);
+                boolean isManagedProfile =
+                        mUserManager.isManagedProfile(newUserHandle.getIdentifier());
+                if (!mDeviceProvisionedController.isUserSetup(newUserHandle.getIdentifier())
+                        && isManagedProfile) {
                     Log.i(TAG, "User setup not finished when " + intent.getAction()
                             + " was received. Deferring... Managed profile? " + isManagedProfile);
+                    return;
+                }
+                if (android.os.Flags.allowPrivateProfile() && isPrivateProfile(newUserHandle)) {
+                    mDeferredThemeEvaluation = true;
+                    Log.i(TAG, "Deferring theme for private profile till user setup is complete");
                     return;
                 }
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
@@ -432,7 +440,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     public void start() {
         if (DEBUG) Log.d(TAG, "Start");
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
+        filter.addAction(Intent.ACTION_PROFILE_ADDED);
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
                 UserHandle.ALL);
@@ -606,6 +614,15 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     @VisibleForTesting
     protected FabricatedOverlay newFabricatedOverlay(String name) {
         return new FabricatedOverlay.Builder("com.android.systemui", name, "android").build();
+    }
+
+    @VisibleForTesting
+    protected boolean isPrivateProfile(UserHandle userHandle) {
+        Context usercontext = mContext.createContextAsUser(userHandle,0);
+        if (usercontext.getSystemService(UserManager.class).isPrivateProfile()) {
+            return true;
+        }
+        return false;
     }
 
     private void createOverlays(int color) {
@@ -784,7 +801,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
 
         Set<UserHandle> managedProfiles = new HashSet<>();
         for (UserInfo userInfo : mUserManager.getEnabledProfiles(currentUser)) {
-            if (userInfo.isManagedProfile()) {
+            if (userInfo.isProfile()) {
                 managedProfiles.add(userInfo.getUserHandle());
             }
         }

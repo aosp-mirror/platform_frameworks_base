@@ -40,8 +40,8 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun isTransitioningTo_transition() {
-        val state = SceneTransitionLayoutState(TestScenes.SceneA)
-        state.transitionState = transition(from = TestScenes.SceneA, to = TestScenes.SceneB)
+        val state = SceneTransitionLayoutStateImpl(TestScenes.SceneA, SceneTransitions.Empty)
+        state.startTransition(transition(from = TestScenes.SceneA, to = TestScenes.SceneB))
 
         assertThat(state.isTransitioning()).isTrue()
         assertThat(state.isTransitioning(from = TestScenes.SceneA)).isTrue()

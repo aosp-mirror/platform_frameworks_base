@@ -28,6 +28,7 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.DejankUtils
+import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
@@ -116,9 +117,11 @@ constructor(
 
     /** Allow for interaction when just about fully visible */
     val isInteractable: Flow<Boolean> = bouncerExpansion.map { it > 0.9 }
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     val sideFpsShowing: Flow<Boolean> = repository.sideFpsShowing
     private var currentUserActiveUnlockRunning = false
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /** This callback needs to be a class field so it does not get garbage collected. */
     val keyguardUpdateMonitorCallback =
         object : KeyguardUpdateMonitorCallback() {
@@ -135,7 +138,10 @@ constructor(
         }
 
     init {
-        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
+        if (!SideFpsControllerRefactor.isEnabled) {
+            keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        }
         applicationScope.launch {
             trustRepository.isCurrentUserActiveUnlockRunning.collect {
                 currentUserActiveUnlockRunning = it
@@ -333,8 +339,10 @@ constructor(
         repository.setPrimaryStartDisappearAnimation(runnable)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /** Determine whether to show the side fps animation. */
     fun updateSideFpsVisibility() {
+        SideFpsControllerRefactor.assertInLegacyMode()
         val sfpsEnabled: Boolean =
             context.resources.getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
         val fpsDetectionRunning: Boolean = keyguardUpdateMonitor.isFingerprintDetectionRunning

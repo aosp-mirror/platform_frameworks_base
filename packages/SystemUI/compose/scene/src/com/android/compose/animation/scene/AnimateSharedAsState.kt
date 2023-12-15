@@ -174,8 +174,8 @@ private fun <T> computeValue(
     lerp: (T, T, Float) -> T,
     canOverflow: Boolean,
 ): T {
-    val state = layoutImpl.state.transitionState
-    if (state !is TransitionState.Transition || !layoutImpl.isTransitionReady(state)) {
+    val transition = layoutImpl.state.currentTransition
+    if (transition == null || !layoutImpl.isTransitionReady(transition)) {
         return sharedValue.value
     }
 
@@ -191,10 +191,11 @@ private fun <T> computeValue(
         return value as Element.SharedValue<T>
     }
 
-    val fromValue = sceneValue(state.fromScene)
-    val toValue = sceneValue(state.toScene)
+    val fromValue = sceneValue(transition.fromScene)
+    val toValue = sceneValue(transition.toScene)
     return if (fromValue != null && toValue != null) {
-        val progress = if (canOverflow) state.progress else state.progress.coerceIn(0f, 1f)
+        val progress =
+            if (canOverflow) transition.progress else transition.progress.coerceIn(0f, 1f)
         lerp(fromValue.value, toValue.value, progress)
     } else if (fromValue != null) {
         fromValue.value

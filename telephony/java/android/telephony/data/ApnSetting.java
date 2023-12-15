@@ -1866,7 +1866,7 @@ public class ApnSetting implements Parcelable {
         private int mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
         private int mSkip464Xlat = Carriers.SKIP_464XLAT_DEFAULT;
         private boolean mAlwaysOn;
-        private int mInfrastructureBitmask = INFRASTRUCTURE_CELLULAR;
+        private int mInfrastructureBitmask = INFRASTRUCTURE_CELLULAR | INFRASTRUCTURE_SATELLITE;
         private boolean mEsimBootstrapProvisioning;
 
         /**

@@ -61,6 +61,13 @@ flag {
 }
 
 flag {
+    name: "refactor_get_current_user"
+    namespace: "systemui"
+    description: "KeyguardUpdateMonitor.getCurrentUser() was providing outdated results."
+    bug: "305984787"
+}
+
+flag {
     name: "notification_throttle_hun"
     namespace: "systemui"
     description: "During notification avalanche, throttle HUNs showing in fast succession."

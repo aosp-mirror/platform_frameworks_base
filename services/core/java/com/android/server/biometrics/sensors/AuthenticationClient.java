@@ -27,7 +27,7 @@ import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.security.KeyStore;
@@ -430,19 +430,19 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
         return mLockoutTracker;
     }
 
-    protected int getShowOverlayReason() {
+    protected int getRequestReason() {
         if (isKeyguard()) {
-            return BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
+            return BiometricRequestConstants.REASON_AUTH_KEYGUARD;
         } else if (isBiometricPrompt()) {
             // BP reason always takes precedent over settings, since callers from within
             // settings can always invoke BP.
-            return BiometricOverlayConstants.REASON_AUTH_BP;
+            return BiometricRequestConstants.REASON_AUTH_BP;
         } else if (isSettings()) {
             // This is pretty much only for FingerprintManager#authenticate usage from
             // FingerprintSettings.
-            return BiometricOverlayConstants.REASON_AUTH_SETTINGS;
+            return BiometricRequestConstants.REASON_AUTH_SETTINGS;
         } else {
-            return BiometricOverlayConstants.REASON_AUTH_OTHER;
+            return BiometricRequestConstants.REASON_AUTH_OTHER;
         }
     }
 }

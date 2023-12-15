@@ -2827,7 +2827,7 @@ class PackageManagerShellCommand extends ShellCommand {
             mInterface.setPackagesSuspendedAsUser(packageNames.toArray(new String[] {}),
                     suspendedState, ((appExtras.size() > 0) ? appExtras : null),
                     ((launcherExtras.size() > 0) ? launcherExtras : null),
-                    info, flags, callingPackage, translatedUserId);
+                    info, flags, callingPackage, UserHandle.USER_SYSTEM, translatedUserId);
             for (int i = 0; i < packageNames.size(); i++) {
                 final String packageName = packageNames.get(i);
                 pw.println("Package " + packageName + " new suspended state: "
@@ -2872,16 +2872,16 @@ class PackageManagerShellCommand extends ShellCommand {
                 UserHandle.USER_NULL, "runGrantRevokePermission"));
 
         List<PackageInfo> packageInfos;
+        PackageManager pm = mContext.createContextAsUser(translatedUser, 0).getPackageManager();
         if (pkg == null) {
-            packageInfos = mContext.getPackageManager().getInstalledPackages(
-                    PackageManager.GET_PERMISSIONS);
+            packageInfos = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS);
         } else {
             try {
-                packageInfos = Collections.singletonList(
-                        mContext.getPackageManager().getPackageInfo(pkg,
-                                PackageManager.GET_PERMISSIONS));
+                packageInfos = Collections.singletonList(pm.getPackageInfo(pkg,
+                        PackageManager.GET_PERMISSIONS));
             } catch (NameNotFoundException e) {
                 getErrPrintWriter().println("Error: package not found");
+                getOutPrintWriter().println("Failure [package not found]");
                 return 1;
             }
         }

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.biometrics
 
-import android.content.Context
-import android.util.AttributeSet
-import com.android.systemui.util.wrapper.LottieViewWrapper
+package com.android.systemui.qs.tiles.impl.colorcorrection
 
-class SideFpsLottieViewWrapper
-@JvmOverloads
-constructor(context: Context, attrs: AttributeSet? = null) : LottieViewWrapper(context, attrs)
+import com.android.systemui.accessibility.qs.QSAccessibilityModule
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.qsEventLogger
+
+val Kosmos.qsColorCorrectionTileConfig by
+    Kosmos.Fixture { QSAccessibilityModule.provideColorCorrectionTileConfig(qsEventLogger) }

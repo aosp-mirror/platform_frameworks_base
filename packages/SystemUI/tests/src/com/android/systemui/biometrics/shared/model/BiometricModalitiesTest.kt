@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics.shared.model
 
+import android.hardware.fingerprint.FingerprintSensorProperties
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
@@ -32,6 +33,46 @@ class BiometricModalitiesTest : SysuiTestCase() {
     @Test
     fun isEmpty() {
         assertThat(BiometricModalities().isEmpty).isTrue()
+    }
+
+    @Test
+    fun hasUdfps() {
+        with(
+            BiometricModalities(
+                fingerprintProperties = fingerprintSensorPropertiesInternal(
+                    sensorType = FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
+                ).first(),
+            )
+        ) {
+            assertThat(isEmpty).isFalse()
+            assertThat(hasUdfps).isTrue()
+            assertThat(hasSfps).isFalse()
+            assertThat(hasFace).isFalse()
+            assertThat(hasFaceOnly).isFalse()
+            assertThat(hasFingerprint).isTrue()
+            assertThat(hasFingerprintOnly).isTrue()
+            assertThat(hasFaceAndFingerprint).isFalse()
+        }
+    }
+
+    @Test
+    fun hasSfps() {
+        with(
+            BiometricModalities(
+                fingerprintProperties = fingerprintSensorPropertiesInternal(
+                    sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                ).first(),
+            )
+        ) {
+            assertThat(isEmpty).isFalse()
+            assertThat(hasUdfps).isFalse()
+            assertThat(hasSfps).isTrue()
+            assertThat(hasFace).isFalse()
+            assertThat(hasFaceOnly).isFalse()
+            assertThat(hasFingerprint).isTrue()
+            assertThat(hasFingerprintOnly).isTrue()
+            assertThat(hasFaceAndFingerprint).isFalse()
+        }
     }
 
     @Test

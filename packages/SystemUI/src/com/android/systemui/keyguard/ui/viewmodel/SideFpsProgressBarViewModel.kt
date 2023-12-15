@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Point
+import androidx.annotation.VisibleForTesting
 import androidx.core.animation.doOnEnd
 import com.android.systemui.Flags
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
@@ -212,5 +213,10 @@ constructor(
                         .launchIn(applicationScope)
             }
         }
+    }
+
+    @VisibleForTesting
+    fun setVisible(isVisible: Boolean) {
+        _visible.value = isVisible
     }
 }

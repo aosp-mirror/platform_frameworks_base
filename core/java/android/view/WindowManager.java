@@ -592,6 +592,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_UNOCCLUDING = (1 << 13); // 0x2000
 
     /**
+     * Transition flag: Indicates that there is a physical display switch
+     * TODO(b/316112906) remove after defer_display_updates flag roll out
+     * @hide
+     */
+    int TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH = (1 << 14); // 0x4000
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -608,7 +615,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_INVISIBLE,
             TRANSIT_FLAG_KEYGUARD_APPEARING,
             TRANSIT_FLAG_KEYGUARD_OCCLUDING,
-            TRANSIT_FLAG_KEYGUARD_UNOCCLUDING
+            TRANSIT_FLAG_KEYGUARD_UNOCCLUDING,
+            TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}

@@ -104,6 +104,15 @@ class TouchTracker {
         mStartThresholdX = mInitTouchX;
     }
 
+    /** Update the start location used to compute the progress
+     * to the latest touch location.
+     */
+    void updateStartLocation() {
+        mInitTouchX = mLatestTouchX;
+        mInitTouchY = mLatestTouchY;
+        mStartThresholdX = mInitTouchX;
+    }
+
     void reset() {
         mInitTouchX = 0;
         mInitTouchY = 0;

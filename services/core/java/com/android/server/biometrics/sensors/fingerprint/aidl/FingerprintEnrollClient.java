@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -42,6 +44,7 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
 import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -65,6 +68,7 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
     @NonNull private final CallbackWithProbe<Probe> mALSProbeCallback;
 
     private final @FingerprintManager.EnrollReason int mEnrollReason;
+    @NonNull private final AuthenticationStateListeners mAuthenticationStateListeners;
     @Nullable private ICancellationSignal mCancellationSignal;
     private final int mMaxTemplatesPerUser;
     private boolean mIsPointerDown;
@@ -80,15 +84,18 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
         }
     }
 
-    public FingerprintEnrollClient(@NonNull Context context,
-            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, long requestId,
+    public FingerprintEnrollClient(
+            @NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+            @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
+            // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
             @Nullable ISidefpsController sidefpsController,
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
         // UDFPS haptics occur when an image is acquired (instead of when the result is known)
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
@@ -96,7 +103,13 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
                 logger, biometricContext);
         setRequestId(requestId);
         mSensorProps = sensorProps;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
+        if (sidefpsControllerRefactor()) {
+            mSensorOverlays = new SensorOverlays(udfpsOverlayController);
+        } else {
+            mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
+        }
+        mAuthenticationStateListeners = authenticationStateListeners;
+
         mMaxTemplatesPerUser = maxTemplatesPerUser;
 
         mALSProbeCallback = getLogger().getAmbientLightProbe(true /* startWithClient */);
@@ -130,7 +143,11 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
 
         if (remaining == 0) {
             mSensorOverlays.hide(getSensorId());
+            if (sidefpsControllerRefactor()) {
+                mAuthenticationStateListeners.onAuthenticationStopped();
+            }
         }
+
     }
 
     @Override
@@ -159,8 +176,10 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
     @Override
     public void onError(int errorCode, int vendorCode) {
         super.onError(errorCode, vendorCode);
-
         mSensorOverlays.hide(getSensorId());
+        if (sidefpsControllerRefactor()) {
+            mAuthenticationStateListeners.onAuthenticationStopped();
+        }
     }
 
     @Override
@@ -171,8 +190,12 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), getOverlayReasonFromEnrollReason(mEnrollReason),
+        mSensorOverlays.show(getSensorId(), getRequestReasonFromEnrollReason(mEnrollReason),
                 this);
+        if (sidefpsControllerRefactor()) {
+            mAuthenticationStateListeners.onAuthenticationStarted(
+                    getRequestReasonFromEnrollReason(mEnrollReason));
+        }
 
         BiometricNotificationUtils.cancelBadCalibrationNotification(getContext());
         try {
@@ -210,6 +233,10 @@ public class FingerprintEnrollClient extends EnrollClient<AidlSession> implement
     @Override
     protected void stopHalOperation() {
         mSensorOverlays.hide(getSensorId());
+        if (sidefpsControllerRefactor()) {
+            mAuthenticationStateListeners.onAuthenticationStopped();
+        }
+
         unsubscribeBiometricContext();
 
         if (mCancellationSignal != null) {

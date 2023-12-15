@@ -45,7 +45,7 @@ constructor(
 ) : QSFactory {
 
     init {
-        QSPipelineFlagsRepository.assertNewTilesInLegacyMode()
+        QSPipelineFlagsRepository.assertNewTiles()
         for (viewModelTileSpec in tileMap.keys) {
             require(qsTileConfigProvider.hasConfig(viewModelTileSpec)) {
                 "No config for $viewModelTileSpec"
@@ -56,7 +56,7 @@ constructor(
     override fun createTile(tileSpec: String): QSTile? {
         val viewModel: QSTileViewModel =
             when (val spec = TileSpec.create(tileSpec)) {
-                is TileSpec.CustomTileSpec -> createCustomTileViewModel(spec)
+                is TileSpec.CustomTileSpec -> null
                 is TileSpec.PlatformTileSpec -> tileMap[tileSpec]?.get()
                 is TileSpec.Invalid -> null
             }

@@ -347,8 +347,7 @@ final class RemovePackageHelper {
                 mPm.mAppsFilter.removePackage(snapshot,
                         snapshot.getPackageStateInternal(packageName));
                 removedAppId = mPm.mSettings.removePackageLPw(packageName);
-                outInfo.mRemovedAppId = removedAppId;
-
+                outInfo.mIsAppIdRemoved = true;
                 if (!mPm.mSettings.isDisabledSystemPackageLPr(packageName)) {
                     // If we don't have a disabled system package to reinstall, the package is
                     // really gone and its permission state should be removed.

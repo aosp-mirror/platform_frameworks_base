@@ -818,7 +818,8 @@ final class InstallRequest {
 
     public void setRemovedAppId(int appId) {
         if (mRemovedInfo != null) {
-            mRemovedInfo.mRemovedAppId = appId;
+            mRemovedInfo.mUid = appId;
+            mRemovedInfo.mIsAppIdRemoved = true;
         }
     }
 

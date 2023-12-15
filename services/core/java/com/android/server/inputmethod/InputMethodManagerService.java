@@ -6499,10 +6499,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 nextEnabledImes).getId();
 
                         // Reset enabled IMEs.
-                        settings.putEnabledInputMethodsStr("");
-                        nextEnabledImes.forEach(
-                                imi -> settings.appendAndPutEnabledInputMethodLocked(
-                                        imi.getId()));
+                        final String[] nextEnabledImeIds = new String[nextEnabledImes.size()];
+                        for (int i = 0; i < nextEnabledImeIds.length; ++i) {
+                            nextEnabledImeIds[i] = nextEnabledImes.get(i).getId();
+                        }
+                        settings.putEnabledInputMethodsStr(InputMethodUtils.concatEnabledImeIds(
+                                settings.getEnabledInputMethodsStr(), nextEnabledImeIds));
 
                         // Reset selected IME.
                         settings.putSelectedInputMethod(nextIme);

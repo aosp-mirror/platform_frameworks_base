@@ -22,8 +22,8 @@ class QSPipelineFlagsRepository @Inject constructor() {
                 AconfigFlags.FLAG_QS_NEW_PIPELINE
             )
 
-        fun assertNewTilesInLegacyMode() =
-            RefactorFlagUtils.assertInLegacyMode(
+        fun assertNewTiles() =
+            RefactorFlagUtils.assertInNewMode(
                 AconfigFlags.qsNewTiles(),
                 AconfigFlags.FLAG_QS_NEW_TILES
             )

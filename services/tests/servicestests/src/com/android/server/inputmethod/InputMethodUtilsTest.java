@@ -60,6 +60,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.inputmethod.StartInputFlags;
 
+import com.google.common.truth.Truth;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -1334,6 +1336,54 @@ public class InputMethodUtilsTest {
         static Context getSecondaryUserContext() {
             return sSecondaryUserContext;
         }
+    }
+
+    private static void verifySplitEnabledImeStr(@NonNull String enabledImeStr,
+            @NonNull String... expected) {
+        final ArrayList<String> actual = new ArrayList<>();
+        InputMethodUtils.splitEnabledImeStr(enabledImeStr, actual::add);
+        if (expected.length == 0) {
+            Truth.assertThat(actual).isEmpty();
+        } else {
+            Truth.assertThat(actual).containsExactlyElementsIn(expected);
+        }
+    }
+
+    @Test
+    public void testSplitEnabledImeStr() {
+        verifySplitEnabledImeStr("");
+        verifySplitEnabledImeStr("com.android/.ime1", "com.android/.ime1");
+        verifySplitEnabledImeStr("com.android/.ime1;1;2;3", "com.android/.ime1");
+        verifySplitEnabledImeStr("com.android/.ime1;1;2;3:com.android/.ime2",
+                "com.android/.ime1", "com.android/.ime2");
+        verifySplitEnabledImeStr("com.android/.ime1:com.android/.ime2",
+                "com.android/.ime1", "com.android/.ime2");
+        verifySplitEnabledImeStr("com.android/.ime1:com.android/.ime2:com.android/.ime3",
+                "com.android/.ime1", "com.android/.ime2", "com.android/.ime3");
+        verifySplitEnabledImeStr("com.android/.ime1;1:com.android/.ime2;1:com.android/.ime3;1",
+                "com.android/.ime1", "com.android/.ime2", "com.android/.ime3");
+    }
+
+    @Test
+    public void testConcatEnabledImeIds() {
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds("")).isEmpty();
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds("", "com.android/.ime1"))
+                .isEqualTo("com.android/.ime1");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1", "com.android/.ime1"))
+                .isEqualTo("com.android/.ime1");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1", "com.android/.ime2"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1", "com.android/.ime2", "com.android/.ime3"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2:com.android/.ime3");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1:com.android/.ime2", "com.android/.ime1"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1:com.android/.ime2", "com.android/.ime3"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2:com.android/.ime3");
     }
 
     @Test
