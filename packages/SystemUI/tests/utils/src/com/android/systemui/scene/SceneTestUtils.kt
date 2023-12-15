@@ -17,6 +17,7 @@
 package com.android.systemui.scene
 
 import android.app.ActivityTaskManager
+import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.UserInfo
@@ -96,6 +97,7 @@ import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserViewModel
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -103,7 +105,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.currentTime
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito
 
 /**
  * Utilities for creating scene container framework related repositories, interactors, and
@@ -144,18 +145,20 @@ class SceneTestUtils(
         )
     }
     val telephonyRepository: FakeTelephonyRepository by lazy { FakeTelephonyRepository() }
-
     val bouncerRepository = BouncerRepository(featureFlags)
     val communalRepository: FakeCommunalRepository by lazy { FakeCommunalRepository() }
     val keyguardRepository: FakeKeyguardRepository by lazy { FakeKeyguardRepository() }
     val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
     val simBouncerRepository: FakeSimBouncerRepository by lazy { FakeSimBouncerRepository() }
-    val telephonyManager: TelephonyManager =
-        Mockito.mock(TelephonyManager::class.java).apply {
-            whenever(createForSubscriptionId(anyInt())).thenReturn(this)
-            whenever(supplyIccLockPin(anyString()))
-                .thenReturn(PinResult(PIN_RESULT_TYPE_SUCCESS, 3))
-        }
+
+    val clock: SystemClock = mock {
+        whenever(elapsedRealtime()).thenAnswer { testScope.currentTime }
+    }
+    val telephonyManager: TelephonyManager = mock {
+        whenever(createForSubscriptionId(anyInt())).thenReturn(this)
+        whenever(supplyIccLockPin(anyString())).thenReturn(PinResult(PIN_RESULT_TYPE_SUCCESS, 3))
+    }
+    val devicePolicyManager: DevicePolicyManager = mock {}
     val mobileConnectionsRepository: FakeMobileConnectionsRepository by lazy {
         FakeMobileConnectionsRepository(mock(), mock())
     }
@@ -235,6 +238,7 @@ class SceneTestUtils(
         return AuthenticationInteractor(
             applicationScope = applicationScope(),
             repository = repository,
+            selectedUserInteractor = selectedUserInteractor(),
         )
     }
 
@@ -292,7 +296,7 @@ class SceneTestUtils(
     fun bouncerViewModel(
         bouncerInteractor: BouncerInteractor,
         authenticationInteractor: AuthenticationInteractor,
-        actionButtonInteractor: BouncerActionButtonInteractor,
+        actionButtonInteractor: BouncerActionButtonInteractor = bouncerActionButtonInteractor(),
         users: List<UserViewModel> = createUsers(),
     ): BouncerViewModel {
         return BouncerViewModel(
@@ -300,14 +304,15 @@ class SceneTestUtils(
             applicationScope = applicationScope(),
             mainDispatcher = testDispatcher,
             bouncerInteractor = bouncerInteractor,
+            simBouncerInteractor = simBouncerInteractor,
             authenticationInteractor = authenticationInteractor,
             flags = sceneContainerFlags,
             selectedUser = flowOf(users.first { it.isSelectionMarkerVisible }),
             users = flowOf(users),
             userSwitcherMenu = flowOf(createMenuActions()),
-            actionButtonInteractor = actionButtonInteractor,
-            simBouncerInteractor = simBouncerInteractor,
-            clock = mock { whenever(elapsedRealtime()).thenAnswer { testScope.currentTime } },
+            actionButton = actionButtonInteractor.actionButton,
+            clock = clock,
+            devicePolicyManager = devicePolicyManager,
         )
     }
 

@@ -21,6 +21,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.None
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Password
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Sim
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.scene.SceneTestUtils
@@ -47,7 +52,6 @@ class BouncerViewModelTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val authenticationInteractor = utils.authenticationInteractor()
-    private val actionButtonInteractor = utils.bouncerActionButtonInteractor()
     private val bouncerInteractor =
         utils.bouncerInteractor(
             authenticationInteractor = authenticationInteractor,
@@ -56,7 +60,6 @@ class BouncerViewModelTest : SysuiTestCase() {
         utils.bouncerViewModel(
             bouncerInteractor = bouncerInteractor,
             authenticationInteractor = authenticationInteractor,
-            actionButtonInteractor = actionButtonInteractor,
         )
 
     @Test
@@ -136,7 +139,7 @@ class BouncerViewModelTest : SysuiTestCase() {
     fun message() =
         testScope.runTest {
             val message by collectLastValue(underTest.message)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
             assertThat(message?.isUpdateAnimated).isTrue()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
@@ -154,7 +157,7 @@ class BouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val authMethodViewModel by collectLastValue(underTest.authMethodViewModel)
             val message by collectLastValue(underTest.message)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
             assertThat(utils.authenticationRepository.lockoutEndTimestamp).isNull()
             assertThat(authMethodViewModel?.lockoutMessageId).isNotNull()
 
@@ -189,7 +192,7 @@ class BouncerViewModelTest : SysuiTestCase() {
                         authViewModel?.isInputEnabled ?: emptyFlow()
                     }
                 )
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
             assertThat(isInputEnabled).isTrue()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
@@ -203,21 +206,22 @@ class BouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun dialogMessage() =
+    fun dialogViewModel() =
         testScope.runTest {
             val authMethodViewModel by collectLastValue(underTest.authMethodViewModel)
-            val dialogMessage by collectLastValue(underTest.dialogMessage)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            val dialogViewModel by collectLastValue(underTest.dialogViewModel)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
             assertThat(authMethodViewModel?.lockoutMessageId).isNotNull()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                assertThat(dialogMessage).isNull()
+                assertThat(dialogViewModel).isNull()
                 bouncerInteractor.authenticate(WRONG_PIN)
             }
-            assertThat(dialogMessage).isNotEmpty()
+            assertThat(dialogViewModel).isNotNull()
+            assertThat(dialogViewModel?.text).isNotEmpty()
 
-            underTest.onDialogDismissed()
-            assertThat(dialogMessage).isNull()
+            dialogViewModel?.onDismiss?.invoke()
+            assertThat(dialogViewModel).isNull()
         }
 
     @Test
@@ -225,20 +229,16 @@ class BouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val isSideBySideSupported by collectLastValue(underTest.isSideBySideSupported)
             utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
             assertThat(isSideBySideSupported).isTrue()
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
-            )
+            utils.authenticationRepository.setAuthenticationMethod(Password)
             assertThat(isSideBySideSupported).isTrue()
 
             utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
             assertThat(isSideBySideSupported).isTrue()
 
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
-            )
+            utils.authenticationRepository.setAuthenticationMethod(Password)
             assertThat(isSideBySideSupported).isFalse()
         }
 
@@ -246,27 +246,17 @@ class BouncerViewModelTest : SysuiTestCase() {
     fun isFoldSplitRequired() =
         testScope.runTest {
             val isFoldSplitRequired by collectLastValue(underTest.isFoldSplitRequired)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
             assertThat(isFoldSplitRequired).isTrue()
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
-            )
+            utils.authenticationRepository.setAuthenticationMethod(Password)
             assertThat(isFoldSplitRequired).isFalse()
 
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pattern
-            )
+            utils.authenticationRepository.setAuthenticationMethod(Pattern)
             assertThat(isFoldSplitRequired).isTrue()
         }
 
     private fun authMethodsToTest(): List<AuthenticationMethodModel> {
-        return listOf(
-            AuthenticationMethodModel.None,
-            AuthenticationMethodModel.Pin,
-            AuthenticationMethodModel.Password,
-            AuthenticationMethodModel.Pattern,
-            AuthenticationMethodModel.Sim,
-        )
+        return listOf(None, Pin, Password, Pattern, Sim)
     }
 
     private fun assertTryAgainMessage(
