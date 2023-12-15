@@ -19,7 +19,6 @@ package android.testing;
 import android.testing.TestableLooper.LooperFrameworkMethod;
 import android.testing.TestableLooper.RunWithLooper;
 
-import org.junit.internal.runners.statements.InvokeMethod;
 import org.junit.rules.MethodRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
@@ -79,13 +78,11 @@ public class TestWithLooperRule implements MethodRule {
             while (next != null) {
                 switch (next.getClass().getSimpleName()) {
                     case "RunAfters":
-                        this.<List<FrameworkMethod>>wrapFieldMethodFor(next,
-                                next.getClass(), "afters", method, target);
+                        this.wrapFieldMethodFor(next, "afters", method, target);
                         next = getNextStatement(next, "next");
                         break;
                     case "RunBefores":
-                        this.<List<FrameworkMethod>>wrapFieldMethodFor(next,
-                                next.getClass(), "befores", method, target);
+                        this.wrapFieldMethodFor(next, "befores", method, target);
                         next = getNextStatement(next, "next");
                         break;
                     case "FailOnTimeout":
@@ -95,8 +92,10 @@ public class TestWithLooperRule implements MethodRule {
                         next = getNextStatement(next, "originalStatement");
                         break;
                     case "InvokeMethod":
-                        this.<FrameworkMethod>wrapFieldMethodFor(next,
-                                InvokeMethod.class, "testMethod", method, target);
+                        this.wrapFieldMethodFor(next, "testMethod", method, target);
+                        return;
+                    case "InvokeParameterizedMethod":
+                        this.wrapFieldMethodFor(next, "frameworkMethod", method, target);
                         return;
                     default:
                         throw new Exception(
@@ -112,12 +111,11 @@ public class TestWithLooperRule implements MethodRule {
 
     // Wrapping the befores, afters, and InvokeMethods with LooperFrameworkMethod
     // within the statement.
-    private <T> void wrapFieldMethodFor(Statement base, Class<?> targetClass, String fieldStr,
-            FrameworkMethod method, Object target)
-            throws NoSuchFieldException, IllegalAccessException {
-        Field field = targetClass.getDeclaredField(fieldStr);
+    private void wrapFieldMethodFor(Statement base, String fieldStr, FrameworkMethod method,
+            Object target) throws NoSuchFieldException, IllegalAccessException {
+        Field field = base.getClass().getDeclaredField(fieldStr);
         field.setAccessible(true);
-        T fieldInstance = (T) field.get(base);
+        Object fieldInstance = field.get(base);
         if (fieldInstance instanceof FrameworkMethod) {
             field.set(base, looperWrap(method, target, (FrameworkMethod) fieldInstance));
         } else {
