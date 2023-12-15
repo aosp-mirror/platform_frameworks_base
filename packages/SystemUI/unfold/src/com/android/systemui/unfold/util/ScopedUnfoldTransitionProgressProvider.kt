@@ -15,8 +15,11 @@
  */
 package com.android.systemui.unfold.util
 
+import android.os.Handler
+import android.os.Looper
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Manages progress listeners that can have smaller lifespan than the unfold animation.
@@ -33,12 +36,13 @@ open class ScopedUnfoldTransitionProgressProvider
 constructor(source: UnfoldTransitionProgressProvider? = null) :
     UnfoldTransitionProgressProvider, TransitionProgressListener {
 
+    private var progressHandler: Handler? = null
     private var source: UnfoldTransitionProgressProvider? = null
 
-    private val listeners: MutableList<TransitionProgressListener> = mutableListOf()
+    private val listeners = CopyOnWriteArrayList<TransitionProgressListener>()
 
-    private var isReadyToHandleTransition = false
-    private var isTransitionRunning = false
+    @Volatile private var isReadyToHandleTransition = false
+    @Volatile private var isTransitionRunning = false
     private var lastTransitionProgress = PROGRESS_UNSET
 
     init {
@@ -70,15 +74,18 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
      * Call it with readyToHandleTransition = false when listeners can't process the events.
      */
     fun setReadyToHandleTransition(isReadyToHandleTransition: Boolean) {
-        if (isTransitionRunning) {
-            if (isReadyToHandleTransition) {
-                listeners.forEach { it.onTransitionStarted() }
-                if (lastTransitionProgress != PROGRESS_UNSET) {
-                    listeners.forEach { it.onTransitionProgress(lastTransitionProgress) }
+        val progressHandler = this.progressHandler
+        if (isTransitionRunning && progressHandler != null) {
+            progressHandler.post {
+                if (isReadyToHandleTransition) {
+                    listeners.forEach { it.onTransitionStarted() }
+                    if (lastTransitionProgress != PROGRESS_UNSET) {
+                        listeners.forEach { it.onTransitionProgress(lastTransitionProgress) }
+                    }
+                } else {
+                    isTransitionRunning = false
+                    listeners.forEach { it.onTransitionFinished() }
                 }
-            } else {
-                isTransitionRunning = false
-                listeners.forEach { it.onTransitionFinished() }
             }
         }
         this.isReadyToHandleTransition = isReadyToHandleTransition
@@ -98,6 +105,7 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
     }
 
     override fun onTransitionStarted() {
+        assertInProgressThread()
         isTransitionRunning = true
         if (isReadyToHandleTransition) {
             listeners.forEach { it.onTransitionStarted() }
@@ -105,6 +113,7 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
     }
 
     override fun onTransitionProgress(progress: Float) {
+        assertInProgressThread()
         if (isReadyToHandleTransition) {
             listeners.forEach { it.onTransitionProgress(progress) }
         }
@@ -112,17 +121,34 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
     }
 
     override fun onTransitionFinishing() {
+        assertInProgressThread()
         if (isReadyToHandleTransition) {
             listeners.forEach { it.onTransitionFinishing() }
         }
     }
 
     override fun onTransitionFinished() {
+        assertInProgressThread()
         if (isReadyToHandleTransition) {
             listeners.forEach { it.onTransitionFinished() }
         }
         isTransitionRunning = false
         lastTransitionProgress = PROGRESS_UNSET
+    }
+
+    private fun assertInProgressThread() {
+        val cachedProgressHandler = progressHandler
+        if (cachedProgressHandler == null) {
+            val thisLooper = Looper.myLooper() ?: error("This thread is expected to have a looper.")
+            progressHandler = Handler(thisLooper)
+        } else {
+            check(cachedProgressHandler.looper.isCurrentThread) {
+                """Receiving unfold transition callback from different threads.
+                    |Current: ${Thread.currentThread()}
+                    |expected: ${cachedProgressHandler.looper.thread}"""
+                    .trimMargin()
+            }
+        }
     }
 
     companion object {
