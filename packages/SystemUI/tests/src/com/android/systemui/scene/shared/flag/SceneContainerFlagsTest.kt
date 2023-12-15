@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,23 @@
 
 package com.android.systemui.scene.shared.flag
 
-import android.platform.test.flag.junit.SetFlagsRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.FakeFeatureFlagsImpl
-import com.android.systemui.Flags as AconfigFlags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.ReleasedFlag
-import com.android.systemui.flags.ResourceBooleanFlag
-import com.android.systemui.flags.UnreleasedFlag
+import com.android.systemui.flags.setFlagValue
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.media.controls.util.MediaInSceneContainerFlag
-import com.android.systemui.res.R
-import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth
+import org.junit.Assume
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 
 @SmallTest
-@RunWith(Parameterized::class)
-internal class SceneContainerFlagsTest(
-    private val testCase: TestCase,
-) : SysuiTestCase() {
-
-    @Rule @JvmField val setFlagsRule: SetFlagsRule = SetFlagsRule()
-
-    private lateinit var underTest: SceneContainerFlags
+@RunWith(AndroidJUnit4::class)
+internal class SceneContainerFlagsTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
@@ -52,83 +40,39 @@ internal class SceneContainerFlagsTest(
         //  Flags.SCENE_CONTAINER_ENABLED is no longer needed.
         val field = Flags::class.java.getField("SCENE_CONTAINER_ENABLED")
         field.isAccessible = true
-        field.set(null, true)
+        field.set(null, true) // note: this does not work with multivalent tests
+    }
 
-        val featureFlags =
-            FakeFeatureFlagsClassic().apply {
-                SceneContainerFlagsImpl.classicFlagTokens.forEach { flagToken ->
-                    when (flagToken) {
-                        is ResourceBooleanFlag -> set(flagToken, testCase.areAllFlagsSet)
-                        is ReleasedFlag -> set(flagToken, testCase.areAllFlagsSet)
-                        is UnreleasedFlag -> set(flagToken, testCase.areAllFlagsSet)
-                        else -> error("Unsupported flag type ${flagToken.javaClass}")
-                    }
-                }
-            }
-        // TODO(b/306421592): get the aconfig FeatureFlags from the SetFlagsRule.
-        val aconfigFlags = FakeFeatureFlagsImpl()
-
+    private fun setAconfigFlagsEnabled(enabled: Boolean) {
         listOf(
-                AconfigFlags.FLAG_SCENE_CONTAINER,
-                AconfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
+                com.android.systemui.Flags.FLAG_SCENE_CONTAINER,
+                com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
                 KeyguardShadeMigrationNssl.FLAG_NAME,
                 MediaInSceneContainerFlag.FLAG_NAME,
             )
-            .forEach { flagToken ->
-                setFlagsRule.enableFlags(flagToken)
-                aconfigFlags.setFlag(flagToken, testCase.areAllFlagsSet)
-                overrideResource(
-                    R.bool.config_sceneContainerFrameworkEnabled,
-                    testCase.isResourceConfigEnabled
-                )
-            }
-
-        underTest =
-            SceneContainerFlagsImpl(
-                context = context,
-                featureFlagsClassic = featureFlags,
-                isComposeAvailable = testCase.isComposeAvailable,
-            )
+            .forEach { flagName -> mSetFlagsRule.setFlagValue(flagName, enabled) }
     }
 
     @Test
-    fun isEnabled() {
-        assertThat(underTest.isEnabled()).isEqualTo(testCase.expectedEnabled)
+    fun isNotEnabled_withoutAconfigFlags() {
+        setAconfigFlagsEnabled(false)
+        Truth.assertThat(SceneContainerFlag.isEnabled).isEqualTo(false)
+        Truth.assertThat(SceneContainerFlagsImpl().isEnabled()).isEqualTo(false)
     }
 
-    internal data class TestCase(
-        val isComposeAvailable: Boolean,
-        val areAllFlagsSet: Boolean,
-        val isResourceConfigEnabled: Boolean,
-        val expectedEnabled: Boolean,
-    ) {
-        override fun toString(): String {
-            return "(compose=$isComposeAvailable + flags=$areAllFlagsSet) + XML" +
-                " config=$isResourceConfigEnabled -> expected=$expectedEnabled"
-        }
+    @Test
+    fun isEnabled_withAconfigFlags_withCompose() {
+        Assume.assumeTrue(ComposeFacade.isComposeAvailable())
+        setAconfigFlagsEnabled(true)
+        Truth.assertThat(SceneContainerFlag.isEnabled).isEqualTo(true)
+        Truth.assertThat(SceneContainerFlagsImpl().isEnabled()).isEqualTo(true)
     }
 
-    companion object {
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun testCases() = buildList {
-            repeat(8) { combination ->
-                val isComposeAvailable = combination and 0b100 != 0
-                val areAllFlagsSet = combination and 0b010 != 0
-                val isResourceConfigEnabled = combination and 0b001 != 0
-
-                val expectedEnabled =
-                    isComposeAvailable && areAllFlagsSet && isResourceConfigEnabled
-
-                add(
-                    TestCase(
-                        isComposeAvailable = isComposeAvailable,
-                        areAllFlagsSet = areAllFlagsSet,
-                        expectedEnabled = expectedEnabled,
-                        isResourceConfigEnabled = isResourceConfigEnabled,
-                    )
-                )
-            }
-        }
+    @Test
+    fun isNotEnabled_withAconfigFlags_withoutCompose() {
+        Assume.assumeFalse(ComposeFacade.isComposeAvailable())
+        setAconfigFlagsEnabled(true)
+        Truth.assertThat(SceneContainerFlag.isEnabled).isEqualTo(false)
+        Truth.assertThat(SceneContainerFlagsImpl().isEnabled()).isEqualTo(false)
     }
 }
