@@ -55,7 +55,7 @@ public final class SessionConfiguration implements Parcelable {
      * at regular non high speed FPS ranges and optionally {@link InputConfiguration} for
      * reprocessable sessions.
      *
-     * @see CameraDevice#createCaptureSession
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
      * @see CameraDevice#createReprocessableCaptureSession
      */
     public static final int SESSION_REGULAR = CameraDevice.SESSION_OPERATION_MODE_NORMAL;
@@ -110,10 +110,7 @@ public final class SessionConfiguration implements Parcelable {
      *
      * @see #SESSION_REGULAR
      * @see #SESSION_HIGH_SPEED
-     * @see CameraDevice#createCaptureSession(List, CameraCaptureSession.StateCallback, Handler)
-     * @see CameraDevice#createCaptureSessionByOutputConfigurations
-     * @see CameraDevice#createReprocessableCaptureSession
-     * @see CameraDevice#createConstrainedHighSpeedCaptureSession
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
      */
     public SessionConfiguration(@SessionMode int sessionType,
             @NonNull List<OutputConfiguration> outputs,

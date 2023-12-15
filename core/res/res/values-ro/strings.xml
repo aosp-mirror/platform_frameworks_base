@@ -1951,7 +1951,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Momentan, aplicația <xliff:g id="APP_NAME_0">%1$s</xliff:g> nu este disponibilă. Aceasta este gestionată de <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Află mai multe"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulează întreruperea aplicației"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Reactivezi aplicații lucru?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Reactivezi aplicații de lucru?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Reactivează"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgență"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplicația nu este disponibilă"</string>
@@ -2340,4 +2340,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Tastatura este setată la <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Atinge pentru a schimba."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Tastaturile fizice au fost configurate"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Atinge pentru a vedea tastaturile"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privat"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Clonează"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Serviciu"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Serviciu 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Serviciu 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Comun"</string>
 </resources>

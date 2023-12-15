@@ -229,7 +229,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"ပြန်လည်စတင်နေ…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"စက်ရုံထုတ်အခြေအနေပြန်ယူခြင်း"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"ပြန်လည်စတင်နေ…"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"စက်ပိတ်ပါမည်"</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"စက်ပိတ်နေသည်…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"သင့်တက်ဘလက်အား စက်ပိတ်ပါမည်"</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"သင့် Android TV စက်ပစ္စည်း ပိတ်သွားပါမည်။"</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"သင်၏ ကြည့်ရှုမှု ပိတ်ပစ်မည်။"</string>
@@ -238,7 +238,7 @@
     <string name="reboot_safemode_title" msgid="5853949122655346734">"safe mode ဖြင့် ပြန်လည် စ တင်ရန်"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"safe mode ကို ပြန်လည် စတင် မလား? ဒီလို စတင်ခြင်းဟာ သင် သွင်းထားသော တတိယပါတီ အပလီကေးရှင်းများအား ရပ်ဆိုင်းထားပါမည်။ ပုံမှန်အတိုင်း ပြန်စလျှင် ထိုအရာများ ပြန်လည် ရောက်ရှိလာပါမည်။"</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"လတ်တလော"</string>
-    <string name="no_recent_tasks" msgid="9063946524312275906">"မကြာမီတုန်းက အက်ပ်များ မရှိပါ"</string>
+    <string name="no_recent_tasks" msgid="9063946524312275906">"မကြာသေးမီက အက်ပ်များ မရှိပါ"</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ရွေးချယ်စရာများ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ဖုန်းဆိုင်ရာရွေးချယ်မှုများ"</string>
@@ -806,7 +806,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"မျက်နှာပြင်ကို သော့ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက်၊ စကားဝှက် ရိုက်ထည့်မှု သိပ်များနေလျှင် တက်ဘလက်ကို သော့ခတ်ရန် သို့မဟုတ် တက်ဘလက် ဒေတာ အားလုံးကို ဖျက်ရန်။"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"မျက်နှာပြင်ကို လော့ခ်ဖွင့်သည့်အခါ စကားဝှက်မှားယွင်းစွာ ရိုက်သွင်းသည့်အကြိမ်ရေကို စောင့်ကြည့်ပြီး မှားယွင်းသည့်အကြိမ်ရေ အလွန်များလာပါက သင့် Android TV စက်ပစ္စည်းကို လော့ခ်ချခြင်း သို့မဟုတ် သင့် Android TV ရှိ အသုံးပြုသူဒေတာများအားလုံးကို ဖျက်ခြင်းတို့ ပြုလုပ်သွားပါမည်။"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"ဖန်သားပြင်လော့ခ်ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက် စကားဝှက် မမှန်မကန် ရိုက်ထည့်မှု များနေလျှင် သတင်းနှင့်ဖျော်ဖြေရေး စနစ်ကို လော့ခ်ချသည် (သို့) ၎င်း၏ ဒေတာအားလုံးကို ဖျက်သည်။"</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"မျက်နှာပြင်ကို သော့ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက်၊ စကားဝှက် ရိုက်ထည့်မှု သိပ်များနေလျှင် ဖုန်းကို သော့ခတ်ရန် သို့မဟုတ် ဖုန်း ဒေတာ အားလုံးကို ဖျက်ရန်။"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"မျက်နှာပြင်ကို လောခ်ဖွင့်ရန်အတွက် ရိုက်ထည့်သည့် မှားယွင်းသောစကားဝှက် အကြိမ်ရေကို စောင့်ကြည့်ပြီး မမှန်သောစကားဝှက် ရိုက်ထည့်မှု အလွန်များနေလျှင် ဖုန်းကိုလော့ခ်ချသည် (သို့) ဖုန်း ဒေတာအားလုံးကို ဖျက်သည်။"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက တက်ဘလက်အား သော့ချခြင်း သို့မဟုတ် တက်ဘလက်၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"မျက်နှာပြင်ကို လော့ခ်ဖွင့်သည့်အခါ စကားဝှက်မှားယွင်းစွာ ရိုက်သွင်းသည့်အကြိမ်ရေကို စောင့်ကြည့်ပြီး မှားယွင်းသည့်အကြိမ်ရေ အလွန်များလာပါက သင့် Android TV စက်ပစ္စည်းကို လော့ခ်ချခြင်း သို့မဟုတ် ဤအသုံးပြုသူဒေတာများအားလုံးကို ဖျက်ခြင်းတို့ ပြုလုပ်သွားပါမည်။"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"ဖန်သားပြင်လော့ခ်ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက် စကားဝှက် မမှန်မကန် ရိုက်ထည့်မှု များနေလျှင် သတင်းနှင့်ဖျော်ဖြေရေး စနစ်ကို လော့ခ်ချသည် (သို့) ဤပရိုဖိုင်၏ ဒေတာအားလုံးကို ဖျက်သည်။"</string>
@@ -1682,8 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ဖယ်ရှားရန်"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"အသံကို အကြံပြုထားသည့် ပမာဏထက် မြှင့်ပေးရမလား?\n\nအသံကို မြင့်သည့် အဆင့်မှာ ကြာရှည်စွာ နားထောင်ခြင်းက သင်၏ နားကို ထိခိုက်စေနိုင်သည်။"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"အသံကျယ်ကျယ်ဖြင့် ဆက်နားဆင်မလား။\n\nနားကြပ်အသံအား အကြံပြုထားသည်ထက် ပိုကြာရှည်စွာ ချဲ့ထားပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ကျယ်လောင်သောအသံကို သိရှိသည်\n\nနားကြပ်အသံအား အကြံပြုထားသည်ထက် ပိုချဲ့ထားပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"အသံကျယ်ကျယ်ဖြင့် ဆက်နားဆင်မလား။\n\nနားကြပ်အသံသည် အကြံပြုထားသည်ထက် အချိန်ကြာရှည်စွာ ကျယ်လောင်နေပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ကျယ်လောင်သောအသံကို သိရှိသည်\n\nနားကြပ်အသံသည် အကြံပြုထားသည်ထက် ပိုကျယ်နေပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"အများသုံးနိုင်မှု ဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုလိုပါသလား။"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံထိန်းခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးနိုင်သည့် ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများအတွက် ဖြတ်လမ်းကို ဖွင့်မလား။"</string>
@@ -1951,7 +1951,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"ပိုမိုလေ့လာရန်"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"အက်ပ်ကို ခဏမရပ်တော့ရန်"</string>
     <string name="work_mode_off_title" msgid="6367463960165135829">"အလုပ်သုံးအက်ပ် ပြန်ဖွင့်မလား။"</string>
-    <string name="work_mode_turn_on" msgid="5316648862401307800">"ပြန်စရန်"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ပြန်ဖွင့်ရန်"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"အရေးပေါ်"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"အက်ပ်ကို မရနိုင်ပါ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ယခု မရနိုင်ပါ။"</string>
@@ -2127,7 +2127,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ပင်မစာမျက်နှာ"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"နောက်သို့"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"လတ်တလောသုံး အက်ပ်များ"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"မကြာသေးမီက အက်ပ်များ"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"အကြောင်းကြားချက်များ"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"အမြန် ဆက်တင်များ"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ပါဝါ ဒိုင်ယာလော့"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ကီးဘုတ်အပြင်အဆင်ကို <xliff:g id="LAYOUT_1">%1$s</xliff:g>၊ <xliff:g id="LAYOUT_2">%2$s</xliff:g>၊ <xliff:g id="LAYOUT_3">%3$s</xliff:g> သို့ သတ်မှတ်လိုက်သည်… ပြောင်းရန် တို့ပါ။"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ပကတိကီးဘုတ်များကို စီစဉ်သတ်မှတ်ထားသည်"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ကီးဘုတ်များကြည့်ရန် တို့ပါ"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"သီးသန့်"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"ဆင်တူပြုလုပ်ရန်"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"အလုပ်"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"အလုပ် ၂"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"အလုပ် ၃"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"စမ်းသပ်မှု"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"အများသုံး"</string>
 </resources>

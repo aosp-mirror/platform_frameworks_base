@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Aktivera USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Läs mer"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skärmbild"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock har inaktiverats"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Håll olåst har inaktiverats"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har skickat en bild"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skärmbilden sparas ..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Sparar skärmbild i jobbprofilen …"</string>
@@ -270,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Färginvertering"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Färgkorrigering"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Teckenstorlek"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Hantera användare"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Välj användare"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Klart"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Stäng"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Ansluten"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Startmeny"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Sida <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låsskärm"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Mobilen stängdes av pga. värme"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefonen fungerar nu som vanligt.\nTryck för mer information"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Mobilen var för varm och stängdes av för att kylas ned. Den fungerar nu som vanligt.\n\nMobilen kan bli för varm om du\n	• använder resurskrävande appar (till exempel spel-, video- eller navigeringsappar)\n	• laddar ned eller laddar upp stora filer\n	• använder mobilen vid höga temperaturer."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Visa alla skötselråd"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Mobilen börjar bli varm"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Vissa funktioner är begränsade medan telefonen svalnar.\nTryck för mer information"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Mobilen försöker svalna automatiskt. Du kan fortfarande använda mobilen, men den kan vara långsammare än vanligt.\n\nMobilen fungerar som vanligt när den har svalnat."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Visa alla skötselråd"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Koppla ur enheten"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Enheten börjar bli varm vid laddningsporten. Om den är ansluten till en laddare eller ett USB-tillbehör kopplar du ur den. Var försiktigt eftersom kabeln också kan vara varm."</string>
@@ -1096,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Bildförhandsgranskning"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"redigera"</string>
     <string name="add" msgid="81036585205287996">"Lägg till"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Hantera användare"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Välj användare"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Det går inte att dra den här aviseringen till delad skärm"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wifi är inte tillgängligt"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritetsläge"</string>

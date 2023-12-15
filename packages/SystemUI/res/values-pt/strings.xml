@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Ativar USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Saiba mais"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Capturar tela"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock desativado"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Desbloqueio extra desativado"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"enviou uma imagem"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Salvando captura de tela..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Salvando captura de tela no perfil de trabalho…"</string>
@@ -108,7 +108,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sons do dispositivo, como música, chamadas e toques"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Microfone"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Áudio e microfone do dispositivo"</string>
-    <string name="screenrecord_continue" msgid="4055347133700593164">"Início"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Iniciar"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Gravando tela"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Gravando tela e áudio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostrar toques na tela"</string>
@@ -128,7 +128,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefone"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistência de voz"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Carteira"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Leitor de código QR"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Leitor de QR code"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"Desbloqueado"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloqueado"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Verificando rosto"</string>
@@ -480,7 +480,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"Som e vibração"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Configurações"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volume diminuído para um nível mais seguro"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"O volume do fones de ouvido está alto há mais tempo que o recomendado"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"O volume dos fones de ouvido está alto há mais tempo que o recomendado"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"O volume dos fones de ouvido excedeu o limite de segurança para esta semana"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Continuar ouvindo"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Diminuir o volume"</string>
@@ -537,7 +537,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocorreu um problema ao carregar os cards. Tente novamente mais tarde"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Configurações de tela de bloqueio"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Leitor de código QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Leitor de QR code"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Atualizando"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabalho"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo avião"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu liga/desliga"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Tela de bloqueio"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"O smartphone foi desligado devido ao aquecimento"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"O smartphone está funcionando normalmente agora.\nToque para saber mais"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O smartphone estava muito quente e foi desligado para resfriar. Agora, ele está sendo executado normalmente.\n\nO smartphone pode ficar quente demais se você:\n	• usar apps que consomem muitos recursos (como apps de jogos, vídeos ou navegação);\n	• fizer o download ou upload de arquivos grandes;\n	• usar o smartphone em temperaturas altas."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver etapas de cuidado"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"O smartphone está esquentando"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Alguns recursos ficam limitados enquanto o smartphone é resfriado.\nToque para saber mais"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Seu smartphone tentará se resfriar automaticamente. Você ainda poderá usá-lo, mas talvez ele fique mais lento.\n\nQuando o smartphone estiver resfriado, ele voltará ao normal."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver etapas de cuidado"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Desconecte seu dispositivo"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Seu dispositivo está ficando quente perto da porta de carregamento. Desconecte qualquer carregador ou acessório USB que esteja conectado, mas tome cuidado, porque o cabo também pode estar quente."</string>
@@ -896,7 +890,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# controle adicionado.}one{# controle adicionado.}many{# de controles adicionados.}other{# controles adicionados.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Removido"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Adicionar o app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> pode escolher quais controles e conteúdos aparecem aqui."</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"O app <xliff:g id="APPNAME">%s</xliff:g> pode escolher quais controles e conteúdos aparecem aqui."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Remover controles do app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Adicionado como favorito"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Adicionado como favorito (posição <xliff:g id="NUMBER">%d</xliff:g>)"</string>
@@ -994,7 +988,7 @@
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmitir"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As pessoas próximas a você com dispositivos Bluetooth compatíveis podem ouvir a mídia que você está transmitindo"</string>
-    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"As pessoas próximas com dispositivos Bluetooth compatíveis podem ler seu código QR ou usar o nome da transmissão e a senha para ouvir a transmissão."</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"As pessoas próximas com dispositivos Bluetooth compatíveis podem ler seu QR code ou usar o nome da transmissão e a senha para ouvir a transmissão."</string>
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nome da transmissão"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Senha"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Salvar"</string>
@@ -1117,7 +1111,7 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Permitir que o app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acesse todos os registros do dispositivo?"</string>
-    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permitir o acesso único"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permitir acesso único"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Não permitir"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Os registros do dispositivo gravam o que acontece nele. Os apps podem usar esses registros para encontrar e corrigir problemas.\n\nAlguns registros podem conter informações sensíveis, então autorize o acesso a eles apenas para os apps em que você confia. \n\nSe você não permitir que esse app acesse todos os registros do dispositivo, ele ainda vai poder acessar os dele. O fabricante do dispositivo também pode ter acesso a alguns registros ou informações."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Saiba mais"</string>
@@ -1125,7 +1119,7 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Abrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Para adicionar o app Carteira como um atalho, verifique se ele está instalado"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Para adicionar o app Carteira como um atalho, verifique se pelo menos um cartão foi adicionado"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Para adicionar o leitor de código QR como um atalho, verifique se algum app de câmera está instalado"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Para adicionar o leitor de QR code como um atalho, verifique se algum app de câmera está instalado"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Para adicionar o app Home como um atalho, verifique se ele está instalado"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Pelo menos um dispositivo está disponível"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Selecione um app de notas padrão para usar o atalho de anotações"</string>

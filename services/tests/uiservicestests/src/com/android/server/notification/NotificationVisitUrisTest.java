@@ -66,6 +66,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -87,7 +89,6 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     // This list should be emptied! Items can be removed as bugs are fixed.
     private static final Multimap<Class<?>, String> KNOWN_BAD =
             ImmutableMultimap.<Class<?>, String>builder()
-                    .put(Notification.WearableExtender.class, "addAction") // TODO: b/281044385
                     .put(Person.Builder.class, "setUri") // TODO: b/281044385
                     .put(RemoteViews.class, "setRemoteAdapter") // TODO: b/281044385
                     .build();
@@ -149,7 +150,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
         Generated<Notification> notification = buildNotification(mContext, /* styleClass= */ null,
                 /* extenderClass= */ null, /* actionExtenderClass= */ null,
                 /* includeRemoteViews= */ true);
-        assertThat(notification.includedUris.size()).isAtLeast(20);
+        assertThat(notification.includedUris.size()).isAtLeast(900);
     }
 
     @Test
@@ -435,17 +436,41 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
             Set<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
         Log.i(TAG, "About to generate parameters for " + ReflectionUtils.methodToString(executable)
                 + " in " + where);
-        Class<?>[] parameterTypes = executable.getParameterTypes();
+        Type[] parameterTypes = executable.getGenericParameterTypes();
         Object[] parameterValues = new Object[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
-            parameterValues[i] = generateObject(
+            parameterValues[i] = generateParameter(
                     parameterTypes[i],
                     where.plus(executable,
-                            String.format("[%d,%s]", i, parameterTypes[i].getName())),
+                            String.format("[%d,%s]", i, parameterTypes[i].getTypeName())),
                     excludingClasses,
                     specialGenerator);
         }
         return parameterValues;
+    }
+
+    private static Object generateParameter(Type parameterType, Location where,
+            Set<Class<?>> excludingClasses, SpecialParameterGenerator specialGenerator) {
+        if (parameterType instanceof Class<?> parameterClass) {
+            return generateObject(
+                    parameterClass,
+                    where,
+                    excludingClasses,
+                    specialGenerator);
+        } else if (parameterType instanceof ParameterizedType parameterizedType) {
+            if (parameterizedType.getRawType().equals(List.class)
+                    && parameterizedType.getActualTypeArguments()[0] instanceof Class<?>) {
+                ArrayList listValue = new ArrayList();
+                for (int i = 0; i < NUM_ELEMENTS_IN_ARRAY; i++) {
+                    listValue.add(
+                            generateObject((Class<?>) parameterizedType.getActualTypeArguments()[0],
+                                    where, excludingClasses, specialGenerator));
+                }
+                return listValue;
+            }
+        }
+        throw new IllegalArgumentException(
+                "I have no idea how to produce a(n) " + parameterType + ", sorry");
     }
 
     private static class ReflectionUtils {

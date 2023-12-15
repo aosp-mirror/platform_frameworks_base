@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Միացնել USB-ն"</string>
     <string name="learn_more" msgid="4690632085667273811">"Իմանալ ավելին"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Սքրինշոթ"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"«Երկարացնել կողպումը» գործառույթն անջատված է"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"«Հետաձգված ապակողպում» գործառույթն անջատված է"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"պատկեր է ուղարկվել"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Սքրինշոթը պահվում է..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Սքրինշոթը պահվում է աշխատանքային պրոֆիլում…"</string>
@@ -390,7 +390,7 @@
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Ավելացնելով նոր օգտատեր՝ դուք դուրս կգաք հյուրի ռեժիմից։ Հյուրի ընթացիկ աշխատաշրջանի բոլոր հավելվածներն ու տվյալները կջնջվեն։"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Սահմանաչափը սպառված է"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Հնարավոր է ստեղծել միայն մեկ օգտատեր։}one{Կարող եք առավելագույնը # օգտատեր ավելացնել։}other{Կարող եք առավելագույնը # օգտատեր ավելացնել։}}"</string>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"Հեռացնե՞լ օգտատիրոջը:"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"Հեռացնե՞լ օգտատիրոջը"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Այս օգտատիրոջ բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Հեռացնել"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Սկսե՞լ տեսագրումը կամ հեռարձակումը <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> հավելվածով"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Սնուցման կոճակի ընտրացանկ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Էջ <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Կողպէկրան"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Հեռախոսն անջատվել էր տաքանալու պատճառով"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Հեռախոսն այժմ նորմալ է աշխատում։\nՀպեք՝ ավելին իմանալու համար։"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ձեր հեռախոսը չափազանց տաք էր, այդ պատճառով այն անջատվել է՝ հովանալու համար: Հեռախոսն այժմ նորմալ աշխատում է:\n\nՀեռախոսը կարող է տաքանալ, եթե՝\n	• Օգտագործում եք ռեսուրսատար հավելվածներ (օրինակ՝ խաղեր, տեսանյութեր կամ նավիգացիայի հավելվածներ)\n	• Ներբեռնում կամ վերբեռնում եք ծանր ֆայլեր\n	• Օգտագործում եք ձեր հեռախոսը բարձր ջերմային պայմաններում"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Հեռախոսը տաքանում է"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Հովանալու ընթացքում հեռախոսի որոշ գործառույթներ սահմանափակ են։\nՀպեք՝ ավելին իմանալու համար։"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ձեր հեռախոսն ավտոմատ կերպով կփորձի hովանալ: Կարող եք շարունակել օգտագործել հեռախոսը, սակայն հնարավոր է, որ այն ավելի դանդաղ աշխատի:\n\nՀովանալուց հետո հեռախոսը կաշխատի կանոնավոր կերպով:"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Անջատեք սարքը"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Լիցքավորման միացքի հատվածում սարքը տաքանում է։ Եթե լիցքավորիչի կամ USB լրասարքի է միացված սարքը, անջատեք այն և զգույշ եղեք, քանի որ մալուխը ևս կարող է տաքացած լինել։"</string>
@@ -1096,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Պատկերի նախադիտում"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"փոփոխել"</string>
     <string name="add" msgid="81036585205287996">"Ավելացնել"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Օգտատերերի կառավարում"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Կառավարել"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Այս ծանուցումը հնարավոր չէ քաշել տրոհված էկրանի մեկ հատվածից մյուսը"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi-ը հասանելի չէ"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Առաջնահերթության ռեժիմ"</string>
@@ -1117,7 +1111,7 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Հասանելի դարձնե՞լ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> հավելվածին սարքի բոլոր մատյանները"</string>
-    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Թույլատրել մեկանգամյա մուտքը"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Թույլատրել մեկանգամյա մուտք"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Չթույլատրել"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Այն, ինչ տեղի է ունենում ձեր սարքում, գրանցվում է սարքի մատյաններում։ Հավելվածները կարող են դրանք օգտագործել անսարքությունները հայտնաբերելու և վերացնելու նպատակով։\n\nՔանի որ որոշ մատյաններ անձնական տեղեկություններ են պարունակում, խորհուրդ ենք տալիս հասանելի դարձնել ձեր սարքի բոլոր մատյանները միայն այն հավելվածներին, որոնց վստահում եք։ \n\nԵթե այս հավելվածին նման թույլտվություն չեք տվել, դրան նախկինի պես հասանելի կլինեն իր մատյանները։ Հնարավոր է՝ ձեր սարքի արտադրողին ևս հասանելի լինեն սարքի որոշ մատյաններ և տեղեկություններ։"</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Իմանալ ավելին"</string>

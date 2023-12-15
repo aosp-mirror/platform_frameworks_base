@@ -291,7 +291,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"वर्क ऐप्लिकेशन"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"नाइट लाइट"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"शाम को चालू की जाएगी"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"शाम को चालू होगी"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सुबह तक चालू रहेगी"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> पर चालू की जाएगी"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> तक"</string>
@@ -414,7 +414,7 @@
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"शुरू करें"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"आपके आईटी एडमिन ने स्क्रीन कैप्चर करने की सुविधा पर रोक लगाई है"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"डिवाइस से जुड़ी नीति के तहत स्क्रीन कैप्चर करने की सुविधा बंद है"</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"सभी को हटाएं"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"सभी हटाएं"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"मैनेज करें"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"नई सूचनाएं"</string>
@@ -480,7 +480,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"आवाज़ और वाइब्रेशन"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"सेटिंग"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"आवाज़ को कम करके, सुरक्षित लेवल पर सेट कर दिया गया है"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"हेडफ़ोन की आवाज़ सुझाए गए समय के बाद भी ज़्यादा रही"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"हेडफ़ोन की आवाज़ सुझाए गए समय से देर तक ज़्यादा रही"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"इस हफ़्ते के लिए हेडफ़ोन की आवाज़, सुझाई गई सीमा से ज़्यादा हो गई है"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"सुनना जारी रखें"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"आवाज़ कम करें"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पावर मेन्यू"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"पेज <xliff:g id="ID_2">%2$d</xliff:g> में से <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"गर्म होने की वजह से फ़ोन बंद हुआ"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"आपका फ़ोन सामान्य रूप से काम कर रहा है.\nज़्यादा जानकारी के लिए टैप करें"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"फ़ोन बहुत गर्म हो गया था, इसलिए ठंडा होने के लिए बंद हो गया. फ़ोन अब अच्छे से चल रहा है.\n\nफ़ोन तब बहुत गर्म हो सकता है जब आप:\n	• ज़्यादा रिसॉर्स का इस्तेमाल करने वाले ऐप्लिकेशन चलाते हैं (जैसे गेमिंग, वीडियो या नेविगेशन ऐप्लिकेशन)\n	• बड़ी फ़ाइलें डाउनलोड या अपलोड करते हैं\n	• ज़्यादा तापमान में फ़ोन का इस्तेमाल करते हैं"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"डिवाइस के रखरखाव के तरीके देखें"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"फ़ोन गर्म हो रहा है"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"फ़ोन के ठंडा होने तक कुछ सुविधाएं काम नहीं करतीं.\nज़्यादा जानकारी के लिए टैप करें"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"आपका फ़ोन अपने आप ठंडा होने की कोशिश करेगा. आप अब भी अपने फ़ोन का उपयोग कर सकते हैं, लेकिन हो सकता है कि यह धीमी गति से चले.\n\nठंडा हो जाने पर आपका फ़ोन सामान्य रूप से चलेगा."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"डिवाइस के रखरखाव के तरीके देखें"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"डिवाइस को अनप्लग करें"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"आपका डिवाइस चार्जिंग पोर्ट के पास गर्म हो रहा है. अगर डिवाइस चार्जर या यूएसबी ऐक्सेसरी से कनेक्ट है, तो उसे अनप्लग करें. साथ ही, ध्यान रखें कि केबल भी गर्म हो सकती है."</string>
@@ -895,8 +889,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"कंट्रोल जोड़ने के लिए ऐप्लिकेशन चुनें"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# कंट्रोल जोड़ा गया.}one{# कंट्रोल जोड़ा गया.}other{# कंट्रोल जोड़े गए.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"हटाया गया"</string>
-    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> को जोड़ना है?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> यह चुन सकता है कि इस पैनल पर कौनसे कंट्रोल और कॉन्टेंट दिखे."</string>
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ऐप्लिकेशन को जोड़ना है?"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> ऐप्लिकेशन यह चुन सकता है कि इस पैनल पर कौनसे कंट्रोल और कॉन्टेंट दिखे."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> के लिए कंट्रोल हटाने हैं?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"पसंदीदा बनाया गया"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"पसंदीदा बनाया गया, क्रम संख्या <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1116,7 +1110,7 @@
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"कोई जानकारी नहीं"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <string name="log_access_confirmation_title" msgid="4843557604739943395">"क्या <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग का ऐक्सेस देना है?"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग ऐक्सेस करने की अनुमति देनी है?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"एक बार ऐक्सेस करने की अनुमति दें"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"अनुमति न दें"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें ठीक करने के लिए कर सकते हैं.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर मौजूद अपने लॉग ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी फिर भी डिवाइस के कुछ लॉग या जानकारी ऐक्सेस कर सकती है."</string>
@@ -1148,7 +1142,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"वर्क प्रोफ़ाइल पर स्विच करें"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"वर्क प्रोफ़ाइल वाला फ़ोन ऐप्लिकेशन इंस्टॉल करें"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"रद्द करें"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"लॉक स्क्रीन को कस्टमाइज़ करें"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"लॉक स्क्रीन को पसंद के मुताबिक बनाएं"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"लॉक स्क्रीन को पसंद के मुताबिक बनाने के लिए अनलॉक करें"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"वाई-फ़ाई उपलब्ध नहीं है"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"कैमरे का ऐक्सेस नहीं है"</string>

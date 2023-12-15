@@ -3212,6 +3212,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         + "not idle", rootTask.getRootTaskId(), resumedActivity);
                 return false;
             }
+            if (mTransitionController.isTransientLaunch(resumedActivity)) {
+                // Not idle if the transient transition animation is running.
+                return false;
+            }
         }
         // End power mode launch when idle.
         mService.endLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);

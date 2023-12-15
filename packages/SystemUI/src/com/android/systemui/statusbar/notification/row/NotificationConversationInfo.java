@@ -48,6 +48,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.transition.ChangeBounds;
@@ -118,6 +119,8 @@ public class NotificationConversationInfo extends LinearLayout implements
     private NotificationGuts mGutsContainer;
     private OnConversationSettingsClickListener mOnConversationSettingsClickListener;
 
+    private UserManager mUm;
+
     @VisibleForTesting
     boolean mSkipPost = false;
     private int mActualHeight;
@@ -155,7 +158,9 @@ public class NotificationConversationInfo extends LinearLayout implements
         // People Tile add request.
         if (mSelectedAction == ACTION_FAVORITE && getPriority() != mSelectedAction) {
             mShadeController.animateCollapseShade();
-            mPeopleSpaceWidgetManager.requestPinAppWidget(mShortcutInfo, new Bundle());
+            if (mUm.isSameProfileGroup(UserHandle.USER_SYSTEM, mSbn.getNormalizedUserId())) {
+                mPeopleSpaceWidgetManager.requestPinAppWidget(mShortcutInfo, new Bundle());
+            }
         }
         mGutsContainer.closeControls(v, /* save= */ true);
     };
@@ -188,6 +193,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     public void bindNotification(
             ShortcutManager shortcutManager,
             PackageManager pm,
+            UserManager um,
             PeopleSpaceWidgetManager peopleSpaceWidgetManager,
             INotificationManager iNotificationManager,
             OnUserInteractionCallback onUserInteractionCallback,
@@ -211,6 +217,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         mEntry = entry;
         mSbn = entry.getSbn();
         mPm = pm;
+        mUm = um;
         mAppName = mPackageName;
         mOnSettingsClickListener = onSettingsClick;
         mNotificationChannel = notificationChannel;

@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Activer l\'USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"En savoir plus"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Capture d\'écran"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock désactivée"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Déverrouillage prolongé désactivé"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"a envoyé une image"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Enregistrement capture écran…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Sauv. de la capture dans le profil prof. en cours…"</string>
@@ -270,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversion des couleurs"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Correction des couleurs"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Taille de police"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Gérer les utilisateurs"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Gérer utilisateurs"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Terminé"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Fermer"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Connecté"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu de l\'interrupteur"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Page <xliff:g id="ID_1">%1$d</xliff:g> sur <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Écran de verrouillage"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tél. éteint car il surchauffait"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Votre téléphone fonctionne maintenant de manière normale.\nTouchez pour en savoir plus"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Votre téléphone s\'est éteint, car il surchauffait. Il s\'est refroidi et fonctionne normalement.\n\nIl peut surchauffer si vous :\n	• Util. des applis utilisant beaucoup de ressources (jeux, vidéo, navigation, etc.)\n	• Téléchargez ou téléversez de gros fichiers\n	• Utilisez téléphone dans des températures élevées"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Afficher les étapes d\'entretien"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Le téléphone commence à chauffer"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Certaines fonctionnalités sont limitées pendant que le téléphone refroidit.\nTouchez pour en savoir plus"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Votre téléphone va essayer de se refroidir automatiquement. Vous pouvez toujours l\'utiliser, mais il risque d\'être plus lent.\n\nUne fois refroidi, il fonctionnera normalement."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Afficher les étapes d\'entretien"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Débranchez votre appareil"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Votre appareil chauffe près du port de recharge. S\'il est connecté à un chargeur ou à un accessoire USB, débranchez-le en faisant attention : le câble pourrait également être chaud."</string>
@@ -1096,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Aperçu de l\'image"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"modifier"</string>
     <string name="add" msgid="81036585205287996">"Ajouter"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Gérer les utilisateurs"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Gérer utilisateurs"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Cette notification ne prend pas en charge l\'écran partagé par glissement"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi-Fi non disponible"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Mode priorité"</string>

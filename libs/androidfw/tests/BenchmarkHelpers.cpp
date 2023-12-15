@@ -53,20 +53,18 @@ void GetResourceBenchmarkOld(const std::vector<std::string>& paths, const ResTab
 
 void GetResourceBenchmark(const std::vector<std::string>& paths, const ResTable_config* config,
                           uint32_t resid, benchmark::State& state) {
-  std::vector<std::unique_ptr<const ApkAssets>> apk_assets;
-  std::vector<const ApkAssets*> apk_assets_ptrs;
+  std::vector<AssetManager2::ApkAssetsPtr> apk_assets;
   for (const std::string& path : paths) {
-    std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path);
+    auto apk = ApkAssets::Load(path);
     if (apk == nullptr) {
       state.SkipWithError(base::StringPrintf("Failed to load assets %s", path.c_str()).c_str());
       return;
     }
-    apk_assets_ptrs.push_back(apk.get());
     apk_assets.push_back(std::move(apk));
   }
 
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets(apk_assets_ptrs);
+  assetmanager.SetApkAssets(apk_assets);
   if (config != nullptr) {
     assetmanager.SetConfiguration(*config);
   }

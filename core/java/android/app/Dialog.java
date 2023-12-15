@@ -454,12 +454,11 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     protected void onStart() {
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
-        if (mContext != null
+        if (allowsRegisterDefaultOnBackInvokedCallback() && mContext != null
                 && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
             // Add onBackPressed as default back behavior.
             mDefaultBackCallback = this::onBackPressed;
             getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
-            mDefaultBackCallback = null;
         }
     }
 
@@ -470,7 +469,16 @@ public class Dialog implements DialogInterface, Window.Callback,
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
         if (mDefaultBackCallback != null) {
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mDefaultBackCallback);
+            mDefaultBackCallback = null;
         }
+    }
+
+    /**
+     * Whether this dialog allows to register the default onBackInvokedCallback.
+     * @hide
+     */
+    protected boolean allowsRegisterDefaultOnBackInvokedCallback() {
+        return true;
     }
 
     private static final String DIALOG_SHOWING_TAG = "android:dialogShowing";
@@ -697,7 +705,8 @@ public class Dialog implements DialogInterface, Window.Callback,
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
                 && event.isTracking()
                 && !event.isCanceled()
-                && !WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
+                && (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)
+                || !allowsRegisterDefaultOnBackInvokedCallback())) {
             onBackPressed();
             return true;
         }

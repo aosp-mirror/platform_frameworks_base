@@ -44,6 +44,9 @@ import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 
 import android.animation.Animator;
 import android.app.AlarmManager;
+import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
@@ -121,6 +124,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     private int mScrimVisibility;
     private boolean mAlwaysOnEnabled;
     private TestableLooper mLooper;
+    private Context mContext;
     @Mock private AlarmManager mAlarmManager;
     @Mock private DozeParameters mDozeParameters;
     @Mock private LightBarController mLightBarController;
@@ -134,6 +138,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock private CoroutineDispatcher mMainDispatcher;
+    @Mock private TypedArray mMockTypedArray;
 
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
@@ -182,10 +187,11 @@ public class ScrimControllerTest extends SysuiTestCase {
             mNumEnds = 0;
             mNumCancels = 0;
         }
-    };
+    }
 
     private AnimatorListener mAnimatorListener = new AnimatorListener();
 
+    private int mSurfaceColor = 0x112233;
 
     private void finishAnimationsImmediately() {
         // Execute code that will trigger animations.
@@ -214,10 +220,17 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mContext = spy(getContext());
+        when(mContext.obtainStyledAttributes(
+                new int[]{com.android.internal.R.attr.materialColorSurface}))
+                .thenReturn(mMockTypedArray);
 
-        mScrimBehind = spy(new ScrimView(getContext()));
-        mScrimInFront = new ScrimView(getContext());
-        mNotificationsScrim = new ScrimView(getContext());
+        when(mMockTypedArray.getColorStateList(anyInt()))
+                .thenAnswer((invocation) -> ColorStateList.valueOf(mSurfaceColor));
+
+        mScrimBehind = spy(new ScrimView(mContext));
+        mScrimInFront = new ScrimView(mContext);
+        mNotificationsScrim = new ScrimView(mContext);
         mAlwaysOnEnabled = true;
         mLooper = TestableLooper.get(this);
         DejankUtils.setImmediate(true);
@@ -577,7 +590,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(BOUNCER);
         finishAnimationsImmediately();
         // Front scrim should be transparent
-        // Back scrim should be visible without tint
+        // Back scrim should be visible and tinted to the surface color
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mNotificationsScrim, TRANSPARENT,
@@ -585,9 +598,31 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
-                mScrimBehind, false,
+                mScrimBehind, true,
                 mNotificationsScrim, false
         ));
+
+        assertScrimTint(mScrimBehind, mSurfaceColor);
+    }
+
+    @Test
+    public void onThemeChange_bouncerBehindTint_isUpdatedToSurfaceColor() {
+        assertEquals(BOUNCER.getBehindTint(), 0x112233);
+        mSurfaceColor = 0x223344;
+        mConfigurationController.notifyThemeChanged();
+        assertEquals(BOUNCER.getBehindTint(), 0x223344);
+    }
+
+    @Test
+    public void onThemeChangeWhileClipQsScrim_bouncerBehindTint_remainsBlack() {
+        mScrimController.setClipsQsScrim(true);
+        mScrimController.transitionTo(BOUNCER);
+        finishAnimationsImmediately();
+
+        assertEquals(BOUNCER.getBehindTint(), Color.BLACK);
+        mSurfaceColor = 0x223344;
+        mConfigurationController.notifyThemeChanged();
+        assertEquals(BOUNCER.getBehindTint(), Color.BLACK);
     }
 
     @Test
@@ -619,16 +654,17 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         finishAnimationsImmediately();
         // Front scrim should be transparent
-        // Back scrim should be visible without tint
+        // Back scrim should be visible and has a tint of surfaceColor
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
                 mNotificationsScrim, TRANSPARENT,
                 mScrimBehind, OPAQUE));
         assertScrimTinted(Map.of(
                 mScrimInFront, false,
-                mScrimBehind, false,
+                mScrimBehind, true,
                 mNotificationsScrim, false
         ));
+        assertScrimTint(mScrimBehind, mSurfaceColor);
     }
 
     @Test
@@ -1807,6 +1843,13 @@ public class ScrimControllerTest extends SysuiTestCase {
                 + " with scrim: " + getScrimName(scrim) + " and tint: "
                 + Integer.toHexString(scrim.getTint());
         assertEquals(message, hasTint, scrim.getTint() != Color.TRANSPARENT);
+    }
+
+    private void assertScrimTint(ScrimView scrim, int expectedTint) {
+        String message = "Tint test failed with expected scrim tint: "
+                + Integer.toHexString(expectedTint) + " and actual tint: "
+                + Integer.toHexString(scrim.getTint()) + " for scrim: " + getScrimName(scrim);
+        assertEquals(message, expectedTint, scrim.getTint(), 0.1);
     }
 
     private String getScrimName(ScrimView scrim) {

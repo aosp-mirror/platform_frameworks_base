@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4K (सुरक्षित)"</item>
     <item msgid="7322156123728520872">"4K (बेहतर)"</item>
     <item msgid="7735692090314849188">"4K (बेहतर, सुरक्षित)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (ड्यूअल स्‍क्रीन)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (dual screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"कोई नहीं"</item>
