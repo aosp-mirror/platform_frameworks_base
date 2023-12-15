@@ -45,6 +45,7 @@ import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.service.contentcapture.ContentCaptureService;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
@@ -69,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -152,7 +154,16 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     public ComponentName mComponentName;
 
     /**
-     * List of events held to be sent as a batch.
+     * Thread-safe queue of events held to be processed as a batch.
+     *
+     * Because it is not guaranteed that the events will be enqueued from a single thread, the
+     * implementation must be thread-safe to prevent unexpected behaviour.
+     */
+    @NonNull
+    private final ConcurrentLinkedQueue<ContentCaptureEvent> mEventProcessQueue;
+
+    /**
+     * List of events held to be sent to the {@link ContentCaptureService} as a batch.
      *
      * @hide
      */
@@ -238,6 +249,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         mFlushHistory = logHistorySize > 0 ? new LocalLog(logHistorySize) : null;
 
         mSessionStateReceiver = new SessionStateReceiver(this);
+
+        mEventProcessQueue = new ConcurrentLinkedQueue<>();
     }
 
     @Override
@@ -733,6 +746,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
         mDirectServiceInterface = null;
         mContentProtectionEventProcessor = null;
+        if (runOnBackgroundThreadEnabled()) {
+            mEventProcessQueue.clear();
+        }
     }
 
     // TODO(b/122454205): once we support multiple sessions, we might need to move some of these
@@ -823,27 +839,30 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     // change should also get get rid of the "internalNotifyXXXX" methods above
     void notifyChildSessionStarted(int parentSessionId, int childSessionId,
             @NonNull ContentCaptureContext clientContext) {
-        runOnContentCaptureThread(
-                () -> sendEvent(new ContentCaptureEvent(childSessionId, TYPE_SESSION_STARTED)
-                .setParentSessionId(parentSessionId).setClientContext(clientContext),
-                FORCE_FLUSH));
+        final ContentCaptureEvent event =
+                new ContentCaptureEvent(childSessionId, TYPE_SESSION_STARTED)
+                        .setParentSessionId(parentSessionId)
+                        .setClientContext(clientContext);
+        enqueueEvent(event, FORCE_FLUSH);
     }
 
     void notifyChildSessionFinished(int parentSessionId, int childSessionId) {
-        runOnContentCaptureThread(
-                () -> sendEvent(new ContentCaptureEvent(childSessionId, TYPE_SESSION_FINISHED)
-                .setParentSessionId(parentSessionId), FORCE_FLUSH));
+        final ContentCaptureEvent event =
+                new ContentCaptureEvent(childSessionId, TYPE_SESSION_FINISHED)
+                        .setParentSessionId(parentSessionId);
+        enqueueEvent(event, FORCE_FLUSH);
     }
 
     void notifyViewAppeared(int sessionId, @NonNull ViewStructureImpl node) {
-        runOnContentCaptureThread(() ->
-                sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_APPEARED)
-                .setViewNode(node.mNode)));
+        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, TYPE_VIEW_APPEARED)
+                .setViewNode(node.mNode);
+        enqueueEvent(event);
     }
 
     void notifyViewDisappeared(int sessionId, @NonNull AutofillId id) {
-        runOnContentCaptureThread(() -> sendEvent(
-                new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED).setAutofillId(id)));
+        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED)
+                .setAutofillId(id);
+        enqueueEvent(event);
     }
 
     void notifyViewTextChanged(int sessionId, @NonNull AutofillId id, @Nullable CharSequence text) {
@@ -867,50 +886,90 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         final int startIndex = Selection.getSelectionStart(text);
         final int endIndex = Selection.getSelectionEnd(text);
-        runOnContentCaptureThread(() -> sendEvent(
-                new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED)
-                        .setAutofillId(id).setText(eventText)
-                        .setComposingIndex(composingStart, composingEnd)
-                        .setSelectionIndex(startIndex, endIndex)));
+
+        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED)
+                .setAutofillId(id).setText(eventText)
+                .setComposingIndex(composingStart, composingEnd)
+                .setSelectionIndex(startIndex, endIndex);
+        enqueueEvent(event);
     }
 
     void notifyViewInsetsChanged(int sessionId, @NonNull Insets viewInsets) {
-        runOnContentCaptureThread(() ->
-                sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_INSETS_CHANGED)
-                .setInsets(viewInsets)));
+        final ContentCaptureEvent event =
+                new ContentCaptureEvent(sessionId, TYPE_VIEW_INSETS_CHANGED)
+                        .setInsets(viewInsets);
+        enqueueEvent(event);
     }
 
     void notifyViewTreeEvent(int sessionId, boolean started) {
         final int type = started ? TYPE_VIEW_TREE_APPEARING : TYPE_VIEW_TREE_APPEARED;
         final boolean disableFlush = mManager.getFlushViewTreeAppearingEventDisabled();
+        final boolean forceFlush = disableFlush ? !started : FORCE_FLUSH;
 
-        runOnContentCaptureThread(() -> sendEvent(
-                new ContentCaptureEvent(sessionId, type),
-                disableFlush ? !started : FORCE_FLUSH));
+        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, type);
+        enqueueEvent(event, forceFlush);
     }
 
     void notifySessionResumed(int sessionId) {
-        runOnContentCaptureThread(() -> sendEvent(
-                new ContentCaptureEvent(sessionId, TYPE_SESSION_RESUMED), FORCE_FLUSH));
+        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, TYPE_SESSION_RESUMED);
+        enqueueEvent(event, FORCE_FLUSH);
     }
 
     void notifySessionPaused(int sessionId) {
-        runOnContentCaptureThread(() -> sendEvent(
-                new ContentCaptureEvent(sessionId, TYPE_SESSION_PAUSED), FORCE_FLUSH));
+        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, TYPE_SESSION_PAUSED);
+        enqueueEvent(event, FORCE_FLUSH);
     }
 
     void notifyContextUpdated(int sessionId, @Nullable ContentCaptureContext context) {
-        runOnContentCaptureThread(() ->
-                sendEvent(new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
-                .setClientContext(context), FORCE_FLUSH));
+        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, TYPE_CONTEXT_UPDATED)
+                .setClientContext(context);
+        enqueueEvent(event, FORCE_FLUSH);
     }
 
     /** public because is also used by ViewRootImpl */
     public void notifyWindowBoundsChanged(int sessionId, @NonNull Rect bounds) {
-        runOnContentCaptureThread(() -> sendEvent(
+        final ContentCaptureEvent event =
                 new ContentCaptureEvent(sessionId, TYPE_WINDOW_BOUNDS_CHANGED)
-                .setBounds(bounds)
-        ));
+                        .setBounds(bounds);
+        enqueueEvent(event);
+    }
+
+    private List<ContentCaptureEvent> clearBufferEvents() {
+        final ArrayList<ContentCaptureEvent> bufferEvents = new ArrayList<>();
+        ContentCaptureEvent event;
+        while ((event = mEventProcessQueue.poll()) != null) {
+            bufferEvents.add(event);
+        }
+        return bufferEvents;
+    }
+
+    private void enqueueEvent(@NonNull final ContentCaptureEvent event) {
+        enqueueEvent(event, /* forceFlush */ false);
+    }
+
+    /**
+     * Enqueue the event into {@code mEventProcessBuffer} if it is not an urgent request. Otherwise,
+     * clear the buffer events then starting sending out current event.
+     */
+    private void enqueueEvent(@NonNull final ContentCaptureEvent event, boolean forceFlush) {
+        if (runOnBackgroundThreadEnabled()) {
+            if (forceFlush) {
+                // The buffer events are cleared in the same thread first to prevent new events
+                // being added during the time of context switch. This would disrupt the sequence
+                // of events.
+                final List<ContentCaptureEvent> batchEvents = clearBufferEvents();
+                runOnContentCaptureThread(() -> {
+                    for (int i = 0; i < batchEvents.size(); i++) {
+                        sendEvent(batchEvents.get(i));
+                    }
+                    sendEvent(event, /* forceFlush= */ true);
+                });
+            } else {
+                mEventProcessQueue.offer(event);
+            }
+        } else {
+            mHandler.post(() -> sendEvent(event, forceFlush));
+        }
     }
 
     /** public because is also used by ViewRootImpl */
