@@ -1,6 +1,8 @@
 package com.android.systemui.qs;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_SCROLL_SWIPE;
+import static com.android.systemui.qs.PageIndicator.PageScrollActionListener.LEFT;
+import static com.android.systemui.qs.PageIndicator.PageScrollActionListener.RIGHT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -12,7 +14,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.PageIndicator.PageScrollActionListener.Direction;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.logging.QSLogger;
@@ -310,26 +312,18 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mPageIndicator = indicator;
         mPageIndicator.setNumPages(mPages.size());
         mPageIndicator.setLocation(mPageIndicatorPosition);
-        mPageIndicator.setOnKeyListener((view, keyCode, keyEvent) -> {
-            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                // only scroll on ACTION_UP as we don't handle longpressing for now. Still we need
-                // to intercept even ACTION_DOWN otherwise keyboard focus will be moved before we
-                // have a chance to intercept ACTION_UP.
-                if (keyEvent.getAction() == KeyEvent.ACTION_UP && mScroller.isFinished()) {
-                    scrollByX(getDeltaXForKeyboardScrolling(keyCode),
-                            SINGLE_PAGE_SCROLL_DURATION_MILLIS);
-                }
-                return true;
+        mPageIndicator.setPageScrollActionListener(swipeDirection -> {
+            if (mScroller.isFinished()) {
+                scrollByX(getDeltaXForPageScrolling(swipeDirection),
+                        SINGLE_PAGE_SCROLL_DURATION_MILLIS);
             }
-            return false;
         });
     }
 
-    private int getDeltaXForKeyboardScrolling(int keyCode) {
-        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && getCurrentItem() != 0) {
+    private int getDeltaXForPageScrolling(@Direction int swipeDirection) {
+        if (swipeDirection == LEFT && getCurrentItem() != 0) {
             return -getWidth();
-        } else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
-                && getCurrentItem() != mPages.size() - 1) {
+        } else if (swipeDirection == RIGHT && getCurrentItem() != mPages.size() - 1) {
             return getWidth();
         }
         return 0;
