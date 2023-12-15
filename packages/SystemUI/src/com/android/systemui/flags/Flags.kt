@@ -17,11 +17,11 @@ package com.android.systemui.flags
 
 import android.provider.DeviceConfig
 import com.android.internal.annotations.Keep
-import com.android.systemui.res.R
 import com.android.systemui.flags.FlagsFactory.releasedFlag
 import com.android.systemui.flags.FlagsFactory.resourceBooleanFlag
 import com.android.systemui.flags.FlagsFactory.sysPropBooleanFlag
 import com.android.systemui.flags.FlagsFactory.unreleasedFlag
+import com.android.systemui.res.R
 
 /**
  * List of [Flag] objects for use in SystemUI.
@@ -607,11 +607,6 @@ object Flags {
     @JvmField
     val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
         unreleasedFlag("bigpicture_notification_lazy_loading")
-
-    // TODO(b/292062937): Tracking bug
-    @JvmField
-    val NOTIFICATION_CLEARABLE_REFACTOR =
-            unreleasedFlag("notification_clearable_refactor")
 
     // TODO(b/283740863): Tracking Bug
     @JvmField
