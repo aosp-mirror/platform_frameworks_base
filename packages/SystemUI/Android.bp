@@ -277,6 +277,7 @@ android_library {
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SystemUICustomizationLib",
+        "SystemUICustomizationTestUtils",
         "SystemUI-statsd",
         "SettingsLib",
         "com_android_systemui_flags_lib",
