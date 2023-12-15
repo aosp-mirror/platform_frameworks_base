@@ -77,7 +77,9 @@ import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+import static android.service.notification.Adjustment.KEY_CONTEXTUAL_ACTIONS;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+import static android.service.notification.Adjustment.KEY_TEXT_REPLIES;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
 import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -213,9 +215,6 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.permission.PermissionManager;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.rule.DeniedDevices;
 import android.platform.test.rule.DeviceProduct;
@@ -350,9 +349,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
-
-    @Rule
-    public CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private TestableNotificationManagerService mService;
     private INotificationManager mBinderService;
@@ -11632,8 +11628,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testGetActiveNotificationsFromListener_redactNotification() throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         NotificationRecord r =
                 generateNotificationRecord(mTestNotificationChannel, 0, 0);
         mService.addNotification(r);
@@ -11662,12 +11658,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testGetSnoozedNotificationsFromListener_redactNotification() throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         NotificationRecord r =
                 generateNotificationRecord(mTestNotificationChannel, 0, 0);
-        mService.addNotification(r);
-        mService.snoozeNotificationInt(r.getKey(), 1000, null, mListener);
+        when(mSnoozeHelper.getSnoozed()).thenReturn(List.of(r));
         when(mListeners.isUidTrusted(anyInt())).thenReturn(false);
         when(mListeners.hasSensitiveContent(any())).thenReturn(true);
         StatusBarNotification redacted = generateRedactedSbn(mTestNotificationChannel, 1, 1);
@@ -11844,6 +11839,97 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         nru = mService.makeRankingUpdateLocked(null);
         assertEquals(2, nru.getRankingMap().getOrderedKeys().length);
+    }
+
+    @Test
+    public void testMakeRankingUpdate_redactsIfRecordSensitiveAndServiceUntrusted() {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        when(mListeners.isUidTrusted(anyInt())).thenReturn(false);
+        when(mListeners.hasSensitiveContent(any())).thenReturn(true);
+        NotificationRecord pkgA = new NotificationRecord(mContext,
+                generateSbn("a", 1000, 9, 0), mTestNotificationChannel);
+        addSmartActionsAndReplies(pkgA);
+        mService.addNotification(pkgA);
+        NotificationRecord pkgB = new NotificationRecord(mContext,
+                generateSbn("b", 1001, 9, 0), mTestNotificationChannel);
+        addSmartActionsAndReplies(pkgB);
+        mService.addNotification(pkgB);
+
+        ManagedServices.ManagedServiceInfo info = mock(ManagedServices.ManagedServiceInfo.class);
+        when(info.enabledAndUserMatches(anyInt())).thenReturn(true);
+        when(info.isSameUser(anyInt())).thenReturn(true);
+        NotificationRankingUpdate nru = mService.makeRankingUpdateLocked(info);
+        NotificationListenerService.Ranking ranking =
+                nru.getRankingMap().getRawRankingObject(pkgA.getSbn().getKey());
+        assertEquals(0, ranking.getSmartActions().size());
+        assertEquals(0, ranking.getSmartReplies().size());
+        NotificationListenerService.Ranking ranking2 =
+                nru.getRankingMap().getRawRankingObject(pkgB.getSbn().getKey());
+        assertEquals(0, ranking2.getSmartActions().size());
+        assertEquals(0, ranking2.getSmartReplies().size());
+    }
+
+    @Test
+    public void testMakeRankingUpdate_doestntRedactIfFlagDisabled() {
+        mSetFlagsRule.disableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        when(mListeners.isUidTrusted(anyInt())).thenReturn(false);
+        when(mListeners.hasSensitiveContent(any())).thenReturn(true);
+        NotificationRecord pkgA = new NotificationRecord(mContext,
+                generateSbn("a", 1000, 9, 0), mTestNotificationChannel);
+        addSmartActionsAndReplies(pkgA);
+
+        mService.addNotification(pkgA);
+        ManagedServices.ManagedServiceInfo info = mock(ManagedServices.ManagedServiceInfo.class);
+        when(info.enabledAndUserMatches(anyInt())).thenReturn(true);
+        when(info.isSameUser(anyInt())).thenReturn(true);
+        NotificationRankingUpdate nru = mService.makeRankingUpdateLocked(info);
+        NotificationListenerService.Ranking ranking =
+                nru.getRankingMap().getRawRankingObject(pkgA.getSbn().getKey());
+        assertEquals(1, ranking.getSmartActions().size());
+        assertEquals(1, ranking.getSmartReplies().size());
+    }
+
+    @Test
+    public void testMakeRankingUpdate_doesntRedactIfNotSensitiveOrServiceTrusted() {
+        mSetFlagsRule.disableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
+        NotificationRecord pkgA = new NotificationRecord(mContext,
+                generateSbn("a", 1000, 9, 0), mTestNotificationChannel);
+        addSmartActionsAndReplies(pkgA);
+
+        mService.addNotification(pkgA);
+        ManagedServices.ManagedServiceInfo info = mock(ManagedServices.ManagedServiceInfo.class);
+        when(info.enabledAndUserMatches(anyInt())).thenReturn(true);
+        when(info.isSameUser(anyInt())).thenReturn(true);
+
+        // No sensitive content, no redaction
+        when(mListeners.isUidTrusted(eq(1000))).thenReturn(false);
+        when(mListeners.hasSensitiveContent(any())).thenReturn(false);
+        NotificationRankingUpdate nru = mService.makeRankingUpdateLocked(info);
+        NotificationListenerService.Ranking ranking =
+                nru.getRankingMap().getRawRankingObject(pkgA.getSbn().getKey());
+        assertEquals(1, ranking.getSmartActions().size());
+        assertEquals(1, ranking.getSmartReplies().size());
+
+        // trusted listener, no redaction
+        when(mListeners.isUidTrusted(eq(1000))).thenReturn(true);
+        when(mListeners.hasSensitiveContent(any())).thenReturn(true);
+        nru = mService.makeRankingUpdateLocked(info);
+        ranking = nru.getRankingMap().getRawRankingObject(pkgA.getSbn().getKey());
+        assertEquals(1, ranking.getSmartActions().size());
+        assertEquals(1, ranking.getSmartReplies().size());
+    }
+
+    private void addSmartActionsAndReplies(NotificationRecord record) {
+        Bundle b = new Bundle();
+        ArrayList<Notification.Action> actions = new ArrayList<>();
+        actions.add(new Notification.Action(0, "", null));
+        b.putParcelableArrayList(KEY_CONTEXTUAL_ACTIONS, actions);
+        ArrayList<CharSequence> replies = new ArrayList<>(List.of("test"));
+        b.putCharSequenceArrayList(KEY_TEXT_REPLIES, replies);
+        Adjustment a = new Adjustment(record.getSbn().getPackageName(), record.getSbn().getKey(),
+                b, "", record.getUserId());
+        record.addAdjustment(a);
+        record.applyAdjustments();
     }
 
     @Test

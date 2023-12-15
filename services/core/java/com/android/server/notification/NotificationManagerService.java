@@ -10733,6 +10733,14 @@ public class NotificationManagerService extends SystemService {
             final String key = record.getSbn().getKey();
             final NotificationListenerService.Ranking ranking =
                     new NotificationListenerService.Ranking();
+            ArrayList<Notification.Action> smartActions = record.getSystemGeneratedSmartActions();
+            ArrayList<CharSequence> smartReplies = record.getSmartReplies();
+            if (redactSensitiveNotificationsFromUntrustedListeners()
+                    && !mListeners.isUidTrusted(info.uid)
+                    && mListeners.hasSensitiveContent(record)) {
+                smartActions = null;
+                smartReplies = null;
+            }
             ranking.populate(
                     key,
                     rankings.size(),
@@ -10750,8 +10758,8 @@ public class NotificationManagerService extends SystemService {
                     record.isHidden(),
                     record.getLastAudiblyAlertedMs(),
                     record.getSound() != null || record.getVibration() != null,
-                    record.getSystemGeneratedSmartActions(),
-                    record.getSmartReplies(),
+                    smartActions,
+                    smartReplies,
                     record.canBubble(),
                     record.isTextChanged(),
                     record.isConversation(),
@@ -11501,20 +11509,16 @@ public class NotificationManagerService extends SystemService {
             super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled, userSet);
             String pkgName = getPackageName(pkgOrComponent);
             if (redactSensitiveNotificationsFromUntrustedListeners()) {
-                try {
-                    int uid = mPackageManagerClient.getPackageUidAsUser(pkgName, userId);
-                    if (!enabled) {
-                        synchronized (mTrustedListenerUids) {
-                            mTrustedListenerUids.remove(uid);
-                        }
+                int uid = mPackageManagerInternal.getPackageUid(pkgName, 0, userId);
+                if (!enabled && uid >= 0) {
+                    synchronized (mTrustedListenerUids) {
+                        mTrustedListenerUids.remove(uid);
                     }
-                    if (enabled && isAppTrustedNotificationListenerService(uid, pkgName)) {
-                        synchronized (mTrustedListenerUids) {
-                            mTrustedListenerUids.add(uid);
-                        }
+                }
+                if (enabled && uid >= 0 && isAppTrustedNotificationListenerService(uid, pkgName)) {
+                    synchronized (mTrustedListenerUids) {
+                        mTrustedListenerUids.add(uid);
                     }
-                } catch (NameNotFoundException e) {
-                    Slog.e(TAG, "PackageManager could not find package " + pkgName, e);
                 }
             }
 
@@ -11934,8 +11938,10 @@ public class NotificationManagerService extends SystemService {
 
                 for (final ManagedServiceInfo info : getServices()) {
                     boolean isTrusted = isUidTrusted(info.uid);
-                    boolean sendRedacted = isNewSensitive && !isTrusted;
-                    boolean sendOldRedacted = isOldSensitive && !isTrusted;
+                    boolean sendRedacted = redactSensitiveNotificationsFromUntrustedListeners()
+                            && isNewSensitive && !isTrusted;
+                    boolean sendOldRedacted = redactSensitiveNotificationsFromUntrustedListeners()
+                            && isOldSensitive && !isTrusted;
                     boolean sbnVisible = isVisibleToListener(sbn, r.getNotificationType(), info);
                     boolean oldSbnVisible = (oldSbn != null)
                             && isVisibleToListener(oldSbn, old.getNotificationType(), info);
@@ -12034,7 +12040,7 @@ public class NotificationManagerService extends SystemService {
 
         StatusBarNotification redactStatusBarNotification(StatusBarNotification sbn) {
             if (!redactSensitiveNotificationsFromUntrustedListeners()) {
-                return sbn;
+                throw new RuntimeException("redactStatusBarNotification called while flag is off");
             }
 
             ApplicationInfo appInfo = sbn.getNotification().extras.getParcelable(
@@ -12206,6 +12212,7 @@ public class NotificationManagerService extends SystemService {
         public void notifyRankingUpdateLocked(List<NotificationRecord> changedHiddenNotifications) {
             boolean isHiddenRankingUpdate = changedHiddenNotifications != null
                     && changedHiddenNotifications.size() > 0;
+
             // TODO (b/73052211): if the ranking update changed the notification type,
             // cancel notifications for NLSes that can't see them anymore
             for (final ManagedServiceInfo serviceInfo : getServices()) {
@@ -12229,7 +12236,6 @@ public class NotificationManagerService extends SystemService {
                 if (notifyThisListener || !isHiddenRankingUpdate) {
                     final NotificationRankingUpdate update = makeRankingUpdateLocked(
                             serviceInfo);
-
                     mHandler.post(() -> notifyRankingUpdate(serviceInfo, update));
                 }
             }
