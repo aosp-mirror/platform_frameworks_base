@@ -1,0 +1,9 @@
+package: "com.android.settingslib.flags"
+
+flag {
+    name: "new_status_bar_icons"
+    namespace: "systemui"
+    description: "Enable new status bar system icons"
+    bug: "314812750"
+}
+
