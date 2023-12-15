@@ -18,6 +18,8 @@ package com.android.systemui.accessibility
 
 import com.android.systemui.accessibility.data.repository.ColorCorrectionRepository
 import com.android.systemui.accessibility.data.repository.ColorCorrectionRepositoryImpl
+import com.android.systemui.accessibility.data.repository.ColorInversionRepository
+import com.android.systemui.accessibility.data.repository.ColorInversionRepositoryImpl
 import com.android.systemui.accessibility.qs.QSAccessibilityModule
 import dagger.Binds
 import dagger.Module
@@ -25,7 +27,8 @@ import dagger.Module
 @Module(includes = [QSAccessibilityModule::class])
 interface AccessibilityModule {
     @Binds
-    abstract fun colorCorrectionRepository(
-        impl: ColorCorrectionRepositoryImpl
-    ): ColorCorrectionRepository
+    fun colorCorrectionRepository(impl: ColorCorrectionRepositoryImpl): ColorCorrectionRepository
+
+    @Binds
+    fun colorInversionRepository(impl: ColorInversionRepositoryImpl): ColorInversionRepository
 }
