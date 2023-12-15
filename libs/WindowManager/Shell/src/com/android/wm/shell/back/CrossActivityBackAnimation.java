@@ -18,9 +18,9 @@ package com.android.wm.shell.back;
 
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
+import static android.window.BackEvent.EDGE_RIGHT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY;
-import static com.android.wm.shell.back.BackAnimationConstants.PROGRESS_COMMIT_THRESHOLD;
 import static com.android.wm.shell.back.BackAnimationConstants.UPDATE_SYSUI_FLAGS_THRESHOLD;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 
@@ -91,7 +91,7 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
                 }
             };
     private static final float MIN_WINDOW_ALPHA = 0.01f;
-    private static final float WINDOW_X_SHIFT_DP = 96;
+    private static final float WINDOW_X_SHIFT_DP = 48;
     private static final int SCALE_FACTOR = 100;
     // TODO(b/264710590): Use the progress commit threshold from ViewConfiguration once it exists.
     private static final float TARGET_COMMIT_PROGRESS = 0.5f;
@@ -126,6 +126,8 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
     private SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
     private boolean mBackInProgress = false;
+    private boolean mIsRightEdge;
+    private boolean mTriggerBack = false;
 
     private PointF mTouchPos = new PointF();
     private IRemoteAnimationFinishedCallback mFinishCallback;
@@ -241,14 +243,15 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
 
     private void onGestureProgress(@NonNull BackEvent backEvent) {
         if (!mBackInProgress) {
+            mIsRightEdge = backEvent.getSwipeEdge() == EDGE_RIGHT;
             mInitialTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
             mBackInProgress = true;
         }
         mTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
 
         float progress = backEvent.getProgress();
-        float springProgress = (progress > PROGRESS_COMMIT_THRESHOLD
-                ? mapLinear(progress, 0.1f, 1, TARGET_COMMIT_PROGRESS, 1)
+        float springProgress = (mTriggerBack
+                ? mapLinear(progress, 0f, 1, TARGET_COMMIT_PROGRESS, 1)
                 : mapLinear(progress, 0, 1f, 0, TARGET_COMMIT_PROGRESS)) * SCALE_FACTOR;
         mLeavingProgressSpring.animateToFinalPosition(springProgress);
         mEnteringProgressSpring.animateToFinalPosition(springProgress);
@@ -312,7 +315,7 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
             transformWithProgress(
                     mEnteringProgress,
                     Math.max(
-                            smoothstep(ENTER_ALPHA_THRESHOLD, 1, mEnteringProgress),
+                            smoothstep(ENTER_ALPHA_THRESHOLD, 0.7f, mEnteringProgress),
                             MIN_WINDOW_ALPHA),  /* alpha */
                     mEnteringTarget.leash,
                     mEnteringRect,
@@ -337,14 +340,13 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
                     mClosingTarget.leash,
                     mClosingRect,
                     0,
-                    mWindowXShift
+                    mIsRightEdge ? 0 : mWindowXShift
             );
         }
     }
 
     private void transformWithProgress(float progress, float alpha, SurfaceControl surface,
             RectF targetRect, float deltaXMin, float deltaXMax) {
-        final float touchY = mTouchPos.y;
 
         final int width = mStartTaskRect.width();
         final int height = mStartTaskRect.height();
@@ -376,12 +378,14 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
     private final class Callback extends IOnBackInvokedCallback.Default {
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
+            mTriggerBack = backEvent.getTriggerBack();
             mProgressAnimator.onBackStarted(backEvent,
                     CrossActivityBackAnimation.this::onGestureProgress);
         }
 
         @Override
         public void onBackProgressed(@NonNull BackMotionEvent backEvent) {
+            mTriggerBack = backEvent.getTriggerBack();
             mProgressAnimator.onBackProgressed(backEvent);
         }
 
