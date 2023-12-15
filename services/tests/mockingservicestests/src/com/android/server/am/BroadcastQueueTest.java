@@ -336,6 +336,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         final ProcessRecord r = spy(new ProcessRecord(mAms, ai, processName, ai.uid));
         r.mState = spy(r.mState);
         r.setPid(mNextPid.getAndIncrement());
+        ProcessRecord.updateProcessRecordNodes(r);
         mActiveProcesses.add(r);
 
         final IApplicationThread thread;

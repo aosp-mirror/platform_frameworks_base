@@ -331,9 +331,9 @@ public class OomAdjusterModernImpl extends OomAdjuster {
                 if (mLastNode[prevSlot] == node) {
                     mLastNode[prevSlot] = node.mPrev;
                 }
-                node.unlink();
             }
-            mProcessRecordNodes[newSlot].append(node);
+            // node will be firstly unlinked in the append.
+            append(node, newSlot);
         }
 
         void moveAllNodesTo(int fromSlot, int toSlot) {
@@ -389,7 +389,11 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         }
 
         void append(@NonNull ProcessRecord app, int targetSlot) {
-            final ProcessRecordNode node = app.mLinkedNodes[mType];
+            append(app.mLinkedNodes[mType], targetSlot);
+        }
+
+        void append(@NonNull ProcessRecordNode node, int targetSlot) {
+            node.unlink();
             mProcessRecordNodes[targetSlot].append(node);
         }
 
@@ -452,6 +456,9 @@ public class OomAdjusterModernImpl extends OomAdjuster {
 
             @VisibleForTesting
             void reset() {
+                if (HEAD.mNext != TAIL) {
+                    HEAD.mNext.mPrev = TAIL.mPrev.mNext = null;
+                }
                 HEAD.mNext = TAIL;
                 TAIL.mPrev = HEAD;
             }
@@ -554,20 +561,6 @@ public class OomAdjusterModernImpl extends OomAdjuster {
     void resetInternal() {
         mProcessRecordProcStateNodes.reset();
         mProcessRecordAdjNodes.reset();
-    }
-
-    @GuardedBy("mService")
-    @Override
-    void onProcessBeginLocked(@NonNull ProcessRecord app) {
-        // Check one type should be good enough.
-        if (app.mLinkedNodes[ProcessRecordNode.NODE_TYPE_PROC_STATE] == null) {
-            for (int i = 0; i < app.mLinkedNodes.length; i++) {
-                app.mLinkedNodes[i] = new ProcessRecordNode(app);
-            }
-        }
-        if (!app.mLinkedNodes[ProcessRecordNode.NODE_TYPE_PROC_STATE].isLinked()) {
-            linkProcessRecordToList(app);
-        }
     }
 
     @GuardedBy("mService")
