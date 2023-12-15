@@ -34,3 +34,10 @@ flag {
   description: "This flag controls the vibrate while unlocked setting of polite notifications"
   bug: "270456865"
 }
+
+flag {
+  name: "autogroup_summary_icon_update"
+  namespace: "systemui"
+  description: "This flag controls the fix for notifications autogroup summary icon updates"
+  bug: "227693160"
+}
