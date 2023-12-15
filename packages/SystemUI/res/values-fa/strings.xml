@@ -330,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ضبط صفحه‌نمایش"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"متوقف کردن"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"حالت یک‌دستی"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"تضاد"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"استاندارد"</string>
@@ -402,8 +408,12 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • درحال شارژ شدن • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> تا شارژ کامل"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"برای شروع آموزش گام‌به‌گام عمومی، تند به‌چپ بکشید"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"باز کردن ویرایشگر ابزارک"</string>
-    <string name="button_to_remove_widget" msgid="1511255853677835341">"حذف ابزارک"</string>
-    <string name="hub_mode_add_widget_button_text" msgid="3956587989338301487">"افزودن ابزارک"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
+    <skip />
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تغییر کاربر"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"منوی پایین‌پر"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"همه برنامه‌ها و داده‌های این جلسه حذف خواهد شد."</string>
@@ -1022,7 +1032,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"برای ارسال محتوای این جلسه، لطفاً برنامه را باز کنید."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"برنامه ناشناس"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"توقف پخش محتوا"</string>
-    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"دستگاه‌های دردسترس برای خروجی صدا."</string>
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"دستگاه‌های دردسترس برای خروجی صوتی."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"میزان صدا"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"بلندگوها و نمایشگرها"</string>
@@ -1197,6 +1207,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"برنامه پیش‌فرض یادداشت را در «تنظیمات» تنظیم کنید"</string>
     <string name="install_app" msgid="5066668100199613936">"نصب برنامه"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"در نمایشگر خارجی پخش شود؟"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"‏همه فعالیت‌های Dual Screen که درحال اجرا است متوقف خواهد شد"</string>
     <string name="mirror_display" msgid="2515262008898122928">"بازتاباندن صفحه‌نمایش"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"بستن"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"نمایشگر متصل شد"</string>

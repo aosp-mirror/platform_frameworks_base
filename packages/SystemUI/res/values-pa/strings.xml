@@ -330,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ਰੋਕੋ"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"ਇੱਕ ਹੱਥ ਮੋਡ"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"ਕੰਟ੍ਰਾਸਟ"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ਮਿਆਰੀ"</string>
@@ -402,8 +408,12 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"ਭਾਈਚਾਰਕ ਟਿਊਟੋਰੀਅਲ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਖੱਬੇ ਪਾਸੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"ਵਿਜੇਟ ਸੰਪਾਦਕ ਖੋਲ੍ਹੋ"</string>
-    <string name="button_to_remove_widget" msgid="1511255853677835341">"ਵਿਜੇਟ ਨੂੰ ਹਟਾਓ"</string>
-    <string name="hub_mode_add_widget_button_text" msgid="3956587989338301487">"ਵਿਜੇਟ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
+    <skip />
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ਪੁੱਲਡਾਊਨ ਮੀਨੂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿਚਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
@@ -1197,6 +1207,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਨੋਟ ਐਪ ਨੂੰ ਸੈੱਟ ਕਰੋ"</string>
     <string name="install_app" msgid="5066668100199613936">"ਐਪ ਸਥਾਪਤ ਕਰੋ"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ਕੀ ਬਾਹਰੀ ਡਿਸਪਲੇ \'ਤੇ ਪ੍ਰਤਿਬਿੰਬਿਤ ਕਰਨਾ ਹੈ?"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"ਇਸ ਵੇਲੇ ਚੱਲ ਰਹੀ ਕਿਸੇ ਵੀ Dual Screen ਸਰਗਰਮੀ ਬੰਦ ਕਰ ਦਿੱਤਾ ਜਾਵੇਗਾ"</string>
     <string name="mirror_display" msgid="2515262008898122928">"ਡਿਸਪਲੇ ਨੂੰ ਪ੍ਰਤਿਬਿੰਬਿਤ ਕਰੋ"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"ਡਿਸਪਲੇ ਨੂੰ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
