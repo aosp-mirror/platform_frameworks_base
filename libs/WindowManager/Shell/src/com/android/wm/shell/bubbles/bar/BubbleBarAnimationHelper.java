@@ -23,6 +23,8 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
+import android.util.Size;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
@@ -33,6 +35,7 @@ import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix;
+import com.android.wm.shell.common.magnetictarget.MagnetizedObject.MagneticTarget;
 
 /**
  * Helper class to animate a {@link BubbleBarExpandedView} on a bubble.
@@ -44,6 +47,13 @@ public class BubbleBarAnimationHelper {
     private static final float EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT = 0.1f;
     private static final float EXPANDED_VIEW_ANIMATE_OUT_SCALE_AMOUNT = .75f;
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
+    private static final int EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION = 100;
+    /**
+     * Additional scale applied to expanded view when it is positioned inside a magnetic target.
+     */
+    private static final float EXPANDED_VIEW_IN_TARGET_SCALE = 0.75f;
+    private static final int EXPANDED_VIEW_ANIMATE_POSITION_DURATION = 300;
+    private static final int EXPANDED_VIEW_DISMISS_DURATION = 250;
 
     /** Spring config for the expanded view scale-in animation. */
     private final PhysicsAnimator.SpringConfig mScaleInSpringConfig =
@@ -181,7 +191,8 @@ public class BubbleBarAnimationHelper {
             Log.w(TAG, "Trying to animate collapse without a bubble");
             return;
         }
-
+        bbev.setScaleX(1f);
+        bbev.setScaleY(1f);
         mExpandedViewContainerMatrix.setScaleX(1f);
         mExpandedViewContainerMatrix.setScaleY(1f);
 
@@ -209,11 +220,124 @@ public class BubbleBarAnimationHelper {
     }
 
     /**
+     * Animates dismissal of currently expanded bubble
+     *
+     * @param endRunnable a runnable to run at the end of the animation
+     */
+    public void animateDismiss(Runnable endRunnable) {
+        mIsExpanded = false;
+        final BubbleBarExpandedView bbev = getExpandedView();
+        if (bbev == null) {
+            Log.w(TAG, "Trying to animate dismiss without a bubble");
+            return;
+        }
+
+        int[] location = bbev.getLocationOnScreen();
+        int diffFromBottom = mPositioner.getScreenRect().bottom - location[1];
+
+        bbev.animate()
+                // 2x distance from bottom so the view flies out
+                .translationYBy(diffFromBottom * 2)
+                .setDuration(EXPANDED_VIEW_DISMISS_DURATION)
+                .withEndAction(endRunnable)
+                .start();
+    }
+
+    /**
+     * Animate current expanded bubble back to its rest position
+     */
+    public void animateToRestPosition() {
+        BubbleBarExpandedView bbev = getExpandedView();
+        if (bbev == null) {
+            Log.w(TAG, "Trying to animate expanded view to rest position without a bubble");
+            return;
+        }
+        Point restPoint = getExpandedViewRestPosition(getExpandedViewSize());
+        bbev.animate()
+                .x(restPoint.x)
+                .y(restPoint.y)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(EXPANDED_VIEW_ANIMATE_POSITION_DURATION)
+                .setInterpolator(Interpolators.EMPHASIZED_DECELERATE)
+                .withStartAction(() -> bbev.setAnimating(true))
+                .withEndAction(() -> bbev.setAnimating(false))
+                .start();
+    }
+
+    /**
+     * Animates currently expanded bubble into the given {@link MagneticTarget}.
+     *
+     * @param target magnetic target to snap to
+     * @param endRunnable a runnable to run at the end of the animation
+     */
+    public void animateIntoTarget(MagneticTarget target, @Nullable Runnable endRunnable) {
+        BubbleBarExpandedView bbev = getExpandedView();
+        if (bbev == null) {
+            Log.w(TAG, "Trying to snap the expanded view to target without a bubble");
+            return;
+        }
+        Point expandedViewCenter = getViewCenterOnScreen(bbev);
+
+        // Calculate the difference between the target's center coordinates and the object's.
+        // Animating the object's x/y properties by these values will center the object on top
+        // of the magnetic target.
+        float xDiff = target.getCenterOnScreen().x - expandedViewCenter.x;
+        float yDiff = target.getCenterOnScreen().y - expandedViewCenter.y;
+
+        // Calculate scale of expanded view so it fits inside the magnetic target
+        float bbevMaxSide = Math.max(bbev.getWidth(), bbev.getHeight());
+        float targetMaxSide = Math.max(target.getTargetView().getWidth(),
+                target.getTargetView().getHeight());
+        float scale = (targetMaxSide * EXPANDED_VIEW_IN_TARGET_SCALE) / bbevMaxSide;
+
+        bbev.animate()
+                .translationX(bbev.getTranslationX() + xDiff)
+                .translationY(bbev.getTranslationY() + yDiff)
+                .scaleX(scale)
+                .scaleY(scale)
+                .setDuration(EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION)
+                .setInterpolator(Interpolators.EMPHASIZED)
+                .withStartAction(() -> bbev.setAnimating(true))
+                .withEndAction(() -> {
+                    bbev.setAnimating(false);
+                    if (endRunnable != null) {
+                        endRunnable.run();
+                    }
+                })
+                .start();
+    }
+
+    /**
+     * Animate currently expanded view when it is released from dismiss view
+     */
+    public void animateUnstuckFromDismissView() {
+        BubbleBarExpandedView expandedView = getExpandedView();
+        if (expandedView == null) {
+            Log.w(TAG, "Trying to unsnap the expanded view from dismiss without a bubble");
+            return;
+        }
+        expandedView
+                .animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION)
+                .setInterpolator(Interpolators.EMPHASIZED)
+                .withStartAction(() -> expandedView.setAnimating(true))
+                .withEndAction(() -> expandedView.setAnimating(false))
+                .start();
+    }
+
+    /**
      * Cancel current animations
      */
     public void cancelAnimations() {
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
         mExpandedViewAlphaAnimator.cancel();
+        BubbleBarExpandedView bbev = getExpandedView();
+        if (bbev != null) {
+            bbev.animate().cancel();
+        }
     }
 
     private @Nullable BubbleBarExpandedView getExpandedView() {
@@ -231,21 +355,42 @@ public class BubbleBarAnimationHelper {
             return;
         }
 
-        boolean isOverflowExpanded = mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
-        final int padding = mPositioner.getBubbleBarExpandedViewPadding();
-        final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
-        final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
+        final Size size = getExpandedViewSize();
+        Point position = getExpandedViewRestPosition(size);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) bbev.getLayoutParams();
-        lp.width = width;
-        lp.height = height;
+        lp.width = size.getWidth();
+        lp.height = size.getHeight();
         bbev.setLayoutParams(lp);
-        if (mLayerView.isOnLeft()) {
-            bbev.setX(mPositioner.getInsets().left + padding);
-        } else {
-            bbev.setX(mPositioner.getAvailableRect().width() - width - padding);
-        }
-        bbev.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
+        bbev.setX(position.x);
+        bbev.setY(position.y);
         bbev.updateLocation();
         bbev.maybeShowOverflow();
+    }
+
+    private Point getExpandedViewRestPosition(Size size) {
+        final int padding = mPositioner.getBubbleBarExpandedViewPadding();
+        Point point = new Point();
+        if (mLayerView.isOnLeft()) {
+            point.x = mPositioner.getInsets().left + padding;
+        } else {
+            point.x = mPositioner.getAvailableRect().width() - size.getWidth() - padding;
+        }
+        point.y = mPositioner.getExpandedViewBottomForBubbleBar() - size.getHeight();
+        return point;
+    }
+
+    private Size getExpandedViewSize() {
+        boolean isOverflowExpanded = mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
+        final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
+        final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
+        return new Size(width, height);
+    }
+
+    private Point getViewCenterOnScreen(View view) {
+        Point center = new Point();
+        int[] onScreenLocation = view.getLocationOnScreen();
+        center.x = (int) (onScreenLocation[0] + (view.getWidth() / 2f));
+        center.y = (int) (onScreenLocation[1] + (view.getHeight() / 2f));
+        return center;
     }
 }
