@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade
 
+import android.content.Context
 import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -45,8 +46,6 @@ import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
-import com.android.systemui.communal.data.repository.FakeCommunalRepository
-import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.compose.ComposeFacade.isComposeAvailable
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
@@ -98,6 +97,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
@@ -112,9 +112,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -150,8 +149,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
-    @Mock private lateinit var mCommunalViewModel: CommunalViewModel
-    private lateinit var mCommunalRepository: FakeCommunalRepository
+    @Mock private lateinit var mGlanceableHubContainerController: GlanceableHubContainerController
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
@@ -201,8 +199,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         featureFlagsClassic.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
 
-        mCommunalRepository = FakeCommunalRepository()
-
         testScope = TestScope()
         fakeClock = FakeSystemClock()
         underTest =
@@ -236,8 +232,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 mock(KeyguardMessageAreaController.Factory::class.java),
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
-                mCommunalViewModel,
-                mCommunalRepository,
+                mGlanceableHubContainerController,
                 notificationLaunchAnimationInteractor,
                 featureFlagsClassic,
                 fakeClock,
@@ -466,6 +461,16 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun handleDispatchTouchEvent_glanceableHubIntercepts_returnsTrue() {
+        whenever(mGlanceableHubContainerController.onTouchEvent(DOWN_EVENT)).thenReturn(true)
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
+
+        assertThat(returnVal).isTrue()
+    }
+
+    @Test
     fun shouldInterceptTouchEvent_statusBarKeyguardViewManagerShouldIntercept() {
         // down event should be intercepted by keyguardViewManager
         whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
@@ -546,7 +551,11 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             return
         }
 
-        mCommunalRepository.setIsCommunalEnabled(true)
+        whenever(mGlanceableHubContainerController.isEnabled()).thenReturn(true)
+
+        val mockCommunalView = mock(View::class.java)
+        whenever(mGlanceableHubContainerController.initView(any<Context>()))
+            .thenReturn(mockCommunalView)
 
         val mockCommunalPlaceholder = mock(View::class.java)
         val fakeViewIndex = 20
@@ -558,7 +567,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
         // Communal view added as a child of the container at the proper index, the stub is removed.
         verify(view).removeView(mockCommunalPlaceholder)
-        verify(view).addView(any(), eq(fakeViewIndex))
+        verify(view).addView(eq(mockCommunalView), eq(fakeViewIndex))
     }
 
     @Test
@@ -567,7 +576,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             return
         }
 
-        mCommunalRepository.setIsCommunalEnabled(false)
+        whenever(mGlanceableHubContainerController.isEnabled()).thenReturn(false)
 
         val mockCommunalPlaceholder = mock(View::class.java)
         val fakeViewIndex = 20
