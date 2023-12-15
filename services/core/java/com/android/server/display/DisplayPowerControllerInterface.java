@@ -69,9 +69,10 @@ public interface DisplayPowerControllerInterface {
 
     /**
      * Used to decide the associated AutomaticBrightnessController's BrightnessMode
-     * @param isIdle Flag which represents if the Idle BrightnessMode is to be set
+     * @param mode The auto-brightness mode
      */
-    void setAutomaticScreenBrightnessMode(boolean isIdle);
+    void setAutomaticScreenBrightnessMode(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode);
 
     /**
      * Used to enable/disable the logging of the WhileBalance associated entities
