@@ -13588,6 +13588,46 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+
+    /**
+     * @see AudioManager#shouldNotificationSoundPlay(AudioAttributes)
+     */
+    @android.annotation.EnforcePermission(
+            android.Manifest.permission.QUERY_AUDIO_STATE)
+    public boolean shouldNotificationSoundPlay(@NonNull final AudioAttributes aa) {
+        super.shouldNotificationSoundPlay_enforcePermission();
+        Objects.requireNonNull(aa);
+
+        // don't play notifications if the stream volume associated with the
+        // AudioAttributes of the notification record is 0 (non-zero volume implies
+        // not silenced by SILENT or VIBRATE ringer mode)
+        final int stream = AudioAttributes.toLegacyStreamType(aa);
+        final boolean mutingFromVolume = getStreamVolume(stream) == 0;
+        if (mutingFromVolume) {
+            if (DEBUG_VOL) {
+                Slog.d(TAG, "notification should not play due to muted stream " + stream);
+            }
+            return false;
+        }
+
+        // don't play notifications if there is a user of GAIN_TRANSIENT_EXCLUSIVE audio focus
+        // and the focus owner is recording
+        final int uid = mMediaFocusControl.getExclusiveFocusOwnerUid();
+        if (uid == -1) { // return value is -1 if focus isn't GAIN_TRANSIENT_EXCLUSIVE
+            return true;
+        }
+        // is the owner of GAIN_TRANSIENT_EXCLUSIVE focus also recording?
+        final boolean mutingFromFocusAndRecording = mRecordMonitor.isRecordingActiveForUid(uid);
+        if (mutingFromFocusAndRecording) {
+            if (DEBUG_VOL) {
+                Slog.d(TAG, "notification should not play due to exclusive focus owner recording "
+                        + " uid:" + uid);
+            }
+            return false;
+        }
+        return true;
+    }
+
     //======================
     // Audioserver state dispatch
     //======================

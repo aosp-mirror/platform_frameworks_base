@@ -25,9 +25,11 @@ import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -178,6 +180,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mAudioManager.getFocusRampTimeMs(anyInt(), any(AudioAttributes.class))).thenReturn(50);
+        when(mAudioManager.shouldNotificationSoundPlay(any(AudioAttributes.class)))
+                .thenReturn(true);
         when(mUsageStats.isAlertRateLimited(any())).thenReturn(false);
         when(mVibrator.hasFrequencyControl()).thenReturn(false);
         when(mKeyguardManager.isDeviceLocked(anyInt())).thenReturn(false);
@@ -915,6 +919,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any(AudioAttributes.class)))
+                .thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 
@@ -932,6 +938,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(1);
+        // all streams at 1 means no muting from audio framework
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(true);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 
@@ -950,6 +958,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 
@@ -971,6 +980,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 
@@ -1243,6 +1253,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
         verifyDelayedVibrate(mAttentionHelper.getVibratorHelper().createFallbackVibration(false));
@@ -1973,6 +1984,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         NotificationRecord r = getBuzzyBeepyNotification();
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
 

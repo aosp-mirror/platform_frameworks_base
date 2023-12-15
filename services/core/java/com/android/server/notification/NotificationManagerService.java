@@ -79,6 +79,7 @@ import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.media.audio.Flags.focusExclusiveWithRecording;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.os.Flags.allowPrivateProfile;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
@@ -9052,27 +9053,40 @@ public class NotificationManagerService extends SystemService {
     }
 
     private boolean playSound(final NotificationRecord record, Uri soundUri) {
+        final boolean shouldPlay;
+        if (focusExclusiveWithRecording()) {
+            // flagged path
+            shouldPlay = mAudioManager.shouldNotificationSoundPlay(record.getAudioAttributes());
+        } else {
+            // legacy path
+            // play notifications if there is no user of exclusive audio focus
+            // and the stream volume is not 0 (non-zero volume implies not silenced by SILENT or
+            //   VIBRATE ringer mode)
+            shouldPlay = !mAudioManager.isAudioFocusExclusive()
+                    && (mAudioManager.getStreamVolume(
+                        AudioAttributes.toLegacyStreamType(record.getAudioAttributes())) != 0);
+        }
+        if (!shouldPlay) {
+            if (DBG) Slog.v(TAG, "Not playing sound " + soundUri + " due to focus/volume");
+            return false;
+        }
+
         boolean looping = (record.getNotification().flags & FLAG_INSISTENT) != 0;
-        // play notifications if there is no user of exclusive audio focus
-        // and the stream volume is not 0 (non-zero volume implies not silenced by SILENT or
-        //   VIBRATE ringer mode)
-        if (!mAudioManager.isAudioFocusExclusive()
-                && (mAudioManager.getStreamVolume(
-                        AudioAttributes.toLegacyStreamType(record.getAudioAttributes())) != 0)) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
-                if (player != null) {
-                    if (DBG) Slog.v(TAG, "Playing sound " + soundUri
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
+            if (player != null) {
+                if (DBG) {
+                    Slog.v(TAG, "Playing sound " + soundUri
                             + " with attributes " + record.getAudioAttributes());
-                    player.playAsync(soundUri, record.getSbn().getUser(), looping,
-                            record.getAudioAttributes(), 1.0f);
-                    return true;
                 }
-            } catch (RemoteException e) {
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+                player.playAsync(soundUri, record.getSbn().getUser(), looping,
+                        record.getAudioAttributes(), 1.0f);
+                return true;
             }
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
         return false;
     }

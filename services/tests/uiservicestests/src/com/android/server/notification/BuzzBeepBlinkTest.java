@@ -158,6 +158,9 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         when(mAudioManager.isAudioFocusExclusive()).thenReturn(false);
         when(mAudioManager.getRingtonePlayer()).thenReturn(mRingtonePlayer);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
+        // consistent with focus not exclusive and volume not muted
+        when(mAudioManager.shouldNotificationSoundPlay(any(AudioAttributes.class)))
+                .thenReturn(true);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mAudioManager.getFocusRampTimeMs(anyInt(), any(AudioAttributes.class))).thenReturn(50);
         when(mUsageStats.isAlertRateLimited(any())).thenReturn(false);
@@ -869,6 +872,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -886,6 +890,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(1);
+        // all streams at 1 means no muting from audio framework
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(true);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -904,6 +910,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -924,6 +931,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
 
@@ -1195,6 +1203,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         // the phone is quiet
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
         verifyDelayedVibrate(mService.getVibratorHelper().createFallbackVibration(false));
@@ -1923,6 +1932,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         NotificationRecord r = getBuzzyBeepyNotification();
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
         when(mAudioManager.getStreamVolume(anyInt())).thenReturn(0);
+        when(mAudioManager.shouldNotificationSoundPlay(any())).thenReturn(false);
 
         mService.buzzBeepBlinkLocked(r);
 
