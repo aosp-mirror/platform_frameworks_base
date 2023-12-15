@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.app.StatusBarManager.DISABLE_HOME;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowVisibleState;
@@ -1005,8 +1004,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // this handling this post-init task. We force an update in this case, and use a new
                 // token to not conflict with any other disabled flags already requested by SysUI
                 Binder token = new Binder();
-                mBarService.disable(DISABLE_HOME, token, mContext.getPackageName());
-                mBarService.disable(0, token, mContext.getPackageName());
+                int userId = mContext.getUserId();
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                info.setNavigationHomeDisabled(true);
+                mBarService.disableForUser(info, token, mContext.getPackageName(),
+                        userId, "set the initial view visibility");
+
+                mBarService.disableForUser(new StatusBarManager.DisableInfo(), token,
+                        mContext.getPackageName(), userId, "set the initial view visibility");
             } catch (RemoteException ex) {
                 ex.rethrowFromSystemServer();
             }

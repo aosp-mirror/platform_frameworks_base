@@ -2689,10 +2689,12 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         protected final void setRotationSuggestionsEnabled(boolean enabled) {
             try {
                 final int userId = Binder.getCallingUserHandle().getIdentifier();
-                final int what = enabled
-                        ? StatusBarManager.DISABLE2_NONE
-                        : StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS;
-                mStatusBarService.disable2ForUser(what, mToken, mContext.getPackageName(), userId);
+                StatusBarManager.DisableInfo info = new StatusBarManager.DisableInfo();
+                if (enabled) {
+                    info.setRotationSuggestionDisabled(true);
+                }
+                mStatusBarService.disableForUser(info, mToken, mContext.getPackageName(), userId,
+                        "setRotationSuggestionsEnabled");
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }

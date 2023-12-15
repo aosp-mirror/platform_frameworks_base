@@ -455,7 +455,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void togglePanel();
   }
 
-  public static final class StatusBarManager.DisableInfo {
+  public static final class StatusBarManager.DisableInfo implements android.os.Parcelable {
     method public boolean isRotationSuggestionDisabled();
   }
 
