@@ -136,6 +136,7 @@ public class Watchdog implements Dumpable {
         "media.swcodec", // /apex/com.android.media.swcodec/bin/mediaswcodec
         "media.transcoding", // Media transcoding service
         "com.android.bluetooth",  // Bluetooth service
+        "/apex/com.android.art/bin/artd",  // ART daemon
         "/apex/com.android.os.statsd/bin/statsd",  // Stats daemon
     };
 
