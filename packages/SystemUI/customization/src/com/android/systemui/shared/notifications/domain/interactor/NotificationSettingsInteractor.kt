@@ -17,32 +17,23 @@
 package com.android.systemui.shared.notifications.domain.interactor
 
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
-import com.android.systemui.shared.notifications.shared.model.NotificationSettingsModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /** Encapsulates business logic for interacting with notification settings. */
 class NotificationSettingsInteractor(
     private val repository: NotificationSettingsRepository,
 ) {
-    /** The current state of the notification setting. */
-    val settings: Flow<NotificationSettingsModel> = repository.settings
+    /** Should notifications be visible on the lockscreen? */
+    val isShowNotificationsOnLockScreenEnabled: StateFlow<Boolean> =
+        repository.isShowNotificationsOnLockScreenEnabled
+
+    suspend fun setShowNotificationsOnLockscreenEnabled(enabled: Boolean) {
+        repository.setShowNotificationsOnLockscreenEnabled(enabled)
+    }
 
     /** Toggles the setting to show or hide notifications on the lock screen. */
-    suspend fun toggleShowNotificationsOnLockScreenEnabled() {
-        val currentModel = repository.getSettings()
-        setSettings(
-            currentModel.copy(
-                isShowNotificationsOnLockScreenEnabled =
-                    !currentModel.isShowNotificationsOnLockScreenEnabled,
-            )
-        )
-    }
-
-    suspend fun setSettings(model: NotificationSettingsModel) {
-        repository.setSettings(model)
-    }
-
-    suspend fun getSettings(): NotificationSettingsModel {
-        return repository.getSettings()
+    suspend fun toggleShowNotificationsOnLockscreenEnabled() {
+        val current = repository.isShowNotificationsOnLockScreenEnabled.value
+        repository.setShowNotificationsOnLockscreenEnabled(!current)
     }
 }

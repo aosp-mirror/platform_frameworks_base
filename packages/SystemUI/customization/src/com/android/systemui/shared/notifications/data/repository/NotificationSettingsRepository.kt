@@ -17,56 +17,39 @@
 package com.android.systemui.shared.notifications.data.repository
 
 import android.provider.Settings
-import com.android.systemui.shared.notifications.shared.model.NotificationSettingsModel
 import com.android.systemui.shared.settings.data.repository.SecureSettingsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
-/** Provides access to state related to notifications. */
+/** Provides access to state related to notification settings. */
 class NotificationSettingsRepository(
     scope: CoroutineScope,
     private val backgroundDispatcher: CoroutineDispatcher,
     private val secureSettingsRepository: SecureSettingsRepository,
 ) {
     /** The current state of the notification setting. */
-    val settings: SharedFlow<NotificationSettingsModel> =
+    val isShowNotificationsOnLockScreenEnabled: StateFlow<Boolean> =
         secureSettingsRepository
             .intSetting(
                 name = Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
             )
-            .map { lockScreenShowNotificationsInt ->
-                NotificationSettingsModel(
-                    isShowNotificationsOnLockScreenEnabled = lockScreenShowNotificationsInt == 1,
-                )
-            }
-            .shareIn(
+            .map { it == 1 }
+            .stateIn(
                 scope = scope,
                 started = SharingStarted.WhileSubscribed(),
-                replay = 1,
+                initialValue = false,
             )
 
-    suspend fun getSettings(): NotificationSettingsModel {
-        return withContext(backgroundDispatcher) {
-            NotificationSettingsModel(
-                isShowNotificationsOnLockScreenEnabled =
-                    secureSettingsRepository.get(
-                        name = Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                        defaultValue = 0,
-                    ) == 1
-            )
-        }
-    }
-
-    suspend fun setSettings(model: NotificationSettingsModel) {
+    suspend fun setShowNotificationsOnLockscreenEnabled(enabled: Boolean) {
         withContext(backgroundDispatcher) {
             secureSettingsRepository.set(
                 name = Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                value = if (model.isShowNotificationsOnLockScreenEnabled) 1 else 0,
+                value = if (enabled) 1 else 0,
             )
         }
     }
