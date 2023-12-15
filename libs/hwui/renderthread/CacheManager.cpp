@@ -277,7 +277,7 @@ void CacheManager::onThreadIdle() {
 
     const nsecs_t now = systemTime(CLOCK_MONOTONIC);
     // Rate limiting
-    if ((now - mLastDeferredCleanup) < 25_ms) {
+    if ((now - mLastDeferredCleanup) > 25_ms) {
         mLastDeferredCleanup = now;
         const nsecs_t frameCompleteNanos = mFrameCompletions[0];
         const nsecs_t frameDiffNanos = now - frameCompleteNanos;
