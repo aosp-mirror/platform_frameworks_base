@@ -26,6 +26,7 @@ import android.media.AudioDeviceAttributes;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.os.ParcelUuid;
 import android.provider.Settings;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -42,11 +43,13 @@ public class HearingAidDeviceManager {
     private static final boolean DEBUG = BluetoothUtils.D;
 
     private final ContentResolver mContentResolver;
+    private final Context mContext;
     private final LocalBluetoothManager mBtManager;
     private final List<CachedBluetoothDevice> mCachedDevices;
     private final HearingAidAudioRoutingHelper mRoutingHelper;
     HearingAidDeviceManager(Context context, LocalBluetoothManager localBtManager,
             List<CachedBluetoothDevice> CachedDevices) {
+        mContext = context;
         mContentResolver = context.getContentResolver();
         mBtManager = localBtManager;
         mCachedDevices = CachedDevices;
@@ -56,6 +59,7 @@ public class HearingAidDeviceManager {
     @VisibleForTesting
     HearingAidDeviceManager(Context context, LocalBluetoothManager localBtManager,
             List<CachedBluetoothDevice> cachedDevices, HearingAidAudioRoutingHelper routingHelper) {
+        mContext = context;
         mContentResolver = context.getContentResolver();
         mBtManager = localBtManager;
         mCachedDevices = cachedDevices;
@@ -285,11 +289,13 @@ public class HearingAidDeviceManager {
     }
 
     void onActiveDeviceChanged(CachedBluetoothDevice device) {
-        if (device.isActiveDevice(BluetoothProfile.HEARING_AID) || device.isActiveDevice(
-                BluetoothProfile.LE_AUDIO)) {
-            setAudioRoutingConfig(device);
-        } else {
-            clearAudioRoutingConfig();
+        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_AUDIO_ROUTING)) {
+            if (device.isActiveDevice(BluetoothProfile.HEARING_AID) || device.isActiveDevice(
+                    BluetoothProfile.LE_AUDIO)) {
+                setAudioRoutingConfig(device);
+            } else {
+                clearAudioRoutingConfig();
+            }
         }
     }
 

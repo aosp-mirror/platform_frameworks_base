@@ -42,6 +42,7 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Parcel;
+import android.util.FeatureFlagUtils;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -109,6 +110,7 @@ public class HearingAidDeviceManagerTest {
 
     @Before
     public void setUp() {
+        FeatureFlagUtils.setEnabled(mContext, FeatureFlagUtils.SETTINGS_AUDIO_ROUTING, true);
         when(mDevice1.getAddress()).thenReturn(DEVICE_ADDRESS_1);
         when(mDevice2.getAddress()).thenReturn(DEVICE_ADDRESS_2);
         when(mDevice1.getName()).thenReturn(DEVICE_NAME_1);
