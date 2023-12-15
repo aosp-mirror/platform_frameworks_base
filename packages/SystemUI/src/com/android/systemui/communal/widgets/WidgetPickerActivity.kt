@@ -19,13 +19,15 @@ package com.android.systemui.communal.widgets
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.activity.ComponentActivity
+import androidx.core.view.setMargins
+import androidx.core.view.setPadding
 import com.android.systemui.res.R
 import javax.inject.Inject
 
@@ -43,7 +45,6 @@ constructor(
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.widget_picker)
-
         loadWidgets()
     }
 
@@ -54,24 +55,38 @@ constructor(
                 appWidgetManager
                     .getInstalledProviders(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
                     ?.stream()
-                    ?.limit(5)
                     ?.forEach { widgetInfo ->
                         val activity = this@WidgetPickerActivity
-                        val widgetPreview =
-                            widgetInfo.loadPreviewImage(activity, DisplayMetrics.DENSITY_HIGH)
-                        val widgetView = ImageView(activity)
-                        val lp = LinearLayout.LayoutParams(WIDGET_PREVIEW_SIZE, WIDGET_PREVIEW_SIZE)
-                        widgetView.setLayoutParams(lp)
-                        widgetView.setImageDrawable(widgetPreview)
-                        widgetView.setOnClickListener({
-                            setResult(
-                                RESULT_OK,
-                                Intent().putExtra(EditWidgetsActivity.ADD_WIDGET_INFO, widgetInfo)
-                            )
-                            finish()
-                        })
-
-                        addView(widgetView)
+                        (widgetInfo.loadPreviewImage(activity, 0)
+                                ?: widgetInfo.loadIcon(activity, 0))
+                            ?.let {
+                                addView(
+                                    ImageView(activity).also { v ->
+                                        v.setImageDrawable(it)
+                                        v.setBackgroundColor(WIDGET_PREVIEW_BACKGROUND_COLOR)
+                                        v.setPadding(WIDGET_PREVIEW_PADDING)
+                                        v.layoutParams =
+                                            LinearLayout.LayoutParams(
+                                                    WIDGET_PREVIEW_SIZE,
+                                                    WIDGET_PREVIEW_SIZE
+                                                )
+                                                .also { lp ->
+                                                    lp.setMargins(WIDGET_PREVIEW_MARGINS)
+                                                }
+                                        v.setOnClickListener {
+                                            setResult(
+                                                RESULT_OK,
+                                                Intent()
+                                                    .putExtra(
+                                                        EditWidgetsActivity.ADD_WIDGET_INFO,
+                                                        widgetInfo
+                                                    )
+                                            )
+                                            finish()
+                                        }
+                                    }
+                                )
+                            }
                     }
             } catch (e: RuntimeException) {
                 Log.e(TAG, "Exception fetching widget providers", e)
@@ -80,7 +95,10 @@ constructor(
     }
 
     companion object {
-        private const val WIDGET_PREVIEW_SIZE = 400
+        private const val WIDGET_PREVIEW_SIZE = 600
+        private const val WIDGET_PREVIEW_MARGINS = 32
+        private const val WIDGET_PREVIEW_PADDING = 32
+        private val WIDGET_PREVIEW_BACKGROUND_COLOR = Color.rgb(216, 225, 220)
         private const val TAG = "WidgetPickerActivity"
     }
 }
