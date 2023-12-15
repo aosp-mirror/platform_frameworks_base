@@ -75,6 +75,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
@@ -474,7 +475,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     TestableNotificationManagerService.StrongAuthTrackerFake mStrongAuthTracker;
 
     TestableFlagResolver mTestFlagResolver = new TestableFlagResolver();
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
     @Mock
@@ -640,6 +641,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 });
 
         // TODO (b/291907312): remove feature flag
+        // NOTE: Prefer using the @EnableFlag annotation where possible. Do not add any android.app
+        //  flags here.
         mSetFlagsRule.disableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER,
                 Flags.FLAG_POLITE_NOTIFICATIONS);
         initNMS();
@@ -6316,15 +6319,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(visitor, times(1)).accept(eq(personIcon3.getUri()));
     }
 
+    private PendingIntent getPendingIntentWithUri(Uri uri) {
+        return PendingIntent.getActivity(mContext, 0,
+                new Intent("action", uri),
+                PendingIntent.FLAG_IMMUTABLE);
+    }
+
     @Test
-    public void testVisitUris_callStyle() {
+    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
+    public void testVisitUris_callStyle_ongoingCall() {
         Icon personIcon = Icon.createWithContentUri("content://media/person");
         Icon verificationIcon = Icon.createWithContentUri("content://media/verification");
         Person callingPerson = new Person.Builder().setName("Someone")
                 .setIcon(personIcon)
                 .build();
-        PendingIntent hangUpIntent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_IMMUTABLE);
+        Uri hangUpUri = Uri.parse("content://intent/hangup");
+        PendingIntent hangUpIntent = getPendingIntentWithUri(hangUpUri);
         Notification n = new Notification.Builder(mContext, "a")
                 .setStyle(Notification.CallStyle.forOngoingCall(callingPerson, hangUpIntent)
                         .setVerificationIcon(verificationIcon))
@@ -6337,6 +6347,36 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(visitor, times(1)).accept(eq(personIcon.getUri()));
         verify(visitor, times(1)).accept(eq(verificationIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(hangUpUri));
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
+    public void testVisitUris_callStyle_incomingCall() {
+        Icon personIcon = Icon.createWithContentUri("content://media/person");
+        Icon verificationIcon = Icon.createWithContentUri("content://media/verification");
+        Person callingPerson = new Person.Builder().setName("Someone")
+                .setIcon(personIcon)
+                .build();
+        Uri answerUri = Uri.parse("content://intent/answer");
+        PendingIntent answerIntent = getPendingIntentWithUri(answerUri);
+        Uri declineUri = Uri.parse("content://intent/decline");
+        PendingIntent declineIntent = getPendingIntentWithUri(declineUri);
+        Notification n = new Notification.Builder(mContext, "a")
+                .setStyle(Notification.CallStyle.forIncomingCall(callingPerson, declineIntent,
+                                answerIntent)
+                        .setVerificationIcon(verificationIcon))
+                .setContentTitle("Calling...")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+
+        verify(visitor, times(1)).accept(eq(personIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(verificationIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(answerIntent.getIntent().getData()));
+        verify(visitor, times(1)).accept(eq(declineUri));
     }
 
     @Test
@@ -6385,23 +6425,80 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
     public void testVisitUris_wearableExtender() {
         Icon actionIcon = Icon.createWithContentUri("content://media/action");
         Icon wearActionIcon = Icon.createWithContentUri("content://media/wearAction");
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_IMMUTABLE);
+        Uri displayIntentUri = Uri.parse("content://intent/display");
+        PendingIntent displayIntent = getPendingIntentWithUri(displayIntentUri);
+        Uri actionIntentUri = Uri.parse("content://intent/action");
+        PendingIntent actionIntent = getPendingIntentWithUri(actionIntentUri);
+        Uri wearActionIntentUri = Uri.parse("content://intent/wear");
+        PendingIntent wearActionIntent = getPendingIntentWithUri(wearActionIntentUri);
         Notification n = new Notification.Builder(mContext, "a")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .addAction(new Notification.Action.Builder(actionIcon, "Hey!", intent).build())
-                .extend(new Notification.WearableExtender().addAction(
-                        new Notification.Action.Builder(wearActionIcon, "Wear!", intent).build()))
+                .addAction(
+                        new Notification.Action.Builder(actionIcon, "Hey!", actionIntent).build())
+                .extend(new Notification.WearableExtender()
+                        .setDisplayIntent(displayIntent)
+                        .addAction(new Notification.Action.Builder(wearActionIcon, "Wear!",
+                                wearActionIntent)
+                                .build()))
                 .build();
 
         Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
         n.visitUris(visitor);
 
         verify(visitor).accept(eq(actionIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(actionIntentUri));
         verify(visitor).accept(eq(wearActionIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(wearActionIntentUri));
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
+    public void testVisitUris_tvExtender() {
+        Uri contentIntentUri = Uri.parse("content://intent/content");
+        PendingIntent contentIntent = getPendingIntentWithUri(contentIntentUri);
+        Uri deleteIntentUri = Uri.parse("content://intent/delete");
+        PendingIntent deleteIntent = getPendingIntentWithUri(deleteIntentUri);
+        Notification n = new Notification.Builder(mContext, "a")
+                .extend(
+                        new Notification.TvExtender()
+                                .setContentIntent(contentIntent)
+                                .setDeleteIntent(deleteIntent))
+                .build();
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+
+        verify(visitor, times(1)).accept(eq(contentIntentUri));
+        verify(visitor, times(1)).accept(eq(deleteIntentUri));
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_VISIT_RISKY_URIS})
+    public void testVisitUris_carExtender() {
+        final String testParticipant = "testParticipant";
+        Uri readPendingIntentUri = Uri.parse("content://intent/read");
+        PendingIntent readPendingIntent = getPendingIntentWithUri(readPendingIntentUri);
+        Uri replyPendingIntentUri = Uri.parse("content://intent/reply");
+        PendingIntent replyPendingIntent = getPendingIntentWithUri(replyPendingIntentUri);
+        final RemoteInput testRemoteInput = new RemoteInput.Builder("key").build();
+
+        Notification n = new Notification.Builder(mContext, "a")
+                .extend(new Notification.CarExtender().setUnreadConversation(
+                        new Notification.CarExtender.Builder(testParticipant)
+                                .setReadPendingIntent(readPendingIntent)
+                                .setReplyAction(replyPendingIntent, testRemoteInput)
+                                .build()))
+                .build();
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+
+        verify(visitor, times(1)).accept(eq(readPendingIntentUri));
+        verify(visitor, times(1)).accept(eq(replyPendingIntentUri));
     }
 
     @Test
