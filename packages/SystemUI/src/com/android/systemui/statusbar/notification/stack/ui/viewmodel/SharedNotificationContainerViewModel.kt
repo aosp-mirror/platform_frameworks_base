@@ -25,6 +25,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
+import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
+import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -70,6 +72,20 @@ constructor(
             KeyguardState.ALTERNATE_BOUNCER,
             KeyguardState.PRIMARY_BOUNCER
         )
+
+    private val lockscreenToOccludedRunning =
+        keyguardTransitionInteractor
+            .transition(KeyguardState.LOCKSCREEN, KeyguardState.OCCLUDED)
+            .map { it.transitionState == STARTED || it.transitionState == RUNNING }
+            .distinctUntilChanged()
+            .onStart { emit(false) }
+
+    private val occludedToLockscreenRunning =
+        keyguardTransitionInteractor
+            .transition(KeyguardState.OCCLUDED, KeyguardState.LOCKSCREEN)
+            .map { it.transitionState == STARTED || it.transitionState == RUNNING }
+            .distinctUntilChanged()
+            .onStart { emit(false) }
 
     val shadeCollapseFadeInComplete = MutableStateFlow(false)
 
@@ -122,7 +138,11 @@ constructor(
             ) { isKeyguard, isShadeVisible, qsExpansion ->
                 isKeyguard && !(isShadeVisible || qsExpansion)
             }
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 
     /** Fade in only for use after the shade collapses */
     val shadeCollpaseFadeIn: Flow<Boolean> =
@@ -182,26 +202,37 @@ constructor(
             )
 
     val alpha: Flow<Float> =
-        isOnLockscreenWithoutShade
-            .flatMapLatest { isOnLockscreenWithoutShade ->
-                combineTransform(
-                    merge(
-                        occludedToLockscreenTransitionViewModel.lockscreenAlpha,
-                        lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
-                        keyguardInteractor.keyguardAlpha,
-                    ),
-                    shadeCollpaseFadeIn,
-                ) { alpha, shadeCollpaseFadeIn ->
-                    if (isOnLockscreenWithoutShade) {
-                        if (!shadeCollpaseFadeIn) {
-                            emit(alpha)
-                        }
+        // Due to issues with the legacy shade, some shade expansion events are sent incorrectly,
+        // such as when the shade resets. This can happen while the LOCKSCREEN<->OCCLUDED transition
+        // is running. Therefore use a series of flatmaps to prevent unwanted interruptions while
+        // those transitions are in progress. Without this, the alpha value will produce a visible
+        // flicker.
+        lockscreenToOccludedRunning.flatMapLatest { isLockscreenToOccludedRunning ->
+            if (isLockscreenToOccludedRunning) {
+                lockscreenToOccludedTransitionViewModel.lockscreenAlpha
+            } else {
+                occludedToLockscreenRunning.flatMapLatest { isOccludedToLockscreenRunning ->
+                    if (isOccludedToLockscreenRunning) {
+                        occludedToLockscreenTransitionViewModel.lockscreenAlpha.onStart { emit(0f) }
                     } else {
-                        emit(1f)
+                        isOnLockscreenWithoutShade.flatMapLatest { isOnLockscreenWithoutShade ->
+                            combineTransform(
+                                keyguardInteractor.keyguardAlpha,
+                                shadeCollpaseFadeIn,
+                            ) { alpha, shadeCollpaseFadeIn ->
+                                if (isOnLockscreenWithoutShade) {
+                                    if (!shadeCollpaseFadeIn) {
+                                        emit(alpha)
+                                    }
+                                } else {
+                                    emit(1f)
+                                }
+                            }
+                        }
                     }
                 }
             }
-            .distinctUntilChanged()
+        }
 
     /**
      * Under certain scenarios, such as swiping up on the lockscreen, the container will need to be
