@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package android.location;
+package android.location.provider;
 
 import android.location.Address;
-import android.location.IGeocodeListener;
-import android.location.GeocoderParams;
 
 /**
- * An interface for location providers implementing the Geocoder services.
- *
- * {@hide}
+ * Binder interface for geocoding callbacks.
+ * @hide
  */
-interface IGeocodeProvider {
-
-    oneway void getFromLocation(double latitude, double longitude, int maxResults, in GeocoderParams params, in IGeocodeListener listener);
-    oneway void getFromLocationName(String locationName, double lowerLeftLatitude, double lowerLeftLongitude, double upperRightLatitude,
-        double upperRightLongitude, int maxResults, in GeocoderParams params, in IGeocodeListener listener);
+oneway interface IGeocodeCallback {
+    void onError(String error);
+    void onResults(in List<Address> results);
 }

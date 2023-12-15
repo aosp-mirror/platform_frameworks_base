@@ -1,30 +1,12 @@
 This library (com.android.location.provider.jar) is a shared java library
-containing classes required by unbundled location providers.
+containing classes required by unbundled providers. The library was created
+as a way of exposing API classes outside of the public API before SystemApi
+was possible. Now that SystemApi exists, no new classes should ever be added
+to this library, and all classes in this library should eventually be
+deprecated and new SystemApi replacements offered.
 
---- Rules of this library ---
-o This library is effectively a PUBLIC API for unbundled location providers
-  that may be distributed outside the system image. So it MUST BE API STABLE.
-  You can add but not remove. The rules are the same as for the
-  public platform SDK API.
-o This library can see and instantiate internal platform classes (such as
-  ProviderRequest.java), but it must not expose them in any public method
-  (or by extending them via inheritance). This would break clients of the
-  library because they cannot see the internal platform classes.
-
-This library is distributed in the system image, and loaded as
-a shared library. So you can change the implementation, but not
-the interface. In this way it is like framework.jar.
-
---- Why does this library exists? ---
-
-Unbundled location providers (such as the NetworkLocationProvider)
-can not use internal platform classes.
-
-So ideally all of these classes would be part of the public platform SDK API,
-but that doesn't seem like a great idea when only applications with a special
-signature can implement this API.
-
-The compromise is this library.
-
-It wraps internal platform classes (like ProviderRequest) with a stable
-API that does not leak the internal classes.
+Whether or not classes in this library can ever be removed must be answered on
+a case by case basis. Most of the classes are usually referenced by Google Play
+services (in which case references can be removed from that code base), but
+these classes may also be referenced by OEM code, which must be considered
+before any removal.

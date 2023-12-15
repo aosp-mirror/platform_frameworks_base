@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package android.location;
+package android.location.provider;
 
-import android.location.Address;
+import android.location.provider.IGeocodeCallback;
+import android.location.provider.ForwardGeocodeRequest;
+import android.location.provider.ReverseGeocodeRequest;
 
 /**
- * An interface for returning geocode results.
- *
- * {@hide}
+ * Binder interface for services that implement geocode providers. Do not implement this directly,
+ * extend {@link GeocodeProviderBase} instead.
+ * @hide
  */
-interface IGeocodeListener {
-
-    oneway void onResults(String error, in List<Address> results);
+oneway interface IGeocodeProvider {
+    void forwardGeocode(in ForwardGeocodeRequest request, in IGeocodeCallback callback);
+    void reverseGeocode(in ReverseGeocodeRequest request, in IGeocodeCallback callback);
 }
