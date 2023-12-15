@@ -299,6 +299,11 @@ class ProcessErrorStateRecord {
         SparseBooleanArray lastPids = new SparseBooleanArray(20);
         ActivityManagerService.VolatileDropboxEntryStates volatileDropboxEntriyStates = null;
 
+        if (mApp.isDebugging()) {
+            Slog.i(TAG, "Skipping debugged app ANR: " + this + " " + annotation);
+            return;
+        }
+
         mApp.getWindowProcessController().appEarlyNotResponding(annotation, () -> {
             latencyTracker.waitingOnAMSLockStarted();
             synchronized (mService) {
