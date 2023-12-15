@@ -353,6 +353,7 @@ import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 import android.window.TransitionInfo.AnimationOptions;
 import android.window.WindowContainerToken;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -978,6 +979,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     int mAllowedTouchUid;
     // Whether client has requested a scene transition when exiting.
     final boolean mHasSceneTransition;
+    // Whether the app has opt-in enableOnBackInvokedCallback.
+    final boolean mOptInOnBackInvoked;
 
     // Whether the ActivityEmbedding is enabled on the app.
     private final boolean mAppActivityEmbeddingSplitsEnabled;
@@ -2231,6 +2234,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // No such property name.
         }
         mAppActivityEmbeddingSplitsEnabled = appActivityEmbeddingEnabled;
+
+        mOptInOnBackInvoked = WindowOnBackInvokedDispatcher
+                .isOnBackInvokedCallbackEnabled(info, info.applicationInfo,
+                        () -> ent != null ? ent.array : null, false);
     }
 
     /**
