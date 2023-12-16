@@ -109,7 +109,6 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
-import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -319,7 +318,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     };
     private NotificationStackScrollLogger mLogger;
-    private NotificationsController mNotificationsController;
+    private Runnable mResetUserExpandedStatesRunnable;
     private ActivityStarter mActivityStarter;
     private final int[] mTempInt2 = new int[2];
     private final HashSet<Runnable> mAnimationFinishedRunnables = new HashSet<>();
@@ -4114,7 +4113,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setExpansionChanging(false);
         if (!mIsExpanded) {
             resetScrollPosition();
-            mNotificationsController.resetUserExpandedStates();
+            mResetUserExpandedStatesRunnable.run();
             clearTemporaryViews();
             clearUserLockedViews();
             resetAllSwipeState();
@@ -4747,8 +4746,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return max + getStackTranslation();
     }
 
-    public void setNotificationsController(NotificationsController notificationsController) {
-        this.mNotificationsController = notificationsController;
+    public void setResetUserExpandedStatesRunnable(Runnable runnable) {
+        this.mResetUserExpandedStatesRunnable = runnable;
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
