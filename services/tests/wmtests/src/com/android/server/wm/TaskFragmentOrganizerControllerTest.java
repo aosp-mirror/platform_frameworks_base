@@ -25,7 +25,9 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_TOP_OF_TASK;
@@ -1759,6 +1761,40 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testApplyTransaction_createTaskFragmentDecorSurface() {
+        // TODO(b/293654166) remove system organizer requirement once security review is cleared.
+        mController.unregisterOrganizer(mIOrganizer);
+        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        final Task task = createTask(mDisplayContent);
+
+        final TaskFragment tf = createTaskFragment(task);
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE).build();
+        mTransaction.addTaskFragmentOperation(tf.getFragmentToken(), operation);
+
+        assertApplyTransactionAllowed(mTransaction);
+
+        verify(task).moveOrCreateDecorSurfaceFor(tf);
+    }
+
+    @Test
+    public void testApplyTransaction_removeTaskFragmentDecorSurface() {
+        // TODO(b/293654166) remove system organizer requirement once security review is cleared.
+        mController.unregisterOrganizer(mIOrganizer);
+        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tf = createTaskFragment(task);
+
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE).build();
+        mTransaction.addTaskFragmentOperation(tf.getFragmentToken(), operation);
+
+        assertApplyTransactionAllowed(mTransaction);
+
+        verify(task).removeDecorSurface();
+    }
+
+    @Test
     public void testApplyTransaction_reorderToBottomOfTask_failsIfNotSystemOrganizer() {
         testApplyTransaction_reorder_failsIfNotSystemOrganizer_common(
                 OP_TYPE_REORDER_TO_BOTTOM_OF_TASK);
@@ -1966,7 +2002,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     /** Setups the mock Task as the parent of the given TaskFragment. */
     private static void setupMockParent(TaskFragment taskFragment, Task mockParent) {
         doReturn(mockParent).when(taskFragment).getTask();
-        doReturn(new TaskFragmentParentInfo(new Configuration(), DEFAULT_DISPLAY, true, true))
+        doReturn(new TaskFragmentParentInfo(
+                new Configuration(), DEFAULT_DISPLAY, true, true, null /* decorSurface */))
                 .when(mockParent).getTaskFragmentParentInfo();
 
         // Task needs to be visible

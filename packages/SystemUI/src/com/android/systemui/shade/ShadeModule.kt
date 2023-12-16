@@ -18,7 +18,12 @@ package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorSceneContainerImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
@@ -45,7 +50,25 @@ abstract class ShadeModule {
                 sceneContainerOff.get()
             }
         }
+
+        @Provides
+        @SysUISingleton
+        fun provideShadeAnimationInteractor(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<ShadeAnimationInteractorSceneContainerImpl>,
+            sceneContainerOff: Provider<ShadeAnimationInteractorLegacyImpl>
+        ): ShadeAnimationInteractor {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
     }
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeRepository(impl: ShadeRepositoryImpl): ShadeRepository
 
     @Binds
     @SysUISingleton

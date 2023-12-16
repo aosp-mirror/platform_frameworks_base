@@ -56,6 +56,7 @@ void RenderNodeDrawable::drawBackwardsProjectedNodes(SkCanvas* canvas,
                                                      int nestLevel) const {
     LOG_ALWAYS_FATAL_IF(0 == nestLevel && !displayList.mProjectionReceiver);
     for (auto& child : displayList.mChildNodes) {
+        if (!child.getRenderNode()->isRenderable()) continue;
         const RenderProperties& childProperties = child.getNodeProperties();
 
         // immediate children cannot be projected on their parent

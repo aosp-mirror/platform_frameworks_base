@@ -28,6 +28,7 @@ import java.util.Iterator;
 /**
  * An iterator for {@link BatteryStats.HistoryItem}'s.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.HistoryItem>,
         AutoCloseable {
     private static final boolean DEBUG = false;
@@ -48,7 +49,7 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
             long endTimeMs) {
         mBatteryStatsHistory = history;
         mStartTimeMs = startTimeMs;
-        mEndTimeMs = (endTimeMs != 0) ? endTimeMs : Long.MAX_VALUE;
+        mEndTimeMs = (endTimeMs != MonotonicClock.UNDEFINED) ? endTimeMs : Long.MAX_VALUE;
         mHistoryItem.clear();
     }
 

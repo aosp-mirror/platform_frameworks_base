@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC හරහා සම්බන්ධ කර ඇත"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC හරහා සම්බන්ධ කර ඇත"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"රූපවාහිනී පෙරනිමිය"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI ප්‍රතිදානය"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"අභ්‍යන්තර ස්පීකර්"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"රූපවාහිනී පෙරනිමිය"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ප්‍රතිදානය"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"අභ්‍යන්තර ස්පීකර්"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"සම්බන්ධ කිරීමේ ගැටලුවකි උපාංගය ක්‍රියාවිරහිත කර &amp; ආපසු ක්‍රියාත්මක කරන්න"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"රැහැන්ගත කළ ඕඩියෝ උපාංගය"</string>
     <string name="help_label" msgid="3528360748637781274">"උදවු &amp; ප්‍රතිපෝෂණ"</string>

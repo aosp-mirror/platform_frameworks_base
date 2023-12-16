@@ -1,5 +1,11 @@
 # Ravenwood "policy" file for framework-minus-apex.
 
+# Keep all AIDL interfaces
+class :aidl stubclass
+
+# Keep all feature flag implementations
+class :feature_flags stubclass
+
 # Collections
 class android.util.ArrayMap stubclass
 class android.util.ArraySet stubclass
@@ -71,6 +77,7 @@ class android.util.proto.ProtoUtils stubclass
 class android.util.proto.WireTypeMismatchException stubclass
 
 # Misc
+class android.util.BackupUtils stubclass
 class android.util.Dumpable stubclass
 class android.util.DebugUtils stubclass
 class android.util.MathUtils stubclass
@@ -78,21 +85,13 @@ class android.util.Patterns stubclass
 class android.util.UtilConfig stubclass
 
 # Internals
-class com.android.internal.util.FastPrintWriter stubclass
-class com.android.internal.util.GrowingArrayUtils stubclass
-class com.android.internal.util.LineBreakBufferedWriter stubclass
+class com.android.internal.util.FileRotator stubclass
+class com.android.internal.util.HexDump stubclass
+class com.android.internal.util.MessageUtils stubclass
 class com.android.internal.util.Preconditions stubclass
-class com.android.internal.util.StringPool stubclass
-
-class com.android.internal.os.SomeArgs stubclass
+class com.android.internal.util.TokenBucket stubclass
 
 # Parcel
-class android.os.Parcel stubclass
-    method writeException (Ljava/lang/Exception;)V @writeException$ravenwood
-    method writeNoException ()V @writeNoException$ravenwood
-class android.os.Parcel !com.android.hoststubgen.nativesubstitution.Parcel_host
-
-class android.os.Parcelable stubclass
 class android.os.ParcelFormatException stubclass
 class android.os.BadParcelableException stubclass
 class android.os.BadTypeParcelableException stubclass
@@ -109,6 +108,7 @@ class android.os.Bundle stubclass
 class android.os.PersistableBundle stubclass
 
 # Misc
+class android.os.HandlerExecutor stubclass
 class android.os.PatternMatcher stubclass
 class android.os.ParcelUuid stubclass
 
@@ -129,6 +129,8 @@ class com.android.modules.utils.TypedXmlSerializer stubclass
 class android.net.Uri stubclass
 class android.net.UriCodec stubclass
 
-# Context: just enough to support wrapper, no further functionality
+# Just enough to support mocking, no further functionality
 class android.content.Context stub
+    method <init> ()V stub
+class android.content.pm.PackageManager stub
     method <init> ()V stub

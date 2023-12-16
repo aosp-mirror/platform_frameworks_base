@@ -113,13 +113,13 @@ package android.location {
   }
 
   public final class GnssMeasurementRequest implements android.os.Parcelable {
-    method @NonNull public android.os.WorkSource getWorkSource();
+    method @FlaggedApi(Flags.FLAG_GNSS_API_MEASUREMENT_REQUEST_WORK_SOURCE) @NonNull public android.os.WorkSource getWorkSource();
     method public boolean isCorrelationVectorOutputsEnabled();
   }
 
   public static final class GnssMeasurementRequest.Builder {
     method @NonNull public android.location.GnssMeasurementRequest.Builder setCorrelationVectorOutputsEnabled(boolean);
-    method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.location.GnssMeasurementRequest.Builder setWorkSource(@Nullable android.os.WorkSource);
+    method @FlaggedApi(Flags.FLAG_GNSS_API_MEASUREMENT_REQUEST_WORK_SOURCE) @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.location.GnssMeasurementRequest.Builder setWorkSource(@Nullable android.os.WorkSource);
   }
 
   public final class GnssReflectingPlane implements android.os.Parcelable {

@@ -400,6 +400,7 @@ abstract class DisplayDevice {
     }
 
     private DisplayDeviceConfig loadDisplayDeviceConfig() {
-        return DisplayDeviceConfig.create(mContext, false);
+        return DisplayDeviceConfig.create(mContext, /* useConfigXml= */ false,
+                mDisplayAdapter.getFeatureFlags());
     }
 }

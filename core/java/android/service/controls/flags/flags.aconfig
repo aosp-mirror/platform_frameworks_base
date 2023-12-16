@@ -1,0 +1,8 @@
+package: "android.service.controls.flags"
+
+flag {
+    name: "home_panel_dream"
+    namespace: "systemui"
+    description: "Enables the home controls dream feature."
+    bug: "298025023"
+}

@@ -21,7 +21,6 @@ import android.app.ActivityTaskManager
 import android.app.PendingIntent
 import android.app.TaskInfo
 import android.graphics.Matrix
-import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Build
@@ -37,7 +36,6 @@ import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
 import androidx.annotation.AnyThread
 import androidx.annotation.BinderThread
@@ -93,7 +91,7 @@ class ActivityLaunchAnimator(
         val INTERPOLATORS =
             LaunchAnimator.Interpolators(
                 positionInterpolator = Interpolators.EMPHASIZED,
-                positionXInterpolator = createPositionXInterpolator(),
+                positionXInterpolator = Interpolators.EMPHASIZED_COMPLEMENT,
                 contentBeforeFadeOutInterpolator = Interpolators.LINEAR_OUT_SLOW_IN,
                 contentAfterFadeInInterpolator = PathInterpolator(0f, 0f, 0.6f, 1f)
             )
@@ -121,16 +119,6 @@ class ActivityLaunchAnimator(
          * cancelled by WM.
          */
         private const val LONG_LAUNCH_TIMEOUT = 5_000L
-
-        private fun createPositionXInterpolator(): Interpolator {
-            val path =
-                Path().apply {
-                    moveTo(0f, 0f)
-                    cubicTo(0.1217f, 0.0462f, 0.15f, 0.4686f, 0.1667f, 0.66f)
-                    cubicTo(0.1834f, 0.8878f, 0.1667f, 1f, 1f, 1f)
-                }
-            return PathInterpolator(path)
-        }
     }
 
     /**

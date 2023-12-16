@@ -130,8 +130,10 @@ public class NotificationSettingsController implements Dumpable {
             }
             mListeners.put(uri, currentListeners);
             if (currentListeners.size() == 1) {
-                mSecureSettings.registerContentObserverForUser(
-                        uri, false, mContentObserver, mUserTracker.getUserId());
+                mBackgroundHandler.post(() -> {
+                    mSecureSettings.registerContentObserverForUser(
+                            uri, false, mContentObserver, mUserTracker.getUserId());
+                });
             }
         }
         mBackgroundHandler.post(() -> {
@@ -156,7 +158,9 @@ public class NotificationSettingsController implements Dumpable {
             }
 
             if (mListeners.size() == 0) {
-                mSecureSettings.unregisterContentObserver(mContentObserver);
+                mBackgroundHandler.post(() -> {
+                    mSecureSettings.unregisterContentObserver(mContentObserver);
+                });
             }
         }
         Trace.traceEnd(Trace.TRACE_TAG_APP);

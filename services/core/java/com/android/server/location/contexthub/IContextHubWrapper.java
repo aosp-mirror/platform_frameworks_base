@@ -18,6 +18,7 @@ package com.android.server.location.contexthub;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.contexthub.HostEndpointInfo;
+import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.contexthub.NanSessionRequest;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
@@ -424,6 +425,7 @@ public abstract class IContextHubWrapper {
             // 9a17008d-6bf1-445a-9011-6d21bd985b6c
             private static final byte[] UUID = {-102, 23, 0, -115, 107, -15, 68, 90,
                                                 -112, 17, 109, 33, -67, -104, 91, 108};
+            private static final String NAME = "ContextHubService";
 
             ContextHubAidlCallback(int contextHubId, ICallback callback) {
                 mContextHubId = contextHubId;
@@ -466,9 +468,17 @@ public abstract class IContextHubWrapper {
                 // TODO(271471342): Implement
             }
 
-            public byte[] getUuid() throws RemoteException {
-                //TODO(b/247124878): return the UUID defined in this file when the API is put in use
-                throw new RemoteException("This API is not implemented yet.");
+            public void handleMessageDeliveryStatus(char hostEndPointId,
+                    MessageDeliveryStatus messageDeliveryStatus) {
+                // TODO(b/312417087): Implement reliable message support
+            }
+
+            public byte[] getUuid() {
+                return UUID;
+            }
+
+            public String getName() {
+                return NAME;
             }
 
             @Override

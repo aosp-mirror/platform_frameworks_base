@@ -47,6 +47,7 @@ import android.app.role.RoleManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -419,6 +420,14 @@ public class TelephonyManager {
 
     /** @hide */
     public static final String PROPERTY_ENABLE_NULL_CIPHER_TOGGLE = "enable_null_cipher_toggle";
+
+    /**
+     * To apply the enforcement telephony feature and API
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long ENABLE_FEATURE_MAPPING = 297989574L;
 
     private final Context mContext;
     private final int mSubId;
@@ -1198,7 +1207,8 @@ public class TelephonyManager {
      * The dialer app receives this event via
      * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
      * <p>
-     * The {@link Bundle} parameter is expected to include the following extras:
+     * The {@link Bundle} parameter is guaranteed to include the following extras if the below
+     * conditions are met:
      * <ul>
      *     <li>{@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE} - the recommending handover
      *         type.</li>
@@ -18006,6 +18016,64 @@ public class TelephonyManager {
             ex.rethrowFromSystemServer();
         }
         return true;
+    }
+
+    /**
+     * Enable or disable notifications sent for cellular identifier disclosure events.
+     *
+     * Disclosure events are defined as instances where a device has sent a cellular identifier
+     * on the Non-access stratum (NAS) before a security context is established. As a result the
+     * identifier is sent in the clear, which has privacy implications for the user.
+     *
+     * @param enable if notifications about disclosure events should be enabled
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_IDENTIFIER_DISCLOSURE_TRANSPARENCY)
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public void setEnableCellularIdentifierDisclosureNotifications(boolean enable) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setEnableCellularIdentifierDisclosureNotifications(enable);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setEnableCellularIdentifierDisclosureNotifications RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get whether or not cellular identifier disclosure notifications are enabled.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_IDENTIFIER_DISCLOSURE_TRANSPARENCY)
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public boolean isCellularIdentifierDisclosureNotificationsEnabled() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isCellularIdentifierDisclosureNotificationsEnabled();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "isCellularIdentifierDisclosureNotificationsEnabled RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return false;
     }
 
     /**

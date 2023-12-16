@@ -144,8 +144,7 @@ private fun SceneScope.LockscreenScene(
             modifier = Modifier.fillMaxSize(),
         )
 
-        val notificationStackPosition by
-            viewModel.keyguardRoot.notificationPositionOnLockscreen.collectAsState()
+        val notificationStackPosition by viewModel.keyguardRoot.notificationBounds.collectAsState()
 
         Layout(
             modifier = Modifier.fillMaxSize(),

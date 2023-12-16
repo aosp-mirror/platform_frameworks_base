@@ -27,7 +27,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.AccessibilityWindowAttributes;
-import android.view.accessibility.IWindowMagnificationConnection;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.InputEvent;
 import android.view.IWindow;
 import android.view.MagnificationSpec;
@@ -90,7 +90,7 @@ interface IAccessibilityManager {
 
     oneway void registerSystemAction(in RemoteAction action, int actionId);
     oneway void unregisterSystemAction(int actionId);
-    oneway void setWindowMagnificationConnection(in IWindowMagnificationConnection connection);
+    oneway void setMagnificationConnection(in IMagnificationConnection connection);
 
     void associateEmbeddedHierarchy(IBinder host, IBinder embedded);
 
@@ -127,6 +127,9 @@ interface IAccessibilityManager {
 
     boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId);
     boolean sendRestrictedDialogIntent(String packageName, int uid, int userId);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    boolean isAccessibilityServiceWarningRequired(in AccessibilityServiceInfo info);
 
     parcelable WindowTransformationSpec {
         float[] transformationMatrix;

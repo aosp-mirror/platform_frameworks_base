@@ -420,6 +420,11 @@
     <!-- Cannot double inherit. Use Theme.SystemUI.QuickSettings in code to match -->
     <style name="BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Animation.BrightnessDialog</item>
+    </style>
+
+    <style name="Animation.BrightnessDialog">
+        <item name="android:windowExitAnimation">@anim/instant_fade_out</item>
     </style>
 
     <style name="Theme.SystemUI.ContrastDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
@@ -1511,10 +1516,6 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:background">?android:attr/dividerHorizontal</item>
-    </style>
-
-    <style name="ShortcutItemBackground">
-        <item name="android:background">@color/ksh_key_item_new_background</item>
     </style>
 
     <style name="LongPressLockScreenAnimation">

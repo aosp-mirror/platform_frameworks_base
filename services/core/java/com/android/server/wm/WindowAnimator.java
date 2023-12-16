@@ -196,7 +196,9 @@ public class WindowAnimator {
             updateRunningExpensiveAnimationsLegacy();
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "applyTransaction");
         mTransaction.apply();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         mService.mWindowTracing.logState("WindowAnimator");
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
 

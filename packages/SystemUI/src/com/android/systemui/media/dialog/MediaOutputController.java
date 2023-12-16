@@ -78,7 +78,6 @@ import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
-import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -86,6 +85,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -358,7 +358,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     Drawable getAppSourceIconFromPackage() {
-        if (mPackageName.isEmpty()) {
+        if (TextUtils.isEmpty(mPackageName)) {
             return null;
         }
         try {
@@ -372,7 +372,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     String getAppSourceName() {
-        if (mPackageName.isEmpty()) {
+        if (TextUtils.isEmpty(mPackageName)) {
             return null;
         }
         final PackageManager packageManager = mContext.getPackageManager();
@@ -391,7 +391,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     Intent getAppLaunchIntent() {
-        if (mPackageName.isEmpty()) {
+        if (TextUtils.isEmpty(mPackageName)) {
             return null;
         }
         return mContext.getPackageManager().getLaunchIntentForPackage(mPackageName);

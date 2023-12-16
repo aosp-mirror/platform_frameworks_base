@@ -387,7 +387,6 @@ public class VoiceInteractionService extends Service {
                 VoiceInteractionService::onShutdownInternal, VoiceInteractionService.this));
     };
 
-
     private void onShutdownInternal() {
         onShutdown();
         // Stop any active recognitions when shutting down.
@@ -1022,6 +1021,36 @@ public class VoiceInteractionService extends Service {
             }
             mActiveVisualQueryDetector = visualQueryDetector;
             return visualQueryDetector;
+        }
+    }
+
+    /**
+     * Allow/disallow receiving training data from trusted process.
+     *
+     * <p> This method can be called by a preinstalled assistant to receive/stop receiving
+     * training data via {@link HotwordDetector.Callback#onTrainingData(HotwordTrainingData)}.
+     * These training data events are produced during sandboxed detection (in trusted process).
+     *
+     * @param allowed whether to allow/disallow receiving training data produced during
+     *                sandboxed detection (from trusted process).
+     * @throws SecurityException if caller is not a preinstalled assistant or if caller is not the
+     * active assistant.
+     *
+     * @hide
+     */
+    //TODO(b/315053245): Add mitigations to make API no-op once user has modified setting.
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
+    @RequiresPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION)
+    public void setShouldReceiveSandboxedTrainingData(boolean allowed) {
+        Log.i(TAG, "setShouldReceiveSandboxedTrainingData to " + allowed);
+        if (mSystemService == null) {
+            throw new IllegalStateException("Not available until onReady() is called");
+        }
+        try {
+            mSystemService.setShouldReceiveSandboxedTrainingData(allowed);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

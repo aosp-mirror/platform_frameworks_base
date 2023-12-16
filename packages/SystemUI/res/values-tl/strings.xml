@@ -197,10 +197,8 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Nakakonekta ang Bluetooth."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Icon ng Bluetooth device"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"I-click para i-configure ang detalye ng device"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"I-click para tingnan ang lahat ng device"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"I-click para magpares ng bagong device"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Hindi alam ang porsyento ng baterya."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Nakakonekta sa <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Nakakonekta sa <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -259,10 +257,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Gumamit ng Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Nakakonekta"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Na-save"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"idiskonekta"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"i-activate"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> na baterya"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -334,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Pag-record ng screen"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Magsimula"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ihinto"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"One-hand mode"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contrast"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
@@ -405,8 +407,13 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mabagal na nagcha-charge • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> na lang para mapuno"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nagcha-charge • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> na lang para mapuno"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Mag-swipe pakaliwa para simulan ang communal na tutorial"</string>
-    <string name="button_to_open_widget_picker" msgid="8007261659745030810">"Buksan ang picker ng widget"</string>
-    <string name="button_to_remove_widget" msgid="1511255853677835341">"Mag-alis ng widget"</string>
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Buksan ang editor ng widget"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
+    <skip />
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Magpalit ng user"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pulldown menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ide-delete ang lahat ng app at data sa session na ito."</string>
@@ -643,10 +650,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Button na <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Back"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Up"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Down"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Left"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Right"</string>
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Pataas na arrow"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Pababang arrow"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Pakaliwang arrow"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Pakanang arrow"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Center"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
@@ -674,7 +681,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Mga Notification"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Mga Keyboard Shortcut"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Magpalit ng layout ng keyboard"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"I-clear ang text"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"o"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"I-clear ang query sa paghahanap"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Mga Shortcut"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Maghanap ng mga shortcut"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Walang nakitang shortcut"</string>
@@ -682,35 +690,40 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Input"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Buksan ang app"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Kasalukuyang app"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"I-access ang notification shade"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Kumuha ng buong screenshot"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"I-access ang listahan ng mga shortcut ng system / mga app"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"Bumalik: bumalik sa nakaraang status (button na bumalik)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"I-access ang home screen"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Pangkalahatang-ideya ng mga bukas na app"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Mag-cycle sa mga kamakailang app (sumulong)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Mag-cycle sa mga kamakailang app (bumalik)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"I-access ang listahan ng lahat ng app at paghahanap (ibig sabihin, Search/Launcher)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Itago at ipakita (ulit) ang taskbar"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"I-access ang mga setting ng system"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"I-access ang Google Assistant"</string>
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"Ipinapakita ang mga resulta ng paghahanap"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"Ipinapakita ang mga shortcut ng system"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Ipinapakita ang mga shortcut ng input"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Ipinapakita ang mga shortcut na nagbubukas ng mga app"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Ipinapakita ang mga shortcut para sa kasalukuyang app"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Tumingin ng mga notification"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Kumuha ng screenshot"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Ipakita ang mga shortcut"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Bumalik"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Pumunta sa home screen"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Tingnan ang mga kamakailang app"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Mag-cycle pasulong sa mga kamakailang app"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Mag-cycle pabalik sa mga kamakailang app"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Buksan ang listahan ng mga app"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Ipakita ang taskbar"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Buksan ang mga setting"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Buksan ang assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"I-lock ang screen"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Buksan ang Notes app para sa mabilis na memo"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"Buksan ang mga tala"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasking ng system"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Lumipat sa Split screen nang nasa RHS ang kasalukuyang app"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Lumipat sa Split screen nang nasa LHS ang kasalukuyang app"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Lumipat sa full screen mula sa Split screen"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Habang nasa Split screen: magpalit-palit ng app"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Lumipat sa split screen nang nasa RHS ang kasalukuyang app"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Lumipat sa split screen nang nasa LHS ang kasalukuyang app"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Lumipat sa full screen mula sa split screen"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"Habang nasa split screen: magpalit-palit ng app"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Magpalit ng wika ng pag-input (susunod na wika)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Magpalit ng wika ng pag-input (nakaraang wika)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Lumipat sa susunod na wika"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Lumipat sa dating wika"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"I-access ang emoji"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"I-access ang voice typing"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Mga Application"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Tulong"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Browser (Chrome bilang default)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistant"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Browser"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Mga Contact"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Email (Gmail bilang default)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Email"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Music"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalendaryo"</string>
@@ -1194,6 +1207,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Magtakda ng default na app sa pagtatala sa Mga Setting"</string>
     <string name="install_app" msgid="5066668100199613936">"I-install ang app"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"I-mirror sa external na display?"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"Ihihinto ang anumang aktibidad sa dual screen na kasalukuyang tumatakbo."</string>
     <string name="mirror_display" msgid="2515262008898122928">"I-mirror ang display"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"I-dismiss"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Naikonekta ang display"</string>

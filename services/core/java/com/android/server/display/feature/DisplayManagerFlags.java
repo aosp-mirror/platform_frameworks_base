@@ -78,9 +78,36 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_POWER_THROTTLING_CLAMPER,
             Flags::enablePowerThrottlingClamper);
 
+    private final FlagState mEvenDimmerFlagState = new FlagState(
+            Flags.FLAG_EVEN_DIMMER,
+            Flags::evenDimmer);
     private final FlagState mSmallAreaDetectionFlagState = new FlagState(
             com.android.graphics.surfaceflinger.flags.Flags.FLAG_ENABLE_SMALL_AREA_DETECTION,
             com.android.graphics.surfaceflinger.flags.Flags::enableSmallAreaDetection);
+
+    private final FlagState mBrightnessIntRangeUserPerceptionFlagState = new FlagState(
+            Flags.FLAG_BRIGHTNESS_INT_RANGE_USER_PERCEPTION,
+            Flags::brightnessIntRangeUserPerception);
+
+    private final FlagState mVsyncProximityVote = new FlagState(
+            Flags.FLAG_ENABLE_EXTERNAL_VSYNC_PROXIMITY_VOTE,
+            Flags::enableExternalVsyncProximityVote);
+
+    private final FlagState mVsyncLowPowerVote = new FlagState(
+            Flags.FLAG_ENABLE_VSYNC_LOW_POWER_VOTE,
+            Flags::enableVsyncLowPowerVote);
+
+    private final FlagState mBrightnessWearBedtimeModeClamperFlagState = new FlagState(
+            Flags.FLAG_BRIGHTNESS_WEAR_BEDTIME_MODE_CLAMPER,
+            Flags::brightnessWearBedtimeModeClamper);
+
+    private final FlagState mAutoBrightnessModesFlagState = new FlagState(
+            Flags.FLAG_AUTO_BRIGHTNESS_MODES,
+            Flags::autoBrightnessModes);
+
+    private final FlagState mFastHdrTransitions = new FlagState(
+            Flags.FLAG_FAST_HDR_TRANSITIONS,
+            Flags::fastHdrTransitions);
 
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
@@ -101,7 +128,6 @@ public class DisplayManagerFlags {
     public boolean isPowerThrottlingClamperEnabled() {
         return mPowerThrottlingClamperFlagState.isEnabled();
     }
-
 
     /**
      * Returns whether adaptive tone improvements are enabled
@@ -158,8 +184,40 @@ public class DisplayManagerFlags {
         return mBackUpSmoothDisplayAndForcePeakRefreshRateFlagState.isEnabled();
     }
 
+    /** Returns whether brightness range is allowed to extend below traditional range. */
+    public boolean isEvenDimmerEnabled() {
+        return mEvenDimmerFlagState.isEnabled();
+    }
+
     public boolean isSmallAreaDetectionEnabled() {
         return mSmallAreaDetectionFlagState.isEnabled();
+    }
+
+    public boolean isBrightnessIntRangeUserPerceptionEnabled() {
+        return mBrightnessIntRangeUserPerceptionFlagState.isEnabled();
+    }
+
+    public boolean isVsyncProximityVoteEnabled() {
+        return mVsyncProximityVote.isEnabled();
+    }
+
+    public boolean isVsyncLowPowerVoteEnabled() {
+        return mVsyncLowPowerVote.isEnabled();
+    }
+
+    public boolean isBrightnessWearBedtimeModeClamperEnabled() {
+        return mBrightnessWearBedtimeModeClamperFlagState.isEnabled();
+    }
+
+    /**
+     * @return Whether generic auto-brightness modes are enabled
+     */
+    public boolean areAutoBrightnessModesEnabled() {
+        return mAutoBrightnessModesFlagState.isEnabled();
+    }
+
+    public boolean isFastHdrTransitionsEnabled() {
+        return mFastHdrTransitions.isEnabled();
     }
 
     /**
@@ -179,6 +237,11 @@ public class DisplayManagerFlags {
         pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);
+        pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
+        pw.println(" " + mVsyncProximityVote);
+        pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);
+        pw.println(" " + mAutoBrightnessModesFlagState);
+        pw.println(" " + mFastHdrTransitions);
     }
 
     private static class FlagState {

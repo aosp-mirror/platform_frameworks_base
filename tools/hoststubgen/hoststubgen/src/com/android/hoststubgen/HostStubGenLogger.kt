@@ -15,10 +15,12 @@
  */
 package com.android.hoststubgen
 
-import java.io.OutputStream
-import java.io.PrintStream
+import java.io.BufferedOutputStream
+import java.io.FileOutputStream
+import java.io.PrintWriter
+import java.io.Writer
 
-val log: HostStubGenLogger = HostStubGenLogger()
+val log: HostStubGenLogger = HostStubGenLogger().setConsoleLogLevel(LogLevel.Info)
 
 /** Logging level */
 enum class LogLevel {
@@ -30,15 +32,13 @@ enum class LogLevel {
     Debug,
 }
 
-/** Simple logging class. */
-class HostStubGenLogger(
-        private var out: PrintStream = System.out!!,
-        var level: LogLevel = LogLevel.Info,
-) {
-    companion object {
-        private val sNullPrintStream: PrintStream = PrintStream(OutputStream.nullOutputStream())
-    }
-
+/**
+ * Simple logging class.
+ *
+ * By default, it has no printers set. Use [setConsoleLogLevel] or [addFilePrinter] to actually
+ * write log.
+ */
+class HostStubGenLogger {
     private var indentLevel: Int = 0
         get() = field
         set(value) {
@@ -46,6 +46,56 @@ class HostStubGenLogger(
             indent = "  ".repeat(value)
         }
     private var indent: String = ""
+
+    private val printers: MutableList<LogPrinter> = mutableListOf()
+
+    private var consolePrinter: LogPrinter? = null
+
+    private var maxLogLevel = LogLevel.None
+
+    private fun updateMaxLogLevel() {
+        maxLogLevel = LogLevel.None
+
+        printers.forEach {
+            if (maxLogLevel < it.logLevel) {
+                maxLogLevel = it.logLevel
+            }
+        }
+    }
+
+    private fun addPrinter(printer: LogPrinter) {
+        printers.add(printer)
+        updateMaxLogLevel()
+    }
+
+    private fun removePrinter(printer: LogPrinter) {
+        printers.remove(printer)
+        updateMaxLogLevel()
+    }
+
+    fun setConsoleLogLevel(level: LogLevel): HostStubGenLogger {
+        // If there's already a console log printer set, remove it, and then add a new one
+        consolePrinter?.let {
+            removePrinter(it)
+        }
+        val cp = StreamPrinter(level, PrintWriter(System.out))
+        addPrinter(cp)
+        consolePrinter = cp
+
+        return this
+    }
+
+    fun addFilePrinter(level: LogLevel, logFilename: String): HostStubGenLogger {
+        addPrinter(StreamPrinter(level, PrintWriter(BufferedOutputStream(
+            FileOutputStream(logFilename)))))
+
+        return this
+    }
+
+    /** Flush all the printers */
+    fun flush() {
+        printers.forEach { it.flush() }
+    }
 
     fun indent() {
         indentLevel++
@@ -68,92 +118,71 @@ class HostStubGenLogger(
     }
 
     fun isEnabled(level: LogLevel): Boolean {
-        return level.ordinal <= this.level.ordinal
+        return level.ordinal <= maxLogLevel.ordinal
     }
 
-    private fun println(message: String) {
-        out.print(indent)
-        out.println(message)
+    private fun println(level: LogLevel, message: String) {
+        printers.forEach {
+            if (it.logLevel.ordinal >= level.ordinal) {
+                it.println(level, indent, message)
+            }
+        }
+    }
+
+    private fun println(level: LogLevel, format: String, vararg args: Any?) {
+        if (isEnabled(level)) {
+            println(level, String.format(format, *args))
+        }
     }
 
     /** Log an error. */
     fun e(message: String) {
-        if (level.ordinal < LogLevel.Error.ordinal) {
-            return
-        }
-        println(message)
+        println(LogLevel.Error, message)
     }
 
     /** Log an error. */
     fun e(format: String, vararg args: Any?) {
-        if (level.ordinal < LogLevel.Error.ordinal) {
-            return
-        }
-        e(String.format(format, *args))
+        println(LogLevel.Error, format, *args)
     }
 
     /** Log a warning. */
     fun w(message: String) {
-        if (level.ordinal < LogLevel.Warn.ordinal) {
-            return
-        }
-        println(message)
+        println(LogLevel.Warn, message)
     }
 
     /** Log a warning. */
     fun w(format: String, vararg args: Any?) {
-        if (level.ordinal < LogLevel.Warn.ordinal) {
-            return
-        }
-        w(String.format(format, *args))
+        println(LogLevel.Warn, format, *args)
     }
 
     /** Log an info message. */
     fun i(message: String) {
-        if (level.ordinal < LogLevel.Info.ordinal) {
-            return
-        }
-        println(message)
+        println(LogLevel.Info, message)
     }
 
-    /** Log a debug message. */
+    /** Log an info message. */
     fun i(format: String, vararg args: Any?) {
-        if (level.ordinal < LogLevel.Warn.ordinal) {
-            return
-        }
-        i(String.format(format, *args))
+        println(LogLevel.Info, format, *args)
     }
 
     /** Log a verbose message. */
     fun v(message: String) {
-        if (level.ordinal < LogLevel.Verbose.ordinal) {
-            return
-        }
-        println(message)
+        println(LogLevel.Verbose, message)
     }
 
     /** Log a verbose message. */
     fun v(format: String, vararg args: Any?) {
-        if (level.ordinal < LogLevel.Verbose.ordinal) {
-            return
-        }
-        v(String.format(format, *args))
+        println(LogLevel.Verbose, format, *args)
     }
 
     /** Log a debug message. */
     fun d(message: String) {
-        if (level.ordinal < LogLevel.Debug.ordinal) {
-            return
-        }
-        println(message)
+        println(LogLevel.Debug, message)
     }
 
     /** Log a debug message. */
     fun d(format: String, vararg args: Any?) {
-        if (level.ordinal < LogLevel.Warn.ordinal) {
-            return
-        }
-        d(String.format(format, *args))
+        println(LogLevel.Debug, format, *args)
     }
 
     inline fun forVerbose(block: () -> Unit) {
@@ -168,31 +197,65 @@ class HostStubGenLogger(
         }
     }
 
-    /** Return a stream for error. */
-    fun getErrorPrintStream(): PrintStream {
-        if (level.ordinal < LogLevel.Error.ordinal) {
-            return sNullPrintStream
-        }
-
-        // TODO Apply indent
-        return PrintStream(out)
+    /** Return a Writer for a given log level. */
+    fun getWriter(level: LogLevel): Writer {
+        return MultiplexingWriter(level)
     }
 
-    /** Return a stream for verbose messages. */
-    fun getVerbosePrintStream(): PrintStream {
-        if (level.ordinal < LogLevel.Verbose.ordinal) {
-            return sNullPrintStream
+    private inner class MultiplexingWriter(val level: LogLevel) : Writer() {
+        private inline fun forPrinters(callback: (LogPrinter) -> Unit) {
+            printers.forEach {
+                if (it.logLevel.ordinal >= level.ordinal) {
+                    callback(it)
+                }
+            }
         }
-        // TODO Apply indent
-        return PrintStream(out)
+
+        override fun close() {
+            flush()
+        }
+
+        override fun flush() {
+            forPrinters {
+                it.flush()
+            }
+        }
+
+        override fun write(cbuf: CharArray, off: Int, len: Int) {
+            // TODO Apply indent
+            forPrinters {
+                it.write(cbuf, off, len)
+            }
+        }
+    }
+}
+
+private interface LogPrinter {
+    val logLevel: LogLevel
+
+    fun println(logLevel: LogLevel, indent: String, message: String)
+
+    // TODO: This should be removed once MultiplexingWriter starts applying indent, at which point
+    // println() should be used instead.
+    fun write(cbuf: CharArray, off: Int, len: Int)
+
+    fun flush()
+}
+
+private class StreamPrinter(
+    override val logLevel: LogLevel,
+    val out: PrintWriter,
+) : LogPrinter {
+    override fun println(logLevel: LogLevel, indent: String, message: String) {
+        out.print(indent)
+        out.println(message)
     }
 
-    /** Return a stream for debug messages. */
-    fun getInfoPrintStream(): PrintStream {
-        if (level.ordinal < LogLevel.Info.ordinal) {
-            return sNullPrintStream
-        }
-        // TODO Apply indent
-        return PrintStream(out)
+    override fun write(cbuf: CharArray, off: Int, len: Int) {
+        out.write(cbuf, off, len)
+    }
+
+    override fun flush() {
+        out.flush()
     }
 }

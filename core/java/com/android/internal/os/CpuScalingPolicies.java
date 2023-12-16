@@ -27,6 +27,7 @@ import java.util.Arrays;
  * CPU scaling policies: the policy IDs and corresponding supported scaling for those
  * policies.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class CpuScalingPolicies {
     private final SparseArray<int[]> mCpusByPolicy;
     private final SparseArray<int[]> mFreqsByPolicy;

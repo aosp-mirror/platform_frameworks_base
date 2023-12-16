@@ -23,7 +23,7 @@
 
     <!-- Root tag definitions -->
 
-    <xs:element name="vibration" type="Vibration"/>
+    <xs:element name="vibration-effect" type="VibrationEffect"/>
 
     <xs:element name="vibration-select" type="VibrationSelect"/>
 
@@ -31,11 +31,11 @@
 
     <xs:complexType name="VibrationSelect">
         <xs:sequence>
-            <xs:element name="vibration" type="Vibration" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="vibration-effect" type="VibrationEffect" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
     </xs:complexType>
 
-    <xs:complexType name="Vibration">
+    <xs:complexType name="VibrationEffect">
         <xs:choice>
 
             <!-- Waveform vibration effect -->

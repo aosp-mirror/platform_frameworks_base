@@ -197,7 +197,9 @@ public class Surface implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_COMPATIBILITY_"},
-            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE})
+            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    FRAME_RATE_COMPATIBILITY_EXACT, FRAME_RATE_COMPATIBILITY_NO_VOTE,
+                    FRAME_RATE_COMPATIBILITY_MIN, FRAME_RATE_COMPATIBILITY_GTE})
     public @interface FrameRateCompatibility {}
 
     // From native_window.h. Keep these in sync.
@@ -241,6 +243,13 @@ public class Surface implements Parcelable {
      * @hide
      */
     public static final int FRAME_RATE_COMPATIBILITY_MIN = 102;
+
+    // From window.h. Keep these in sync.
+    /**
+     * The surface requests a frame rate that is greater than or equal to {@code frameRate}.
+     * @hide
+     */
+    public static final int FRAME_RATE_COMPATIBILITY_GTE = 103;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

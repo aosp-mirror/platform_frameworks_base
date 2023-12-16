@@ -28,6 +28,7 @@ import android.os.IBinder;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.testutils.TestHandler;
 
 import org.junit.Before;
@@ -59,13 +60,17 @@ public class VirtualDisplayAdapterTest {
 
     private VirtualDisplayAdapter mVirtualDisplayAdapter;
 
+    @Mock
+    private DisplayManagerFlags mFeatureFlags;
+
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mHandler = new TestHandler(null);
         mVirtualDisplayAdapter = new VirtualDisplayAdapter(new DisplayManagerService.SyncRoot(),
-                mContextMock, mHandler, mMockListener, mMockSufaceControlDisplayFactory);
+                mContextMock, mHandler, mMockListener, mMockSufaceControlDisplayFactory,
+                mFeatureFlags);
 
         when(mMockCallback.asBinder()).thenReturn(mMockBinder);
     }

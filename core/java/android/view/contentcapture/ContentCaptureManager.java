@@ -18,6 +18,7 @@ package android.view.contentcapture;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toSet;
+import static android.view.contentcapture.flags.Flags.runOnBackgroundThreadEnabled;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -52,6 +53,7 @@ import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.util.SyncResultReceiver;
 
@@ -495,10 +497,9 @@ public final class ContentCaptureManager {
     @GuardedBy("mLock")
     private int mFlags;
 
-    // TODO(b/119220549): use UI Thread directly (as calls are one-way) or a shared thread / handler
-    // held at the Application level
-    @NonNull
-    private final Handler mHandler;
+    @Nullable
+    @GuardedBy("mLock")
+    private Handler mHandler;
 
     @GuardedBy("mLock")
     private MainContentCaptureSession mMainSession;
@@ -562,11 +563,6 @@ public final class ContentCaptureManager {
 
         if (sVerbose) Log.v(TAG, "Constructor for " + context.getPackageName());
 
-        // TODO(b/119220549): we might not even need a handler, as the IPCs are oneway. But if we
-        // do, then we should optimize it to run the tests after the Choreographer finishes the most
-        // important steps of the frame.
-        mHandler = Handler.createAsync(Looper.getMainLooper());
-
         mDataShareAdapterResourceManager = new LocalDataShareAdapterResourceManager();
 
         if (mOptions.contentProtectionOptions.enableReceiver
@@ -594,11 +590,25 @@ public final class ContentCaptureManager {
     public MainContentCaptureSession getMainContentCaptureSession() {
         synchronized (mLock) {
             if (mMainSession == null) {
-                mMainSession = new MainContentCaptureSession(mContext, this, mHandler, mService);
+                mMainSession = new MainContentCaptureSession(
+                        mContext, this, prepareContentCaptureHandler(), mService);
                 if (sVerbose) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
             }
             return mMainSession;
         }
+    }
+
+    @NonNull
+    @GuardedBy("mLock")
+    private Handler prepareContentCaptureHandler() {
+        if (mHandler == null) {
+            if (runOnBackgroundThreadEnabled()) {
+                mHandler = BackgroundThread.getHandler();
+            } else {
+                mHandler = Handler.createAsync(Looper.getMainLooper());
+            }
+        }
+        return mHandler;
     }
 
     /** @hide */

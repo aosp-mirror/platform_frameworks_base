@@ -6,12 +6,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,9 +31,9 @@ import androidx.test.filters.SmallTest;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -48,7 +46,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 
@@ -613,66 +610,21 @@ public class InternetDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void showProgressBar_wifiDisabled_hideProgressBar() {
-        Mockito.reset(mHandler);
-        when(mInternetDialogController.isWifiEnabled()).thenReturn(false);
+    public void onWifiScan_isScanTrue_setProgressBarVisibleTrue() {
+        mInternetDialog.mIsProgressBarVisible = false;
 
-        mInternetDialog.showProgressBar();
+        mInternetDialog.onWifiScan(true);
 
-        assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
-        verify(mHandler, never()).postDelayed(any(Runnable.class), anyLong());
+        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
     }
 
     @Test
-    public void showProgressBar_deviceLocked_hideProgressBar() {
-        Mockito.reset(mHandler);
-        when(mInternetDialogController.isDeviceLocked()).thenReturn(true);
+    public void onWifiScan_isScanFalse_setProgressBarVisibleFalse() {
+        mInternetDialog.mIsProgressBarVisible = true;
 
-        mInternetDialog.showProgressBar();
+        mInternetDialog.onWifiScan(false);
 
         assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
-        verify(mHandler, never()).postDelayed(any(Runnable.class), anyLong());
-    }
-
-    @Test
-    public void showProgressBar_wifiEnabledWithWifiEntry_showProgressBarThenHide() {
-        Mockito.reset(mHandler);
-        when(mInternetDialogController.isWifiEnabled()).thenReturn(true);
-
-        mInternetDialog.showProgressBar();
-
-        // Show progress bar
-        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
-
-        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mHandler).postDelayed(runnableCaptor.capture(),
-                eq(InternetDialog.PROGRESS_DELAY_MS));
-        runnableCaptor.getValue().run();
-
-        // Then hide progress bar
-        assertThat(mInternetDialog.mIsProgressBarVisible).isFalse();
-    }
-
-    @Test
-    public void showProgressBar_wifiEnabledWithoutWifiEntries_showProgressBarThenHideSearch() {
-        Mockito.reset(mHandler);
-        when(mInternetDialogController.isWifiEnabled()).thenReturn(true);
-        mInternetDialog.mConnectedWifiEntry = null;
-        mInternetDialog.mWifiEntriesCount = 0;
-
-        mInternetDialog.showProgressBar();
-
-        // Show progress bar
-        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
-
-        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-        verify(mHandler).postDelayed(runnableCaptor.capture(),
-                eq(InternetDialog.PROGRESS_DELAY_MS));
-        runnableCaptor.getValue().run();
-
-        // Then hide searching sub-title only
-        assertThat(mInternetDialog.mIsProgressBarVisible).isTrue();
-        assertThat(mInternetDialog.mIsSearchingHidden).isTrue();
     }
 
     @Test

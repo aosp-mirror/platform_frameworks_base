@@ -97,7 +97,16 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final List<ApplicationInfo> getInstalledApplications(
             @PackageManager.ApplicationInfoFlagsBits long flags, int userId, int callingUid) {
-        return snapshot().getInstalledApplications(flags, userId, callingUid);
+        return snapshot().getInstalledApplications(flags, userId, callingUid,
+                /* forceAllowCrossUser= */ false);
+    }
+
+    @Override
+    @Deprecated
+    public final List<ApplicationInfo> getInstalledApplicationsCrossUser(
+            @PackageManager.ApplicationInfoFlagsBits long flags, int userId, int callingUid) {
+        return snapshot().getInstalledApplications(flags, userId, callingUid,
+                /* forceAllowCrossUser= */ true);
     }
 
     @Override
@@ -753,13 +762,14 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     }
 
     @Override
-    public boolean isPackageQuarantined(@NonNull String packageName,
-            @UserIdInt int userId) {
+    public boolean isPackageQuarantined(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException {
         return snapshot().isPackageQuarantinedForUser(packageName, userId);
     }
 
     @Override
-    public boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId) {
+    public boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException {
         return snapshot().isPackageStoppedForUser(packageName, userId);
     }
 

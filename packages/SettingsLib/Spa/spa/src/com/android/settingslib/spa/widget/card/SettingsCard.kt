@@ -16,30 +16,40 @@
 
 package com.android.settingslib.spa.widget.card
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.debug.UiModePreviews
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraLarge
+import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraSmall
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsTitle
@@ -49,7 +59,7 @@ fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
         shape = CornerExtraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = SettingsTheme.colorScheme.surface,
+            containerColor = Color.Transparent,
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -57,6 +67,20 @@ fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
                 horizontal = SettingsDimension.itemPaddingEnd,
                 vertical = SettingsDimension.itemPaddingAround,
             ),
+        content = content,
+    )
+}
+
+@Composable
+fun SettingsCardContent(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        shape = CornerExtraSmall,
+        colors = CardDefaults.cardColors(
+            containerColor = SettingsTheme.colorScheme.surface,
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 1.dp),
         content = content,
     )
 }
@@ -70,14 +94,27 @@ fun SettingsCard(model: CardModel) {
 
 @Composable
 internal fun SettingsCardImpl(model: CardModel) {
-    Column(
-        modifier = Modifier.padding(SettingsDimension.itemPaddingStart),
-        verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround)
-    ) {
-        CardIcon(model.imageVector)
-        SettingsTitle(model.title)
-        SettingsBody(model.text)
-        Buttons(model.buttons)
+    AnimatedVisibility(visible = model.isVisible()) {
+        SettingsCardContent {
+            Column(
+                modifier = Modifier.padding(SettingsDimension.itemPaddingStart),
+                verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround)
+            ) {
+                CardHeader(model.imageVector, model.onDismiss)
+                SettingsTitle(model.title)
+                SettingsBody(model.text)
+                Buttons(model.buttons)
+            }
+        }
+    }
+}
+
+@Composable
+fun CardHeader(imageVector: ImageVector?, onDismiss: (() -> Unit)? = null) {
+    Row(Modifier.fillMaxWidth()) {
+        CardIcon(imageVector)
+        Spacer(modifier = Modifier.weight(1f))
+        DismissButton(onDismiss)
     }
 }
 
@@ -90,6 +127,28 @@ private fun CardIcon(imageVector: ImageVector?) {
             modifier = Modifier.size(SettingsDimension.itemIconSize),
             tint = MaterialTheme.colorScheme.primary,
         )
+    }
+}
+
+@Composable
+private fun DismissButton(onDismiss: (() -> Unit)?) {
+    if (onDismiss == null) return
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+    ) {
+        IconButton(
+            onClick = onDismiss,
+            modifier = Modifier.size(SettingsDimension.itemIconSize)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Close,
+                contentDescription = stringResource(
+                    androidx.compose.material3.R.string.m3c_snackbar_dismiss
+                ),
+                modifier = Modifier.size(SettingsDimension.iconSmall),
+            )
+        }
     }
 }
 

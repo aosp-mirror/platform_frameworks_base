@@ -186,6 +186,9 @@ interface NativeInputManagerService {
 
     void setCustomPointerIcon(PointerIcon icon);
 
+    boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
+            IBinder inputToken);
+
     void requestPointerCapture(IBinder windowToken, boolean enabled);
 
     boolean canDispatchToDisplay(int deviceId, int displayId);
@@ -242,6 +245,16 @@ interface NativeInputManagerService {
      * The recreated device may contain new associated peripheral devices like Light, Battery, etc.
      */
     void sysfsNodeChanged(String sysfsNodePath);
+
+    /**
+     * Notify if Accessibility bounce keys threshold is changed from InputSettings.
+     */
+    void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
+
+    /**
+     * Notify if Accessibility sticky keys is enabled/disabled from InputSettings.
+     */
+    void setAccessibilityStickyKeysEnabled(boolean enabled);
 
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
@@ -434,6 +447,10 @@ interface NativeInputManagerService {
         public native void setCustomPointerIcon(PointerIcon icon);
 
         @Override
+        public native boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId,
+                int pointerId, IBinder inputToken);
+
+        @Override
         public native void requestPointerCapture(IBinder windowToken, boolean enabled);
 
         @Override
@@ -493,5 +510,11 @@ interface NativeInputManagerService {
 
         @Override
         public native void sysfsNodeChanged(String sysfsNodePath);
+
+        @Override
+        public native void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
+
+        @Override
+        public native void setAccessibilityStickyKeysEnabled(boolean enabled);
     }
 }

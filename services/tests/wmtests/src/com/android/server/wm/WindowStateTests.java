@@ -757,7 +757,6 @@ public class WindowStateTests extends WindowTestsBase {
         startingApp.getWindowFrames().setInsetsChanged(true);
         startingApp.updateResizingWindowIfNeeded();
         assertTrue(startingApp.isDrawn());
-        assertFalse(startingApp.getOrientationChanging());
     }
 
     @SetupWindows(addWindows = W_ABOVE_ACTIVITY)

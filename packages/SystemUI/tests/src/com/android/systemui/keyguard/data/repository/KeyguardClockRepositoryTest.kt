@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.data.repository
 
 import android.provider.Settings
 import androidx.test.filters.SmallTest
+import com.android.keyguard.ClockEventController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
@@ -47,6 +48,7 @@ class KeyguardClockRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: KeyguardClockRepository
     private lateinit var fakeSettings: FakeSettings
     @Mock private lateinit var clockRegistry: ClockRegistry
+    @Mock private lateinit var clockEventController: ClockEventController
 
     @Before
     fun setup() {
@@ -55,7 +57,14 @@ class KeyguardClockRepositoryTest : SysuiTestCase() {
         scheduler = TestCoroutineScheduler()
         dispatcher = StandardTestDispatcher(scheduler)
         scope = TestScope(dispatcher)
-        underTest = KeyguardClockRepository(fakeSettings, clockRegistry, dispatcher)
+        underTest =
+            KeyguardClockRepositoryImpl(
+                fakeSettings,
+                clockRegistry,
+                clockEventController,
+                dispatcher,
+                scope.backgroundScope
+            )
     }
 
     @Test

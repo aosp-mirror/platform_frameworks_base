@@ -24,9 +24,9 @@ import static org.mockito.Mockito.verify;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.Display;
+import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnection;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.server.accessibility.AccessibilityTraceManager;
@@ -39,28 +39,28 @@ import org.mockito.MockitoAnnotations;
 /**
  * Tests for MagnificationConnectionWrapper. We don't test {@code
  * MagnificationConnectionWrapper#linkToDeath(IBinder.DeathRecipient)} since it's tested in
- * {@link WindowMagnificationManagerTest}.
+ * {@link MagnificationConnectionManagerTest}.
  */
 public class MagnificationConnectionWrapperTest {
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
 
-    private IWindowMagnificationConnection mConnection;
+    private IMagnificationConnection mConnection;
     @Mock
     private AccessibilityTraceManager mTrace;
     @Mock
-    private IWindowMagnificationConnectionCallback mCallback;
+    private IMagnificationConnectionCallback mCallback;
     @Mock
     private MagnificationAnimationCallback mAnimationCallback;
 
-    private MockWindowMagnificationConnection mMockWindowMagnificationConnection;
+    private MockMagnificationConnection mMockMagnificationConnection;
     private MagnificationConnectionWrapper mConnectionWrapper;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mMockWindowMagnificationConnection = new MockWindowMagnificationConnection();
-        mConnection = mMockWindowMagnificationConnection.getConnection();
+        mMockMagnificationConnection = new MockMagnificationConnection();
+        mConnection = mMockMagnificationConnection.getConnection();
         mConnectionWrapper = new MagnificationConnectionWrapper(mConnection, mTrace);
     }
 
@@ -73,9 +73,9 @@ public class MagnificationConnectionWrapperTest {
     }
 
     @Test
-    public void setScale() throws RemoteException {
-        mConnectionWrapper.setScale(TEST_DISPLAY, 3.0f);
-        verify(mConnection).setScale(TEST_DISPLAY, 3.0f);
+    public void setScaleForWindowMagnification() throws RemoteException {
+        mConnectionWrapper.setScaleForWindowMagnification(TEST_DISPLAY, 3.0f);
+        verify(mConnection).setScaleForWindowMagnification(TEST_DISPLAY, 3.0f);
     }
 
     @Test

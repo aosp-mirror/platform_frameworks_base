@@ -9,6 +9,12 @@
       ]
     }
   ],
+  "ravenwood-presubmit": [
+    {
+      "name": "PowerStatsTestsRavenwood",
+      "host": true
+    }
+  ],
   "postsubmit": [
     {
       "name": "PowerStatsTests",

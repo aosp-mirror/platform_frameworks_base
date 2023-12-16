@@ -21,6 +21,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+import static android.view.accessibility.Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
@@ -85,9 +86,9 @@ import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService.AccessibilityDisplayListener;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
+import com.android.server.accessibility.magnification.MagnificationConnectionManager;
 import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
-import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -156,7 +157,7 @@ public class AccessibilityManagerServiceTest {
     @Mock private UserManagerInternal mMockUserManagerInternal;
     @Mock private IBinder mMockBinder;
     @Mock private IAccessibilityServiceClient mMockServiceClient;
-    @Mock private WindowMagnificationManager mMockWindowMagnificationMgr;
+    @Mock private MagnificationConnectionManager mMockMagnificationConnectionManager;
     @Mock private MagnificationController mMockMagnificationController;
     @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     @Mock private ProxyManager mProxyManager;
@@ -180,8 +181,8 @@ public class AccessibilityManagerServiceTest {
                 UserManagerInternal.class, mMockUserManagerInternal);
         mInputFilter = Mockito.mock(FakeInputFilter.class);
 
-        when(mMockMagnificationController.getWindowMagnificationMgr()).thenReturn(
-                mMockWindowMagnificationMgr);
+        when(mMockMagnificationController.getMagnificationConnectionManager()).thenReturn(
+                mMockMagnificationConnectionManager);
         when(mMockMagnificationController.getFullScreenMagnificationController()).thenReturn(
                 mMockFullScreenMagnificationController);
         when(mMockMagnificationController.supportWindowMagnification()).thenReturn(true);
@@ -530,7 +531,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(true);
+        verify(mMockMagnificationConnectionManager).requestConnection(true);
     }
 
     @SmallTest
@@ -547,7 +548,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(true);
+        verify(mMockMagnificationConnectionManager).requestConnection(true);
     }
 
     @SmallTest
@@ -565,7 +566,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(false);
+        verify(mMockMagnificationConnectionManager).requestConnection(false);
     }
 
     @SmallTest
@@ -583,7 +584,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(true);
+        verify(mMockMagnificationConnectionManager).requestConnection(true);
     }
 
     @SmallTest
@@ -602,7 +603,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(false);
+        verify(mMockMagnificationConnectionManager).requestConnection(false);
     }
 
     @SmallTest
@@ -616,7 +617,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(true);
+        verify(mMockMagnificationConnectionManager).requestConnection(true);
     }
 
     @SmallTest
@@ -630,7 +631,8 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr, atLeastOnce()).removeMagnificationButton(anyInt());
+        verify(mMockMagnificationConnectionManager, atLeastOnce())
+                .removeMagnificationButton(anyInt());
     }
 
     @SmallTest
@@ -644,7 +646,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr, never()).removeMagnificationButton(anyInt());
+        verify(mMockMagnificationConnectionManager, never()).removeMagnificationButton(anyInt());
     }
 
     @SmallTest
@@ -659,7 +661,8 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr, atLeastOnce()).removeMagnificationButton(anyInt());
+        verify(mMockMagnificationConnectionManager, atLeastOnce())
+                .removeMagnificationButton(anyInt());
     }
 
     @SmallTest
@@ -674,7 +677,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr, never()).removeMagnificationButton(anyInt());
+        verify(mMockMagnificationConnectionManager, never()).removeMagnificationButton(anyInt());
     }
 
     @Test
@@ -848,6 +851,53 @@ public class AccessibilityManagerServiceTest {
         mA11yms.switchUser(mA11yms.getCurrentUserIdLocked() + 1);
 
         assertThat(lockState.get()).containsExactly(false);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
+    public void testIsAccessibilityServiceWarningRequired_requiredByDefault() {
+        mockManageAccessibilityGranted(mTestableContext);
+        final AccessibilityServiceInfo info = new AccessibilityServiceInfo();
+        info.setComponentName(COMPONENT_NAME);
+
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info)).isTrue();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
+    public void testIsAccessibilityServiceWarningRequired_notRequiredIfAlreadyEnabled() {
+        mockManageAccessibilityGranted(mTestableContext);
+        final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
+        info_a.setComponentName(COMPONENT_NAME);
+        final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
+        info_b.setComponentName(new ComponentName("package_b", "class_b"));
+        final AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mEnabledServices.clear();
+        userState.mEnabledServices.add(info_b.getComponentName());
+
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_a)).isTrue();
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_b)).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
+    public void testIsAccessibilityServiceWarningRequired_notRequiredIfExistingShortcut() {
+        mockManageAccessibilityGranted(mTestableContext);
+        final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
+        info_a.setComponentName(new ComponentName("package_a", "class_a"));
+        final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
+        info_b.setComponentName(new ComponentName("package_b", "class_b"));
+        final AccessibilityServiceInfo info_c = new AccessibilityServiceInfo();
+        info_c.setComponentName(new ComponentName("package_c", "class_c"));
+        final AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mAccessibilityButtonTargets.clear();
+        userState.mAccessibilityButtonTargets.add(info_b.getComponentName().flattenToString());
+        userState.mAccessibilityShortcutKeyTargets.clear();
+        userState.mAccessibilityShortcutKeyTargets.add(info_c.getComponentName().flattenToString());
+
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_a)).isTrue();
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_b)).isFalse();
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_c)).isFalse();
     }
 
     // Single package intents can trigger multiple PackageMonitor callbacks.

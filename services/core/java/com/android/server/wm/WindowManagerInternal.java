@@ -866,6 +866,11 @@ public abstract class WindowManagerInternal {
     public abstract ImeTargetInfo onToggleImeRequested(boolean show,
             @NonNull IBinder focusedToken, @NonNull IBinder requestToken, int displayId);
 
+    /**
+     * Returns the token to identify the target window that the IME is associated with.
+     */
+    public abstract @Nullable IBinder getTargetWindowTokenFromInputToken(IBinder inputToken);
+
     /** The information of input method target when IME is requested to show or hide. */
     public static class ImeTargetInfo {
         public final String focusedWindowName;
@@ -993,4 +998,18 @@ public abstract class WindowManagerInternal {
      * @param displayId the id of display to check if there is a software navigation bar.
      */
     public abstract boolean hasNavigationBar(int displayId);
+
+    /**
+     * Controls whether the app-requested screen orientation is always respected.
+     *
+     * @param respected If {@code true}, the app requested orientation is always respected.
+     *                  Otherwise, the system might ignore the request due to
+     *                  {@link com.android.server.wm.DisplayArea#getIgnoreOrientationRequest}.
+     * @param fromOrientations The orientations we want to map to the correspondent orientations
+     *                         in toOrientation.
+     * @param toOrientations The orientations we map to the ones in fromOrientations at the same
+     *                       index
+     */
+    public abstract void setOrientationRequestPolicy(boolean respected,
+            int[] fromOrientations, int[] toOrientations);
 }

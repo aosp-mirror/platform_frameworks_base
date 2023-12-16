@@ -48,7 +48,7 @@ constructor(
     override fun start() {
         listenForDreamingToOccluded()
         listenForDreamingToGone()
-        listenForDreamingToDozing()
+        listenForDreamingToAodOrDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
@@ -94,7 +94,7 @@ constructor(
         }
     }
 
-    private fun listenForDreamingToDozing() {
+    private fun listenForDreamingToAodOrDozing() {
         scope.launch {
             combine(
                     keyguardInteractor.dozeTransitionModel,
@@ -102,11 +102,12 @@ constructor(
                     ::Pair
                 )
                 .collect { (dozeTransitionModel, keyguardState) ->
-                    if (
-                        dozeTransitionModel.to == DozeStateModel.DOZE &&
-                            keyguardState == KeyguardState.DREAMING
-                    ) {
-                        startTransitionTo(KeyguardState.DOZING)
+                    if (keyguardState == KeyguardState.DREAMING) {
+                        if (dozeTransitionModel.to == DozeStateModel.DOZE) {
+                            startTransitionTo(KeyguardState.DOZING)
+                        } else if (dozeTransitionModel.to == DozeStateModel.DOZE_AOD) {
+                            startTransitionTo(KeyguardState.AOD)
+                        }
                     }
                 }
         }

@@ -15,29 +15,40 @@
  *
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
+import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
-import com.android.systemui.util.kotlin.sample
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.isActive
 
 /** View-model for the shared notification container, used by both the shade and keyguard spaces */
 class SharedNotificationContainerViewModel
@@ -45,9 +56,11 @@ class SharedNotificationContainerViewModel
 constructor(
     private val interactor: SharedNotificationContainerInteractor,
     @Application applicationScope: CoroutineScope,
-    keyguardInteractor: KeyguardInteractor,
+    private val keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
+    occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
 ) {
     private val statesForConstrainedNotifications =
         setOf(
@@ -57,6 +70,8 @@ constructor(
             KeyguardState.ALTERNATE_BOUNCER,
             KeyguardState.PRIMARY_BOUNCER
         )
+
+    val shadeCollapseFadeInComplete = MutableStateFlow(false)
 
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
         interactor.configurationBasedDimensions
@@ -68,6 +83,14 @@ constructor(
                     marginTop =
                         if (it.useLargeScreenHeader) it.marginTopLargeScreen else it.marginTop,
                     useSplitShade = it.useSplitShade,
+                    paddingTop =
+                        if (it.useSplitShade) {
+                            // When in split shade, the margin is applied twice as the legacy shade
+                            // code uses it to calculate padding.
+                            it.keyguardSplitShadeTopMargin - 2 * it.marginTopLargeScreen
+                        } else {
+                            0
+                        }
                 )
             }
             .distinctUntilChanged()
@@ -101,6 +124,27 @@ constructor(
             }
             .distinctUntilChanged()
 
+    /** Fade in only for use after the shade collapses */
+    val shadeCollpaseFadeIn: Flow<Boolean> =
+        flow {
+                while (currentCoroutineContext().isActive) {
+                    emit(false)
+                    // Wait for shade to be fully expanded
+                    keyguardInteractor.statusBarState.first { it == SHADE_LOCKED }
+                    // ... and then for it to be collapsed
+                    isOnLockscreenWithoutShade.first { it }
+                    emit(true)
+                    // ... and then for the animation to complete
+                    shadeCollapseFadeInComplete.first { it }
+                    shadeCollapseFadeInComplete.value = false
+                }
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+
     /**
      * The container occupies the entire screen, and must be positioned relative to other elements.
      *
@@ -109,47 +153,68 @@ constructor(
      *
      * When the shade is expanding, the position is controlled by... the shade.
      */
-    val position: StateFlow<SharedNotificationContainerPosition> =
-        isOnLockscreenWithoutShade
-            .flatMapLatest { onLockscreen ->
+    val bounds: StateFlow<NotificationContainerBounds> =
+        combine(
+                isOnLockscreenWithoutShade,
+                keyguardInteractor.notificationContainerBounds,
+                configurationBasedDimensions,
+                interactor.topPosition.sampleCombine(
+                    keyguardTransitionInteractor.isInTransitionToAnyState,
+                    shadeInteractor.qsExpansion,
+                ),
+            ) { onLockscreen, bounds, config, (top, isInTransitionToAnyState, qsExpansion) ->
                 if (onLockscreen) {
-                    combine(
-                        keyguardInteractor.sharedNotificationContainerPosition,
-                        configurationBasedDimensions
-                    ) { position, config ->
-                        if (config.useSplitShade) {
-                            position.copy(top = 0f)
-                        } else {
-                            position
-                        }
-                    }
+                    bounds.copy(top = bounds.top + config.paddingTop)
                 } else {
-                    interactor.topPosition.sample(shadeInteractor.qsExpansion, ::Pair).map {
-                        (top, qsExpansion) ->
-                        // When QS expansion > 0, it should directly set the top padding so do not
-                        // animate it
-                        val animate = qsExpansion == 0f
-                        keyguardInteractor.sharedNotificationContainerPosition.value.copy(
-                            top = top,
-                            animate = animate
-                        )
-                    }
+                    // When QS expansion > 0, it should directly set the top padding so do not
+                    // animate it
+                    val animate = qsExpansion == 0f && !isInTransitionToAnyState
+                    keyguardInteractor.notificationContainerBounds.value.copy(
+                        top = top,
+                        isAnimated = animate,
+                    )
                 }
             }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = SharedNotificationContainerPosition(0f, 0f),
+                started = SharingStarted.Lazily,
+                initialValue = NotificationContainerBounds(),
             )
+
+    val alpha: Flow<Float> =
+        isOnLockscreenWithoutShade
+            .flatMapLatest { isOnLockscreenWithoutShade ->
+                combineTransform(
+                    merge(
+                        occludedToLockscreenTransitionViewModel.lockscreenAlpha,
+                        lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
+                        keyguardInteractor.keyguardAlpha,
+                    ),
+                    shadeCollpaseFadeIn,
+                ) { alpha, shadeCollpaseFadeIn ->
+                    if (isOnLockscreenWithoutShade) {
+                        if (!shadeCollpaseFadeIn) {
+                            emit(alpha)
+                        }
+                    } else {
+                        emit(1f)
+                    }
+                }
+            }
+            .distinctUntilChanged()
 
     /**
      * Under certain scenarios, such as swiping up on the lockscreen, the container will need to be
      * translated as the keyguard fades out.
      */
     val translationY: Flow<Float> =
-        combine(isOnLockscreen, keyguardInteractor.keyguardTranslationY) {
+        combine(
             isOnLockscreen,
-            translationY ->
+            merge(
+                keyguardInteractor.keyguardTranslationY,
+                occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
+            )
+        ) { isOnLockscreen, translationY ->
             if (isOnLockscreen) {
                 translationY
             } else {
@@ -164,34 +229,36 @@ constructor(
      * When expanding or when the user is interacting with the shade, keep the count stable; do not
      * emit a value.
      */
-    fun getMaxNotifications(calculateSpace: (Float) -> Int): Flow<Int> {
-        // When to limit notifications: on lockscreen with an unexpanded shade. Also, recalculate
-        // when the notification stack has changed internally
-        val limitedNotifications =
+    fun getMaxNotifications(calculateSpace: (Float, Boolean) -> Int): Flow<Int> {
+        val showLimitedNotifications = isOnLockscreenWithoutShade
+        val showUnlimitedNotifications =
             combine(
-                position,
-                interactor.notificationStackChanged.onStart { emit(Unit) },
-            ) { position, _ ->
-                calculateSpace(position.bottom - position.top)
+                isOnLockscreen,
+                keyguardInteractor.statusBarState,
+            ) { isOnLockscreen, statusBarState ->
+                statusBarState == SHADE_LOCKED || !isOnLockscreen
             }
 
-        // When to show unlimited notifications: When the shade is fully expanded and the user is
-        // not actively dragging the shade
-        val unlimitedNotifications =
-            combineTransform(
-                shadeInteractor.shadeExpansion,
+        return combineTransform(
+                showLimitedNotifications,
+                showUnlimitedNotifications,
                 shadeInteractor.isUserInteracting,
-            ) { shadeExpansion, isUserInteracting ->
-                if (shadeExpansion == 1f && !isUserInteracting) {
-                    emit(-1)
-                }
-            }
-        return isOnLockscreenWithoutShade
-            .flatMapLatest { isOnLockscreenWithoutShade ->
-                if (isOnLockscreenWithoutShade) {
-                    limitedNotifications
-                } else {
-                    unlimitedNotifications
+                bounds,
+                interactor.notificationStackChanged.onStart { emit(Unit) },
+                interactor.useExtraShelfSpace,
+            ) { flows ->
+                val showLimitedNotifications = flows[0] as Boolean
+                val showUnlimitedNotifications = flows[1] as Boolean
+                val isUserInteracting = flows[2] as Boolean
+                val bounds = flows[3] as NotificationContainerBounds
+                val useExtraShelfSpace = flows[5] as Boolean
+
+                if (!isUserInteracting) {
+                    if (showLimitedNotifications) {
+                        emit(calculateSpace(bounds.bottom - bounds.top, useExtraShelfSpace))
+                    } else if (showUnlimitedNotifications) {
+                        emit(-1)
+                    }
                 }
             }
             .distinctUntilChanged()
@@ -201,11 +268,16 @@ constructor(
         interactor.notificationStackChanged()
     }
 
+    fun setShadeCollapseFadeInComplete(complete: Boolean) {
+        shadeCollapseFadeInComplete.value = complete
+    }
+
     data class ConfigurationBasedDimensions(
         val marginStart: Int,
         val marginTop: Int,
         val marginEnd: Int,
         val marginBottom: Int,
         val useSplitShade: Boolean,
+        val paddingTop: Int,
     )
 }

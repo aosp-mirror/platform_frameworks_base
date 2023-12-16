@@ -15,6 +15,8 @@
  *
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.data.repository
 
 import androidx.test.filters.SmallTest
@@ -25,8 +27,10 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBl
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -76,8 +80,21 @@ class KeyguardBlueprintRepositoryTest : SysuiTestCase() {
     fun testTransitionToLayout_validId() {
         assertThat(underTest.applyBlueprint(DEFAULT)).isTrue()
     }
+
     @Test
     fun testTransitionToLayout_invalidId() {
         assertThat(underTest.applyBlueprint("abc")).isFalse()
     }
+
+    @Test
+    fun testTransitionToSameBlueprint_refreshesBlueprint() =
+        testScope.runTest {
+            val refreshBlueprint by collectLastValue(underTest.refreshBluePrint)
+            runCurrent()
+
+            underTest.applyBlueprint(defaultLockscreenBlueprint)
+            runCurrent()
+
+            assertThat(refreshBlueprint).isNotNull()
+        }
 }

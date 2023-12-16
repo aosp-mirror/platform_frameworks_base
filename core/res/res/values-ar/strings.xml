@@ -1694,7 +1694,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"إزالة"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"هل تريد مواصلة الاستماع بصوت عالٍ؟\n\nكان مستوى صوت سمّاعة الرأس مرتفعًا لمدة أطول مما يُنصَح به، وقد يضر هذا بسمعك."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"تم رصد صوت مرتفع\n\nكان مستوى صوت سمّاعة الرأس مرتفعًا لمدة أطول مما يُنصَح به، وقد يضر هذا بسمعك."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"تم رصد صوت مرتفع\n\nكان مستوى صوت سمّاعة الرأس أعلى من المستوى الذي يُنصَح به، ما قد يضرّ بسمعك."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"هل تريد استخدام اختصار \"سهولة الاستخدام\"؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"عند تفعيل الاختصار، يؤدي الضغط على زرّي التحكّم في مستوى الصوت معًا لمدة 3 ثوانٍ إلى تفعيل إحدى ميزات إمكانية الوصول."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"هل تريد تفعيل الاختصار لميزات إمكانية الوصول؟"</string>
@@ -1714,10 +1714,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"قد يؤدي ذلك إلى السماح للميزة بتتبّع تفاعلاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"سماح"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رفض"</string>
-    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
-    <skip />
-    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
-    <skip />
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"إلغاء التثبيت"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"تعذَّر التحقّق من ردّك بسبب حجب أحد التطبيقات طلب الحصول على الإذن."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"اختيار الميزات التي تريد استخدامها مع زر أدوات تمكين الوصول"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"اختيار الميزات التي تريد استخدامها مع اختصار مفتاح التحكّم في مستوى الصوت"</string>
@@ -1912,10 +1910,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"نهاية الأسبوع"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"حدث"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"النوم"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
     <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"مفعَّل"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"غير مفعَّل"</string>
     <string name="muted_by" msgid="91464083490094950">"يعمل <xliff:g id="THIRD_PARTY">%1$s</xliff:g> على كتم بعض الأصوات."</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"حدثت مشكلة داخلية في جهازك، وقد لا يستقر وضعه حتى إجراء إعادة الضبط على الإعدادات الأصلية."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"حدثت مشكلة داخلية في جهازك. يمكنك الاتصال بالمصنِّع للحصول على تفاصيل."</string>
@@ -2348,10 +2346,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"تم حظر الميكروفون."</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"يتعذّر إجراء نسخ مطابق لمحتوى جهازك إلى الشاشة"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"يُرجى استخدام كابل آخر وإعادة المحاولة."</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"قد لا يتوافق الكابل مع الشاشات"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"‏قد لا يتم توصيل الكابل المزوَّد بمنفذ USB-C بالشاشات بشكل صحيح."</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"جهازك ساخن للغاية ولا يمكنه إجراء نسخ مطابق للمحتوى إلى الشاشة إلى أن تنخفض حرارته."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏ميزة Dual Screen مفعّلة"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"يستخدم \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" كلتا الشاشتين لعرض المحتوى."</string>
@@ -2368,4 +2363,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"تم ضبط تنسيق لوحة المفاتيح على <xliff:g id="LAYOUT_1">%1$s</xliff:g> و<xliff:g id="LAYOUT_2">%2$s</xliff:g> و<xliff:g id="LAYOUT_3">%3$s</xliff:g>… انقر لتغييره."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"تم إعداد لوحات المفاتيح الخارجية"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"انقر لعرض لوحات المفاتيح."</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ملف شخصي خاص"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"نسخة طبق الأصل"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"ملف العمل"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"ملف العمل 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"ملف العمل 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"ملف شخصي تجريبي"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"ملف شخصي مشترك"</string>
 </resources>

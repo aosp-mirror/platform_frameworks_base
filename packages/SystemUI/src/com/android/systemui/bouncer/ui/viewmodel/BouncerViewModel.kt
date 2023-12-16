@@ -36,7 +36,6 @@ import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.user.ui.viewmodel.UserViewModel
 import dagger.Module
 import dagger.Provides
-import kotlin.math.ceil
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -106,17 +105,17 @@ class BouncerViewModel(
         get() = bouncerInteractor.isUserSwitcherVisible
 
     private val isInputEnabled: StateFlow<Boolean> =
-        bouncerInteractor.isThrottled
-            .map { !it }
+        bouncerInteractor.lockout
+            .map { it == null }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = !bouncerInteractor.isThrottled.value,
+                initialValue = bouncerInteractor.lockout.value == null,
             )
 
     // Handle to the scope of the child ViewModel (stored in [authMethod]).
     private var childViewModelScope: CoroutineScope? = null
-    private val _throttlingDialogMessage = MutableStateFlow<String?>(null)
+    private val _dialogMessage = MutableStateFlow<String?>(null)
 
     /** View-model for the current UI, based on the current authentication method. */
     val authMethodViewModel: StateFlow<AuthMethodBouncerViewModel?> =
@@ -129,20 +128,20 @@ class BouncerViewModel(
             )
 
     /**
-     * A message for a throttling dialog to show when the user has attempted the wrong credential
-     * too many times and now must wait a while before attempting again.
+     * A message for a dialog to show when the user has attempted the wrong credential too many
+     * times and now must wait a while before attempting again.
      *
      * If `null`, no dialog should be shown.
      *
-     * Once the dialog is shown, the UI should call [onThrottlingDialogDismissed] when the user
-     * dismisses this dialog.
+     * Once the dialog is shown, the UI should call [onDialogDismissed] when the user dismisses this
+     * dialog.
      */
-    val throttlingDialogMessage: StateFlow<String?> = _throttlingDialogMessage.asStateFlow()
+    val dialogMessage: StateFlow<String?> = _dialogMessage.asStateFlow()
 
     /** The user-facing message to show in the bouncer. */
     val message: StateFlow<MessageViewModel> =
-        combine(bouncerInteractor.message, bouncerInteractor.isThrottled) { message, isThrottled ->
-                toMessageViewModel(message, isThrottled)
+        combine(bouncerInteractor.message, bouncerInteractor.lockout) { message, lockout ->
+                toMessageViewModel(message, isLockedOut = lockout != null)
             }
             .stateIn(
                 scope = applicationScope,
@@ -150,7 +149,7 @@ class BouncerViewModel(
                 initialValue =
                     toMessageViewModel(
                         message = bouncerInteractor.message.value,
-                        isThrottled = bouncerInteractor.isThrottled.value,
+                        isLockedOut = bouncerInteractor.lockout.value != null,
                     ),
             )
 
@@ -198,29 +197,28 @@ class BouncerViewModel(
     init {
         if (flags.isEnabled()) {
             applicationScope.launch {
-                combine(bouncerInteractor.isThrottled, authMethodViewModel) {
-                        isThrottled,
+                combine(bouncerInteractor.lockout, authMethodViewModel) {
+                        lockout,
                         authMethodViewModel ->
-                        if (isThrottled && authMethodViewModel != null) {
+                        if (lockout != null && authMethodViewModel != null) {
                             applicationContext.getString(
-                                authMethodViewModel.throttlingMessageId,
-                                bouncerInteractor.throttling.value.failedAttemptCount,
-                                ceil(bouncerInteractor.throttling.value.remainingMs / 1000f)
-                                    .toInt(),
+                                authMethodViewModel.lockoutMessageId,
+                                lockout.failedAttemptCount,
+                                lockout.remainingSeconds,
                             )
                         } else {
                             null
                         }
                     }
                     .distinctUntilChanged()
-                    .collect { dialogMessage -> _throttlingDialogMessage.value = dialogMessage }
+                    .collect { dialogMessage -> _dialogMessage.value = dialogMessage }
             }
         }
     }
 
-    /** Notifies that a throttling dialog has been dismissed by the user. */
-    fun onThrottlingDialogDismissed() {
-        _throttlingDialogMessage.value = null
+    /** Notifies that the dialog has been dismissed by the user. */
+    fun onDialogDismissed() {
+        _dialogMessage.value = null
     }
 
     private fun isSideBySideSupported(authMethod: AuthMethodBouncerViewModel?): Boolean {
@@ -233,11 +231,11 @@ class BouncerViewModel(
 
     private fun toMessageViewModel(
         message: String?,
-        isThrottled: Boolean,
+        isLockedOut: Boolean,
     ): MessageViewModel {
         return MessageViewModel(
             text = message ?: "",
-            isUpdateAnimated = !isThrottled,
+            isUpdateAnimated = !isLockedOut,
         )
     }
 

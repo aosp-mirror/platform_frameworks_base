@@ -513,7 +513,7 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Mbinu zinazotumika"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Tumia lugha za mfumo"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Imeshindwa kufungua mipangilio ya <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"Huenda mbinu hii ya kuingiza ikakusanya maandishi yote unayoandika, pamoja na data ya kibinafsi kama vile manenosiri na nambari za kadi za mkopo. Inatoka kwa programu <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Je, ungependa kutumia mbinu hii ya kingiza?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"Huenda mbinu hii ya kuingiza ikakusanya maandishi yote unayoandika, pamoja na data ya kibinafsi kama vile manenosiri na namba za kadi za mkopo. Inatoka kwa programu <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Je, ungependa kutumia mbinu hii ya kingiza?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Kumbuka: Baada ya kuwasha tena programu hii, hutaweza kuitumia hadi utakapofungua simu yako"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Hali ya usajili wa IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Imesajiliwa"</string>
@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Imeunganishwa kupitia ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Imeunganishwa kupitia eARC"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"Mipangilio Chaguomsingi ya Televisheni"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"Kutoa Sauti Kupitia HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Spika za Ndani"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Mipangilio Chaguomsingi ya TV"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Kutoa sauti kupitia HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Spika za ndani"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kuna tatizo la kuunganisha kwenye Intaneti. Zima kisha uwashe kifaa"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kifaa cha sauti kinachotumia waya"</string>
     <string name="help_label" msgid="3528360748637781274">"Usaidizi na maoni"</string>

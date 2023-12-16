@@ -369,15 +369,15 @@ public final class KeyboardMetricsCollector {
         if (inputDevice == null || inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
             return;
         }
-        int vendorId = inputDevice.getVendorId();
-        int productId = inputDevice.getProductId();
         if (keyboardSystemEvent == null) {
             Slog.w(TAG, "Invalid keyboard event logging, keycode = " + Arrays.toString(keyCodes)
                     + ", modifier state = " + modifierState);
             return;
         }
         FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED,
-                vendorId, productId, keyboardSystemEvent.getIntValue(), keyCodes, modifierState);
+                inputDevice.getVendorId(), inputDevice.getProductId(),
+                keyboardSystemEvent.getIntValue(), keyCodes, modifierState,
+                inputDevice.getDeviceBus());
 
         if (DEBUG) {
             Slog.d(TAG, "Logging Keyboard system event: " + keyboardSystemEvent.mName);
@@ -402,7 +402,7 @@ public final class KeyboardMetricsCollector {
         // Push the atom to Statsd
         FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_CONFIGURED,
                 event.isFirstConfiguration(), event.getVendorId(), event.getProductId(),
-                proto.getBytes());
+                proto.getBytes(), event.getDeviceBus());
 
         if (DEBUG) {
             Slog.d(TAG, "Logging Keyboard configuration event: " + event);
@@ -467,6 +467,10 @@ public final class KeyboardMetricsCollector {
             return mInputDevice.getProductId();
         }
 
+        public int getDeviceBus() {
+            return mInputDevice.getDeviceBus();
+        }
+
         public boolean isFirstConfiguration() {
             return mIsFirstConfiguration;
         }
@@ -479,6 +483,7 @@ public final class KeyboardMetricsCollector {
         public String toString() {
             return "InputDevice = {VendorId = " + Integer.toHexString(getVendorId())
                     + ", ProductId = " + Integer.toHexString(getProductId())
+                    + ", Device Bus = " + Integer.toHexString(getDeviceBus())
                     + "}, isFirstConfiguration = " + mIsFirstConfiguration
                     + ", LayoutConfigurations = " + mLayoutConfigurations;
         }

@@ -1,6 +1,13 @@
 package: "com.android.graphics.hwui.flags"
 
 flag {
+  name: "matrix_44"
+  namespace: "core_graphics"
+  description: "API for 4x4 matrix and related canvas functions"
+  bug: "280116960"
+}
+
+flag {
   name: "limited_hdr"
   namespace: "core_graphics"
   description: "API to enable apps to restrict the amount of HDR headroom that is used"
@@ -40,4 +47,11 @@ flag {
   namespace: "core_graphics"
   description: "Enable r_8, r_16_uint, rg_1616_uint, and rgba_10101010 in the SDK"
   bug: "292545615"
+}
+
+flag {
+  name: "animate_hdr_transitions"
+  namespace: "core_graphics"
+  description: "Automatically animate all changes in HDR headroom"
+  bug: "314810174"
 }

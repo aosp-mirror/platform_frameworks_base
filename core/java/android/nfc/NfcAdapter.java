@@ -284,6 +284,20 @@ public final class NfcAdapter {
     public static final int STATE_TURNING_OFF = 4;
 
     /**
+     * Possible states from {@link #getAdapterState}.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "STATE_" }, value = {
+            STATE_OFF,
+            STATE_TURNING_ON,
+            STATE_ON,
+            STATE_TURNING_OFF
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AdapterState{}
+
+    /**
      * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
      * <p>
      * Setting this flag enables polling for Nfc-A technology.
@@ -948,7 +962,7 @@ public final class NfcAdapter {
      */
     @SystemApi
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
-    public int getAdapterState() {
+    public @AdapterState int getAdapterState() {
         try {
             return sService.getState();
         } catch (RemoteException e) {

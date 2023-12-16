@@ -39,9 +39,9 @@ import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
 import androidx.preference.PreferenceViewHolder;
-import com.android.settingslib.widget.preference.banner.R;
 
 import com.android.settingslib.testutils.OverpoweredReflectionHelper;
+import com.android.settingslib.widget.preference.banner.R;
 
 import org.junit.Before;
 import org.junit.Test;

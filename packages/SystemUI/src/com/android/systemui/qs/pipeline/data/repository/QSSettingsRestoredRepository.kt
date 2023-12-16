@@ -10,6 +10,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.pipeline.data.model.RestoreData
+import com.android.systemui.qs.pipeline.data.repository.QSSettingsRestoredRepository.Companion.BUFFER_CAPACITY
 import com.android.systemui.qs.pipeline.data.repository.TilesSettingConverter.toTilesList
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import javax.inject.Inject
@@ -28,6 +29,14 @@ import kotlinx.coroutines.flow.shareIn
 /** Provides restored data (from Backup and Restore) for Quick Settings pipeline */
 interface QSSettingsRestoredRepository {
     val restoreData: Flow<RestoreData>
+
+    companion object {
+        // This capacity is the number of restore data that we will keep buffered in the shared
+        // flow. It is unlikely that at any given time there would be this many restores being
+        // processed by consumers, but just in case that a couple of users are restored at the
+        // same time and they need to be replayed for the consumers of the flow.
+        const val BUFFER_CAPACITY = 10
+    }
 }
 
 @SysUISingleton
@@ -86,11 +95,6 @@ constructor(
 
     private companion object {
         private const val TAG = "QSSettingsRestoredBroadcastRepository"
-        // This capacity is the number of restore data that we will keep buffered in the shared
-        // flow. It is unlikely that at any given time there would be this many restores being
-        // processed by consumers, but just in case that a couple of users are restored at the
-        // same time and they need to be replayed for the consumers of the flow.
-        private const val BUFFER_CAPACITY = 10
 
         private val INTENT_FILTER = IntentFilter(Intent.ACTION_SETTING_RESTORED)
         private const val TILES_SETTING = Settings.Secure.QS_TILES

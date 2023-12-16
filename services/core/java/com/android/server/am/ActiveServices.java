@@ -241,6 +241,7 @@ import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.am.ServiceRecord.ShortFgsInfo;
 import com.android.server.pm.KnownPackages;
 import com.android.server.uri.NeededUriGrants;
+import com.android.server.utils.AnrTimer;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 
 import java.io.FileDescriptor;
@@ -5174,6 +5175,8 @@ public final class ActiveServices {
             return null;
         }
 
+        final long startTimeNs = SystemClock.elapsedRealtimeNanos();
+
         if (DEBUG_SERVICE) {
             Slog.v(TAG_SERVICE, "Bringing up " + r + " " + r.intent + " fg=" + r.fgRequired);
         }
@@ -5332,9 +5335,14 @@ public final class ActiveServices {
                 bringDownServiceLocked(r, enqueueOomAdj);
                 return msg;
             }
+            mAm.mProcessList.getAppStartInfoTracker().handleProcessServiceStart(startTimeNs, app, r,
+                    hostingRecord, true);
             if (isolated) {
                 r.isolationHostProc = app;
             }
+        } else {
+            mAm.mProcessList.getAppStartInfoTracker().handleProcessServiceStart(startTimeNs, app, r,
+                    hostingRecord, false);
         }
 
         if (r.fgRequired) {

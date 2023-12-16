@@ -899,7 +899,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>To start a CaptureSession with a target FPS range different from the
      * capture request template's default value, the application
      * is strongly recommended to call
-     * {@link SessionConfiguration#setSessionParameters }
+     * {@link android.hardware.camera2.params.SessionConfiguration#setSessionParameters }
      * with the target fps range before creating the capture session. The aeTargetFpsRange is
      * typically a session parameter. Specifying it at session creation time helps avoid
      * session reconfiguration delays in cases like 60fps or high speed recording.</p>
@@ -2382,7 +2382,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * OFF if the recording output is not stabilized, or if there are no output
      * Surface types that can be stabilized.</p>
      * <p>The application is strongly recommended to call
-     * {@link SessionConfiguration#setSessionParameters }
+     * {@link android.hardware.camera2.params.SessionConfiguration#setSessionParameters }
      * with the desired video stabilization mode before creating the capture session.
      * Video stabilization mode is a session parameter on many devices. Specifying
      * it at session creation time helps avoid reconfiguration delay caused by difference
@@ -2814,6 +2814,31 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.control.autoframingState", int.class);
 
     /**
+     * <p>Current state of the low light boost AE mode.</p>
+     * <p>When low light boost is enabled by setting the AE mode to
+     * 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY', it can dynamically apply a low light
+     * boost when the light level threshold is exceeded.</p>
+     * <p>This state indicates when low light boost is 'ACTIVE' and applied. Similarly, it can
+     * indicate when it is not being applied by returning 'INACTIVE'.</p>
+     * <p>This key will be absent from the CaptureResult if AE mode is not set to
+     * 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_LOW_LIGHT_BOOST_STATE_INACTIVE INACTIVE}</li>
+     *   <li>{@link #CONTROL_LOW_LIGHT_BOOST_STATE_ACTIVE ACTIVE}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #CONTROL_LOW_LIGHT_BOOST_STATE_INACTIVE
+     * @see #CONTROL_LOW_LIGHT_BOOST_STATE_ACTIVE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
+    public static final Key<Integer> CONTROL_LOW_LIGHT_BOOST_STATE =
+            new Key<Integer>("android.control.lowLightBoostState", int.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means
@@ -2974,7 +2999,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * set to TORCH;
      * <code>[1-android.flash.info.singleStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to SINGLE</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#FLASH_MODE
@@ -5226,6 +5251,60 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<android.hardware.camera2.params.OisSample[]>("android.statistics.oisSamples", android.hardware.camera2.params.OisSample[].class);
 
     /**
+     * <p>An array of intra-frame lens intrinsic samples.</p>
+     * <p>Contains an array of intra-frame {@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration} updates. This must
+     * not be confused or compared to {@link CaptureResult#STATISTICS_OIS_SAMPLES android.statistics.oisSamples}. Although OIS could be the
+     * main driver, all relevant factors such as focus distance and optical zoom must also
+     * be included. Do note that OIS samples must not be applied on top of the lens intrinsic
+     * samples.
+     * Support for this capture result can be queried via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.
+     * If available, clients can expect multiple samples per capture result. The specific
+     * amount will depend on current frame duration and sampling rate. Generally a sampling rate
+     * greater than or equal to 200Hz is considered sufficient for high quality results.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CaptureResult#STATISTICS_OIS_SAMPLES
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<android.hardware.camera2.params.LensIntrinsicsSample[]> STATISTICS_LENS_INTRINSICS_SAMPLES =
+            new Key<android.hardware.camera2.params.LensIntrinsicsSample[]>("android.statistics.lensIntrinsicsSamples", android.hardware.camera2.params.LensIntrinsicsSample[].class);
+
+    /**
+     * <p>An array of timestamps of lens intrinsics samples, in nanoseconds.</p>
+     * <p>The array contains the timestamps of lens intrinsics samples. The timestamps are in the
+     * same timebase as and comparable to {@link CaptureResult#SENSOR_TIMESTAMP android.sensor.timestamp}.</p>
+     * <p><b>Units</b>: nanoseconds</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureResult#SENSOR_TIMESTAMP
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<long[]> STATISTICS_LENS_INTRINSIC_TIMESTAMPS =
+            new Key<long[]>("android.statistics.lensIntrinsicTimestamps", long[].class);
+
+    /**
+     * <p>An array of intra-frame lens intrinsics.</p>
+     * <p>The data layout and contents of individual array entries matches with
+     * {@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}.</p>
+     * <p><b>Units</b>:
+     * Pixels in the {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} coordinate system.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<float[]> STATISTICS_LENS_INTRINSIC_SAMPLES =
+            new Key<float[]>("android.statistics.lensIntrinsicSamples", float[].class);
+
+    /**
      * <p>Tonemapping / contrast / gamma curve for the blue
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * CONTRAST_CURVE.</p>
@@ -5666,6 +5745,55 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @NonNull
     public static final Key<String> LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID =
             new Key<String>("android.logicalMultiCamera.activePhysicalId", String.class);
+
+    /**
+     * <p>The current region of the active physical sensor that will be read out for this
+     * capture.</p>
+     * <p>This capture result matches with {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} on non-logical single
+     * camera sensor devices. In case of logical cameras that can switch between several
+     * physical devices in response to {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, this capture result will
+     * not behave like {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} and {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, where the
+     * combination of both reflects the effective zoom and crop of the logical camera output.
+     * Instead, this capture result value will describe the zoom and crop of the active physical
+     * device. Some examples of when the value of this capture result will change include
+     * switches between different physical lenses, switches between regular and maximum
+     * resolution pixel mode and going through the device digital or optical range.
+     * This capture result is similar to {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} with respect to distortion
+     * correction. When the distortion correction mode is OFF, the coordinate system follows
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}, with (0, 0) being the top-left pixel
+     * of the pre-correction active array. When the distortion correction mode is not OFF,
+     * the coordinate system follows {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}, with (0, 0) being
+     * the top-left pixel of the active array.</p>
+     * <p>For camera devices with the
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}
+     * , the current active physical device
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
+     * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
+     * <p><b>Units</b>: Pixel coordinates relative to
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} or
+     * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize} of the currently
+     * {@link CaptureResult#LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID android.logicalMultiCamera.activePhysicalId} depending on distortion correction capability
+     * and mode</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CaptureResult#LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_ID
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final Key<android.graphics.Rect> LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_SENSOR_CROP_REGION =
+            new Key<android.graphics.Rect>("android.logicalMultiCamera.activePhysicalSensorCropRegion", android.graphics.Rect.class);
 
     /**
      * <p>Mode of operation for the lens distortion correction block.</p>

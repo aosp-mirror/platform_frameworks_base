@@ -16,8 +16,10 @@
 
 package com.android.systemui.qs.tiles.impl.flashlight.domain
 
-import android.content.Context
+import android.content.res.Resources
+import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.flashlight.domain.model.FlashlightTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
@@ -26,19 +28,24 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 
 /** Maps [FlashlightTileModel] to [QSTileState]. */
-class FlashlightMapper @Inject constructor(private val context: Context) :
-    QSTileDataToStateMapper<FlashlightTileModel> {
+class FlashlightMapper
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    private val theme: Theme,
+) : QSTileDataToStateMapper<FlashlightTileModel> {
 
     override fun map(config: QSTileConfig, data: FlashlightTileModel): QSTileState =
-        QSTileState.build(context, config.uiConfig) {
+        QSTileState.build(resources, theme, config.uiConfig) {
             val icon =
                 Icon.Loaded(
-                    context.resources.getDrawable(
+                    resources.getDrawable(
                         if (data.isEnabled) {
                             R.drawable.qs_flashlight_icon_on
                         } else {
                             R.drawable.qs_flashlight_icon_off
-                        }
+                        },
+                        theme,
                     ),
                     contentDescription = null
                 )
@@ -46,10 +53,10 @@ class FlashlightMapper @Inject constructor(private val context: Context) :
 
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
-                secondaryLabel = context.resources.getStringArray(R.array.tile_states_flashlight)[2]
+                secondaryLabel = resources.getStringArray(R.array.tile_states_flashlight)[2]
             } else {
                 activationState = QSTileState.ActivationState.INACTIVE
-                secondaryLabel = context.resources.getStringArray(R.array.tile_states_flashlight)[1]
+                secondaryLabel = resources.getStringArray(R.array.tile_states_flashlight)[1]
             }
             contentDescription = label
             supportedActions =

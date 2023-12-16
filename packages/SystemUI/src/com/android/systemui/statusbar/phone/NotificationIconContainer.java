@@ -400,6 +400,21 @@ public class NotificationIconContainer extends ViewGroup {
         }
     }
 
+    /**
+     * Removes all child {@link StatusBarIconView} instances from this container, immediately and
+     * without animation. This should be called when tearing down this container so that external
+     * icon views are not holding onto a reference thru {@link View#getParent()}.
+     */
+    public void detachAllIcons() {
+        boolean animsWereEnabled = mAnimationsEnabled;
+        boolean wasChangingPositions = mChangingViewPositions;
+        mAnimationsEnabled = false;
+        mChangingViewPositions = true;
+        removeAllViews();
+        mChangingViewPositions = wasChangingPositions;
+        mAnimationsEnabled = animsWereEnabled;
+    }
+
     public boolean areIconsOverflowing() {
         return mIsShowingOverflowDot;
     }

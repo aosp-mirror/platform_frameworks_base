@@ -214,7 +214,7 @@ constructor(
     private fun listenForLockscreenToPrimaryBouncerDragging() {
         var transitionId: UUID? = null
         scope.launch("$TAG#listenForLockscreenToPrimaryBouncerDragging") {
-            shadeRepository.shadeModel
+            shadeRepository.legacyShadeExpansion
                 .sample(
                     combine(
                         transitionInteractor.startedKeyguardTransitionStep,
@@ -224,23 +224,23 @@ constructor(
                     ),
                     ::toQuad
                 )
-                .collect { (shadeModel, keyguardState, statusBarState, isKeyguardUnlocked) ->
+                .collect { (shadeExpansion, keyguardState, statusBarState, isKeyguardUnlocked) ->
                     val id = transitionId
                     if (id != null) {
                         if (keyguardState.to == KeyguardState.PRIMARY_BOUNCER) {
                             // An existing `id` means a transition is started, and calls to
                             // `updateTransition` will control it until FINISHED or CANCELED
                             var nextState =
-                                if (shadeModel.expansionAmount == 0f) {
+                                if (shadeExpansion == 0f) {
                                     TransitionState.FINISHED
-                                } else if (shadeModel.expansionAmount == 1f) {
+                                } else if (shadeExpansion == 1f) {
                                     TransitionState.CANCELED
                                 } else {
                                     TransitionState.RUNNING
                                 }
                             transitionRepository.updateTransition(
                                 id,
-                                1f - shadeModel.expansionAmount,
+                                1f - shadeExpansion,
                                 nextState,
                             )
 
@@ -274,7 +274,7 @@ constructor(
                         // integrated into KeyguardTransitionRepository
                         if (
                             keyguardState.to == KeyguardState.LOCKSCREEN &&
-                                shadeModel.isUserDragging &&
+                                shadeRepository.legacyShadeTracking.value &&
                                 !isKeyguardUnlocked &&
                                 statusBarState == KEYGUARD
                         ) {
@@ -380,6 +380,8 @@ constructor(
                     KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
                     KeyguardState.AOD -> TO_AOD_DURATION
+                    KeyguardState.DOZING -> TO_DOZING_DURATION
+                    KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> TO_DREAMING_HOSTED_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -388,7 +390,9 @@ constructor(
     companion object {
         const val TAG = "FromLockscreenTransitionInteractor"
         private val DEFAULT_DURATION = 400.milliseconds
+        val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
+        val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION

@@ -48,6 +48,7 @@ import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.scaffold.SearchScaffoldPageProvider
+import com.android.settingslib.spa.gallery.scaffold.SuwScaffoldPageProvider
 import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
 import com.android.settingslib.spa.gallery.ui.CopyablePageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
@@ -100,6 +101,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 SettingsExposedDropdownMenuCheckBoxProvider,
                 SettingsTextFieldPasswordPageProvider,
                 SearchScaffoldPageProvider,
+                SuwScaffoldPageProvider,
                 CardPageProvider,
                 CopyablePageProvider,
             ),

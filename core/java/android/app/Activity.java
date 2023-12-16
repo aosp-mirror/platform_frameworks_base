@@ -20,12 +20,11 @@ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIO
 import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
-
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
-
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.AnimRes;
@@ -972,6 +971,7 @@ public class Activity extends ContextThemeWrapper
 
     private final ActivityManager.TaskDescription mTaskDescription =
             new ActivityManager.TaskDescription();
+    private int mLastTaskDescriptionHashCode;
 
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
@@ -3061,21 +3061,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Request to put the a freeform activity into fullscreen. This will only be allowed if the
-     * activity is on a freeform display, such as a desktop device. The requester has to be the
-     * top-most activity of the focused display, and the request should be a response to a user
-     * input. When getting fullscreen and receiving corresponding
+     * Request to put the freeform activity into fullscreen. The requester has to be the top-most
+     * activity of the focused display which can be verified using
+     * {@link #onTopResumedActivityChanged(boolean)}. The request should also be a response to a
+     * user input. When getting fullscreen and receiving corresponding
      * {@link #onConfigurationChanged(Configuration)} and
      * {@link #onMultiWindowModeChanged(boolean, Configuration)}, the activity should relayout
      * itself and the system bars' visibilities can be controlled as usual fullscreen apps.
      *
      * Calling it again with the exit request can restore the activity to the previous status.
      * This will only happen when it got into fullscreen through this API.
-     *
-     * If an app wants to be in fullscreen always, it should claim as not being resizable
-     * by setting
-     * <a href="https://developer.android.com/guide/topics/large-screens/multi-window-support#resizeableActivity">
-     * {@code android:resizableActivity="false"}</a> instead of calling this API.
      *
      * @param request Can be {@link #FULLSCREEN_MODE_REQUEST_ENTER} or
      *                {@link #FULLSCREEN_MODE_REQUEST_EXIT} to indicate this request is to get
@@ -5572,7 +5567,7 @@ public class Activity extends ContextThemeWrapper
      * @see #shouldShowRequestPermissionRationale
      * @see Context#DEVICE_ID_DEFAULT
      */
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public final void requestPermissions(@NonNull String[] permissions, int requestCode,
             int deviceId) {
         if (requestCode < 0) {
@@ -5645,7 +5640,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #requestPermissions
      */
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults, int deviceId) {
         onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -5678,7 +5673,7 @@ public class Activity extends ContextThemeWrapper
      * @see #requestPermissions
      * @see #onRequestPermissionsResult
      */
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
         final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
                 : createDeviceContext(deviceId).getPackageManager();
@@ -6884,8 +6879,8 @@ public class Activity extends ContextThemeWrapper
      * application package was involved.
      *
      * <p>If called while inside the handling of {@link #onNewIntent}, this function will
-     * return the referrer that submitted that new intent to the activity.  Otherwise, it
-     * always returns the referrer of the original Intent.</p>
+     * return the referrer that submitted that new intent to the activity only after
+     * {@link #setIntent(Intent)} is called with the provided intent.</p>
      *
      * <p>Note that this is <em>not</em> a security feature -- you can not trust the
      * referrer information, applications can spoof it.</p>
@@ -7613,6 +7608,13 @@ public class Activity extends ContextThemeWrapper
                 mTaskDescription.setIcon(Icon.createWithBitmap(icon));
             }
         }
+        if (mLastTaskDescriptionHashCode == mTaskDescription.hashCode()) {
+            // Early return if the hashCode is the same.
+            // Note that we do not use #equals() to perform the check because there are several
+            // places in this class that directly sets the value to mTaskDescription.
+            return;
+        }
+        mLastTaskDescriptionHashCode = mTaskDescription.hashCode();
         ActivityClient.getInstance().setTaskDescription(mToken, mTaskDescription);
     }
 
@@ -9380,6 +9382,7 @@ public class Activity extends ContextThemeWrapper
      * @param allowed {@code true} to disable the UID restrictions; {@code false} to revert back to
      *                            the default behaviour
      */
+    @FlaggedApi(android.security.Flags.FLAG_ASM_RESTRICTIONS_ENABLED)
     public void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
         ActivityClient.getInstance().setAllowCrossUidActivitySwitchFromBelow(mToken, allowed);
     }
@@ -9437,6 +9440,15 @@ public class Activity extends ContextThemeWrapper
      */
     public void enableTaskLocaleOverride() {
         ActivityClient.getInstance().enableTaskLocaleOverride(mToken);
+    }
+
+    /**
+     * Request ActivityRecordInputSink to enable or disable blocking input events.
+     * @hide
+     */
+    @RequiresPermission(INTERNAL_SYSTEM_WINDOW)
+    public void setActivityRecordInputSinkEnabled(boolean enabled) {
+        ActivityClient.getInstance().setActivityRecordInputSinkEnabled(mToken, enabled);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {

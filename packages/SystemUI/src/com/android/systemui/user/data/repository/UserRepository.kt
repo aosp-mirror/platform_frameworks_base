@@ -29,7 +29,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.data.model.SelectedUserModel
@@ -120,7 +119,6 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val globalSettings: GlobalSettings,
     private val tracker: UserTracker,
-    featureFlags: FeatureFlags,
 ) : UserRepository {
 
     private val _userSwitcherSettings: StateFlow<UserSwitcherSettingsModel> =

@@ -101,6 +101,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 /**
  * An intent is an abstract description of an operation to be performed.  It
@@ -2805,7 +2806,7 @@ public class Intent implements Parcelable, Cloneable {
      * and the package in the stopped state cannot self-start for any reason unless there's an
      * explicit request to start a component in the package. The {@link #ACTION_PACKAGE_UNSTOPPED}
      * broadcast is sent when such an explicit process start occurs and the package is taken
-     * out of the stopped state.
+     * out of the stopped state. The data contains the name of the package.
      * </p>
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
@@ -2888,7 +2889,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      * <p>
-     * Starting in {@link Build.VERSION_CODES#VANILLA_ICE_CREAM Android V}, an extra timestamp
+     * Starting in Android V, an extra timestamp
      * {@link #EXTRA_TIME} is included with this broadcast to indicate the exact time the package
      * was restarted, in {@link SystemClock#elapsedRealtime() elapsed realtime}.
      * </p>
@@ -5353,11 +5354,11 @@ public class Intent implements Parcelable, Cloneable {
      * Broadcast Action: Sent to the responsible installer of an archived package when unarchival
      * is requested.
      *
-     * @see android.content.pm.PackageInstaller#requestUnarchive(String)
-     * @hide
+     * @see android.content.pm.PackageInstaller#requestUnarchive
      */
-    @SystemApi
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    @BroadcastBehavior(explicitOnly = true)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UNARCHIVE_PACKAGE = "android.intent.action.UNARCHIVE_PACKAGE";
 
     // ---------------------------------------------------------------------
@@ -8144,6 +8145,27 @@ public class Intent implements Parcelable, Cloneable {
 
         } catch (IndexOutOfBoundsException e) {
             throw new URISyntaxException(uri, "illegal Intent URI format", i);
+        }
+    }
+
+    /**
+     * Note all {@link Uri} that are referenced internally, with the expectation that Uri permission
+     * grants will need to be issued to ensure the recipient of this object is able to render its
+     * contents.
+     * See b/281044385 for more context and examples about what happens when this isn't done
+     * correctly.
+     *
+     * @hide
+     */
+    public void visitUris(@NonNull Consumer<Uri> visitor) {
+        if (android.app.Flags.visitRiskyUris()) {
+            visitor.accept(mData);
+            if (mSelector != null) {
+                mSelector.visitUris(visitor);
+            }
+            if (mOriginalIntent != null) {
+                mOriginalIntent.visitUris(visitor);
+            }
         }
     }
 
@@ -12606,8 +12628,11 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
-     * @deprecated Use {@link SdkSandboxActivityAuthority#isSdkSandboxActivity} instead.
+     * @deprecated Use {@link SdkSandboxActivityAuthority#isSdkSandboxActivityIntent} instead.
      * Once the other API is finalized this method will be removed.
+     *
+     * TODO(b/300059435): remove as part of the cleanup.
+     *
      * @hide
      */
     @Deprecated

@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Connectat mitjançant ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Connectat mitjançant eARC"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"Valor predeterminat per al televisor"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"Sortida HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Altaveus interns"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Televisor predeterminat"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Sortida HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Altaveus interns"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Apaga el dispositiu i torna\'l a encendre."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositiu d\'àudio amb cable"</string>
     <string name="help_label" msgid="3528360748637781274">"Ajuda i suggeriments"</string>

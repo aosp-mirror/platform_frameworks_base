@@ -27,11 +27,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onPlaced
@@ -72,8 +74,8 @@ object Notifications {
 @Composable
 fun SceneScope.HeadsUpNotificationSpace(
     viewModel: NotificationsPlaceholderViewModel,
-    isPeekFromBottom: Boolean = false,
     modifier: Modifier = Modifier,
+    isPeekFromBottom: Boolean = false,
 ) {
     NotificationPlaceholder(
         viewModel = viewModel,
@@ -89,13 +91,18 @@ fun SceneScope.NotificationStack(
     isScrimVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val cornerRadius by viewModel.cornerRadiusDp.collectAsState()
+
     Box(modifier = modifier) {
         if (isScrimVisible) {
             Box(
                 modifier =
                     Modifier.element(Notifications.Elements.NotificationScrim)
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(32.dp))
+                        .graphicsLayer {
+                            shape = RoundedCornerShape(cornerRadius.dp)
+                            clip = true
+                        }
                         .background(MaterialTheme.colorScheme.surface)
             )
         }
@@ -149,11 +156,11 @@ private fun SceneScope.NotificationPlaceholder(
     form: Form,
     modifier: Modifier = Modifier,
 ) {
-    val key = Notifications.Elements.NotificationPlaceholder
+    val elementKey = Notifications.Elements.NotificationPlaceholder
     Box(
         modifier =
             modifier
-                .element(key)
+                .element(elementKey)
                 .debugBackground(viewModel)
                 .onSizeChanged { size: IntSize ->
                     debugLog(viewModel) { "STACK onSizeChanged: size=$size" }
@@ -166,8 +173,10 @@ private fun SceneScope.NotificationPlaceholder(
                             " bounds=${coordinates.boundsInWindow()}"
                     }
                     val boundsInWindow = coordinates.boundsInWindow()
-                    viewModel.setPlaceholderPositionInWindow(
+                    viewModel.onBoundsChanged(
+                        left = boundsInWindow.left,
                         top = boundsInWindow.top,
+                        right = boundsInWindow.right,
                         bottom = boundsInWindow.bottom,
                     )
                 }
@@ -176,7 +185,7 @@ private fun SceneScope.NotificationPlaceholder(
             animateSharedFloatAsState(
                 value = if (form == Form.HunFromTop) 0f else 1f,
                 key = SharedExpansionValue,
-                element = key
+                element = elementKey
             )
         debugLog(viewModel) { "STACK composed: expansion=$animatedExpansion" }
         if (viewModel.isPlaceholderTextVisible) {

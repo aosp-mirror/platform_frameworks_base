@@ -228,6 +228,14 @@ public class TelecomManager {
             "android.telecom.extra.DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME";
 
     /**
+     * Optional extra to indicate a call should not be added to the call log.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DO_NOT_LOG_CALL =
+            "android.telecom.extra.DO_NOT_LOG_CALL";
+
+    /**
      * Extra value used with {@link #ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED} broadcast to
      * indicate whether an app is the default call screening app.
      * <p>
@@ -1341,6 +1349,24 @@ public class TelecomManager {
     }
 
     /**
+     * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
+     * calls. The returned list includes those accounts which have been explicitly enabled by
+     * the user or other users visible to the user.
+     *
+     * @see #EXTRA_PHONE_ACCOUNT_HANDLE
+     * @return A list of {@code PhoneAccountHandle} objects.
+     *
+     * @throws IllegalStateException if telecom service is null.
+     */
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_WORK_PROFILE_API_SPLIT)
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES})
+    public @NonNull List<PhoneAccountHandle> getCallCapablePhoneAccountsAcrossProfiles() {
+        return getCallCapablePhoneAccountsAcrossProfiles(false);
+    }
+
+
+    /**
      * Returns a list of {@link PhoneAccountHandle}s for all self-managed
      * {@link ConnectionService}s owned by the calling {@link UserHandle}.
      * <p>
@@ -1415,13 +1441,44 @@ public class TelecomManager {
         if (service != null) {
             try {
                 return service.getCallCapablePhoneAccounts(includeDisabledAccounts,
-                        mContext.getOpPackageName(), mContext.getAttributionTag()).getList();
+                        mContext.getOpPackageName(), mContext.getAttributionTag(), false).getList();
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#getCallCapablePhoneAccounts("
                         + includeDisabledAccounts + ")", e);
             }
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Returns a list of {@link PhoneAccountHandle}s visible to current user including those which
+     * have not been enabled by the user.
+     *
+     * @param includeDisabledAccounts When {@code true}, disabled phone accounts will be included,
+     *                                when {@code false}, only enabled phone accounts will be
+     *                                included.
+     * @return A list of {@code PhoneAccountHandle} objects.
+     *
+     * @throws IllegalStateException if telecom service is null.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_WORK_PROFILE_API_SPLIT)
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES})
+    public @NonNull List<PhoneAccountHandle> getCallCapablePhoneAccountsAcrossProfiles(
+            boolean includeDisabledAccounts) {
+        ITelecomService service = getTelecomService();
+        if (service == null) {
+            throw new IllegalStateException("telecom service is null.");
+        }
+
+        try {
+            return service.getCallCapablePhoneAccounts(includeDisabledAccounts,
+                    mContext.getOpPackageName(), mContext.getAttributionTag(), true).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
     }
 
     /**

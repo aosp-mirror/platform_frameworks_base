@@ -33,6 +33,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import android.widget.FrameLayout
+import com.android.internal.jank.Cuj.CujType
 import com.android.internal.jank.InteractionJankMonitor
 import java.util.LinkedList
 import kotlin.math.min
@@ -58,7 +59,7 @@ constructor(
     /** The view that will be ghosted and from which the background will be extracted. */
     private val ghostedView: View,
 
-    /** The [InteractionJankMonitor.CujType] associated to this animation. */
+    /** The [CujType] associated to this animation. */
     private val cujType: Int? = null,
     private var interactionJankMonitor: InteractionJankMonitor =
         InteractionJankMonitor.getInstance(),

@@ -16,10 +16,12 @@ android_app {
 
     dex_preopt: {
         profile_guided: true,
+        //TODO: b/312357299 - Update baseline profile
         profile: "profile.txt.prof",
     },
 
     static_libs: [
+        "CredentialManagerShared",
         "PlatformComposeCore",
         "androidx.activity_activity-compose",
         "androidx.appcompat_appcompat",

@@ -43,14 +43,12 @@ public class MonotonicClockTest {
         assertThat(monotonicClock.monotonicTime()).isEqualTo(1234);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        monotonicClock.writeXml(out, Xml.newFastSerializer());
-        String xml = out.toString();
-        assertThat(xml).contains("timeshift=\"1234\"");
+        monotonicClock.writeXml(out, Xml.newBinarySerializer());
 
         mClock.realtime = 42;
         MonotonicClock newMonotonicClock = new MonotonicClock(0, mClock);
-        newMonotonicClock.readXml(new ByteArrayInputStream(out.toByteArray()),
-                Xml.newFastPullParser());
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        newMonotonicClock.readXml(in, Xml.newBinaryPullParser());
 
         mClock.realtime = 2000;
         assertThat(newMonotonicClock.monotonicTime()).isEqualTo(1234 - 42 + 2000);

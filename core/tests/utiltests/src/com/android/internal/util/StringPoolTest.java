@@ -16,12 +16,21 @@
 
 package com.android.internal.util;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
-public final class StringPoolTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public final class StringPoolTest {
 
+    @Test
     public void testStringPool() {
         StringPool stringPool = new StringPool();
         String bcd = stringPool.get(new char[] { 'a', 'b', 'c', 'd', 'e' }, 1, 3);
@@ -29,6 +38,7 @@ public final class StringPoolTest extends AndroidTestCase {
         assertSame(bcd, stringPool.get(new char[] { 'a', 'b', 'c', 'd', 'e' }, 1, 3));
     }
 
+    @Test
     public void testHashCollision() {
         StringPool stringPool = new StringPool();
         char[] a = { (char) 1, (char) 0 };

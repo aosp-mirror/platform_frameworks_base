@@ -25,11 +25,16 @@ import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
+import com.android.systemui.keyguard.data.repository.KeyguardClockRepositoryImpl
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockFaceConfig
+import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.shared.clocks.ClockRegistry
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -50,7 +55,6 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
     private lateinit var scheduler: TestCoroutineScheduler
     private lateinit var dispatcher: CoroutineDispatcher
     private lateinit var scope: TestScope
-
     private lateinit var underTest: KeyguardClockViewModel
     private lateinit var keyguardInteractor: KeyguardInteractor
     private lateinit var keyguardRepository: KeyguardRepository
@@ -58,6 +62,9 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
     private lateinit var keyguardClockRepository: KeyguardClockRepository
     private lateinit var fakeSettings: FakeSettings
     @Mock private lateinit var clockRegistry: ClockRegistry
+    @Mock private lateinit var clock: ClockController
+    @Mock private lateinit var largeClock: ClockFaceController
+    @Mock private lateinit var clockFaceConfig: ClockFaceConfig
     @Mock private lateinit var eventController: ClockEventController
     @Before
     fun setup() {
@@ -70,13 +77,21 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         scheduler = TestCoroutineScheduler()
         dispatcher = StandardTestDispatcher(scheduler)
         scope = TestScope(dispatcher)
-        keyguardClockRepository = KeyguardClockRepository(fakeSettings, clockRegistry, dispatcher)
-        keyguardClockInteractor = KeyguardClockInteractor(eventController, keyguardClockRepository)
+        setupMockClock()
+        keyguardClockRepository =
+            KeyguardClockRepositoryImpl(
+                fakeSettings,
+                clockRegistry,
+                eventController,
+                dispatcher,
+                scope.backgroundScope
+            )
+        keyguardClockInteractor = KeyguardClockInteractor(keyguardClockRepository)
         underTest =
             KeyguardClockViewModel(
                 keyguardInteractor,
                 keyguardClockInteractor,
-                scope.backgroundScope
+                scope.backgroundScope,
             )
     }
 
@@ -86,7 +101,7 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
             // When use double line clock is disabled,
             // should always return small
             fakeSettings.putInt(LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 0)
-            keyguardRepository.setClockSize(LARGE)
+            keyguardClockRepository.setClockSize(LARGE)
             val value = collectLastValue(underTest.clockSize)
             assertThat(value()).isEqualTo(SMALL)
         }
@@ -95,12 +110,19 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
     fun testClockSize_dynamicClockSize() =
         scope.runTest {
             fakeSettings.putInt(LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1)
-            keyguardRepository.setClockSize(SMALL)
+            keyguardClockRepository.setClockSize(SMALL)
             var value = collectLastValue(underTest.clockSize)
             assertThat(value()).isEqualTo(SMALL)
 
-            keyguardRepository.setClockSize(LARGE)
+            keyguardClockRepository.setClockSize(LARGE)
             value = collectLastValue(underTest.clockSize)
             assertThat(value()).isEqualTo(LARGE)
         }
+
+    private fun setupMockClock() {
+        whenever(clock.largeClock).thenReturn(largeClock)
+        whenever(largeClock.config).thenReturn(clockFaceConfig)
+        whenever(clockFaceConfig.hasCustomWeatherDataDisplay).thenReturn(false)
+        whenever(clockRegistry.createCurrentClock()).thenReturn(clock)
+    }
 }

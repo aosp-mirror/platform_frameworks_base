@@ -26,14 +26,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 import platform.test.screenshot.DeviceEmulationSpec
 
 /** A screenshot test for Keyboard layout preview for Iso physical layout. */
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 class KeyboardLayoutPreviewIsoScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     companion object {
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         @JvmStatic
         fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
     }

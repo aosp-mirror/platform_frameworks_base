@@ -16,6 +16,10 @@
 
 package android.media.tv.ad;
 
+import android.annotation.FlaggedApi;
+import android.annotation.SystemService;
+import android.content.Context;
+import android.media.tv.flags.Flags;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -23,14 +27,17 @@ import android.util.Log;
 /**
  * Central system API to the overall client-side TV AD architecture, which arbitrates interaction
  * between applications and AD services.
- * @hide
  */
+@FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
+@SystemService(Context.TV_AD_SERVICE)
 public class TvAdManager {
+    // TODO: implement more methods and unhide APIs.
     private static final String TAG = "TvAdManager";
 
     private final ITvAdManager mService;
     private final int mUserId;
 
+    /** @hide */
     public TvAdManager(ITvAdManager service, int userId) {
         mService = service;
         mUserId = userId;
@@ -38,6 +45,7 @@ public class TvAdManager {
 
     /**
      * The Session provides the per-session functionality of AD service.
+     * @hide
      */
     public static final class Session {
         private final IBinder mToken;

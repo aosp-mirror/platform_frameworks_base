@@ -20,6 +20,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
 import static android.app.AppOpsManager.OP_USE_FULL_SCREEN_INTENT;
+import static android.companion.virtual.VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -150,7 +151,7 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     }
 
     @Override
-    public SparseIntArray getNonDefaultUidModes(int uid) {
+    public SparseIntArray getNonDefaultUidModes(int uid, String persistentDeviceId) {
         synchronized (mLock) {
             SparseIntArray opModes = mUidModes.get(uid, null);
             if (opModes == null) {
@@ -176,7 +177,7 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     }
 
     @Override
-    public int getUidMode(int uid, int op) {
+    public int getUidMode(int uid, String persistentDeviceId, int op) {
         synchronized (mLock) {
             SparseIntArray opModes = mUidModes.get(uid, null);
             if (opModes == null) {
@@ -187,7 +188,7 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     }
 
     @Override
-    public boolean setUidMode(int uid, int op, int mode) {
+    public boolean setUidMode(int uid, String persistentDeviceId, int op, int mode) {
         final int defaultMode = AppOpsManager.opToDefaultMode(op);
         List<AppOpsModeChangedListener> listenersCopy;
         synchronized (mLock) {
@@ -329,7 +330,7 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     }
 
     @Override
-    public SparseBooleanArray getForegroundOps(int uid) {
+    public SparseBooleanArray getForegroundOps(int uid, String persistentDeviceId) {
         SparseBooleanArray result = new SparseBooleanArray();
         synchronized (mLock) {
             SparseIntArray modes = mUidModes.get(uid);
@@ -606,9 +607,17 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
         for (final String pkg : packagesDeclaringPermission) {
             for (int userId : userIds) {
                 final int uid = pmi.getPackageUid(pkg, 0, userId);
-                final int oldMode = getUidMode(uid, OP_SCHEDULE_EXACT_ALARM);
+                final int oldMode =
+                        getUidMode(
+                                uid,
+                                PERSISTENT_DEVICE_ID_DEFAULT,
+                                OP_SCHEDULE_EXACT_ALARM);
                 if (oldMode == AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM)) {
-                    setUidMode(uid, OP_SCHEDULE_EXACT_ALARM, MODE_ALLOWED);
+                    setUidMode(
+                            uid,
+                            PERSISTENT_DEVICE_ID_DEFAULT,
+                            OP_SCHEDULE_EXACT_ALARM,
+                            MODE_ALLOWED);
                 }
             }
             // This appop is meant to be controlled at a uid level. So we leave package modes as
@@ -641,7 +650,10 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
                 final int flags = permissionManager.getPermissionFlags(pkg, permissionName,
                         UserHandle.of(userId));
                 if ((flags & PackageManager.FLAG_PERMISSION_USER_SET) == 0) {
-                    setUidMode(uid, OP_USE_FULL_SCREEN_INTENT,
+                    setUidMode(
+                            uid,
+                            PERSISTENT_DEVICE_ID_DEFAULT,
+                            OP_USE_FULL_SCREEN_INTENT,
                             AppOpsManager.opToDefaultMode(OP_USE_FULL_SCREEN_INTENT));
                 }
             }

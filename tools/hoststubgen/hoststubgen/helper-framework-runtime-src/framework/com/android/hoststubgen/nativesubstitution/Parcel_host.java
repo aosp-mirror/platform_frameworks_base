@@ -15,9 +15,6 @@
  */
 package com.android.hoststubgen.nativesubstitution;
 
-import android.os.IBinder;
-
-import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -27,16 +24,17 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Tentative, partial implementation of the Parcel native methods, using Java's
- * {@link ByteBuffer}. It turned out there's enough semantics differences between Parcel
- * and {@link ByteBuffer}, so it didn't actually work.
- * (e.g. Parcel seems to allow moving the data position to be beyond its size? Which
+ * {@code byte[]}.
+ * (We don't use a {@link ByteBuffer} because there's enough semantics differences between Parcel
+ * and {@link ByteBuffer}, and it didn't work out.
+ * e.g. Parcel seems to allow moving the data position to be beyond its size? Which
  * {@link ByteBuffer} wouldn't allow...)
  */
 public class Parcel_host {
     private Parcel_host() {
     }
 
-    private static final AtomicLong sNextId = new AtomicLong(0);
+    private static final AtomicLong sNextId = new AtomicLong(1);
 
     private static final Map<Long, Parcel_host> sInstances = new ConcurrentHashMap<>();
 
@@ -142,12 +140,6 @@ public class Parcel_host {
     public static void nativeMarkSensitive(long nativePtr) {
         getInstance(nativePtr).mSensitive = true;
     }
-    public static void nativeMarkForBinder(long nativePtr, IBinder binder) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static boolean nativeIsForRpc(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
     public static int nativeDataSize(long nativePtr) {
         return getInstance(nativePtr).mSize;
     }
@@ -235,9 +227,6 @@ public class Parcel_host {
     public static int nativeWriteDouble(long nativePtr, double val) {
         return nativeWriteLong(nativePtr, Double.doubleToLongBits(val));
     }
-    public static void nativeSignalExceptionForError(int error) {
-        throw new RuntimeException("Not implemented yet");
-    }
 
     private static int align4(int val) {
         return ((val + 3) / 4) * 4;
@@ -254,12 +243,6 @@ public class Parcel_host {
     public static void nativeWriteString16(long nativePtr, String val) {
         // Just reuse String8
         nativeWriteString8(nativePtr, val);
-    }
-    public static void nativeWriteStrongBinder(long nativePtr, IBinder val) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val) {
-        throw new RuntimeException("Not implemented yet");
     }
 
     public static byte[] nativeCreateByteArray(long nativePtr) {
@@ -347,12 +330,6 @@ public class Parcel_host {
     public static String nativeReadString16(long nativePtr) {
         return nativeReadString8(nativePtr);
     }
-    public static IBinder nativeReadStrongBinder(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static FileDescriptor nativeReadFileDescriptor(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
 
     public static byte[] nativeMarshall(long nativePtr) {
         var p = getInstance(nativePtr);
@@ -367,11 +344,26 @@ public class Parcel_host {
         p.updateSize();
     }
     public static int nativeCompareData(long thisNativePtr, long otherNativePtr) {
-        throw new RuntimeException("Not implemented yet");
+        var a = getInstance(thisNativePtr);
+        var b = getInstance(otherNativePtr);
+        if ((a.mSize == b.mSize) && Arrays.equals(a.mBuffer, b.mBuffer)) {
+            return 0;
+        } else {
+            return -1;
+        }
     }
     public static boolean nativeCompareDataInRange(
             long ptrA, int offsetA, long ptrB, int offsetB, int length) {
-        throw new RuntimeException("Not implemented yet");
+        var a = getInstance(ptrA);
+        var b = getInstance(ptrB);
+        if (offsetA < 0 || offsetA + length > a.mSize) {
+            throw new IllegalArgumentException();
+        }
+        if (offsetB < 0 || offsetB + length > b.mSize) {
+            throw new IllegalArgumentException();
+        }
+        return Arrays.equals(Arrays.copyOfRange(a.mBuffer, offsetA, offsetA + length),
+                Arrays.copyOfRange(b.mBuffer, offsetB, offsetB + length));
     }
     public static void nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int srcOffset, int length) {
@@ -395,29 +387,5 @@ public class Parcel_host {
             long nativePtr, int offset, int length) {
         // Assume false for now, because we don't support writing FDs yet.
         return false;
-    }
-    public static void nativeWriteInterfaceToken(long nativePtr, String interfaceName) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static void nativeEnforceInterface(long nativePtr, String interfaceName) {
-        throw new RuntimeException("Not implemented yet");
-    }
-
-    public static boolean nativeReplaceCallingWorkSourceUid(
-            long nativePtr, int workSourceUid) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static int nativeReadCallingWorkSourceUid(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
-
-    public static long nativeGetOpenAshmemSize(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static long getGlobalAllocSize() {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static long getGlobalAllocCount() {
-        throw new RuntimeException("Not implemented yet");
     }
 }

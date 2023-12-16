@@ -109,6 +109,7 @@ public class BatteryControllerTest {
         mFlexibilityController =
                 new FlexibilityController(mJobSchedulerService, mock(PrefetchController.class));
         mBatteryController = new BatteryController(mJobSchedulerService, mFlexibilityController);
+        mBatteryController.startTrackingLocked();
 
         verify(mContext).registerReceiver(receiverCaptor.capture(),
                 ArgumentMatchers.argThat(filter ->

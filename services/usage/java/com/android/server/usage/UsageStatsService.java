@@ -83,6 +83,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -91,6 +92,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -192,6 +194,11 @@ public class UsageStatsService extends SystemService implements
     private static final String GLOBAL_COMPONENT_USAGE_FILE_NAME = "globalcomponentusage";
 
     private static final char TOKEN_DELIMITER = '/';
+
+    // The maximum length for extras {@link UsageStatsManager#EXTRA_EVENT_CATEGORY},
+    // {@link UsageStatsManager#EXTRA_EVENT_ACTION} in a {@link UsageEvents.Event#mExtras}.
+    // The value will be truncated at this limit.
+    private static final int MAX_TEXT_LENGTH = 127;
 
     // Handler message types.
     static final int MSG_REPORT_EVENT = 0;
@@ -325,6 +332,7 @@ public class UsageStatsService extends SystemService implements
                         mUsageEventListeners.valueAt(i).onUsageEvent(userId, event);
                     }
                 }
+                return true;
             }
         }
         return false;
@@ -1814,6 +1822,13 @@ public class UsageStatsService extends SystemService implements
         mHandler.removeMessages(MSG_FLUSH_TO_DISK);
     }
 
+    private String getTrimmedString(String input) {
+        if (input != null && input.length() > MAX_TEXT_LENGTH) {
+            return input.substring(0, MAX_TEXT_LENGTH);
+        }
+        return input;
+    }
+
     /**
      * Called by the Binder stub.
      */
@@ -1959,6 +1974,8 @@ public class UsageStatsService extends SystemService implements
                 + ": " + Flags.userInteractionTypeApi());
         pw.println("    " + Flags.FLAG_USE_PARCELED_LIST
                 + ": " + Flags.useParceledList());
+        pw.println("    " + Flags.FLAG_FILTER_BASED_EVENT_QUERY_API
+                + ": " + Flags.filterBasedEventQueryApi());
 
         final int[] userIds;
         synchronized (mLock) {
@@ -2231,7 +2248,7 @@ public class UsageStatsService extends SystemService implements
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
-                    callingUid, userId);
+                    callingUid, UserHandle.getCallingUserId());
 
             final long token = Binder.clearCallingIdentity();
             try {
@@ -2251,6 +2268,39 @@ public class UsageStatsService extends SystemService implements
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        private void reportUserInteractionInnerHelper(String packageName, @UserIdInt int userId,
+                PersistableBundle extras) {
+            if (Flags.reportUsageStatsPermission()) {
+                if (!canReportUsageStats()) {
+                    throw new SecurityException(
+                        "Only the system or holders of the REPORT_USAGE_STATS"
+                            + " permission are allowed to call reportUserInteraction");
+                }
+                if (userId != UserHandle.getCallingUserId()) {
+                    // Cross-user event reporting.
+                    getContext().enforceCallingPermission(
+                            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                            "Caller doesn't have INTERACT_ACROSS_USERS_FULL permission");
+                }
+            } else {
+                if (!isCallingUidSystem()) {
+                    throw new SecurityException("Only system is allowed to call"
+                        + " reportUserInteraction");
+                }
+            }
+
+            // Verify if this package exists before reporting an event for it.
+            if (mPackageManagerInternal.getPackageUid(packageName, 0, userId) < 0) {
+                throw new IllegalArgumentException("Package " + packageName
+                        + " does not exist!");
+            }
+
+            final Event event = new Event(USER_INTERACTION, SystemClock.elapsedRealtime());
+            event.mPackage = packageName;
+            event.mExtras = extras;
+            reportEventOrAddToQueue(userId, event);
         }
 
         @Override
@@ -2344,6 +2394,7 @@ public class UsageStatsService extends SystemService implements
             if (!hasQueryPermission(callingPackage)) {
                 return null;
             }
+
             return queryEventsHelper(UserHandle.getCallingUserId(), query.getBeginTimeMillis(),
                     query.getEndTimeMillis(), callingPackage, query.getEventTypeFilter());
         }
@@ -2686,23 +2737,36 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public void reportUserInteraction(String packageName, int userId) {
+            reportUserInteractionInnerHelper(packageName, userId, null);
+        }
+
+        @Override
+        public void reportUserInteractionWithBundle(String packageName, @UserIdInt int userId,
+                PersistableBundle extras) {
             Objects.requireNonNull(packageName);
-            if (Flags.reportUsageStatsPermission()) {
-                if (!canReportUsageStats()) {
-                    throw new SecurityException(
-                        "Only the system or holders of the REPORT_USAGE_STATS"
-                            + " permission are allowed to call reportUserInteraction");
-                }
-            } else {
-                if (!isCallingUidSystem()) {
-                    throw new SecurityException("Only system is allowed to call"
-                            + " reportUserInteraction");
-                }
+            if (extras == null || extras.size() == 0) {
+                throw new IllegalArgumentException("Emtry extras!");
             }
 
-            final Event event = new Event(USER_INTERACTION, SystemClock.elapsedRealtime());
-            event.mPackage = packageName;
-            reportEventOrAddToQueue(userId, event);
+            // Only category/action are allowed now, other unknown keys will be trimmed.
+            // Also, empty category/action is not meanful.
+            String category = extras.getString(UsageStatsManager.EXTRA_EVENT_CATEGORY);
+            if (TextUtils.isEmpty(category)) {
+                throw new IllegalArgumentException("Empty "
+                        + UsageStatsManager.EXTRA_EVENT_CATEGORY);
+            }
+            String action = extras.getString(UsageStatsManager.EXTRA_EVENT_ACTION);
+            if (TextUtils.isEmpty(action)) {
+                throw new IllegalArgumentException("Empty "
+                        + UsageStatsManager.EXTRA_EVENT_ACTION);
+            }
+
+            PersistableBundle extrasCopy = new PersistableBundle();
+            extrasCopy.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY,
+                    getTrimmedString(category));
+            extrasCopy.putString(UsageStatsManager.EXTRA_EVENT_ACTION, getTrimmedString(action));
+
+            reportUserInteractionInnerHelper(packageName, userId, extrasCopy);
         }
 
         @Override
@@ -3157,6 +3221,24 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportContentProviderUsage(String name, String packageName, int userId) {
             mAppStandby.postReportContentProviderUsage(name, packageName, userId);
+        }
+
+        @Override
+        public void reportUserInteractionEvent(@NonNull String pkgName, @UserIdInt int userId,
+                @NonNull PersistableBundle extras) {
+            if (extras != null && extras.size() != 0) {
+                // Truncate the value if necessary.
+                String category = extras.getString(UsageStatsManager.EXTRA_EVENT_CATEGORY);
+                String action = extras.getString(UsageStatsManager.EXTRA_EVENT_ACTION);
+                extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY,
+                        getTrimmedString(category));
+                extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, getTrimmedString(action));
+            }
+
+            Event event = new Event(USER_INTERACTION, SystemClock.elapsedRealtime());
+            event.mPackage = pkgName;
+            event.mExtras = extras;
+            reportEventOrAddToQueue(userId, event);
         }
 
         @Override

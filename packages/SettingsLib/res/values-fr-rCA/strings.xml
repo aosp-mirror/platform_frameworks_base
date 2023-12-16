@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Connecté par ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Connecté par eARC"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"Sortie audio par défaut de la télévision"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"Sortie HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Haut-parleurs internes"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Sortie audio par défaut de la télévision"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Sortie HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Haut-parleurs internes"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problème de connexion. Éteingez et rallumez l\'appareil"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Appareil audio à câble"</string>
     <string name="help_label" msgid="3528360748637781274">"Aide et commentaires"</string>

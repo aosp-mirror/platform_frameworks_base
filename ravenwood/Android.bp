@@ -34,6 +34,7 @@ java_library {
         "framework-minus-apex.ravenwood",
         "junit",
     ],
+    sdk_version: "core_current",
     visibility: ["//frameworks/base"],
 }
 

@@ -19,10 +19,10 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import android.app.NotificationManager.Policy
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
@@ -41,6 +41,7 @@ import com.android.systemui.runTest
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModelModule
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule
 import com.android.systemui.statusbar.policy.FakeConfigurationController
@@ -59,6 +60,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableFlags(FooterViewRefactor.FLAG_NAME)
 class NotificationListViewModelTest : SysuiTestCase() {
 
     @SysUISingleton
@@ -104,8 +106,6 @@ class NotificationListViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        mSetFlagsRule.enableFlags(Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR)
     }
 
     @Test

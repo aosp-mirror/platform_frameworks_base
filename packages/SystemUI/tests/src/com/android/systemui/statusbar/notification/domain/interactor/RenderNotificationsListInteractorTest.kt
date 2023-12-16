@@ -25,14 +25,19 @@ import com.android.systemui.statusbar.notification.shared.byKey
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 @SmallTest
 class RenderNotificationsListInteractorTest : SysuiTestCase() {
+    private val backgroundDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(backgroundDispatcher)
 
     private val notifsRepository = ActiveNotificationListRepository()
-    private val notifsInteractor = ActiveNotificationsInteractor(notifsRepository)
+    private val notifsInteractor =
+        ActiveNotificationsInteractor(notifsRepository, backgroundDispatcher)
     private val underTest =
         RenderNotificationListInteractor(
             notifsRepository,
@@ -40,21 +45,26 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
         )
 
     @Test
-    fun setRenderedList_preservesOrdering() = runTest {
-        val notifs by collectLastValue(notifsInteractor.topLevelRepresentativeNotifications)
-        val keys = (1..50).shuffled().map { "$it" }
-        val entries =
-            keys.map {
-                mock<ListEntry> {
-                    val mockRep = mock<NotificationEntry> {
-                        whenever(key).thenReturn(it)
-                        whenever(sbn).thenReturn(mock())
-                        whenever(icons).thenReturn(mock())
+    fun setRenderedList_preservesOrdering() =
+        testScope.runTest {
+            val notifs by collectLastValue(notifsInteractor.topLevelRepresentativeNotifications)
+            val keys = (1..50).shuffled().map { "$it" }
+            val entries =
+                keys.map {
+                    mock<ListEntry> {
+                        val mockRep =
+                            mock<NotificationEntry> {
+                                whenever(key).thenReturn(it)
+                                whenever(sbn).thenReturn(mock())
+                                whenever(icons).thenReturn(mock())
+                            }
+                        whenever(representativeEntry).thenReturn(mockRep)
                     }
-                    whenever(representativeEntry).thenReturn(mockRep)
                 }
-            }
-        underTest.setRenderedList(entries)
-        assertThat(notifs).comparingElementsUsing(byKey).containsExactlyElementsIn(keys).inOrder()
-    }
+            underTest.setRenderedList(entries)
+            assertThat(notifs)
+                .comparingElementsUsing(byKey)
+                .containsExactlyElementsIn(keys)
+                .inOrder()
+        }
 }

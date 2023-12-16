@@ -18,6 +18,7 @@ package com.android.input.screenshot
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.ui.platform.ViewRootForTest
@@ -49,15 +50,17 @@ class InputScreenshotTestRule(
             )
         )
     private val composeRule = createAndroidComposeRule<ComponentActivity>()
-    private val delegateRule =
-            RuleChain.outerRule(colorsRule)
-                .around(deviceEmulationRule)
+    private val roboRule =
+            RuleChain.outerRule(deviceEmulationRule)
                 .around(screenshotRule)
                 .around(composeRule)
+    private val delegateRule = RuleChain.outerRule(colorsRule).around(roboRule)
     private val matcher = UnitTestBitmapMatcher
+    private val isRobolectric = if (Build.FINGERPRINT.contains("robolectric")) true else false
 
     override fun apply(base: Statement, description: Description): Statement {
-        return delegateRule.apply(base, description)
+        val ruleToApply = if (isRobolectric) roboRule else delegateRule
+        return ruleToApply.apply(base, description)
     }
 
     /**

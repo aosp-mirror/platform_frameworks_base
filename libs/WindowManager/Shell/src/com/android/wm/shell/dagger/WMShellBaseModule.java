@@ -250,10 +250,10 @@ public abstract class WMShellBaseModule {
             SyncTransactionQueue syncQueue,
             @ShellMainThread ShellExecutor mainExecutor,
             Lazy<Transitions> transitionsLazy,
-            DockStateReader dockStateReader,
-            CompatUIConfiguration compatUIConfiguration,
-            CompatUIShellCommandHandler compatUIShellCommandHandler,
-            AccessibilityManager accessibilityManager) {
+            Lazy<DockStateReader> dockStateReader,
+            Lazy<CompatUIConfiguration> compatUIConfiguration,
+            Lazy<CompatUIShellCommandHandler> compatUIShellCommandHandler,
+            Lazy<AccessibilityManager> accessibilityManager) {
         if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
             return Optional.empty();
         }
@@ -268,10 +268,10 @@ public abstract class WMShellBaseModule {
                         syncQueue,
                         mainExecutor,
                         transitionsLazy,
-                        dockStateReader,
-                        compatUIConfiguration,
-                        compatUIShellCommandHandler,
-                        accessibilityManager));
+                        dockStateReader.get(),
+                        compatUIConfiguration.get(),
+                        compatUIShellCommandHandler.get(),
+                        accessibilityManager.get()));
     }
 
     @WMSingleton
@@ -324,13 +324,16 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static SystemPerformanceHinter provideSystemPerformanceHinter(Context context,
+    static Optional<SystemPerformanceHinter> provideSystemPerformanceHinter(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             RootTaskDisplayAreaOrganizer rootTdaOrganizer) {
+        if (!com.android.window.flags.Flags.explicitRefreshRateHints()) {
+            return Optional.empty();
+        }
         final PerfHintController perfHintController =
                 new PerfHintController(context, shellInit, shellCommandHandler, rootTdaOrganizer);
-        return perfHintController.getHinter();
+        return Optional.of(perfHintController.getHinter());
     }
 
     //

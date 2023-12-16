@@ -1711,10 +1711,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pot fer un seguiment de les teves interaccions amb una aplicació o un sensor de maquinari, i interaccionar amb aplicacions en nom teu."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permet"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denega"</string>
-    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
-    <skip />
-    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
-    <skip />
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Desinstal·la"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Una aplicació està ocultant la sol·licitud de permís, de manera que la teva resposta no es pot verificar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toca una funció per començar a utilitzar-la:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Tria les funcions que vols utilitzar amb el botó d\'accessibilitat"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Tria les funcions que vols utilitzar amb la drecera per a tecles de volum"</string>
@@ -1909,10 +1907,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Cap de setmana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Esdeveniment"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Mentre dormo"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
     <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activat"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivat"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> està silenciant alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"S\'ha produït un error intern al dispositiu i és possible que funcioni de manera inestable fins que restableixis les dades de fàbrica."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"S\'ha produït un error intern al dispositiu. Contacta amb el fabricant del dispositiu per obtenir més informació."</string>
@@ -2345,10 +2343,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micròfon està bloquejat"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"No es pot projectar a la pantalla"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Utilitza un altre cable i torna-ho a provar"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"És possible que el cable no sigui compatible amb pantalles"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"És possible que el teu cable USB-C no es connecti correctament a les pantalles"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"El dispositiu està massa calent i no pot projectar a la pantalla fins que es refredi"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Pantalla dual"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La pantalla dual està activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> està utilitzant les dues pantalles per mostrar contingut"</string>
@@ -2365,4 +2360,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Disseny del teclat definit en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toca per canviar-ho."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclats físic configurats"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toca per veure els teclats"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privat"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Clon"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Treball"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Treball 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Treball 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Prova"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Compartit"</string>
 </resources>

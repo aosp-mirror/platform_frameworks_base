@@ -18,17 +18,17 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.app.Activity.FULLSCREEN_MODE_REQUEST_ENTER;
+import static android.app.Activity.FULLSCREEN_MODE_REQUEST_EXIT;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.INVALID_WINDOWING_MODE;
 import static android.app.FullscreenRequestHandler.REMOTE_CALLBACK_RESULT_KEY;
 import static android.app.FullscreenRequestHandler.RESULT_APPROVED;
-import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_DEFAULT_FREEFORM;
-import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_IN_FREEFORM;
 import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY;
 import static android.app.FullscreenRequestHandler.RESULT_FAILED_NOT_TOP_FOCUSED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -55,6 +55,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
+import static com.android.window.flags.Flags.allowDisableActivityRecordInputSink;
 
 import android.Manifest;
 import android.annotation.ColorInt;
@@ -1091,19 +1092,14 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     private @FullscreenRequestHandler.RequestResult int validateMultiwindowFullscreenRequestLocked(
             Task topFocusedRootTask, int fullscreenRequest, ActivityRecord requesterActivity) {
-        // If the mode is not by default freeform, the freeform will be a user-driven event.
-        if (topFocusedRootTask.getParent().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-            return RESULT_FAILED_NOT_DEFAULT_FREEFORM;
+        if (requesterActivity.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            return RESULT_APPROVED;
         }
         // If this is not coming from the currently top-most activity, reject the request.
         if (requesterActivity != topFocusedRootTask.getTopMostActivity()) {
             return RESULT_FAILED_NOT_TOP_FOCUSED;
         }
-        if (fullscreenRequest == FULLSCREEN_MODE_REQUEST_ENTER) {
-            if (topFocusedRootTask.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
-                return RESULT_FAILED_NOT_IN_FREEFORM;
-            }
-        } else {
+        if (fullscreenRequest == FULLSCREEN_MODE_REQUEST_EXIT) {
             if (topFocusedRootTask.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
                 return RESULT_FAILED_NOT_IN_FULLSCREEN_WITH_HISTORY;
             }
@@ -1686,6 +1682,22 @@ class ActivityClientController extends IActivityClientController.Stub {
             if (r == null) return false;
 
             return r.mRequestedLaunchingTaskFragmentToken == taskFragmentToken;
+        }
+    }
+
+    @Override
+    public void setActivityRecordInputSinkEnabled(IBinder activityToken, boolean enabled) {
+        if (!allowDisableActivityRecordInputSink()) {
+            return;
+        }
+
+        mService.mAmInternal.enforceCallingPermission(
+                Manifest.permission.INTERNAL_SYSTEM_WINDOW, "setActivityRecordInputSinkEnabled");
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+            if (r != null) {
+                r.mActivityRecordInputSinkEnabled = enabled;
+            }
         }
     }
 }

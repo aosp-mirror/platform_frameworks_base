@@ -532,9 +532,10 @@ public class UserManagerService extends IUserManager.Stub {
             }
             final IntentSender target = intent.getParcelableExtra(Intent.EXTRA_INTENT, android.content.IntentSender.class);
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_NULL);
+            final String callingPackage = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
             // Call setQuietModeEnabled on bg thread to avoid ANR
             BackgroundThread.getHandler().post(() ->
-                    setQuietModeEnabled(userId, false, target, /* callingPackage */ null));
+                    setQuietModeEnabled(userId, false, target, callingPackage));
         }
     };
 
@@ -1410,7 +1411,7 @@ public class UserManagerService extends IUserManager.Stub {
                     if (onlyIfCredentialNotRequired) {
                         return false;
                     }
-                    showConfirmCredentialToDisableQuietMode(userId, target);
+                    showConfirmCredentialToDisableQuietMode(userId, target, callingPackage);
                     return false;
                 }
             }
@@ -1434,7 +1435,7 @@ public class UserManagerService extends IUserManager.Stub {
                 if (onlyIfCredentialNotRequired) {
                     return false;
                 }
-                showConfirmCredentialToDisableQuietMode(userId, target);
+                showConfirmCredentialToDisableQuietMode(userId, target, callingPackage);
                 return false;
             }
             setQuietModeEnabled(userId, false /* enableQuietMode */, target, callingPackage);
@@ -1519,7 +1520,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         try {
             if (enableQuietMode) {
-                ActivityManager.getService().stopUser(userId, /* force= */ true, null);
+                stopUserForQuietMode(userId);
                 LocalServices.getService(ActivityManagerInternal.class)
                         .killForegroundAppsForUser(userId);
             } else {
@@ -1547,6 +1548,18 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    private void stopUserForQuietMode(int userId) throws RemoteException {
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+            // Allow delayed locking since some profile types want to be able to unlock again via
+            // biometrics.
+            ActivityManager.getService()
+                    .stopUserWithDelayedLocking(userId, /* force= */ true, null);
+            return;
+        }
+        ActivityManager.getService().stopUser(userId, /* force= */ true, null);
+    }
+
     private void logQuietModeEnabled(@UserIdInt int userId, boolean enableQuietMode,
             @Nullable String callingPackage) {
         Slogf.i(LOG_TAG,
@@ -1566,6 +1579,7 @@ public class UserManagerService extends IUserManager.Stub {
                 : now - userData.info.creationTime);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.REQUEST_QUIET_MODE_ENABLED)
+                .setInt(UserJourneyLogger.getUserTypeForStatsd(userData.info.userType))
                 .setStrings(callingPackage)
                 .setBoolean(enableQuietMode)
                 .setTimePeriod(period)
@@ -1591,7 +1605,20 @@ public class UserManagerService extends IUserManager.Stub {
      * Show confirm credential screen to unlock user in order to turn off quiet mode.
      */
     private void showConfirmCredentialToDisableQuietMode(
-            @UserIdInt int userId, @Nullable IntentSender target) {
+            @UserIdInt int userId, @Nullable IntentSender target, @Nullable String callingPackage) {
+        if (android.app.admin.flags.Flags.quietModeCredentialBugFix()) {
+            // TODO (b/308121702) It may be brittle to rely on user states to check profile state
+            int state;
+            synchronized (mUserStates) {
+                state = mUserStates.get(userId, UserState.STATE_NONE);
+            }
+            if (state != UserState.STATE_NONE) {
+                Slog.i(LOG_TAG,
+                        "showConfirmCredentialToDisableQuietMode() called too early, user " + userId
+                                + " is still alive.");
+                return;
+            }
+        }
         // otherwise, we show a profile challenge to trigger decryption of the user
         final KeyguardManager km = (KeyguardManager) mContext.getSystemService(
                 Context.KEYGUARD_SERVICE);
@@ -1609,6 +1636,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         callBackIntent.putExtra(Intent.EXTRA_USER_ID, userId);
         callBackIntent.setPackage(mContext.getPackageName());
+        callBackIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, callingPackage);
         callBackIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 mContext,
@@ -1942,6 +1970,19 @@ public class UserManagerService extends IUserManager.Stub {
             return Resources.ID_NULL;
         }
         return userTypeDetails.getStatusBarIcon();
+    }
+
+    @Override
+    public @StringRes int getProfileLabelResId(@UserIdInt int userId) {
+        checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "getProfileLabelResId");
+        final UserInfo userInfo = getUserInfoNoChecks(userId);
+        final UserTypeDetails userTypeDetails = getUserTypeDetails(userInfo);
+        if (userInfo == null || userTypeDetails == null) {
+            return Resources.ID_NULL;
+        }
+        final int userIndex = userInfo.profileBadge;
+        return userTypeDetails.getLabel(userIndex);
     }
 
     public boolean isProfile(@UserIdInt int userId) {
@@ -5097,8 +5138,7 @@ public class UserManagerService extends IUserManager.Stub {
             // unlocked.  We do this to ensure that CE storage isn't prepared before the CE key is
             // saved to disk.  This also matches what is done for user 0.
             t.traceBegin("prepareUserData");
-            mUserDataPreparer.prepareUserData(userId, userInfo.serialNumber,
-                    StorageManager.FLAG_STORAGE_DE);
+            mUserDataPreparer.prepareUserData(userInfo, StorageManager.FLAG_STORAGE_DE);
             t.traceEnd();
 
             t.traceBegin("LSS.createNewUser");
@@ -5110,12 +5150,6 @@ public class UserManagerService extends IUserManager.Stub {
             t.traceBegin("PM.createNewUser");
             mPm.createNewUser(userId, userTypeInstallablePackages, disallowedPackages);
             t.traceEnd();
-
-            userInfo.partial = false;
-            synchronized (mPackagesLock) {
-                writeUserLP(userData);
-            }
-            updateUserIds();
 
             Bundle restrictions = new Bundle();
             if (isGuest) {
@@ -5133,6 +5167,12 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mRestrictionsLock) {
                 mBaseUserRestrictions.updateRestrictions(userId, restrictions);
             }
+
+            userInfo.partial = false;
+            synchronized (mPackagesLock) {
+                writeUserLP(userData);
+            }
+            updateUserIds();
 
             t.traceBegin("PM.onNewUserCreated-" + userId);
             mPm.onNewUserCreated(userId, /* convertedFromPreCreated= */ false);
@@ -6360,12 +6400,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("onBeforeStartUser-" + userId);
-        final int userSerial = userInfo.serialNumber;
         // Migrate only if build fingerprints mismatch
         boolean migrateAppsData = !PackagePartitions.FINGERPRINT.equals(
                 userInfo.lastLoggedInFingerprint);
         t.traceBegin("prepareUserData");
-        mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
+        mUserDataPreparer.prepareUserData(userInfo, StorageManager.FLAG_STORAGE_DE);
         t.traceEnd();
         t.traceBegin("reconcileAppsData");
         getPackageManagerInternal().reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE,
@@ -6391,14 +6430,13 @@ public class UserManagerService extends IUserManager.Stub {
         if (userInfo == null) {
             return;
         }
-        final int userSerial = userInfo.serialNumber;
         // Migrate only if build fingerprints mismatch
         boolean migrateAppsData = !PackagePartitions.FINGERPRINT.equals(
                 userInfo.lastLoggedInFingerprint);
 
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("prepareUserData-" + userId);
-        mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
+        mUserDataPreparer.prepareUserData(userInfo, StorageManager.FLAG_STORAGE_CE);
         t.traceEnd();
 
         StorageManagerInternal smInternal = LocalServices.getService(StorageManagerInternal.class);

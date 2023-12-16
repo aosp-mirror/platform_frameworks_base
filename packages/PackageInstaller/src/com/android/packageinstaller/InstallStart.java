@@ -16,6 +16,7 @@
 
 package com.android.packageinstaller;
 
+import static android.content.pm.Flags.usePiaV2;
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
@@ -37,7 +38,6 @@ import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.android.packageinstaller.v2.ui.InstallLaunch;
@@ -57,14 +57,14 @@ public class InstallStart extends Activity {
 
     private final boolean mLocalLOGV = false;
 
-    // TODO (sumedhsen): Replace with an Android Feature Flag once implemented
-    private static final boolean USE_PIA_V2 = false;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (USE_PIA_V2) {
+
+        if (usePiaV2()) {
+            Log.i(TAG, "Using Pia V2");
+
             Intent piaV2 = new Intent(getIntent());
             piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getCallingPackage());
             piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());

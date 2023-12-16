@@ -28,6 +28,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down PRIMARY BOUNCER->LOCKSCREEN transition into discrete steps for corresponding views to
@@ -40,11 +41,12 @@ class PrimaryBouncerToLockscreenTransitionViewModel
 constructor(
     interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
-            transitionFlow =
+        animationFlow.setup(
+            duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
+            stepFlow =
                 interactor.transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.LOCKSCREEN),
         )
 
@@ -55,6 +57,11 @@ constructor(
             } else {
                 emptyFlow()
             }
+        }
+
+    val shortcutsAlpha: Flow<Float> =
+        interactor.transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.LOCKSCREEN).map {
+            it.value
         }
 
     override val deviceEntryParentViewAlpha: Flow<Float> =

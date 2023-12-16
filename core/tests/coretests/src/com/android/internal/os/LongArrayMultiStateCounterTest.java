@@ -22,16 +22,22 @@ import static org.junit.Assert.assertThrows;
 
 import android.os.BadParcelableException;
 import android.os.Parcel;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@IgnoreUnderRavenwood(blockedBy = LongArrayMultiStateCounter.class)
 public class LongArrayMultiStateCounterTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
     public void setStateAndUpdateValue() {
@@ -48,6 +54,16 @@ public class LongArrayMultiStateCounterTest {
 
         assertThat(counter.toString()).isEqualTo(
                 "[0: {75, 150, 225, 300}, 1: {25, 50, 75, 100}] updated: 9000 currentState: 0");
+    }
+
+    @Test
+    public void setValue() {
+        LongArrayMultiStateCounter counter = new LongArrayMultiStateCounter(2, 4);
+
+        counter.setValues(0, new long[]{1, 2, 3, 4});
+        counter.setValues(1, new long[]{5, 6, 7, 8});
+        assertCounts(counter, 0, new long[]{1, 2, 3, 4});
+        assertCounts(counter, 1, new long[]{5, 6, 7, 8});
     }
 
     @Test

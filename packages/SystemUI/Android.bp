@@ -190,6 +190,7 @@ android_library {
         "androidx.room_room-runtime",
         "androidx.room_room-ktx",
         "com.google.android.material_material",
+        "device_state_flags_lib",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
         "iconloader_base",
@@ -203,6 +204,7 @@ android_library {
         "lottie",
         "LowLightDreamLib",
         "motion_tool_lib",
+        "notification_flags_lib",
     ],
     libs: [
         "keepanno-annotations",
@@ -224,11 +226,6 @@ android_library {
         extra_check_modules: ["SystemUILintChecker"],
         warning_checks: ["MissingApacheLicenseDetector"],
     },
-    errorprone: {
-        javacflags: [
-            "-Xep:InvalidPatternSyntax:WARN",
-        ],
-    },
 }
 
 filegroup {
@@ -247,184 +244,10 @@ filegroup {
 }
 
 filegroup {
-    name: "SystemUI-test-fakes",
-    srcs: [
-        /* Status bar fakes */
-        "tests/src/com/android/systemui/statusbar/pipeline/airplane/data/repository/FakeAirplaneModeRepository.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/shared/data/repository/FakeConnectivityRepository.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/FakeWifiRepository.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/mobile/util/FakeSubscriptionManagerProxy.kt",
-
-        /* QS fakes */
-        "tests/src/com/android/systemui/qs/pipeline/domain/interactor/FakeQSTile.kt",
-    ],
-    path: "tests/src",
-}
-
-filegroup {
-    name: "SystemUI-tests-robolectric-pilots",
-    srcs: [
-        /* Keyguard converted tests */
-        // data
-        "tests/src/com/android/systemui/bouncer/data/repository/SimBouncerRepositoryTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/DoNotDisturbQuickAffordanceConfigTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/FlashlightQuickAffordanceConfigTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/HomeControlsKeyguardQuickAffordanceConfigTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceLegacySettingSyncerTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceLocalUserSelectionManagerTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/KeyguardQuickAffordanceRemoteUserSelectionManagerTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/MuteQuickAffordanceConfigTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/QrCodeScannerKeyguardQuickAffordanceConfigTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/QuickAccessWalletKeyguardQuickAffordanceConfigTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/VideoCameraQuickAffordanceConfigTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/repository/BiometricSettingsRepositoryTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/repository/DeviceEntryFaceAuthRepositoryTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/repository/DeviceEntryFingerprintAuthRepositoryTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/repository/DevicePostureRepositoryTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/repository/KeyguardQuickAffordanceRepositoryTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/repository/KeyguardRepositoryImplTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/repository/LightRevealScrimRepositoryTest.kt",
-        "tests/src/com/android/systemui/keyguard/data/repository/TrustRepositoryTest.kt",
-        // domain
-        "tests/src/com/android/systemui/bouncer/domain/interactor/AlternateBouncerInteractorTest.kt",
-        "tests/src/com/android/systemui/bouncer/domain/interactor/PrimaryBouncerCallbackInteractorTest.kt",
-        "tests/src/com/android/systemui/bouncer/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
-        "tests/src/com/android/systemui/bouncer/domain/interactor/SimBouncerInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardLongPressInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardTransitionInteractorTest.kt",
-        "tests/src/com/android/systemui/keyguard/domain/interactor/LightRevealScrimInteractorTest.kt",
-        // ui
-        "tests/src/com/android/systemui/bouncer/ui/viewmodel/KeyguardBouncerViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/DreamingToLockscreenTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/GoneToDreamingTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToDreamingTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToOccludedTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/OccludedToLockscreenTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/PrimaryBouncerToGoneTransitionViewModelTest.kt",
-        // Keyguard helper
-        "tests/src/com/android/systemui/keyguard/data/quickaffordance/FakeKeyguardQuickAffordanceConfig.kt",
-        "tests/src/com/android/systemui/dock/DockManagerFake.java",
-        "tests/src/com/android/systemui/dump/LogBufferHelper.kt",
-        "tests/src/com/android/systemui/statusbar/phone/FakeKeyguardStateController.java",
-
-        /* Biometric converted tests */
-        "tests/src/com/android/systemui/biometrics/BiometricTestExtensions.kt",
-        "tests/src/com/android/systemui/biometrics/AuthControllerTest.java",
-        "tests/src/com/android/systemui/biometrics/BiometricDisplayListenerTest.java",
-        "tests/src/com/android/systemui/biometrics/FaceHelpMessageDeferralTest.kt",
-        "tests/src/com/android/systemui/biometrics/SideFpsControllerTest.kt",
-        "tests/src/com/android/systemui/biometrics/UdfpsControllerOverlayTest.kt",
-        "tests/src/com/android/systemui/biometrics/UdfpsControllerTest.java",
-        "tests/src/com/android/systemui/biometrics/UdfpsDialogMeasureAdapterTest.java",
-        "tests/src/com/android/systemui/biometrics/UdfpsDisplayModeTest.java",
-        "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewLegacyControllerBaseTest.java",
-        "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewLegacyControllerTest.java",
-        "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewLegacyControllerWithCoroutinesTest.kt",
-        "tests/src/com/android/systemui/biometrics/UdfpsShellTest.kt",
-        "tests/src/com/android/systemui/biometrics/UdfpsViewTest.kt",
-
-        /* Status bar wifi converted tests */
-        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/WifiRepositorySwitcherTest.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/DisabledWifiRepositoryTest.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/WifiRepositoryImplTest.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/wifi/domain/interactor/WifiInteractorImplTest.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/wifi/ui/viewmodel/WifiViewModelTest.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/mobile/domain/interactor/FakeMobileIconsInteractor.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/mobile/domain/interactor/FakeMobileIconInteractor.kt",
-
-        /* Bouncer UI tests */
-        "tests/src/com/android/keyguard/KeyguardPasswordViewControllerTest.kt",
-        "tests/src/com/android/keyguard/KeyguardPatternViewControllerTest.kt",
-        "tests/src/com/android/keyguard/KeyguardPinBasedInputViewControllerTest.java",
-        "tests/src/com/android/keyguard/KeyguardPinViewControllerTest.kt",
-        "tests/src/com/android/keyguard/KeyguardSecurityContainerTest.java",
-        "tests/src/com/android/keyguard/KeyguardSecurityContainerControllerTest.kt",
-        "tests/src/com/android/keyguard/KeyguardSecurityViewFlipperControllerTest.java",
-        "tests/src/com/android/keyguard/KeyguardSimPinViewControllerTest.kt",
-        "tests/src/com/android/keyguard/KeyguardSimPukViewControllerTest.kt",
-
-        /* Communal tests */
-        "tests/src/com/android/systemui/communal/data/repository/CommunalWidgetRepositoryImplTest.kt",
-        "tests/src/com/android/systemui/communal/domain/interactor/CommunalInteractorTest.kt",
-        "tests/src/com/android/systemui/communal/ui/view/layout/blueprints/DefaultCommunalBlueprintTest.kt",
-
-        /* Dream tests */
-        "tests/src/com/android/systemui/dreams/complication/HideComplicationTouchHandlerTest.java",
-        "tests/src/com/android/systemui/dreams/conditions/AssistantAttentionConditionTest.java",
-        "tests/src/com/android/systemui/dreams/conditions/DreamConditionTest.java",
-        "tests/src/com/android/systemui/dreams/touch/scrim/BouncerlessScrimControllerTest.java",
-        "tests/src/com/android/systemui/dreams/touch/scrim/ScrimManagerTest.java",
-        "tests/src/com/android/systemui/dreams/touch/BouncerSwipeTouchHandlerTest.java",
-        "tests/src/com/android/systemui/dreams/touch/ShadeTouchHandlerTest.java",
-        "tests/src/com/android/systemui/dreams/DreamOverlayAnimationsControllerTest.kt",
-        "tests/src/com/android/systemui/dreams/DreamOverlayCallbackControllerTest.kt",
-        "tests/src/com/android/systemui/dreams/DreamOverlayContainerViewControllerTest.java",
-        "tests/src/com/android/systemui/dreams/DreamOverlayNotificationCountProviderTest.java",
-        "tests/src/com/android/systemui/dreams/DreamOverlayServiceTest.java",
-        "tests/src/com/android/systemui/dreams/DreamOverlayStateControllerTest.java",
-        "tests/src/com/android/systemui/dreams/DreamOverlayStatusBarItemsProviderTest.java",
-        "tests/src/com/android/systemui/dreams/DreamOverlayStatusBarViewControllerTest.java",
-
-        /* Smartspace tests */
-        "tests/src/com/android/systemui/smartspace/BcSmartspaceConfigProviderTest.kt",
-        "tests/src/com/android/systemui/smartspace/DreamSmartspaceControllerTest.kt",
-        "tests/src/com/android/systemui/smartspace/LockscreenAndDreamTargetFilterTest.kt",
-        "tests/src/com/android/systemui/smartspace/LockscreenPreconditionTest.kt",
-
-        /* Quick Settings new pipeline converted tests */
-        "tests/src/com/android/systemui/qs/pipeline/data/**/*Test.kt",
-        "tests/src/com/android/systemui/qs/pipeline/domain/**/*Test.kt",
-        "tests/src/com/android/systemui/qs/pipeline/shared/TileSpecTest.kt",
-        "tests/src/com/android/systemui/qs/tiles/base/**/*.kt",
-        "tests/src/com/android/systemui/qs/tiles/viewmodel/**/*.kt",
-        "tests/src/com/android/systemui/qs/tiles/impl/**/*.kt",
-
-        /* Authentication */
-        "tests/src/com/android/systemui/authentication/data/repository/AuthenticationRepositoryTest.kt",
-        "tests/src/com/android/systemui/authentication/domain/interactor/AuthenticationInteractorTest.kt",
-
-        /* Device entry */
-        "tests/src/com/android/systemui/deviceentry/data/repository/DeviceEntryRepositoryTest.kt",
-        "tests/src/com/android/systemui/deviceentry/domain/interactor/DeviceEntryInteractorTest.kt",
-
-        /* Bouncer scene */
-        "tests/src/com/android/systemui/bouncer/domain/interactor/BouncerInteractorTest.kt",
-        "tests/src/com/android/systemui/bouncer/ui/viewmodel/AuthMethodBouncerViewModelTest.kt",
-        "tests/src/com/android/systemui/bouncer/ui/viewmodel/BouncerViewModelTest.kt",
-        "tests/src/com/android/systemui/bouncer/ui/viewmodel/PasswordBouncerViewModelTest.kt",
-        "tests/src/com/android/systemui/bouncer/ui/viewmodel/PatternBouncerViewModelTest.kt",
-        "tests/src/com/android/systemui/bouncer/ui/viewmodel/PinBouncerViewModelTest.kt",
-        "tests/src/com/android/systemui/bouncer/ui/viewmodel/PinInputViewModelTest.kt",
-
-        /* Lockscreen scene */
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenSceneViewModelTest.kt",
-
-        /* Shade scene */
-        "tests/src/com/android/systemui/shade/ui/viewmodel/ShadeSceneViewModelTest.kt",
-        "tests/src/com/android/systemui/shade/ui/viewmodel/ShadeHeaderViewModelTest.kt",
-
-        /* Quick Settings scene */
-        "tests/src/com/android/systemui/qs/ui/viewmodel/QuickSettingsSceneViewModelTest.kt",
-
-        /* Flexiglass / Scene framework tests */
-        "tests/src/com/android/systemui/scene/SceneFrameworkIntegrationTest.kt",
-        "tests/src/com/android/systemui/scene/data/repository/SceneContainerRepositoryTest.kt",
-        "tests/src/com/android/systemui/scene/data/repository/WindowRootViewVisibilityRepositoryTest.kt",
-        "tests/src/com/android/systemui/scene/domain/interactor/SceneInteractorTest.kt",
-        "tests/src/com/android/systemui/scene/domain/interactor/WindowRootViewVisibilityInteractorTest.kt",
-        "tests/src/com/android/systemui/scene/domain/startable/SceneContainerStartableTest.kt",
-        "tests/src/com/android/systemui/scene/ui/viewmodel/SceneContainerViewModelTest.kt",
-
-    ],
-    path: "tests/src",
-}
-
-filegroup {
     name: "SystemUI-tests-multivalent",
     srcs: [
         "multivalentTests/src/**/*.kt",
+        "multivalentTests/src/**/*.java",
     ],
     path: "multivalentTests/src",
 }
@@ -454,11 +277,13 @@ android_library {
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SystemUICustomizationLib",
+        "SystemUICustomizationTestUtils",
         "SystemUI-statsd",
         "SettingsLib",
         "com_android_systemui_flags_lib",
         "com_android_systemui_shared_flags_lib",
         "flag-junit-base",
+        "platform-parametric-runner-lib",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
@@ -481,6 +306,7 @@ android_library {
         "androidx.exifinterface_exifinterface",
         "androidx.room_room-runtime",
         "androidx.room_room-ktx",
+        "device_state_flags_lib",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "kotlinx_coroutines_test",
@@ -504,6 +330,7 @@ android_library {
         "androidx.compose.ui_ui",
         "flag-junit",
         "platform-test-annotations",
+        "notification_flags_lib",
     ],
 }
 
@@ -553,11 +380,6 @@ android_library {
         test: true,
         extra_check_modules: ["SystemUILintChecker"],
     },
-    errorprone: {
-        javacflags: [
-            "-Xep:InvalidPatternSyntax:WARN",
-        ],
-    },
 }
 
 android_app {
@@ -599,12 +421,6 @@ android_app {
     },
 
     plugins: ["dagger2-compiler"],
-
-    errorprone: {
-        javacflags: [
-            "-Xep:InvalidPatternSyntax:WARN",
-        ],
-    },
 }
 
 android_robolectric_test {
@@ -613,8 +429,6 @@ android_robolectric_test {
         "tests/robolectric/src/**/*.kt",
         "tests/robolectric/src/**/*.java",
         ":SystemUI-tests-utils",
-        ":SystemUI-test-fakes",
-        ":SystemUI-tests-robolectric-pilots",
         ":SystemUI-tests-multivalent",
     ],
     static_libs: [

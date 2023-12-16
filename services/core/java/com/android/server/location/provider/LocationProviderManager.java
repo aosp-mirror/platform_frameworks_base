@@ -1734,12 +1734,6 @@ public class LocationProviderManager extends
             return null;
         }
 
-        // lastly - note app ops
-        if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel),
-                identity)) {
-            return null;
-        }
-
         Location location = getPermittedLocation(
                 getLastLocationUnsafe(
                         identity.getUserId(),
@@ -1748,10 +1742,18 @@ public class LocationProviderManager extends
                         Long.MAX_VALUE),
                 permissionLevel);
 
-        if (location != null && identity.getPid() == Process.myPid()) {
+        if (location != null) {
+            // lastly - note app ops
+            if (!mAppOpsHelper.noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel),
+                    identity)) {
+                return null;
+            }
+
             // if delivering to the same process, make a copy of the location first (since
             // location is mutable)
-            location = new Location(location);
+            if (identity.getPid() == Process.myPid()) {
+                location = new Location(location);
+            }
         }
 
         return location;

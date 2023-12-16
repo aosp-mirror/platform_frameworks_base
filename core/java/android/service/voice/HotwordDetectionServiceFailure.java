@@ -89,6 +89,11 @@ public final class HotwordDetectionServiceFailure implements Parcelable {
     @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
     public static final int ERROR_CODE_ON_TRAINING_DATA_SECURITY_EXCEPTION = 9;
 
+    /** Indicates shutdown of {@link HotwordDetectionService} due to voice activation op being
+     * disabled. */
+    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
+    public static final int ERROR_CODE_SHUTDOWN_HDS_ON_VOICE_ACTIVATION_OP_DISABLED = 10;
+
     /**
      * @hide
      */
@@ -100,7 +105,10 @@ public final class HotwordDetectionServiceFailure implements Parcelable {
             ERROR_CODE_DETECT_TIMEOUT,
             ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION,
             ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE,
-            ERROR_CODE_REMOTE_EXCEPTION
+            ERROR_CODE_REMOTE_EXCEPTION,
+            ERROR_CODE_ON_TRAINING_DATA_EGRESS_LIMIT_EXCEEDED,
+            ERROR_CODE_ON_TRAINING_DATA_SECURITY_EXCEPTION,
+            ERROR_CODE_SHUTDOWN_HDS_ON_VOICE_ACTIVATION_OP_DISABLED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface HotwordDetectionServiceErrorCode {}

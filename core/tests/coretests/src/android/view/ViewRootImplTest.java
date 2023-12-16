@@ -472,6 +472,7 @@ public class ViewRootImplTest {
      * Test the value of the frame rate cateogry based on the visibility of a view
      * Invsible: FRAME_RATE_CATEGORY_NO_PREFERENCE
      * Visible: FRAME_RATE_CATEGORY_NORMAL
+     * Also, mIsFrameRateBoosting should be true when the visibility becomes visible
      */
     @Test
     @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
@@ -485,12 +486,18 @@ public class ViewRootImplTest {
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
                     FRAME_RATE_CATEGORY_NO_PREFERENCE);
         });
+        sInstrumentation.waitForIdleSync();
 
         sInstrumentation.runOnMainSync(() -> {
             view.setVisibility(View.VISIBLE);
             view.invalidate();
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
                     FRAME_RATE_CATEGORY_NORMAL);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getIsFrameRateBoosting(), true);
         });
     }
 
@@ -628,6 +635,42 @@ public class ViewRootImplTest {
         });
     }
 
+    /**
+     * We should boost the frame rate if the value of mInsetsAnimationRunning is true.
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_insetsAnimation() {
+        View view = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            Display display = wm.getDefaultDisplay();
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+            wmlp.width = (int) (metrics.widthPixels * 0.9);
+            wmlp.height = (int) (metrics.heightPixels * 0.9);
+            wm.addView(view, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        sInstrumentation.runOnMainSync(() -> {
+            view.invalidate();
+            assertEquals(viewRootImpl.getLastPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NORMAL);
+            viewRootImpl.notifyInsetsAnimationRunningStateChanged(true);
+            view.invalidate();
+        });
+        sInstrumentation.waitForIdleSync();
+
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getLastPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_HIGH);
+        });
+    }
 
     @Test
     public void forceInvertOffDarkThemeOff_forceDarkModeDisabled() {

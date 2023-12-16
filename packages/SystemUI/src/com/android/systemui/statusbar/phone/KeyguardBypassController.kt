@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.ListenersTracing.forEachTraced
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -98,7 +99,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
                 FACE_UNLOCK_BYPASS_NEVER -> false
                 else -> field
             }
-            return enabled && mKeyguardStateController.isFaceEnrolled &&
+            return enabled && mKeyguardStateController.isFaceEnrolledAndEnabled &&
                     isPostureAllowedForFaceAuth()
         }
         private set(value) {
@@ -186,7 +187,9 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
                 }
         }
 
-    private fun notifyListeners() = listeners.forEach { it.onBypassStateChanged(bypassEnabled) }
+    private fun notifyListeners() = listeners.forEachTraced("KeyguardBypassController") {
+        it.onBypassStateChanged(bypassEnabled)
+    }
 
     /**
      * Notify that the biometric unlock has happened.

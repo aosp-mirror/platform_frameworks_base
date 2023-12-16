@@ -20,15 +20,16 @@ import com.android.app.tracing.TraceUtils.Companion.withContext
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
+import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
@@ -58,8 +59,8 @@ class AuthenticationInteractor
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val repository: AuthenticationRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val repository: AuthenticationRepository,
     private val userRepository: UserRepository,
     private val clock: SystemClock,
 ) {
@@ -83,35 +84,26 @@ constructor(
      */
     val authenticationMethod: Flow<AuthenticationMethodModel> = repository.authenticationMethod
 
-    /** The current authentication throttling state, only meaningful if [isThrottled] is `true`. */
-    val throttling: StateFlow<AuthenticationThrottlingModel> = repository.throttling
-
     /**
-     * Whether currently throttled and the user has to wait before being able to try another
-     * authentication attempt.
+     * The current authentication lockout (aka "throttling") state, set when the user has to wait
+     * before being able to try another authentication attempt. `null` indicates lockout isn't
+     * active.
      */
-    val isThrottled: StateFlow<Boolean> =
-        throttling
-            .map { it.remainingMs > 0 }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = throttling.value.remainingMs > 0,
-            )
+    val lockout: StateFlow<AuthenticationLockoutModel?> = repository.lockout
 
     /**
      * Whether the auto confirm feature is enabled for the currently-selected user.
      *
      * Note that the length of the PIN is also important to take into consideration, please see
      * [hintedPinLength].
-     *
-     * During throttling, this is always disabled (`false`).
      */
     val isAutoConfirmEnabled: StateFlow<Boolean> =
-        combine(repository.isAutoConfirmFeatureEnabled, isThrottled) { featureEnabled, isThrottled
-                ->
-                // Disable auto-confirm during throttling.
-                featureEnabled && !isThrottled
+        combine(repository.isAutoConfirmFeatureEnabled, repository.hasLockoutOccurred) {
+                featureEnabled,
+                hasLockoutOccurred ->
+                // Disable auto-confirm if lockout occurred since the last successful
+                // authentication attempt.
+                featureEnabled && !hasLockoutOccurred
             }
             .stateIn(
                 scope = applicationScope,
@@ -148,7 +140,7 @@ constructor(
     /** Whether the "enhanced PIN privacy" setting is enabled for the current user. */
     val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> = repository.isPinEnhancedPrivacyEnabled
 
-    private var throttlingCountdownJob: Job? = null
+    private var lockoutCountdownJob: Job? = null
 
     init {
         applicationScope.launch {
@@ -197,9 +189,8 @@ constructor(
         val authMethod = getAuthenticationMethod()
         val skipCheck =
             when {
-                // We're being throttled, the UI layer should not have called this; skip the
-                // attempt.
-                isThrottled.value -> true
+                // Lockout is active, the UI layer should not have called this; skip the attempt.
+                lockout.value != null -> true
                 // The input is too short; skip the attempt.
                 input.isTooShort(authMethod) -> true
                 // Auto-confirm attempt when the feature is not enabled; skip the attempt.
@@ -225,18 +216,22 @@ constructor(
             )
         }
 
-        // Check if we need to throttle and, if so, kick off the throttle countdown:
-        if (!authenticationResult.isSuccessful && authenticationResult.throttleDurationMs > 0) {
-            repository.setThrottleDuration(
-                durationMs = authenticationResult.throttleDurationMs,
-            )
-            startThrottlingCountdown()
+        // Check if lockout should start and, if so, kick off the countdown:
+        if (!authenticationResult.isSuccessful && authenticationResult.lockoutDurationMs > 0) {
+            repository.apply {
+                setLockoutDuration(durationMs = authenticationResult.lockoutDurationMs)
+                reportLockoutStarted(durationMs = authenticationResult.lockoutDurationMs)
+                hasLockoutOccurred.value = true
+            }
+            startLockoutCountdown()
         }
 
         if (authenticationResult.isSuccessful) {
-            // Since authentication succeeded, we should refresh throttling to make sure that our
-            // state is completely reflecting the upstream source of truth.
-            refreshThrottling()
+            // Since authentication succeeded, refresh lockout to make sure the state is completely
+            // reflecting the upstream source of truth.
+            refreshLockout()
+
+            repository.hasLockoutOccurred.value = false
         }
 
         return if (authenticationResult.isSuccessful) {
@@ -254,50 +249,52 @@ constructor(
         }
     }
 
-    /** Starts refreshing the throttling state every second. */
-    private suspend fun startThrottlingCountdown() {
-        cancelThrottlingCountdown()
-        throttlingCountdownJob =
+    /** Starts refreshing the lockout state every second. */
+    private suspend fun startLockoutCountdown() {
+        cancelLockoutCountdown()
+        lockoutCountdownJob =
             applicationScope.launch {
-                while (refreshThrottling() > 0) {
+                while (refreshLockout()) {
                     delay(1.seconds.inWholeMilliseconds)
                 }
             }
     }
 
-    /** Cancels any throttling state countdown started in [startThrottlingCountdown]. */
-    private fun cancelThrottlingCountdown() {
-        throttlingCountdownJob?.cancel()
-        throttlingCountdownJob = null
+    /** Cancels any lockout state countdown started in [startLockoutCountdown]. */
+    private fun cancelLockoutCountdown() {
+        lockoutCountdownJob?.cancel()
+        lockoutCountdownJob = null
     }
 
     /** Notifies that the currently-selected user has changed. */
     private suspend fun onSelectedUserChanged() {
-        cancelThrottlingCountdown()
-        if (refreshThrottling() > 0) {
-            startThrottlingCountdown()
+        cancelLockoutCountdown()
+        if (refreshLockout()) {
+            startLockoutCountdown()
         }
     }
 
     /**
-     * Refreshes the throttling state, hydrating the repository with the latest state.
+     * Refreshes the lockout state, hydrating the repository with the latest state.
      *
-     * @return The remaining time for the current throttling countdown, in milliseconds or `0` if
-     *   not being throttled.
+     * @return Whether lockout is active or not.
      */
-    private suspend fun refreshThrottling(): Long {
-        return withContext("$TAG#refreshThrottling", backgroundDispatcher) {
+    private suspend fun refreshLockout(): Boolean {
+        withContext("$TAG#refreshLockout", backgroundDispatcher) {
             val failedAttemptCount = async { repository.getFailedAuthenticationAttemptCount() }
-            val deadline = async { repository.getThrottlingEndTimestamp() }
+            val deadline = async { repository.getLockoutEndTimestamp() }
             val remainingMs = max(0, deadline.await() - clock.elapsedRealtime())
-            repository.setThrottling(
-                AuthenticationThrottlingModel(
-                    failedAttemptCount = failedAttemptCount.await(),
-                    remainingMs = remainingMs.toInt(),
-                ),
-            )
-            remainingMs
+            repository.lockout.value =
+                if (remainingMs > 0) {
+                    AuthenticationLockoutModel(
+                        failedAttemptCount = failedAttemptCount.await(),
+                        remainingSeconds = ceil(remainingMs / 1000f).toInt(),
+                    )
+                } else {
+                    null // Lockout ended.
+                }
         }
+        return repository.lockout.value != null
     }
 
     private fun AuthenticationMethodModel.createCredential(

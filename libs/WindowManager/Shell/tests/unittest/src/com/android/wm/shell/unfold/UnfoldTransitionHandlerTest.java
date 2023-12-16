@@ -18,12 +18,11 @@ package com.android.wm.shell.unfold;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -40,22 +39,17 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
-import com.android.window.flags.FakeFeatureFlagsImpl;
-import com.android.window.flags.FeatureFlags;
-import com.android.window.flags.Flags;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
+import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
 import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
 import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,10 +92,13 @@ public class UnfoldTransitionHandlerTest {
     }
 
     @Test
-    public void handleRequest_physicalDisplayChange_handlesTransition() {
+    public void handleRequest_physicalDisplayChangeUnfold_handlesTransition() {
         ActivityManager.RunningTaskInfo triggerTaskInfo = new ActivityManager.RunningTaskInfo();
         TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
-                Display.DEFAULT_DISPLAY).setPhysicalDisplayChanged(true);
+                Display.DEFAULT_DISPLAY)
+                .setPhysicalDisplayChanged(true)
+                .setStartAbsBounds(new Rect(0, 0, 100, 100))
+                .setEndAbsBounds(new Rect(0, 0, 200, 200));
         TransitionRequestInfo requestInfo = new TransitionRequestInfo(TRANSIT_CHANGE,
                 triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
 
@@ -109,6 +106,23 @@ public class UnfoldTransitionHandlerTest {
                 requestInfo);
 
         assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void handleRequest_physicalDisplayChangeFold_doesNotHandleTransition() {
+        ActivityManager.RunningTaskInfo triggerTaskInfo = new ActivityManager.RunningTaskInfo();
+        TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
+                Display.DEFAULT_DISPLAY)
+                .setPhysicalDisplayChanged(true)
+                .setStartAbsBounds(new Rect(0, 0, 200, 200))
+                .setEndAbsBounds(new Rect(0, 0, 100, 100));
+        TransitionRequestInfo requestInfo = new TransitionRequestInfo(TRANSIT_CHANGE,
+                triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
+
+        WindowContainerTransaction result = mUnfoldTransitionHandler.handleRequest(mTransition,
+                requestInfo);
+
+        assertThat(result).isNull();
     }
 
     @Test
@@ -173,6 +187,22 @@ public class UnfoldTransitionHandlerTest {
         );
 
         assertThat(animationStarted).isTrue();
+    }
+
+    @Test
+    public void startAnimation_differentTransitionFromRequestWithResize_doesNotStartAnimation() {
+        mUnfoldTransitionHandler.handleRequest(new Binder(), createNoneTransitionInfo());
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                createDisplayResizeTransitionInfo(),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        assertThat(animationStarted).isFalse();
     }
 
     @Test
@@ -306,7 +336,10 @@ public class UnfoldTransitionHandlerTest {
     private TransitionRequestInfo createUnfoldTransitionRequestInfo() {
         ActivityManager.RunningTaskInfo triggerTaskInfo = new ActivityManager.RunningTaskInfo();
         TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
-                Display.DEFAULT_DISPLAY).setPhysicalDisplayChanged(true);
+                Display.DEFAULT_DISPLAY)
+                .setPhysicalDisplayChanged(true)
+                .setStartAbsBounds(new Rect(0, 0, 100, 100))
+                .setEndAbsBounds(new Rect(0, 0, 200, 200));
         return new TransitionRequestInfo(TRANSIT_CHANGE,
                 triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
     }
@@ -380,24 +413,18 @@ public class UnfoldTransitionHandlerTest {
         }
     }
 
-    static class TestCase {
-        private final boolean mShouldHandleMixedUnfold;
-
-        public TestCase(boolean shouldHandleMixedUnfold) {
-            mShouldHandleMixedUnfold = shouldHandleMixedUnfold;
-        }
-
-        public boolean mixedUnfoldFlagEnabled() {
-            return mShouldHandleMixedUnfold;
-        }
-
-        @Override
-        public String toString() {
-            return "shouldHandleMixedUnfold flag = " + mShouldHandleMixedUnfold;
-        }
+    private TransitionInfo createUnfoldTransitionInfo() {
+        TransitionInfo transitionInfo = new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
+        TransitionInfo.Change change = new TransitionInfo.Change(null, mock(SurfaceControl.class));
+        change.setStartAbsBounds(new Rect(0, 0, 10, 10));
+        change.setEndAbsBounds(new Rect(0, 0, 100, 100));
+        change.setFlags(TransitionInfo.FLAG_IS_DISPLAY);
+        transitionInfo.addChange(change);
+        transitionInfo.setFlags(TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH);
+        return transitionInfo;
     }
 
-    private TransitionInfo createUnfoldTransitionInfo() {
+    private TransitionInfo createDisplayResizeTransitionInfo() {
         TransitionInfo transitionInfo = new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
         TransitionInfo.Change change = new TransitionInfo.Change(null, mock(SurfaceControl.class));
         change.setStartAbsBounds(new Rect(0, 0, 10, 10));

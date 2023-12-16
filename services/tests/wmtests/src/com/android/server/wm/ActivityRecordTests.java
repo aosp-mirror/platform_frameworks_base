@@ -123,6 +123,7 @@ import android.app.ICompatCameraControlCallback;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.WindowStateResizeItem;
@@ -169,6 +170,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -260,8 +262,18 @@ public class ActivityRecordTests extends WindowTestsBase {
         final MutableBoolean pauseFound = new MutableBoolean(false);
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final ClientTransaction transaction = invocationOnMock.getArgument(0);
-            if (transaction.getLifecycleStateRequest() instanceof PauseActivityItem) {
-                pauseFound.value = true;
+            final List<ClientTransactionItem> items = transaction.getTransactionItems();
+            if (items != null) {
+                for (ClientTransactionItem item : items) {
+                    if (item instanceof PauseActivityItem) {
+                        pauseFound.value = true;
+                        break;
+                    }
+                }
+            } else {
+                if (transaction.getLifecycleStateRequest() instanceof PauseActivityItem) {
+                    pauseFound.value = true;
+                }
             }
             return null;
         }).when(mClientLifecycleManager).scheduleTransaction(any());
@@ -279,6 +291,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // If the activity is not focusable, it should move to paused.
         activity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);
+        mClientLifecycleManager.dispatchPendingTransactions();
+
         assertTrue(activity.isState(PAUSING));
         assertTrue(pauseFound.value);
 
@@ -1175,10 +1189,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testFinishActivityIfPossible_nonVisibleNoAppTransition() {
         registerTestTransitionPlayer();
+        spyOn(mRootWindowContainer.mTransitionController);
+        final ActivityRecord bottomActivity = createActivityWithTask();
+        bottomActivity.setVisibility(false);
+        bottomActivity.setState(STOPPED, "test");
+        bottomActivity.mLastSurfaceShowing = false;
         final ActivityRecord activity = createActivityWithTask();
-        // Put an activity on top of test activity to make it invisible and prevent us from
-        // accidentally resuming the topmost one again.
-        new ActivityBuilder(mAtm).build();
         activity.setVisibleRequested(false);
         activity.setState(STOPPED, "test");
 
@@ -1186,6 +1202,14 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         verify(activity.mDisplayContent, never()).prepareAppTransition(eq(TRANSIT_CLOSE));
         assertFalse(activity.inTransition());
+
+        // finishIfPossible -> completeFinishing -> addToFinishingAndWaitForIdle
+        // -> resumeFocusedTasksTopActivities
+        assertTrue(bottomActivity.isState(RESUMED));
+        assertTrue(bottomActivity.isVisible());
+        verify(mRootWindowContainer.mTransitionController).onVisibleWithoutCollectingTransition(
+                eq(bottomActivity), any());
+        assertTrue(bottomActivity.mLastSurfaceShowing);
     }
 
     /**
@@ -1229,7 +1253,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testFinishActivityIfPossible_sendResultImmediately() {
+    public void testFinishActivityIfPossible_sendResultImmediately() throws RemoteException {
         // Create activity representing the source of the activity result.
         final ComponentName sourceComponent = ComponentName.createRelative(
                 DEFAULT_COMPONENT_PACKAGE_NAME, ".SourceActivity");
@@ -1260,12 +1284,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         targetActivity.finishIfPossible(0, new Intent(), null, "test", false /* oomAdj */);
 
-        try {
-            verify(mClientLifecycleManager, atLeastOnce()).scheduleTransaction(
-                    any(ClientTransaction.class));
-        } catch (RemoteException ignored) {
-        }
-
+        verify(mClientLifecycleManager, atLeastOnce()).scheduleTransactionItem(
+                any(), any(ClientTransactionItem.class));
         assertNull(targetActivity.results);
     }
 
@@ -3715,6 +3735,24 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         mAtm.mActivityClientController.onBackPressed(ar.token, null /* callback */);
         verify(task).moveTaskToBack(any());
+    }
+
+    /**
+     * Verifies the {@link ActivityRecord#moveFocusableActivityToTop} returns {@code false} if
+     * there's a PIP task on top.
+     */
+    @Test
+    public void testMoveFocusableActivityToTop() {
+        // Create a Task
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord ar = createActivityRecord(task);
+
+        // Create a PIP Task on top
+        final Task pipTask = createTask(mDisplayContent);
+        doReturn(true).when(pipTask).inPinnedWindowingMode();
+
+        // Verifies that the Task is not moving-to-top.
+        assertFalse(ar.moveFocusableActivityToTop("test"));
     }
 
     private ICompatCameraControlCallback getCompatCameraControlCallback() {

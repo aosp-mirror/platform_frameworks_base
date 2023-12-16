@@ -56,22 +56,22 @@ public class HapticFeedbackCustomizationTest {
     @Rule public MockitoRule rule = MockitoJUnit.rule();
 
     // Pairs of valid vibration XML along with their equivalent VibrationEffect.
-    private static final String COMPOSITION_VIBRATION_XML = "<vibration>"
+    private static final String COMPOSITION_VIBRATION_XML = "<vibration-effect>"
             + "<primitive-effect name=\"tick\" scale=\"0.2497\"/>"
-            + "</vibration>";
+            + "</vibration-effect>";
     private static final VibrationEffect COMPOSITION_VIBRATION =
             VibrationEffect.startComposition().addPrimitive(PRIMITIVE_TICK, 0.2497f).compose();
 
     private static final String PREDEFINED_VIBRATION_XML =
-            "<vibration><predefined-effect name=\"click\"/></vibration>";
+            "<vibration-effect><predefined-effect name=\"click\"/></vibration-effect>";
     private static final VibrationEffect PREDEFINED_VIBRATION =
             VibrationEffect.createPredefined(EFFECT_CLICK);
 
-    private static final String WAVEFORM_VIBRATION_XML = "<vibration>"
+    private static final String WAVEFORM_VIBRATION_XML = "<vibration-effect>"
             + "<waveform-effect>"
             + "<waveform-entry durationMs=\"123\" amplitude=\"254\"/>"
             + "</waveform-effect>"
-            + "</vibration>";
+            + "</vibration-effect>";
     private static final VibrationEffect WAVEFORM_VIBARTION =
             VibrationEffect.createWaveform(new long[] {123}, new int[] {254}, -1);
 
@@ -259,13 +259,13 @@ public class HapticFeedbackCustomizationTest {
         assertParseCustomizationsFails(
                 "<haptic-feedback-constants>"
                 + "<constant id=\"10\">"
-                + "<vibration>"
+                + "<vibration-effect>"
                 + "<waveform-effect>"
                 + "<repeating>"
                 + "<waveform-entry durationMs=\"10\" amplitude=\"100\"/>"
                 + "</repeating>"
                 + "</waveform-effect>"
-                + "</vibration>"
+                + "</vibration-effect>"
                 + "</constant>"
                 + "</haptic-feedback-constants>");
     }
@@ -339,14 +339,14 @@ public class HapticFeedbackCustomizationTest {
         assertParseCustomizationsFails(
                 "<haptic-feedback-constants>"
                 + "<constant id=\"10\">"
-                + "<bad-vibration></bad-vibration>"
+                + "<bad-vibration-effect></bad-vibration-effect>"
                 + "</constant>"
                 + "</haptic-feedback-constants>");
 
         assertParseCustomizationsFails(
                 "<haptic-feedback-constants>"
                 + "<constant id=\"10\">"
-                + "<vibration><predefined-effect name=\"bad-effect-name\"/></vibration>"
+                + "<vibration-effect><predefined-effect name=\"bad-effect\"/></vibration-effect>"
                 + "</constant>"
                 + "</haptic-feedback-constants>");
 
@@ -354,14 +354,14 @@ public class HapticFeedbackCustomizationTest {
                 "<haptic-feedback-constants>"
                 + "<constant id=\"10\">"
                 + "<vibration-select>"
-                + "<vibration><predefined-effect name=\"bad-effect-name\"/></vibration>"
+                + "<vibration-effect><predefined-effect name=\"bad-effect\"/></vibration-effect>"
                 + "</constant>"
                 + "</haptic-feedback-constants>");
 
         assertParseCustomizationsFails(
                 "<haptic-feedback-constants>"
                 + "<constant id=\"10\">"
-                + "<vibration><predefined-effect name=\"bad-effect-name\"/></vibration>"
+                + "<vibration-effect><predefined-effect name=\"bad-effect\"/></vibration-effect>"
                 + "</vibration-select>"
                 + "</constant>"
                 + "</haptic-feedback-constants>");

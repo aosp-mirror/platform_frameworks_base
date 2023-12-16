@@ -546,6 +546,15 @@ filegroup {
     ],
 }
 
+// PackageManager common
+filegroup {
+    name: "framework-pm-common-shared-srcs",
+    srcs: [
+        "com/android/server/pm/pkg/AndroidPackage.java",
+        "com/android/server/pm/pkg/AndroidPackageSplit.java",
+    ],
+}
+
 java_library {
     name: "protolog-lib",
     platform_apis: true,

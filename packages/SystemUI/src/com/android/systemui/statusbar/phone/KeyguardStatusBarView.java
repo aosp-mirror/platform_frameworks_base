@@ -24,11 +24,11 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Trace;
 import android.util.AttributeSet;
-import android.util.Pair;
 import android.util.TypedValue;
 import android.view.DisplayCutout;
 import android.view.Gravity;
@@ -103,7 +103,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private DisplayCutout mDisplayCutout;
     private int mRoundedCornerPadding = 0;
     // right and left padding applied to this view to account for cutouts and rounded corners
-    private Pair<Integer, Integer> mPadding = new Pair(0, 0);
+    private Insets mPadding = Insets.of(0, 0, 0, 0);
 
     /**
      * The clipping on the top
@@ -184,7 +184,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
 
         int marginStart = calculateMargin(
                 getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin),
-                mPadding.first);
+                mPadding.left);
         lp.setMarginStart(marginStart);
 
         mCarrierLabel.setLayoutParams(lp);
@@ -303,9 +303,9 @@ public class KeyguardStatusBarView extends RelativeLayout {
 
         // consider privacy dot space
         final int minLeft = (isLayoutRtl() && mIsPrivacyDotEnabled)
-                ? Math.max(mMinDotWidth, mPadding.first) : mPadding.first;
+                ? Math.max(mMinDotWidth, mPadding.left) : mPadding.left;
         final int minRight = (!isLayoutRtl() && mIsPrivacyDotEnabled)
-                ? Math.max(mMinDotWidth, mPadding.second) : mPadding.second;
+                ? Math.max(mMinDotWidth, mPadding.right) : mPadding.right;
 
         setPadding(minLeft, waterfallTop, minRight, 0);
     }

@@ -128,7 +128,7 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_PROFILE_CLONE)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(1)
-                .setLabel(0)
+                .setLabels(R.string.profile_label_clone)
                 .setIconBadge(com.android.internal.R.drawable.ic_clone_icon_badge)
                 .setBadgePlain(com.android.internal.R.drawable.ic_clone_badge)
                 // Clone doesn't use BadgeNoBackground, so just set to BadgePlain as a placeholder.
@@ -154,9 +154,15 @@ public final class UserTypeFactory {
                                 UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
                         .setCrossProfileIntentResolutionStrategy(UserProperties
                                 .CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING)
+                        .setShowInQuietMode(
+                                UserProperties.SHOW_IN_QUIET_MODE_DEFAULT)
+                        .setShowInSharingSurfaces(
+                                UserProperties.SHOW_IN_SHARING_SURFACES_WITH_PARENT)
                         .setMediaSharedWithParent(true)
                         .setCredentialShareableWithParent(true)
-                        .setDeleteAppWithParent(true));
+                        .setDeleteAppWithParent(true)
+                        .setCrossProfileContentSharingStrategy(UserProperties
+                                .CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT));
     }
 
     /**
@@ -169,7 +175,10 @@ public final class UserTypeFactory {
                 .setBaseType(FLAG_PROFILE)
                 .setDefaultUserInfoPropertyFlags(FLAG_MANAGED_PROFILE)
                 .setMaxAllowedPerParent(1)
-                .setLabel(0)
+                .setLabels(
+                        R.string.profile_label_work,
+                        R.string.profile_label_work_2,
+                        R.string.profile_label_work_3)
                 .setIconBadge(com.android.internal.R.drawable.ic_corp_icon_badge_case)
                 .setBadgePlain(com.android.internal.R.drawable.ic_corp_badge_case)
                 .setBadgeNoBackground(com.android.internal.R.drawable.ic_corp_badge_no_background)
@@ -193,6 +202,10 @@ public final class UserTypeFactory {
                         .setStartWithParent(true)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
+                        .setShowInQuietMode(
+                                UserProperties.SHOW_IN_QUIET_MODE_PAUSED)
+                        .setShowInSharingSurfaces(
+                                UserProperties.SHOW_IN_SHARING_SURFACES_SEPARATE)
                         .setAuthAlwaysRequiredToDisableQuietMode(false)
                         .setCredentialShareableWithParent(true));
     }
@@ -209,7 +222,10 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_PROFILE_TEST)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(2)
-                .setLabel(0)
+                .setLabels(
+                        R.string.profile_label_test,
+                        R.string.profile_label_test,
+                        R.string.profile_label_test)
                 .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
                 .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
                 .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)
@@ -240,7 +256,7 @@ public final class UserTypeFactory {
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowed(1)
                 .setEnabled(UserManager.isCommunalProfileEnabled() ? 1 : 0)
-                .setLabel(0)
+                .setLabels(R.string.profile_label_communal)
                 .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
                 .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
                 .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)
@@ -276,7 +292,7 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_PROFILE_PRIVATE)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(1)
-                .setLabel(0)
+                .setLabels(R.string.profile_label_private)
                 .setIconBadge(com.android.internal.R.drawable.ic_private_profile_icon_badge)
                 .setBadgePlain(com.android.internal.R.drawable.ic_private_profile_badge)
                 // Private Profile doesn't use BadgeNoBackground, so just set to BadgePlain
@@ -290,18 +306,23 @@ public final class UserTypeFactory {
                 .setDarkThemeBadgeColors(
                         R.color.white)
                 .setDefaultRestrictions(getDefaultProfileRestrictions())
-                .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
                         .setCredentialShareableWithParent(true)
                         .setAuthAlwaysRequiredToDisableQuietMode(true)
+                        .setAllowStoppingUserWithDelayedLocking(true)
                         .setMediaSharedWithParent(false)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
-                        .setHideInSettingsInQuietMode(true)
+                        .setShowInQuietMode(
+                                UserProperties.SHOW_IN_QUIET_MODE_HIDDEN)
+                        .setShowInSharingSurfaces(
+                                UserProperties.SHOW_IN_SHARING_SURFACES_SEPARATE)
                         .setCrossProfileIntentFilterAccessControl(
                                 UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
-                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT));
+                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
+                        .setCrossProfileContentSharingStrategy(
+                                UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT));
     }
 
     /**

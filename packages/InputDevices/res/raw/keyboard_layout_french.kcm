@@ -44,7 +44,7 @@ key 2 {
     label:                              '2'
     base:                               '\u00e9'
     shift:                              '2'
-    ralt:                               '~'
+    ralt:                               '\u0303'
 }
 
 key 3 {
@@ -79,7 +79,7 @@ key 7 {
     label:                              '7'
     base:                               '\u00e8'
     shift:                              '7'
-    ralt:                               '`'
+    ralt:                               '\u0300'
 }
 
 key 8 {

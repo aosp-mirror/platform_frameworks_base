@@ -201,6 +201,7 @@ public class LocaleConfig implements Parcelable {
 
         String defaultLocale = null;
         if (android.content.res.Flags.defaultLocale()) {
+            // Read the defaultLocale attribute of the LocaleConfig element
             TypedArray att = res.obtainAttributes(
                     attrs, com.android.internal.R.styleable.LocaleConfig);
             defaultLocale = att.getString(

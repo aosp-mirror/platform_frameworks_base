@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC मार्फत कनेक्ट गरिएका"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC मार्फत कनेक्ट गरिएका"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"टिभीको डिफल्ट अडियो आउटपुट"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI आउटपुट"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"आन्तरिक स्पिकरहरू"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"टिभीको डिफल्ट अडियो आउटपुट"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI आउटपुट"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"आन्तरिक स्पिकरहरू"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि अन गर्नुहोस्"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"तारयुक्त अडियो यन्त्र"</string>
     <string name="help_label" msgid="3528360748637781274">"मद्दत र प्रतिक्रिया"</string>

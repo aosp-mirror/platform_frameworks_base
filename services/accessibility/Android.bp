@@ -19,6 +19,9 @@ java_library_static {
     defaults: [
         "platform_service_defaults",
     ],
+    lint: {
+        error_checks: ["MissingPermissionAnnotation"],
+    },
     srcs: [
         ":services.accessibility-sources",
         "//frameworks/base/packages/SettingsLib/RestrictedLockUtils:SettingsLibRestrictedLockUtilsSrc",
@@ -29,6 +32,22 @@ java_library_static {
     ],
     static_libs: [
         "com_android_server_accessibility_flags_lib",
+    ],
+}
+
+java_library_static {
+    name: "AccessibilityGestureUtils",
+    srcs: [
+        "java/**/gestures/GestureMatcher.java",
+        "java/**/gestures/GestureManifold.java",
+        "java/**/gestures/MultiFingerMultiTap.java",
+        "java/**/gestures/TouchState.java",
+    ],
+    static_libs: [
+        "services.accessibility",
+    ],
+    libs: [
+        "androidx.annotation_annotation",
     ],
 }
 

@@ -24,7 +24,6 @@ import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
@@ -149,24 +148,6 @@ class WindowSurfaceController {
         }
 
         mAnimator.mWin.getPendingTransaction().setOpaque(mSurfaceControl, isOpaque);
-        mService.scheduleAnimationLocked();
-    }
-
-    void setSecure(boolean isSecure) {
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isSecure=%b: %s", isSecure, title);
-
-        if (mSurfaceControl == null) {
-            return;
-        }
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setSecureLocked");
-
-        final SurfaceControl.Transaction t = mAnimator.mWin.getPendingTransaction();
-        t.setSecure(mSurfaceControl, isSecure);
-
-        final DisplayContent dc = mAnimator.mWin.mDisplayContent;
-        if (dc != null) {
-            dc.refreshImeSecureFlag(t);
-        }
         mService.scheduleAnimationLocked();
     }
 

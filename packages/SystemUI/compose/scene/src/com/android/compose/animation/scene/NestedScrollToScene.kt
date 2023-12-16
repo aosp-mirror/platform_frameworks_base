@@ -17,11 +17,13 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
+import androidx.compose.ui.node.DelegatableNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
+import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 
 /**
  * Defines the behavior of the [SceneTransitionLayout] when a scrollable component is scrolled.
@@ -32,8 +34,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
  */
 enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
     /**
-     * During scene transitions, scroll events are consumed by the [SceneTransitionLayout] instead
-     * of the scrollable component.
+     * During scene transitions, if we are within
+     * [SceneTransitionLayoutImpl.transitionInterceptionThreshold], the [SceneTransitionLayout]
+     * consumes scroll events instead of the scrollable component.
      */
     DuringTransitionBetweenScenes(canStartOnPostFling = false),
 
@@ -41,22 +44,22 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
      * Overscroll will only be used by the [SceneTransitionLayout] to move to the next scene if the
      * gesture begins at the edge of the scrollable component (so that a scroll in that direction
      * can no longer be consumed). If the gesture is partially consumed by the scrollable component,
-     * there will be NO overscroll effect between scenes.
+     * there will be NO preview of the next scene.
      *
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    EdgeNoOverscroll(canStartOnPostFling = false),
+    EdgeNoPreview(canStartOnPostFling = false),
 
     /**
      * Overscroll will only be used by the [SceneTransitionLayout] to move to the next scene if the
      * gesture begins at the edge of the scrollable component. If the gesture is partially consumed
-     * by the scrollable component, there will be an overscroll effect between scenes.
+     * by the scrollable component, there will be a preview of the next scene.
      *
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    EdgeWithOverscroll(canStartOnPostFling = true),
+    EdgeWithPreview(canStartOnPostFling = true),
 
     /**
      * Any overscroll will be used by the [SceneTransitionLayout] to move to the next scene.
@@ -64,40 +67,121 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    Always(canStartOnPostFling = true),
+    EdgeAlways(canStartOnPostFling = true),
 }
 
 internal fun Modifier.nestedScrollToScene(
     layoutImpl: SceneTransitionLayoutImpl,
     orientation: Orientation,
-    startBehavior: NestedScrollBehavior,
-    endBehavior: NestedScrollBehavior,
-): Modifier = composed {
-    val connection =
-        remember(layoutImpl, orientation, startBehavior, endBehavior) {
+    topOrLeftBehavior: NestedScrollBehavior,
+    bottomOrRightBehavior: NestedScrollBehavior,
+) =
+    this then
+        NestedScrollToSceneElement(
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
+        )
+
+private data class NestedScrollToSceneElement(
+    private val layoutImpl: SceneTransitionLayoutImpl,
+    private val orientation: Orientation,
+    private val topOrLeftBehavior: NestedScrollBehavior,
+    private val bottomOrRightBehavior: NestedScrollBehavior,
+) : ModifierNodeElement<NestedScrollToSceneNode>() {
+    override fun create() =
+        NestedScrollToSceneNode(
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
+        )
+
+    override fun update(node: NestedScrollToSceneNode) {
+        node.update(
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
+        )
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "nestedScrollToScene"
+        properties["layoutImpl"] = layoutImpl
+        properties["orientation"] = orientation
+        properties["topOrLeftBehavior"] = topOrLeftBehavior
+        properties["bottomOrRightBehavior"] = bottomOrRightBehavior
+    }
+}
+
+private class NestedScrollToSceneNode(
+    layoutImpl: SceneTransitionLayoutImpl,
+    orientation: Orientation,
+    topOrLeftBehavior: NestedScrollBehavior,
+    bottomOrRightBehavior: NestedScrollBehavior,
+) : DelegatingNode() {
+    private var priorityNestedScrollConnection: PriorityNestedScrollConnection =
+        scenePriorityNestedScrollConnection(
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
+        )
+
+    private var nestedScrollNode: DelegatableNode =
+        nestedScrollModifierNode(
+            connection = priorityNestedScrollConnection,
+            dispatcher = null,
+        )
+
+    override fun onAttach() {
+        delegate(nestedScrollNode)
+    }
+
+    override fun onDetach() {
+        // Make sure we reset the scroll connection when this modifier is removed from composition
+        priorityNestedScrollConnection.reset()
+    }
+
+    fun update(
+        layoutImpl: SceneTransitionLayoutImpl,
+        orientation: Orientation,
+        topOrLeftBehavior: NestedScrollBehavior,
+        bottomOrRightBehavior: NestedScrollBehavior,
+    ) {
+        // Clean up the old nested scroll connection
+        priorityNestedScrollConnection.reset()
+        undelegate(nestedScrollNode)
+
+        // Create a new nested scroll connection
+        priorityNestedScrollConnection =
             scenePriorityNestedScrollConnection(
                 layoutImpl = layoutImpl,
                 orientation = orientation,
-                startBehavior = startBehavior,
-                endBehavior = endBehavior
+                topOrLeftBehavior = topOrLeftBehavior,
+                bottomOrRightBehavior = bottomOrRightBehavior,
             )
-        }
-
-    // Make sure we reset the scroll connection when this modifier is removed from composition
-    DisposableEffect(connection) { onDispose { connection.reset() } }
-
-    nestedScroll(connection = connection)
+        nestedScrollNode =
+            nestedScrollModifierNode(
+                connection = priorityNestedScrollConnection,
+                dispatcher = null,
+            )
+        delegate(nestedScrollNode)
+    }
 }
 
 private fun scenePriorityNestedScrollConnection(
     layoutImpl: SceneTransitionLayoutImpl,
     orientation: Orientation,
-    startBehavior: NestedScrollBehavior,
-    endBehavior: NestedScrollBehavior,
+    topOrLeftBehavior: NestedScrollBehavior,
+    bottomOrRightBehavior: NestedScrollBehavior,
 ) =
     SceneNestedScrollHandler(
-            gestureHandler = layoutImpl.gestureHandler(orientation = orientation),
-            startBehavior = startBehavior,
-            endBehavior = endBehavior,
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
         )
         .connection

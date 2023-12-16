@@ -16,14 +16,16 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
+import android.content.Context
+import android.util.TypedValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 /** Binds the shared notification container to its view-model. */
@@ -31,29 +33,46 @@ object NotificationStackAppearanceViewBinder {
 
     @JvmStatic
     fun bind(
+        context: Context,
         view: SharedNotificationContainer,
         viewModel: NotificationStackAppearanceViewModel,
-        sceneContainerFlags: SceneContainerFlags,
         ambientState: AmbientState,
         controller: NotificationStackScrollLayoutController,
     ) {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
-                    viewModel.stackPosition.collect {
+                    viewModel.stackBounds.collect { bounds ->
                         controller.updateTopPadding(
-                            it.top,
+                            bounds.top,
                             controller.isAddOrRemoveAnimationPending
+                        )
+                        controller.setRoundedClippingBounds(
+                            it.left,
+                            it.top,
+                            it.right,
+                            it.bottom,
+                            viewModel.cornerRadiusDp.value.dpToPx(context),
+                            viewModel.cornerRadiusDp.value.dpToPx(context),
                         )
                     }
                 }
                 launch {
-                    viewModel.expandFraction.collect {
-                        ambientState.expansionFraction = it
-                        controller.expandedHeight = it * controller.view.height
+                    viewModel.expandFraction.collect { expandFraction ->
+                        ambientState.expansionFraction = expandFraction
+                        controller.expandedHeight = expandFraction * controller.view.height
                     }
                 }
             }
         }
+    }
+
+    private fun Float.dpToPx(context: Context): Int {
+        return TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                this,
+                context.resources.displayMetrics
+            )
+            .roundToInt()
     }
 }

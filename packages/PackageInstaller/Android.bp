@@ -49,6 +49,8 @@ android_app {
         "androidx.fragment_fragment",
         "androidx.lifecycle_lifecycle-livedata",
         "androidx.lifecycle_lifecycle-extensions",
+        "android.content.pm.flags-aconfig-java",
+        "android.os.flags-aconfig-java",
     ],
 
     lint: {
@@ -75,6 +77,8 @@ android_app {
         "androidx.fragment_fragment",
         "androidx.lifecycle_lifecycle-livedata",
         "androidx.lifecycle_lifecycle-extensions",
+        "android.content.pm.flags-aconfig-java",
+        "android.os.flags-aconfig-java",
     ],
     aaptflags: ["--product tablet"],
 
@@ -103,6 +107,8 @@ android_app {
         "androidx.fragment_fragment",
         "androidx.lifecycle_lifecycle-livedata",
         "androidx.lifecycle_lifecycle-extensions",
+        "android.content.pm.flags-aconfig-java",
+        "android.os.flags-aconfig-java",
     ],
     aaptflags: ["--product tv"],
 

@@ -44,7 +44,7 @@ internal fun transitionsImpl(
 }
 
 private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
-    val transitionSpecs = mutableListOf<TransitionSpec>()
+    val transitionSpecs = mutableListOf<TransitionSpecImpl>()
 
     override fun to(to: SceneKey, builder: TransitionBuilder.() -> Unit): TransitionSpec {
         return transition(from = null, to = to, builder)
@@ -63,14 +63,15 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
         to: SceneKey?,
         builder: TransitionBuilder.() -> Unit,
     ): TransitionSpec {
-        val impl = TransitionBuilderImpl().apply(builder)
-        val spec =
-            TransitionSpec(
-                from,
-                to,
-                impl.transformations,
-                impl.spec,
+        fun transformationSpec(): TransformationSpecImpl {
+            val impl = TransitionBuilderImpl().apply(builder)
+            return TransformationSpecImpl(
+                progressSpec = impl.spec,
+                transformations = impl.transformations,
             )
+        }
+
+        val spec = TransitionSpecImpl(from, to, ::transformationSpec)
         transitionSpecs.add(spec)
         return spec
     }
@@ -143,7 +144,7 @@ internal class TransitionBuilderImpl : TransitionBuilder {
 
         transformations.add(
             if (reversed) {
-                transformation.reverse()
+                transformation.reversed()
             } else {
                 transformation
             }
@@ -178,7 +179,12 @@ internal class TransitionBuilderImpl : TransitionBuilder {
         transformation(DrawScale(matcher, scaleX, scaleY, pivot))
     }
 
-    override fun anchoredSize(matcher: ElementMatcher, anchor: ElementKey) {
-        transformation(AnchoredSize(matcher, anchor))
+    override fun anchoredSize(
+        matcher: ElementMatcher,
+        anchor: ElementKey,
+        anchorWidth: Boolean,
+        anchorHeight: Boolean,
+    ) {
+        transformation(AnchoredSize(matcher, anchor, anchorWidth, anchorHeight))
     }
 }

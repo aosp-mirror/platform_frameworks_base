@@ -121,8 +121,6 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
         )
 
         utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-        utils.featureFlags.set(Flags.FACE_AUTH_REFACTOR, true)
-
         spyContext = spy(context)
         keyguardReply = KeyguardInteractorFactory.create(featureFlags = utils.featureFlags)
         keyguardRepository = keyguardReply.repository

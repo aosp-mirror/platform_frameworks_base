@@ -1057,6 +1057,12 @@ public final class InputManager {
         mGlobal.setCustomPointerIcon(icon);
     }
 
+    /** @hide */
+    public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
+            IBinder inputToken) {
+        return mGlobal.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
+    }
+
     /**
      * Check if showing a {@link android.view.PointerIcon} for styluses is enabled.
      *
@@ -1092,62 +1098,6 @@ public final class InputManager {
      */
     public InputMonitor monitorGestureInput(String name, int displayId) {
         return mGlobal.monitorGestureInput(name, displayId);
-    }
-
-    /**
-     * Get sensors information as list.
-     *
-     * @hide
-     */
-    public InputSensorInfo[] getSensorList(int deviceId) {
-        return mGlobal.getSensorList(deviceId);
-    }
-
-    /**
-     * Enable input device sensor
-     *
-     * @hide
-     */
-    public boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
-            int maxBatchReportLatencyUs) {
-        return mGlobal.enableSensor(deviceId, sensorType, samplingPeriodUs,
-                maxBatchReportLatencyUs);
-    }
-
-    /**
-     * Enable input device sensor
-     *
-     * @hide
-     */
-    public void disableSensor(int deviceId, int sensorType) {
-        mGlobal.disableSensor(deviceId, sensorType);
-    }
-
-    /**
-     * Flush input device sensor
-     *
-     * @hide
-     */
-    public boolean flushSensor(int deviceId, int sensorType) {
-        return mGlobal.flushSensor(deviceId, sensorType);
-    }
-
-    /**
-     * Register input device sensor listener
-     *
-     * @hide
-     */
-    public boolean registerSensorListener(IInputSensorEventListener listener) {
-        return mGlobal.registerSensorListener(listener);
-    }
-
-    /**
-     * Unregister input device sensor listener
-     *
-     * @hide
-     */
-    public void unregisterSensorListener(IInputSensorEventListener listener) {
-        mGlobal.unregisterSensorListener(listener);
     }
 
     /**

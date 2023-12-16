@@ -2258,7 +2258,8 @@ public class AppStandbyController
             }
             synchronized (mSystemExemptionAppOpMode) {
                 if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
-                    mSystemExemptionAppOpMode.delete(UserHandle.getUid(userId, getAppId(pkgName)));
+                    final int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
+                    mSystemExemptionAppOpMode.delete(uid);
                 }
             }
 

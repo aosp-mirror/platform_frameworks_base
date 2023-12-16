@@ -105,6 +105,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.config.appcloning.AppCloningDeviceConfigHelper;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
@@ -438,19 +439,23 @@ public class SyncManager {
         }
     };
 
-    private final BroadcastReceiver mForceStoppedReceiver = new BroadcastReceiver() {
+    private static class PackageMonitorImpl extends PackageMonitor {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public boolean onHandleForceStop(Intent intent, String[] packageNames, int uid,
+                boolean doit, Bundle extras) {
             final boolean isLoggable = Log.isLoggable(TAG, Log.DEBUG);
-            // For now, just log when packages were force-stopped and unstopped for debugging.
             if (isLoggable) {
-                if (Intent.ACTION_PACKAGE_RESTARTED.equals(intent.getAction())) {
-                    Log.d(TAG, "Package force-stopped: "
-                            + intent.getData().getSchemeSpecificPart());
-                } else if (Intent.ACTION_PACKAGE_UNSTOPPED.equals(intent.getAction())) {
-                    Log.d(TAG, "Package unstopped: "
-                            + intent.getData().getSchemeSpecificPart());
-                }
+                Log.d(TAG, "Package force-stopped: " + Arrays.toString(packageNames)
+                        + ", uid: " + uid);
+            }
+            return false;
+        }
+
+        @Override
+        public void onPackageUnstopped(String packageName, int uid, Bundle extras) {
+            final boolean isLoggable = Log.isLoggable(TAG, Log.DEBUG);
+            if (isLoggable) {
+                Log.d(TAG, "Package unstopped: " + packageName + ", uid: " + uid);
             }
         }
     };
@@ -718,11 +723,10 @@ public class SyncManager {
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
 
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        intentFilter.addAction(Intent.ACTION_PACKAGE_UNSTOPPED);
-        intentFilter.addDataScheme("package");
-        context.registerReceiver(mForceStoppedReceiver, intentFilter);
+
+        final PackageMonitor packageMonitor = new PackageMonitorImpl();
+        packageMonitor.register(mContext, null /* thread */, UserHandle.ALL,
+                false /* externalStorage */);
 
         intentFilter = new IntentFilter(Intent.ACTION_TIME_CHANGED);
         context.registerReceiver(mOtherIntentsReceiver, intentFilter);
@@ -1288,7 +1292,11 @@ public class SyncManager {
      */
     private boolean isPackageStopped(String packageName, int userId) {
         if (android.content.pm.Flags.stayStopped()) {
-            return mPackageManagerInternal.isPackageStopped(packageName, userId);
+            try {
+                return mPackageManagerInternal.isPackageStopped(packageName, userId);
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "Couldn't determine stopped state for unknown package: " + packageName);
+            }
         }
         return false;
     }

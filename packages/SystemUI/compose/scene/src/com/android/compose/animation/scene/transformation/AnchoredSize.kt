@@ -29,6 +29,8 @@ import com.android.compose.animation.scene.TransitionState
 internal class AnchoredSize(
     override val matcher: ElementMatcher,
     private val anchor: ElementKey,
+    private val anchorWidth: Boolean,
+    private val anchorHeight: Boolean,
 ) : PropertyTransformation<IntSize> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
@@ -41,7 +43,10 @@ internal class AnchoredSize(
         fun anchorSizeIn(scene: SceneKey): IntSize {
             val size = layoutImpl.elements[anchor]?.sceneValues?.get(scene)?.targetSize
             return if (size != null && size != Element.SizeUnspecified) {
-                size
+                IntSize(
+                    width = if (anchorWidth) size.width else value.width,
+                    height = if (anchorHeight) size.height else value.height,
+                )
             } else {
                 value
             }

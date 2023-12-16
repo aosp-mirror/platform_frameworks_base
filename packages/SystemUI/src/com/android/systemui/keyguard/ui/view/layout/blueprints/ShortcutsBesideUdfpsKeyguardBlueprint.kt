@@ -23,7 +23,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AlignShortcutsToUdfpsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntryIconSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
@@ -42,7 +42,7 @@ class ShortcutsBesideUdfpsKeyguardBlueprint
 @Inject
 constructor(
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
-    defaultDeviceEntryIconSection: DefaultDeviceEntryIconSection,
+    defaultDeviceEntrySection: DefaultDeviceEntrySection,
     @Named(KeyguardSectionsModule.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION)
     defaultAmbientIndicationAreaSection: Optional<KeyguardSection>,
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
@@ -68,7 +68,7 @@ constructor(
             splitShadeGuidelines,
             aodNotificationIconsSection,
             aodBurnInSection,
-            defaultDeviceEntryIconSection, // Add LAST: Intentionally has z-order above other views.
+            defaultDeviceEntrySection, // Add LAST: Intentionally has z-order above other views.
         )
 
     companion object {

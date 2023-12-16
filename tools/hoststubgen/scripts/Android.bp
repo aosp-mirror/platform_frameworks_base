@@ -18,9 +18,3 @@ genrule_defaults {
     tools: ["dump-jar"],
     cmd: "$(location dump-jar) -s -o $(out) $(in)",
 }
-
-sh_binary_host {
-    name: "run-ravenwood-test",
-    src: "run-ravenwood-test",
-    visibility: ["//visibility:public"],
-}

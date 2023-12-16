@@ -79,7 +79,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     private static final float MIN_SCALE = 1.0f;
     private static final float MAX_SCALE = MagnificationScaleProvider.MAX_SCALE;
 
-    private final WindowMagnificationManager mWindowMagnificationMgr;
+    private final MagnificationConnectionManager mMagnificationConnectionManager;
     @VisibleForTesting
     final DelegatingState mDelegatingState;
     @VisibleForTesting
@@ -101,7 +101,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     private long mTripleTapAndHoldStartedTime = 0;
 
     public WindowMagnificationGestureHandler(@UiContext Context context,
-            WindowMagnificationManager windowMagnificationMgr,
+            MagnificationConnectionManager magnificationConnectionManager,
             AccessibilityTraceManager trace,
             Callback callback,
             boolean detectSingleFingerTripleTap,
@@ -115,7 +115,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                     "WindowMagnificationGestureHandler() , displayId = " + displayId + ")");
         }
         mContext = context;
-        mWindowMagnificationMgr = windowMagnificationMgr;
+        mMagnificationConnectionManager = magnificationConnectionManager;
         mMotionEventDispatcherDelegate = new MotionEventDispatcherDelegate(context,
                 (event, rawEvent, policyFlags) -> dispatchTransformedEvent(event, rawEvent,
                         policyFlags));
@@ -128,18 +128,18 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                             @Override
                             public boolean processScroll(int displayId, float distanceX,
                                     float distanceY) {
-                                return mWindowMagnificationMgr.processScroll(displayId, distanceX,
-                                        distanceY);
+                                return mMagnificationConnectionManager.processScroll(
+                                        displayId, distanceX, distanceY);
                             }
 
                             @Override
                             public void setScale(int displayId, float scale) {
-                                mWindowMagnificationMgr.setScale(displayId, scale);
+                                mMagnificationConnectionManager.setScale(displayId, scale);
                             }
 
                             @Override
                             public float getScale(int displayId) {
-                                return mWindowMagnificationMgr.getScale(displayId);
+                                return mMagnificationConnectionManager.getScale(displayId);
                             }
                         }));
 
@@ -167,7 +167,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             Slog.i(mLogTag, "onDestroy(); delayed = "
                     + mDetectingState.toString());
         }
-        mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, true);
+        mMagnificationConnectionManager.disableWindowMagnification(mDisplayId, true);
         resetToDetectState();
     }
 
@@ -176,7 +176,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         final Point screenSize = mTempPoint;
         getScreenSize(mTempPoint);
         toggleMagnification(screenSize.x / 2.0f, screenSize.y / 2.0f,
-                WindowMagnificationManager.WINDOW_POSITION_AT_CENTER);
+                MagnificationConnectionManager.WINDOW_POSITION_AT_CENTER);
     }
 
     private  void getScreenSize(Point outSize) {
@@ -190,28 +190,29 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     }
 
     private void enableWindowMagnifier(float centerX, float centerY,
-            @WindowMagnificationManager.WindowPosition int windowPosition) {
+            @MagnificationConnectionManager.WindowPosition int windowPosition) {
         if (DEBUG_ALL) {
             Slog.i(mLogTag, "enableWindowMagnifier :"
                     + centerX + ", " + centerY + ", " + windowPosition);
         }
 
         final float scale = MathUtils.constrain(
-                mWindowMagnificationMgr.getPersistedScale(mDisplayId), MIN_SCALE, MAX_SCALE);
-        mWindowMagnificationMgr.enableWindowMagnification(mDisplayId, scale, centerX, centerY,
-                windowPosition);
+                mMagnificationConnectionManager.getPersistedScale(mDisplayId),
+                MIN_SCALE, MAX_SCALE);
+        mMagnificationConnectionManager.enableWindowMagnification(
+                mDisplayId, scale, centerX, centerY, windowPosition);
     }
 
     private void disableWindowMagnifier() {
         if (DEBUG_ALL) {
             Slog.i(mLogTag, "disableWindowMagnifier()");
         }
-        mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, false);
+        mMagnificationConnectionManager.disableWindowMagnification(mDisplayId, false);
     }
 
     private void toggleMagnification(float centerX, float centerY,
-            @WindowMagnificationManager.WindowPosition int windowPosition) {
-        if (mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId)) {
+            @MagnificationConnectionManager.WindowPosition int windowPosition) {
+        if (mMagnificationConnectionManager.isWindowMagnifierEnabled(mDisplayId)) {
             disableWindowMagnifier();
         } else {
             enableWindowMagnifier(centerX, centerY, windowPosition);
@@ -223,7 +224,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             Slog.i(mLogTag, "onTripleTap()");
         }
         toggleMagnification(up.getX(), up.getY(),
-                WindowMagnificationManager.WINDOW_POSITION_AT_CENTER);
+                MagnificationConnectionManager.WINDOW_POSITION_AT_CENTER);
     }
 
     @VisibleForTesting
@@ -232,9 +233,9 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             Slog.i(mLogTag, "onTripleTapAndHold()");
         }
         mViewportDraggingState.mEnabledBeforeDrag =
-                mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId);
+                mMagnificationConnectionManager.isWindowMagnifierEnabled(mDisplayId);
         enableWindowMagnifier(up.getX(), up.getY(),
-                WindowMagnificationManager.WINDOW_POSITION_AT_TOP_LEFT);
+                MagnificationConnectionManager.WINDOW_POSITION_AT_TOP_LEFT);
         mTripleTapAndHoldStartedTime = SystemClock.uptimeMillis();
         transitionTo(mViewportDraggingState);
     }
@@ -242,7 +243,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     @VisibleForTesting
     void releaseTripleTapAndHold() {
         if (!mViewportDraggingState.mEnabledBeforeDrag) {
-            mWindowMagnificationMgr.disableWindowMagnification(mDisplayId, true);
+            mMagnificationConnectionManager.disableWindowMagnification(mDisplayId, true);
         }
         transitionTo(mDetectingState);
         if (mTripleTapAndHoldStartedTime != 0) {
@@ -331,7 +332,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         @Override
         public void onExit() {
             mPanningScalingHandler.setEnabled(false);
-            mWindowMagnificationMgr.persistScale(mDisplayId);
+            mMagnificationConnectionManager.persistScale(mDisplayId);
             clear();
         }
 
@@ -404,7 +405,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                     if (!Float.isNaN(mLastX) && !Float.isNaN(mLastY)) {
                         float offsetX = event.getX() - mLastX;
                         float offsetY = event.getY() - mLastY;
-                        mWindowMagnificationMgr.moveWindowMagnification(mDisplayId, offsetX,
+                        mMagnificationConnectionManager.moveWindowMagnification(mDisplayId, offsetX,
                                 offsetY);
                     }
                     mLastX = event.getX();
@@ -480,10 +481,10 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
                 if (mDetectTwoFingerTripleTap) {
                     mGestureMatchers.add(new MultiFingerMultiTap(context, /* fingers= */ 2,
-                            /* taps= */ 3, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP,
+                            /* taps= */ 2, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP,
                             null));
                     mGestureMatchers.add(new MultiFingerMultiTapAndHold(context, /* fingers= */ 2,
-                            /* taps= */ 3, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD,
+                            /* taps= */ 2, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD,
                             null));
                 }
 
@@ -522,7 +523,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
         @Override
         public boolean shouldStopDetection(MotionEvent motionEvent) {
-            return !mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId)
+            return !mMagnificationConnectionManager.isWindowMagnifierEnabled(mDisplayId)
                     && !mDetectSingleFingerTripleTap
                     && !(mDetectTwoFingerTripleTap
                     && Flags.enableMagnificationMultipleFingerMultipleTapGesture());
@@ -540,7 +541,8 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                         "onGestureDetected : delayedEventQueue = " + delayedEventQueue);
             }
             if (gestureId == MagnificationGestureMatcher.GESTURE_TWO_FINGERS_DOWN_OR_SWIPE
-                    && mWindowMagnificationMgr.pointersInWindow(mDisplayId, motionEvent) > 0) {
+                    && mMagnificationConnectionManager
+                        .pointersInWindow(mDisplayId, motionEvent) > 0) {
                 transitionTo(mObservePanningScalingState);
             } else if (gestureId == MagnificationGestureMatcher.GESTURE_TRIPLE_TAP) {
                 onTripleTap(motionEvent);
@@ -584,7 +586,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                 + ", mMagnifiedInteractionState=" + mObservePanningScalingState
                 + ", mCurrentState=" + State.nameOf(mCurrentState)
                 + ", mPreviousState=" + State.nameOf(mPreviousState)
-                + ", mWindowMagnificationMgr=" + mWindowMagnificationMgr
+                + ", mMagnificationConnectionManager=" + mMagnificationConnectionManager
                 + ", mDisplayId=" + mDisplayId
                 + '}';
     }

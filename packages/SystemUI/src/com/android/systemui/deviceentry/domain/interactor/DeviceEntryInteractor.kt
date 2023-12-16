@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
+import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
@@ -30,6 +31,7 @@ import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -60,6 +62,9 @@ constructor(
     trustRepository: TrustRepository,
     flags: SceneContainerFlags,
 ) {
+    val enteringDeviceFromBiometricUnlock: Flow<BiometricUnlockSource> =
+        repository.enteringDeviceFromBiometricUnlock
+
     /**
      * Whether the device is unlocked.
      *
@@ -103,8 +108,11 @@ constructor(
                 initialValue = false,
             )
 
-    // Authenticated by a TrustAgent like trusted device, location, etc or by face auth.
-    private val passivelyAuthenticated =
+    /**
+     * Whether the user is currently authenticated by a TrustAgent like trusted device, location,
+     * etc., or by face auth.
+     */
+    private val isPassivelyAuthenticated =
         merge(
                 trustRepository.isCurrentUserTrusted,
                 deviceEntryFaceAuthRepository.isAuthenticated,
@@ -117,25 +125,31 @@ constructor(
      * mechanism like face or trust manager. This returns `false` whenever the lockscreen has been
      * dismissed.
      *
+     * A value of `null` is meaningless and is used as placeholder while the actual value is still
+     * being loaded in the background.
+     *
      * Note: `true` doesn't mean the lockscreen is visible. It may be occluded or covered by other
      * UI.
      */
-    val canSwipeToEnter =
+    val canSwipeToEnter: StateFlow<Boolean?> =
         combine(
                 // This is true when the user has chosen to show the lockscreen but has not made it
                 // secure.
                 authenticationInteractor.authenticationMethod.map {
                     it == AuthenticationMethodModel.None && repository.isLockscreenEnabled()
                 },
-                passivelyAuthenticated,
+                isPassivelyAuthenticated,
                 isDeviceEntered
-            ) { isSwipeAuthMethod, passivelyAuthenticated, isDeviceEntered ->
-                (isSwipeAuthMethod || passivelyAuthenticated) && !isDeviceEntered
+            ) { isSwipeAuthMethod, isPassivelyAuthenticated, isDeviceEntered ->
+                (isSwipeAuthMethod || isPassivelyAuthenticated) && !isDeviceEntered
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = false,
+                // Starts as null to prevent downstream collectors from falsely assuming that the
+                // user can or cannot swipe to enter the device while the real value is being loaded
+                // from upstream data sources.
+                initialValue = null,
             )
 
     /**

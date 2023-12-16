@@ -85,7 +85,11 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_DELAY_MS),
                         (reason) -> updateKeyRepeatInfo()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_ROTARY_INPUT),
-                        (reason) -> updateShowRotaryInput()));
+                        (reason) -> updateShowRotaryInput()),
+                Map.entry(Settings.System.getUriFor(Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS),
+                        (reason) -> updateAccessibilityBounceKeys()),
+                Map.entry(Settings.System.getUriFor(Settings.Secure.ACCESSIBILITY_STICKY_KEYS),
+                        (reason) -> updateAccessibilityStickyKeys()));
     }
 
     /**
@@ -215,5 +219,15 @@ class InputSettingsObserver extends ContentObserver {
             return;
         }
         mNative.setMaximumObscuringOpacityForTouch(opacity);
+    }
+
+    private void updateAccessibilityBounceKeys() {
+        mService.setAccessibilityBounceKeysThreshold(
+                InputSettings.getAccessibilityBounceKeysThreshold(mContext));
+    }
+
+    private void updateAccessibilityStickyKeys() {
+        mService.setAccessibilityStickyKeysEnabled(
+                InputSettings.isAccessibilityStickyKeysEnabled(mContext));
     }
 }

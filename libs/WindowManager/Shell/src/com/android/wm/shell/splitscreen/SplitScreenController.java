@@ -25,6 +25,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
+import static com.android.wm.shell.common.split.SplitScreenConstants.KEY_EXTRA_WIDGET_INTENT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -364,6 +365,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     /** Get the split stage of task is under it. */
     public @StageType int getStageOfTask(int taskId) {
         return mStageCoordinator.getStageOfTask(taskId);
+    }
+
+    /**
+     * @return {@code true} if we should create a left-right split, {@code false} if we should
+     * create a top-bottom split.
+     */
+    public boolean isLeftRightSplit() {
+        return mStageCoordinator.isLeftRightSplit();
     }
 
     /** Check split is foreground and task is under split or not by taskId. */
@@ -711,10 +720,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         //       recents that hasn't launched and is not being organized
         final String packageName2 = SplitScreenUtils.getPackageName(taskId, mTaskOrganizer);
         final int userId2 = SplitScreenUtils.getUserId(taskId, mTaskOrganizer);
+        boolean setSecondIntentMultipleTask = false;
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
             if (supportMultiInstancesSplit(packageName1)) {
-                fillInIntent = new Intent();
-                fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                setSecondIntentMultipleTask = true;
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
             } else {
                 if (mRecentTasksOptional.isPresent()) {
@@ -728,6 +737,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
                         Toast.LENGTH_SHORT).show();
             }
+        }
+        if (options2 != null) {
+            Intent widgetIntent = options2.getParcelable(KEY_EXTRA_WIDGET_INTENT, Intent.class);
+            fillInIntent = resolveWidgetFillinIntent(widgetIntent, setSecondIntentMultipleTask);
         }
         mStageCoordinator.startIntentAndTask(pendingIntent, fillInIntent, options1, taskId,
                 options2, splitPosition, snapPosition, remoteTransition, instanceId);
@@ -779,12 +792,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 ? ActivityOptions.fromBundle(options1) : ActivityOptions.makeBasic();
         final ActivityOptions activityOptions2 = options2 != null
                 ? ActivityOptions.fromBundle(options2) : ActivityOptions.makeBasic();
+        boolean setSecondIntentMultipleTask = false;
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
             if (supportMultiInstancesSplit(packageName1)) {
                 fillInIntent1 = new Intent();
                 fillInIntent1.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-                fillInIntent2 = new Intent();
-                fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                setSecondIntentMultipleTask = true;
 
                 if (shortcutInfo1 != null) {
                     activityOptions1.setApplyMultipleTaskFlagForShortcut(true);
@@ -802,6 +815,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
                         Toast.LENGTH_SHORT).show();
             }
+        }
+        if (options2 != null) {
+            Intent widgetIntent = options2.getParcelable(KEY_EXTRA_WIDGET_INTENT, Intent.class);
+            fillInIntent2 = resolveWidgetFillinIntent(widgetIntent, setSecondIntentMultipleTask);
         }
         mStageCoordinator.startIntents(pendingIntent1, fillInIntent1, shortcutInfo1,
                 activityOptions1.toBundle(), pendingIntent2, fillInIntent2, shortcutInfo2,
@@ -830,9 +847,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 .map(recentTasks -> recentTasks.findTaskInBackground(component, userId1))
                 .orElse(null);
         if (taskInfo != null) {
-            startTask(taskInfo.taskId, position, options);
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                    "Start task in background");
+            if (ENABLE_SHELL_TRANSITIONS) {
+                mStageCoordinator.startTask(taskInfo.taskId, position, options);
+            } else {
+                startTask(taskInfo.taskId, position, options);
+            }
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Start task in background");
             return;
         }
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
@@ -906,6 +926,34 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         return false;
+    }
+
+    /**
+     * Determines whether the widgetIntent needs to be modified if multiple tasks of its
+     * corresponding package/app are supported. There are 4 possible paths:
+     *  <li> We select a widget for second app which is the same as the first app </li>
+     *  <li> We select a widget for second app which is different from the first app </li>
+     *  <li> No widgets involved, we select a second app that is the same as first app </li>
+     *  <li> No widgets involved, we select a second app that is different from the first app
+     *       (returns null) </li>
+     *
+     * @return an {@link Intent} with the appropriate {@link Intent#FLAG_ACTIVITY_MULTIPLE_TASK}
+     *         added on or not depending on {@param launchMultipleTasks}.
+     */
+    @Nullable
+    private Intent resolveWidgetFillinIntent(@Nullable Intent widgetIntent,
+            boolean launchMultipleTasks) {
+        Intent fillInIntent2 = null;
+        if (launchMultipleTasks && widgetIntent != null) {
+            fillInIntent2 = widgetIntent;
+            fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+        } else if (widgetIntent != null) {
+            fillInIntent2 = widgetIntent;
+        } else if (launchMultipleTasks) {
+            fillInIntent2 = new Intent();
+            fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+        }
+        return fillInIntent2;
     }
 
     RemoteAnimationTarget[] onGoingToRecentsLegacy(RemoteAnimationTarget[] apps) {

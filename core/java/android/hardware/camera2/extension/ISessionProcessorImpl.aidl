@@ -34,7 +34,7 @@ interface ISessionProcessorImpl
             in Map<String, CameraMetadataNative> charsMap, in OutputSurface previewSurface,
             in OutputSurface imageCaptureSurface, in OutputSurface postviewSurface);
     void deInitSession(in IBinder token);
-    void onCaptureSessionStart(IRequestProcessorImpl requestProcessor);
+    void onCaptureSessionStart(IRequestProcessorImpl requestProcessor, in String statsKey);
     void onCaptureSessionEnd();
     int startRepeating(in ICaptureCallback callback);
     void stopRepeating();

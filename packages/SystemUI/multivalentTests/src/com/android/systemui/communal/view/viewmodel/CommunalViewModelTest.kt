@@ -17,6 +17,7 @@
 package com.android.systemui.communal.view.viewmodel
 
 import android.app.smartspace.SmartspaceTarget
+import android.os.PowerManager
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -33,10 +34,12 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import javax.inject.Provider
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -50,6 +53,8 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class CommunalViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
+    @Mock private lateinit var shadeViewController: ShadeViewController
+    @Mock private lateinit var powerManager: PowerManager
 
     private lateinit var testScope: TestScope
 
@@ -80,6 +85,8 @@ class CommunalViewModelTest : SysuiTestCase() {
             CommunalViewModel(
                 withDeps.communalInteractor,
                 withDeps.tutorialInteractor,
+                Provider { shadeViewController },
+                powerManager,
                 mediaHost,
             )
     }
@@ -128,7 +135,7 @@ class CommunalViewModelTest : SysuiTestCase() {
             whenever(target.smartspaceTargetId).thenReturn("target")
             whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
             whenever(target.remoteViews).thenReturn(Mockito.mock(RemoteViews::class.java))
-            smartspaceRepository.setLockscreenSmartspaceTargets(listOf(target))
+            smartspaceRepository.setCommunalSmartspaceTargets(listOf(target))
 
             // Media playing.
             mediaRepository.mediaPlaying.value = true

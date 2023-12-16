@@ -40,11 +40,13 @@ android_test {
         "servicestests-utils",
         "testables",
         "truth",
+        "TestParameterInjector",
         // TODO: remove once Android migrates to JUnit 4.12,
         // which provides assertThrows
         "testng",
         "flag-junit",
         "notification_flags_lib",
+        "platform-test-rules",
     ],
 
     libs: [
@@ -82,4 +84,7 @@ android_test {
         "libutils",
         "netd_aidl_interface-V5-cpp",
     ],
+
+    // Required for TestParameterInjector
+    javacflags: ["-parameters"],
 }

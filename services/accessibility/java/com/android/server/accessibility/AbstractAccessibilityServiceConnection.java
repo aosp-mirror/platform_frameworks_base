@@ -34,7 +34,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCE
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
-import static com.android.window.flags.Flags.removeCaptureDisplay;
+import static com.android.window.flags.Flags.deleteCaptureDisplay;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
@@ -118,6 +118,7 @@ import java.util.Set;
  * This class represents an accessibility client - either an AccessibilityService or a UiAutomation.
  * It is responsible for behavior common to both types of clients.
  */
+@SuppressWarnings("MissingPermissionAnnotation")
 abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServiceConnection.Stub
         implements ServiceConnection, IBinder.DeathRecipient, KeyEventDispatcher.KeyEventFilter,
         FingerprintGestureDispatcher.FingerprintGestureClient {
@@ -209,6 +210,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     final ComponentName mComponentName;
 
     int mGenericMotionEventSources;
+    int mObservedMotionEventSources;
 
     // the events pending events to be dispatched to this service
     final SparseArray<AccessibilityEvent> mPendingEvents = new SparseArray<>();
@@ -397,6 +399,19 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mNotificationTimeout = info.notificationTimeout;
         mIsDefault = (info.flags & DEFAULT) != 0;
         mGenericMotionEventSources = info.getMotionEventSources();
+        if (android.view.accessibility.Flags.motionEventObserving()) {
+            if (mContext.checkCallingOrSelfPermission(
+                            android.Manifest.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING)
+                    == PackageManager.PERMISSION_GRANTED) {
+                mObservedMotionEventSources = info.getObservedMotionEventSources();
+            } else {
+                Slog.e(
+                        LOG_TAG,
+                        "Observing motion events requires"
+                            + " android.Manifest.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING.");
+                mObservedMotionEventSources = 0;
+            }
+        }
 
         if (supportsFlagForNotImportantViews(info)) {
             if ((info.flags & AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0) {
@@ -1443,7 +1458,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             return;
         }
         final long identity = Binder.clearCallingIdentity();
-        if (removeCaptureDisplay()) {
+        if (deleteCaptureDisplay()) {
             try {
                 ScreenCapture.ScreenCaptureListener screenCaptureListener = new
                         ScreenCapture.ScreenCaptureListener(
@@ -1485,7 +1500,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     private void sendScreenshotSuccess(ScreenshotHardwareBuffer screenshotBuffer,
             RemoteCallback callback) {
-        if (removeCaptureDisplay()) {
+        if (deleteCaptureDisplay()) {
             mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
                 final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
                 final ParcelableColorSpace colorSpace =
@@ -1599,7 +1614,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final int displayId = displays[i].getDisplayId();
             onDisplayRemoved(displayId);
         }
-        if (Flags.cleanupA11yOverlays()) {
+        if (com.android.server.accessibility.Flags.cleanupA11yOverlays()) {
             detachAllOverlays();
         }
     }
@@ -1848,8 +1863,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void notifyGesture(AccessibilityGestureEvent gestureEvent) {
-        mInvocationHandler.obtainMessage(InvocationHandler.MSG_ON_GESTURE,
-                gestureEvent).sendToTarget();
+        if (android.view.accessibility.Flags.copyEventsForGestureDetection()) {
+            // We will use this event async, so copy it because it contains MotionEvents.
+            mInvocationHandler.obtainMessage(InvocationHandler.MSG_ON_GESTURE,
+                    gestureEvent.copyForAsync()).sendToTarget();
+        } else {
+            mInvocationHandler.obtainMessage(InvocationHandler.MSG_ON_GESTURE,
+                    gestureEvent).sendToTarget();
+        }
     }
 
     public void notifySystemActionsChangedLocked() {
@@ -1912,6 +1933,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
         return (mGenericMotionEventSources & eventSourceWithoutClass) != 0;
     }
+
 
     /**
      * Called by the invocation handler to notify the service that the
@@ -2323,9 +2345,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final int type = message.what;
             switch (type) {
                 case MSG_ON_GESTURE: {
-                    notifyGestureInternal((AccessibilityGestureEvent) message.obj);
+                    if (message.obj instanceof AccessibilityGestureEvent gesture) {
+                        notifyGestureInternal(gesture);
+                        if (android.view.accessibility.Flags.copyEventsForGestureDetection()) {
+                            gesture.recycle();
+                        }
+                    }
                 } break;
-
                 case MSG_CLEAR_ACCESSIBILITY_CACHE: {
                     notifyClearAccessibilityCacheInternal();
                 } break;

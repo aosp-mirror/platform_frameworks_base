@@ -1110,6 +1110,10 @@ class UserUsageStatsService {
         if (event.mNotificationChannelId != null) {
             pw.printPair("channelId", event.mNotificationChannelId);
         }
+
+        if ((event.mEventType == Event.USER_INTERACTION) && (event.mExtras != null)) {
+            pw.print(event.mExtras.toString());
+        }
         pw.printHexPair("flags", event.mFlags);
         pw.println();
     }

@@ -32,9 +32,12 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,8 +54,12 @@ public class PersistentDataStoreTest {
     private TestInjector mInjector;
     private TestLooper mTestLooper;
 
+    @Mock
+    private DisplayAdapter mDisplayAdapter;
+
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         mInjector = new TestInjector();
         mTestLooper = new TestLooper();
         Handler handler = new Handler(mTestLooper.getLooper());
@@ -62,8 +69,8 @@ public class PersistentDataStoreTest {
     @Test
     public void testLoadBrightness() {
         final String uniqueDisplayId = "test:123";
-        final DisplayDevice testDisplayDevice = new DisplayDevice(
-                null, null, uniqueDisplayId, null) {
+        final DisplayDevice testDisplayDevice = new DisplayDevice(mDisplayAdapter,
+                /* displayToken= */ null, uniqueDisplayId, /* context= */ null) {
             @Override
             public boolean hasStableUniqueId() {
                 return true;
@@ -100,7 +107,8 @@ public class PersistentDataStoreTest {
     public void testSetBrightness_brightnessTagWithNoUserId_updatesToBrightnessTagWithUserId() {
         final String uniqueDisplayId = "test:123";
         final DisplayDevice testDisplayDevice =
-                new DisplayDevice(null, null, uniqueDisplayId, null) {
+                new DisplayDevice(mDisplayAdapter, /* displayToken= */ null, uniqueDisplayId,
+                        /* context= */ null) {
             @Override
             public boolean hasStableUniqueId() {
                 return true;
@@ -273,7 +281,8 @@ public class PersistentDataStoreTest {
         assertNull(mDataStore.getBrightnessConfigurationForDisplayLocked(uniqueDisplayId,
                 userSerial));
 
-        DisplayDevice testDisplayDevice = new DisplayDevice(null, null, uniqueDisplayId, null) {
+        DisplayDevice testDisplayDevice = new DisplayDevice(mDisplayAdapter,
+                /* displayToken= */ null, uniqueDisplayId, /* context= */ null) {
             @Override
             public boolean hasStableUniqueId() {
                 return true;
@@ -319,7 +328,8 @@ public class PersistentDataStoreTest {
         assertNull(mDataStore.getBrightnessConfigurationForDisplayLocked(uniqueDisplayId,
                 userSerial));
 
-        DisplayDevice testDisplayDevice = new DisplayDevice(null, null, uniqueDisplayId, null) {
+        DisplayDevice testDisplayDevice = new DisplayDevice(mDisplayAdapter,
+                /* displayToken= */ null, uniqueDisplayId, /* context= */ null) {
             @Override
             public boolean hasStableUniqueId() {
                 return false;
@@ -386,7 +396,8 @@ public class PersistentDataStoreTest {
     @Test
     public void testStoreAndRestoreResolution() {
         final String uniqueDisplayId = "test:123";
-        DisplayDevice testDisplayDevice = new DisplayDevice(null, null, uniqueDisplayId, null) {
+        DisplayDevice testDisplayDevice = new DisplayDevice(mDisplayAdapter,
+                /* displayToken= */ null, uniqueDisplayId, /* context= */ null) {
             @Override
             public boolean hasStableUniqueId() {
                 return true;
@@ -422,7 +433,8 @@ public class PersistentDataStoreTest {
     @Test
     public void testStoreAndRestoreRefreshRate() {
         final String uniqueDisplayId = "test:123";
-        DisplayDevice testDisplayDevice = new DisplayDevice(null, null, uniqueDisplayId, null) {
+        DisplayDevice testDisplayDevice = new DisplayDevice(mDisplayAdapter,
+                /* displayToken= */ null, uniqueDisplayId, /* context= */ null) {
             @Override
             public boolean hasStableUniqueId() {
                 return true;
@@ -455,7 +467,8 @@ public class PersistentDataStoreTest {
     @Test
     public void testBrightnessInitialisesWithInvalidFloat() {
         final String uniqueDisplayId = "test:123";
-        DisplayDevice testDisplayDevice = new DisplayDevice(null, null, uniqueDisplayId, null) {
+        DisplayDevice testDisplayDevice = new DisplayDevice(mDisplayAdapter,
+                /* displayToken= */ null, uniqueDisplayId, /* context= */ null) {
             @Override
             public boolean hasStableUniqueId() {
                 return true;

@@ -30,6 +30,7 @@ private fun createKeyboard(
     deviceId: Int,
     vendorId: Int,
     productId: Int,
+    deviceBus: Int,
     languageTag: String?,
     layoutType: String?
 ): InputDevice =
@@ -42,6 +43,7 @@ private fun createKeyboard(
         .setExternal(true)
         .setVendorId(vendorId)
         .setProductId(productId)
+        .setDeviceBus(deviceBus)
         .setKeyboardLanguageTag(languageTag)
         .setKeyboardLayoutType(layoutType)
         .build()
@@ -67,6 +69,7 @@ class KeyboardMetricsCollectorTests {
         const val DEVICE_ID = 1
         const val DEFAULT_VENDOR_ID = 123
         const val DEFAULT_PRODUCT_ID = 456
+        const val DEFAULT_DEVICE_BUS = 789
     }
 
     @Test
@@ -77,6 +80,7 @@ class KeyboardMetricsCollectorTests {
                     DEVICE_ID,
                     DEFAULT_VENDOR_ID,
                     DEFAULT_PRODUCT_ID,
+                    DEFAULT_DEVICE_BUS,
                     null,
                     null
                 )
@@ -92,6 +96,7 @@ class KeyboardMetricsCollectorTests {
                     DEVICE_ID,
                     DEFAULT_VENDOR_ID,
                     DEFAULT_PRODUCT_ID,
+                    DEFAULT_DEVICE_BUS,
                     null,
                     null
                 )
@@ -107,6 +112,7 @@ class KeyboardMetricsCollectorTests {
                 DEVICE_ID,
                 DEFAULT_VENDOR_ID,
                 DEFAULT_PRODUCT_ID,
+                DEFAULT_DEVICE_BUS,
                 "de-CH",
                 "qwertz"
             )
@@ -134,6 +140,11 @@ class KeyboardMetricsCollectorTests {
             "KeyboardConfigurationEvent should pick product ID from provided InputDevice",
             DEFAULT_PRODUCT_ID,
             event.productId
+        )
+        assertEquals(
+             "KeyboardConfigurationEvent should pick device bus from provided InputDevice",
+             DEFAULT_DEVICE_BUS,
+             event.deviceBus
         )
         assertTrue(event.isFirstConfiguration)
 
@@ -178,6 +189,7 @@ class KeyboardMetricsCollectorTests {
                 DEVICE_ID,
                 DEFAULT_VENDOR_ID,
                 DEFAULT_PRODUCT_ID,
+                DEFAULT_DEVICE_BUS,
                 "und", // Undefined language tag
                 "azerty"
             )

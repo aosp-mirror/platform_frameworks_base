@@ -90,8 +90,13 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     private int mLastConfigurationWidthDp = -1;
     private int mLastConfigurationHeightDp = -1;
 
-    private List<Runnable> mOnCreateRunnables = new ArrayList<>();
+    private final List<Runnable> mOnCreateRunnables = new ArrayList<>();
 
+    /**
+     * @deprecated Don't subclass SystemUIDialog. Please subclass {@link Delegate} and pass it to
+     *             {@link Factory#create(DialogDelegate)} to create a custom dialog.
+     */
+    @Deprecated
     public SystemUIDialog(Context context) {
         this(context, DEFAULT_THEME, DEFAULT_DISMISS_ON_DEVICE_LOCK);
     }
@@ -109,27 +114,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 Dependency.get(SystemUIDialogManager.class),
                 Dependency.get(SysUiState.class),
                 Dependency.get(BroadcastDispatcher.class),
-                Dependency.get(DialogLaunchAnimator.class),
-                new DialogDelegate<>() {});
-    }
-
-    @Inject
-    public SystemUIDialog(
-            @Application Context context,
-            FeatureFlags featureFlags,
-            SystemUIDialogManager systemUIDialogManager,
-            SysUiState sysUiState,
-            BroadcastDispatcher broadcastDispatcher,
-            DialogLaunchAnimator dialogLaunchAnimator) {
-        this(context,
-                DEFAULT_THEME,
-                DEFAULT_DISMISS_ON_DEVICE_LOCK,
-                featureFlags,
-                systemUIDialogManager,
-                sysUiState,
-                broadcastDispatcher,
-                dialogLaunchAnimator,
-                new DialogDelegate<>(){});
+                Dependency.get(DialogLaunchAnimator.class));
     }
 
     public static class Factory {
@@ -156,13 +141,32 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             mDialogLaunchAnimator = dialogLaunchAnimator;
         }
 
+        /** Creates a new instance of {@link SystemUIDialog} with no customized behavior.
+         *
+         * When you just need a dialog, call this.
+         */
+        public SystemUIDialog create() {
+            return create(new DialogDelegate<>(){}, mContext);
+        }
+
         /**
          * Creates a new instance of {@link SystemUIDialog} with {@code delegate} as the {@link
-         * DialogDelegate}.
+         * Delegate}.
+         *
+         * When you need to customize the dialog, pass it a delegate.
          */
-        public SystemUIDialog create(DialogDelegate<SystemUIDialog> delegate) {
+        public SystemUIDialog create(Delegate delegate, Context context) {
+            return create((DialogDelegate<SystemUIDialog>) delegate, context);
+        }
+
+        public SystemUIDialog create(Delegate delegate) {
+            return create(delegate, mContext);
+        }
+
+        private SystemUIDialog create(DialogDelegate<SystemUIDialog> dialogDelegate,
+                Context context) {
             return new SystemUIDialog(
-                    mContext,
+                    context,
                     DEFAULT_THEME,
                     DEFAULT_DISMISS_ON_DEVICE_LOCK,
                     mFeatureFlags,
@@ -170,7 +174,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                     mSysUiState,
                     mBroadcastDispatcher,
                     mDialogLaunchAnimator,
-                    delegate);
+                    dialogDelegate);
         }
     }
 
@@ -193,6 +197,28 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 broadcastDispatcher,
                 dialogLaunchAnimator,
                 new DialogDelegate<>(){});
+    }
+
+    public SystemUIDialog(
+            Context context,
+            int theme,
+            boolean dismissOnDeviceLock,
+            FeatureFlags featureFlags,
+            SystemUIDialogManager dialogManager,
+            SysUiState sysUiState,
+            BroadcastDispatcher broadcastDispatcher,
+            DialogLaunchAnimator dialogLaunchAnimator,
+            Delegate delegate) {
+        this(
+                context,
+                theme,
+                dismissOnDeviceLock,
+                featureFlags,
+                dialogManager,
+                sysUiState,
+                broadcastDispatcher,
+                dialogLaunchAnimator,
+                (DialogDelegate<SystemUIDialog>) delegate);
     }
 
     public SystemUIDialog(
@@ -587,5 +613,19 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
             mDialog.dismiss();
         }
+    }
+
+    /**
+     * A delegate class that should be implemented in place of sublcassing {@link SystemUIDialog}.
+     *
+     * Implement this interface and then pass an instance of your implementation to
+     * {@link SystemUIDialog.Factory#create(Delegate)}.
+     */
+    public interface Delegate extends DialogDelegate<SystemUIDialog> {
+        /**
+         * Returns a new {@link SystemUIDialog} which has been passed this Delegate in its
+         * construction.
+         */
+        SystemUIDialog createDialog();
     }
 }

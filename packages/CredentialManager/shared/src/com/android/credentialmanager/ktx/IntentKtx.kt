@@ -37,17 +37,17 @@ val Intent.requestInfo: RequestInfo?
         RequestInfo::class.java
     )
 
-val Intent.getCredentialProviderDataList: List<ProviderData>
+val Intent.getCredentialProviderDataList: List<GetCredentialProviderData>
     get() = this.extras?.getParcelableArrayList(
         ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
         GetCredentialProviderData::class.java
-    ) ?: emptyList()
+    ) ?.filterIsInstance<GetCredentialProviderData>() ?: emptyList()
 
-val Intent.createCredentialProviderDataList: List<ProviderData>
+val Intent.createCredentialProviderDataList: List<CreateCredentialProviderData>
     get() = this.extras?.getParcelableArrayList(
         ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST,
         CreateCredentialProviderData::class.java
-    ) ?: emptyList()
+    ) ?.filterIsInstance<CreateCredentialProviderData>() ?: emptyList()
 
 val Intent.resultReceiver: ResultReceiver?
     get() = this.getParcelableExtra(

@@ -41,14 +41,14 @@ abstract class SmartspaceModule {
         const val DREAM_WEATHER_SMARTSPACE_DATA_PLUGIN = "dream_weather_smartspace_data_plugin"
 
         /**
-         * The dream smartspace target filter.
+         * The target filter for smartspace over lockscreen.
          */
-        const val DREAM_SMARTSPACE_TARGET_FILTER = "dream_smartspace_target_filter"
+        const val LOCKSCREEN_SMARTSPACE_TARGET_FILTER = "lockscreen_smartspace_target_filter"
 
         /**
-         * The precondition for dream smartspace
+         * The precondition for smartspace over lockscreen
          */
-        const val DREAM_SMARTSPACE_PRECONDITION = "dream_smartspace_precondition"
+        const val LOCKSCREEN_SMARTSPACE_PRECONDITION = "lockscreen_smartspace_precondition"
 
         /**
          * The BcSmartspaceDataPlugin for the standalone date (+alarm+dnd).
@@ -59,10 +59,15 @@ abstract class SmartspaceModule {
          * The BcSmartspaceDataPlugin for the standalone weather.
          */
         const val WEATHER_SMARTSPACE_DATA_PLUGIN = "weather_smartspace_data_plugin"
+
+        /**
+         * The BcSmartspaceDataProvider for the glanceable hub.
+         */
+        const val GLANCEABLE_HUB_SMARTSPACE_DATA_PLUGIN = "glanceable_hub_smartspace_data_plugin"
     }
 
     @BindsOptionalOf
-    @Named(DREAM_SMARTSPACE_TARGET_FILTER)
+    @Named(LOCKSCREEN_SMARTSPACE_TARGET_FILTER)
     abstract fun optionalDreamSmartspaceTargetFilter(): SmartspaceTargetFilter?
 
     @BindsOptionalOf
@@ -74,8 +79,12 @@ abstract class SmartspaceModule {
     abstract fun optionalDreamWeatherSmartspaceDataPlugin(): BcSmartspaceDataPlugin?
 
     @Binds
-    @Named(DREAM_SMARTSPACE_PRECONDITION)
+    @Named(LOCKSCREEN_SMARTSPACE_PRECONDITION)
     abstract fun bindSmartspacePrecondition(
         lockscreenPrecondition: LockscreenPrecondition?
     ): SmartspacePrecondition?
+
+    @BindsOptionalOf
+    @Named(GLANCEABLE_HUB_SMARTSPACE_DATA_PLUGIN)
+    abstract fun optionalBcSmartspaceDataPlugin(): BcSmartspaceDataPlugin?
 }

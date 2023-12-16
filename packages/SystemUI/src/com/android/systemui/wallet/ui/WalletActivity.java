@@ -214,14 +214,12 @@ public class WalletActivity extends ComponentActivity implements
                 Utils.getColorAttrDefaultColor(
                         this, com.android.internal.R.attr.colorAccentPrimary));
         mKeyguardFaceAuthInteractor.onWalletLaunched();
-        mKeyguardViewManager.requestFace(true);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mKeyguardViewManager.requestFp(false, -1);
-        mKeyguardViewManager.requestFace(false);
     }
 
     @Override

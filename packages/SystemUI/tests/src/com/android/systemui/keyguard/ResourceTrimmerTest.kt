@@ -52,7 +52,6 @@ class ResourceTrimmerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         featureFlags.set(Flags.TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK, true)
         featureFlags.set(Flags.TRIM_FONT_CACHES_AT_UNLOCK, true)
-        featureFlags.set(Flags.FACE_AUTH_REFACTOR, false)
         powerInteractor = PowerInteractorFactory.create().powerInteractor
         keyguardRepository.setDozeAmount(0f)
         keyguardRepository.setKeyguardGoingAway(false)

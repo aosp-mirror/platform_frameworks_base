@@ -1901,6 +1901,16 @@ interface ITelephony {
     void unregisterImsRegistrationCallback(int subId, IImsRegistrationCallback c);
 
     /**
+     * Adds an IMS emergency registration status callback for the subscription id specified.
+     */
+    void registerImsEmergencyRegistrationCallback(int subId, IImsRegistrationCallback c);
+    /**
+     * Removes an existing IMS emergency registration status callback for the subscription
+     * id specified.
+     */
+    void unregisterImsEmergencyRegistrationCallback(int subId, IImsRegistrationCallback c);
+
+    /**
      * Get the IMS service registration state for the MmTelFeature associated with this sub id.
      */
     void getImsMmTelRegistrationState(int subId, IIntegerConsumer consumer);
@@ -3035,8 +3045,8 @@ interface ITelephony {
      *
      * @param handoverType The type of handover from emergency call to satellite messaging. Use one
      *                     of the following values to enable the override:
-     *                     0 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS
-     *                     1 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911
+     *                     1 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS
+     *                     2 - EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911
      *                     To disable the override, use -1 for handoverType.
      * @param delaySeconds The event EVENT_DISPLAY_EMERGENCY_MESSAGE will be sent to Dialer
      *                     delaySeconds after the emergency call starts.
@@ -3101,16 +3111,21 @@ interface ITelephony {
     void requestNtnSignalStrength(int subId, in ResultReceiver receiver);
 
     /**
-     * Registers for NTN signal strength changed from satellite modem.
+     * Registers for NTN signal strength changed from satellite modem. If the registration operation
+     * is not successful, a {@link SatelliteException} that contains {@link SatelliteResult} will be
+     * thrown.
      *
      * @param subId The subId of the subscription to request for.
-     * @param callback The callback to handle the NTN signal strength changed event.
-     *
-     * @return The {@link SatelliteResult} result of the operation.
+     * @param callback The callback to handle the NTN signal strength changed event. If the
+     * operation is successful, {@link NtnSignalStrengthCallback#onNtnSignalStrengthChanged(
+     * NtnSignalStrength)} will return an instance of {@link NtnSignalStrength} with a value of
+     * {@link NtnSignalStrength.NtnSignalStrengthLevel} when the signal strength of non-terrestrial
+     * network has changed.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForNtnSignalStrengthChanged(int subId, in INtnSignalStrengthCallback callback);
+    void registerForNtnSignalStrengthChanged(int subId,
+            in INtnSignalStrengthCallback callback);
 
     /**
      * Unregisters for NTN signal strength changed from satellite modem.
@@ -3159,4 +3174,37 @@ interface ITelephony {
      * @return {@code true} if the operation is successful, {@code false} otherwise.
      */
     boolean setShouldSendDatagramToModemInDemoMode(boolean shouldSendToModemInDemoMode);
+
+    /**
+     * Enable or disable notifications sent for cellular identifier disclosure events.
+     *
+     * Disclosure events are defined as instances where a device has sent a cellular identifier
+     * on the Non-access stratum (NAS) before a security context is established. As a result the
+     * identifier is sent in the clear, which has privacy implications for the user.
+     *
+     * <p>Requires permission: android.Manifest.MODIFY_PHONE_STATE</p>
+     *
+     * @param enabled if notifications about disclosure events should be enabled
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.MODIFY_PHONE_STATE)")
+    void setEnableCellularIdentifierDisclosureNotifications(boolean enable);
+
+    /**
+     * Get whether or not cellular identifier disclosure notifications are enabled.
+     *
+     * <p>Requires permission: android.Manifest.READ_PRIVILEGED_PHONE_STATE</p>
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+    boolean isCellularIdentifierDisclosureNotificationsEnabled();
 }

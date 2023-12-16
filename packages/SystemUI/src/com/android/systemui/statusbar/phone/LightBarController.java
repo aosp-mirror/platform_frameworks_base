@@ -42,7 +42,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.data.model.StatusBarAppearance;
-import com.android.systemui.statusbar.data.repository.StatusBarModeRepository;
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.kotlin.JavaAdapter;
@@ -68,7 +68,7 @@ public class LightBarController implements
     private final JavaAdapter mJavaAdapter;
     private final SysuiDarkIconDispatcher mStatusBarIconController;
     private final BatteryController mBatteryController;
-    private final StatusBarModeRepository mStatusBarModeRepository;
+    private final StatusBarModeRepositoryStore mStatusBarModeRepository;
     private BiometricUnlockController mBiometricUnlockController;
 
     private LightBarTransitionsController mNavigationBarController;
@@ -126,7 +126,7 @@ public class LightBarController implements
             DarkIconDispatcher darkIconDispatcher,
             BatteryController batteryController,
             NavigationModeController navModeController,
-            StatusBarModeRepository statusBarModeRepository,
+            StatusBarModeRepositoryStore statusBarModeRepository,
             DumpManager dumpManager,
             DisplayTracker displayTracker) {
         mJavaAdapter = javaAdapter;
@@ -146,7 +146,7 @@ public class LightBarController implements
     @Override
     public void start() {
         mJavaAdapter.alwaysCollectFlow(
-                mStatusBarModeRepository.getStatusBarAppearance(),
+                mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance(),
                 this::onStatusBarAppearanceChanged);
     }
 
@@ -476,7 +476,7 @@ public class LightBarController implements
         private final DarkIconDispatcher mDarkIconDispatcher;
         private final BatteryController mBatteryController;
         private final NavigationModeController mNavModeController;
-        private final StatusBarModeRepository mStatusBarModeRepository;
+        private final StatusBarModeRepositoryStore mStatusBarModeRepository;
         private final DumpManager mDumpManager;
         private final DisplayTracker mDisplayTracker;
 
@@ -486,7 +486,7 @@ public class LightBarController implements
                 DarkIconDispatcher darkIconDispatcher,
                 BatteryController batteryController,
                 NavigationModeController navModeController,
-                StatusBarModeRepository statusBarModeRepository,
+                StatusBarModeRepositoryStore statusBarModeRepository,
                 DumpManager dumpManager,
                 DisplayTracker displayTracker) {
             mJavaAdapter = javaAdapter;

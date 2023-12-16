@@ -1365,7 +1365,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Nenhuma permissão necessária"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"isso pode lhe custar dinheiro"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Carregando este dispositivo via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Carregar dispositivo via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Carregando dispositivo conectado via USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transferência de arquivo via USB ativada"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB ativado"</string>
@@ -1711,10 +1711,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode monitorar suas interações com um app ou um sensor de hardware e interagir com apps em seu nome."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Negar"</string>
-    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
-    <skip />
-    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
-    <skip />
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Desinstalar"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Um app está ocultando a solicitação de permissão e impedindo a verificação da sua resposta."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toque em um recurso para começar a usá-lo:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Escolha recursos para usar com o botão de acessibilidade"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escolha recursos para usar com o atalho da tecla de volume"</string>
@@ -1909,10 +1907,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fim de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Dormir"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
     <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Ativada"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desativada"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está silenciando alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Há um problema interno com seu dispositivo. Ele pode ficar instável até que você faça a redefinição para configuração original."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Há um problema interno com seu dispositivo. Entre em contato com o fabricante para saber mais detalhes."</string>
@@ -2345,10 +2343,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"O microfone está bloqueado"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Não é possível espelhar a tela"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Use outro cabo e tente de novo"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Talvez o cabo não tenha suporte a telas"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Seu cabo USB-C pode não se conectar a telas corretamente"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"O dispositivo está muito quente. Não será possível espelhar a tela até ele resfriar"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Tela dupla"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"A tela dupla está ativada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> está usando as duas telas para mostrar conteúdo"</string>
@@ -2365,4 +2360,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Layout do teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toque para mudar."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclados físicos configurados"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toque para conferir os teclados"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Particular"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Clone"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Trabalho"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Trabalho 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Trabalho 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Teste"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Público"</string>
 </resources>

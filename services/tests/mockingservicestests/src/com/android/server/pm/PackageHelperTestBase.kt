@@ -36,6 +36,7 @@ import org.mockito.MockitoAnnotations
 open class PackageHelperTestBase {
 
     companion object {
+        const val PLATFORM_PACKAGE_NAME = "android"
         const val TEST_PACKAGE_1 = "com.android.test.package1"
         const val TEST_PACKAGE_2 = "com.android.test.package2"
         const val DEVICE_OWNER_PACKAGE = "com.android.test.owner"

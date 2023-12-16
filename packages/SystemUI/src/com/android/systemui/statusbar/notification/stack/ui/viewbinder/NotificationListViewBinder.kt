@@ -24,10 +24,12 @@ import com.android.internal.logging.nano.MetricsProto
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.reinflateAndBindLatest
 import com.android.systemui.common.ui.view.setImportantForAccessibilityYesNo
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationShelf
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore
@@ -38,8 +40,9 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -48,13 +51,14 @@ class NotificationListViewBinder
 @Inject
 constructor(
     private val viewModel: NotificationListViewModel,
-    private val metricsLogger: MetricsLogger,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val configuration: ConfigurationState,
-    private val configurationController: ConfigurationController,
     private val falsingManager: FalsingManager,
     private val iconAreaController: NotificationIconAreaController,
     private val iconViewBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
+    private val metricsLogger: MetricsLogger,
     private val shelfIconViewStore: ShelfNotificationIconViewStore,
+    private val systemBarUtilsState: SystemBarUtilsState,
 ) {
 
     fun bind(
@@ -62,14 +66,17 @@ constructor(
         viewController: NotificationStackScrollLayoutController
     ) {
         bindShelf(view)
-        bindFooter(view)
-        bindEmptyShade(view)
         bindHideList(viewController, viewModel)
 
-        view.repeatWhenAttached {
-            lifecycleScope.launch {
-                viewModel.isImportantForAccessibility.collect { isImportantForAccessibility ->
-                    view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
+        if (FooterViewRefactor.isEnabled) {
+            bindFooter(view)
+            bindEmptyShade(view)
+
+            view.repeatWhenAttached {
+                lifecycleScope.launch {
+                    viewModel.isImportantForAccessibility.collect { isImportantForAccessibility ->
+                        view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
+                    }
                 }
             }
         }
@@ -84,7 +91,7 @@ constructor(
             shelf,
             viewModel.shelf,
             configuration,
-            configurationController,
+            systemBarUtilsState,
             falsingManager,
             iconViewBindingFailureTracker,
             iconAreaController,
@@ -101,6 +108,7 @@ constructor(
                     R.layout.status_bar_notification_footer,
                     parentView,
                     attachToRoot = false,
+                    backgroundDispatcher,
                 ) { footerView: FooterView ->
                     traceSection("bind FooterView") {
                         val disposableHandle =

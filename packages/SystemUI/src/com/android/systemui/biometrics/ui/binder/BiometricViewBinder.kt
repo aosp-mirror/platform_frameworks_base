@@ -376,6 +376,22 @@ object BiometricViewBinder {
                     }
                 }
 
+                // Talkback directional guidance
+                backgroundView.setOnHoverListener { _, event ->
+                    launch {
+                        viewModel.onAnnounceAccessibilityHint(
+                            event,
+                            accessibilityManager.isTouchExplorationEnabled
+                        )
+                    }
+                    false
+                }
+                launch {
+                    viewModel.accessibilityHint.collect { message ->
+                        if (message.isNotBlank()) view.announceForAccessibility(message)
+                    }
+                }
+
                 // Play haptics
                 launch {
                     viewModel.hapticsToPlay.collect { hapticFeedbackConstant ->

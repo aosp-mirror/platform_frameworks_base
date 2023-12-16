@@ -43,8 +43,6 @@ class WindowManagerFlags {
 
     /* Start Available Flags */
 
-    final boolean mSyncWindowConfigUpdateFlag = Flags.syncWindowConfigUpdateFlag();
-
     final boolean mWindowStateResizeItemFlag = Flags.windowStateResizeItemFlag();
 
     final boolean mWallpaperOffsetAsync = Flags.wallpaperOffsetAsync();

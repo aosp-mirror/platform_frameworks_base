@@ -16,8 +16,8 @@
 
 package com.android.credentialmanager.client.impl
 
+import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.UserSelectionDialogResult
 import android.os.Bundle
@@ -26,12 +26,13 @@ import com.android.credentialmanager.TAG
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.parse
 import com.android.credentialmanager.client.CredentialManagerClient
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 class CredentialManagerClientImpl @Inject constructor(
-        private val packageManager: PackageManager,
+    @ApplicationContext private val context: Context,
 ) : CredentialManagerClient {
 
     private val _requests = MutableStateFlow<Request?>(null)
@@ -40,7 +41,7 @@ class CredentialManagerClientImpl @Inject constructor(
 
     override fun updateRequest(intent: Intent) {
         val request = intent.parse(
-            packageManager = packageManager,
+            context = context,
         )
         Log.d(TAG, "Request parsed: $request, client instance: $this")
         if (request is Request.Cancel || request is Request.Close) {

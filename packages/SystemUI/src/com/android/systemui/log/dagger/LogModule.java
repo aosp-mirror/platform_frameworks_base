@@ -156,6 +156,14 @@ public class LogModule {
         return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to keyguard media controller. */
+    @Provides
+    @SysUISingleton
+    @KeyguardMediaControllerLog
+    public static LogBuffer provideKeyguardMediaControllerLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardMediaControllerLog", 50 /* maxSize */, false /* systrace */);
+    }
+
     /** Provides a logging buffer for all logs related to unseen notifications. */
     @Provides
     @SysUISingleton
@@ -180,7 +188,7 @@ public class LogModule {
             LogBufferFactory factory,
             QSPipelineFlagsRepository flags
     ) {
-        if (flags.getPipelineTilesEnabled()) {
+        if (flags.getTilesEnabled()) {
             // we use
             return factory.create("QSLog", 450 /* maxSize */, false /* systrace */);
         } else {
@@ -514,6 +522,16 @@ public class LogModule {
     @KeyguardLog
     public static LogBuffer provideKeyguardLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardLog", 250);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for keyguard transition animation logs.
+     */
+    @Provides
+    @SysUISingleton
+    @KeyguardTransitionAnimationLog
+    public static LogBuffer provideKeyguardTransitionAnimationLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyguardTransitionAnimationLog", 250);
     }
 
     /**

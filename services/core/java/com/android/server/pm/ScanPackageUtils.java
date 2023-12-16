@@ -73,21 +73,21 @@ import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.ComponentMutateUtils;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.pm.pkg.component.ParsedProcess;
 import com.android.internal.pm.pkg.component.ParsedProvider;
 import com.android.internal.pm.pkg.component.ParsedService;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.library.PackageBackwardCompatibility;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateUtils;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedArraySet;
 
 import dalvik.system.VMRuntime;
@@ -218,7 +218,8 @@ final class ScanPackageUtils {
                     parsedPackage.getLongVersionCode(), pkgFlags, pkgPrivateFlags, user,
                     true /*allowInstall*/, instantApp, virtualPreload, isStoppedSystemApp,
                     UserManagerService.getInstance(), usesSdkLibraries,
-                    parsedPackage.getUsesSdkLibrariesVersionsMajor(), usesStaticLibraries,
+                    parsedPackage.getUsesSdkLibrariesVersionsMajor(),
+                    parsedPackage.getUsesSdkLibrariesOptional(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
                     newDomainSetId,
                     parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
@@ -240,6 +241,7 @@ final class ScanPackageUtils {
                     PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting),
                     UserManagerService.getInstance(),
                     usesSdkLibraries, parsedPackage.getUsesSdkLibrariesVersionsMajor(),
+                    parsedPackage.getUsesSdkLibrariesOptional(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
                     parsedPackage.getMimeGroups(), newDomainSetId,
                     parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());

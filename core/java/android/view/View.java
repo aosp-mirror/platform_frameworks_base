@@ -34,6 +34,7 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
+import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
@@ -5154,9 +5155,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private Runnable mHandwritingDelegatorCallback;
     private String mAllowedHandwritingDelegatePackageName;
 
-    // These two fields are set if the view is a handwriting delegate.
+    // These three fields are set if the view is a handwriting delegate.
     private boolean mIsHandwritingDelegate;
     private String mAllowedHandwritingDelegatorPackageName;
+    private @InputMethodManager.HandwritingDelegateFlags int mHandwritingDelegateFlags;
 
     /**
      * Solid color to use as a background when creating the drawing cache. Enables
@@ -12744,6 +12746,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     public String getAllowedHandwritingDelegatorPackageName() {
         return mAllowedHandwritingDelegatorPackageName;
+    }
+
+    /**
+     * Sets flags configuring the handwriting delegation behavior for this delegate editor view.
+     *
+     * <p>This method has no effect unless {@link #setIsHandwritingDelegate} is also called to
+     * configure this view to act as a handwriting delegate.
+     *
+     * @param flags {@link InputMethodManager#HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or
+     *     {@code 0}
+     */
+    @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
+    public void setHandwritingDelegateFlags(
+            @InputMethodManager.HandwritingDelegateFlags int flags) {
+        mHandwritingDelegateFlags = flags;
+    }
+
+    /**
+     * Returns flags configuring the handwriting delegation behavior for this delegate editor view,
+     * as set by {@link #setHandwritingDelegateFlags}.
+     */
+    @FlaggedApi(FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR)
+    public @InputMethodManager.HandwritingDelegateFlags int getHandwritingDelegateFlags() {
+        return mHandwritingDelegateFlags;
     }
 
     /**
@@ -28314,6 +28340,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 IBinder token = mAttachInfo.mSession.performDrag(
                         mAttachInfo.mWindow, flags, null,
                         mAttachInfo.mViewRootImpl.getLastTouchSource(),
+                        mAttachInfo.mViewRootImpl.getLastTouchDeviceId(),
+                        mAttachInfo.mViewRootImpl.getLastTouchPointerId(),
                         0f, 0f, 0f, 0f, data);
                 if (ViewDebug.DEBUG_DRAG) {
                     Log.d(VIEW_LOG_TAG, "startDragAndDrop via a11y action returned " + token);
@@ -28388,7 +28416,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             token = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, flags, surfaceControl,
-                    root.getLastTouchSource(), lastTouchPoint.x, lastTouchPoint.y,
+                    root.getLastTouchSource(), root.getLastTouchDeviceId(),
+                    root.getLastTouchPointerId(), lastTouchPoint.x, lastTouchPoint.y,
                     shadowTouchPoint.x, shadowTouchPoint.y, data);
             if (ViewDebug.DEBUG_DRAG) {
                 Log.d(VIEW_LOG_TAG, "performDrag returned " + token);
@@ -29875,12 +29904,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
         mMousePointerIcon = pointerIcon;
-        if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
-            return;
-        }
-        try {
-            mAttachInfo.mSession.updatePointerIcon(mAttachInfo.mWindow);
-        } catch (RemoteException e) {
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            final ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl == null) {
+                return;
+            }
+            viewRootImpl.refreshPointerIcon();
+        } else {
+            if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
+                return;
+            }
+            try {
+                mAttachInfo.mSession.updatePointerIcon(mAttachInfo.mWindow);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -32651,6 +32688,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 == PFLAG4_IMPORTANT_FOR_CREDENTIAL_MANAGER);
     }
 
+    // TODO(316208691): Revive following removed API docs.
+    // @see EditorInfo#setStylusHandwritingEnabled(boolean)
     /**
      * Set whether this view enables automatic handwriting initiation.
      *
@@ -32672,7 +32711,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)
      * @param enabled whether auto handwriting initiation is enabled for this view.
      * @attr ref android.R.styleable#View_autoHandwritingEnabled
-     * @see EditorInfo#setStylusHandwritingEnabled(boolean)
      */
     public void setAutoHandwritingEnabled(boolean enabled) {
         if (enabled) {
@@ -33018,7 +33056,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private float getSizePercentage() {
-        if (mResources == null || getAlpha() == 0 || getVisibility() != VISIBLE) {
+        if (mResources == null || getVisibility() != VISIBLE) {
             return 0;
         }
 

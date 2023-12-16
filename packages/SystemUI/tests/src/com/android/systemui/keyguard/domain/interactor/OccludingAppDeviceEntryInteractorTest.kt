@@ -32,7 +32,6 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -103,7 +102,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
         configurationRepository = FakeConfigurationRepository()
-        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
+        featureFlags = FakeFeatureFlags()
         trustRepository = FakeTrustRepository()
         powerRepository = FakePowerRepository()
         powerInteractor =
@@ -147,7 +146,8 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     keyguardUpdateMonitor,
                     trustRepository,
                     testScope.backgroundScope,
-                    mSelectedUserInteractor
+                    mSelectedUserInteractor,
+                    keyguardFaceAuthInteractor = mock(),
                 ),
                 AlternateBouncerInteractor(
                     statusBarStateController = mock(),

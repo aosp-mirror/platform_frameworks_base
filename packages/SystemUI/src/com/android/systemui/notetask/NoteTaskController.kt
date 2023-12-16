@@ -37,9 +37,10 @@ import android.os.UserManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.res.R
+import com.android.app.tracing.TraceUtils.Companion.launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
@@ -47,6 +48,7 @@ import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.util.settings.SecureSettings
@@ -54,8 +56,8 @@ import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles.BubbleExpandListener
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * Entry point for creating and managing note.
@@ -81,7 +83,8 @@ constructor(
     private val devicePolicyManager: DevicePolicyManager,
     private val userTracker: UserTracker,
     private val secureSettings: SecureSettings,
-    @Application private val applicationScope: CoroutineScope
+    @Application private val applicationScope: CoroutineScope,
+    @Background private val bgCoroutineContext: CoroutineContext
 ) {
 
     @VisibleForTesting val infoReference = AtomicReference<NoteTaskInfo?>()
@@ -172,7 +175,9 @@ constructor(
     ) {
         if (!isEnabled) return
 
-        applicationScope.launch { awaitShowNoteTaskAsUser(entryPoint, user) }
+        applicationScope.launch("$TAG#showNoteTaskAsUser") {
+            awaitShowNoteTaskAsUser(entryPoint, user)
+        }
     }
 
     private suspend fun awaitShowNoteTaskAsUser(
@@ -258,7 +263,11 @@ constructor(
      * If the shortcut entry `android:enabled` is set to `true`, the shortcut will be visible in the
      * Widget Picker to all users.
      */
+    // TODO(b/316332684)
+    @Suppress("UNREACHABLE_CODE")
     fun setNoteTaskShortcutEnabled(value: Boolean, user: UserHandle) {
+        return // shortcut should not be enabled until additional features are implemented.
+
         if (!userManager.isUserUnlocked(user)) {
             debugLog { "setNoteTaskShortcutEnabled call but user locked: user=$user" }
             return
@@ -337,7 +346,7 @@ constructor(
 
     @InternalNoteTaskApi
     fun launchUpdateNoteTaskAsUser(user: UserHandle) {
-        applicationScope.launch {
+        applicationScope.launch("$TAG#launchUpdateNoteTaskAsUser", bgCoroutineContext) {
             if (!userManager.isUserUnlocked(user)) {
                 debugLog { "updateNoteTaskAsUserInternal call but user locked: user=$user" }
                 return@launch

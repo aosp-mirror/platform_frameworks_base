@@ -627,7 +627,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void refreshSecureSurfaceState() {
         forAllWindows((w) -> {
             if (w.mHasSurface) {
-                w.mWinAnimator.setSecureLocked(w.isSecureLocked());
+                w.setSecureLocked(w.isSecureLocked());
             }
         }, true /* traverseTopToBottom */);
     }
@@ -841,6 +841,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         handleResizingWindows();
         clearFrameChangingWindows();
+
+        // Called after #handleResizingWindows to include WindowStateResizeItem if any.
+        mWmService.mAtmService.getLifecycleManager().dispatchPendingTransactions();
 
         if (mWmService.mDisplayFrozen) {
             ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -1741,14 +1744,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @param starting                  The currently starting activity or {@code null} if there is
      *                                  none.
      * @param displayId                 The id of the display where operation is executed.
-     * @param markFrozenIfConfigChanged Whether to set {@link ActivityRecord#frozenBeforeDestroy} to
-     *                                  {@code true} if config changed.
      * @param deferResume               Whether to defer resume while updating config.
      * @return 'true' if starting activity was kept or wasn't provided, 'false' if it was relaunched
      * because of configuration update.
      */
-    boolean ensureVisibilityAndConfig(ActivityRecord starting, int displayId,
-            boolean markFrozenIfConfigChanged, boolean deferResume) {
+    boolean ensureVisibilityAndConfig(ActivityRecord starting, int displayId, boolean deferResume) {
         // First ensure visibility without updating the config just yet. We need this to know what
         // activities are affecting configuration now.
         // Passing null here for 'starting' param value, so that visibility of actual starting
@@ -1773,9 +1773,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // configuration push because the visibility of some activities may not be updated yet.
         if (starting != null) {
             starting.reportDescendantOrientationChangeIfNeeded();
-        }
-        if (starting != null && markFrozenIfConfigChanged && config != null) {
-            starting.frozenBeforeDestroy = true;
         }
 
         if (displayContent != null) {
@@ -2171,12 +2168,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     // now, it will take focus briefly which confuses the RecentTasks tracker.
                     rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
                 }
-
+                // Temporarily disable focus when reparenting to avoid intermediate focus change
+                // (because the task is on top and the activity is resumed), which could cause the
+                // task to be added in recents task list unexpectedly.
+                rootTask.setFocusable(false);
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
                 // On the other hand, ActivityRecord#onParentChanged takes care of setting the
                 // up-to-dated root pinned task information on this newly created root task.
                 r.reparent(rootTask, MAX_VALUE, reason);
+                rootTask.setFocusable(true);
 
                 // Ensure the leash of new task is in sync with its current bounds after reparent.
                 rootTask.maybeApplyLastRecentsAnimationTransaction();
@@ -2716,13 +2717,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         synchronized (mService.mGlobalLock) {
             final DisplayContent displayContent = getDisplayContent(displayId);
             if (displayContent != null) {
-                displayContent.onDisplayChanged();
+                displayContent.requestDisplayUpdate(() -> clearDisplayInfoCaches(displayId));
+            } else {
+                clearDisplayInfoCaches(displayId);
             }
-            // Drop any cached DisplayInfos associated with this display id - the values are now
-            // out of date given this display changed event.
-            mWmService.mPossibleDisplayInfoMapper.removePossibleDisplayInfos(displayId);
-            updateDisplayImePolicyCache();
         }
+    }
+
+    private void clearDisplayInfoCaches(int displayId) {
+        // Drop any cached DisplayInfos associated with this display id - the values are now
+        // out of date given this display changed event.
+        mWmService.mPossibleDisplayInfoMapper.removePossibleDisplayInfos(displayId);
+        updateDisplayImePolicyCache();
     }
 
     void updateDisplayImePolicyCache() {

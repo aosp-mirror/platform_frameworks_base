@@ -43,8 +43,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.IWindowMagnificationConnection;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
+import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IMagnificationConnectionCallback;
 
 import androidx.test.filters.SmallTest;
 
@@ -75,7 +75,7 @@ public class MagnificationTest extends SysuiTestCase {
     @Mock
     private SysUiState mSysUiState;
     @Mock
-    private IWindowMagnificationConnectionCallback mConnectionCallback;
+    private IMagnificationConnectionCallback mConnectionCallback;
     @Mock
     private OverviewProxyService mOverviewProxyService;
     @Mock
@@ -98,11 +98,11 @@ public class MagnificationTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         getContext().addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
         doAnswer(invocation -> {
-            IWindowMagnificationConnection connection = invocation.getArgument(0);
+            IMagnificationConnection connection = invocation.getArgument(0);
             connection.setConnectionCallback(mConnectionCallback);
             return null;
-        }).when(mAccessibilityManager).setWindowMagnificationConnection(
-                any(IWindowMagnificationConnection.class));
+        }).when(mAccessibilityManager).setMagnificationConnection(
+                any(IMagnificationConnection.class));
 
         when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
 
@@ -138,22 +138,22 @@ public class MagnificationTest extends SysuiTestCase {
 
     @Test
     public void requestWindowMagnificationConnection_setConnectionAndListener() {
-        mCommandQueue.requestWindowMagnificationConnection(true);
+        mCommandQueue.requestMagnificationConnection(true);
         waitForIdleSync();
 
-        verify(mAccessibilityManager).setWindowMagnificationConnection(any(
-                IWindowMagnificationConnection.class));
+        verify(mAccessibilityManager).setMagnificationConnection(any(
+                IMagnificationConnection.class));
 
-        mCommandQueue.requestWindowMagnificationConnection(false);
+        mCommandQueue.requestMagnificationConnection(false);
         waitForIdleSync();
 
-        verify(mAccessibilityManager).setWindowMagnificationConnection(isNull());
+        verify(mAccessibilityManager).setMagnificationConnection(isNull());
     }
 
     @Test
     public void onWindowMagnifierBoundsChanged() throws RemoteException {
         final Rect testBounds = new Rect(0, 0, 500, 600);
-        mCommandQueue.requestWindowMagnificationConnection(true);
+        mCommandQueue.requestMagnificationConnection(true);
         waitForIdleSync();
 
         mMagnification.mWindowMagnifierCallback
@@ -166,7 +166,7 @@ public class MagnificationTest extends SysuiTestCase {
     public void onPerformScaleAction_enabled_notifyCallback() throws RemoteException {
         final float newScale = 4.0f;
         final boolean updatePersistence = true;
-        mCommandQueue.requestWindowMagnificationConnection(true);
+        mCommandQueue.requestMagnificationConnection(true);
         waitForIdleSync();
 
         mMagnification.mWindowMagnifierCallback
@@ -178,7 +178,7 @@ public class MagnificationTest extends SysuiTestCase {
 
     @Test
     public void onAccessibilityActionPerformed_enabled_notifyCallback() throws RemoteException {
-        mCommandQueue.requestWindowMagnificationConnection(true);
+        mCommandQueue.requestMagnificationConnection(true);
         waitForIdleSync();
 
         mMagnification.mWindowMagnifierCallback
@@ -189,7 +189,7 @@ public class MagnificationTest extends SysuiTestCase {
 
     @Test
     public void onMove_enabled_notifyCallback() throws RemoteException {
-        mCommandQueue.requestWindowMagnificationConnection(true);
+        mCommandQueue.requestMagnificationConnection(true);
         waitForIdleSync();
 
         mMagnification.mWindowMagnifierCallback.onMove(TEST_DISPLAY);
@@ -254,7 +254,7 @@ public class MagnificationTest extends SysuiTestCase {
 
     @Test
     public void onMagnifierScale_notifyCallback() throws RemoteException {
-        mCommandQueue.requestWindowMagnificationConnection(true);
+        mCommandQueue.requestMagnificationConnection(true);
         waitForIdleSync();
         final float scale = 3.0f;
         final boolean updatePersistence = false;
@@ -271,7 +271,7 @@ public class MagnificationTest extends SysuiTestCase {
     public void onModeSwitch_windowEnabledAndSwitchToFullscreen_hidePanelAndNotifyCallback()
             throws RemoteException {
         when(mWindowMagnificationController.isActivated()).thenReturn(true);
-        mCommandQueue.requestWindowMagnificationConnection(true);
+        mCommandQueue.requestMagnificationConnection(true);
         waitForIdleSync();
 
         mMagnification.mMagnificationSettingsControllerCallback.onModeSwitch(
@@ -289,7 +289,7 @@ public class MagnificationTest extends SysuiTestCase {
     public void onModeSwitch_switchToSameMode_doNothing()
             throws RemoteException {
         when(mWindowMagnificationController.isActivated()).thenReturn(true);
-        mCommandQueue.requestWindowMagnificationConnection(true);
+        mCommandQueue.requestMagnificationConnection(true);
         waitForIdleSync();
 
         mMagnification.mMagnificationSettingsControllerCallback.onModeSwitch(

@@ -1,7 +1,7 @@
 package: "android.permission.flags"
 
 flag {
-  name: "device_aware_permission_apis"
+  name: "device_aware_permission_apis_enabled"
   is_fixed_read_only: true
   namespace: "permissions"
   description: "enable device aware permission APIs"
@@ -16,7 +16,7 @@ flag {
 }
 
 flag {
-    name: "role_controller_in_system_server"
+    name: "system_server_role_controller_enabled"
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable role controller in system server"
@@ -56,4 +56,11 @@ flag {
   namespace: "permissions"
   description: "enables logging of the OP_ENABLE_MOBILE_DATA_BY_USER"
   bug: "222650148"
+}
+
+flag {
+  name: "factory_reset_prep_permission_apis"
+  namespace: "wallet_integration"
+  description: "enable Permission PREPARE_FACTORY_RESET."
+  bug: "302016478"
 }

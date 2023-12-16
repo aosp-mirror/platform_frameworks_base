@@ -1,6 +1,5 @@
 {
-  // TODO(b/182461754): Change to "presubmit" when go/test-mapping-slo-guide allows.
-  "postsubmit": [
+  "presubmit": [
     {
       "name": "FrameworksTimeCoreTests",
       "options": [
@@ -10,21 +9,21 @@
       ]
     },
     {
-      "name": "FrameworksServicesTests",
+      "name": "CtsTimeTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksTimeServicesTests",
       "options": [
         {
           "include-filter": "com.android.server.timezonedetector."
         },
         {
           "include-filter": "com.android.server.timedetector."
-        }
-      ]
-    },
-    {
-      "name": "CtsTimeTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     }

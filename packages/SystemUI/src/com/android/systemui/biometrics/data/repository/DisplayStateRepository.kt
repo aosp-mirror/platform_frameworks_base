@@ -30,13 +30,16 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 
 /** Repository for the current state of the display */
@@ -57,6 +60,8 @@ interface DisplayStateRepository {
     val currentRotation: StateFlow<DisplayRotation>
 }
 
+// TODO(b/296211844): This class could directly use DeviceStateRepository and DisplayRepository
+// instead.
 @SysUISingleton
 class DisplayStateRepositoryImpl
 @Inject
@@ -66,7 +71,8 @@ constructor(
     deviceStateManager: DeviceStateManager,
     displayManager: DisplayManager,
     @Main handler: Handler,
-    @Main mainExecutor: Executor
+    @Background backgroundExecutor: Executor,
+    @Background backgroundDispatcher: CoroutineDispatcher,
 ) : DisplayStateRepository {
     override val isReverseDefaultRotation =
         context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
@@ -94,9 +100,10 @@ constructor(
                     }
 
                 sendRearDisplayStateUpdate(false)
-                deviceStateManager.registerCallback(mainExecutor, callback)
+                deviceStateManager.registerCallback(backgroundExecutor, callback)
                 awaitClose { deviceStateManager.unregisterCallback(callback) }
             }
+            .flowOn(backgroundDispatcher)
             .stateIn(
                 applicationScope,
                 started = SharingStarted.Eagerly,
@@ -137,6 +144,7 @@ constructor(
                 )
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
             }
+            .flowOn(backgroundDispatcher)
             .stateIn(
                 applicationScope,
                 started = SharingStarted.Eagerly,

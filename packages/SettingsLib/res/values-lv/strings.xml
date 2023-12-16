@@ -266,9 +266,9 @@
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Uzlādes laikā ekrāns nekad nepārslēgsies miega režīmā"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Iespējot Bluetooth HCI analizētāja žurnālu"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Tvert Bluetooth paketes. (Pārslēgt Bluetooth pēc šī iestatījuma mainīšanas.)"</string>
-    <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM atbloķēšana"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"OAR atbloķēšana"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Atļaut palaišanas ielādētāja atbloķēšanu"</string>
-    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Vai atļaut OEM atbloķēšanu?"</string>
+    <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Vai atļaut OAR atbloķēšanu?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"BRĪDINĀJUMS. Kamēr šis iestatījums būs ieslēgts, ierīces aizsardzības funkcijas nedarbosies."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Atlasīt imitētas atrašanās vietas lietotni"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Nav iestatīta imitētas atrašanās vietas lietotne"</string>
@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Savienojums izveidots, izmantojot ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Savienojums izveidots, izmantojot eARC"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"Noklusējuma iestatījums televizorā"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI izvade"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Iekšējie skaļruņi"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Noklusējuma iestatījums televizorā"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI izvade"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Iekšējie skaļruņi"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Radās problēma ar savienojuma izveidi. Izslēdziet un atkal ieslēdziet ierīci."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Vadu audioierīce"</string>
     <string name="help_label" msgid="3528360748637781274">"Palīdzība un atsauksmes"</string>

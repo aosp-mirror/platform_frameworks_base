@@ -21,7 +21,5 @@
           android:textSize="14sp"
           android:fontFamily="sans-serif-medium"
           android:importantForAccessibility="yes"
-          android:paddingStart="24dp"
           android:paddingTop="20dp"
-          android:paddingEnd="24dp"
           android:paddingBottom="10dp"/>

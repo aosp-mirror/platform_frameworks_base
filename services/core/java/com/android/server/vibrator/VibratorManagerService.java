@@ -91,6 +91,8 @@ import java.util.function.Function;
 public class VibratorManagerService extends IVibratorManagerService.Stub {
     private static final String TAG = "VibratorManagerService";
     private static final String EXTERNAL_VIBRATOR_SERVICE = "external_vibrator_service";
+    private static final String VIBRATOR_CONTROL_SERVICE =
+            "android.frameworks.vibrator.IVibratorControlService/default";
     private static final boolean DEBUG = false;
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
             new VibrationAttributes.Builder().build();
@@ -269,6 +271,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         context.registerReceiver(mIntentReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
+        if (ServiceManager.isDeclared(VIBRATOR_CONTROL_SERVICE)) {
+            injector.addService(VIBRATOR_CONTROL_SERVICE,
+                    new VibratorControlService(new VibratorControllerHolder(), mLock));
+        }
+
     }
 
     /** Finish initialization at boot phase {@link SystemService#PHASE_SYSTEM_SERVICES_READY}. */
@@ -403,9 +410,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     @Override // Binder call
     public void performHapticFeedback(
-            int uid, int deviceId, String opPkg, int constant, boolean always, String reason,
-            IBinder token) {
-        performHapticFeedbackInternal(uid, deviceId, opPkg, constant, always, reason, token);
+            int uid, int deviceId, String opPkg, int constant, boolean always, String reason) {
+        // Note that the `performHapticFeedback` method does not take a token argument from the
+        // caller, and instead, uses this service as the token. This is to mitigate performance
+        // impact that would otherwise be caused due to marshal latency. Haptic feedback effects are
+        // short-lived, so we don't need to cancel when the process dies.
+        performHapticFeedbackInternal(
+                uid, deviceId, opPkg, constant, always, reason, /* token= */ this);
     }
 
     /**

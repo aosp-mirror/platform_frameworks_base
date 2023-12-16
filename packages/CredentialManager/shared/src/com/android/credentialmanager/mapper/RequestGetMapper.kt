@@ -16,51 +16,18 @@
 
 package com.android.credentialmanager.mapper
 
+import android.content.Context
 import android.content.Intent
-import android.credentials.ui.Entry
-import android.credentials.ui.GetCredentialProviderData
-import androidx.credentials.provider.PasswordCredentialEntry
-import com.android.credentialmanager.factory.fromSlice
 import com.android.credentialmanager.ktx.getCredentialProviderDataList
 import com.android.credentialmanager.ktx.requestInfo
 import com.android.credentialmanager.ktx.resultReceiver
-import com.android.credentialmanager.model.Password
+import com.android.credentialmanager.ktx.toProviderList
 import com.android.credentialmanager.model.Request
-import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableMap
 
-fun Intent.toGet(): Request.Get {
-    val credentialEntries = mutableListOf<Pair<String, Entry>>()
-    for (providerData in getCredentialProviderDataList) {
-        if (providerData is GetCredentialProviderData) {
-            for (credentialEntry in providerData.credentialEntries) {
-                credentialEntries.add(
-                    Pair(providerData.providerFlattenedComponentName, credentialEntry)
-                )
-            }
-        }
-    }
-
-    val passwordEntries = mutableListOf<Password>()
-    for ((providerId, entry) in credentialEntries) {
-        val slice = fromSlice(entry.slice)
-        if (slice is PasswordCredentialEntry) {
-            passwordEntries.add(
-                Password(
-                    providerId = providerId,
-                    entry = entry,
-                    passwordCredentialEntry = slice
-                )
-            )
-        }
-    }
-
+fun Intent.toGet(context: Context): Request.Get {
     return Request.Get(
         token = requestInfo?.token,
-        resultReceiver = this.resultReceiver,
-        providers = ImmutableMap.copyOf(
-            getCredentialProviderDataList.associateBy { it.providerFlattenedComponentName }
-        ),
-        passwordEntries = ImmutableList.copyOf(passwordEntries)
+        resultReceiver = resultReceiver,
+        providerInfos = getCredentialProviderDataList.toProviderList(context)
     )
 }

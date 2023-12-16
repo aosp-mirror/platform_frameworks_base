@@ -44,6 +44,7 @@ public interface BcSmartspaceDataPlugin extends Plugin {
     String UI_SURFACE_HOME_SCREEN = "home";
     String UI_SURFACE_MEDIA = "media_data_manager";
     String UI_SURFACE_DREAM = "dream";
+    String UI_SURFACE_GLANCEABLE_HUB = "glanceable_hub";
 
     String ACTION = "com.android.systemui.action.PLUGIN_BC_SMARTSPACE_DATA";
     int VERSION = 1;

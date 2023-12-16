@@ -437,8 +437,8 @@
     <string name="transcode_notification" msgid="5560515979793436168">"Hiện thông báo chuyển mã"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Vô hiệu hóa bộ nhớ đệm dùng để chuyển mã"</string>
     <string name="widevine_settings_title" msgid="4023329801172572917">"Cài đặt Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Buộc chuyển sang phương án dự phòng L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Chọn để buộc chuyển sang phương án dự phòng L3"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Buộc sử dụng mức bảo mật L3"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Chọn để buộc sử dụng mức bảo mật L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Các dịch vụ đang chạy"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Xem và kiểm soát các dịch vụ đang chạy"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Triển khai WebView"</string>
@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Đã kết nối qua ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Đã kết nối qua eARC"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"Chế độ mặc định của TV"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"Đầu ra HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Loa trong"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Chế độ mặc định của TV"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Đầu ra HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Các loa trong"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Sự cố kết nối. Hãy tắt thiết bị rồi bật lại"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Thiết bị âm thanh có dây"</string>
     <string name="help_label" msgid="3528360748637781274">"Trợ giúp và phản hồi"</string>

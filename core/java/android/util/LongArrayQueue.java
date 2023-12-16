@@ -28,6 +28,7 @@ import java.util.NoSuchElementException;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LongArrayQueue {
 
     private long[] mValues;

@@ -1,26 +1,21 @@
-# HostStubGen: real framework test
+# HostStubGen: (obsolete) real framework test
 
 This directory contains tests against the actual framework.jar code. The tests were
 copied from somewhere else in the android tree. We use this directory to quickly run existing
 tests.
 
+This directory was used during the prototype phase, but now that we have real ravenwood tests,
+this directory is obsolete and should be deleted.
+
 ## How to run
 
 - With `atest`. This is the proper way to run it, but it may fail due to atest's known problems.
 
-  See the top level README.md on why `--no-bazel-mode` is needed (for now).
-
 ```
-$ atest --no-bazel-mode HostStubGenTest-framework-test-host-test
+$ atest HostStubGenTest-framework-all-test-host-test
 ```
 
-- With `run-ravenwood-test`
-
-```
-$ run-ravenwood-test HostStubGenTest-framework-test-host-test
-```
-
-- Advanced option: `run-test-without-atest.sh` runs the test without using `atest` or `run-ravenwood-test`
+- Advanced option: `run-test-without-atest.sh` runs the test without using `atest`
 
 ```
 $ ./run-test-without-atest.sh

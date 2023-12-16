@@ -55,7 +55,8 @@ import java.util.Set;
  * capture.</p>
  *
  * <p>CaptureRequests can be created by using a {@link Builder} instance,
- * obtained by calling {@link CameraDevice#createCaptureRequest}</p>
+ * obtained by calling {@link CameraDevice#createCaptureRequest} or {@link
+ * CameraManager#createCaptureRequest}</p>
  *
  * <p>CaptureRequests are given to {@link CameraCaptureSession#capture} or
  * {@link CameraCaptureSession#setRepeatingRequest} to capture images from a camera.</p>
@@ -82,6 +83,7 @@ import java.util.Set;
  * @see CameraCaptureSession#setRepeatingBurst
  * @see CameraDevice#createCaptureRequest
  * @see CameraDevice#createReprocessCaptureRequest
+ * @see CameraManager#createCaptureRequest
  */
 public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         implements Parcelable {
@@ -793,8 +795,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * A builder for capture requests.
      *
      * <p>To obtain a builder instance, use the
-     * {@link CameraDevice#createCaptureRequest} method, which initializes the
-     * request fields to one of the templates defined in {@link CameraDevice}.
+     * {@link CameraDevice#createCaptureRequest} or {@link CameraManager#createCaptureRequest}
+     * method, which initializes the request fields to one of the templates defined in
+     * {@link CameraDevice}.
      *
      * @see CameraDevice#createCaptureRequest
      * @see CameraDevice#TEMPLATE_PREVIEW
@@ -802,6 +805,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CameraDevice#TEMPLATE_STILL_CAPTURE
      * @see CameraDevice#TEMPLATE_VIDEO_SNAPSHOT
      * @see CameraDevice#TEMPLATE_MANUAL
+     * @see CameraManager#createCaptureRequest
      */
     public final static class Builder {
 
@@ -1480,7 +1484,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>To start a CaptureSession with a target FPS range different from the
      * capture request template's default value, the application
      * is strongly recommended to call
-     * {@link SessionConfiguration#setSessionParameters }
+     * {@link android.hardware.camera2.params.SessionConfiguration#setSessionParameters }
      * with the target fps range before creating the capture session. The aeTargetFpsRange is
      * typically a session parameter. Specifying it at session creation time helps avoid
      * session reconfiguration delays in cases like 60fps or high speed recording.</p>
@@ -2157,7 +2161,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * OFF if the recording output is not stabilized, or if there are no output
      * Surface types that can be stabilized.</p>
      * <p>The application is strongly recommended to call
-     * {@link SessionConfiguration#setSessionParameters }
+     * {@link android.hardware.camera2.params.SessionConfiguration#setSessionParameters }
      * with the desired video stabilization mode before creating the capture session.
      * Video stabilization mode is a session parameter on many devices. Specifying
      * it at session creation time helps avoid reconfiguration delay caused by difference
@@ -2688,7 +2692,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * set to TORCH;
      * <code>[1-android.flash.info.singleStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to SINGLE</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#FLASH_MODE

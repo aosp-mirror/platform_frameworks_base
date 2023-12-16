@@ -266,7 +266,8 @@ Status Idmap2Service::createFabricatedOverlay(
     } else if (res.binaryData.has_value()) {
       builder.SetResourceValue(res.resourceName, res.binaryData->get(),
                                res.binaryDataOffset, res.binaryDataSize,
-                               res.configuration.value_or(std::string()));
+                               res.configuration.value_or(std::string()),
+                               res.isNinePatch);
     } else {
       builder.SetResourceValue(res.resourceName, res.dataType, res.data,
             res.configuration.value_or(std::string()));

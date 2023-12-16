@@ -21,14 +21,13 @@ import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
@@ -48,6 +47,7 @@ import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.shared.condition.Monitor;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,9 +69,6 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
 
     @Mock
     private DreamOverlayStateController mDreamOverlayStateController;
-
-    @Mock
-    private Context mContext;
 
     @Mock
     private Resources mResources;
@@ -100,6 +97,9 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     @Mock
     private UiEventLogger mUiEventLogger;
 
+    @Mock
+    private ConfigurationController mConfigurationController;
+
     @Captor
     private ArgumentCaptor<DreamOverlayStateController.Callback> mStateCallbackCaptor;
 
@@ -109,7 +109,8 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        when(mContext.getString(anyInt())).thenReturn("");
+        mContext.ensureTestableResources();
+
         when(mControlsComponent.getControlsController()).thenReturn(
                 Optional.of(mControlsController));
         when(mControlsComponent.getControlsListingController()).thenReturn(
@@ -225,6 +226,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
                         mHomeControlsView,
                         mActivityStarter,
                         mContext,
+                        mConfigurationController,
                         mControlsComponent,
                         mUiEventLogger);
         viewController.onViewAttached();
@@ -235,6 +237,24 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
 
         clickListenerCaptor.getValue().onClick(mHomeControlsView);
         verify(mUiEventLogger).log(DreamOverlayUiEvent.DREAM_HOME_CONTROLS_TAPPED);
+    }
+
+    @Test
+    public void testUnregistersConfigurationCallback() {
+        final DreamHomeControlsComplication.DreamHomeControlsChipViewController viewController =
+                new DreamHomeControlsComplication.DreamHomeControlsChipViewController(
+                        mHomeControlsView,
+                        mActivityStarter,
+                        mContext,
+                        mConfigurationController,
+                        mControlsComponent,
+                        mUiEventLogger);
+        viewController.onViewAttached();
+        verify(mConfigurationController).addCallback(any());
+        verify(mConfigurationController, never()).removeCallback(any());
+
+        viewController.onViewDetached();
+        verify(mConfigurationController).removeCallback(any());
     }
 
     private void setHaveFavorites(boolean value) {

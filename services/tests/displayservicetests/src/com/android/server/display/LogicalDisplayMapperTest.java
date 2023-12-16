@@ -119,8 +119,8 @@ public class LogicalDisplayMapperTest {
     @Mock IThermalService mIThermalServiceMock;
     @Spy DeviceStateToLayoutMap mDeviceStateToLayoutMapSpy =
             new DeviceStateToLayoutMap(mIdProducer, NON_EXISTING_FILE);
-    @Mock
-    DisplayManagerFlags mFlagsMock;
+    @Mock DisplayManagerFlags mFlagsMock;
+    @Mock DisplayAdapter mDisplayAdapterMock;
 
     @Captor ArgumentCaptor<LogicalDisplay> mDisplayCaptor;
     @Captor ArgumentCaptor<Integer> mDisplayEventCaptor;
@@ -1075,7 +1075,8 @@ public class LogicalDisplayMapperTest {
         private int mState;
 
         TestDisplayDevice() {
-            super(null, null, "test_display_" + sUniqueTestDisplayId++, mContextMock);
+            super(mDisplayAdapterMock, /* displayToken= */ null,
+                    "test_display_" + sUniqueTestDisplayId++, mContextMock);
             mInfo = new DisplayDeviceInfo();
         }
 

@@ -19,11 +19,13 @@ package android.provider.settings.validators;
 import static android.provider.settings.validators.SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.AUTOFILL_SERVICE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COLON_SEPARATED_COMPONENT_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COLON_SEPARATED_PACKAGE_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COMMA_SEPARATED_COMPONENT_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COMPONENT_NAME_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.CREDENTIAL_SERVICE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.JSON_OBJECT_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.LOCALE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR;
@@ -62,7 +64,6 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.ADAPTIVE_CHARGING_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ADAPTIVE_SLEEP, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.CAMERA_AUTOROTATE, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Secure.AUTOFILL_SERVICE, NULLABLE_COMPONENT_NAME_VALIDATOR);
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
                 new InclusiveFloatRangeValidator(1.0f, Float.MAX_VALUE));
@@ -109,12 +110,17 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.FONT_WEIGHT_ADJUSTMENT, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.REDUCE_BRIGHT_COLORS_LEVEL, PERCENTAGE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.REDUCE_BRIGHT_COLORS_PERSIST_ACROSS_REBOOTS, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.EVEN_DIMMER_ACTIVATED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.EVEN_DIMMER_MIN_NITS,
+                new InclusiveFloatRangeValidator(0.0f, Float.MAX_VALUE));
         VALIDATORS.put(Secure.TTS_DEFAULT_RATE, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.TTS_DEFAULT_PITCH, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.TTS_DEFAULT_SYNTH, PACKAGE_NAME_VALIDATOR);
         VALIDATORS.put(Secure.TTS_ENABLED_PLUGINS, new PackageNameListValidator(" "));
         VALIDATORS.put(Secure.TTS_DEFAULT_LOCALE, TTS_LIST_VALIDATOR);
         VALIDATORS.put(Secure.SHOW_IME_WITH_HARD_KEYBOARD, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.ACCESSIBILITY_BOUNCE_KEYS, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.ACCESSIBILITY_STICKY_KEYS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.WIFI_NUM_OPEN_NETWORKS_KEPT, NON_NEGATIVE_INTEGER_VALIDATOR);
@@ -315,6 +321,9 @@ public class SecureSettingsValidators {
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
+        VALIDATORS.put(
+                Secure.ACCESSIBILITY_QS_TARGETS,
+                ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ONE_HANDED_MODE_ACTIVATED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ONE_HANDED_MODE_ENABLED, BOOLEAN_VALIDATOR);
@@ -387,7 +396,7 @@ public class SecureSettingsValidators {
                 new DiscreteValueValidator(new String[] {"0", "1", "2"}));
         VALIDATORS.put(Secure.HEARING_AID_MEDIA_ROUTING,
                 new DiscreteValueValidator(new String[] {"0", "1", "2"}));
-        VALIDATORS.put(Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+        VALIDATORS.put(Secure.HEARING_AID_NOTIFICATION_ROUTING,
                 new DiscreteValueValidator(new String[] {"0", "1", "2"}));
         VALIDATORS.put(Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_EDGE_HAPTIC_ENABLED,
@@ -398,5 +407,8 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.STYLUS_HANDWRITING_ENABLED,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1"}));
         VALIDATORS.put(Secure.DEFAULT_NOTE_TASK_PROFILE, NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.CREDENTIAL_SERVICE, CREDENTIAL_SERVICE_VALIDATOR);
+        VALIDATORS.put(Secure.CREDENTIAL_SERVICE_PRIMARY, NULLABLE_COMPONENT_NAME_VALIDATOR);
+        VALIDATORS.put(Secure.AUTOFILL_SERVICE, AUTOFILL_SERVICE_VALIDATOR);
     }
 }

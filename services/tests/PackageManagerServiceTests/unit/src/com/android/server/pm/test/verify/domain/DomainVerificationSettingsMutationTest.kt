@@ -24,16 +24,17 @@ import android.os.Build
 import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
+import com.android.internal.pm.pkg.component.ParsedActivityImpl
+import com.android.internal.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
+import java.util.UUID
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -44,7 +45,6 @@ import org.mockito.Mockito.anyString
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
-import java.util.UUID
 
 @RunWith(Parameterized::class)
 class DomainVerificationSettingsMutationTest {

@@ -62,11 +62,13 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.pip",
     instrumentation_target_package: "com.android.wm.shell.flicker.pip",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [
         ":WMShellFlickerTestsPip1-src",
         ":WMShellFlickerTestsPipCommon-src",
     ],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }
 
 android_test {
@@ -75,11 +77,13 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.pip",
     instrumentation_target_package: "com.android.wm.shell.flicker.pip",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [
         ":WMShellFlickerTestsPip2-src",
         ":WMShellFlickerTestsPipCommon-src",
     ],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }
 
 android_test {
@@ -88,6 +92,7 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.pip",
     instrumentation_target_package: "com.android.wm.shell.flicker.pip",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [
         ":WMShellFlickerTestsPip3-src",
         ":WMShellFlickerTestsPipCommon-src",
@@ -98,6 +103,7 @@ android_test {
         ":WMShellFlickerTestsPipApps-src",
     ],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }
 
 android_test {
@@ -106,19 +112,22 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.pip.apps",
     instrumentation_target_package: "com.android.wm.shell.flicker.pip.apps",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [
         ":WMShellFlickerTestsPipApps-src",
         ":WMShellFlickerTestsPipCommon-src",
     ],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }
 
 android_test {
     name: "WMShellFlickerTestsPipAppsCSuite",
-    defaults: ["WMShellFlickerTestsDefaultWithoutTemplate"],
+    defaults: ["WMShellFlickerTestsDefault"],
     additional_manifests: ["AndroidManifest.xml"],
     package_name: "com.android.wm.shell.flicker.pip.apps",
     instrumentation_target_package: "com.android.wm.shell.flicker.pip.apps",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [
         ":WMShellFlickerTestsPipApps-src",
         ":WMShellFlickerTestsPipCommon-src",
@@ -128,9 +137,11 @@ android_test {
         "device-tests",
         "csuite",
     ],
+    data: ["trace_config/*"],
 }
 
 csuite_test {
     name: "csuite-1p3p-pip-flickers",
+    test_plan_include: "csuitePlan.xml",
     test_config_template: "csuiteDefaultTemplate.xml",
 }

@@ -199,6 +199,11 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     public void onPackageChangedWithExtras(String packageName, Bundle extras) {
     }
 
+    public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit,
+            Bundle extras) {
+        return onHandleForceStop(intent, packages, uid, doit);
+    }
+
     public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
         return false;
     }
@@ -252,6 +257,15 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
      * Called when an existing package is updated or its disabled state changes.
      */
     public void onPackageModified(@NonNull String packageName) {
+    }
+
+    /**
+     * Called when a package in the stopped state is started for some reason.
+     *
+     * @param packageName Name of the package that was unstopped
+     * @param uid UID of the package that was unstopped
+     */
+    public void onPackageUnstopped(String packageName, int uid, Bundle extras) {
     }
 
     public boolean didSomePackagesChange() {
@@ -444,13 +458,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
             mChangeType = PACKAGE_TEMPORARY_CHANGE;
             boolean canRestart = onHandleForceStop(intent,
                     mDisappearingPackages,
-                    intent.getIntExtra(Intent.EXTRA_UID, 0), false);
+                    intent.getIntExtra(Intent.EXTRA_UID, 0), false, intent.getExtras());
             if (canRestart) setResultCode(Activity.RESULT_OK);
         } else if (Intent.ACTION_PACKAGE_RESTARTED.equals(action)) {
             mDisappearingPackages = new String[] {getPackageName(intent)};
             mChangeType = PACKAGE_TEMPORARY_CHANGE;
             onHandleForceStop(intent, mDisappearingPackages,
-                    intent.getIntExtra(Intent.EXTRA_UID, 0), true);
+                    intent.getIntExtra(Intent.EXTRA_UID, 0), true, intent.getExtras());
         } else if (Intent.ACTION_UID_REMOVED.equals(action)) {
             onUidRemoved(intent.getIntExtra(Intent.EXTRA_UID, 0));
         } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
@@ -485,6 +499,12 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
             String[] pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             mSomePackagesChanged = true;
             onPackagesUnsuspended(pkgList);
+        } else if (Intent.ACTION_PACKAGE_UNSTOPPED.equals(action)) {
+            final String pkgName = getPackageName(intent);
+            mAppearingPackages = new String[] {pkgName};
+            mChangeType = PACKAGE_TEMPORARY_CHANGE;
+            onPackageUnstopped(pkgName, intent.getIntExtra(Intent.EXTRA_UID, 0),
+                    intent.getExtras());
         }
 
         if (mSomePackagesChanged) {

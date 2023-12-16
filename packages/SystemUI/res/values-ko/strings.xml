@@ -197,10 +197,8 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"블루투스가 연결되었습니다."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"블루투스 기기 아이콘"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"기기 세부정보를 구성하려면 클릭하세요."</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"모든 기기를 보려면 클릭하세요"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"새 기기를 페어링하려면 클릭하세요"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"배터리 잔량을 알 수 없습니다."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>에 연결되었습니다."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g>에 연결됨"</string>
@@ -259,10 +257,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"블루투스 사용"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"연결됨"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"저장됨"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"연결 해제"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"실행"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"오디오"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"헤드셋"</string>
@@ -334,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"화면 녹화"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"시작"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"중지"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"한 손 사용 모드"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"대비"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"표준"</string>
@@ -405,9 +407,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 저속 충전 중 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> 후 충전 완료"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 충전 중 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> 후 충전 완료"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"공동 튜토리얼을 시작하려면 왼쪽으로 스와이프하세요"</string>
-    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"위젯 편집기 열기"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
     <skip />
-    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"사용자 전환"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"풀다운 메뉴"</string>
@@ -645,10 +650,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> 버튼"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"뒤로"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"위쪽"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"아래쪽"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"왼쪽"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"오른쪽"</string>
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"위쪽 화살표"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"아래쪽 화살표"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"왼쪽 화살표"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"오른쪽 화살표"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"중앙"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
@@ -676,7 +681,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"알림"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"단축키"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"키보드 레이아웃 전환"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"텍스트 삭제"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"또는"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"검색어 삭제"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"단축키"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"단축키 검색"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"단축키 없음"</string>
@@ -684,35 +690,40 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"입력"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"열린 앱"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"현재 앱"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"알림 창에 액세스"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"전체 스크린샷 촬영"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"시스템/앱 단축키 목록에 액세스"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"뒤로: 이전 상태로 되돌아가기(뒤로 버튼)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"홈 화면에 액세스"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"열린 앱 개요"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"최근 앱 간 순환(앞으로)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"최근 앱 간 순환(뒤로)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"모든 앱 및 검색 목록(예: 검색/런처)에 액세스"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"태스크 바 숨김 및 다시 표시"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"시스템 설정에 액세스"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Google 어시스턴트에 액세스"</string>
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"검색 결과 표시"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"시스템 바로가기 표시"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"입력 바로가기 표시"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"앱 열기 바로가기 표시"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"현재 앱 바로가기 표시"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"알림 보기"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"스크린샷 촬영"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"단축키 표시"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"돌아가기"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"홈 화면으로 이동"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"최근 앱 보기"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"최근 앱 간 앞으로 순환"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"최근 앱 간 뒤로 순환"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"앱 목록 열기"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"태스크 바 표시"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"설정 열기"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"어시스턴트 열기"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"잠금 화면"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"빠른 메모를 위해 노트 앱 불러오기"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"메모 열기"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"시스템 멀티태스킹"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"현재 앱을 오른쪽으로 보내는 화면 분할 입력"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"현재 앱을 왼쪽으로 보내는 화면 분할 입력"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"화면 분할에서 전체 화면으로 전환"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"화면 분할 중: 다른 앱으로 바꾸기"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"현재 앱을 오른쪽으로 보내는 화면 분할 입력"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"현재 앱을 왼쪽으로 보내는 화면 분할 입력"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"화면 분할에서 전체 화면으로 전환"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"화면 분할 중: 다른 앱으로 바꾸기"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"입력"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"입력 언어 전환(다음 언어)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"입력 언어 전환(이전 언어)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"다음 언어로 전환"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"이전 언어로 전환"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"이모티콘에 액세스"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"음성 입력에 액세스"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"애플리케이션"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"지원"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"브라우저(Chrome을 기본값으로 설정)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"어시스턴트"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"브라우저"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"연락처"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"이메일(Gmail을 기본값으로 설정)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"이메일"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"음악"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"캘린더"</string>
@@ -1196,6 +1207,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"설정에서 기본 메모 앱 설정"</string>
     <string name="install_app" msgid="5066668100199613936">"앱 설치"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"외부 디스플레이로 미러링하시겠습니까?"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"실행 중인 모든 듀얼 화면이 중지됩니다."</string>
     <string name="mirror_display" msgid="2515262008898122928">"디스플레이 미러링"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"닫기"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"디스플레이 연결됨"</string>
@@ -1217,8 +1229,6 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"최근 <xliff:g id="APP_NAME">%1$s</xliff:g>에서 사용됨(<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 사용 중(<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"최근 <xliff:g id="APP_NAME">%1$s</xliff:g>에서 사용됨(<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
-    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
-    <skip />
-    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
-    <skip />
+    <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"키보드 백라이트"</string>
+    <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d단계 중 %1$d단계"</string>
 </resources>

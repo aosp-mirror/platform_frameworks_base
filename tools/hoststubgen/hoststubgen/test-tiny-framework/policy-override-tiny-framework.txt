@@ -15,3 +15,6 @@ class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	stub
 
 # Class load hook
 class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	~com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded
+
+# Heuristics rule: Stub all the AIDL classes.
+class :aidl stubclass

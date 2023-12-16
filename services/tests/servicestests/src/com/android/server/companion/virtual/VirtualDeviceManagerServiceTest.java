@@ -413,17 +413,23 @@ public class VirtualDeviceManagerServiceTest {
     public void getDeviceIdForDisplayId_invalidDisplayId_returnsDefault() {
         assertThat(mVdm.getDeviceIdForDisplayId(Display.INVALID_DISPLAY))
                 .isEqualTo(DEVICE_ID_DEFAULT);
+        assertThat(mLocalService.getDeviceIdForDisplayId(Display.INVALID_DISPLAY))
+                .isEqualTo(DEVICE_ID_DEFAULT);
     }
 
     @Test
     public void getDeviceIdForDisplayId_defaultDisplayId_returnsDefault() {
         assertThat(mVdm.getDeviceIdForDisplayId(Display.DEFAULT_DISPLAY))
                 .isEqualTo(DEVICE_ID_DEFAULT);
+        assertThat(mLocalService.getDeviceIdForDisplayId(Display.DEFAULT_DISPLAY))
+                .isEqualTo(DEVICE_ID_DEFAULT);
     }
 
     @Test
     public void getDeviceIdForDisplayId_nonExistentDisplayId_returnsDefault() {
         assertThat(mVdm.getDeviceIdForDisplayId(NON_EXISTENT_DISPLAY_ID))
+                .isEqualTo(DEVICE_ID_DEFAULT);
+        assertThat(mLocalService.getDeviceIdForDisplayId(NON_EXISTENT_DISPLAY_ID))
                 .isEqualTo(DEVICE_ID_DEFAULT);
     }
 
@@ -433,21 +439,32 @@ public class VirtualDeviceManagerServiceTest {
 
         assertThat(mVdm.getDeviceIdForDisplayId(DISPLAY_ID_1))
                 .isEqualTo(mDeviceImpl.getDeviceId());
+        assertThat(mLocalService.getDeviceIdForDisplayId(DISPLAY_ID_1))
+                .isEqualTo(mDeviceImpl.getDeviceId());
+    }
+
+    @Test
+    public void isDeviceIdValid_invalidDeviceId_returnsFalse() {
+        assertThat(mVdm.isValidVirtualDeviceId(DEVICE_ID_INVALID)).isFalse();
+        assertThat(mLocalService.isValidVirtualDeviceId(DEVICE_ID_INVALID)).isFalse();
     }
 
     @Test
     public void isDeviceIdValid_defaultDeviceId_returnsFalse() {
         assertThat(mVdm.isValidVirtualDeviceId(DEVICE_ID_DEFAULT)).isFalse();
+        assertThat(mLocalService.isValidVirtualDeviceId(DEVICE_ID_DEFAULT)).isFalse();
     }
 
     @Test
     public void isDeviceIdValid_validVirtualDeviceId_returnsTrue() {
         assertThat(mVdm.isValidVirtualDeviceId(mDeviceImpl.getDeviceId())).isTrue();
+        assertThat(mLocalService.isValidVirtualDeviceId(mDeviceImpl.getDeviceId())).isTrue();
     }
 
     @Test
     public void isDeviceIdValid_nonExistentDeviceId_returnsFalse() {
         assertThat(mVdm.isValidVirtualDeviceId(mDeviceImpl.getDeviceId() + 1)).isFalse();
+        assertThat(mLocalService.isValidVirtualDeviceId(mDeviceImpl.getDeviceId() + 1)).isFalse();
     }
 
     @Test
@@ -770,6 +787,30 @@ public class VirtualDeviceManagerServiceTest {
         verify(mPersistentDeviceIdRemovedListener)
                 .accept(VirtualDeviceImpl.createPersistentDeviceId(3));
         verifyNoMoreInteractions(mPersistentDeviceIdRemovedListener);
+    }
+
+    @Test
+    public void getAllPersistentDeviceIds_respectsCurrentAssociations() {
+        mVdms.onCdmAssociationsChanged(List.of(mAssociationInfo));
+        TestableLooper.get(this).processAllMessages();
+
+        assertThat(mLocalService.getAllPersistentDeviceIds())
+                .containsExactly(mDeviceImpl.getPersistentDeviceId());
+
+        mVdms.onCdmAssociationsChanged(List.of(
+                createAssociationInfo(2, AssociationRequest.DEVICE_PROFILE_APP_STREAMING),
+                createAssociationInfo(3, AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION),
+                createAssociationInfo(4, AssociationRequest.DEVICE_PROFILE_WATCH)));
+        TestableLooper.get(this).processAllMessages();
+
+        assertThat(mLocalService.getAllPersistentDeviceIds()).containsExactly(
+                VirtualDeviceImpl.createPersistentDeviceId(2),
+                VirtualDeviceImpl.createPersistentDeviceId(3));
+
+        mVdms.onCdmAssociationsChanged(Collections.emptyList());
+        TestableLooper.get(this).processAllMessages();
+
+        assertThat(mLocalService.getAllPersistentDeviceIds()).isEmpty();
     }
 
     @Test

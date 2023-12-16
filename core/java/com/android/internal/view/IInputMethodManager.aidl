@@ -152,8 +152,8 @@ interface IInputMethodManager {
                 in String delegatorPackageName);
 
     /** Accepts and starts a stylus handwriting session for the delegate view **/
-    boolean acceptStylusHandwritingDelegation(in IInputMethodClient client,
-                in int userId, in String delegatePackageName, in String delegatorPackageName);
+    boolean acceptStylusHandwritingDelegation(in IInputMethodClient client, in int userId,
+            in String delegatePackageName, in String delegatorPackageName, int flags);
 
     /** Returns {@code true} if currently selected IME supports Stylus handwriting. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "

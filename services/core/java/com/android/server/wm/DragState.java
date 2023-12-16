@@ -416,6 +416,13 @@ class DragState {
         return mInputInterceptor == null ? null : mInputInterceptor.mDragWindowHandle;
     }
 
+    IBinder getInputToken() {
+        if (mInputInterceptor == null || mInputInterceptor.mClientChannel == null) {
+            return null;
+        }
+        return mInputInterceptor.mClientChannel.getToken();
+    }
+
     /**
      * @param display The Display that the window being dragged is on.
      */
@@ -692,6 +699,7 @@ class DragState {
     void overridePointerIconLocked(int touchSource) {
         mTouchSource = touchSource;
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            // TODO(b/293587049): Pointer Icon Refactor: Set the pointer icon from the drag window.
             InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
         }
     }

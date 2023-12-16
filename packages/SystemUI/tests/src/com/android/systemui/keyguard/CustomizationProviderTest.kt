@@ -30,7 +30,6 @@ import android.testing.TestableLooper
 import android.view.SurfaceControlViewHost
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.res.R
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
@@ -51,11 +50,14 @@ import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRendererFactory
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -100,6 +102,8 @@ class CustomizationProviderTest : SysuiTestCase() {
 
     private lateinit var underTest: CustomizationProvider
     private lateinit var testScope: TestScope
+
+    private val kosmos = testKosmos()
 
     @Before
     fun setUp() {
@@ -173,7 +177,6 @@ class CustomizationProviderTest : SysuiTestCase() {
             FakeFeatureFlags().apply {
                 set(Flags.LOCKSCREEN_CUSTOM_CLOCKS, true)
                 set(Flags.WALLPAPER_FULLSCREEN_PREVIEW, true)
-                set(Flags.FACE_AUTH_REFACTOR, true)
             }
         underTest.interactor =
             KeyguardQuickAffordanceInteractor(
@@ -186,6 +189,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                                 },
                         )
                         .keyguardInteractor,
+                shadeInteractor = kosmos.shadeInteractor,
                 lockPatternUtils = lockPatternUtils,
                 keyguardStateController = keyguardStateController,
                 userTracker = userTracker,

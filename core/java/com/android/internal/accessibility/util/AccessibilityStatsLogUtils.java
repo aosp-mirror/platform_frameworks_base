@@ -33,6 +33,7 @@ import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TRIPLE_TAP;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TWO_FINGER_TRIPLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
 import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_ALL;
@@ -127,6 +128,18 @@ public final class AccessibilityStatsLogUtils {
         FrameworkStatsLog.write(FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED,
                 MAGNIFICATION_COMPONENT_NAME.flattenToString(),
                 ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TRIPLE_TAP,
+                convertToLoggingServiceStatus(enabled));
+    }
+
+    /**
+     * Logs magnification that is assigned to the two finger triple tap shortcut. Calls this when
+     * triggering the magnification two finger triple tap shortcut.
+     */
+    public static void logMagnificationTwoFingerTripleTap(boolean enabled) {
+        FrameworkStatsLog.write(FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED,
+                MAGNIFICATION_COMPONENT_NAME.flattenToString(),
+                // jean update
+                ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TWO_FINGER_TRIPLE_TAP,
                 convertToLoggingServiceStatus(enabled));
     }
 

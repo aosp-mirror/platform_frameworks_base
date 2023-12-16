@@ -197,10 +197,8 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth pripojené."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Ikona zariadenia s rozhraním Bluetooth"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Kliknutím nakonfigurujte podrobnosti o zariadení"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"Kliknutím zobrazíte všetky zariadenia"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"Kliknutím spárujete nové zariadenie"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Percento batérie nie je známe."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Pripojené k zariadeniu <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Pripojené k zariadeniu <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -259,10 +257,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Použiť Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Pripojené"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Uložené"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"odpojiť"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivovať"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Batéria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Náhlavná súprava"</string>
@@ -334,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Rekordér obrazovky"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Začať"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ukončiť"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Režim jednej ruky"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"Kontrast"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Štandardný"</string>
@@ -405,9 +407,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa pomaly • Do úplného nabitia zostáva <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa • Do úplného nabitia zostáva <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Potiahnutím doľava spustite komunitný návod"</string>
-    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Otvoriť editor miniaplikácií"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
     <skip />
-    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Prepnutie používateľa"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rozbaľovacia ponuka"</string>
@@ -645,10 +650,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Tlačidlo <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Domov"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Späť"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Nahor"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Nadol"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Doľava"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Doprava"</string>
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Šípka nahor"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Šípka nadol"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Šípka doľava"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Šípka doprava"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Do stredu"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Medzerník"</string>
@@ -676,7 +681,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Upozornenia"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Klávesové skratky"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Prepnúť rozloženie klávesnice"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Vymazať text"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"alebo"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Vymazať vyhľadávací dopyt"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Skratky"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Hľadajte skratky"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Nenašli sa žiadne skratky"</string>
@@ -684,35 +690,40 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Vstup"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Otvorenie apl."</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Aktuálna aplik."</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Prístup k panelu upozornení"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Vytvorenie snímky celej obrazovky"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Zoznam prístupov systému a odkazy do aplikácií"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"Späť: prechod na predchádzajúci stav (tlačidlo Späť)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Prístup k ploche"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Prehľad otvorených aplikácií"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Cyklické prechádzanie nedávnymi aplikáciami (dopredu)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Cyklické prechádzanie nedávnymi aplikáciami (dozadu)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Zoznam prístupov všet. aplik. a vyhľad. (teda Vyhľadávanie a Launcher)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Skrytie a opätovné zobrazenie panela úloh"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Prístup k nastaveniam systému"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Prístup k Asistentovi Google"</string>
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"Zobrazujú sa výsledky vyhľadávania"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"Zobrazujú sa skratky systému"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Zobrazujú sa skratky vstupu"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Zobrazujú sa skratky na otvorenie aplikácií"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Zobrazujú sa skratky aktuálnej aplikácie"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Zobrazenie upozornení"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Vytvorenie snímky obrazovky"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Zobrazenie skratiek"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Prechod späť"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Prechod na plochu"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Zobrazenie nedávnych aplikácií"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Cyklické prechádzanie dopredu po nedávnych aplikáciách"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Cyklické prechádzanie dozadu po nedávnych aplikáciách"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvorenie zoznamu aplikácií"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Zobrazenie panela aplikácií"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvorenie nastavení"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvorenie Asistenta"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Zamknúť obrazovku"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Otvorenie aplikácie Poznámky na rýchle zapisovanie"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"Otvorenie poznámok"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasking systému"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Rozdelenie obrazovky s aktuálnou aplikáciou vpravo"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Rozdelenie obrazovky s aktuálnou aplikáciou vľavo"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Prepnutie rozdelenej obrazovky na celú"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Počas rozdelenej obrazovky: nahradenie aplikácie inou"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Rozdelenie obrazovky s aktuálnou aplikáciou vpravo"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Rozdelenie obrazovky s aktuálnou aplikáciou vľavo"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Prepnutie rozdelenej obrazovky na celú"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"Počas rozdelenej obrazovky: nahradenie aplikácie inou"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Vstup"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Prepnutie vstupného jazyka (ďalší jazyk)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Prepnutie vstupného jazyka (predchádzajúci jazyk)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Prepnutie na ďalší jazyk"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Prepnutie na predchádzajúci jazyk"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Prístup k emodži"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Prístup k hlasovému zadávaniu"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikácie"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Pomocná aplikácia"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Prehliadač (Chrome ako predvolený)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Asistent"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Prehliadač"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontakty"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Pošta (Gmail ako predvolená služba)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"E-mail"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Hudba"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalendár"</string>
@@ -1196,6 +1207,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Nastavte predvolenú aplikáciu na poznámky v Nastaveniach"</string>
     <string name="install_app" msgid="5066668100199613936">"Inštalovať aplikáciu"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Chcete zrkadliť na externú obrazovku?"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"Akákoľvek momentálne prebiehajúca aktivita vo funkcii Dual Screen bude zastavená"</string>
     <string name="mirror_display" msgid="2515262008898122928">"Zrkadliť obrazovku"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Zavrieť"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Obrazovka je pripojená"</string>
@@ -1217,8 +1229,6 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Nedávno využila aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Využíva <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Nedávno využila aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
-    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
-    <skip />
-    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
-    <skip />
+    <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Podsvietenie klávesnice"</string>
+    <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. úroveň z %2$d"</string>
 </resources>

@@ -1710,10 +1710,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"یہ کسی ایپ یا ہارڈویئر سینسر کے ساتھ آپ کے تعاملات کو ٹریک کر سکتا ہے، اور آپ کی طرف سے ایپس کے ساتھ تعامل کر سکتا ہے۔"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"اجازت دیں"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"مسترد کریں"</string>
-    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
-    <skip />
-    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
-    <skip />
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"اَن انسٹال کریں"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ایپ اجازت کی درخواست کو مبہم کر رہی ہے لہذا آپ کے جواب کی تصدیق نہیں کی جا سکتی۔"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ایک خصوصیت کا استعمال شروع کرنے کیلئے اسے تھپتھپائیں:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ایکسیسبیلٹی بٹن کے ساتھ استعمال کرنے کیلئے خصوصیات منتخب کریں"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"والیوم کلید کے شارٹ کٹ کے ساتھ استعمال کرنے کیلئے خصوصیات منتخب کریں"</string>
@@ -1908,10 +1906,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ویک اینڈ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ایونٹ"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"سونا"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
     <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"آن ہے"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"آف ہے"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> کچھ آوازوں کو خاموش کر رہا ہے"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"آپ کے آلہ میں ایک داخلی مسئلہ ہے اور جب تک آپ فیکٹری ڈیٹا کو دوبارہ ترتیب نہیں دے دیتے ہیں، ہوسکتا ہے کہ یہ غیر مستحکم رہے۔"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"آپ کے آلہ میں ایک داخلی مسئلہ ہے۔ تفصیلات کیلئے اپنے مینوفیکچرر سے رابطہ کریں۔"</string>
@@ -2344,10 +2342,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"مائیکروفون مسدود ہے"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ڈسپلے پر دو طرفہ مطابقت پذیری ممکن نہیں ہے"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"مختلف کیبل استعمال کریں اور دوبارہ کوشش کریں"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ہو سکتا ہے کہ کیبل ڈسپلیز کو سپورٹ نہ کرے"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"‏ہو سکتا ہے کہ آپ کی USB-C کیبل مناسب طریقے سے ڈسپلیز سے منسلک نہ ہو"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"آپ کا آلہ بہت گرم ہے اور جب تک یہ ٹھنڈا نہیں ہو جاتا اس وقت تک ڈسپلے میں عکس دو طرفہ مطابقت پذیر نہیں ہو سکتا"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"دوہری اسکرین"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"دوہری اسکرین آن ہے"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"مواد دکھانے کیلئے <xliff:g id="APP_NAME">%1$s</xliff:g> دونوں ڈسپلیز استعمال کر رہی ہے"</string>
@@ -2364,4 +2359,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"کی بورڈ لے آؤٹ <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g> پر سیٹ ہے… تبدیل کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"فزیکل کی بورڈز کنفیگر کئے گئے"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"کی بورڈز دیکھنے کے لیے تھپتھپائیں"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"نجی"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"کلون"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"دفتری پروفائل"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"دوسری دفتری پروفائل"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"تیسری دفتری پروفائل"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"ٹیسٹ"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"کمیونل"</string>
 </resources>

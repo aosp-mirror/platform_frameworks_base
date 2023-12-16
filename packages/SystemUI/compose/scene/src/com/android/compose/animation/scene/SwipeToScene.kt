@@ -27,7 +27,8 @@ internal fun Modifier.swipeToScene(gestureHandler: SceneGestureHandler): Modifie
     fun Scene.shouldEnableSwipes(orientation: Orientation): Boolean =
         userActions.keys.any { it is Swipe && it.direction.orientation == orientation }
 
-    val currentScene = gestureHandler.currentScene
+    val layoutImpl = gestureHandler.layoutImpl
+    val currentScene = layoutImpl.scene(layoutImpl.state.transitionState.currentScene)
     val orientation = gestureHandler.orientation
     val canSwipe = currentScene.shouldEnableSwipes(orientation)
     val canOppositeSwipe =
@@ -46,7 +47,7 @@ internal fun Modifier.swipeToScene(gestureHandler: SceneGestureHandler): Modifie
         // user can't swipe in the other direction.
         startDragImmediately =
             gestureHandler.isDrivingTransition &&
-                gestureHandler.isAnimatingOffset &&
+                gestureHandler.swipeTransition.isAnimatingOffset &&
                 !canOppositeSwipe,
         onDragStarted = gestureHandler.draggable::onDragStarted,
         onDragDelta = gestureHandler.draggable::onDelta,

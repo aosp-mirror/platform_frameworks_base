@@ -18,8 +18,6 @@ package com.android.systemui.qs.ui.adapter
 
 import android.content.Context
 import android.view.View
-import android.view.ViewGroup
-import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
 class FakeQSSceneAdapter(
-    private val inflateDelegate: suspend (Context, ViewGroup?) -> View,
+    private val inflateDelegate: suspend (Context) -> View,
 ) : QSSceneAdapter {
     private val _customizing = MutableStateFlow(false)
     override val isCustomizing: StateFlow<Boolean> = _customizing.asStateFlow()
@@ -38,8 +36,8 @@ class FakeQSSceneAdapter(
     private val _state = MutableStateFlow<QSSceneAdapter.State?>(null)
     val state = _state.filterNotNull()
 
-    override suspend fun inflate(context: Context, parent: ViewGroup?) {
-        _view.value = inflateDelegate(context, parent)
+    override suspend fun inflate(context: Context) {
+        _view.value = inflateDelegate(context)
     }
 
     override fun setState(state: QSSceneAdapter.State) {

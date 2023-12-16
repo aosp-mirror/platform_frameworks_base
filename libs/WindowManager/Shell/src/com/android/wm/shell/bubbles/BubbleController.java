@@ -788,7 +788,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 mLayerView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
                     if (!windowInsets.equals(mWindowInsets) && mLayerView != null) {
                         mWindowInsets = windowInsets;
-                        mBubblePositioner.update();
+                        mBubblePositioner.update(DeviceConfig.create(mContext, mWindowManager));
                         mLayerView.onDisplaySizeChanged();
                     }
                     return windowInsets;
@@ -798,7 +798,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 mStackView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
                     if (!windowInsets.equals(mWindowInsets) && mStackView != null) {
                         mWindowInsets = windowInsets;
-                        mBubblePositioner.update();
+                        mBubblePositioner.update(DeviceConfig.create(mContext, mWindowManager));
                         mStackView.onDisplaySizeChanged();
                     }
                     return windowInsets;
@@ -980,7 +980,7 @@ public class BubbleController implements ConfigurationChangeListener,
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mBubblePositioner != null) {
-            mBubblePositioner.update();
+            mBubblePositioner.update(DeviceConfig.create(mContext, mWindowManager));
         }
         if (mStackView != null && newConfig != null) {
             if (newConfig.densityDpi != mDensityDpi
@@ -1280,7 +1280,14 @@ public class BubbleController implements ConfigurationChangeListener,
      * Dismiss bubble if it exists and remove it from the stack
      */
     public void dismissBubble(Bubble bubble, @Bubbles.DismissReason int reason) {
-        mBubbleData.dismissBubbleWithKey(bubble.getKey(), reason);
+        dismissBubble(bubble.getKey(), reason);
+    }
+
+    /**
+     * Dismiss bubble with given key if it exists and remove it from the stack
+     */
+    public void dismissBubble(String key, @Bubbles.DismissReason int reason) {
+        mBubbleData.dismissBubbleWithKey(key, reason);
     }
 
     /**
@@ -1471,6 +1478,36 @@ public class BubbleController implements ConfigurationChangeListener,
     public void removeBubble(String key, int reason) {
         if (mBubbleData.hasAnyBubbleWithKey(key)) {
             mBubbleData.dismissBubbleWithKey(key, reason);
+        }
+    }
+
+    // TODO(b/316358859): remove this method after task views are shared across modes
+    /**
+     * Removes the bubble with the given key after task removal, unless the task was removed as
+     * a result of mode switching, in which case, the bubble isn't removed because it will be
+     * re-inflated for the new mode.
+     */
+    @MainThread
+    public void removeFloatingBubbleAfterTaskRemoval(String key, int reason) {
+        // if we're floating remove the bubble. otherwise, we're here because the task was removed
+        // after switching modes. See b/316358859
+        if (!isShowingAsBubbleBar()) {
+            removeBubble(key, reason);
+        }
+    }
+
+    // TODO(b/316358859): remove this method after task views are shared across modes
+    /**
+     * Removes the bubble with the given key after task removal, unless the task was removed as
+     * a result of mode switching, in which case, the bubble isn't removed because it will be
+     * re-inflated for the new mode.
+     */
+    @MainThread
+    public void removeBarBubbleAfterTaskRemoval(String key, int reason) {
+        // if we're showing as bubble bar remove the bubble. otherwise, we're here because the task
+        // was removed after switching modes. See b/316358859
+        if (isShowingAsBubbleBar()) {
+            removeBubble(key, reason);
         }
     }
 

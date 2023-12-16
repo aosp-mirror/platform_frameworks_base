@@ -549,7 +549,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     @Test
     fun fullscreenIsTrue_chipStillClickable() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
-        statusBarModeRepository.isInFullscreenMode.value = true
+        statusBarModeRepository.defaultDisplay.isInFullscreenMode.value = true
         testScope.runCurrent()
 
         assertThat(chipView.hasOnClickListeners()).isTrue()
@@ -559,7 +559,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     @Test
     fun callStartedInImmersiveMode_swipeGestureCallbackAdded() {
-        statusBarModeRepository.isInFullscreenMode.value = true
+        statusBarModeRepository.defaultDisplay.isInFullscreenMode.value = true
         testScope.runCurrent()
 
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
@@ -570,7 +570,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     @Test
     fun callStartedNotInImmersiveMode_swipeGestureCallbackNotAdded() {
-        statusBarModeRepository.isInFullscreenMode.value = false
+        statusBarModeRepository.defaultDisplay.isInFullscreenMode.value = false
         testScope.runCurrent()
 
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
@@ -583,7 +583,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
     fun transitionToImmersiveMode_swipeGestureCallbackAdded() {
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
 
-        statusBarModeRepository.isInFullscreenMode.value = true
+        statusBarModeRepository.defaultDisplay.isInFullscreenMode.value = true
         testScope.runCurrent()
 
         verify(mockSwipeStatusBarAwayGestureHandler)
@@ -592,11 +592,11 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     @Test
     fun transitionOutOfImmersiveMode_swipeGestureCallbackRemoved() {
-        statusBarModeRepository.isInFullscreenMode.value = true
+        statusBarModeRepository.defaultDisplay.isInFullscreenMode.value = true
         notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
         reset(mockSwipeStatusBarAwayGestureHandler)
 
-        statusBarModeRepository.isInFullscreenMode.value = false
+        statusBarModeRepository.defaultDisplay.isInFullscreenMode.value = false
         testScope.runCurrent()
 
         verify(mockSwipeStatusBarAwayGestureHandler)
@@ -605,7 +605,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     @Test
     fun callEndedWhileInImmersiveMode_swipeGestureCallbackRemoved() {
-        statusBarModeRepository.isInFullscreenMode.value = true
+        statusBarModeRepository.defaultDisplay.isInFullscreenMode.value = true
         testScope.runCurrent()
         val ongoingCallNotifEntry = createOngoingCallNotifEntry()
         notifCollectionListener.onEntryAdded(ongoingCallNotifEntry)

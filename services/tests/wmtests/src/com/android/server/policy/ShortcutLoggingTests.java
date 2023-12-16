@@ -30,12 +30,12 @@ import androidx.test.filters.MediumTest;
 import com.android.internal.annotations.Keep;
 import com.android.server.input.KeyboardMetricsCollector.KeyboardLogEvent;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
 @Presubmit
 @MediumTest
@@ -44,6 +44,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
 
     private static final int VENDOR_ID = 0x123;
     private static final int PRODUCT_ID = 0x456;
+    private static final int DEVICE_BUS = 0x789;
     private static final int META_KEY = KeyEvent.KEYCODE_META_LEFT;
     private static final int META_ON = MODIFIER.get(KeyEvent.KEYCODE_META_LEFT);
     private static final int ALT_KEY = KeyEvent.KEYCODE_ALT_LEFT;
@@ -71,8 +72,8 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         KeyboardLogEvent.RECENT_APPS, KeyEvent.KEYCODE_TAB, ALT_ON},
                 {"BACK key -> Go back", new int[]{KeyEvent.KEYCODE_BACK}, KeyboardLogEvent.BACK,
                         KeyEvent.KEYCODE_BACK, 0},
-                {"Meta + `(grave) -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_GRAVE},
-                        KeyboardLogEvent.BACK, KeyEvent.KEYCODE_GRAVE, META_ON},
+                {"Meta + Escape -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_ESCAPE},
+                        KeyboardLogEvent.BACK, KeyEvent.KEYCODE_ESCAPE, META_ON},
                 {"Meta + Left arrow -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_DPAD_LEFT},
                         KeyboardLogEvent.BACK, KeyEvent.KEYCODE_DPAD_LEFT, META_ON},
                 {"Meta + Del -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_DEL},
@@ -132,13 +133,6 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                 {"LANGUAGE_SWITCH key -> Switch Keyboard Language",
                         new int[]{KeyEvent.KEYCODE_LANGUAGE_SWITCH},
                         KeyboardLogEvent.LANGUAGE_SWITCH, KeyEvent.KEYCODE_LANGUAGE_SWITCH, 0},
-                {"Meta + Space -> Switch Keyboard Language",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_SPACE},
-                        KeyboardLogEvent.LANGUAGE_SWITCH, KeyEvent.KEYCODE_SPACE, META_ON},
-                {"Meta + Shift + Space -> Switch Keyboard Language",
-                        new int[]{META_KEY, SHIFT_KEY, KeyEvent.KEYCODE_SPACE},
-                        KeyboardLogEvent.LANGUAGE_SWITCH, KeyEvent.KEYCODE_SPACE,
-                        META_ON | SHIFT_ON},
                 {"META key -> Open App Drawer in Accessibility mode", new int[]{META_KEY},
                         KeyboardLogEvent.ACCESSIBILITY_ALL_APPS, META_KEY, META_ON},
                 {"Meta + Alt -> Toggle CapsLock", new int[]{META_KEY, ALT_KEY},
@@ -298,7 +292,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
     @Before
     public void setUp() {
         setUpPhoneWindowManager(/*supportSettingsUpdate*/ true);
-        mPhoneWindowManager.overrideKeyEventSource(VENDOR_ID, PRODUCT_ID);
+        mPhoneWindowManager.overrideKeyEventSource(VENDOR_ID, PRODUCT_ID, DEVICE_BUS);
         mPhoneWindowManager.overrideLaunchHome();
         mPhoneWindowManager.overrideSearchKeyBehavior(
                 PhoneWindowManager.SEARCH_BEHAVIOR_TARGET_ACTIVITY);
@@ -318,7 +312,8 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
             int expectedKey, int expectedModifierState) {
         sendKeyCombination(testKeys, 0 /* duration */);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
-                expectedKey, expectedModifierState, "Failed while executing " + testName);
+                expectedKey, expectedModifierState, DEVICE_BUS,
+                "Failed while executing " + testName);
     }
 
     @Test
@@ -328,7 +323,8 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideLongPressOnHomeBehavior(longPressOnHomeBehavior);
         sendLongPressKeyCombination(testKeys);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
-                expectedKey, expectedModifierState, "Failed while executing " + testName);
+                expectedKey, expectedModifierState, DEVICE_BUS,
+                "Failed while executing " + testName);
     }
 
     @Test
@@ -340,7 +336,8 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         sendKeyCombination(testKeys, 0 /* duration */);
         sendKeyCombination(testKeys, 0 /* duration */);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
-                expectedKey, expectedModifierState, "Failed while executing " + testName);
+                expectedKey, expectedModifierState, DEVICE_BUS,
+                "Failed while executing " + testName);
     }
 
     @Test
@@ -351,6 +348,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideShortPressOnSettingsBehavior(shortPressOnSettingsBehavior);
         sendKeyCombination(testKeys, 0 /* duration */);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
-                expectedKey, expectedModifierState, "Failed while executing " + testName);
+                expectedKey, expectedModifierState, DEVICE_BUS,
+                "Failed while executing " + testName);
     }
 }

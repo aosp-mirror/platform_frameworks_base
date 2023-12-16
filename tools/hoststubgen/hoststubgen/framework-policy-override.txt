@@ -100,3 +100,6 @@ class android.os.BadTypeParcelableException stubclass
 class android.os.BaseBundle        stubclass
 class android.os.Bundle            stubclass
 class android.os.PersistableBundle stubclass
+
+class android.os.MessageQueue stubclass
+class android.os.MessageQueue !com.android.hoststubgen.nativesubstitution.MessageQueue_host

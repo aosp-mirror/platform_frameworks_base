@@ -18,12 +18,10 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.graphics.Color
-import android.view.View
 import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor.Companion.TRANSITION_DURATION_MS
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
@@ -38,18 +36,19 @@ import kotlinx.coroutines.flow.merge
 class AlternateBouncerViewModel
 @Inject
 constructor(
-    statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
+    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     transitionInteractor: KeyguardTransitionInteractor,
-    falsingManager: FalsingManager,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     // When we're fully transitioned to the AlternateBouncer, the alpha of the scrim should be:
     private val alternateBouncerScrimAlpha = .66f
     private val toAlternateBouncerTransition =
-        KeyguardTransitionAnimationFlow(
-                transitionDuration = TRANSITION_DURATION_MS,
-                transitionFlow = transitionInteractor.anyStateToAlternateBouncerTransition,
+        animationFlow
+            .setup(
+                duration = TRANSITION_DURATION_MS,
+                stepFlow = transitionInteractor.anyStateToAlternateBouncerTransition,
             )
-            .createFlow(
+            .sharedFlow(
                 duration = TRANSITION_DURATION_MS,
                 onStep = { it },
                 onFinish = { 1f },
@@ -58,11 +57,12 @@ constructor(
                 interpolator = Interpolators.FAST_OUT_SLOW_IN,
             )
     private val fromAlternateBouncerTransition =
-        KeyguardTransitionAnimationFlow(
-                transitionDuration = TRANSITION_DURATION_MS,
-                transitionFlow = transitionInteractor.transitionStepsFromState(ALTERNATE_BOUNCER),
+        animationFlow
+            .setup(
+                TRANSITION_DURATION_MS,
+                transitionInteractor.transitionStepsFromState(ALTERNATE_BOUNCER),
             )
-            .createFlow(
+            .sharedFlow(
                 duration = TRANSITION_DURATION_MS,
                 onStep = { 1f - it },
                 // Reset on cancel
@@ -83,21 +83,10 @@ constructor(
     /** An observable for the scrim color. Change color for easier debugging. */
     val scrimColor: Flow<Int> = flowOf(Color.BLACK)
 
-    private val clickListener =
-        View.OnClickListener {
-            if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                statusBarKeyguardViewManager.showPrimaryBouncer(/* scrimmed */ true)
-            }
-        }
+    val registerForDismissGestures: Flow<Boolean> =
+        transitionToAlternateBouncerProgress.map { it == 1f }.distinctUntilChanged()
 
-    val onClickListener: Flow<View.OnClickListener?> =
-        transitionToAlternateBouncerProgress
-            .map {
-                if (it == 1f) {
-                    clickListener
-                } else {
-                    null
-                }
-            }
-            .distinctUntilChanged()
+    fun showPrimaryBouncer() {
+        statusBarKeyguardViewManager.showPrimaryBouncer(/* scrimmed */ true)
+    }
 }

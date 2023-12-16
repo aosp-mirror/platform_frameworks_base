@@ -79,6 +79,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_TIME_SHIFT_SET_MODE = 30;
     private static final int DO_SET_TV_MESSAGE_ENABLED = 31;
     private static final int DO_NOTIFY_TV_MESSAGE = 32;
+    private static final int DO_STOP_PLAYBACK = 33;
+    private static final int DO_START_PLAYBACK = 34;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -286,6 +288,14 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.onTvMessageReceived((Integer) args.arg1, (Bundle) args.arg2);
                 break;
             }
+            case DO_STOP_PLAYBACK: {
+                mTvInputSessionImpl.stopPlayback(msg.arg1);
+                break;
+            }
+            case DO_START_PLAYBACK: {
+                mTvInputSessionImpl.startPlayback();
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -482,6 +492,17 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_SET_TV_MESSAGE_ENABLED, type,
                 enabled));
     }
+
+    @Override
+    public void stopPlayback(int mode) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_STOP_PLAYBACK, mode));
+    }
+
+    @Override
+    public void startPlayback() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_START_PLAYBACK));
+    }
+
 
     private final class TvInputEventReceiver extends InputEventReceiver {
         TvInputEventReceiver(InputChannel inputChannel, Looper looper) {

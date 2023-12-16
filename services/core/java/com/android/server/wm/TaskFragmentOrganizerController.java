@@ -762,6 +762,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     .setTask(task)
                     .build());
         }
+        // Make sure the parent info changed event will be dispatched if there are no other changes.
+        mAtmService.mWindowManager.mWindowPlacerLocked.requestTraversal();
     }
 
     boolean isSystemOrganizer(@NonNull IBinder organizerToken) {

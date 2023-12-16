@@ -22,6 +22,7 @@ import android.app.usage.BroadcastResponseStatsList;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEventsQuery;
 import android.content.pm.ParceledListSlice;
+import android.os.PersistableBundle;
 
 /**
  * System private API for talking with the UsageStatsManagerService.
@@ -77,6 +78,8 @@ interface IUsageStatsManager {
             String callingPackage);
     void reportUsageStop(in IBinder activity, String token, String callingPackage);
     void reportUserInteraction(String packageName, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.REPORT_USAGE_STATS)")
+    void reportUserInteractionWithBundle(String packageName, int userId, in PersistableBundle eventExtras);
     int getUsageSource();
     void forceUsageSourceSettingRead();
     long getLastTimeAnyComponentUsed(String packageName, String callingPackage);

@@ -197,10 +197,8 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"蓝牙已连接。"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"蓝牙设备图标"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"点击以配置设备详情"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"点击即可查看所有设备"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"点击即可配对新设备"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"电池电量百分比未知。"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"已连接到<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"已连接到 <xliff:g id="CAST">%s</xliff:g>。"</string>
@@ -259,10 +257,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"使用蓝牙"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"已连接"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"已保存"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"断开连接"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"启用"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> 的电量"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音频"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳机"</string>
@@ -334,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"屏幕录制"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"开始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"单手模式"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"对比度"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"标准"</string>
@@ -405,8 +407,13 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在慢速充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"向左滑动即可启动公共教程"</string>
-    <string name="button_to_open_widget_picker" msgid="8007261659745030810">"打开微件选择器"</string>
-    <string name="button_to_remove_widget" msgid="1511255853677835341">"移除微件"</string>
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"打开微件编辑器"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
+    <skip />
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切换用户"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉菜单"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
@@ -643,10 +650,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g>按钮"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"返回"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"向上"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"向下"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"向左"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"向右"</string>
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"向上键"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"向下键"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"向左键"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"向右键"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"中心"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"空格"</string>
@@ -674,7 +681,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"通知"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"键盘快捷键"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"切换键盘布局"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"清除文字"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"或"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"清除搜索查询"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"快捷键"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"搜索快捷键"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"未找到任何快捷键"</string>
@@ -682,35 +690,40 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"输入"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"已开应用"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"当前应用"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"访问通知栏"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"截取全屏"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"访问系统/应用快捷方式的列表"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"返回：返回到上一个状态（返回按钮）"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"访问主屏幕"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"已开应用概览"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"循环浏览近期使用的应用（向前）"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"循环浏览近期使用的应用（向后）"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"访问所有应用的列表并搜索所需应用（即搜索/启动器）"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"隐藏和重新显示任务栏"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"访问系统设置"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"访问 Google 助理"</string>
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"目前显示的是搜索结果"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"目前显示的是系统快捷键"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"目前显示的是输入法的快捷键"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"目前显示的是用于打开应用的快捷键"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"目前显示的是当前应用的快捷键"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"查看通知"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"截取屏幕截图"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"显示快捷键"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"返回"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"前往主屏幕"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"查看最近运行过的应用"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"向前循环浏览近期使用的应用"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"向后循环浏览近期使用的应用"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"打开应用列表"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"显示任务栏"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"打开设置"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"打开 Google 助理"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"锁定屏幕"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"调出记事应用快速做记录"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"打开笔记"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"系统多任务处理"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"进入分屏模式，当前应用显示于右侧"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"进入分屏模式，当前应用显示于左侧"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"从分屏模式切换为全屏"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"在分屏期间：将一个应用替换为另一个应用"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"进入分屏模式，当前应用显示于右侧"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"进入分屏模式，当前应用显示于左侧"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"从分屏模式切换为全屏"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"在分屏期间：将一个应用替换为另一个应用"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"输入"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"切换输入语言（下一种语言）"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"切换输入语言（上一种语言）"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"切换到下一种语言"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"切换到上一种语言"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"访问表情符号"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"访问语音输入"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"应用"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"助理"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"浏览器（默认为 Chrome）"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Google 助理"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"浏览器"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"通讯录"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"电子邮件（默认为 Gmail）"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"电子邮件"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"短信"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"音乐"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"日历"</string>
@@ -1194,7 +1207,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在设置中设置默认记事应用"</string>
     <string name="install_app" msgid="5066668100199613936">"安装应用"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"镜像到外接显示屏？"</string>
-    <string name="mirror_display" msgid="2515262008898122928">"镜像显示"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"当前正在进行的任何双屏幕活动都将会停止"</string>
+    <string name="mirror_display" msgid="2515262008898122928">"镜像到显示屏"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"关闭"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"显示屏已连接"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"麦克风和摄像头"</string>

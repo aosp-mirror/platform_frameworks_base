@@ -61,7 +61,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.v2.model.EventResultPersister.OutOfIdsException;
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.InstallEventReceiver;
 import com.android.packageinstaller.v2.model.PackageUtil.AppSnippet;
 import com.android.packageinstaller.v2.model.installstagedata.InstallAborted;
 import com.android.packageinstaller.v2.model.installstagedata.InstallFailed;
@@ -76,6 +77,8 @@ import java.io.IOException;
 
 public class InstallRepository {
 
+    public static final String EXTRA_STAGED_SESSION_ID =
+        "com.android.packageinstaller.extra.STAGED_SESSION_ID";
     private static final String SCHEME_PACKAGE = "package";
     private static final String BROADCAST_ACTION =
         "com.android.packageinstaller.ACTION_INSTALL_COMMIT";
@@ -142,6 +145,8 @@ public class InstallRepository {
             ? intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, SessionInfo.INVALID_ID)
             : SessionInfo.INVALID_ID;
 
+        mStagedSessionId = mIntent.getIntExtra(EXTRA_STAGED_SESSION_ID, SessionInfo.INVALID_ID);
+
         mCallingPackage = callerInfo.getPackageName();
 
         if (mCallingPackage == null && mSessionId != SessionInfo.INVALID_ID) {
@@ -168,7 +173,10 @@ public class InstallRepository {
             return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
         }
 
-        if (!isCallerSessionOwner(mPackageInstaller, originatingUid, mSessionId)) {
+        if ((mSessionId != SessionInfo.INVALID_ID
+            && !isCallerSessionOwner(mPackageInstaller, originatingUid, mSessionId))
+            || (mStagedSessionId != SessionInfo.INVALID_ID
+            && !isCallerSessionOwner(mPackageInstaller, Process.myUid(), mStagedSessionId))) {
             return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
         }
 
@@ -254,10 +262,11 @@ public class InstallRepository {
 
     public void stageForInstall() {
         Uri uri = mIntent.getData();
-        if (mIsSessionInstall || (uri != null && SCHEME_PACKAGE.equals(uri.getScheme()))) {
+        if (mStagedSessionId != SessionInfo.INVALID_ID
+            || mIsSessionInstall
+            || (uri != null && SCHEME_PACKAGE.equals(uri.getScheme()))) {
             // For a session based install or installing with a package:// URI, there is no file
-            // for us to stage. Setting the mStagingResult as null will signal InstallViewModel to
-            // proceed with user confirmation stage.
+            // for us to stage.
             mStagingResult.setValue(new InstallReady());
             return;
         }
@@ -322,6 +331,10 @@ public class InstallRepository {
             mSessionStager = new SessionStager(mContext, uri, mStagedSessionId, listener);
             mSessionStager.execute();
         }
+    }
+
+    public int getStagedSessionId() {
+        return mStagedSessionId;
     }
 
     private void cleanupStagingSession() {
@@ -761,7 +774,7 @@ public class InstallRepository {
             mInstallResult.setValue(new InstallInstalling(mAppSnippet));
             installId = InstallEventReceiver.addObserver(mContext,
                 EventResultPersister.GENERATE_NEW_ID, this::setStageBasedOnResult);
-        } catch (OutOfIdsException e) {
+        } catch (EventResultPersister.OutOfIdsException e) {
             setStageBasedOnResult(PackageInstaller.STATUS_FAILURE,
                 PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null, -1);
             return;

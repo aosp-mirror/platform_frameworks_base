@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.credentials.ui.RequestInfo
@@ -27,10 +28,10 @@ import com.android.credentialmanager.mapper.toGet
 import com.android.credentialmanager.model.Request
 
 fun Intent.parse(
-    packageManager: PackageManager,
+    context: Context,
 ): Request {
-    return parseCancelUiRequest(packageManager)
-        ?: parseRequestInfo()
+    return parseCancelUiRequest(context.packageManager)
+        ?: parseRequestInfo(context)
 }
 
 fun Intent.parseCancelUiRequest(packageManager: PackageManager): Request? =
@@ -51,11 +52,11 @@ fun Intent.parseCancelUiRequest(packageManager: PackageManager): Request? =
         }
     }
 
-fun Intent.parseRequestInfo(): Request =
+fun Intent.parseRequestInfo(context: Context): Request =
     requestInfo.let{ info ->
         when (info?.type) {
             RequestInfo.TYPE_CREATE -> Request.Create(info.token)
-            RequestInfo.TYPE_GET -> toGet()
+            RequestInfo.TYPE_GET -> toGet(context)
             else -> {
                 throw IllegalStateException("Unrecognized request type: ${info?.type}")
             }

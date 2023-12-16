@@ -33,6 +33,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -264,5 +265,12 @@ class AggregatedPowerStats {
             }
             ipw.decreaseIndent();
         }
+    }
+
+    @Override
+    public String toString() {
+        StringWriter sw = new StringWriter();
+        dump(new IndentingPrintWriter(sw));
+        return sw.toString();
     }
 }

@@ -43,15 +43,15 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 
 /**
  * Controller for QSPanel views.
@@ -232,7 +232,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mQsTileRevealController.updateRevealedTiles(tiles);
         }
         boolean shouldChange = false;
-        if (tiles.size() == mRecords.size()) {
+        if (tiles.size() <= mRecords.size()) {
             int i = 0;
             for (QSTile tile : tiles) {
                 if (tile != mRecords.get(i).tile) {
@@ -240,6 +240,17 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                     break;
                 }
                 i++;
+            }
+
+            // If the first tiles are the same as the new ones, remove any extras.
+            if (!shouldChange) {
+                while (i < mRecords.size()) {
+                    QSPanelControllerBase.TileRecord record = mRecords.get(i);
+                    mView.removeTile(record);
+                    record.tile.removeCallback(record.callback);
+                    i++;
+                }
+                mCachedSpecs = getTilesSpecs();
             }
         } else {
             shouldChange = true;
@@ -254,6 +265,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mCachedSpecs = "";
             for (QSTile tile : tiles) {
                 addTile(tile, collapsedView);
+            }
+        } else {
+            for (QSPanelControllerBase.TileRecord record : mRecords) {
+                record.tile.addCallback(record.callback);
             }
         }
     }

@@ -26,6 +26,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down LOCKSCREEN->PRIMARY BOUNCER transition into discrete steps for corresponding views to
@@ -38,18 +39,24 @@ class LockscreenToPrimaryBouncerTransitionViewModel
 constructor(
     interactor: KeyguardTransitionInteractor,
     shadeDependentFlows: ShadeDependentFlows,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
-            transitionFlow =
+        animationFlow.setup(
+            duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
+            stepFlow =
                 interactor.transition(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER),
         )
+
+    val shortcutsAlpha: Flow<Float> =
+        interactor.transition(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER).map {
+            1 - it.value
+        }
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         shadeDependentFlows.transitionFlow(
             flowWhenShadeIsNotExpanded =
-                transitionAnimation.createFlow(
+                transitionAnimation.sharedFlow(
                     duration = 250.milliseconds,
                     onStep = { 1f - it },
                     onFinish = { 0f }

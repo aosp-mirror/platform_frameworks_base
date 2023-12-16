@@ -21,9 +21,11 @@ import android.os.VibrationEffect
 import android.view.VelocityTracker
 import android.view.animation.AccelerateInterpolator
 import androidx.annotation.FloatRange
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.statusbar.VibratorHelper
 import kotlin.math.abs
 import kotlin.math.min
+import kotlin.math.pow
 
 /**
  * Listener of slider events that triggers haptic feedback.
@@ -63,18 +65,29 @@ class SliderHapticFeedbackProvider(
      * @param[absoluteVelocity] Velocity of the handle when it reached the bookend.
      */
     private fun vibrateOnEdgeCollision(absoluteVelocity: Float) {
+        val powerScale = scaleOnEdgeCollision(absoluteVelocity)
+        val vibration =
+            VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, powerScale)
+                .compose()
+        vibratorHelper.vibrate(vibration, VIBRATION_ATTRIBUTES_PIPELINING)
+    }
+
+    /**
+     * Get the velocity-based scale at the bookends
+     *
+     * @param[absoluteVelocity] Velocity of the handle when it reached the bookend.
+     * @return The power scale for the vibration.
+     */
+    @VisibleForTesting
+    fun scaleOnEdgeCollision(absoluteVelocity: Float): Float {
         val velocityInterpolated =
             velocityAccelerateInterpolator.getInterpolation(
                 min(absoluteVelocity / config.maxVelocityToScale, 1f)
             )
         val bookendScaleRange = config.upperBookendScale - config.lowerBookendScale
         val bookendsHitScale = bookendScaleRange * velocityInterpolated + config.lowerBookendScale
-
-        val vibration =
-            VibrationEffect.startComposition()
-                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, bookendsHitScale)
-                .compose()
-        vibratorHelper.vibrate(vibration, VIBRATION_ATTRIBUTES_PIPELINING)
+        return bookendsHitScale.pow(config.exponent)
     }
 
     /**
@@ -96,6 +109,31 @@ class SliderHapticFeedbackProvider(
         val deltaProgress = abs(normalizedSliderProgress - dragTextureLastProgress)
         if (deltaProgress < config.deltaProgressForDragThreshold) return
 
+        val powerScale = scaleOnDragTexture(absoluteVelocity, normalizedSliderProgress)
+
+        // Trigger the vibration composition
+        val composition = VibrationEffect.startComposition()
+        repeat(config.numberOfLowTicks) {
+            composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, powerScale)
+        }
+        vibratorHelper.vibrate(composition.compose(), VIBRATION_ATTRIBUTES_PIPELINING)
+        dragTextureLastTime = currentTime
+        dragTextureLastProgress = normalizedSliderProgress
+    }
+
+    /**
+     * Get the scale of the drag texture vibration.
+     *
+     * @param[absoluteVelocity] Absolute velocity of the handle.
+     * @param[normalizedSliderProgress] Progress of the slider handled normalized to the range from
+     *   0F to 1F (inclusive).
+     *     @return the scale of the vibration.
+     */
+    @VisibleForTesting
+    fun scaleOnDragTexture(
+        absoluteVelocity: Float,
+        @FloatRange(from = 0.0, to = 1.0) normalizedSliderProgress: Float
+    ): Float {
         val velocityInterpolated =
             velocityAccelerateInterpolator.getInterpolation(
                 min(absoluteVelocity / config.maxVelocityToScale, 1f)
@@ -113,15 +151,7 @@ class SliderHapticFeedbackProvider(
 
         // Total scale
         val scale = positionBasedScale + velocityBasedScale
-
-        // Trigger the vibration composition
-        val composition = VibrationEffect.startComposition()
-        repeat(config.numberOfLowTicks) {
-            composition.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, scale)
-        }
-        vibratorHelper.vibrate(composition.compose(), VIBRATION_ATTRIBUTES_PIPELINING)
-        dragTextureLastTime = currentTime
-        dragTextureLastProgress = normalizedSliderProgress
+        return scale.pow(config.exponent)
     }
 
     override fun onHandleAcquiredByTouch() {}

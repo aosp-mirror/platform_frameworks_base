@@ -38,7 +38,6 @@ import android.util.LongArray;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.MultiStateStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
 
@@ -192,7 +191,7 @@ public class CpuAggregatedPowerStatsProcessorTest {
 
     private static class MockPowerComponentAggregatedPowerStats extends
             PowerComponentAggregatedPowerStats {
-        private final CpuPowerStatsCollector.StatsArrayLayout mStatsLayout;
+        private final CpuPowerStatsCollector.CpuStatsArrayLayout mStatsLayout;
         private final PowerStats.Descriptor mDescriptor;
         private HashMap<String, long[]> mDeviceStats = new HashMap<>();
         private HashMap<String, long[]> mUidStats = new HashMap<>();
@@ -203,10 +202,10 @@ public class CpuAggregatedPowerStatsProcessorTest {
         MockPowerComponentAggregatedPowerStats(AggregatedPowerStatsConfig.PowerComponent config,
                 boolean useEnergyConsumers) {
             super(config);
-            mStatsLayout = new CpuPowerStatsCollector.StatsArrayLayout();
+            mStatsLayout = new CpuPowerStatsCollector.CpuStatsArrayLayout();
             mStatsLayout.addDeviceSectionCpuTimeByScalingStep(3);
             mStatsLayout.addDeviceSectionCpuTimeByCluster(2);
-            mStatsLayout.addDeviceSectionUptime();
+            mStatsLayout.addDeviceSectionUsageDuration();
             if (useEnergyConsumers) {
                 mStatsLayout.addDeviceSectionEnergyConsumers(2);
             }

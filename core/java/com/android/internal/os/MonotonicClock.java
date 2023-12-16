@@ -30,6 +30,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,6 +40,7 @@ import java.nio.charset.StandardCharsets;
  * A clock that is similar to SystemClock#elapsedRealtime(), except that it is not reset
  * on reboot, but keeps going.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class MonotonicClock {
     private static final String TAG = "MonotonicClock";
 
@@ -48,6 +50,8 @@ public class MonotonicClock {
     private final AtomicFile mFile;
     private final Clock mClock;
     private long mTimeshift;
+
+    public static final long UNDEFINED = -1;
 
     public MonotonicClock(File file) {
         mFile = new AtomicFile(file);
@@ -98,14 +102,11 @@ public class MonotonicClock {
             return;
         }
 
-        mFile.write(out -> {
-            try {
-                writeXml(out, Xml.newBinarySerializer());
-                out.close();
-            } catch (IOException e) {
-                Log.e(TAG, "Cannot write monotonic clock to " + mFile.getBaseFile(), e);
-            }
-        });
+        try (FileOutputStream out = mFile.startWrite()) {
+            writeXml(out, Xml.newBinarySerializer());
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot write monotonic clock to " + mFile.getBaseFile(), e);
+        }
     }
 
     /**

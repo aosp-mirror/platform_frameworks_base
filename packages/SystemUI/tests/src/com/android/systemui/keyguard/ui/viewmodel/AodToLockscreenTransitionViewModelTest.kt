@@ -19,22 +19,18 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
+import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
-import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -42,83 +38,67 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class AodToLockscreenTransitionViewModelTest : SysuiTestCase() {
-    private lateinit var underTest: AodToLockscreenTransitionViewModel
-    private lateinit var repository: FakeKeyguardTransitionRepository
-    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
-
-    @Before
-    fun setUp() {
-        repository = FakeKeyguardTransitionRepository()
-        fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
-        underTest =
-            AodToLockscreenTransitionViewModel(
-                interactor =
-                    KeyguardTransitionInteractorFactory.create(
-                            scope = TestScope().backgroundScope,
-                            repository = repository,
-                        )
-                        .keyguardTransitionInteractor,
-                deviceEntryUdfpsInteractor =
-                    DeviceEntryUdfpsInteractor(
-                        fingerprintPropertyRepository = fingerprintPropertyRepository,
-                        fingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository(),
-                        biometricSettingsRepository = FakeBiometricSettingsRepository(),
-                    ),
-            )
-    }
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val repository = kosmos.fakeKeyguardTransitionRepository
+    val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
+    val underTest = kosmos.aodToLockscreenTransitionViewModel
 
     @Test
-    fun deviceEntryParentViewShows() = runTest {
-        val deviceEntryParentViewAlpha by collectValues(underTest.deviceEntryParentViewAlpha)
-        repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-        repository.sendTransitionStep(step(0.1f))
-        repository.sendTransitionStep(step(0.3f))
-        repository.sendTransitionStep(step(0.5f))
-        repository.sendTransitionStep(step(0.6f))
-        repository.sendTransitionStep(step(1f))
-        deviceEntryParentViewAlpha.forEach { assertThat(it).isEqualTo(1f) }
-    }
+    fun deviceEntryParentViewShows() =
+        testScope.runTest {
+            val deviceEntryParentViewAlpha by collectValues(underTest.deviceEntryParentViewAlpha)
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            repository.sendTransitionStep(step(1f))
+            deviceEntryParentViewAlpha.forEach { assertThat(it).isEqualTo(1f) }
+        }
 
     @Test
-    fun deviceEntryBackgroundView_udfps_alphaFadeIn() = runTest {
-        fingerprintPropertyRepository.supportsUdfps()
-        val deviceEntryBackgroundViewAlpha by
-            collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
+    fun deviceEntryBackgroundView_udfps_alphaFadeIn() =
+        testScope.runTest {
+            fingerprintPropertyRepository.supportsUdfps()
+            val deviceEntryBackgroundViewAlpha by
+                collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
 
-        // fade in
-        repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-        assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(0f)
+            // fade in
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(0f)
 
-        repository.sendTransitionStep(step(0.1f))
-        assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(.2f)
+            repository.sendTransitionStep(step(0.1f))
+            assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(.2f)
 
-        repository.sendTransitionStep(step(0.3f))
-        assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(.6f)
+            repository.sendTransitionStep(step(0.3f))
+            assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(.6f)
 
-        repository.sendTransitionStep(step(0.6f))
-        assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(1f)
+            repository.sendTransitionStep(step(0.6f))
+            assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(1f)
 
-        repository.sendTransitionStep(step(1f))
-        assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(1f)
-    }
+            repository.sendTransitionStep(step(1f))
+            assertThat(deviceEntryBackgroundViewAlpha).isEqualTo(1f)
+        }
 
     @Test
-    fun deviceEntryBackgroundView_rearFp_noUpdates() = runTest {
-        fingerprintPropertyRepository.supportsRearFps()
-        val deviceEntryBackgroundViewAlpha by
-            collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
-        // no updates
-        repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-        assertThat(deviceEntryBackgroundViewAlpha).isNull()
-        repository.sendTransitionStep(step(0.1f))
-        assertThat(deviceEntryBackgroundViewAlpha).isNull()
-        repository.sendTransitionStep(step(0.3f))
-        assertThat(deviceEntryBackgroundViewAlpha).isNull()
-        repository.sendTransitionStep(step(0.6f))
-        assertThat(deviceEntryBackgroundViewAlpha).isNull()
-        repository.sendTransitionStep(step(1f))
-        assertThat(deviceEntryBackgroundViewAlpha).isNull()
-    }
+    fun deviceEntryBackgroundView_rearFp_noUpdates() =
+        testScope.runTest {
+            fingerprintPropertyRepository.supportsRearFps()
+            val deviceEntryBackgroundViewAlpha by
+                collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
+            // no updates
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(deviceEntryBackgroundViewAlpha).isNull()
+            repository.sendTransitionStep(step(0.1f))
+            assertThat(deviceEntryBackgroundViewAlpha).isNull()
+            repository.sendTransitionStep(step(0.3f))
+            assertThat(deviceEntryBackgroundViewAlpha).isNull()
+            repository.sendTransitionStep(step(0.6f))
+            assertThat(deviceEntryBackgroundViewAlpha).isNull()
+            repository.sendTransitionStep(step(1f))
+            assertThat(deviceEntryBackgroundViewAlpha).isNull()
+        }
 
     private fun step(
         value: Float,

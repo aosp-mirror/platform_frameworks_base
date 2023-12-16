@@ -90,6 +90,7 @@ import android.view.autofill.AutofillManagerInternal;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
@@ -162,11 +163,36 @@ class TestPhoneWindowManager {
 
     @Mock private KeyguardServiceDelegate mKeyguardServiceDelegate;
 
+    @Mock
+    private PhoneWindowManager.ButtonOverridePermissionChecker mButtonOverridePermissionChecker;
+
+    @Mock private IBinder mInputToken;
+    @Mock private IBinder mImeTargetWindowToken;
+
     private StaticMockitoSession mMockitoSession;
     private OffsettableClock mClock = new OffsettableClock();
     private TestLooper mTestLooper = new TestLooper(() -> mClock.now());
     private HandlerThread mHandlerThread;
     private Handler mHandler;
+
+    private boolean mIsTalkBackEnabled;
+
+    class TestTalkbackShortcutController extends TalkbackShortcutController {
+        TestTalkbackShortcutController(Context context) {
+            super(context);
+        }
+
+        @Override
+        boolean toggleTalkback(int currentUserId) {
+            mIsTalkBackEnabled = !mIsTalkBackEnabled;
+            return mIsTalkBackEnabled;
+        }
+
+        @Override
+        boolean isTalkBackShortcutGestureEnabled() {
+            return true;
+        }
+    }
 
     private class TestInjector extends PhoneWindowManager.Injector {
         TestInjector(Context context, WindowManagerPolicy.WindowManagerFuncs funcs) {
@@ -188,6 +214,14 @@ class TestPhoneWindowManager {
 
         IActivityManager getActivityManagerService() {
             return mActivityManagerService;
+        }
+
+        PhoneWindowManager.ButtonOverridePermissionChecker getButtonOverridePermissionChecker() {
+            return mButtonOverridePermissionChecker;
+        }
+
+        TalkbackShortcutController getTalkbackShortcutController() {
+            return new TestTalkbackShortcutController(mContext);
         }
     }
 
@@ -296,6 +330,9 @@ class TestPhoneWindowManager {
         doNothing().when(mPhoneWindowManager).finishedWakingUp(anyInt(), anyInt());
         doNothing().when(mPhoneWindowManager).lockNow(any());
 
+        doReturn(mImeTargetWindowToken)
+                .when(mWindowManagerInternal).getTargetWindowTokenFromInputToken(mInputToken);
+
         mPhoneWindowManager.init(new TestInjector(mContext, mWindowManagerFuncsImpl));
         mPhoneWindowManager.systemReady();
         mPhoneWindowManager.systemBooted();
@@ -304,6 +341,11 @@ class TestPhoneWindowManager {
         doReturn(false).when(mPhoneWindowManager).keyguardOn();
         doNothing().when(mContext).startActivityAsUser(any(), any());
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        KeyInterceptionInfo interceptionInfo = new KeyInterceptionInfo(0, 0, null, 0);
+        doReturn(interceptionInfo)
+                .when(mWindowManagerInternal).getKeyInterceptionInfoFromToken(any());
+
         Mockito.reset(mContext);
     }
 
@@ -329,12 +371,12 @@ class TestPhoneWindowManager {
     }
 
     long interceptKeyBeforeDispatching(KeyEvent event) {
-        return mPhoneWindowManager.interceptKeyBeforeDispatching(null /*focusedToken*/,
-                event, FLAG_INTERACTIVE);
+        return mPhoneWindowManager.interceptKeyBeforeDispatching(mInputToken, event,
+                FLAG_INTERACTIVE);
     }
 
     void dispatchUnhandledKey(KeyEvent event) {
-        mPhoneWindowManager.dispatchUnhandledKey(null /*focusedToken*/, event, FLAG_INTERACTIVE);
+        mPhoneWindowManager.dispatchUnhandledKey(mInputToken, event, FLAG_INTERACTIVE);
     }
 
     long getCurrentTime() {
@@ -483,10 +525,15 @@ class TestPhoneWindowManager {
         doReturn(mPackageManager).when(mContext).getPackageManager();
     }
 
-    void overrideKeyEventSource(int vendorId, int productId) {
-        InputDevice device = new InputDevice.Builder().setId(1).setVendorId(vendorId).setProductId(
-                productId).setSources(InputDevice.SOURCE_KEYBOARD).setKeyboardType(
-                InputDevice.KEYBOARD_TYPE_ALPHABETIC).build();
+    void overrideKeyEventSource(int vendorId, int productId, int deviceBus) {
+        InputDevice device = new InputDevice.Builder()
+                .setId(1)
+                .setVendorId(vendorId)
+                .setProductId(productId)
+                .setDeviceBus(deviceBus)
+                .setSources(InputDevice.SOURCE_KEYBOARD)
+                .setKeyboardType(InputDevice.KEYBOARD_TYPE_ALPHABETIC)
+                .build();
         doReturn(mInputManager).when(mContext).getSystemService(eq(InputManager.class));
         doReturn(device).when(mInputManager).getInputDevice(anyInt());
     }
@@ -518,6 +565,11 @@ class TestPhoneWindowManager {
 
     void overrideStemPressTargetActivity(ComponentName component) {
         mPhoneWindowManager.mPrimaryShortPressTargetActivity = component;
+    }
+
+    void overrideFocusedWindowButtonOverridePermission(boolean granted) {
+        doReturn(granted)
+                .when(mButtonOverridePermissionChecker).canAppOverrideSystemKey(any(), anyInt());
     }
 
     /**
@@ -600,14 +652,16 @@ class TestPhoneWindowManager {
         verify(mStatusBarManagerInternal).startAssist(any());
     }
 
-    void assertSwitchKeyboardLayout(int direction) {
+    void assertSwitchKeyboardLayout(int direction, int displayId) {
         mTestLooper.dispatchAll();
         if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
-            verify(mInputMethodManagerInternal).switchKeyboardLayout(eq(direction));
+            verify(mInputMethodManagerInternal).onSwitchKeyboardLayoutShortcut(eq(direction),
+                    eq(displayId), eq(mImeTargetWindowToken));
             verify(mWindowManagerFuncsImpl, never()).switchKeyboardLayout(anyInt(), anyInt());
         } else {
             verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), eq(direction));
-            verify(mInputMethodManagerInternal, never()).switchKeyboardLayout(anyInt());
+            verify(mInputMethodManagerInternal, never())
+                    .onSwitchKeyboardLayoutShortcut(anyInt(), anyInt(), any());
         }
     }
 
@@ -682,11 +736,11 @@ class TestPhoneWindowManager {
     }
 
     void assertShortcutLogged(int vendorId, int productId, KeyboardLogEvent logEvent,
-            int expectedKey, int expectedModifierState, String errorMsg) {
+            int expectedKey, int expectedModifierState, int deviceBus, String errorMsg) {
         mTestLooper.dispatchAll();
         verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED,
                         vendorId, productId, logEvent.getIntValue(), new int[]{expectedKey},
-                        expectedModifierState), description(errorMsg));
+                        expectedModifierState, deviceBus), description(errorMsg));
     }
 
     void assertSwitchToRecent(int persistentId) throws RemoteException {

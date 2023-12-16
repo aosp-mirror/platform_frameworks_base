@@ -18,6 +18,7 @@ package android.media;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.media.flags.Flags.FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2;
+import static com.android.media.flags.Flags.FLAG_ENABLE_CROSS_USER_ROUTING_IN_MEDIA_ROUTER2;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -32,8 +33,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -78,8 +81,11 @@ public final class MediaRouter2 {
     // The manager request ID representing that no manager is involved.
     private static final long MANAGER_REQUEST_ID_NONE = MediaRoute2ProviderService.REQUEST_ID_NONE;
 
+    private record PackageNameUserHandlePair(String packageName, UserHandle user) {}
+
     @GuardedBy("sSystemRouterLock")
-    private static final Map<String, MediaRouter2> sSystemMediaRouter2Map = new ArrayMap<>();
+    private static final Map<PackageNameUserHandlePair, MediaRouter2> sAppToProxyRouterMap =
+            new ArrayMap<>();
 
     @GuardedBy("sRouterLock")
     private static MediaRouter2 sInstance;
@@ -161,66 +167,121 @@ public final class MediaRouter2 {
     }
 
     /**
-     * Gets an instance of the system media router which controls the app's media routing. Returns
-     * {@code null} if the given package name is invalid. There are several things to note when
-     * using the media routers created with this method.
+     * Returns a proxy MediaRouter2 instance that allows you to control the routing of an app
+     * specified by {@code clientPackageName}. Returns {@code null} if the specified package name
+     * does not exist.
      *
-     * <p>First of all, the discovery preference passed to {@link #registerRouteCallback} will have
-     * no effect. The callback will be called accordingly with the client app's discovery
-     * preference. Therefore, it is recommended to pass {@link RouteDiscoveryPreference#EMPTY}
-     * there.
-     *
-     * <p>Also, do not keep/compare the instances of the {@link RoutingController}, since they are
-     * always newly created with the latest session information whenever below methods are called:
+     * <p>Proxy MediaRouter2 instances operate differently than regular MediaRouter2 instances:
      *
      * <ul>
-     *   <li>{@link #getControllers()}
-     *   <li>{@link #getController(String)}
-     *   <li>{@link TransferCallback#onTransfer(RoutingController, RoutingController)}
-     *   <li>{@link TransferCallback#onStop(RoutingController)}
-     *   <li>{@link ControllerCallback#onControllerUpdated(RoutingController)}
+     *   <li>
+     *       <p>{@link #registerRouteCallback} ignores any {@link RouteDiscoveryPreference discovery
+     *       preference} passed by a proxy router. Use {@link RouteDiscoveryPreference#EMPTY} when
+     *       setting a route callback.
+     *   <li>
+     *       <p>Methods returning non-system {@link RoutingController controllers} always return
+     *       new instances with the latest data. Do not attempt to compare or store them. Instead,
+     *       use {@link #getController(String)} or {@link #getControllers()} to query the most
+     *       up-to-date state.
+     *   <li>
+     *       <p>Calls to {@link #setOnGetControllerHintsListener} are ignored.
      * </ul>
-     *
-     * Therefore, in order to track the current routing status, keep the controller's ID instead,
-     * and use {@link #getController(String)} and {@link #getSystemController()} for getting
-     * controllers.
-     *
-     * <p>Finally, it will have no effect to call {@link #setOnGetControllerHintsListener}.
      *
      * @param clientPackageName the package name of the app to control
      * @throws SecurityException if the caller doesn't have {@link
      *     Manifest.permission#MEDIA_CONTENT_CONTROL MEDIA_CONTENT_CONTROL} permission.
      * @hide
      */
+    // TODO (b/311711420): Deprecate once #getInstance(Context, Looper, String, UserHandle)
+    //  reaches public SDK.
     @SystemApi
     @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     @Nullable
     public static MediaRouter2 getInstance(
             @NonNull Context context, @NonNull String clientPackageName) {
-        Objects.requireNonNull(context, "context must not be null");
-        Objects.requireNonNull(clientPackageName, "clientPackageName must not be null");
-
-        // Note: Even though this check could be somehow bypassed, the other permission checks
-        // in system server will not allow MediaRouter2Manager to be registered.
-        IMediaRouterService serviceBinder =
-                IMediaRouterService.Stub.asInterface(
-                        ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
+        // Capturing the IAE here to not break nullability.
         try {
-            // verifyPackageExists throws SecurityException if the caller doesn't hold
-            // MEDIA_CONTENT_CONTROL permission.
-            if (!serviceBinder.verifyPackageExists(clientPackageName)) {
-                Log.e(TAG, "Package " + clientPackageName + " not found. Ignoring.");
-                return null;
-            }
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            return findOrCreateProxyInstanceForCallingUser(
+                    context, Looper.getMainLooper(), clientPackageName, context.getUser());
+        } catch (IllegalArgumentException ex) {
+            Log.e(TAG, "Package " + clientPackageName + " not found. Ignoring.");
+            return null;
+        }
+    }
+
+    /**
+     * Returns a proxy MediaRouter2 instance that allows you to control the routing of an app
+     * specified by {@code clientPackageName} and {@code user}.
+     *
+     * <p>You can specify any {@link Looper} of choice on which internal state updates will run.
+     *
+     * <p>Proxy MediaRouter2 instances operate differently than regular MediaRouter2 instances:
+     *
+     * <ul>
+     *   <li>
+     *       <p>{@link #registerRouteCallback} ignores any {@link RouteDiscoveryPreference discovery
+     *       preference} passed by a proxy router. Use a {@link RouteDiscoveryPreference} with empty
+     *       {@link RouteDiscoveryPreference.Builder#setPreferredFeatures(List) preferred features}
+     *       when setting a route callback.
+     *   <li>
+     *       <p>Methods returning non-system {@link RoutingController controllers} always return
+     *       new instances with the latest data. Do not attempt to compare or store them. Instead,
+     *       use {@link #getController(String)} or {@link #getControllers()} to query the most
+     *       up-to-date state.
+     *   <li>
+     *       <p>Calls to {@link #setOnGetControllerHintsListener} are ignored.
+     * </ul>
+     *
+     * @param context The {@link Context} of the caller.
+     * @param looper The {@link Looper} on which to process internal state changes.
+     * @param clientPackageName The package name of the app you want to control the routing of.
+     * @param user The {@link UserHandle} of the user running the app for which to get the proxy
+     *     router instance. Must match {@link Process#myUserHandle()} if the caller doesn't hold
+     *     {@code Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     * @throws SecurityException if {@code user} does not match {@link Process#myUserHandle()} and
+     *     the caller does not hold {@code Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     * @throws IllegalArgumentException if {@code clientPackageName} does not exist in {@code user}.
+     */
+    @FlaggedApi(FLAG_ENABLE_CROSS_USER_ROUTING_IN_MEDIA_ROUTER2)
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_CONTENT_CONTROL,
+                Manifest.permission.MEDIA_ROUTING_CONTROL
+            })
+    @NonNull
+    public static MediaRouter2 getInstance(
+            @NonNull Context context,
+            @NonNull Looper looper,
+            @NonNull String clientPackageName,
+            @NonNull UserHandle user) {
+        return findOrCreateProxyInstanceForCallingUser(context, looper, clientPackageName, user);
+    }
+
+    /**
+     * Returns the per-process singleton proxy router instance for the {@code clientPackageName} and
+     * {@code user} if it exists, or otherwise it creates the appropriate instance.
+     *
+     * <p>If no instance has been created previously, the method will create an instance via {@link
+     * #MediaRouter2(Context, Looper, String, UserHandle)}.
+     */
+    @NonNull
+    private static MediaRouter2 findOrCreateProxyInstanceForCallingUser(
+            Context context, Looper looper, String clientPackageName, UserHandle user) {
+        Objects.requireNonNull(context, "context must not be null");
+        Objects.requireNonNull(looper, "looper must not be null");
+        Objects.requireNonNull(user, "user must not be null");
+
+        if (TextUtils.isEmpty(clientPackageName)) {
+            throw new IllegalArgumentException("clientPackageName must not be null or empty");
         }
 
+        PackageNameUserHandlePair key = new PackageNameUserHandlePair(clientPackageName, user);
+
         synchronized (sSystemRouterLock) {
-            MediaRouter2 instance = sSystemMediaRouter2Map.get(clientPackageName);
+            MediaRouter2 instance = sAppToProxyRouterMap.get(key);
             if (instance == null) {
-                instance = new MediaRouter2(context, clientPackageName);
-                sSystemMediaRouter2Map.put(clientPackageName, instance);
+                instance = new MediaRouter2(context, looper, clientPackageName, user);
+                sAppToProxyRouterMap.put(key, instance);
             }
             return instance;
         }
@@ -304,9 +365,10 @@ public final class MediaRouter2 {
         mSystemController = new SystemRoutingController(currentSystemSessionInfo);
     }
 
-    private MediaRouter2(Context context, String clientPackageName) {
+    private MediaRouter2(
+            Context context, Looper looper, String clientPackageName, UserHandle user) {
         mContext = context;
-        mHandler = new Handler(Looper.getMainLooper());
+        mHandler = new Handler(looper);
         mMediaRouterService =
                 IMediaRouterService.Stub.asInterface(
                         ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
@@ -315,7 +377,7 @@ public final class MediaRouter2 {
                 new SystemRoutingController(
                         ProxyMediaRouter2Impl.getSystemSessionInfoImpl(
                                 mMediaRouterService, clientPackageName));
-        mImpl = new ProxyMediaRouter2Impl(context, clientPackageName);
+        mImpl = new ProxyMediaRouter2Impl(context, clientPackageName, user);
     }
 
     /**
@@ -2000,25 +2062,30 @@ public final class MediaRouter2 {
      */
     private class ProxyMediaRouter2Impl implements MediaRouter2Impl {
         // Fields originating from MediaRouter2Manager.
-        private final MediaRouter2Manager mManager;
         private final IMediaRouter2Manager.Stub mClient;
         private final CopyOnWriteArrayList<MediaRouter2Manager.TransferRequest>
                 mTransferRequests = new CopyOnWriteArrayList<>();
+        private final AtomicInteger mScanRequestCount = new AtomicInteger(/* initialValue= */ 0);
 
         // Fields originating from MediaRouter2.
         @NonNull private final String mClientPackageName;
-
-        // TODO(b/281072508): Implement scan request counting when MediaRouter2Manager is removed.
+        @NonNull private final UserHandle mClientUser;
         private final AtomicBoolean mIsScanning = new AtomicBoolean(/* initialValue= */ false);
 
-        ProxyMediaRouter2Impl(@NonNull Context context, @NonNull String clientPackageName) {
-            mManager = MediaRouter2Manager.getInstance(context.getApplicationContext());
+        ProxyMediaRouter2Impl(
+                @NonNull Context context,
+                @NonNull String clientPackageName,
+                @NonNull UserHandle user) {
+            mClientUser = user;
             mClientPackageName = clientPackageName;
             mClient = new Client();
 
             try {
-                mMediaRouterService.registerManager(
-                        mClient, context.getApplicationContext().getPackageName());
+                mMediaRouterService.registerProxyRouter(
+                        mClient,
+                        context.getApplicationContext().getPackageName(),
+                        clientPackageName,
+                        user);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -2029,14 +2096,35 @@ public final class MediaRouter2 {
         @Override
         public void startScan() {
             if (!mIsScanning.getAndSet(true)) {
-                mManager.registerScanRequest();
+                if (mScanRequestCount.getAndIncrement() == 0) {
+                    try {
+                        mMediaRouterService.startScan(mClient);
+                    } catch (RemoteException ex) {
+                        throw ex.rethrowFromSystemServer();
+                    }
+                }
             }
         }
 
         @Override
         public void stopScan() {
             if (mIsScanning.getAndSet(false)) {
-                mManager.unregisterScanRequest();
+                if (mScanRequestCount.updateAndGet(
+                                count -> {
+                                    if (count == 0) {
+                                        throw new IllegalStateException(
+                                                "No active scan requests to unregister.");
+                                    } else {
+                                        return --count;
+                                    }
+                                })
+                        == 0) {
+                    try {
+                        mMediaRouterService.stopScan(mClient);
+                    } catch (RemoteException ex) {
+                        throw ex.rethrowFromSystemServer();
+                    }
+                }
             }
         }
 

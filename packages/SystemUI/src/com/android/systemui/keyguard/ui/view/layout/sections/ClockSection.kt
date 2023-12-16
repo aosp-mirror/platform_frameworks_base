@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.keyguard.ui.view.layout.items
+package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
 import android.view.View
@@ -28,18 +28,16 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardClockViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockFaceLayout
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockFaceLayout
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Utils
-import dagger.Lazy
 import javax.inject.Inject
 
 internal fun ConstraintSet.setVisibility(
@@ -60,7 +58,6 @@ constructor(
     val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val context: Context,
     private val splitShadeStateController: SplitShadeStateController,
-    private val keyguardBlueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
     private val featureFlags: FeatureFlagsClassic,
 ) : KeyguardSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {}
@@ -70,9 +67,7 @@ constructor(
             this,
             constraintLayout,
             keyguardClockViewModel,
-            keyguardBlueprintInteractor.get(),
             clockInteractor,
-            featureFlags
         )
     }
 
@@ -109,15 +104,15 @@ constructor(
         return previousValue != largeClockEndGuideline
     }
 
-    fun getTargetClockFace(clock: ClockController): ClockFaceLayout =
+    private fun getTargetClockFace(clock: ClockController): ClockFaceLayout =
         if (keyguardClockViewModel.useLargeClock) getLargeClockFace(clock)
         else getSmallClockFace(clock)
-    fun getNonTargetClockFace(clock: ClockController): ClockFaceLayout =
+    private fun getNonTargetClockFace(clock: ClockController): ClockFaceLayout =
         if (keyguardClockViewModel.useLargeClock) getSmallClockFace(clock)
         else getLargeClockFace(clock)
 
-    fun getLargeClockFace(clock: ClockController): ClockFaceLayout = clock.largeClock.layout
-    fun getSmallClockFace(clock: ClockController): ClockFaceLayout = clock.smallClock.layout
+    private fun getLargeClockFace(clock: ClockController): ClockFaceLayout = clock.largeClock.layout
+    private fun getSmallClockFace(clock: ClockController): ClockFaceLayout = clock.smallClock.layout
     fun applyDefaultConstraints(constraints: ConstraintSet) {
         constraints.apply {
             connect(R.id.lockscreen_clock_view_large, START, PARENT_ID, START)
@@ -138,6 +133,7 @@ constructor(
                     )
             }
             connect(R.id.lockscreen_clock_view_large, TOP, PARENT_ID, TOP, largeClockTopMargin)
+            constrainHeight(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
             constrainWidth(R.id.lockscreen_clock_view_large, WRAP_CONTENT)
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(

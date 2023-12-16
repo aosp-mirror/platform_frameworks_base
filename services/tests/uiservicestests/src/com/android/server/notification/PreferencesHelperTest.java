@@ -67,7 +67,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -2370,7 +2369,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel, true, false,
                 uid, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
 
         // create notification channel that can bypass dnd
@@ -2380,18 +2379,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true,
                 uid, false);
         assertTrue(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
 
         // delete channels
         mHelper.deleteNotificationChannel(PKG_N_MR1, uid, channel.getId(), uid, false);
         assertTrue(mHelper.areChannelsBypassingDnd()); // channel2 can still bypass DND
-        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
 
         mHelper.deleteNotificationChannel(PKG_N_MR1, uid, channel2.getId(), uid, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
     }
 
@@ -2407,7 +2406,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel, true, false,
                 uid, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
 
         // Recreate a channel & now the app has dnd access granted and can set the bypass dnd field
@@ -2417,7 +2416,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 uid, false);
 
         assertTrue(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
     }
 
@@ -2433,7 +2432,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel, true, false,
                 uid, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
 
         // create notification channel that can bypass dnd, using local app level settings
@@ -2443,18 +2442,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true,
                 uid, false);
         assertTrue(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
 
         // delete channels
         mHelper.deleteNotificationChannel(PKG_N_MR1, uid, channel.getId(), uid, false);
         assertTrue(mHelper.areChannelsBypassingDnd()); // channel2 can still bypass DND
-        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
 
         mHelper.deleteNotificationChannel(PKG_N_MR1, uid, channel2.getId(), uid, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
     }
 
@@ -2481,8 +2480,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true,
                 uid, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(),
-                anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
     }
 
@@ -2504,7 +2502,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true,
                 uid, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
     }
 
@@ -2526,7 +2524,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel2, true, true,
                 uid, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
     }
 
@@ -2542,7 +2540,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_N_MR1, uid, channel, true, false,
                 uid, false);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
 
         // update channel so it CAN bypass dnd:
@@ -2550,7 +2548,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel.setBypassDnd(true);
         mHelper.updateNotificationChannel(PKG_N_MR1, uid, channel, true, SYSTEM_UID, true);
         assertTrue(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
 
         // update channel so it can't bypass dnd:
@@ -2558,7 +2556,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel.setBypassDnd(false);
         mHelper.updateNotificationChannel(PKG_N_MR1, uid, channel, true, SYSTEM_UID, true);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
     }
 
@@ -2571,7 +2569,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         mHelper.syncChannelsBypassingDnd();
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
     }
 
@@ -2581,7 +2579,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0, 0, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         assertFalse(mHelper.areChannelsBypassingDnd());
-        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyBoolean());
+        verify(mMockZenModeHelper, never()).setNotificationPolicy(any(), anyInt(), anyInt());
         resetZenModeHelper();
     }
 
@@ -5733,17 +5731,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetFsiState_flagDisabled_zero() {
-        final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission */ true, /* isFlagEnabled= */ false);
-
-        assertEquals(0, fsiState);
-    }
-
-    @Test
     public void testGetFsiState_appDidNotRequest_enumNotRequested() {
         final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission */ false, /* isFlagEnabled= */ true);
+                /* requestedFsiPermission */ false);
 
         assertEquals(PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED, fsiState);
     }
@@ -5754,7 +5744,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .thenReturn(PermissionManager.PERMISSION_GRANTED);
 
         final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission= */ true, /* isFlagEnabled= */ true);
+                /* requestedFsiPermission= */ true);
 
         assertEquals(PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED, fsiState);
     }
@@ -5765,7 +5755,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .thenReturn(PermissionManager.PERMISSION_SOFT_DENIED);
 
         final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission = */ true, /* isFlagEnabled= */ true);
+                /* requestedFsiPermission = */ true);
 
         assertEquals(PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED, fsiState);
     }
@@ -5776,7 +5766,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .thenReturn(PermissionManager.PERMISSION_HARD_DENIED);
 
         final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission = */ true, /* isFlagEnabled= */ true);
+                /* requestedFsiPermission = */ true);
 
         assertEquals(PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED, fsiState);
     }
@@ -5785,18 +5775,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testIsFsiPermissionUserSet_appDidNotRequest_false() {
         final boolean isUserSet = mHelper.isFsiPermissionUserSet("pkg", /* uid= */ 0,
                 /* fsiState = */ PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED,
-                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET,
-                /* isStickyHunFlagEnabled= */ true);
-
-        assertFalse(isUserSet);
-    }
-
-    @Test
-    public void testIsFsiPermissionUserSet_flagDisabled_false() {
-        final boolean isUserSet = mHelper.isFsiPermissionUserSet("pkg", /* uid= */ 0,
-                /* fsiState = */ PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED,
-                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET,
-                /* isStickyHunFlagEnabled= */ false);
+                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET);
 
         assertFalse(isUserSet);
     }
@@ -5805,8 +5784,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testIsFsiPermissionUserSet_userSet_true() {
         final boolean isUserSet = mHelper.isFsiPermissionUserSet("pkg", /* uid= */ 0,
                 /* fsiState = */ PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED,
-                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET,
-                /* isStickyHunFlagEnabled= */ true);
+                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET);
 
         assertTrue(isUserSet);
     }
@@ -5815,8 +5793,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testIsFsiPermissionUserSet_notUserSet_false() {
         final boolean isUserSet = mHelper.isFsiPermissionUserSet("pkg", /* uid= */ 0,
                 /* fsiState = */ PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED,
-                /* currentPermissionFlags= */ ~PackageManager.FLAG_PERMISSION_USER_SET,
-                /* isStickyHunFlagEnabled= */ true);
+                /* currentPermissionFlags= */ ~PackageManager.FLAG_PERMISSION_USER_SET);
 
         assertFalse(isUserSet);
     }

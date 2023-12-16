@@ -31,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -217,8 +218,12 @@ public final class UserManagerTest {
                 .isEqualTo(cloneUserProperties.isMediaSharedWithParent());
         assertThat(typeProps.isCredentialShareableWithParent())
                 .isEqualTo(cloneUserProperties.isCredentialShareableWithParent());
+        assertThat(typeProps.getCrossProfileContentSharingStrategy())
+                .isEqualTo(cloneUserProperties.getCrossProfileContentSharingStrategy());
         assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
         assertThrows(SecurityException.class, cloneUserProperties::getAlwaysVisible);
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
@@ -334,7 +339,14 @@ public final class UserManagerTest {
         assertThat(typeProps.isAuthAlwaysRequiredToDisableQuietMode())
                 .isEqualTo(privateProfileUserProperties
                         .isAuthAlwaysRequiredToDisableQuietMode());
+        assertThat(typeProps.getCrossProfileContentSharingStrategy())
+                .isEqualTo(privateProfileUserProperties.getCrossProfileContentSharingStrategy());
         assertThrows(SecurityException.class, privateProfileUserProperties::getDeleteAppWithParent);
+        assertThrows(SecurityException.class,
+                privateProfileUserProperties::getAllowStoppingUserWithDelayedLocking);
+
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         // Verify private profile parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
@@ -343,6 +355,8 @@ public final class UserManagerTest {
         assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
         removeUser(userInfo.id);
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+        assertThat(mUserManager.getProfileLabel()).isEqualTo(
+                Resources.getSystem().getString(userTypeDetails.getLabel(0)));
     }
 
     @MediumTest
@@ -953,6 +967,8 @@ public final class UserManagerTest {
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
         assertThat(mUserManager.getUserStatusBarIconResId(userId))
                 .isEqualTo(userTypeDetails.getStatusBarIcon());
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         final int badgeIndex = userInfo.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(
@@ -1758,6 +1774,12 @@ public final class UserManagerTest {
     private boolean isMainUserPermanentAdmin() {
         return Resources.getSystem()
                 .getBoolean(com.android.internal.R.bool.config_isMainUserPermanentAdmin);
+    }
+
+    private void compareDrawables(Drawable actual, Drawable expected){
+        assertEquals(actual.getIntrinsicWidth(), expected.getIntrinsicWidth());
+        assertEquals(actual.getIntrinsicHeight(), expected.getIntrinsicHeight());
+        assertEquals(actual.getLevel(), expected.getLevel());
     }
 
 }

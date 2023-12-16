@@ -2,9 +2,11 @@ package com.android.wm.shell.windowdecor.viewholder
 
 import android.animation.ObjectAnimator
 import android.app.ActivityManager.RunningTaskInfo
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.res.ColorStateList
-import android.graphics.drawable.GradientDrawable
+import android.graphics.Color
 import android.view.View
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import android.widget.ImageButton
 import com.android.wm.shell.R
 import com.android.wm.shell.animation.Interpolators
@@ -34,10 +36,8 @@ internal class DesktopModeFocusedWindowDecorationViewHolder(
 
     override fun bindData(taskInfo: RunningTaskInfo) {
         taskInfo.taskDescription?.statusBarColor?.let { captionColor ->
-            val captionDrawable = captionView.background as GradientDrawable
-            captionDrawable.setColor(captionColor)
+            captionView.setBackgroundColor(captionColor)
         }
-
         captionHandle.imageTintList = ColorStateList.valueOf(getCaptionHandleBarColor(taskInfo))
     }
 
@@ -55,6 +55,22 @@ internal class DesktopModeFocusedWindowDecorationViewHolder(
         } else {
             context.getColor(R.color.desktop_mode_caption_handle_bar_dark)
         }
+    }
+
+    /**
+     * Whether the caption items should use the 'light' color variant so that there's good contrast
+     * with the caption background color.
+     */
+    private fun shouldUseLightCaptionColors(taskInfo: RunningTaskInfo): Boolean {
+        return taskInfo.taskDescription
+            ?.let { taskDescription ->
+                if (Color.alpha(taskDescription.statusBarColor) != 0 &&
+                    taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+                    Color.valueOf(taskDescription.statusBarColor).luminance() < 0.5
+                } else {
+                    taskDescription.statusBarAppearance and APPEARANCE_LIGHT_STATUS_BARS == 0
+                }
+            } ?: false
     }
 
     /** Animate appearance/disappearance of caption handle as the handle menu is animated. */

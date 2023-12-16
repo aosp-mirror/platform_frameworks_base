@@ -769,6 +769,9 @@ public class LauncherAppsService extends SystemService {
         @NonNull
         private List<LauncherActivityInfoInternal> generateLauncherActivitiesForArchivedApp(
                 @Nullable String packageName, UserHandle user) {
+            if (!canAccessProfile(user.getIdentifier(), "Cannot retrieve activities")) {
+                return List.of();
+            }
             List<ApplicationInfo> applicationInfoList =
                     (packageName == null)
                             ? getApplicationInfoListForAllArchivedApps(user)
@@ -819,7 +822,7 @@ public class LauncherAppsService extends SystemService {
             return new LauncherActivityInfoInternal(
                     activityInfo,
                     new IncrementalStatesInfo(
-                            false /* isLoading */, 1 /* progress */, 0 /* loadingCompletedTime */),
+                            false /* isLoading */, 0 /* progress */, 0 /* loadingCompletedTime */),
                     user);
         }
 
@@ -827,7 +830,7 @@ public class LauncherAppsService extends SystemService {
         private List<ApplicationInfo> getApplicationInfoListForAllArchivedApps(UserHandle user) {
             final int callingUid = injectBinderCallingUid();
             List<ApplicationInfo> installedApplicationInfoList =
-                    mPackageManagerInternal.getInstalledApplications(
+                    mPackageManagerInternal.getInstalledApplicationsCrossUser(
                             PackageManager.MATCH_ARCHIVED_PACKAGES,
                             user.getIdentifier(),
                             callingUid);
@@ -845,11 +848,12 @@ public class LauncherAppsService extends SystemService {
         private List<ApplicationInfo> getApplicationInfoForArchivedApp(
                 @NonNull String packageName, UserHandle user) {
             final int callingUid = injectBinderCallingUid();
-            ApplicationInfo applicationInfo = mPackageManagerInternal.getApplicationInfo(
-                    packageName,
-                    PackageManager.MATCH_ARCHIVED_PACKAGES,
-                    callingUid,
-                    user.getIdentifier());
+            ApplicationInfo applicationInfo = Binder.withCleanCallingIdentity(() ->
+                    mPackageManagerInternal.getApplicationInfo(
+                            packageName,
+                            PackageManager.MATCH_ARCHIVED_PACKAGES,
+                            callingUid,
+                            user.getIdentifier()));
             if (applicationInfo == null || !applicationInfo.isArchived) {
                 return Collections.EMPTY_LIST;
             }
@@ -1531,7 +1535,8 @@ public class LauncherAppsService extends SystemService {
                 throw new ActivityNotFoundException("Activity could not be found");
             }
 
-            final Intent launchIntent = getMainActivityLaunchIntent(component, user);
+            final Intent launchIntent = getMainActivityLaunchIntent(component, user,
+                    false /* includeArchivedApps */);
             if (launchIntent == null) {
                 throw new SecurityException("Attempt to launch activity without "
                         + " category Intent.CATEGORY_LAUNCHER " + component);
@@ -1570,6 +1575,57 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        public List<String> getPreInstalledSystemPackages(UserHandle user) {
+            // Only system launchers, which have access to recents should have access to this API.
+            // TODO(b/303803157): Update access control for this API to default Launcher app.
+            if (!mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
+                throw new SecurityException("Caller is not the recents app");
+            }
+            if (!canAccessProfile(user.getIdentifier(),
+                    "Can't access preinstalled packages for another user")) {
+                return null;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                String userType = mUm.getUserInfo(user.getIdentifier()).userType;
+                Set<String> preInstalledPackages = mUm.getPreInstallableSystemPackages(userType);
+                if (preInstalledPackages == null) {
+                    return new ArrayList<>();
+                }
+                return List.copyOf(preInstalledPackages);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public @Nullable IntentSender getAppMarketActivityIntent(@NonNull String callingPackage,
+                @Nullable String packageName, @NonNull UserHandle user) {
+            // Only system launchers, which have access to recents should have access to this API.
+            // TODO(b/303803157): Update access control for this API to default Launcher app.
+            if (!mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
+                throw new SecurityException("Caller is not the recents app");
+            }
+            if (!canAccessProfile(user.getIdentifier(),
+                    "Can't access AppMarketActivity for another user")) {
+                return null;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                // TODO(b/316118005): Add code to launch the app installer for the packageName.
+                Intent appMarketIntent = new Intent(Intent.ACTION_MAIN);
+                appMarketIntent.addCategory(Intent.CATEGORY_APP_MARKET);
+                final PendingIntent pi = PendingIntent.getActivityAsUser(
+                        mContext, /* requestCode */ 0, appMarketIntent, PendingIntent.FLAG_ONE_SHOT
+                                | PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT,
+                        /* options */ null, user);
+                return pi == null ? null : pi.getIntentSender();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void startActivityAsUser(IApplicationThread caller, String callingPackage,
                 String callingFeatureId, ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {
@@ -1577,7 +1633,8 @@ public class LauncherAppsService extends SystemService {
                 return;
             }
 
-            Intent launchIntent = getMainActivityLaunchIntent(component, user);
+            Intent launchIntent = getMainActivityLaunchIntent(component, user,
+                    true /* includeArchivedApps */);
             if (launchIntent == null) {
                 throw new SecurityException("Attempt to launch activity without "
                         + " category Intent.CATEGORY_LAUNCHER " + component);
@@ -1593,7 +1650,8 @@ public class LauncherAppsService extends SystemService {
         /**
          * Returns the main activity launch intent for the given component package.
          */
-        private Intent getMainActivityLaunchIntent(ComponentName component, UserHandle user) {
+        private Intent getMainActivityLaunchIntent(ComponentName component, UserHandle user,
+                boolean includeArchivedApps) {
             Intent launchIntent = new Intent(Intent.ACTION_MAIN);
             launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -1631,6 +1689,14 @@ public class LauncherAppsService extends SystemService {
                         canLaunch = true;
                         break;
                     }
+                }
+                if (!canLaunch
+                        && includeArchivedApps
+                        && Flags.archiving()
+                        && getMatchingArchivedAppActivityInfo(component, user) != null) {
+                    launchIntent.setPackage(null);
+                    launchIntent.setComponent(component);
+                    canLaunch = true;
                 }
                 if (!canLaunch) {
                     return null;

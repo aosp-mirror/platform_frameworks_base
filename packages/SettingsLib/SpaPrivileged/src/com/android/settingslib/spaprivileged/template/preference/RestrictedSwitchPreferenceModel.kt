@@ -31,6 +31,7 @@ import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spaprivileged.framework.compose.getPlaceholder
 import com.android.settingslib.spaprivileged.model.enterprise.BaseUserRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdmin
+import com.android.settingslib.spaprivileged.model.enterprise.BlockedByEcm
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictedMode
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
@@ -56,6 +57,7 @@ internal class RestrictedSwitchPreferenceModel(
         is NoRestricted -> model.checked
         is BaseUserRestricted -> ({ false })
         is BlockedByAdmin -> model.checked
+        is BlockedByEcm -> model.checked
     }
 
     override val changeable = if (restrictedMode is NoRestricted) model.changeable else ({ false })
@@ -68,24 +70,42 @@ internal class RestrictedSwitchPreferenceModel(
         is BaseUserRestricted -> model.onCheckedChange
         // Pass null since semantics ToggleableState is provided in RestrictionWrapper.
         is BlockedByAdmin -> null
+        is BlockedByEcm -> null
     }
 
     @Composable
     fun RestrictionWrapper(content: @Composable () -> Unit) {
-        if (restrictedMode !is BlockedByAdmin) {
-            content()
-            return
+        when (restrictedMode) {
+            is BlockedByAdmin -> {
+                Box(
+                    Modifier
+                            .clickable(
+                                role = Role.Switch,
+                                onClick = { restrictedMode.sendShowAdminSupportDetailsIntent() },
+                            )
+                            .semantics {
+                                this.toggleableState = ToggleableState(checked())
+                            },
+                ) { content() }
+            }
+
+            is BlockedByEcm -> {
+                Box(
+                    Modifier
+                            .clickable(
+                                role = Role.Switch,
+                                onClick = { restrictedMode.showRestrictedSettingsDetails() },
+                            )
+                            .semantics {
+                                this.toggleableState = ToggleableState(checked())
+                            },
+                ) { content() }
+            }
+
+            else -> {
+                content()
+            }
         }
-        Box(
-            Modifier
-                .clickable(
-                    role = Role.Switch,
-                    onClick = { restrictedMode.sendShowAdminSupportDetailsIntent() },
-                )
-                .semantics {
-                    this.toggleableState = ToggleableState(checked())
-                },
-        ) { content() }
     }
 
     private fun ToggleableState(value: Boolean?) = when (value) {
@@ -123,6 +143,9 @@ internal class RestrictedSwitchPreferenceModel(
                     context.getString(com.android.settingslib.R.string.disabled)
 
                 is BlockedByAdmin -> restrictedMode.getSummary(checked())
+                is BlockedByEcm ->
+                    context.getString(com.android.settingslib.R.string.disabled)
+
                 null -> context.getPlaceholder()
             }
         }

@@ -98,4 +98,8 @@ public class InstallViewModel extends AndroidViewModel {
             }
         });
     }
+
+    public int getStagedSessionId() {
+        return mRepository.getStagedSessionId();
+    }
 }

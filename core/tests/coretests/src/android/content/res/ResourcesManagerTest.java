@@ -83,6 +83,12 @@ public class ResourcesManagerTest extends TestCase {
             }
 
             @Override
+            protected AssetManager createAssetManager(@NonNull final ResourcesKey key,
+                    ResourcesManager.ApkAssetsSupplier apkSupplier) {
+                return createAssetManager(key);
+            }
+
+            @Override
             protected DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments daj) {
                 return mDisplayMetricsMap.get(displayId);
             }
@@ -100,7 +106,7 @@ public class ResourcesManagerTest extends TestCase {
                 null, APP_ONE_RES_DIR, null, null, null, null, null, null,
                 CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(newResources);
-        assertSame(resources, newResources);
+        assertSame(resources.getImpl(), newResources.getImpl());
     }
 
     @SmallTest

@@ -16,11 +16,9 @@
 
 package com.android.credentialmanager.model
 
-import android.credentials.ui.ProviderData
 import android.os.IBinder
 import android.os.ResultReceiver
-import com.google.common.collect.ImmutableList
-import com.google.common.collect.ImmutableMap
+import com.android.credentialmanager.model.get.ProviderInfo
 
 /**
  * Represents the request made by the CredentialManager API.
@@ -51,8 +49,7 @@ sealed class Request private constructor(
     data class Get(
         override val token: IBinder?,
         val resultReceiver: ResultReceiver?,
-        val providers: ImmutableMap<String, ProviderData>,
-        val passwordEntries: ImmutableList<Password>,
+        val providerInfos: List<ProviderInfo>,
     ) : Request(token)
     /**
      * Request to start the create credentials flow.

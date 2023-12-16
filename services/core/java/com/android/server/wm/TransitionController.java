@@ -731,9 +731,9 @@ class TransitionController {
             }
 
             // set the pip task in the request if provided
-            if (mCollectingTransition.getPipActivity() != null) {
-                pipTaskInfo = mCollectingTransition.getPipActivity().getTask().getTaskInfo();
-                mCollectingTransition.setPipActivity(null);
+            if (transition.getPipActivity() != null) {
+                pipTaskInfo = transition.getPipActivity().getTask().getTaskInfo();
+                transition.setPipActivity(null);
             }
 
             final TransitionRequestInfo request = new TransitionRequestInfo(transition.mType,
@@ -790,6 +790,12 @@ class TransitionController {
     void recordTaskOrder(@NonNull WindowContainer wc) {
         if (mCollectingTransition == null) return;
         mCollectingTransition.recordTaskOrder(wc);
+    }
+
+    /** @see Transition#hasOrderChanges */
+    boolean hasOrderChanges() {
+        if (mCollectingTransition == null) return false;
+        return mCollectingTransition.hasOrderChanges();
     }
 
     /**
@@ -992,11 +998,19 @@ class TransitionController {
     private void enforceSurfaceVisible(WindowContainer<?> wc) {
         if (wc.mSurfaceControl == null) return;
         wc.getSyncTransaction().show(wc.mSurfaceControl);
+        final ActivityRecord ar = wc.asActivityRecord();
+        if (ar != null) {
+            ar.mLastSurfaceShowing = true;
+        }
         // Force showing the parents because they may be hidden by previous transition.
         for (WindowContainer<?> p = wc.getParent(); p != null && p != wc.mDisplayContent;
                 p = p.getParent()) {
             if (p.mSurfaceControl != null) {
                 p.getSyncTransaction().show(p.mSurfaceControl);
+                final Task task = p.asTask();
+                if (task != null) {
+                    task.mLastSurfaceShowing = true;
+                }
             }
         }
         wc.scheduleAnimation();

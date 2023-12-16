@@ -23,8 +23,6 @@ import android.os.UserManager
 import android.provider.Settings
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
@@ -322,8 +320,6 @@ class UserRepositoryImplTest : SysuiTestCase() {
         }
 
     private fun create(scope: CoroutineScope = TestCoroutineScope()): UserRepositoryImpl {
-        val featureFlags = FakeFeatureFlags()
-        featureFlags.set(FACE_AUTH_REFACTOR, true)
         return UserRepositoryImpl(
             appContext = context,
             manager = manager,
@@ -332,7 +328,6 @@ class UserRepositoryImplTest : SysuiTestCase() {
             backgroundDispatcher = IMMEDIATE,
             globalSettings = globalSettings,
             tracker = tracker,
-            featureFlags = featureFlags,
         )
     }
 

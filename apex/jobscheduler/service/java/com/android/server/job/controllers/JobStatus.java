@@ -24,7 +24,6 @@ import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
-import static com.android.server.job.controllers.FlexibilityController.NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
 import static com.android.server.job.controllers.FlexibilityController.SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -155,7 +154,7 @@ public final class JobStatus {
     /**
      * Keeps track of how many flexible constraints must be satisfied for the job to execute.
      */
-    private final int mNumRequiredFlexibleConstraints;
+    private int mNumAppliedFlexibleConstraints;
 
     /**
      * Number of required flexible constraints that have been dropped.
@@ -636,7 +635,7 @@ public final class JobStatus {
                     .build());
             // Don't perform validation checks at this point since we've already passed the
             // initial validation check.
-            job = builder.build(false, false);
+            job = builder.build(false, false, false);
         }
 
         this.job = job;
@@ -697,11 +696,7 @@ public final class JobStatus {
                 && satisfiesMinWindowException
                 && (numFailures + numSystemStops) != 1
                 && lacksSomeFlexibleConstraints) {
-            mNumRequiredFlexibleConstraints =
-                    NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS + (mCanApplyTransportAffinities ? 1 : 0);
             requiredConstraints |= CONSTRAINT_FLEXIBLE;
-        } else {
-            mNumRequiredFlexibleConstraints = 0;
         }
 
         this.requiredConstraints = requiredConstraints;
@@ -1102,6 +1097,12 @@ public final class JobStatus {
         return job.getService();
     }
 
+    /** Return the package name of the app that scheduled the job. */
+    public String getCallingPackageName() {
+        return job.getService().getPackageName();
+    }
+
+    /** Return the package name of the app on whose behalf the job was scheduled. */
     public String getSourcePackageName() {
         return sourcePackageName;
     }
@@ -1521,9 +1522,14 @@ public final class JobStatus {
         return (requiredConstraints & CONSTRAINT_FLEXIBLE) != 0;
     }
 
+    /** Returns the number of flexible job constraints being applied to the job. */
+    public int getNumAppliedFlexibleConstraints() {
+        return mNumAppliedFlexibleConstraints;
+    }
+
     /** Returns the number of flexible job constraints required to be satisfied to execute */
     public int getNumRequiredFlexibleConstraints() {
-        return mNumRequiredFlexibleConstraints - mNumDroppedFlexibleConstraints;
+        return mNumAppliedFlexibleConstraints - mNumDroppedFlexibleConstraints;
     }
 
     /**
@@ -2106,9 +2112,14 @@ public final class JobStatus {
     }
 
     /** Adjusts the number of required flexible constraints by the given number */
-    public void adjustNumRequiredFlexibleConstraints(int adjustment) {
-        mNumDroppedFlexibleConstraints = Math.max(0, Math.min(mNumRequiredFlexibleConstraints,
-                mNumDroppedFlexibleConstraints - adjustment));
+    public void setNumAppliedFlexibleConstraints(int count) {
+        mNumAppliedFlexibleConstraints = count;
+    }
+
+    /** Sets the number of dropped flexible constraints to the given number */
+    public void setNumDroppedFlexibleConstraints(int count) {
+        mNumDroppedFlexibleConstraints = Math.max(0,
+                Math.min(mNumAppliedFlexibleConstraints, count));
     }
 
     /**

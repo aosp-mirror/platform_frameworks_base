@@ -100,6 +100,9 @@ public final class InputManagerGlobal {
     @GuardedBy("mKeyboardBacklightListenerLock")
     @Nullable private IKeyboardBacklightListener mKeyboardBacklightListener;
 
+    // InputDeviceSensorManager gets notified synchronously from the binder thread when input
+    // devices change, so it must be synchronized with the input device listeners.
+    @GuardedBy("mInputDeviceListeners")
     @Nullable private InputDeviceSensorManager mInputDeviceSensorManager;
 
     private static InputManagerGlobal sInstance;
@@ -250,6 +253,9 @@ public final class InputManagerGlobal {
                         Log.d(TAG, "Device removed: " + deviceId);
                     }
                     mInputDevices.removeAt(i);
+                    if (mInputDeviceSensorManager != null) {
+                        mInputDeviceSensorManager.onInputDeviceRemoved(deviceId);
+                    }
                     sendMessageToInputDeviceListenersLocked(
                             InputDeviceListenerDelegate.MSG_DEVICE_REMOVED, deviceId);
                 }
@@ -267,6 +273,9 @@ public final class InputManagerGlobal {
                                 Log.d(TAG, "Device changed: " + deviceId);
                             }
                             mInputDevices.setValueAt(index, null);
+                            if (mInputDeviceSensorManager != null) {
+                                mInputDeviceSensorManager.onInputDeviceChanged(deviceId);
+                            }
                             sendMessageToInputDeviceListenersLocked(
                                     InputDeviceListenerDelegate.MSG_DEVICE_CHANGED, deviceId);
                         }
@@ -276,6 +285,9 @@ public final class InputManagerGlobal {
                         Log.d(TAG, "Device added: " + deviceId);
                     }
                     mInputDevices.put(deviceId, null);
+                    if (mInputDeviceSensorManager != null) {
+                        mInputDeviceSensorManager.onInputDeviceAdded(deviceId);
+                    }
                     sendMessageToInputDeviceListenersLocked(
                             InputDeviceListenerDelegate.MSG_DEVICE_ADDED, deviceId);
                 }
@@ -930,14 +942,17 @@ public final class InputManagerGlobal {
      */
     @NonNull
     public SensorManager getInputDeviceSensorManager(int deviceId) {
-        if (mInputDeviceSensorManager == null) {
-            mInputDeviceSensorManager = new InputDeviceSensorManager(this);
+        synchronized (mInputDeviceListeners) {
+            if (mInputDeviceSensorManager == null) {
+                mInputDeviceSensorManager = new InputDeviceSensorManager(this);
+            }
+            return mInputDeviceSensorManager.getSensorManager(deviceId);
         }
-        return mInputDeviceSensorManager.getSensorManager(deviceId);
     }
 
     /**
-     * @see InputManager#getSensorList(int)
+     * Get information about all of the sensors supported by an input device
+     * @see InputDeviceSensorManager
      */
     InputSensorInfo[] getSensorList(int deviceId) {
         try {
@@ -948,7 +963,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#enableSensor(int, int, int, int)
+     * @see InputDeviceSensorManager
      */
     boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
             int maxBatchReportLatencyUs) {
@@ -961,7 +976,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#disableSensor(int, int)
+     * @see InputDeviceSensorManager
      */
     void disableSensor(int deviceId, int sensorType) {
         try {
@@ -972,7 +987,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#flushSensor(int, int)
+     * @see InputDeviceSensorManager
      */
     boolean flushSensor(int deviceId, int sensorType) {
         try {
@@ -983,7 +998,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#registerSensorListener(IInputSensorEventListener)
+     * @see InputDeviceSensorManager
      */
     boolean registerSensorListener(IInputSensorEventListener listener) {
         try {
@@ -994,7 +1009,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#unregisterSensorListener(IInputSensorEventListener)
+     * @see InputDeviceSensorManager
      */
     void unregisterSensorListener(IInputSensorEventListener listener) {
         try {
@@ -1265,6 +1280,18 @@ public final class InputManagerGlobal {
     public void setCustomPointerIcon(PointerIcon icon) {
         try {
             mIm.setCustomPointerIcon(icon);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#setPointerIcon(PointerIcon, int, int, int, IBinder)
+     */
+    public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
+            IBinder inputToken) {
+        try {
+            return mIm.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

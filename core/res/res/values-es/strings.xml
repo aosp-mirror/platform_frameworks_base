@@ -1691,7 +1691,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Quitar"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos fuertes durante mucho tiempo puede dañar los oídos."</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"¿Seguir escuchando a un volumen alto?\n\nEl volumen de los auriculares ha estado alto durante más tiempo del recomendado, lo que puede dañar tu audición."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Sonido alto detectado\n\nEl volumen de los auriculares está más alto de lo recomendado, lo que puede dañar tu audición."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Volumen alto detectado\n\nEl volumen de los auriculares está más alto de lo recomendado, lo que puede dañar tu audición."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"¿Utilizar acceso directo de accesibilidad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si el acceso directo está activado, pulsa los dos botones de volumen durante 3 segundos para iniciar una función de accesibilidad."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"¿Quieres activar el acceso directo a las funciones de accesibilidad?"</string>
@@ -1711,10 +1711,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Puede registrar tus interacciones con una aplicación o un sensor de hardware, así como interactuar con las aplicaciones en tu nombre."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denegar"</string>
-    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
-    <skip />
-    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
-    <skip />
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Desinstalar"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Una aplicación está ocultando la solicitud de permiso, por lo que no se puede verificar tu respuesta."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toca una función para empezar a usarla:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Selecciona qué funciones usar con el botón de accesibilidad"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Selecciona qué funciones usar con la tecla de volumen"</string>
@@ -1909,10 +1907,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Durmiendo"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
     <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activado"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivado"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> silencia algunos sonidos"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Se ha producido un problema interno en el dispositivo y es posible que este no sea estable hasta que restablezcas el estado de fábrica."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Se ha producido un problema interno en el dispositivo. Ponte en contacto con el fabricante para obtener más información."</string>
@@ -2345,10 +2343,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micrófono está bloqueado"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"No se puede proyectar a la pantalla"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Usa otro cable y vuelve a intentarlo"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"El cable puede no ser compatible con pantallas"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Puede que tu cable USB‑C no sea adecuado para conectarse a pantallas"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Tu dispositivo está demasiado caliente y no puede proyectar a la pantalla hasta que se enfríe"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La función Dual Screen está activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando ambas pantallas para mostrar contenido"</string>
@@ -2365,4 +2360,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Diseño del teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toca para cambiarlo."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclados físicos configurados"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toca para ver los teclados"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privado"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Clon"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Trabajo"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Trabajo 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Trabajo 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Prueba"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Común"</string>
 </resources>

@@ -29,7 +29,7 @@ constructor(
             TAG,
             LogLevel.ERROR,
             { str1 = logKey(key) },
-            { "Heads up view disappearing $str1 for ANIMATION_TYPE_ADD" }
+            { "Heads up view appearing $str1 for ANIMATION_TYPE_ADD" }
         )
     }
 

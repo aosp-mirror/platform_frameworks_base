@@ -128,6 +128,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         final MergedConfiguration mOutMergedConfiguration = new MergedConfiguration();
         final InsetsState mOutInsetsState = new InsetsState();
         final InsetsSourceControl.Array mOutControls = new InsetsSourceControl.Array();
+        final Bundle mOutBundle = new Bundle();
         final IWindow mWindow;
         final View mView;
         final WindowManager.LayoutParams mParams;
@@ -136,7 +137,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         final SurfaceControl mOutSurfaceControl;
 
         final IntSupplier mViewVisibility;
-
+        int mRelayoutSeq;
         int mFlags;
 
         RelayoutRunner(Activity activity, IWindow window, IntSupplier visibilitySupplier) {
@@ -152,10 +153,11 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
         void runBenchmark(BenchmarkState state) throws RemoteException {
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             while (state.keepRunning()) {
+                mRelayoutSeq++;
                 session.relayout(mWindow, mParams, mWidth, mHeight,
-                        mViewVisibility.getAsInt(), mFlags, 0 /* seq */, 0 /* lastSyncSeqId */,
+                        mViewVisibility.getAsInt(), mFlags, mRelayoutSeq, 0 /* lastSyncSeqId */,
                         mOutFrames, mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState,
-                        mOutControls, new Bundle());
+                        mOutControls, mOutBundle);
             }
         }
     }

@@ -107,7 +107,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
             mDisplayController.getDisplayLayout(mDesktopWindowDecoration.mDisplay.getDisplayId())
                     .getStableBounds(mStableBounds);
         }
-        return mRepositionTaskBounds;
+        return new Rect(mRepositionTaskBounds);
     }
 
     @Override

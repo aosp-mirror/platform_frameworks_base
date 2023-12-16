@@ -52,8 +52,10 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.service",
     instrumentation_target_package: "com.android.wm.shell.flicker.service",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: ["src/**/*.kt"],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }
 
 android_test {
@@ -62,6 +64,8 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.service",
     instrumentation_target_package: "com.android.wm.shell.flicker.service",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [":WMShellFlickerServicePlatinumTests-src"],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }

@@ -19,8 +19,8 @@ package com.android.systemui.bouncer.domain.interactor
 import android.content.Context
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
@@ -32,7 +32,6 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -61,32 +60,25 @@ constructor(
 
     /** The user-facing message to show in the bouncer. */
     val message: StateFlow<String?> =
-        combine(
-                repository.message,
-                authenticationInteractor.isThrottled,
-                authenticationInteractor.throttling,
-            ) { message, isThrottled, throttling ->
-                messageOrThrottlingMessage(message, isThrottled, throttling)
+        combine(repository.message, authenticationInteractor.lockout) { message, lockout ->
+                messageOrLockoutMessage(message, lockout)
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
-                    messageOrThrottlingMessage(
+                    messageOrLockoutMessage(
                         repository.message.value,
-                        authenticationInteractor.isThrottled.value,
-                        authenticationInteractor.throttling.value,
+                        authenticationInteractor.lockout.value,
                     )
             )
 
-    /** The current authentication throttling state, only meaningful if [isThrottled] is `true`. */
-    val throttling: StateFlow<AuthenticationThrottlingModel> = authenticationInteractor.throttling
-
     /**
-     * Whether currently throttled and the user has to wait before being able to try another
-     * authentication attempt.
+     * The current authentication lockout (aka "throttling") state, set when the user has to wait
+     * before being able to try another authentication attempt. `null` indicates lockout isn't
+     * active.
      */
-    val isThrottled: StateFlow<Boolean> = authenticationInteractor.isThrottled
+    val lockout: StateFlow<AuthenticationLockoutModel?> = authenticationInteractor.lockout
 
     /** Whether the auto confirm feature is enabled for the currently-selected user. */
     val isAutoConfirmEnabled: StateFlow<Boolean> = authenticationInteractor.isAutoConfirmEnabled
@@ -105,16 +97,16 @@ constructor(
     val isUserSwitcherVisible: Boolean
         get() = repository.isUserSwitcherVisible
 
-    private val _onImeHidden = MutableSharedFlow<Unit>()
-    /** Provide the onImeHidden events from the bouncer */
-    val onImeHidden: SharedFlow<Unit> = _onImeHidden
+    private val _onImeHiddenByUser = MutableSharedFlow<Unit>()
+    /** Emits a [Unit] each time the IME (keyboard) is hidden by the user. */
+    val onImeHiddenByUser: SharedFlow<Unit> = _onImeHiddenByUser
 
     init {
         if (flags.isEnabled()) {
-            // Clear the message if moved from throttling to no-longer throttling.
+            // Clear the message if moved from locked-out to no-longer locked-out.
             applicationScope.launch {
-                isThrottled.pairwise().collect { (wasThrottled, currentlyThrottled) ->
-                    if (wasThrottled && !currentlyThrottled) {
+                lockout.pairwise().collect { (previous, current) ->
+                    if (previous != null && current == null) {
                         clearMessage()
                     }
                 }
@@ -222,17 +214,17 @@ constructor(
      * Shows the error message.
      *
      * Callers should use this instead of [authenticate] when they know ahead of time that an auth
-     * attempt will fail but aren't interested in the other side effects like triggering throttling.
+     * attempt will fail but aren't interested in the other side effects like triggering lockout.
      * For example, if the user entered a pattern that's too short, the system can show the error
-     * message without having the attempt trigger throttling.
+     * message without having the attempt trigger lockout.
      */
     private suspend fun showErrorMessage() {
         repository.setMessage(errorMessage(authenticationInteractor.getAuthenticationMethod()))
     }
 
-    /** Notifies the interactor that the input method editor has been hidden. */
-    suspend fun onImeHidden() {
-        _onImeHidden.emit(Unit)
+    /** Notifies that the input method editor (software keyboard) has been hidden by the user. */
+    suspend fun onImeHiddenByUser() {
+        _onImeHiddenByUser.emit(Unit)
     }
 
     private fun promptMessage(authMethod: AuthenticationMethodModel): String {
@@ -259,16 +251,15 @@ constructor(
         }
     }
 
-    private fun messageOrThrottlingMessage(
+    private fun messageOrLockoutMessage(
         message: String?,
-        isThrottled: Boolean,
-        throttlingModel: AuthenticationThrottlingModel,
+        lockoutModel: AuthenticationLockoutModel?,
     ): String {
         return when {
-            isThrottled ->
+            lockoutModel != null ->
                 applicationContext.getString(
                     com.android.internal.R.string.lockscreen_too_many_failed_attempts_countdown,
-                    throttlingModel.remainingMs.milliseconds.inWholeSeconds,
+                    lockoutModel.remainingSeconds,
                 )
             message != null -> message
             else -> ""

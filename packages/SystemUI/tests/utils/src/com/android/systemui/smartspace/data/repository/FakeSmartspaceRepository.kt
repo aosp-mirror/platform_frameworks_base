@@ -10,12 +10,12 @@ class FakeSmartspaceRepository(
 
     override val isSmartspaceRemoteViewsEnabled = smartspaceRemoteViewsEnabled
 
-    private val _lockscreenSmartspaceTargets: MutableStateFlow<List<SmartspaceTarget>> =
+    private val _communalSmartspaceTargets: MutableStateFlow<List<SmartspaceTarget>> =
         MutableStateFlow(emptyList())
-    override val lockscreenSmartspaceTargets: Flow<List<SmartspaceTarget>> =
-        _lockscreenSmartspaceTargets
+    override val communalSmartspaceTargets: Flow<List<SmartspaceTarget>> =
+        _communalSmartspaceTargets
 
-    fun setLockscreenSmartspaceTargets(targets: List<SmartspaceTarget>) {
-        _lockscreenSmartspaceTargets.value = targets
+    fun setCommunalSmartspaceTargets(targets: List<SmartspaceTarget>) {
+        _communalSmartspaceTargets.value = targets
     }
 }

@@ -23,13 +23,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,6 +48,9 @@ import java.util.Objects;
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BundleTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private Log.TerribleFailureHandler mWtfHandler;
 
     @After
@@ -115,6 +121,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = ParcelFileDescriptor.class)
     public void testCreateFromParcel() throws Exception {
         boolean withFd;
         Parcel p;
@@ -295,6 +302,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void kindofEquals_lazyValuesAndDifferentClassLoaders_returnsFalse() {
         Parcelable p1 = new CustomParcelable(13, "Tiramisu");
         Parcelable p2 = new CustomParcelable(13, "Tiramisu");
@@ -350,6 +358,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void readWriteLengthMismatch_logsWtf() throws Exception {
         mWtfHandler = Log.setWtfHandler((tag, e, system) -> {
             throw new RuntimeException(e);
@@ -364,6 +373,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void getParcelable_whenThrowingAndNotDefusing_throws() throws Exception {
         Bundle.setShouldDefuse(false);
         Bundle bundle = new Bundle();
@@ -376,6 +386,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void getParcelable_whenThrowingAndDefusing_returnsNull() throws Exception {
         Bundle.setShouldDefuse(true);
         Bundle bundle = new Bundle();
@@ -391,6 +402,7 @@ public class BundleTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void getParcelable_whenThrowingAndDefusing_leavesElement() throws Exception {
         Bundle.setShouldDefuse(true);
         Bundle bundle = new Bundle();

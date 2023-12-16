@@ -197,10 +197,8 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"藍牙連線已建立。"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"藍牙裝置圖示"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"按一下即可設定裝置詳情"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"㩒一下就可以睇所有裝置"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"㩒一下就可以配對新裝置"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"電量百分比不明。"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"已連線至<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"已連接至 <xliff:g id="CAST">%s</xliff:g>。"</string>
@@ -259,10 +257,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"使用藍牙"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"已連接"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"已儲存"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"解除連結"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"啟動"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"音訊"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"耳機"</string>
@@ -334,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"螢幕錄影"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"開始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"單手模式"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"對比"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"標準"</string>
@@ -405,8 +407,13 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 慢速充電中 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充滿電"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充滿電"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"向左滑動即可開始共用教學課程"</string>
-    <string name="button_to_open_widget_picker" msgid="8007261659745030810">"開啟小工具挑選器"</string>
-    <string name="button_to_remove_widget" msgid="1511255853677835341">"移除小工具"</string>
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"開啟小工具編輯器"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
+    <skip />
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切換使用者"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉式選單"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會被刪除。"</string>
@@ -643,10 +650,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> 鍵"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"返回"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"向上"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"向下"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"向左"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"向右"</string>
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"向上箭咀"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"向下箭咀"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"向左箭咀"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"向右箭咀"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"箭咀中央"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"空格"</string>
@@ -674,7 +681,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"通知"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"鍵盤快速鍵"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"切換鍵盤配置"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"清除文字"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"或"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"清除搜尋查詢"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"快速鍵"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"搜尋快速鍵"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"找不到快速鍵"</string>
@@ -682,35 +690,40 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"輸入"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"已開應用程式"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"目前的應用程式"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"存取通知欄"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"擷取全螢幕截圖"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"存取系統/應用程式捷徑清單"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"返回：回到先前的狀態 (返回按鈕)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"存取主畫面"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"「已開啟的應用程式」概覽"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"輪流切換最近使用的應用程式 (前進)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"輪流切換最近使用的應用程式 (返回)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"存取所有應用程式的清單並搜尋 (即搜尋/啟動器)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"隱藏和顯示/重新顯示工作列"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"存取系統設定"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"存取「Google 助理」"</string>
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"顯示緊搜尋結果"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"顯示緊系統嘅快速鍵"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"顯示緊輸入裝置嘅快速鍵"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"顯示緊打開應用程式嘅快速鍵"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"顯示緊而家呢個應用程式用到嘅快速鍵"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"查看通知"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"擷取螢幕截圖"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"顯示快速鍵"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"返回"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"前往主畫面"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"查看最近使用的應用程式"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"輪流切換最近使用的應用程式 (向前)"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"輪流切換最近使用的應用程式 (向後)"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"開啟應用程式清單"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"顯示工作列"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"開啟設定"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"開啟「Google 助理」"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"上鎖畫面"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"開啟「筆記」應用程式快速寫筆記"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"開啟筆記"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"系統多工處理"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"進入分割螢幕模式，並將目前的應用程式顯示在右側"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"進入分割螢幕模式，並將目前的應用程式顯示在左側"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"將分割螢幕切換為全螢幕"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"使用分割螢幕期間：更換應用程式"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"進入分割螢幕模式，並將目前的應用程式顯示在右側"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"進入分割螢幕模式，並將目前的應用程式顯示在左側"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"將分割螢幕切換為全螢幕"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"使用分割螢幕期間：更換應用程式"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"輸入"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"切換輸入語言 (下一個語言)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"切換輸入語言 (上一個語言)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"切換至下一個語言"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"切換至上一個語言"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"存取 Emoji"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"存取語音輸入內容"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"應用程式"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"小幫手"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"瀏覽器 (預設為 Chrome)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Google 助理"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"瀏覽器"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"通訊錄"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"電郵 (預設為 Gmail)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"電郵"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"短訊"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"音樂"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"日曆"</string>
@@ -1194,6 +1207,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在「設定」中指定預設筆記應用程式"</string>
     <string name="install_app" msgid="5066668100199613936">"安裝應用程式"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"要鏡像投射至外部顯示屏嗎？"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"目前進行的雙螢幕活動都會停止"</string>
     <string name="mirror_display" msgid="2515262008898122928">"鏡像顯示"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"關閉"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"已連接顯示屏"</string>

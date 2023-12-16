@@ -30,7 +30,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.PowerOff
 import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -54,18 +53,16 @@ import com.android.settingslib.spa.widget.ui.SettingsTitleSmall
 fun SettingsCollapsibleCard(
     title: String,
     imageVector: ImageVector,
-    models: List<CardModel>
+    models: List<CardModel>,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     SettingsCard {
-        Header(title, imageVector, models.size, expanded) { expanded = it }
+        SettingsCardContent {
+            Header(title, imageVector, models.count { it.isVisible() }, expanded) { expanded = it }
+        }
         AnimatedVisibility(expanded) {
             Column {
                 for (model in models) {
-                    HorizontalDivider(
-                        thickness = SettingsDimension.paddingSmall,
-                        color = MaterialTheme.colorScheme.surface,
-                    )
                     SettingsCardImpl(model)
                 }
             }

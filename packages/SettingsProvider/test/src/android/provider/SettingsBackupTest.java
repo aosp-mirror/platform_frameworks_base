@@ -235,6 +235,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR,
                     Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH,
                     Settings.Global.DEVICE_DEMO_MODE,
+                    Settings.Global.DEVICE_IDLE_CONSTANTS,
                     Settings.Global.DISABLE_WINDOW_BLURS,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
                     Settings.Global.BATTERY_TIP_CONSTANTS,
@@ -851,8 +852,6 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
                  Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                  Settings.Secure.UI_TRANSLATION_ENABLED,
-                 Settings.Secure.CREDENTIAL_SERVICE,
-                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
                  Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_EDGE_HAPTIC_ENABLED,
                  Settings.Secure.DND_CONFIGS_MIGRATED,
                  Settings.Secure.NAVIGATION_MODE_RESTORE);

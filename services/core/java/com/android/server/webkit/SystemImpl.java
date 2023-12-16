@@ -16,6 +16,8 @@
 
 package com.android.server.webkit;
 
+import static android.webkit.Flags.updateServiceV2;
+
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Context;
@@ -237,18 +239,30 @@ public class SystemImpl implements SystemInterface {
 
     @Override
     public int getMultiProcessSetting(Context context) {
-        return Settings.Global.getInt(context.getContentResolver(),
-                                      Settings.Global.WEBVIEW_MULTIPROCESS, 0);
+        if (updateServiceV2()) {
+            throw new IllegalStateException(
+                    "getMultiProcessSetting shouldn't be called if update_service_v2 flag is set.");
+        }
+        return Settings.Global.getInt(
+                context.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, 0);
     }
 
     @Override
     public void setMultiProcessSetting(Context context, int value) {
-        Settings.Global.putInt(context.getContentResolver(),
-                               Settings.Global.WEBVIEW_MULTIPROCESS, value);
+        if (updateServiceV2()) {
+            throw new IllegalStateException(
+                    "setMultiProcessSetting shouldn't be called if update_service_v2 flag is set.");
+        }
+        Settings.Global.putInt(
+                context.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, value);
     }
 
     @Override
     public void notifyZygote(boolean enableMultiProcess) {
+        if (updateServiceV2()) {
+            throw new IllegalStateException(
+                    "notifyZygote shouldn't be called if update_service_v2 flag is set.");
+        }
         WebViewZygote.setMultiprocessEnabled(enableMultiProcess);
     }
 

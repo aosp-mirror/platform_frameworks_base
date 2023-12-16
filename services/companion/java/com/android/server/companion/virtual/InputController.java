@@ -253,13 +253,8 @@ class InputController {
         mInputManagerInternal.setDisplayEligibilityForPointerCapture(displayId, isEligible);
     }
 
-    void setLocalIme(int displayId) {
-        // WM throws a SecurityException if the display is untrusted.
-        if ((mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
-                == Display.FLAG_TRUSTED) {
-            mWindowManager.setDisplayImePolicy(displayId,
-                    WindowManager.DISPLAY_IME_POLICY_LOCAL);
-        }
+    void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
+        mWindowManager.setDisplayImePolicy(displayId, policy);
     }
 
     @GuardedBy("mLock")

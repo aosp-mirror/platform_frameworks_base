@@ -96,6 +96,9 @@
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
     <!-- Divider handle size for split screen -->
+    <dimen name="split_divider_handle_region_width">96dp</dimen>
+    <dimen name="split_divider_handle_region_height">48dp</dimen>
+
     <dimen name="split_divider_handle_width">72dp</dimen>
     <dimen name="split_divider_handle_height">3dp</dimen>
 

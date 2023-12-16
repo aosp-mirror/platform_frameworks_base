@@ -197,10 +197,8 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth connectat."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Icona de dispositiu Bluetooth"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Fes clic per configurar els detalls del dispositiu"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"Fes clic per veure tots els dispositius"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"Fes clic per vincular un dispositiu nou"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Es desconeix el percentatge de bateria."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"S\'ha connectat a <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Està connectat amb <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -259,10 +257,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Utilitza\'l"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Connectat"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Desat"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"desconnecta"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activa"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de bateria"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Àudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculars"</string>
@@ -334,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Gravació de pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Inicia"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Atura"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode d\'una mà"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contrast"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Estàndard"</string>
@@ -405,9 +407,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant lentament • Es completarà d\'aquí a <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • S\'està carregant • Es completarà d\'aquí a <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Llisca cap a l\'esquerra per iniciar el tutorial de la comunitat"</string>
-    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Obre l\'editor de widgets"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
     <skip />
-    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Canvia d\'usuari"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú desplegable"</string>
@@ -645,10 +650,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botó <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Inici"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Enrere"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Amunt"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Avall"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Esquerra"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Dreta"</string>
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Fletxa amunt"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Fletxa avall"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Fletxa esquerra"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Fletxa dreta"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Centre"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espai"</string>
@@ -676,7 +681,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notificacions"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Tecles de drecera"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Canvia disposició de teclat"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Esborra el text"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"o"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Esborra la consulta de cerca"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Dreceres"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Cerca dreceres"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"No s\'ha trobat cap drecera"</string>
@@ -684,35 +690,40 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrada"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Obre aplicacions"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Aplicació actual"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Accedeix a l\'àrea de notificacions"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Fes una captura de pantalla completa"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Accedeix a la llista de dreceres d\'aplicacions i del sistema"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"Enrere: torna a l\'estat anterior (botó Enrere)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Accedeix a la pantalla d\'inici"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Informació general sobre les aplicacions obertes"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Recorre les aplicacions recents (endavant)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Recorre les aplicacions recents (enrere)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Accedeix a la llista de totes les apps i a la cerca (Cerca/Launcher)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Amaga i torna a mostrar la barra de tasques"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Accedeix a la configuració del sistema"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Accedeix a l\'Assistent de Google"</string>
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"S\'estan mostrant els resultats de la cerca"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"S\'estan mostrant les dreceres del sistema"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"S\'estan mostrant les dreceres d\'entrada"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"S\'estan mostrant les dreceres que obren aplicacions"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"S\'estan mostrant les dreceres per a l\'aplicació actual"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Mostra les notificacions"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Fes una captura de pantalla"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Mostra les dreceres"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Torna"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Ves a la pantalla d\'inici"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Mostra les aplicacions recents"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Desplaça\'t cap endavant per les aplicacions recents"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Desplaça\'t cap enrere per les aplicacions recents"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Obre la llista d\'aplicacions"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Mostra la barra de tasques"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Obre la configuració"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Obre l\'Assistent"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueig"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Obre l\'aplicació Notes per prendre notes ràpides"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"Obre les notes"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasques del sistema"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Entra al mode de pantalla dividida amb l\'aplicació actual a la dreta"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Entra al mode de pantalla dividida amb l\'aplicació actual a l\'esquerra"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Canvia de pantalla dividida a pantalla completa"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Durant el mode de pantalla dividida: substitueix una app per una altra"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Entra al mode de pantalla dividida amb l\'aplicació actual a la dreta"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Entra al mode de pantalla dividida amb l\'aplicació actual a l\'esquerra"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Canvia de pantalla dividida a pantalla completa"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"Durant el mode de pantalla dividida: substitueix una app per una altra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Canvia l\'idioma d\'introducció (idioma següent)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Canvia l\'idioma d\'introducció (idioma anterior)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Canvia a l\'idioma següent"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Caniva a l\'idioma anterior"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Accedeix als emojis"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Accedeix a l\'escriptura per veu"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplicacions"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assistència"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Navegador (Chrome com a predeterminat)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistent"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Navegador"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contactes"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Correu electrònic (Gmail com a predeterminat)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Correu electrònic"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Música"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
@@ -1195,8 +1206,9 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"S\'ha detectat la presència d\'usuaris"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Defineix l\'aplicació de notes predeterminada a Configuració"</string>
     <string name="install_app" msgid="5066668100199613936">"Instal·la l\'aplicació"</string>
-    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Vols replicar-ho a la pantalla externa?"</string>
-    <string name="mirror_display" msgid="2515262008898122928">"Duplica la pantalla"</string>
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Replicar a la pantalla externa?"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"Qualsevol activitat de pantalla dual que s\'estigui executant en aquests moments s\'aturarà"</string>
+    <string name="mirror_display" msgid="2515262008898122928">"Replica la pantalla"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Ignora"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Pantalla connectada"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Micròfon i càmera"</string>
@@ -1217,8 +1229,6 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Utilitzat recentment per <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"En ús per <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Utilitzat recentment per <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
-    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
-    <skip />
-    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
-    <skip />
+    <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroil·luminació del teclat"</string>
+    <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivell %1$d de %2$d"</string>
 </resources>

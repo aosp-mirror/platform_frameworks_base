@@ -23,8 +23,8 @@ fun Request.Get.toGet(): CredentialSelectorUiState.Get {
     // TODO: b/301206470 returning a hard coded state for MVP
     if (true) return CredentialSelectorUiState.Get.SingleProviderSinglePassword
 
-    return if (providers.size == 1) {
-        if (passwordEntries.size == 1) {
+    return if (providerInfos.size == 1) {
+        if (providerInfos.first().credentialEntryList.size == 1) {
             CredentialSelectorUiState.Get.SingleProviderSinglePassword
         } else {
             TODO() // b/301206470 - Implement other get flows

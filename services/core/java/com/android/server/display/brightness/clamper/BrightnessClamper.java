@@ -17,6 +17,7 @@
 package com.android.server.display.brightness.clamper;
 
 import android.annotation.NonNull;
+import android.os.Handler;
 import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
@@ -24,12 +25,24 @@ import com.android.server.display.DisplayBrightnessState;
 import java.io.PrintWriter;
 
 /**
- * Provides max allowed brightness
+ * Provides brightness range constraints
  */
 abstract class BrightnessClamper<T> {
 
     protected float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
     protected boolean mIsActive = false;
+
+    @NonNull
+    protected final Handler mHandler;
+
+    @NonNull
+    protected final BrightnessClamperController.ClamperChangeListener mChangeListener;
+
+    BrightnessClamper(Handler handler,
+            BrightnessClamperController.ClamperChangeListener changeListener) {
+        mHandler = handler;
+        mChangeListener = changeListener;
+    }
 
     float getBrightnessCap() {
         return mBrightnessCap;
@@ -60,6 +73,8 @@ abstract class BrightnessClamper<T> {
 
     protected enum Type {
         THERMAL,
-        POWER
+        POWER,
+        BEDTIME_MODE,
+        LUX,
     }
 }

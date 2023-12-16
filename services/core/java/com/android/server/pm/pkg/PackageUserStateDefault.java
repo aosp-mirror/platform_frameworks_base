@@ -206,9 +206,4 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     public boolean dataExists() {
         return true;
     }
-
-    @Override
-    public long getArchiveTimeMillis() {
-        return 0;
-    }
 }

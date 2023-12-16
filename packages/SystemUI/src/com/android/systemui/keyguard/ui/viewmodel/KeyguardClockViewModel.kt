@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import androidx.constraintlayout.helper.widget.Layer
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.dagger.SysUISingleton
@@ -23,13 +24,12 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
-import com.android.systemui.plugins.ClockController
+import com.android.systemui.plugins.clocks.ClockController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 
 @SysUISingleton
@@ -40,19 +40,14 @@ constructor(
     val keyguardClockInteractor: KeyguardClockInteractor,
     @Application private val applicationScope: CoroutineScope,
 ) {
+    var burnInLayer: Layer? = null
     val useLargeClock: Boolean
         get() = clockSize.value == LARGE
 
-    var clock: ClockController?
-        set(value) {
-            keyguardClockInteractor.clock = value
-        }
-        get() {
-            return keyguardClockInteractor.clock
-        }
+    var clock: ClockController? by keyguardClockInteractor::clock
 
     val clockSize =
-        combine(keyguardClockInteractor.selectedClockSize, keyguardInteractor.clockSize) {
+        combine(keyguardClockInteractor.selectedClockSize, keyguardClockInteractor.clockSize) {
                 selectedSize,
                 clockSize ->
                 if (selectedSize == SettingsClockSize.SMALL) {
@@ -61,7 +56,6 @@ constructor(
                     clockSize
                 }
             }
-            .distinctUntilChanged()
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
@@ -72,16 +66,23 @@ constructor(
 
     val hasCustomWeatherDataDisplay =
         combine(clockSize, currentClock) { size, clock ->
-                (if (size == LARGE) clock.largeClock.config.hasCustomWeatherDataDisplay
-                else clock.smallClock.config.hasCustomWeatherDataDisplay)
+                clock?.let {
+                    (if (size == LARGE) clock.largeClock.config.hasCustomWeatherDataDisplay
+                    else clock.smallClock.config.hasCustomWeatherDataDisplay)
+                }
+                    ?: false
             }
-            .distinctUntilChanged()
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = false
+                initialValue = currentClock.value?.largeClock?.config?.hasCustomWeatherDataDisplay
+                        ?: false
             )
 
     val clockShouldBeCentered: Flow<Boolean> =
-        keyguardInteractor.clockShouldBeCentered.distinctUntilChanged()
+        keyguardInteractor.clockShouldBeCentered.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = true
+        )
 }

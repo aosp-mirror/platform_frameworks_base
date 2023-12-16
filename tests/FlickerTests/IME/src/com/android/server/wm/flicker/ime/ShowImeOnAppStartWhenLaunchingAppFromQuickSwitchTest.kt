@@ -104,7 +104,7 @@ class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: LegacyFlicke
 
     @Presubmit
     @Test
-    open fun imeLayerIsVisibleWhenSwitchingToImeApp() {
+    fun imeLayerIsVisibleWhenSwitchingToImeApp() {
         flicker.assertLayersStart { isVisible(ComponentNameMatcher.IME) }
         flicker.assertLayersTag(TAG_IME_VISIBLE) { isVisible(ComponentNameMatcher.IME) }
         flicker.assertLayersEnd { isVisible(ComponentNameMatcher.IME) }

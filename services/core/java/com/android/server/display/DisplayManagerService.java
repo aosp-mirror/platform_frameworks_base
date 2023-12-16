@@ -576,7 +576,8 @@ public final class DisplayManagerService extends SystemService {
                 foldSettingProvider,
                 mDisplayDeviceRepo, new LogicalDisplayListener(), mSyncRoot, mHandler, mFlags);
         mDisplayModeDirector = new DisplayModeDirector(context, mHandler, mFlags);
-        mBrightnessSynchronizer = new BrightnessSynchronizer(mContext);
+        mBrightnessSynchronizer = new BrightnessSynchronizer(mContext,
+                mFlags.isBrightnessIntRangeUserPerceptionEnabled());
         Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
@@ -1852,7 +1853,7 @@ public final class DisplayManagerService extends SystemService {
             // early apps like SetupWizard/Launcher. In particular, SUW is displayed using
             // the virtual display inside VR before any VR-specific apps even run.
             mVirtualDisplayAdapter = mInjector.getVirtualDisplayAdapter(mSyncRoot, mContext,
-                    mHandler, mDisplayDeviceRepo);
+                    mHandler, mDisplayDeviceRepo, mFlags);
             if (mVirtualDisplayAdapter != null) {
                 registerDisplayAdapterLocked(mVirtualDisplayAdapter);
             }
@@ -1870,7 +1871,7 @@ public final class DisplayManagerService extends SystemService {
 
     private void registerOverlayDisplayAdapterLocked() {
         registerDisplayAdapterLocked(new OverlayDisplayAdapter(
-                mSyncRoot, mContext, mHandler, mDisplayDeviceRepo, mUiHandler));
+                mSyncRoot, mContext, mHandler, mDisplayDeviceRepo, mUiHandler, mFlags));
     }
 
     private void registerWifiDisplayAdapterLocked() {
@@ -1879,7 +1880,7 @@ public final class DisplayManagerService extends SystemService {
                 || SystemProperties.getInt(FORCE_WIFI_DISPLAY_ENABLE, -1) == 1) {
             mWifiDisplayAdapter = new WifiDisplayAdapter(
                     mSyncRoot, mContext, mHandler, mDisplayDeviceRepo,
-                    mPersistentDataStore);
+                    mPersistentDataStore, mFlags);
             registerDisplayAdapterLocked(mWifiDisplayAdapter);
         }
     }
@@ -2879,7 +2880,9 @@ public final class DisplayManagerService extends SystemService {
             final DisplayPowerControllerInterface displayPowerController =
                     mDisplayPowerControllers.get(displayId);
             if (displayPowerController != null) {
-                displayPowerController.setAutomaticScreenBrightnessMode(enabled);
+                displayPowerController.setAutomaticScreenBrightnessMode(enabled
+                        ? AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE
+                        : AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT);
             }
         }
     }
@@ -3287,8 +3290,10 @@ public final class DisplayManagerService extends SystemService {
     @VisibleForTesting
     static class Injector {
         VirtualDisplayAdapter getVirtualDisplayAdapter(SyncRoot syncRoot, Context context,
-                Handler handler, DisplayAdapter.Listener displayAdapterListener) {
-            return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener);
+                Handler handler, DisplayAdapter.Listener displayAdapterListener,
+                DisplayManagerFlags flags) {
+            return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
+                    flags);
         }
 
         LocalDisplayAdapter getLocalDisplayAdapter(SyncRoot syncRoot, Context context,

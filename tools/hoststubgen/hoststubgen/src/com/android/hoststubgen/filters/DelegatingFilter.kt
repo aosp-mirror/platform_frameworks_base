@@ -19,7 +19,7 @@ package com.android.hoststubgen.filters
  * Base class for an [OutputFilter] that uses another filter as a fallback.
  */
 abstract class DelegatingFilter(
-        // fallback shouldn't be used by subclasses, so make it private.
+        // fallback shouldn't be used by subclasses directly, so make it private.
         // They should instead be calling into `super` or `outermostFilter`.
         private val fallback: OutputFilter
 ) : OutputFilter() {
@@ -27,11 +27,21 @@ abstract class DelegatingFilter(
         fallback.outermostFilter = this
     }
 
+    /**
+     * Returns the outermost filter in a filter chain.
+     *
+     * When methods in a subclass needs to refer to a policy on an item (class, fields, methods)
+     * that are not the "subject" item -- e.g.
+     * in [ClassWidePolicyPropagatingFilter.getPolicyForField], when it checks the
+     * class policy -- [outermostFilter] must be used, rather than the super's method.
+     * The former will always return the correct policy, but the later won't consult outer
+     * filters than the current filter.
+     */
     override var outermostFilter: OutputFilter = this
         get() = field
         set(value) {
             field = value
-            // Propagate the inner filters.
+            // Propagate to the inner filters.
             fallback.outermostFilter = value
         }
 

@@ -16,29 +16,12 @@
 
 package com.android.server.wm.flicker.testapp;
 
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-
-import android.content.Intent;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ToggleButton;
-
 public class ImeActivityAutoFocus extends ImeActivity {
     @Override
     protected void onStart() {
         super.onStart();
 
-        Button startThemedActivityButton = findViewById(R.id.start_dialog_themed_activity_btn);
-        startThemedActivityButton.setOnClickListener(
-                button -> startActivity(new Intent(this, DialogThemedActivity.class)));
-
-        ToggleButton toggleFixedPortraitButton = findViewById(R.id.toggle_fixed_portrait_btn);
-        toggleFixedPortraitButton.setOnCheckedChangeListener(
-                (button, isChecked) -> setRequestedOrientation(
-                        isChecked ? SCREEN_ORIENTATION_PORTRAIT : SCREEN_ORIENTATION_UNSPECIFIED));
-
-        EditText editTextField = findViewById(R.id.plain_text_input);
+        final var editTextField = findViewById(R.id.plain_text_input);
         editTextField.requestFocus();
     }
 }

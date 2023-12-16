@@ -35,6 +35,7 @@ import java.util.List;
  * <p>
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public interface HeavyHitterSketch<T> {
     /**
      * Return the default implementation.

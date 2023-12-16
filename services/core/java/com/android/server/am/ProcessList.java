@@ -34,7 +34,7 @@ import static android.os.Process.getFreeMemory;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.killProcessQuiet;
 import static android.os.Process.startWebView;
-import static android.system.OsConstants.*;
+import static android.system.OsConstants.EAGAIN;
 
 import static com.android.sdksandbox.flags.Flags.selinuxSdkSandboxAudit;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
@@ -133,7 +133,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
@@ -499,7 +498,7 @@ public final class ProcessList {
 
     /** Manages the {@link android.app.ApplicationStartInfo} records. */
     @GuardedBy("mAppStartInfoTracker")
-    final AppStartInfoTracker mAppStartInfoTracker = new AppStartInfoTracker();
+    private final AppStartInfoTracker mAppStartInfoTracker = new AppStartInfoTracker();
 
     /**
      * The currently running SDK sandbox processes for a uid.
@@ -1524,6 +1523,10 @@ public final class ProcessList {
         return mCachedRestoreLevel;
     }
 
+    AppStartInfoTracker getAppStartInfoTracker() {
+        return mAppStartInfoTracker;
+    }
+
     /**
      * Set the out-of-memory badness adjustment for a process.
      * If {@code pid <= 0}, this method will be a no-op.
@@ -2150,6 +2153,7 @@ public final class ProcessList {
                     mService.forceStopPackageLocked(app.info.packageName,
                             UserHandle.getAppId(app.uid),
                             false, false, true, false, false, false, app.userId, "start failure");
+                    app.doEarlyCleanupIfNecessaryLocked();
                 }
             }
         };
@@ -2573,6 +2577,7 @@ public final class ProcessList {
             boolean isSdkSandbox, int sdkSandboxUid, String sdkSandboxClientAppPackage,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         long startTime = SystemClock.uptimeMillis();
+        final long startTimeNs = SystemClock.elapsedRealtimeNanos();
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(processName, info.uid);
@@ -2778,6 +2783,7 @@ public final class ProcessList {
             }
             noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
                     ApplicationExitInfo.SUBREASON_INVALID_START, reason);
+            app.doEarlyCleanupIfNecessaryLocked();
             return false;
         }
         mService.mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
@@ -3299,8 +3305,6 @@ public final class ProcessList {
             // about the process state of the isolated UID *before* it is registered with the
             // owning application.
             mService.mBatteryStatsService.addIsolatedUid(uid, info.uid);
-            FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
-                    FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
         final ProcessRecord r = new ProcessRecord(mService, info, proc, uid,
                 sdkSandboxClientAppPackage,

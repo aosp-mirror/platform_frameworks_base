@@ -79,7 +79,13 @@ public final class Temperature implements Parcelable {
             TYPE_TPU,
             TYPE_DISPLAY,
             TYPE_MODEM,
-            TYPE_SOC
+            TYPE_SOC,
+            TYPE_WIFI,
+            TYPE_CAMERA,
+            TYPE_FLASHLIGHT,
+            TYPE_SPEAKER,
+            TYPE_AMBIENT,
+            TYPE_POGO
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
@@ -101,6 +107,12 @@ public final class Temperature implements Parcelable {
     public static final int TYPE_DISPLAY = TemperatureType.DISPLAY;
     public static final int TYPE_MODEM = TemperatureType.MODEM;
     public static final int TYPE_SOC = TemperatureType.SOC;
+    public static final int TYPE_WIFI = TemperatureType.WIFI;
+    public static final int TYPE_CAMERA = TemperatureType.CAMERA;
+    public static final int TYPE_FLASHLIGHT = TemperatureType.FLASHLIGHT;
+    public static final int TYPE_SPEAKER = TemperatureType.SPEAKER;
+    public static final int TYPE_AMBIENT = TemperatureType.AMBIENT;
+    public static final int TYPE_POGO = TemperatureType.POGO;
 
     /**
      * Verify a valid Temperature type.
@@ -108,7 +120,7 @@ public final class Temperature implements Parcelable {
      * @return true if a Temperature type is valid otherwise false.
      */
     public static boolean isValidType(@Type int type) {
-        return type >= TYPE_UNKNOWN && type <= TYPE_SOC;
+        return type >= TYPE_UNKNOWN && type <= TYPE_POGO;
     }
 
     /**

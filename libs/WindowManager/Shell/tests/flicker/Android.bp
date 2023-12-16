@@ -52,7 +52,7 @@ java_library {
 }
 
 java_defaults {
-    name: "WMShellFlickerTestsDefaultWithoutTemplate",
+    name: "WMShellFlickerTestsDefault",
     platform_apis: true,
     certificate: "platform",
     optimize: {
@@ -75,14 +75,7 @@ java_defaults {
     ],
     data: [
         ":FlickerTestApp",
-        "trace_config/*",
     ],
-}
-
-java_defaults {
-    name: "WMShellFlickerTestsDefault",
-    defaults: ["WMShellFlickerTestsDefaultWithoutTemplate"],
-    test_config_template: "AndroidTestTemplate.xml",
 }
 
 java_library {

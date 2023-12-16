@@ -61,6 +61,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -88,7 +89,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
     // Called with SyncRoot lock held.
     public VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
-            Context context, Handler handler, Listener listener) {
+            Context context, Handler handler, Listener listener, DisplayManagerFlags featureFlags) {
         this(syncRoot, context, handler, listener, new SurfaceControlDisplayFactory() {
             @Override
             public IBinder createDisplay(String name, boolean secure, float requestedRefreshRate) {
@@ -99,14 +100,15 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             public void destroyDisplay(IBinder displayToken) {
                 DisplayControl.destroyDisplay(displayToken);
             }
-        });
+        }, featureFlags);
     }
 
     @VisibleForTesting
     VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener,
-            SurfaceControlDisplayFactory surfaceControlDisplayFactory) {
-        super(syncRoot, context, handler, listener, TAG);
+            SurfaceControlDisplayFactory surfaceControlDisplayFactory,
+            DisplayManagerFlags featureFlags) {
+        super(syncRoot, context, handler, listener, TAG, featureFlags);
         mHandler = handler;
         mSurfaceControlDisplayFactory = surfaceControlDisplayFactory;
     }

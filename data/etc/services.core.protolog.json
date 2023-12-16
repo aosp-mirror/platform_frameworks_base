@@ -169,6 +169,12 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
+    "-1961637874": {
+      "message": "DeferredDisplayUpdater: applying DisplayInfo immediately",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/DeferredDisplayUpdater.java"
+    },
     "-1949279037": {
       "message": "Attempted to add input method window with bad token %s.  Aborting.",
       "level": "WARN",
@@ -312,6 +318,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "-1818910559": {
+      "message": "DeferredDisplayUpdater: applied DisplayInfo after deferring",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/DeferredDisplayUpdater.java"
     },
     "-1814361639": {
       "message": "Set IME snapshot position: (%d, %d)",
@@ -529,6 +541,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/ActivityStarter.java"
     },
+    "-1582845629": {
+      "message": "Starting animation on %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_DIMMER",
+      "at": "com\/android\/server\/wm\/DimmerAnimationHelper.java"
+    },
     "-1575977269": {
       "message": "Skipping %s: mismatch root %s",
       "level": "DEBUG",
@@ -588,6 +606,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1518132958": {
+      "message": "fractionRendered boundsOverSource=%f",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "-1517908912": {
       "message": "requestScrollCapture: caught exception dispatching to window.token=%s",
@@ -925,6 +949,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-1243510456": {
+      "message": "Dim animation requested: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_DIMMER",
+      "at": "com\/android\/server\/wm\/DimmerAnimationHelper.java"
+    },
     "-1237827119": {
       "message": "Schedule remove starting %s startingWindow=%s animate=%b Callers=%s",
       "level": "VERBOSE",
@@ -948,6 +978,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONTENT_RECORDING",
       "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
+    "-1209762265": {
+      "message": "Registering listener=%s with id=%d for window=%s with %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "-1209252064": {
       "message": "Clear animatingExit: reason=clearAnimatingFlags win=%s",
@@ -990,12 +1026,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_WINDOW_INSETS",
       "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
-    },
-    "-1176488860": {
-      "message": "SURFACE isSecure=%b: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
     "-1164930508": {
       "message": "Moving to RESUMED: %s (starting new instance) callers=%s",
@@ -1177,6 +1207,12 @@
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
+    "-1028213464": {
+      "message": "%s skipping animation and directly setting alpha=%f, blur=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_DIMMER",
+      "at": "com\/android\/server\/wm\/DimmerAnimationHelper.java"
+    },
     "-1022146708": {
       "message": "Skipping %s: mismatch activity type",
       "level": "DEBUG",
@@ -1320,6 +1356,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
+    },
+    "-888703350": {
+      "message": "Skipping %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "-883738232": {
       "message": "Adding more than one toast window for UID at a time.",
@@ -1801,12 +1843,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-504637678": {
-      "message": "Starting animation on dim layer %s, requested by %s, alpha: %f -> %f, blur: %d -> %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_DIMMER",
-      "at": "com\/android\/server\/wm\/SmoothDimmer.java"
-    },
     "-503656156": {
       "message": "Update process config of %s to new config %s",
       "level": "VERBOSE",
@@ -1903,6 +1939,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
+    "-415346336": {
+      "message": "DeferredDisplayUpdater: partially applying DisplayInfo immediately",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/DeferredDisplayUpdater.java"
+    },
     "-401282500": {
       "message": "destroyIfPossible: r=%s destroy returned removed=%s",
       "level": "DEBUG",
@@ -1950,6 +1992,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
+    "-376950429": {
+      "message": "DeferredDisplayUpdater: deferring DisplayInfo update",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/DeferredDisplayUpdater.java"
     },
     "-374767836": {
       "message": "setAppVisibility(%s, visible=%b): %s visible=%b mVisibleRequested=%b Callers=%s",
@@ -2797,6 +2845,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "360319850": {
+      "message": "fractionRendered scale=%f",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "364992694": {
       "message": "freezeDisplayRotation: current rotation=%d, new rotation=%d, caller=%s",
       "level": "VERBOSE",
@@ -2977,6 +3031,12 @@
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
+    "532771960": {
+      "message": "Adding untrusted state listener=%s with id=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "535103992": {
       "message": "Wallpaper may change!  Adjusting",
       "level": "VERBOSE",
@@ -3054,6 +3114,12 @@
       "level": "ERROR",
       "group": "WM_DEBUG_DREAM",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "605179032": {
+      "message": "checkIfInThreshold fractionRendered=%f alpha=%f currTimeMs=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "608694300": {
       "message": "  NEW SURFACE SESSION %s",
@@ -3276,6 +3342,18 @@
       "level": "INFO",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "810599500": {
+      "message": "SURFACE isSecure=%b: %s",
+      "level": "INFO",
+      "group": "WM_SHOW_TRANSACTIONS",
+      "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "824532141": {
+      "message": "lastState=%s newState=%s alpha=%f minAlpha=%f fractionRendered=%f minFractionRendered=%f",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "829434921": {
       "message": "Draw state now committed in %s",
@@ -3571,6 +3649,12 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
     },
+    "1090378847": {
+      "message": "Checking %d windows",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "1100065297": {
       "message": "Attempted to get IME policy of a display that does not exist: %d",
       "level": "WARN",
@@ -3702,6 +3786,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1251721200": {
+      "message": "unregister failed, couldn't find deathRecipient for %s with id=%d",
+      "level": "ERROR",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "1252594551": {
       "message": "Window types in WindowContext and LayoutParams.type should match! Type from LayoutParams is %d, but type from WindowContext is %d",
@@ -3841,6 +3931,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
+    "1382634842": {
+      "message": "Unregistering listener=%s with id=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "1393721079": {
       "message": "Starting remote display change: from [rot = %d], to [%dx%d, rot = %d]",
       "level": "VERBOSE",
@@ -3888,6 +3984,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1445704347": {
+      "message": "coveredRegionsAbove updated with %s frame:%s region:%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "1448683958": {
       "message": "Override pending remote transitionSet=%b adapter=%s",
@@ -4026,12 +4128,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "1620751818": {
-      "message": "Dim %s skipping animation and directly setting alpha=%f, blur=%d",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_DIMMER",
-      "at": "com\/android\/server\/wm\/SmoothDimmer.java"
     },
     "1621562070": {
       "message": "    startWCT=%s",
@@ -4194,6 +4290,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
+    },
+    "1786463281": {
+      "message": "Adding trusted state listener=%s with id=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "1789321832": {
       "message": "Then token:%s is invalid. It might be removed",
@@ -4368,6 +4470,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
+    },
+    "1955470028": {
+      "message": "computeFractionRendered: visibleRegion=%s screenBounds=%s contentSize=%s scale=%f,%f",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "1964565370": {
       "message": "Starting remote animation",
@@ -4651,6 +4759,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_TASKS": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_TPL": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_WALLPAPER": {

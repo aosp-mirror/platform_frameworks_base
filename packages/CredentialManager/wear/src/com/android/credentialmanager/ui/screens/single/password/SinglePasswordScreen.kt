@@ -76,7 +76,9 @@ fun SinglePasswordScreen(
             }
 
             SideEffect {
-                launcher.launch(state.intentSenderRequest)
+                state.intentSenderRequest?.let {
+                    launcher.launch(it)
+                }
             }
         }
 

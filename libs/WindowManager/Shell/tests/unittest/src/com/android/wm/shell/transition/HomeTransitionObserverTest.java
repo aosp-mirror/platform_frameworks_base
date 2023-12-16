@@ -18,8 +18,10 @@ package com.android.wm.shell.transition;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
@@ -38,12 +40,12 @@ import android.os.RemoteException;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionInfo.TransitionMode;
-import android.window.WindowOrganizer;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
@@ -66,7 +68,7 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class HomeTransitionObserverTest extends ShellTestCase {
 
-    private final WindowOrganizer mOrganizer = mock(WindowOrganizer.class);
+    private final ShellTaskOrganizer mOrganizer = mock(ShellTaskOrganizer.class);
     private final TransactionPool mTransactionPool = mock(TransactionPool.class);
     private final Context mContext =
             InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -99,7 +101,7 @@ public class HomeTransitionObserverTest extends ShellTestCase {
         when(change.getTaskInfo()).thenReturn(taskInfo);
         when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
 
-        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_OPEN);
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_OPEN, true);
 
         mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
                 info,
@@ -117,7 +119,7 @@ public class HomeTransitionObserverTest extends ShellTestCase {
         when(change.getTaskInfo()).thenReturn(taskInfo);
         when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
 
-        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_TO_BACK);
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_TO_BACK, true);
 
         mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
                 info,
@@ -135,7 +137,7 @@ public class HomeTransitionObserverTest extends ShellTestCase {
         when(change.getTaskInfo()).thenReturn(taskInfo);
         when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
 
-        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_UNDEFINED, TRANSIT_TO_BACK);
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_UNDEFINED, TRANSIT_TO_BACK, true);
 
         mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
                 info,
@@ -145,15 +147,53 @@ public class HomeTransitionObserverTest extends ShellTestCase {
         verify(mListener, times(0)).onHomeVisibilityChanged(anyBoolean());
     }
 
+    @Test
+    public void testNonRunningHomeActivityDoesNotTriggerCallback() throws RemoteException {
+        TransitionInfo info = mock(TransitionInfo.class);
+        TransitionInfo.Change change = mock(TransitionInfo.Change.class);
+        ActivityManager.RunningTaskInfo taskInfo = mock(ActivityManager.RunningTaskInfo.class);
+        when(change.getTaskInfo()).thenReturn(taskInfo);
+        when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
+
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_UNDEFINED, TRANSIT_TO_BACK, false);
+
+        mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
+                info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+
+        verify(mListener, times(0)).onHomeVisibilityChanged(anyBoolean());
+    }
+
+    @Test
+    public void testHomeActivityWithBackGestureNotifiesHomeIsVisible() throws RemoteException {
+        TransitionInfo info = mock(TransitionInfo.class);
+        TransitionInfo.Change change = mock(TransitionInfo.Change.class);
+        ActivityManager.RunningTaskInfo taskInfo = mock(ActivityManager.RunningTaskInfo.class);
+        when(change.getTaskInfo()).thenReturn(taskInfo);
+        when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
+
+        when(change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)).thenReturn(true);
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_CHANGE, true);
+
+        mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
+                info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+
+        verify(mListener, times(1)).onHomeVisibilityChanged(true);
+    }
+
     /**
      * Helper class to initialize variables for the rest.
      */
     private void setupTransitionInfo(ActivityManager.RunningTaskInfo taskInfo,
             TransitionInfo.Change change,
             @ActivityType int activityType,
-            @TransitionMode int mode) {
+            @TransitionMode int mode,
+            boolean isRunning) {
         when(taskInfo.getActivityType()).thenReturn(activityType);
         when(change.getMode()).thenReturn(mode);
+        taskInfo.isRunning = isRunning;
     }
-
 }

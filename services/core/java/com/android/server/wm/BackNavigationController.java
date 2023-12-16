@@ -258,11 +258,11 @@ class BackNavigationController {
                 // activity, we won't close the activity.
                 backType = BackNavigationInfo.TYPE_DIALOG_CLOSE;
                 removedWindowContainer = window;
-            } else if (!currentActivity.occludesParent() || currentActivity.showWallpaper()) {
-                // skip if current activity is translucent
+            } else if (hasTranslucentActivity(currentActivity, prevActivities)) {
+                // skip if one of participant activity is translucent
                 backType = BackNavigationInfo.TYPE_CALLBACK;
             } else if (prevActivities.size() > 0) {
-                if (!isOccluded || prevActivities.get(0).canShowWhenLocked()) {
+                if (!isOccluded || isAllActivitiesCanShowWhenLocked(prevActivities)) {
                     // We have another Activity in the same currentTask to go to
                     final WindowContainer parent = currentActivity.getParent();
                     final boolean canCustomize = parent != null
@@ -307,7 +307,7 @@ class BackNavigationController {
                     findAdjacentActivityIfExist(tmpPre, prevActivities);
                 }
                 if (prevTask == null || prevActivities.isEmpty()
-                        || (isOccluded && !prevActivities.get(0).canShowWhenLocked())) {
+                        || (isOccluded && !isAllActivitiesCanShowWhenLocked(prevActivities))) {
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 } else if (prevTask.isActivityTypeHome()) {
                     removedWindowContainer = currentTask;
@@ -395,7 +395,8 @@ class BackNavigationController {
      *
      * @return false if unable to predict what will happen
      */
-    private static boolean getAnimatablePrevActivities(@NonNull Task currentTask,
+    @VisibleForTesting
+    static boolean getAnimatablePrevActivities(@NonNull Task currentTask,
             @NonNull ActivityRecord currentActivity,
             @NonNull ArrayList<ActivityRecord> outPrevActivities) {
         if (currentActivity.mAtmService
@@ -413,40 +414,84 @@ class BackNavigationController {
         // Searching previous
         final ActivityRecord prevActivity = currentTask.getActivity((below) -> !below.finishing,
                 currentActivity, false /*includeBoundary*/, true /*traverseTopToBottom*/);
-        if (prevActivity == null) {
-            // No previous activity in this task, can still predict if previous task exists.
-            return true;
-        }
-        if (currentTask.getActivity((above) -> !above.finishing, currentActivity,
-                false /*includeBoundary*/, false /*traverseTopToBottom*/) != null) {
-            // another activity is above this activity, don't know what will happen
-            return false;
-        }
 
         final TaskFragment currTF = currentActivity.getTaskFragment();
-        final TaskFragment prevTF = prevActivity.getTaskFragment();
-        if (currTF != prevTF && prevTF != null) {
-            final TaskFragment prevTFAdjacent = prevTF.getAdjacentTaskFragment();
-            if (prevTFAdjacent != null) {
-                if (prevTFAdjacent == currTF) {
-                    // Cannot predict what will happen when app receive back key, skip animation.
-                    outPrevActivities.clear();
-                    return false;
-                } else {
-                    final ActivityRecord prevActivityAdjacent =
-                            prevTFAdjacent.getTopNonFinishingActivity();
-                    if (prevActivityAdjacent != null) {
-                        outPrevActivities.add(prevActivityAdjacent);
-                    } else {
-                        // Don't know what will happen.
-                        outPrevActivities.clear();
-                        return false;
-                    }
+        if (currTF != null && currTF.asTask() == null) {
+            // The currentActivity is embedded, search for the candidate previous activities.
+            if (prevActivity != null && currTF.hasChild(prevActivity)) {
+                // PrevActivity is under the same task fragment, that's it.
+                outPrevActivities.add(prevActivity);
+                return true;
+            }
+            if (currTF.getAdjacentTaskFragment() != null) {
+                // The two TFs are adjacent (visually displayed side-by-side), search if any
+                // activity below the lowest one
+                // If companion, those two TF will be closed together.
+                if (currTF.getCompanionTaskFragment() != null) {
+                    final WindowContainer commonParent = currTF.getParent();
+                    final TaskFragment adjacentTF = currTF.getAdjacentTaskFragment();
+                    final TaskFragment lowerTF = commonParent.mChildren.indexOf(currTF)
+                            < commonParent.mChildren.indexOf(adjacentTF)
+                            ? currTF : adjacentTF;
+                    final ActivityRecord lowerActivity = lowerTF.getTopNonFinishingActivity();
+                    // TODO (b/274997067) close currTF + companionTF, open next activities if any.
+                    // Allow to predict next task if no more activity in task. Or return previous
+                    // activities for cross-activity animation.
+                    return currentTask.getActivity((below) -> !below.finishing, lowerActivity,
+                            false /*includeBoundary*/, true /*traverseTopToBottom*/) == null;
                 }
+                // Unable to predict if no companion, it can only close current activity and make
+                // prev Activity full screened.
+                return false;
+            } else if (currTF.getCompanionTaskFragment() != null) {
+                // TF is isStacked, search bottom activity from companion TF.
+                //
+                // Sample hierarchy: search for underPrevious if any.
+                //     Current TF
+                //     Companion TF (bottomActivityInCompanion)
+                //     Bottom Activity not inside companion TF (underPrevious)
+                final TaskFragment companionTF = currTF.getCompanionTaskFragment();
+                // find bottom activity in Companion TF.
+                final ActivityRecord bottomActivityInCompanion = companionTF.getActivity(
+                        (below) -> !below.finishing, false /* traverseTopToBottom */);
+                final ActivityRecord underPrevious = currentTask.getActivity(
+                        (below) -> !below.finishing, bottomActivityInCompanion,
+                        false /*includeBoundary*/, true /*traverseTopToBottom*/);
+                if (underPrevious != null) {
+                    outPrevActivities.add(underPrevious);
+                    addPreviousAdjacentActivityIfExist(underPrevious, outPrevActivities);
+                }
+                return true;
             }
         }
+
+        if (prevActivity == null) {
+            // No previous activity in this Task nor TaskFragment, it can still predict if previous
+            // task exists.
+            return true;
+        }
+        // Add possible adjacent activity if prevActivity is embedded
+        addPreviousAdjacentActivityIfExist(prevActivity, outPrevActivities);
         outPrevActivities.add(prevActivity);
         return true;
+    }
+
+    private static void addPreviousAdjacentActivityIfExist(@NonNull ActivityRecord prevActivity,
+            @NonNull ArrayList<ActivityRecord> outPrevActivities) {
+        final TaskFragment prevTF = prevActivity.getTaskFragment();
+        if (prevTF == null || prevTF.asTask() != null) {
+            return;
+        }
+
+        final TaskFragment prevTFAdjacent = prevTF.getAdjacentTaskFragment();
+        if (prevTFAdjacent == null || prevTFAdjacent.asTask() != null) {
+            return;
+        }
+        final ActivityRecord prevActivityAdjacent =
+                prevTFAdjacent.getTopNonFinishingActivity();
+        if (prevActivityAdjacent != null) {
+            outPrevActivities.add(prevActivityAdjacent);
+        }
     }
 
     private static void findAdjacentActivityIfExist(@NonNull ActivityRecord mainActivity,
@@ -461,6 +506,30 @@ class BackNavigationController {
             return;
         }
         outList.add(topActivity);
+    }
+
+    private static boolean hasTranslucentActivity(@NonNull ActivityRecord currentActivity,
+            @NonNull ArrayList<ActivityRecord> prevActivities) {
+        if (!currentActivity.occludesParent() || currentActivity.showWallpaper()) {
+            return true;
+        }
+        for (int i = prevActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord test = prevActivities.get(i);
+            if (!test.occludesParent() || test.showWallpaper()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isAllActivitiesCanShowWhenLocked(
+            @NonNull ArrayList<ActivityRecord> prevActivities) {
+        for (int i = prevActivities.size() - 1; i >= 0; --i) {
+            if (!prevActivities.get(i).canShowWhenLocked()) {
+                return false;
+            }
+        }
+        return !prevActivities.isEmpty();
     }
 
     boolean isMonitoringTransition() {

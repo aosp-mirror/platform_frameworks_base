@@ -23,10 +23,13 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.flicker.testapp.ActivityOptions.Ime.Default.ACTION_FINISH_ACTIVITY
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,7 +56,12 @@ class CloseImeToHomeOnFinishActivityTest(flicker: LegacyFlickerTest) : BaseTest(
             testApp.launchViaIntent(wmHelper)
             testApp.openIME(wmHelper)
         }
-        transitions { testApp.finishActivity(wmHelper) }
+        transitions {
+            broadcastActionTrigger.doAction(ACTION_FINISH_ACTIVITY)
+            wmHelper.StateSyncBuilder()
+                    .withActivityRemoved(ActivityOptions.Ime.Default.COMPONENT.toFlickerComponent())
+                    .waitForAndVerify()
+        }
         teardown { simpleApp.exit(wmHelper) }
     }
 

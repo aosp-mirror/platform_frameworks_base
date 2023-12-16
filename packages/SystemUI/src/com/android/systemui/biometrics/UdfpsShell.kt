@@ -18,13 +18,13 @@ package com.android.systemui.biometrics
 
 import android.content.Context
 import android.graphics.Rect
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_OTHER
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR
-import android.hardware.biometrics.BiometricOverlayConstants.REASON_UNKNOWN
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_BP
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_OTHER
+import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTINGS
+import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
+import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR
+import android.hardware.biometrics.BiometricRequestConstants.REASON_UNKNOWN
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.util.Log
 import android.view.LayoutInflater

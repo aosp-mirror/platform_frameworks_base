@@ -44,11 +44,11 @@ object Flags {
     // 100 - notification
     // TODO(b/297792660): Tracking Bug
     @JvmField val UNCLEARED_TRANSIENT_HUN_FIX =
-        unreleasedFlag("uncleared_transient_hun_fix", teamfood = false)
+        unreleasedFlag("uncleared_transient_hun_fix", teamfood = true)
 
     // TODO(b/298308067): Tracking Bug
     @JvmField val SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX =
-        unreleasedFlag("swipe_uncleared_transient_view_fix", teamfood = false)
+        unreleasedFlag("swipe_uncleared_transient_view_fix", teamfood = true)
 
     // TODO(b/254512751): Tracking Bug
     val NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
@@ -111,7 +111,7 @@ object Flags {
     // TODO(b/301955929)
     @JvmField
     val NOTIF_LS_BACKGROUND_THREAD =
-            unreleasedFlag("notification_lockscreen_mgr_bg_thread", teamfood = true)
+            releasedFlag("notification_lockscreen_mgr_bg_thread")
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
@@ -151,10 +151,6 @@ object Flags {
     // TODO(b/305984787):
     @JvmField
     val REFACTOR_GETCURRENTUSER = unreleasedFlag("refactor_getcurrentuser", teamfood = true)
-
-    /** Flag to control the migration of face auth to modern architecture. */
-    // TODO(b/262838215): Tracking bug
-    @JvmField val FACE_AUTH_REFACTOR = releasedFlag("face_auth_refactor")
 
     /** Flag to control the revamp of keyguard biometrics progress animation */
     // TODO(b/244313043): Tracking bug
@@ -234,20 +230,10 @@ object Flags {
     @JvmField val MIGRATE_KEYGUARD_STATUS_BAR_VIEW =
         unreleasedFlag("migrate_keyguard_status_bar_view")
 
-    /** Migrate clocks from keyguard status view to keyguard root view*/
-    // TODO(b/301502635): Tracking Bug.
-    @JvmField val MIGRATE_CLOCKS_TO_BLUEPRINT =
-            unreleasedFlag("migrate_clocks_to_blueprint")
-
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
     @JvmField
     val WALLPAPER_PICKER_PREVIEW_ANIMATION = releasedFlag("wallpaper_picker_preview_animation")
-
-    /** Flag to enable rest to unlock feature. */
-    // TODO(b/303672286): Tracking bug
-    @JvmField
-    val REST_TO_UNLOCK: UnreleasedFlag = unreleasedFlag("rest_to_unlock")
 
     /**
      * TODO(b/278086361): Tracking bug
@@ -261,12 +247,6 @@ object Flags {
     @JvmField
     val KEYGUARD_WM_STATE_REFACTOR: UnreleasedFlag =
             unreleasedFlag("keyguard_wm_state_refactor")
-
-    /** Flag to disable the face scanning animation pulsing. */
-    // TODO(b/295245791): Tracking bug.
-    @JvmField val STOP_PULSING_FACE_SCANNING_ANIMATION = resourceBooleanFlag(
-            R.bool.flag_stop_pulsing_face_scanning_animation,
-            "stop_pulsing_face_scanning_animation")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -297,10 +277,6 @@ object Flags {
             R.bool.flag_lockscreen_qs_user_detail_shortcut,
             "qs_user_detail_shortcut"
         )
-
-    // TODO(b/296357483): Tracking Bug
-    @JvmField
-    val QS_PIPELINE_NEW_TILES = unreleasedFlag("qs_pipeline_new_tiles")
 
     // TODO(b/254512383): Tracking Bug
     @JvmField
@@ -458,18 +434,7 @@ object Flags {
     val LOCKSCREEN_ENABLE_LANDSCAPE =
             unreleasedFlag("lockscreen.enable_landscape")
 
-    // TODO(b/281648899): Tracking bug
-    @Keep
-    @JvmField
-    val WALLPAPER_MULTI_CROP =
-        sysPropBooleanFlag("persist.wm.debug.wallpaper_multi_crop", default = false)
-
     // 1200 - predictive back
-    @Keep
-    @JvmField
-    val WM_ENABLE_PREDICTIVE_BACK =
-        sysPropBooleanFlag("persist.wm.debug.predictive_back", default = true)
-
     @Keep
     @JvmField
     val WM_ENABLE_PREDICTIVE_BACK_ANIM =
@@ -549,28 +514,12 @@ object Flags {
             unreleasedFlag("clipboard_shared_transitions", teamfood = true)
 
     /**
-     * Whether the scene container (Flexiglass) is enabled. Note that [SCENE_CONTAINER] should be
-     * checked and toggled together with [SCENE_CONTAINER_ENABLED] so that ProGuard can remove
-     * unused code from our APK at compile time.
+     * Whether the scene container (Flexiglass) is enabled. Note that SceneContainerFlags#isEnabled
+     * should be checked and toggled together with [SCENE_CONTAINER_ENABLED] so that ProGuard can
+     * remove unused code from our APK at compile time.
      */
     // TODO(b/283300105): Tracking Bug
     @JvmField val SCENE_CONTAINER_ENABLED = false
-    @Deprecated(
-        message = """
-            Do not use this flag directly. Please use
-            [com.android.systemui.scene.shared.flag.SceneContainerFlags#isEnabled].
-
-            (Not really deprecated but using this as a simple way to bring attention to the above).
-        """,
-        replaceWith = ReplaceWith(
-            "com.android.systemui.scene.shared.flag.SceneContainerFlags#isEnabled",
-        ),
-        level = DeprecationLevel.WARNING,
-    )
-    @JvmField val SCENE_CONTAINER = resourceBooleanFlag(
-        R.bool.config_sceneContainerFrameworkEnabled,
-        "scene_container",
-    )
 
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
@@ -615,6 +564,13 @@ object Flags {
     val ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS =
         unreleasedFlag("enable_unfold_status_bar_animations")
 
+    // TODO(b/316157842): Tracking Bug
+    // Adds extra delay to notifications measure
+    @Keep
+    @JvmField
+    val ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE =
+        unreleasedFlag("enable_notifications_simulate_slow_measure")
+
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag("exp_flag_release")
 
@@ -630,7 +586,7 @@ object Flags {
 
     // TODO(b/277201412): Tracking Bug
     @JvmField
-    val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION = releasedFlag("split_shade_subpixel_optimization")
+    val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION = unreleasedFlag("split_shade_subpixel_optimization")
 
     // TODO(b/288868056): Tracking Bug
     @JvmField
@@ -707,7 +663,7 @@ object Flags {
 
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField
-    val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog")
+    val BLUETOOTH_QS_TILE_DIALOG = releasedFlag("bluetooth_qs_tile_dialog")
 
     // TODO(b/300995746): Tracking Bug
     /** A resource flag for whether the communal service is enabled. */

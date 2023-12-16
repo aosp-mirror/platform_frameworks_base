@@ -61,6 +61,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.PrintWriterPrinter;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -163,6 +164,11 @@ final class BroadcastRecord extends Binder {
     // the intent to the receiver.
     @Nullable
     final BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver;
+
+    // Cache of records that are "matching" this. Only used at the time of enqueuing this record
+    // into the queue.
+    @Nullable
+    private ArrayMap<BroadcastRecord, Boolean> mMatchingRecordsCache;
 
     private @Nullable String mCachedToString;
     private @Nullable String mCachedToShortString;
@@ -1248,6 +1254,33 @@ final class BroadcastRecord extends Binder {
         // checking how many receivers have finished (either skipped or cancelled) and whether or
         // not the dispatch has been started should be sufficient.
         return (terminalCount == 0 && dispatchTime <= 0);
+    }
+
+    boolean isMatchingRecord(@NonNull BroadcastRecord record) {
+        final int idx = mMatchingRecordsCache.indexOfKey(record);
+        if (idx > 0) {
+            return mMatchingRecordsCache.valueAt(idx);
+        }
+        // Consider a record to be matching if has the same receivers in the same order.
+        boolean matches = (receivers.size() == record.receivers.size());
+        if (matches) {
+            for (int i = receivers.size() - 1; i >= 0; --i) {
+                if (!isReceiverEquals(receivers.get(i), record.receivers.get(i))) {
+                    matches = false;
+                    break;
+                }
+            }
+        }
+        mMatchingRecordsCache.put(record, matches);
+        return matches;
+    }
+
+    void setMatchingRecordsCache(@NonNull ArrayMap<BroadcastRecord, Boolean> matchingRecordsCache) {
+        mMatchingRecordsCache = matchingRecordsCache;
+    }
+
+    void clearMatchingRecordsCache() {
+        mMatchingRecordsCache = null;
     }
 
     @Override

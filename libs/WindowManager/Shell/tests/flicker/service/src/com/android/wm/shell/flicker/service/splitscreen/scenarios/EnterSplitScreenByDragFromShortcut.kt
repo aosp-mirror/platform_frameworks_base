@@ -19,6 +19,7 @@ package com.android.wm.shell.flicker.service.splitscreen.scenarios
 import android.app.Instrumentation
 import android.tools.common.NavBar
 import android.tools.common.Rotation
+import android.tools.device.AndroidLoggerSetupRule
 import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
@@ -29,6 +30,7 @@ import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
+import org.junit.ClassRule
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -57,10 +59,13 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
+
+        tapl.enableBlockTimeout(true)
     }
 
     @Test
     open fun enterSplitScreenByDragFromShortcut() {
+        tapl.showTaskbarIfHidden()
         tapl.launchedAppState.taskbar
             .getAppIcon(secondaryApp.appName)
             .openDeepShortcutMenu()
@@ -81,5 +86,10 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun teardwon() {
         primaryApp.exit(wmHelper)
         secondaryApp.exit(wmHelper)
+        tapl.enableBlockTimeout(false)
+    }
+
+    companion object {
+        @ClassRule @JvmField val setupLoggerRule = AndroidLoggerSetupRule()
     }
 }

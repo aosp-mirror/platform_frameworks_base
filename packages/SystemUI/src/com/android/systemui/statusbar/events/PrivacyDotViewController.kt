@@ -278,6 +278,7 @@ open class PrivacyDotViewController @Inject constructor(
         var contentInsets = state.contentRectForRotation(rot)
         tl.setPadding(0, state.paddingTop, 0, 0)
         (tl.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = contentInsets.top
             height = contentInsets.height()
             if (rtl) {
                 width = contentInsets.left
@@ -290,6 +291,7 @@ open class PrivacyDotViewController @Inject constructor(
         contentInsets = state.contentRectForRotation(rot)
         tr.setPadding(0, state.paddingTop, 0, 0)
         (tr.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = contentInsets.top
             height = contentInsets.height()
             if (rtl) {
                 width = contentInsets.left
@@ -302,6 +304,7 @@ open class PrivacyDotViewController @Inject constructor(
         contentInsets = state.contentRectForRotation(rot)
         br.setPadding(0, state.paddingTop, 0, 0)
         (br.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = contentInsets.top
             height = contentInsets.height()
             if (rtl) {
                 width = contentInsets.left
@@ -314,6 +317,7 @@ open class PrivacyDotViewController @Inject constructor(
         contentInsets = state.contentRectForRotation(rot)
         bl.setPadding(0, state.paddingTop, 0, 0)
         (bl.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = contentInsets.top
             height = contentInsets.height()
             if (rtl) {
                 width = contentInsets.left

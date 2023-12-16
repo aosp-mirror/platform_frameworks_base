@@ -28,6 +28,7 @@ import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
+import com.android.server.wm.flicker.testapp.ActivityOptions.Ime.Default.ACTION_TOGGLE_ORIENTATION
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,7 +54,11 @@ class OpenImeWindowToFixedPortraitAppTest(flicker: LegacyFlickerTest) : BaseTest
             // Enable letterbox when the app calls setRequestedOrientation
             device.executeShellCommand("cmd window set-ignore-orientation-request true")
         }
-        transitions { testApp.toggleFixPortraitOrientation(wmHelper) }
+        transitions {
+            broadcastActionTrigger.doAction(ACTION_TOGGLE_ORIENTATION)
+            // Ensure app relaunching transition finished and the IME was shown
+            testApp.waitIMEShown(wmHelper)
+        }
         teardown {
             testApp.exit()
             device.executeShellCommand("cmd window set-ignore-orientation-request false")

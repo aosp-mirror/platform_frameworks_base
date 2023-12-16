@@ -216,6 +216,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         default CompatibilityInfo.Translator getTranslator() {
             return null;
         }
+
+        /**
+         * Notifies when the state of running animation is changed. The state is either "running" or
+         * "idle".
+         *
+         * @param running {@code true} if there is any animation running; {@code false} otherwise.
+         */
+        default void notifyAnimationRunningStateChanged(boolean running) {}
     }
 
     private static final String TAG = "InsetsController";
@@ -749,6 +757,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     final InsetsAnimationControlRunner runner = new InsetsResizeAnimationRunner(
                             mFrame, state1, mToState, RESIZE_INTERPOLATOR,
                             ANIMATION_DURATION_RESIZE, mTypes, InsetsController.this);
+                    if (mRunningAnimations.isEmpty()) {
+                        mHost.notifyAnimationRunningStateChanged(true);
+                    }
                     mRunningAnimations.add(new RunningAnimation(runner, runner.getAnimationType()));
                 }
             };
@@ -1382,6 +1393,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_ANIMATION_RUNNING);
+        if (mRunningAnimations.isEmpty()) {
+            mHost.notifyAnimationRunningStateChanged(true);
+        }
         mRunningAnimations.add(new RunningAnimation(runner, animationType));
         if (DEBUG) Log.d(TAG, "Animation added to runner. useInsetsAnimationThread: "
                 + useInsetsAnimationThread);
@@ -1587,6 +1601,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 }
                 break;
             }
+        }
+        if (mRunningAnimations.isEmpty()) {
+            mHost.notifyAnimationRunningStateChanged(false);
         }
         onAnimationStateChanged(removedTypes, false /* running */);
     }

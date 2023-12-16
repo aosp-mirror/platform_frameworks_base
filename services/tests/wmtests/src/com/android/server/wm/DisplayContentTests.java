@@ -51,8 +51,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -159,6 +157,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Tests for the {@link DisplayContent} class.
@@ -991,7 +993,9 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.getDisplayPolicy().getDecorInsetsInfo(ROTATION_0, dc.mBaseDisplayHeight,
                 dc.mBaseDisplayWidth).mConfigFrame.set(0, 0, 1000, 990);
         dc.computeScreenConfiguration(config, ROTATION_0);
+        dc.onRequestedOverrideConfigurationChanged(config);
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, config.orientation);
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, dc.getNaturalOrientation());
     }
 
     @Test
@@ -2084,15 +2088,17 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testShellTransitRotation() {
-        DisplayContent dc = createNewDisplay();
-        dc.setLastHasContent();
+        final DisplayContent dc = mDisplayContent;
+        // Create 2 visible activities to verify that they can both receive the new configuration.
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        doReturn(true).when(activity1).isSyncFinished(any());
+        doReturn(true).when(activity2).isSyncFinished(any());
 
         final TestTransitionPlayer testPlayer = registerTestTransitionPlayer();
         final DisplayRotation dr = dc.getDisplayRotation();
-        doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
-        // Rotate 180 degree so the display doesn't have configuration change. This condition is
-        // used for the later verification of stop-freezing (without setting mWaitingForConfig).
-        doReturn((dr.getRotation() + 2) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
+        spyOn(dr);
+        doReturn((dr.getRotation() + 1) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
         mWm.mDisplayChangeController =
                 new IDisplayChangeWindowController.Stub() {
                     @Override
@@ -2107,11 +2113,8 @@ public class DisplayContentTests extends WindowTestsBase {
                     }
                 };
 
-        // kill any existing rotation animation (vestigial from test setup).
-        dc.setRotationAnimation(null);
-
         final int origRot = dc.getConfiguration().windowConfiguration.getRotation();
-
+        dc.setLastHasContent();
         mWm.updateRotation(true /* alwaysSendConfiguration */, false /* forceRelayout */);
         // Should create a transition request without performing rotation
         assertNotNull(testPlayer.mLastRequest);
@@ -2120,6 +2123,10 @@ public class DisplayContentTests extends WindowTestsBase {
         // Once transition starts, rotation is applied and transition shows DC rotating.
         testPlayer.startTransition();
         waitUntilHandlersIdle();
+        verify(activity1).ensureActivityConfiguration(anyInt(), anyBoolean(), anyBoolean(),
+                anyBoolean());
+        verify(activity2).ensureActivityConfiguration(anyInt(), anyBoolean(), anyBoolean(),
+                anyBoolean());
         assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
         assertNotNull(testPlayer.mLastReady);
         assertTrue(testPlayer.mController.isPlaying());
@@ -2287,7 +2294,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 0 /* userId */);
         dc.mCurrentUniqueDisplayId = mDisplayInfo.uniqueId + "-test";
         // Trigger display changed.
-        dc.onDisplayChanged();
+        updateDisplay(dc);
         // Ensure overridden size and denisty match the most up-to-date values in settings for the
         // display.
         verifySizes(dc, forcedWidth, forcedHeight, forcedDensity);
@@ -2762,26 +2769,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 mDisplayContent.getKeepClearAreas());
     }
 
-    @Test
-    public void testMayImeShowOnLaunchingActivity_negativeWhenSoftInputModeHidden() {
-        final ActivityRecord app = createActivityRecord(mDisplayContent);
-        final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, app, "appWin");
-        createWindow(null, TYPE_APPLICATION_STARTING, app, "startingWin");
-        app.mStartingData = mock(SnapshotStartingData.class);
-        // Assume the app has shown IME before and warm launching with a snapshot window.
-        doReturn(true).when(app.mStartingData).hasImeSurface();
-
-        // Expect true when this IME focusable activity will show IME during launching.
-        assertTrue(WindowManager.LayoutParams.mayUseInputMethod(appWin.mAttrs.flags));
-        assertTrue(mDisplayContent.mayImeShowOnLaunchingActivity(app));
-
-        // Not expect IME will be shown during launching if the app's softInputMode is hidden.
-        appWin.mAttrs.softInputMode = SOFT_INPUT_STATE_ALWAYS_HIDDEN;
-        assertFalse(mDisplayContent.mayImeShowOnLaunchingActivity(app));
-        appWin.mAttrs.softInputMode = SOFT_INPUT_STATE_HIDDEN;
-        assertFalse(mDisplayContent.mayImeShowOnLaunchingActivity(app));
-    }
-
     private void removeRootTaskTests(Runnable runnable) {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task rootTask1 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
@@ -2852,7 +2839,7 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     private DisplayContent createDisplayNoUpdateDisplayInfo() {
         final DisplayContent displayContent = createNewDisplay();
-        doNothing().when(displayContent).updateDisplayInfo();
+        doNothing().when(displayContent).updateDisplayInfo(any());
         return displayContent;
     }
 
@@ -2880,6 +2867,16 @@ public class DisplayContentTests extends WindowTestsBase {
         final ArrayList<WindowState> result = new ArrayList<>(list);
         Collections.reverse(result);
         return result;
+    }
+
+    private void updateDisplay(DisplayContent displayContent) {
+        CompletableFuture<Object> future = new CompletableFuture<>();
+        displayContent.requestDisplayUpdate(() -> future.complete(new Object()));
+        try {
+            future.get(15, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void tapOnDisplay(final DisplayContent dc) {

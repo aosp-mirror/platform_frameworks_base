@@ -18,31 +18,17 @@ package com.android.wm.shell.draganddrop;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.ClipDescription.EXTRA_PENDING_INTENT;
-import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
-import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
-import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
-import static android.content.Intent.EXTRA_USER;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.PendingIntent;
 import android.app.WindowConfiguration;
 import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.net.Uri;
-import android.os.UserHandle;
-
-import androidx.annotation.IntDef;
-import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.DisplayLayout;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**

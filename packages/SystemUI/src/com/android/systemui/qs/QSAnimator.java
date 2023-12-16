@@ -36,11 +36,11 @@ import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -64,6 +64,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
     private static final String TAG = "QSAnimator";
 
+    private static final int ANIMATORS_UPDATE_DELAY_MS = 100;
     private static final float EXPANDED_TILE_DELAY = .86f;
     //Non first page delays
     private static final float QS_TILE_LABEL_FADE_OUT_START = 0.15f;
@@ -133,7 +134,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private int mLastQQSTileHeight;
     private float mLastPosition;
     private final QSHost mHost;
-    private final Executor mExecutor;
+    private final DelayableExecutor mExecutor;
     private boolean mShowCollapsedOnKeyguard;
     private int mQQSTop;
 
@@ -144,7 +145,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     public QSAnimator(@RootView View rootView, QuickQSPanel quickPanel,
             QSPanelController qsPanelController,
             QuickQSPanelController quickQSPanelController, QSHost qsTileHost,
-            @Main Executor executor, TunerService tunerService,
+            @Main DelayableExecutor executor, TunerService tunerService,
             QSExpansionPathInterpolator qsExpansionPathInterpolator) {
         mQsRootView = rootView;
         mQuickQsPanel = quickPanel;
@@ -170,6 +171,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
     public void onRtlChanged() {
         updateAnimators();
+        setCurrentPosition();
     }
 
     /**
@@ -209,6 +211,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     @Override
     public void onViewAttachedToWindow(@NonNull View view) {
         updateAnimators();
+        setCurrentPosition();
     }
 
     @Override
@@ -753,7 +756,10 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     public void onTilesChanged() {
         // Give the QS panels a moment to generate their new tiles, then create all new animators
         // hooked up to the new views.
-        mExecutor.execute(mUpdateAnimators);
+        mExecutor.executeDelayed(mUpdateAnimators, ANIMATORS_UPDATE_DELAY_MS);
+
+        // Also requests a lazy animators update in case the animation starts before the executor.
+        requestAnimatorUpdate();
     }
 
     private final TouchAnimator.Listener mNonFirstPageListener =

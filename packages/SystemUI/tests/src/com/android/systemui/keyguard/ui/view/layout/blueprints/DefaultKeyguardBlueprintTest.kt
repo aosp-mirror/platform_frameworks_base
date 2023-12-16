@@ -27,10 +27,10 @@ import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialInd
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.keyguard.ui.view.layout.items.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntryIconSection
+import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
@@ -57,7 +57,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     private lateinit var underTest: DefaultKeyguardBlueprint
     private lateinit var rootView: KeyguardRootView
     @Mock private lateinit var defaultIndicationAreaSection: DefaultIndicationAreaSection
-    @Mock private lateinit var mDefaultDeviceEntryIconSection: DefaultDeviceEntryIconSection
+    @Mock private lateinit var mDefaultDeviceEntrySection: DefaultDeviceEntrySection
     @Mock private lateinit var defaultShortcutsSection: DefaultShortcutsSection
     @Mock private lateinit var defaultAmbientIndicationAreaSection: Optional<KeyguardSection>
     @Mock private lateinit var defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection
@@ -78,7 +78,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
         underTest =
             DefaultKeyguardBlueprint(
                 defaultIndicationAreaSection,
-                mDefaultDeviceEntryIconSection,
+                mDefaultDeviceEntrySection,
                 defaultShortcutsSection,
                 defaultAmbientIndicationAreaSection,
                 defaultSettingsPopupMenuSection,
@@ -105,14 +105,14 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
         val prevBlueprint = mock(KeyguardBlueprint::class.java)
         val someSection = mock(KeyguardSection::class.java)
         whenever(prevBlueprint.sections)
-            .thenReturn(underTest.sections.minus(mDefaultDeviceEntryIconSection).plus(someSection))
+            .thenReturn(underTest.sections.minus(mDefaultDeviceEntrySection).plus(someSection))
         val constraintLayout = ConstraintLayout(context, null)
         underTest.replaceViews(prevBlueprint, constraintLayout)
-        underTest.sections.minus(mDefaultDeviceEntryIconSection).forEach {
+        underTest.sections.minus(mDefaultDeviceEntrySection).forEach {
             verify(it, never())?.addViews(constraintLayout)
         }
 
-        verify(mDefaultDeviceEntryIconSection).addViews(constraintLayout)
+        verify(mDefaultDeviceEntrySection).addViews(constraintLayout)
         verify(someSection).removeViews(constraintLayout)
     }
 

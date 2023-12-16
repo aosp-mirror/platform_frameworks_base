@@ -36,16 +36,8 @@
             android:forceQueryable="true"
             android:directBootAware="true">
 
-        <receiver android:name=".TemporaryFileManager"
+        <receiver android:name=".common.TemporaryFileManager"
             android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name="v2.model.TemporaryFileManager"
-            android:exported="false"
-            android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -54,7 +46,7 @@
         <activity android:name=".v2.ui.InstallLaunch"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/Theme.AlertDialogActivity"
-            android:exported="true"/>
+            android:exported="false"/>
 
         <activity android:name=".InstallStart"
                 android:theme="@style/Theme.AlertDialogActivity"
@@ -101,18 +93,9 @@
                 android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
 
-        <receiver android:name=".InstallEventReceiver"
+        <receiver android:name=".common.InstallEventReceiver"
                 android:permission="android.permission.INSTALL_PACKAGES"
                 android:exported="false">
-            <intent-filter android:priority="1">
-                <action android:name="com.android.packageinstaller.ACTION_INSTALL_COMMIT" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name=".v2.model.InstallEventReceiver"
-            android:permission="android.permission.INSTALL_PACKAGES"
-            android:exported="false"
-            android:enabled="false">
             <intent-filter android:priority="1">
                 <action android:name="com.android.packageinstaller.ACTION_INSTALL_COMMIT" />
             </intent-filter>
@@ -140,7 +123,15 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".UninstallEventReceiver"
+        <activity android:name=".v2.ui.UninstallLaunch"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:exported="false">
+        </activity>
+
+        <receiver android:name=".common.UninstallEventReceiver"
             android:permission="android.permission.INSTALL_PACKAGES"
             android:exported="false">
             <intent-filter android:priority="1">
@@ -181,6 +172,30 @@
 
         <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver"
             tools:node="remove" />
+
+        <activity android:name=".UnarchiveActivity"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
+                  android:excludeFromRecents="true"
+                  android:noHistory="true"
+                  android:exported="true">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.intent.action.UNARCHIVE_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".UnarchiveErrorActivity"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
+                  android:excludeFromRecents="true"
+                  android:noHistory="true"
+                  android:exported="true">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.intent.action.UNARCHIVE_ERROR_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

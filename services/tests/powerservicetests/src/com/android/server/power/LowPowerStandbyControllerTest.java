@@ -49,8 +49,11 @@ import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IForegroundServiceObserver;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
@@ -68,7 +71,7 @@ import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
@@ -85,9 +88,11 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -145,7 +150,8 @@ public class LowPowerStandbyControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mContextSpy = spy(new BroadcastInterceptingContext(InstrumentationRegistry.getContext()));
+        mContextSpy = spy(new BroadcastInterceptingContext(InstrumentationRegistry
+                .getInstrumentation().getTargetContext()));
         when(mContextSpy.getPackageManager()).thenReturn(mPackageManagerMock);
         when(mContextSpy.getSystemService(AlarmManager.class)).thenReturn(mAlarmManagerMock);
         when(mContextSpy.getSystemService(UserManager.class)).thenReturn(mUserManagerMock);
@@ -395,26 +401,65 @@ public class LowPowerStandbyControllerTest {
         setLowPowerStandbySupportedConfig(true);
         mController.systemReady();
 
+        TestReceiver receiver = new TestReceiver();
+        mContextSpy.registerReceiver(receiver,
+                new IntentFilter(PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED));
+
         BroadcastInterceptingContext.FutureIntent futureIntent = mContextSpy.nextBroadcastIntent(
                 PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED);
         mController.setEnabled(false);
         futureIntent.assertNotReceived();
+        assertThat(receiver.receivedCount).isEqualTo(0);
+        receiver.reset();
 
         futureIntent = mContextSpy.nextBroadcastIntent(
                 PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED);
         mController.setEnabled(true);
         assertThat(futureIntent.get(1, TimeUnit.SECONDS)).isNotNull();
+        assertThat(receiver.receivedCount).isEqualTo(1);
+        receiver.reset();
 
         futureIntent = mContextSpy.nextBroadcastIntent(
                 PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED);
         mController.setEnabled(true);
         futureIntent.assertNotReceived();
+        assertThat(receiver.receivedCount).isEqualTo(0);
+        receiver.reset();
 
         futureIntent = mContextSpy.nextBroadcastIntent(
                 PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED);
-
         mController.setEnabled(false);
         assertThat(futureIntent.get(1, TimeUnit.SECONDS)).isNotNull();
+        assertThat(receiver.receivedCount).isEqualTo(1);
+        receiver.reset();
+    }
+
+    @Test
+    public void testLowPowerStandbyEnabled_EnabledChangedExplicitBroadcastSent() throws Exception {
+        setLowPowerStandbySupportedConfig(true);
+        List<PackageInfo> packagesHoldingPermission = new ArrayList<>();
+
+        when(mPackageManagerMock.getPackagesHoldingPermissions(Mockito.any(),
+                Mockito.anyInt())).thenReturn(packagesHoldingPermission);
+
+        PackageInfo testInfo = new PackageInfo();
+        testInfo.packageName = mContextSpy.getPackageName();
+        packagesHoldingPermission.add(testInfo);
+        mController.systemReady();
+        TestReceiver receiver = new TestReceiver();
+        mContextSpy.registerReceiver(receiver,
+                new IntentFilter(PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED));
+
+        mController.setEnabled(false);
+        assertThat(receiver.receivedCount).isEqualTo(0);
+        receiver.reset();
+
+        mController.setEnabled(true);
+        // Since we added a package manually to the packages that are allowed to
+        // manage LPS, the interceptor should have intercepted two broadcasts, one
+        // implicit via registration and one explicit to the package added above.
+        assertThat(receiver.receivedCount).isEqualTo(2);
+        receiver.reset();
     }
 
     @Test
@@ -905,5 +950,20 @@ public class LowPowerStandbyControllerTest {
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
         LocalServices.removeServiceForTest(clazz);
         LocalServices.addService(clazz, mock);
+    }
+
+    public static class TestReceiver extends BroadcastReceiver {
+        public int receivedCount = 0;
+
+        /**
+         * Resets the count of this receiver
+         */
+        public void reset() {
+            receivedCount = 0;
+        }
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            receivedCount++;
+        }
     }
 }

@@ -44,7 +44,9 @@ public class NavigationHandle extends View implements ButtonInterface {
     protected final float mBottom;
     private final float mAdditionalWidthForAnimation;
     private final float mAdditionalHeightForAnimation;
+    private final float mShrinkWidthForAnimation;
     private boolean mRequiresInvalidate;
+    private boolean mShrink;
 
     private ObjectAnimator mPulseAnimator = null;
     private float mPulseAnimationProgress;
@@ -75,6 +77,8 @@ public class NavigationHandle extends View implements ButtonInterface {
                 res.getDimension(R.dimen.navigation_home_handle_additional_width_for_animation);
         mAdditionalHeightForAnimation =
                 res.getDimension(R.dimen.navigation_home_handle_additional_height_for_animation);
+        mShrinkWidthForAnimation =
+                res.getDimension(R.dimen.navigation_home_handle_shrink_width_for_animation);
 
         final int dualToneDarkTheme = Utils.getThemeAttr(context, R.attr.darkIconTheme);
         final int dualToneLightTheme = Utils.getThemeAttr(context, R.attr.lightIconTheme);
@@ -101,12 +105,20 @@ public class NavigationHandle extends View implements ButtonInterface {
 
         // Draw that bar
         int navHeight = getHeight();
-        float additionalHeight = mAdditionalHeightForAnimation * mPulseAnimationProgress;
+        float additionalHeight;
+        float additionalWidth;
+        if (mShrink) {
+            additionalHeight = 0;
+            additionalWidth = -mShrinkWidthForAnimation * mPulseAnimationProgress;
+        } else {
+            additionalHeight = mAdditionalHeightForAnimation * mPulseAnimationProgress;
+            additionalWidth = mAdditionalWidthForAnimation * mPulseAnimationProgress;
+        }
+
         float height = mRadius * 2 + additionalHeight;
-        float additionalWidth = mAdditionalWidthForAnimation * mPulseAnimationProgress;
         float width = getWidth() + additionalWidth;
-        float x = -(additionalWidth / 2);
-        float y = navHeight - mBottom - height - (additionalHeight / 2);
+        float x = -additionalWidth;
+        float y = navHeight - mBottom - height + (additionalHeight / 2);
         float adjustedRadius = height / 2;
         canvas.drawRoundRect(x, y, width, y + height, adjustedRadius, adjustedRadius, mPaint);
     }
@@ -138,26 +150,32 @@ public class NavigationHandle extends View implements ButtonInterface {
     public void setDelayTouchFeedback(boolean shouldDelay) {}
 
     @Override
-    public void animateLongPress(boolean isTouchDown, long durationMs) {
+    public void animateLongPress(boolean isTouchDown, boolean shrink, long durationMs) {
         if (mPulseAnimator != null) {
             mPulseAnimator.cancel();
         }
 
+        mShrink = shrink;
         Interpolator interpolator;
-        if (isTouchDown) {
-            // For now we animate the navbar expanding and contracting so that the navbar is the
-            // original size by the end of {@code duration}. This is because a screenshot is taken
-            // at that point and we don't want to capture the larger navbar.
-            // TODO(b/306400785): Determine a way to exclude navbar from the screenshot.
+        if (shrink) {
+            interpolator = Interpolators.LEGACY_DECELERATE;
+        } else {
+            if (isTouchDown) {
+                // For now we animate the navbar expanding and contracting so that the navbar is
+                // the original size by the end of {@code duration}. This is because a screenshot
+                // is taken at that point and we don't want to capture the larger navbar.
+                // TODO(b/306400785): Determine a way to exclude navbar from the screenshot.
 
-            // Fraction of the touch down animation to expand; remaining is used to contract again.
-            float expandFraction = 0.9f;
-            interpolator = t -> t <= expandFraction
+                // Fraction of the touch down animation to expand; remaining is used to contract
+                // again.
+                float expandFraction = 0.9f;
+                interpolator = t -> t <= expandFraction
                         ? Interpolators.clampToProgress(Interpolators.LEGACY, t, 0, expandFraction)
                         : 1 - Interpolators.clampToProgress(
                                 Interpolators.LINEAR, t, expandFraction, 1);
-        } else {
-            interpolator = Interpolators.LEGACY_DECELERATE;
+            } else {
+                interpolator = Interpolators.LEGACY_DECELERATE;
+            }
         }
 
         mPulseAnimator =

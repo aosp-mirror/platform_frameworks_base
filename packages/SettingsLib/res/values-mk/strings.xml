@@ -437,8 +437,8 @@
     <string name="transcode_notification" msgid="5560515979793436168">"Прикажувај известувања за транскодирање"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Оневозможи го кешот на транскодирањето"</string>
     <string name="widevine_settings_title" msgid="4023329801172572917">"Поставки за Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Резервен план за Force L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Изберете за да се овозможи резервен план за Force L3"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Наметни алтернативно безбедносно ниво L3"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Изберете за да се наметне алтернативно безбедносно ниво L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Активни услуги"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Погледнете и контролирајте услуги што се моментално активни"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Примена на WebView"</string>
@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Поврзано преку ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Поврзано преку eARC"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"Стандардни поставки за телевизор"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"Излез за HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Внатрешни звучници"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Стандарден излез на телевизор"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Излез за HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Внатрешни звучници"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Проблем со поврзување. Исклучете го уредот и повторно вклучете го"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Жичен аудиоуред"</string>
     <string name="help_label" msgid="3528360748637781274">"Помош и повратни информации"</string>

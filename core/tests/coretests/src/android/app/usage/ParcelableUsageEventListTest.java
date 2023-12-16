@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import android.app.usage.UsageEvents.Event;
 import android.content.res.Configuration;
 import android.os.Parcel;
+import android.os.PersistableBundle;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -140,6 +141,12 @@ public class ParcelableUsageEventListTest {
             case Event.LOCUS_ID_SET:
                 event.mLocusId = anyString();
                 break;
+            case Event.USER_INTERACTION:
+                PersistableBundle extras = new PersistableBundle();
+                extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, anyString());
+                extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, anyString());
+                event.mExtras = extras;
+                break;
         }
 
         event.mFlags = anyInt();
@@ -175,6 +182,14 @@ public class ParcelableUsageEventListTest {
                 break;
             case Event.LOCUS_ID_SET:
                 assertEquals(ue1.mLocusId, ue2.mLocusId);
+                break;
+            case Event.USER_INTERACTION:
+                final PersistableBundle extras1 = ue1.getExtras();
+                final PersistableBundle extras2 = ue2.getExtras();
+                assertEquals(extras1.getString(UsageStatsManager.EXTRA_EVENT_CATEGORY),
+                        extras2.getString(UsageStatsManager.EXTRA_EVENT_CATEGORY));
+                assertEquals(extras1.getString(UsageStatsManager.EXTRA_EVENT_ACTION),
+                        extras2.getString(UsageStatsManager.EXTRA_EVENT_ACTION));
                 break;
         }
 

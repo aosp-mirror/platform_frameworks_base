@@ -24,7 +24,7 @@ import com.android.app.animation.Interpolators;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
-import com.android.systemui.plugins.ClockController;
+import com.android.systemui.plugins.clocks.ClockController;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.DefaultClockController;
 

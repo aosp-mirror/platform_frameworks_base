@@ -1,0 +1,9 @@
+filegroup {
+    name: "framework-crashrecovery-sources",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.aidl",
+    ],
+    path: "java",
+    visibility: ["//frameworks/base:__subpackages__"],
+}

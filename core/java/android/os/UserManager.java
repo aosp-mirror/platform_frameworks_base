@@ -16,6 +16,7 @@
 
 package android.os;
 
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_BADGED_LABEL;
 import static android.app.admin.DevicePolicyResources.UNDEFINED;
 
@@ -5652,6 +5653,38 @@ public class UserManager {
     }
 
     /**
+     * Retrieves a user badge associated with the current context user. This is only
+     * applicable to profile users since non-profile users do not have badges.
+     *
+     * @return A {@link Drawable} user badge corresponding to the context user
+     * @throws android.content.res.Resources.NotFoundException if the user is not a profile or
+     * does not have a badge defined.
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public @NonNull Drawable getUserBadge() {
+        if (!isProfile(mUserId)) {
+            throw new Resources.NotFoundException("No badge found for this user.");
+        }
+        if (isManagedProfile(mUserId)) {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            return dpm.getResources().getDrawable(
+                    android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON_BADGE,
+                    SOLID_COLORED, () -> getDefaultUserBadge(mUserId));
+        }
+        return getDefaultUserBadge(mUserId);
+    }
+
+    private Drawable getDefaultUserBadge(@UserIdInt int userId){
+        return mContext.getResources().getDrawable(getUserBadgeResId(userId), mContext.getTheme());
+    }
+
+    /**
      * If the target user is a profile of the calling user or the caller
      * is itself a profile, then this returns a copy of the label with
      * badging for accessibility services like talkback. E.g. passing in "Email"
@@ -5687,6 +5720,44 @@ public class UserManager {
         try {
             final int resourceId = mService.getUserBadgeLabelResId(userId);
             return Resources.getSystem().getString(resourceId, label);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the string/label that should be used to represent the context user. For example,
+     * this string can represent a profile in tabbed views. This is only applicable to
+     * {@link #isProfile() profile users}. This string is translated to the device default language.
+     *
+     * @return String representing the label for the context user.
+     *
+     * @throws android.content.res.Resources.NotFoundException if the user does not have a label
+     * defined.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("UnflaggedApi") // b/306636213
+    @UserHandleAware(
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.QUERY_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS})
+    public @NonNull String getProfileLabel() {
+        if (isManagedProfile(mUserId)) {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            return dpm.getResources().getString(
+                    android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_TAB,
+                    () -> getDefaultProfileLabel(mUserId));
+        }
+        return getDefaultProfileLabel(mUserId);
+    }
+
+    private String getDefaultProfileLabel(int userId) {
+        try {
+            final int resourceId = mService.getProfileLabelResId(userId);
+            return Resources.getSystem().getString(resourceId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

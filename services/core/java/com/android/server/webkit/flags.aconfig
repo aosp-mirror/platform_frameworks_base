@@ -1,0 +1,9 @@
+package: "android.webkit"
+
+flag {
+    name: "update_service_v2"
+    namespace: "webview"
+    description: "Using a new version of the WebView update service"
+    bug: "308907090"
+    is_fixed_read_only: true
+}

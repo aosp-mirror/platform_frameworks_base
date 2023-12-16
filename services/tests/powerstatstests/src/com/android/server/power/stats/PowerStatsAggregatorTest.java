@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.PersistableBundle;
-import android.text.format.DateFormat;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
@@ -39,7 +38,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.text.ParseException;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -60,7 +60,7 @@ public class PowerStatsAggregatorTest {
     public void setup() throws ParseException {
         mHistory = new BatteryStatsHistory(32, 1024,
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
-                mMonotonicClock);
+                mMonotonicClock, mock(BatteryStatsHistory.TraceDelegate.class));
 
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(TEST_POWER_COMPONENT)
@@ -76,9 +76,18 @@ public class PowerStatsAggregatorTest {
 
     @Test
     public void stateUpdates() {
+        PowerStats.Descriptor descriptor =
+                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
+                        new PersistableBundle());
+        PowerStats powerStats = new PowerStats(descriptor);
+
         mClock.currentTime = 1222156800000L;    // An important date in world history
 
         mHistory.forceRecordAllHistory();
+        powerStats.stats = new long[]{0};
+        powerStats.uidStats.put(TEST_UID, new long[]{0});
+        mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
+
         mHistory.recordBatteryState(mClock.realtime, mClock.uptime, 10, /* plugged */ true);
         mHistory.recordStateStartEvent(mClock.realtime, mClock.uptime,
                 BatteryStats.HistoryItem.STATE_SCREEN_ON_FLAG);
@@ -87,10 +96,6 @@ public class PowerStatsAggregatorTest {
 
         advance(1000);
 
-        PowerStats.Descriptor descriptor =
-                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
-                        new PersistableBundle());
-        PowerStats powerStats = new PowerStats(descriptor);
         powerStats.stats = new long[]{10000};
         powerStats.uidStats.put(TEST_UID, new long[]{1234});
         mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
@@ -115,7 +120,7 @@ public class PowerStatsAggregatorTest {
         powerStats.uidStats.put(TEST_UID, new long[]{4444});
         mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
 
-        mAggregator.aggregatePowerStats(0, 0, stats -> {
+        mAggregator.aggregatePowerStats(0, MonotonicClock.UNDEFINED, stats -> {
             assertThat(mAggregatedStatsCount++).isEqualTo(0);
             assertThat(stats.getStartTime()).isEqualTo(START_TIME);
 
@@ -174,24 +179,28 @@ public class PowerStatsAggregatorTest {
 
     @NonNull
     private static CharSequence formatDateTime(long timeInMillis) {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        cal.setTimeInMillis(timeInMillis);
-        return DateFormat.format("yyyy-MM-dd hh:mm:ss", cal);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        format.getCalendar().setTimeZone(TimeZone.getTimeZone("GMT"));
+        return format.format(new Date(timeInMillis));
     }
 
     @Test
     public void incompatiblePowerStats() {
+        PowerStats.Descriptor descriptor =
+                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
+                        new PersistableBundle());
+        PowerStats powerStats = new PowerStats(descriptor);
+
         mHistory.forceRecordAllHistory();
+        powerStats.stats = new long[]{0};
+        powerStats.uidStats.put(TEST_UID, new long[]{0});
+        mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
         mHistory.recordBatteryState(mClock.realtime, mClock.uptime, 10, /* plugged */ true);
         mHistory.recordProcessStateChange(mClock.realtime, mClock.uptime, TEST_UID,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND);
 
         advance(1000);
 
-        PowerStats.Descriptor descriptor =
-                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
-                        new PersistableBundle());
-        PowerStats powerStats = new PowerStats(descriptor);
         powerStats.stats = new long[]{10000};
         powerStats.uidStats.put(TEST_UID, new long[]{1234});
         mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
@@ -211,7 +220,7 @@ public class PowerStatsAggregatorTest {
 
         mHistory.recordBatteryState(mClock.realtime, mClock.uptime, 50, /* plugged */ true);
 
-        mAggregator.aggregatePowerStats(0, 0, stats -> {
+        mAggregator.aggregatePowerStats(0, MonotonicClock.UNDEFINED, stats -> {
             long[] values = new long[1];
 
             PowerComponentAggregatedPowerStats powerComponentStats =

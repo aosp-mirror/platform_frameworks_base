@@ -503,9 +503,6 @@ public final class SurfaceControl implements Parcelable {
     // be dumped as additional context
     private static volatile boolean sDebugUsageAfterRelease = false;
 
-    static GlobalTransactionWrapper sGlobalTransaction;
-    static long sTransactionNestCount = 0;
-
     private static final NativeAllocationRegistry sRegistry =
             NativeAllocationRegistry.createMalloced(SurfaceControl.class.getClassLoader(),
                     nativeGetNativeSurfaceControlFinalizer());
@@ -859,31 +856,45 @@ public final class SurfaceControl implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_SELECTION_STRATEGY_"},
-            value = {FRAME_RATE_SELECTION_STRATEGY_SELF,
-                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN})
+            value = {FRAME_RATE_SELECTION_STRATEGY_PROPAGATE,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN,
+                    FRAME_RATE_SELECTION_STRATEGY_SELF})
     public @interface FrameRateSelectionStrategy {}
 
     // From window.h. Keep these in sync.
     /**
      * Default value. The layer uses its own frame rate specifications, assuming it has any
-     * specifications, instead of its parent's.
+     * specifications, instead of its parent's. If it does not have its own frame rate
+     * specifications, it will try to use its parent's. It will propagate its specifications to any
+     * descendants that do not have their own.
+     *
      * However, {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} on an ancestor layer
-     * supersedes this behavior, meaning that this layer will inherit the frame rate specifications
-     * of that ancestor layer.
+     * supersedes this behavior, meaning that this layer will inherit frame rate specifications
+     * regardless of whether it has its own.
      * @hide
      */
-    public static final int FRAME_RATE_SELECTION_STRATEGY_SELF = 0;
+    public static final int FRAME_RATE_SELECTION_STRATEGY_PROPAGATE = 0;
 
     /**
      * The layer's frame rate specifications will propagate to and override those of its descendant
      * layers.
-     * The layer with this strategy has the {@link #FRAME_RATE_SELECTION_STRATEGY_SELF} behavior
-     * for itself. This does mean that any parent or ancestor layer that also has the strategy
-     * {@link FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} will override this layer's
+     *
+     * The layer itself has the {@link #FRAME_RATE_SELECTION_STRATEGY_PROPAGATE} behavior.
+     * Thus, ancestor layer that also has the strategy
+     * {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} will override this layer's
      * frame rate specifications.
      * @hide
      */
     public static final int FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN = 1;
+
+    /**
+     * The layer's frame rate specifications will not propagate to its descendant
+     * layers, even if the descendant layer has no frame rate specifications.
+     * However, {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} on an ancestor
+     * layer supersedes this behavior.
+     * @hide
+     */
+    public static final int FRAME_RATE_SELECTION_STRATEGY_SELF = 2;
 
     /**
      * Builder class for {@link SurfaceControl} objects.
@@ -1576,54 +1587,30 @@ public final class SurfaceControl implements Parcelable {
         return mNativeObject != 0;
     }
 
-    /*
-     * set surface parameters.
-     * needs to be inside open/closeTransaction block
-     */
-
     /** start a transaction
      * @hide
-     */
-    @UnsupportedAppUsage
-    public static void openTransaction() {
-        synchronized (SurfaceControl.class) {
-            if (sGlobalTransaction == null) {
-                sGlobalTransaction = new GlobalTransactionWrapper();
-            }
-            synchronized(SurfaceControl.class) {
-                sTransactionNestCount++;
-            }
-        }
-    }
-
-    /**
-     * Merge the supplied transaction in to the deprecated "global" transaction.
-     * This clears the supplied transaction in an identical fashion to {@link Transaction#merge}.
-     * <p>
-     * This is a utility for interop with legacy-code and will go away with the Global Transaction.
-     * @hide
+     * @deprecated Use regular Transaction instead.
      */
     @Deprecated
-    public static void mergeToGlobalTransaction(Transaction t) {
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.merge(t);
-        }
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.VANILLA_ICE_CREAM,
+            publicAlternatives = "Use {@code SurfaceControl.Transaction} instead",
+            trackingBug = 247078497)
+    public static void openTransaction() {
+        // TODO(b/247078497): It was used for global transaction (all usages are removed).
+        //  Keep the method declaration to avoid breaking reference from legacy access.
     }
 
     /** end a transaction
      * @hide
+     * @deprecated Use regular Transaction instead.
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.VANILLA_ICE_CREAM,
+            publicAlternatives = "Use {@code SurfaceControl.Transaction} instead",
+            trackingBug = 247078497)
     public static void closeTransaction() {
-        synchronized(SurfaceControl.class) {
-            if (sTransactionNestCount == 0) {
-                Log.e(TAG,
-                        "Call to SurfaceControl.closeTransaction without matching openTransaction");
-            } else if (--sTransactionNestCount > 0) {
-                return;
-            }
-            sGlobalTransaction.applyGlobalTransaction(false);
-        }
+        // TODO(b/247078497): It was used for global transaction (all usages are removed).
+        //  Keep the method declaration to avoid breaking reference from legacy access.
     }
 
     /**
@@ -4496,39 +4483,6 @@ public final class SurfaceControl implements Parcelable {
                         "Unlocked access to synchronized SurfaceControl.Transaction");
             }
         }
-    }
-
-    /**
-     * As part of eliminating usage of the global Transaction we expose
-     * a SurfaceControl.getGlobalTransaction function. However calling
-     * apply on this global transaction (rather than using closeTransaction)
-     * would be very dangerous. So for the global transaction we use this
-     * subclass of Transaction where the normal apply throws an exception.
-     */
-    private static class GlobalTransactionWrapper extends SurfaceControl.Transaction {
-        void applyGlobalTransaction(boolean sync) {
-            applyResizedSurfaces();
-            notifyReparentedSurfaces();
-            nativeApplyTransaction(mNativeObject, sync, /*oneWay*/ false);
-        }
-
-        @Override
-        public void apply(boolean sync) {
-            throw new RuntimeException("Global transaction must be applied from closeTransaction");
-        }
-    }
-
-    /**
-     * This is a refactoring utility function to enable lower levels of code to be refactored
-     * from using the global transaction (and instead use a passed in Transaction) without
-     * having to refactor the higher levels at the same time.
-     * The returned global transaction can't be applied, it must be applied from closeTransaction
-     * Unless you are working on removing Global Transaction usage in the WindowManager, this
-     * probably isn't a good function to use.
-     * @hide
-     */
-    public static Transaction getGlobalTransaction() {
-        return sGlobalTransaction;
     }
 
     /**

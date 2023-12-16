@@ -16,6 +16,8 @@
 
 package android.platform.test.ravenwood;
 
+import static org.junit.Assert.fail;
+
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 
 import org.junit.Assume;
@@ -34,6 +36,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RavenwoodRule implements TestRule {
     private static AtomicInteger sNextPid = new AtomicInteger(100);
 
+    private static final boolean IS_UNDER_RAVENWOOD = RavenwoodRuleImpl.isUnderRavenwood();
+
+    /**
+     * When probing is enabled, all tests will be unconditionally run under Ravenwood to detect
+     * cases where a test is able to pass despite being marked as {@code IgnoreUnderRavenwood}.
+     *
+     * This is typically helpful for internal maintainers discovering tests that had previously
+     * been ignored, but now have enough Ravenwood-supported functionality to be enabled.
+     */
+    private static final boolean ENABLE_PROBE_IGNORED = false; // DO NOT SUBMIT WITH TRUE
+
     private static final int SYSTEM_UID = 1000;
     private static final int NOBODY_UID = 9999;
     private static final int FIRST_APPLICATION_UID = 10000;
@@ -44,6 +57,8 @@ public class RavenwoodRule implements TestRule {
      */
     int mUid = NOBODY_UID;
     int mPid = sNextPid.getAndIncrement();
+
+    boolean mProvideMainThread = false;
 
     public RavenwoodRule() {
     }
@@ -72,6 +87,15 @@ public class RavenwoodRule implements TestRule {
             return this;
         }
 
+        /**
+         * Configure a "main" thread to be available for the duration of the test, as defined
+         * by {@code Looper.getMainLooper()}. Has no effect under non-Ravenwood environments.
+         */
+        public Builder setProvideMainThread(boolean provideMainThread) {
+            mRule.mProvideMainThread = provideMainThread;
+            return this;
+        }
+
         public RavenwoodRule build() {
             return mRule;
         }
@@ -80,29 +104,80 @@ public class RavenwoodRule implements TestRule {
     /**
      * Return if the current process is running under a Ravenwood test environment.
      */
-    public boolean isUnderRavenwood() {
-        // TODO: give ourselves a better environment signal
-        return System.getProperty("java.class.path").contains("ravenwood");
+    public static boolean isUnderRavenwood() {
+        return IS_UNDER_RAVENWOOD;
+    }
+
+    /**
+     * Test if the given {@link Description} has been marked with an {@link IgnoreUnderRavenwood}
+     * annotation, either at the method or class level.
+     */
+    private static boolean hasIgnoreUnderRavenwoodAnnotation(Description description) {
+        if (description.getTestClass().getAnnotation(IgnoreUnderRavenwood.class) != null) {
+            return true;
+        } else if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
     public Statement apply(Statement base, Description description) {
+        if (ENABLE_PROBE_IGNORED) {
+            return applyProbeIgnored(base, description);
+        } else {
+            return applyDefault(base, description);
+        }
+    }
+
+    /**
+     * Run the given {@link Statement} with no special treatment.
+     */
+    private Statement applyDefault(Statement base, Description description) {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                final boolean isUnderRavenwood = isUnderRavenwood();
-                if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
-                    Assume.assumeFalse(isUnderRavenwood);
+                if (hasIgnoreUnderRavenwoodAnnotation(description)) {
+                    Assume.assumeFalse(IS_UNDER_RAVENWOOD);
                 }
-                if (isUnderRavenwood) {
-                    RavenwoodRuleImpl.init(RavenwoodRule.this);
-                }
+
+                RavenwoodRuleImpl.init(RavenwoodRule.this);
                 try {
                     base.evaluate();
                 } finally {
-                    if (isUnderRavenwood) {
-                        RavenwoodRuleImpl.reset(RavenwoodRule.this);
+                    RavenwoodRuleImpl.reset(RavenwoodRule.this);
+                }
+            }
+        };
+    }
+
+    /**
+     * Run the given {@link Statement} with probing enabled. All tests will be unconditionally
+     * run under Ravenwood to detect cases where a test is able to pass despite being marked as
+     * {@code IgnoreUnderRavenwood}.
+     */
+    private Statement applyProbeIgnored(Statement base, Description description) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                RavenwoodRuleImpl.init(RavenwoodRule.this);
+                try {
+                    base.evaluate();
+                } catch (Throwable t) {
+                    if (hasIgnoreUnderRavenwoodAnnotation(description)) {
+                        // This failure is expected, so eat the exception and report the
+                        // assumption failure that test authors expect
+                        Assume.assumeFalse(IS_UNDER_RAVENWOOD);
                     }
+                    throw t;
+                } finally {
+                    RavenwoodRuleImpl.reset(RavenwoodRule.this);
+                }
+
+                if (hasIgnoreUnderRavenwoodAnnotation(description) && IS_UNDER_RAVENWOOD) {
+                    fail("Test was annotated with IgnoreUnderRavenwood, but it actually "
+                            + "passed under Ravenwood; consider removing the annotation");
                 }
             }
         };

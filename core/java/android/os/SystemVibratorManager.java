@@ -39,6 +39,7 @@ public class SystemVibratorManager extends VibratorManager {
 
     private final IVibratorManagerService mService;
     private final Context mContext;
+    private final int mUid;
     private final Binder mToken = new Binder();
     private final Object mLock = new Object();
     @GuardedBy("mLock")
@@ -56,6 +57,7 @@ public class SystemVibratorManager extends VibratorManager {
     public SystemVibratorManager(Context context) {
         super(context);
         mContext = context;
+        mUid = Process.myUid();
         mService = IVibratorManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VIBRATOR_MANAGER_SERVICE));
     }
@@ -152,8 +154,7 @@ public class SystemVibratorManager extends VibratorManager {
         }
         try {
             mService.performHapticFeedback(
-                    Process.myUid(), mContext.getDeviceId(), mPackageName, constant, always, reason,
-                    mToken);
+                    mUid, mContext.getDeviceId(), mPackageName, constant, always, reason);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to perform haptic feedback.", e);
         }

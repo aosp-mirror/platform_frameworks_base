@@ -56,6 +56,7 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.CpuScalingPolicies;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerStats;
 
 import com.google.android.collect.Lists;
@@ -1657,6 +1658,7 @@ public abstract class BatteryStats {
      */
     public abstract CpuScalingPolicies getCpuScalingPolicies();
 
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class HistoryTag {
         public static final int HISTORY_TAG_POOL_OVERFLOW = -1;
 
@@ -1713,6 +1715,7 @@ public abstract class BatteryStats {
      * Optional detailed information that can go into a history step.  This is typically
      * generated each time the battery level changes.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class HistoryStepDetails {
         // Time (in 1/100 second) spent in user space and the kernel since the last step.
         public int userTime;
@@ -1797,6 +1800,7 @@ public abstract class BatteryStats {
     /**
      * An extension to the history item describing a proc state change for a UID.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class ProcessStateChange {
         public int uid;
         public @BatteryConsumer.ProcessState int processState;
@@ -1850,6 +1854,7 @@ public abstract class BatteryStats {
     /**
      * Battery history record.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class HistoryItem {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         public HistoryItem next;
@@ -4029,6 +4034,17 @@ public abstract class BatteryStats {
     }
 
     /**
+     * A helper object passed to various dump... methods to integrate with such objects
+     * as BatteryUsageStatsProvider.
+     */
+    public interface BatteryStatsDumpHelper {
+        /**
+         * Generates BatteryUsageStats based on the specified BatteryStats.
+         */
+        BatteryUsageStats getBatteryUsageStats(BatteryStats batteryStats, boolean detailed);
+    }
+
+    /**
      * Dumps the ControllerActivityCounter if it has any data worth dumping.
      * The order of the arguments in the final check in line is:
      *
@@ -4390,7 +4406,7 @@ public abstract class BatteryStats {
      * NOTE: all times are expressed in microseconds, unless specified otherwise.
      */
     public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid,
-            boolean wifiOnly) {
+            boolean wifiOnly, BatteryStatsDumpHelper dumpHelper) {
 
         if (which != BatteryStats.STATS_SINCE_CHARGED) {
             dumpLine(pw, 0, STAT_NAMES[which], "err",
@@ -4652,7 +4668,7 @@ public abstract class BatteryStats {
             }
         }
 
-        final BatteryUsageStats stats = getBatteryUsageStats(context, true /* detailed */);
+        final BatteryUsageStats stats = dumpHelper.getBatteryUsageStats(this, true /* detailed */);
         dumpLine(pw, 0 /* uid */, category, POWER_USE_SUMMARY_DATA,
                 formatCharge(stats.getBatteryCapacity()),
                 formatCharge(stats.getConsumedPower()),
@@ -5127,7 +5143,7 @@ public abstract class BatteryStats {
 
     @SuppressWarnings("unused")
     public final void dumpLocked(Context context, PrintWriter pw, String prefix, final int which,
-            int reqUid, boolean wifiOnly) {
+            int reqUid, boolean wifiOnly, BatteryStatsDumpHelper dumpHelper) {
 
         if (which != BatteryStats.STATS_SINCE_CHARGED) {
             pw.println("ERROR: BatteryStats.dump called for which type " + which
@@ -5854,7 +5870,7 @@ public abstract class BatteryStats {
         pw.println();
 
 
-        BatteryUsageStats stats = getBatteryUsageStats(context, true /* detailed */);
+        BatteryUsageStats stats = dumpHelper.getBatteryUsageStats(this, true /* detailed */);
         stats.dump(pw, prefix);
 
         List<UidMobileRadioStats> uidMobileRadioStats =
@@ -7469,7 +7485,8 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
+        try (BatteryStatsHistoryIterator iterator =
+                     iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 try {
@@ -7642,10 +7659,11 @@ public abstract class BatteryStats {
     /**
      * Dumps a human-readable summary of the battery statistics to the given PrintWriter.
      *
-     * @param pw a Printer to receive the dump output.
+     * @param pw         a Printer to receive the dump output.
      */
     @SuppressWarnings("unused")
-    public void dump(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
+    public void dump(Context context, PrintWriter pw, int flags, int reqUid, long histStart,
+            BatteryStatsDumpHelper dumpHelper) {
         synchronized (this) {
             prepareForDumpLocked();
         }
@@ -7663,12 +7681,12 @@ public abstract class BatteryStats {
         }
 
         synchronized (this) {
-            dumpLocked(context, pw, flags, reqUid, filtering);
+            dumpLocked(context, pw, flags, reqUid, filtering, dumpHelper);
         }
     }
 
     private void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid,
-            boolean filtering) {
+            boolean filtering, BatteryStatsDumpHelper dumpHelper) {
         if (!filtering) {
             SparseArray<? extends Uid> uidStats = getUidStats();
             final int NU = uidStats.size();
@@ -7803,15 +7821,15 @@ public abstract class BatteryStats {
             pw.println("  System starts: " + getStartCount()
                     + ", currently on battery: " + getIsOnBattery());
             dumpLocked(context, pw, "", STATS_SINCE_CHARGED, reqUid,
-                    (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
+                    (flags & DUMP_DEVICE_WIFI_ONLY) != 0, dumpHelper);
             pw.println();
         }
     }
 
     // This is called from BatteryStatsService.
     @SuppressWarnings("unused")
-    public void dumpCheckin(Context context, PrintWriter pw,
-            List<ApplicationInfo> apps, int flags, long histStart) {
+    public void dumpCheckin(Context context, PrintWriter pw, List<ApplicationInfo> apps, int flags,
+            long histStart, BatteryStatsDumpHelper dumpHelper) {
         synchronized (this) {
             prepareForDumpLocked();
 
@@ -7829,12 +7847,12 @@ public abstract class BatteryStats {
         }
 
         synchronized (this) {
-            dumpCheckinLocked(context, pw, apps, flags);
+            dumpCheckinLocked(context, pw, apps, flags, dumpHelper);
         }
     }
 
     private void dumpCheckinLocked(Context context, PrintWriter pw, List<ApplicationInfo> apps,
-            int flags) {
+            int flags, BatteryStatsDumpHelper dumpHelper) {
         if (apps != null) {
             SparseArray<Pair<ArrayList<String>, MutableBoolean>> uids = new SparseArray<>();
             for (int i=0; i<apps.size(); i++) {
@@ -7881,7 +7899,7 @@ public abstract class BatteryStats {
                         (Object[])lineArgs);
             }
             dumpCheckinLocked(context, pw, STATS_SINCE_CHARGED, -1,
-                    (flags&DUMP_DEVICE_WIFI_ONLY) != 0);
+                    (flags & DUMP_DEVICE_WIFI_ONLY) != 0, dumpHelper);
         }
     }
 
@@ -7891,7 +7909,7 @@ public abstract class BatteryStats {
      * @hide
      */
     public void dumpProtoLocked(Context context, FileDescriptor fd, List<ApplicationInfo> apps,
-            int flags, long histStart) {
+            int flags, long histStart, BatteryStatsDumpHelper dumpHelper) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
         prepareForDumpLocked();
 
@@ -7909,7 +7927,8 @@ public abstract class BatteryStats {
         proto.write(BatteryStatsProto.END_PLATFORM_VERSION, getEndPlatformVersion());
 
         if ((flags & DUMP_DAILY_ONLY) == 0) {
-            final BatteryUsageStats stats = getBatteryUsageStats(context, false /* detailed */);
+            final BatteryUsageStats stats =
+                    dumpHelper.getBatteryUsageStats(this, false /* detailed */);
             ProportionalAttributionCalculator proportionalAttributionCalculator =
                     new ProportionalAttributionCalculator(context, stats);
             dumpProtoAppsLocked(proto, stats, apps, proportionalAttributionCalculator);
@@ -8392,7 +8411,8 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
+        try (BatteryStatsHistoryIterator iterator =
+                     iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 lastTime = rec.time;
@@ -8855,8 +8875,6 @@ public abstract class BatteryStats {
         }
         return !tm.isDataCapable();
     }
-
-    protected abstract BatteryUsageStats getBatteryUsageStats(Context context, boolean detailed);
 
     private boolean shouldHidePowerComponent(int powerComponent) {
         return powerComponent == BatteryConsumer.POWER_COMPONENT_IDLE

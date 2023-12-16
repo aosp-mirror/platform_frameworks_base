@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -25,7 +26,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -45,9 +45,11 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -86,7 +88,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 StatusBarStateController statusBarStateController,
                 KeyguardBypassController keyguardBypassController,
                 ConfigurationController configurationController,
-                Handler handler,
+                GlobalSettings globalSettings,
+                SystemClock systemClock,
+                DelayableExecutor executor,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger,
                 JavaAdapter javaAdapter,
@@ -100,14 +104,17 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     groupManager,
                     visualStabilityProvider,
                     configurationController,
-                    handler,
+                    mockExecutorHandler(executor),
+                    globalSettings,
+                    systemClock,
+                    executor,
                     accessibilityManagerWrapper,
                     uiEventLogger,
                     javaAdapter,
                     shadeInteractor
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
+            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
         }
     }
 
@@ -120,7 +127,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mStatusBarStateController,
                 mBypassController,
                 mConfigurationController,
-                mTestHandler,
+                mGlobalSettings,
+                mSystemClock,
+                mExecutor,
                 mAccessibilityManagerWrapper,
                 mUiEventLogger,
                 mJavaAdapter,
@@ -134,7 +143,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     }
 
     @Before
-    @Override
     public void setUp() {
         when(mShadeInteractor.isAnyExpanded()).thenReturn(StateFlowKt.MutableStateFlow(false));
         final AccessibilityManagerWrapper accessibilityMgr =
@@ -145,14 +153,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mContext.getOrCreateTestableResources().addOverride(
                 R.integer.ambient_notification_extension_time, 500);
-
-        super.setUp();
-    }
-
-    @After
-    @Override
-    public void tearDown() {
-        super.tearDown();
     }
 
     @Test
@@ -216,8 +216,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
         hmp.showNotification(entry);
         hmp.extendHeadsUp();
+        mSystemClock.advanceTime(TEST_AUTO_DISMISS_TIME + hmp.mExtensionTime / 2);
 
-        final int pastNormalTimeMillis = TEST_AUTO_DISMISS_TIME + hmp.mExtensionTime / 2;
-        verifyAlertingAtTime(hmp, entry, true, pastNormalTimeMillis, "normal time");
+        assertTrue(hmp.isAlerting(entry.getKey()));
     }
 }

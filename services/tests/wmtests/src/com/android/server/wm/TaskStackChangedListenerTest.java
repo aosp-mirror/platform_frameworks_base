@@ -40,6 +40,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -167,7 +168,7 @@ public class TaskStackChangedListenerTest {
     @Presubmit
     public void testTaskDescriptionChanged() throws Exception {
         final Object[] params = new Object[2];
-        final CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(2);
         registerTaskStackChangedListener(new TaskStackListener() {
             int mTaskId = -1;
 
@@ -510,6 +511,8 @@ public class TaskStackChangedListenerTest {
         protected void onPostResume() {
             super.onPostResume();
             setTaskDescription(new TaskDescription("Test Label"));
+            // Sets the color of the status-bar should update the TaskDescription again.
+            getWindow().setStatusBarColor(Color.RED);
             synchronized (sLock) {
                 // Hold the lock to ensure no one is trying to access fields of this Activity in
                 // this test.

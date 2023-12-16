@@ -95,7 +95,7 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
-        ":android.hardware.biometrics.common-V3-java-source",
+        ":android.hardware.biometrics.common-V4-java-source",
         ":android.hardware.biometrics.fingerprint-V3-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
@@ -106,7 +106,7 @@ filegroup {
         ":android.hardware.radio.voice-V3-java-source",
         ":android.hardware.security.keymint-V3-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
-        ":android.hardware.thermal-V1-java-source",
+        ":android.hardware.thermal-V2-java-source",
         ":android.hardware.tv.tuner-V2-java-source",
         ":android.security.apc-java-source",
         ":android.security.authorization-java-source",
@@ -139,6 +139,9 @@ filegroup {
 
         // For the generated R.java and Manifest.java
         ":framework-res{.aapt.srcjar}",
+
+        // Java/AIDL sources to be moved out to CrashRecovery module
+        ":framework-crashrecovery-sources",
 
         // etc.
         ":framework-javastream-protos",
@@ -207,6 +210,7 @@ java_library {
         "apex_aidl_interface-java",
         "packagemanager_aidl-java",
         "framework-protos",
+        "libtombstone_proto_java",
         "updatable-driver-protos",
         "ota_metadata_proto_java",
         "android.hidl.base-V1.0-java",
@@ -376,6 +380,7 @@ java_defaults {
         // system propagates "required" properly.
         "gps_debug.conf",
         "protolog.conf.json.gz",
+        "framework-res",
         // any install dependencies should go into framework-minus-apex-install-dependencies
         // rather than here to avoid bloating incremental build time
     ],

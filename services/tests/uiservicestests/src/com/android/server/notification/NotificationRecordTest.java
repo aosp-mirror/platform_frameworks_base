@@ -29,6 +29,8 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -44,6 +46,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.Flags;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
@@ -64,6 +67,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.Vibrator;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.StatusBarNotification;
@@ -80,6 +84,7 @@ import com.android.server.UiServiceTestCase;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -121,6 +126,9 @@ public class NotificationRecordTest extends UiServiceTestCase {
             .build();
     private static final NotificationRecord.Light CUSTOM_LIGHT =
             new NotificationRecord.Light(1, 2, 3);
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
@@ -651,6 +659,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
     @Test
     public void testNotificationStats() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
@@ -690,6 +699,37 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         record.recordDirectReplied();
         assertTrue(record.getStats().hasDirectReplied());
+
+        record.recordSmartReplied();
+        assertThat(record.getStats().hasSmartReplied()).isTrue();
+    }
+
+    @Test
+    public void testDirectRepliedAddsLifetimeExtensionFlag() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
+
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.recordDirectReplied();
+        assertThat(record.getSbn().getNotification().flags
+                & Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isGreaterThan(0);
+    }
+
+    @Test
+    public void testSmartRepliedAddsLifetimeExtensionFlag() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
+
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.recordSmartReplied();
+        assertThat(record.getSbn().getNotification().flags
+                & Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isGreaterThan(0);
     }
 
     @Test

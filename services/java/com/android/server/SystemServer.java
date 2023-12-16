@@ -268,6 +268,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.backup.BackupManagerService$Lifecycle";
     private static final String APPWIDGET_SERVICE_CLASS =
             "com.android.server.appwidget.AppWidgetService";
+    private static final String ARC_PERSISTENT_DATA_BLOCK_SERVICE_CLASS =
+            "com.android.server.arc.persistent_data_block.ArcPersistentDataBlockService";
     private static final String ARC_SYSTEM_HEALTH_SERVICE =
             "com.android.server.arc.health.ArcSystemHealthService";
     private static final String VOICE_RECOGNITION_MANAGER_SERVICE_CLASS =
@@ -1489,8 +1491,6 @@ public final class SystemServer implements Dumpable {
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
 
-        boolean isEmulator = SystemProperties.get("ro.boot.qemu").equals("1");
-
         boolean isWatch = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WATCH);
 
@@ -1892,6 +1892,12 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
+            if (Build.IS_ARC && SystemProperties.getInt("ro.boot.dev_mode", 0) == 1) {
+                t.traceBegin("StartArcPersistentDataBlock");
+                mSystemServiceManager.startService(ARC_PERSISTENT_DATA_BLOCK_SERVICE_CLASS);
+                t.traceEnd();
+            }
+
             t.traceBegin("StartTestHarnessMode");
             mSystemServiceManager.startService(TestHarnessModeService.class);
             t.traceEnd();
@@ -2112,6 +2118,15 @@ public final class SystemServer implements Dumpable {
             networkPolicy.bindConnectivityManager();
             t.traceEnd();
 
+            t.traceBegin("StartSecurityStateManagerService");
+            try {
+                ServiceManager.addService(Context.SECURITY_STATE_SERVICE,
+                        new SecurityStateManagerService(context));
+            } catch (Throwable e) {
+                reportWtf("starting SecurityStateManagerService", e);
+            }
+            t.traceEnd();
+
             t.traceBegin("StartVpnManagerService");
             try {
                 vpnManager = VpnManagerService.create(context);
@@ -2309,7 +2324,7 @@ public final class SystemServer implements Dumpable {
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)
                     || mPackageManager.hasSystemFeature(
                     PackageManager.FEATURE_USB_ACCESSORY)
-                    || isEmulator) {
+                    || Build.IS_EMULATOR) {
                 // Manage USB host and device support
                 t.traceBegin("StartUsbService");
                 mSystemServiceManager.startService(USB_SERVICE_CLASS);

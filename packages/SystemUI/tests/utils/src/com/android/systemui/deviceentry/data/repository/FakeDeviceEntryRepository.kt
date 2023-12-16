@@ -16,16 +16,24 @@
 package com.android.systemui.deviceentry.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [DeviceEntryRepository] */
 @SysUISingleton
 class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
+    private val _enteringDeviceFromBiometricUnlock: MutableSharedFlow<BiometricUnlockSource> =
+        MutableSharedFlow()
+    override val enteringDeviceFromBiometricUnlock: Flow<BiometricUnlockSource> =
+        _enteringDeviceFromBiometricUnlock.asSharedFlow()
 
     private var isLockscreenEnabled = true
 
@@ -53,6 +61,10 @@ class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
 
     fun setBypassEnabled(isBypassEnabled: Boolean) {
         _isBypassEnabled.value = isBypassEnabled
+    }
+
+    suspend fun enteringDeviceFromBiometricUnlock(sourceType: BiometricUnlockSource) {
+        _enteringDeviceFromBiometricUnlock.emit(sourceType)
     }
 }
 

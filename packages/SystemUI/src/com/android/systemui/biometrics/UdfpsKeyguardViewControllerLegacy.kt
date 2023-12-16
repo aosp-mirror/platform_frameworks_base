@@ -26,11 +26,13 @@ import com.android.app.animation.Interpolators
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATION_UNLOCKED_SCREEN_OFF
+import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -49,8 +51,7 @@ import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Class that coordinates non-HBM animations during keyguard authentication. */
@@ -192,8 +193,69 @@ open class UdfpsKeyguardViewControllerLegacy(
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 listenForBouncerExpansion(this)
                 listenForAlternateBouncerVisibility(this)
+                listenForOccludedToAodTransition(this)
                 listenForGoneToAodTransition(this)
                 listenForLockscreenAodTransitions(this)
+                listenForAodToOccludedTransitions(this)
+                listenForAlternateBouncerToAodTransitions(this)
+                listenForDreamingToAodTransitions(this)
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForDreamingToAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.transition(KeyguardState.DREAMING, KeyguardState.AOD).collect {
+                transitionStep ->
+                view.onDozeAmountChanged(
+                    transitionStep.value,
+                    transitionStep.value,
+                    ANIMATE_APPEAR_ON_SCREEN_OFF,
+                )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForAlternateBouncerToAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor
+                .transition(KeyguardState.ALTERNATE_BOUNCER, KeyguardState.AOD)
+                .collect { transitionStep ->
+                    view.onDozeAmountChanged(
+                        transitionStep.value,
+                        transitionStep.value,
+                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
+                    )
+                }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForAodToOccludedTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.transition(KeyguardState.AOD, KeyguardState.OCCLUDED).collect {
+                transitionStep ->
+                view.onDozeAmountChanged(
+                    1f - transitionStep.value,
+                    1f - transitionStep.value,
+                    UdfpsKeyguardViewLegacy.ANIMATION_NONE,
+                )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForOccludedToAodTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.transition(KeyguardState.OCCLUDED, KeyguardState.AOD).collect {
+                transitionStep ->
+                view.onDozeAmountChanged(
+                    transitionStep.value,
+                    transitionStep.value,
+                    ANIMATE_APPEAR_ON_SCREEN_OFF,
+                )
             }
         }
     }
@@ -205,7 +267,7 @@ open class UdfpsKeyguardViewControllerLegacy(
                 view.onDozeAmountChanged(
                     transitionStep.value,
                     transitionStep.value,
-                    ANIMATION_UNLOCKED_SCREEN_OFF,
+                    ANIMATE_APPEAR_ON_SCREEN_OFF,
                 )
             }
         }
@@ -215,12 +277,30 @@ open class UdfpsKeyguardViewControllerLegacy(
     suspend fun listenForLockscreenAodTransitions(scope: CoroutineScope): Job {
         return scope.launch {
             transitionInteractor.dozeAmountTransition.collect { transitionStep ->
-                  view.onDozeAmountChanged(
-                      transitionStep.value,
-                      transitionStep.value,
-                      UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
-                  )
-              }
+                if (
+                    transitionStep.from == KeyguardState.AOD &&
+                        transitionStep.transitionState == TransitionState.CANCELED
+                ) {
+                    if (
+                        transitionInteractor.startedKeyguardTransitionStep.first().to !=
+                            KeyguardState.AOD
+                    ) {
+                        // If the next started transition isn't transitioning back to AOD, force
+                        // doze amount to be 0f (as if the transition to the lockscreen completed).
+                        view.onDozeAmountChanged(
+                            0f,
+                            0f,
+                            UdfpsKeyguardViewLegacy.ANIMATION_NONE,
+                        )
+                    }
+                } else {
+                    view.onDozeAmountChanged(
+                        transitionStep.value,
+                        transitionStep.value,
+                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
+                    )
+                }
+            }
         }
     }
 
@@ -286,7 +366,6 @@ open class UdfpsKeyguardViewControllerLegacy(
         keyguardStateController.removeCallback(keyguardStateControllerCallback)
         statusBarStateController.removeCallback(stateListener)
         keyguardViewManager.removeOccludingAppBiometricUI(occludingAppBiometricUI)
-        keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         configurationController.removeCallback(configurationListener)
         if (lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy === this) {
             lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = null
@@ -334,14 +413,9 @@ open class UdfpsKeyguardViewControllerLegacy(
             if (udfpsAffordanceWasNotShowing) {
                 view.animateInUdfpsBouncer(null)
             }
-            if (keyguardStateController.isOccluded) {
-                keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true)
-            }
             view.announceForAccessibility(
                 view.context.getString(R.string.accessibility_fingerprint_bouncer)
             )
-        } else {
-            keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         }
         updateAlpha()
         updatePauseAuth()

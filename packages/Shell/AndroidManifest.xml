@@ -442,6 +442,9 @@
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS" />
 
+    <!-- Permission required for CTS test - CtsNfcResolverDerviceTest -->
+    <uses-permission android:name="android.permission.SHOW_CUSTOMIZED_RESOLVER" />
+
     <!-- Permission needed for CTS test - MusicRecognitionManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_MUSIC_RECOGNITION" />
 
@@ -558,6 +561,9 @@
 
     <!-- Permissions required for CTS test - NotificationManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATION_LISTENERS" />
+
+    <!-- Permissions required for CTS test - NotificationManagerZenTest -->
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
 
     <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
     <uses-permission android:name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
@@ -872,6 +878,12 @@
     <uses-permission android:name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO" />
 
     <uses-permission android:name="android.permission.GET_BINDING_UID_IMPORTANCE" />
+
+    <!-- Permissions required for CTS test - CtsAccessibilityServiceTestCases-->
+    <uses-permission android:name="android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING" />
+
+    <!-- Permission required for Cts test - CtsNotificationTestCases -->
+    <uses-permission android:name="android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS" />
 
     <application
         android:label="@string/app_label"

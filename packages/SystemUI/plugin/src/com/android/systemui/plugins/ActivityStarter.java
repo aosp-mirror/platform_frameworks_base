@@ -133,16 +133,6 @@ public interface ActivityStarter {
             boolean afterKeyguardGone,
             boolean deferred);
 
-    /** Execute a runnable after dismissing keyguard. */
-    void executeRunnableDismissingKeyguard(
-            Runnable runnable,
-            Runnable cancelAction,
-            boolean dismissShade,
-            boolean afterKeyguardGone,
-            boolean deferred,
-            boolean willAnimateOnKeyguard,
-            @Nullable String customMessage);
-
     /** Whether we should animate an activity launch. */
     boolean shouldAnimateLaunch(boolean isActivityIntent);
 

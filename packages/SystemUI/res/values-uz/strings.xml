@@ -197,10 +197,8 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth ulandi."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Bluetooth qurilma belgisi"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Qurilma haqida tafsilotlarni oʻzgartirish uchun bosing"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"Barcha qurilmalarni koʻrish uchun bosing"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"Yangi qurilmani ulash uchun bosing"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batareya quvvati foizi nomaʼlum."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Ulangan: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Bunga ulangan: <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -259,10 +257,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth ishlatish"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ulandi"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saqlangan"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"uzish"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"faollashtirish"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Garnitura"</string>
@@ -334,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Ekran yozuvi"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Boshlash"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Toʻxtatish"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Ixcham rejim"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"Kontrast"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standart"</string>
@@ -405,8 +407,13 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Sekin quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Qoʻllanma bilan tanishish uchun chapga suring"</string>
-    <string name="button_to_open_widget_picker" msgid="8007261659745030810">"Vidjet tanlash vositasini ochish"</string>
-    <string name="button_to_remove_widget" msgid="1511255853677835341">"Vidjetni olib tashlash"</string>
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Vidjet muharririni ochish"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
+    <skip />
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Foydalanuvchini almashtirish"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"tortib tushiriladigan menyu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
@@ -643,10 +650,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> tugmasi"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Bosh ekran"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Orqaga"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Tepaga qaragan ko‘rsatkichli chiziq"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Pastga qaragan ko‘rsatkichli chiziq"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Chapga qaragan ko‘rsatkichli chiziq"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"O‘ngga qaragan ko‘rsatkichli chiziq"</string>
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Tepaga strelka"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Pastga strelka"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Chapga strelka"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Oʻngga strelka"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Markaziy ko‘rsatkichli chiziq"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Probel"</string>
@@ -674,7 +681,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Bildirishnomalar"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Tezkor tugmalar"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Klaviatura terilmasini almashtirish"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Matnni tozalash"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"yoki"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Qidiruv soʻrovini tozalash"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Tezkor tugmalar"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Tezkor tugmalar qidiruvi"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Tezkor tugmalar topilmadi"</string>
@@ -682,35 +690,40 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Kiritish"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Ochiq ilovalar"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Joriy ilova"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Bildirishnoma soyasiga ruxsat"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Butun skrinshot olish"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Tizim va ilovalar tezkor tugmalari roʻyxatiga ruxsat"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"Orqaga: avvalgi holatga qaytish (orqaga tugmasi)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Bosh ekranga ruxsat"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Ochiq ilovalar bilan tanishish"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Oxirgi ilovalarni varaqlash (faol rejimda)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Oxirgi ilovalarni varaqlash (fonda)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Barcha ilovalar va qidiruv roʻyxatiga ruxsat (Qidiruv/Launcher kabi)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Vazifalar panelini ochish va yopish"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Tizim sozlamalariga ruxsat"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Google Assistentga ruxsat"</string>
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"Qidiruv natijalarini koʻrsatadi"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"Tizim tezkor tugmalari koʻrsatiladi"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Kirish bilan bogʻliq tezkor tugmalarni koʻrsatiladi"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Ilovalarni ochuvchi tezkor tugmalar koʻrsatiladi"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Joriy ilova uchun tezkor tugmalar koʻrsatiladi"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Bildirishnomalarni ochish"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Skrinshot olish"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Yorliqlarni ochish"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Orqaga"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Bosh ekranni ochish"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Oxirgi ilovalarni ochish"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Oxirgi ilovalarni oldinga varaqlash"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Oxirgi ilovalarni orqaga varaqlash"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ilovalar roʻyxatini ochish"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Vazifalar panelini chiqarish"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Sozlamalarni ochish"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistentni ochish"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Ekran qulfi"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Tezkor eslatma uchun Qaydlar ilovasini ochish"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"Qaydlarni ochish"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Tizimdagi multi-vazifalik"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Oʻng tomondagi ajratilgan ekran rejimiga kirish"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Chap tomondagi ajratilgan ekran rejimiga kirish"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Ajratilgan ekran rejimidan butun ekranga qaytish"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Ajratilgan rejimda ilovalarni oʻzaro almashtirish"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Oʻng tomondagi ajratilgan ekran rejimiga kirish"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Chap tomondagi ajratilgan ekran rejimiga kirish"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Ajratilgan ekran rejimidan butun ekranga almashtirish"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"Ajratilgan rejimda ilovalarni oʻzaro almashtirish"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Kiritish"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Kiritish tili tugmasi (keyingi til)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Kiritish tili tugmasi (avvalgi til)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Keyingi tilga almashtirish"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Avvalgi tilga almashtirish"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Emojilarga ruxsat"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Ovoz bilan yozishga ruxsat"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Ilovalar"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Yordamchi"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Brauzer (birlamchisi Chrome)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistent"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Brauzer"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontaktlar"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Email (birlamchisi Gmail)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Email"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musiqa"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Taqvim"</string>
@@ -1194,7 +1207,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standart qaydlar ilovasini Sozlamalar orqali tanlang"</string>
     <string name="install_app" msgid="5066668100199613936">"Ilovani oʻrnatish"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Tashqi displeyda aks ettirilsinmi?"</string>
-    <string name="mirror_display" msgid="2515262008898122928">"Displeyni akslantirish"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"Joriy ishga tushgan ikki ekranli faollik toʻxtatiladi"</string>
+    <string name="mirror_display" msgid="2515262008898122928">"Displeyni aks ettirish"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Yopish"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Displey ulandi"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofon va kamera"</string>

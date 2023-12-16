@@ -276,12 +276,14 @@ public class StartingSurfaceController {
         /**
          * Removes the starting window surface. Do not hold the window manager lock when calling
          * this method!
+         *
          * @param animate Whether need to play the default exit animation for starting window.
+         * @param hasImeSurface Whether the starting window has IME surface.
          */
-        public void remove(boolean animate) {
+        public void remove(boolean animate, boolean hasImeSurface) {
             synchronized (mService.mGlobalLock) {
                 mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask,
-                        mTaskOrganizer, animate);
+                        mTaskOrganizer, animate, hasImeSurface);
             }
         }
     }

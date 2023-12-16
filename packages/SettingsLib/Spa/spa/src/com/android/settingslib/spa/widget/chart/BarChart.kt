@@ -38,6 +38,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.settingslib.spa.framework.theme.divider
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.components.YAxis.AxisDependency
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
@@ -86,6 +88,14 @@ interface BarChartModel {
      */
     val yAxisLabelCount: Int
         get() = 3
+
+    /** If set to true, touch gestures are enabled on the [BarChart]. */
+    val enableBarchartTouch: Boolean
+        get() = true
+
+    /** The renderer provider for x-axis. */
+    val xAxisRendererProvider: XAxisRendererProvider?
+        get() = null
 }
 
 data class BarChartData(
@@ -127,6 +137,7 @@ fun BarChart(barChartModel: BarChartModel) {
                             legend.isEnabled = false
                             extraBottomOffset = 4f
                             setScaleEnabled(false)
+                            setTouchEnabled(barChartModel.enableBarchartTouch)
 
                             xAxis.apply {
                                 position = XAxis.XAxisPosition.BOTTOM
@@ -136,6 +147,16 @@ fun BarChart(barChartModel: BarChartModel) {
                                 textSize = labelTextSize
                                 valueFormatter = barChartModel.xValueFormatter
                                 yOffset = 10f
+                            }
+
+                            barChartModel.xAxisRendererProvider?.let {
+                                setXAxisRenderer(
+                                    it.provideXAxisRenderer(
+                                        getViewPortHandler(),
+                                        getXAxis(),
+                                        getTransformer(YAxis.AxisDependency.LEFT)
+                                    )
+                                )
                             }
 
                             axisLeft.apply {

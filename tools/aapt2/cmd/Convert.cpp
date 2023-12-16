@@ -24,13 +24,13 @@
 #include "android-base/file.h"
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/BigBufferStream.h"
 #include "androidfw/StringPiece.h"
 #include "cmd/Util.h"
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
 #include "format/proto/ProtoDeserialize.h"
 #include "format/proto/ProtoSerialize.h"
-#include "io/BigBufferStream.h"
 #include "io/Util.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
@@ -80,7 +80,7 @@ class BinaryApkSerializer : public IApkSerializer {
       return false;
     }
 
-    io::BigBufferInputStream input_stream(&buffer);
+    android::BigBufferInputStream input_stream(&buffer);
     return io::CopyInputStreamToArchive(context_, &input_stream, path, compression_flags, writer);
   }
 
@@ -91,14 +91,14 @@ class BinaryApkSerializer : public IApkSerializer {
       return false;
     }
 
-    io::BigBufferInputStream input_stream(&buffer);
+    android::BigBufferInputStream input_stream(&buffer);
     return io::CopyInputStreamToArchive(context_, &input_stream, kApkResourceTablePath,
                                         ArchiveEntry::kAlign, writer);
   }
 
   bool SerializeFile(FileReference* file, IArchiveWriter* writer) override {
     if (file->type == ResourceFile::Type::kProtoXml) {
-      unique_ptr<io::InputStream> in = file->file->OpenInputStream();
+      unique_ptr<android::InputStream> in = file->file->OpenInputStream();
       if (in == nullptr) {
         context_->GetDiagnostics()->Error(android::DiagMessage(source_)
                                           << "failed to open file " << *file->path);

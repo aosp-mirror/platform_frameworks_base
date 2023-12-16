@@ -261,7 +261,7 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
         // GIVEN fingerprint and face are NOT enrolled
         activeUnlockConfig.keyguardUpdateMonitor = keyguardUpdateMonitor
-        `when`(keyguardUpdateMonitor.isFaceEnrolled).thenReturn(false)
+        `when`(keyguardUpdateMonitor.isFaceEnabledAndEnrolled).thenReturn(false)
         `when`(keyguardUpdateMonitor.isUnlockWithFingerprintPossible(0)).thenReturn(false)
 
         // WHEN unlock intent is allowed when NO biometrics are enrolled (0)
@@ -291,7 +291,7 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
         // GIVEN fingerprint and face are both enrolled
         activeUnlockConfig.keyguardUpdateMonitor = keyguardUpdateMonitor
-        `when`(keyguardUpdateMonitor.isFaceEnrolled).thenReturn(true)
+        `when`(keyguardUpdateMonitor.isFaceEnabledAndEnrolled).thenReturn(true)
         `when`(keyguardUpdateMonitor.isUnlockWithFingerprintPossible(0)).thenReturn(true)
 
         // WHEN unlock intent is allowed when ONLY fingerprint is enrolled or NO biometircs
@@ -314,7 +314,7 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         )
 
         // WHEN fingerprint ONLY enrolled
-        `when`(keyguardUpdateMonitor.isFaceEnrolled).thenReturn(false)
+        `when`(keyguardUpdateMonitor.isFaceEnabledAndEnrolled).thenReturn(false)
         `when`(keyguardUpdateMonitor.isUnlockWithFingerprintPossible(0)).thenReturn(true)
 
         // THEN active unlock triggers allowed on unlock intent
@@ -325,7 +325,7 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         )
 
         // WHEN face ONLY enrolled
-        `when`(keyguardUpdateMonitor.isFaceEnrolled).thenReturn(true)
+        `when`(keyguardUpdateMonitor.isFaceEnabledAndEnrolled).thenReturn(true)
         `when`(keyguardUpdateMonitor.isUnlockWithFingerprintPossible(0)).thenReturn(false)
 
         // THEN active unlock triggers allowed on unlock intent

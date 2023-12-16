@@ -223,6 +223,105 @@ RuntimeVisibleAnnotations:
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE,Ljava/lang/annotation/ElementType;.FIELD,Ljava/lang/annotation/ElementType;.METHOD]
     )
+## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy.class
+  Compiled from "IPretendingAidl.java"
+public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Proxy
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 2, attributes: 3
+  public com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Proxy();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy;
+
+  public static int addTwo(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=1, args_size=1
+         x: iload_0
+         x: iconst_2
+         x: iadd
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       4     0     a   I
+}
+SourceFile: "IPretendingAidl.java"
+NestHost: class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+InnerClasses:
+  public static #x= #x of #x;          // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
+## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub.class
+  Compiled from "IPretendingAidl.java"
+public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 2, attributes: 3
+  public com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub;
+
+  public static int addOne(int);
+    descriptor: (I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=1, args_size=1
+         x: iload_0
+         x: iconst_1
+         x: iadd
+         x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       4     0     a   I
+}
+SourceFile: "IPretendingAidl.java"
+NestHost: class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+InnerClasses:
+  public static #x= #x of #x;           // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
+## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl.class
+  Compiled from "IPretendingAidl.java"
+public interface com.android.hoststubgen.test.tinyframework.IPretendingAidl
+  minor version: 0
+  major version: 61
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 0, attributes: 3
+}
+SourceFile: "IPretendingAidl.java"
+NestMembers:
+  com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
+  com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
+InnerClasses:
+  public static #x= #x of #x;            // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl.class
   Compiled from "TinyFrameworkCallerCheck.java"
 class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck$Impl
@@ -1718,7 +1817,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 8, attributes: 2
+  interfaces: 0, fields: 1, methods: 10, attributes: 2
   int value;
     descriptor: I
     flags: (0x0000)
@@ -1805,6 +1904,24 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         Start  Length  Slot  Name   Signature
             0       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
             0       6     1   arg   I
+
+  public static native void nativeStillNotSupported();
+    descriptor: ()V
+    flags: (0x0109) ACC_PUBLIC, ACC_STATIC, ACC_NATIVE
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestThrow
+
+  public static void nativeStillNotSupported_should_be_like_this();
+    descriptor: ()V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":()V
+         x: athrow
+      LineNumberTable:
 }
 SourceFile: "TinyFrameworkNative.java"
 RuntimeInvisibleAnnotations:

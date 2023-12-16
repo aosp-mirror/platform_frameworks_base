@@ -193,14 +193,14 @@ public class BatteryUsageStatsTest {
         for (UidBatteryConsumer uidBatteryConsumer : uidBatteryConsumers) {
             if (uidBatteryConsumer.getUid() == APP_UID1) {
                 assertUidBatteryConsumer(uidBatteryConsumer, 2124, null,
-                        5321, 7432, 423, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 745,
+                        5321, 6900, 532, 423, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 745,
                         POWER_MODEL_UNDEFINED,
                         956, 1167, 1478,
                         true, 3554, 3776, 3998, 444, 3554, 15542, 3776, 17762, 3998, 19982,
                         444, 1110);
             } else if (uidBatteryConsumer.getUid() == APP_UID2) {
                 assertUidBatteryConsumer(uidBatteryConsumer, 1332, "bar",
-                        1111, 2222, 333, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 444,
+                        1111, 2220, 2, 333, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 444,
                         BatteryConsumer.POWER_MODEL_POWER_PROFILE,
                         555, 666, 777,
                         true, 1777, 1888, 1999, 321, 1777, 7771, 1888, 8881, 1999, 9991,
@@ -269,7 +269,7 @@ public class BatteryUsageStatsTest {
                         .setStatsEndTimestamp(3000);
 
         addUidBatteryConsumer(builder, batteryStats, APP_UID1, "foo",
-                1000, 2000,
+                1000, 1500, 500,
                 300, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 400,
                 BatteryConsumer.POWER_MODEL_POWER_PROFILE, 500, 600, 800,
                 1777, 7771, 1888, 8881, 1999, 9991, 123, 456);
@@ -312,13 +312,13 @@ public class BatteryUsageStatsTest {
                 .setStatsEndTimestamp(5000);
 
         addUidBatteryConsumer(builder, batteryStats, APP_UID1, null,
-                4321, 5432,
+                4321, 5400, 32,
                 123, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 345, POWER_MODEL_ENERGY_CONSUMPTION,
                 456, 567, 678,
                 1777, 7771, 1888, 8881, 1999, 9991, 321, 654);
 
         addUidBatteryConsumer(builder, batteryStats, APP_UID2, "bar",
-                1111, 2222,
+                1111, 2220, 2,
                 333, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 444,
                 BatteryConsumer.POWER_MODEL_POWER_PROFILE, 555, 666, 777,
                 1777, 7771, 1888, 8881, 1999, 9991, 321, 654);
@@ -338,7 +338,8 @@ public class BatteryUsageStatsTest {
 
     private void addUidBatteryConsumer(BatteryUsageStats.Builder builder,
             MockBatteryStatsImpl batteryStats, int uid, String packageWithHighestDrain,
-            int timeInStateForeground, int timeInStateBackground, double screenPower,
+            int timeInProcessStateForeground, int timeInProcessStateBackground,
+            int timeInProcessStateForegroundService, double screenPower,
             int screenPowerModel, double cpuPower, int cpuPowerModel, double customComponentPower,
             int cpuDuration, int customComponentDuration, double cpuPowerForeground,
             int cpuDurationForeground, double cpuPowerBackground, int cpuDurationBackground,
@@ -348,8 +349,10 @@ public class BatteryUsageStatsTest {
                 builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid);
         uidBuilder
                 .setPackageWithHighestDrain(packageWithHighestDrain)
-                .setTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND, timeInStateForeground)
-                .setTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND, timeInStateBackground)
+                .setTimeInProcessStateMs(PROCESS_STATE_FOREGROUND, timeInProcessStateForeground)
+                .setTimeInProcessStateMs(PROCESS_STATE_BACKGROUND, timeInProcessStateBackground)
+                .setTimeInProcessStateMs(PROCESS_STATE_FOREGROUND_SERVICE,
+                        timeInProcessStateForegroundService)
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_SCREEN, screenPower, screenPowerModel)
                 .setConsumedPower(
@@ -446,7 +449,7 @@ public class BatteryUsageStatsTest {
         for (UidBatteryConsumer uidBatteryConsumer : uidBatteryConsumers) {
             if (uidBatteryConsumer.getUid() == APP_UID1) {
                 assertUidBatteryConsumer(uidBatteryConsumer, 1200, "foo",
-                        1000, 2000, 300, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 400,
+                        1000, 1500, 500, 300, BatteryConsumer.POWER_MODEL_POWER_PROFILE, 400,
                         BatteryConsumer.POWER_MODEL_POWER_PROFILE,
                         500, 600, 800,
                         true, 1777, 1888, 1999, 123, 1777, 7771, 1888, 8881, 1999, 9991, 123, 456);
@@ -496,8 +499,9 @@ public class BatteryUsageStatsTest {
     }
 
     private void assertUidBatteryConsumer(UidBatteryConsumer uidBatteryConsumer,
-            double consumedPower, String packageWithHighestDrain, int timeInStateForeground,
-            int timeInStateBackground, int screenPower, int screenPowerModel, double cpuPower,
+            double consumedPower, String packageWithHighestDrain, int timeInProcessStateForeground,
+            int timeInProcessStateBackground, int timeInProcessStateForegroundService,
+            int screenPower, int screenPowerModel, double cpuPower,
             int cpuPowerModel, double customComponentPower, int cpuDuration,
             int customComponentDuration, boolean processStateDataIncluded,
             double totalPowerForeground, double totalPowerBackground, double totalPowerFgs,
@@ -509,9 +513,16 @@ public class BatteryUsageStatsTest {
         assertThat(uidBatteryConsumer.getPackageWithHighestDrain()).isEqualTo(
                 packageWithHighestDrain);
         assertThat(uidBatteryConsumer.getTimeInStateMs(
-                UidBatteryConsumer.STATE_FOREGROUND)).isEqualTo(timeInStateForeground);
+                UidBatteryConsumer.STATE_FOREGROUND)).isEqualTo(timeInProcessStateForeground);
         assertThat(uidBatteryConsumer.getTimeInStateMs(
-                UidBatteryConsumer.STATE_BACKGROUND)).isEqualTo(timeInStateBackground);
+                UidBatteryConsumer.STATE_BACKGROUND)).isEqualTo(
+                        timeInProcessStateBackground + timeInProcessStateForegroundService);
+        assertThat(uidBatteryConsumer.getTimeInProcessStateMs(
+                PROCESS_STATE_FOREGROUND)).isEqualTo(timeInProcessStateForeground);
+        assertThat(uidBatteryConsumer.getTimeInProcessStateMs(
+                PROCESS_STATE_BACKGROUND)).isEqualTo(timeInProcessStateBackground);
+        assertThat(uidBatteryConsumer.getTimeInProcessStateMs(
+                PROCESS_STATE_FOREGROUND_SERVICE)).isEqualTo(timeInProcessStateForegroundService);
         assertThat(uidBatteryConsumer.getConsumedPower(
                 BatteryConsumer.POWER_COMPONENT_SCREEN)).isEqualTo(screenPower);
         assertThat(uidBatteryConsumer.getPowerModel(

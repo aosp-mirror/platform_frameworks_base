@@ -22,6 +22,9 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
@@ -38,6 +41,8 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.flags.FeatureFlags;
@@ -224,10 +229,9 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mKeyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                featureFlags,
                 sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
-                configurationRepository,
+                new ConfigurationInteractor(configurationRepository),
                 mShadeRepository,
                 () -> sceneInteractor);
 
@@ -273,6 +277,10 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
         ResourcesSplitShadeStateController splitShadeStateController =
                 new ResourcesSplitShadeStateController();
 
+        DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
+                mock(DeviceEntryUdfpsInteractor.class);
+        when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(emptyFlow());
+
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 deviceProvisioningRepository,
@@ -289,13 +297,17 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
-                                splitShadeStateController),
+                                splitShadeStateController,
+                                keyguardInteractor,
+                                deviceEntryUdfpsInteractor),
                         mShadeRepository
                 )
         );
 
-        mActiveNotificationsInteractor =
-                new ActiveNotificationsInteractor(new ActiveNotificationListRepository());
+        mActiveNotificationsInteractor = new ActiveNotificationsInteractor(
+                        new ActiveNotificationListRepository(),
+                        StandardTestDispatcher(/* scheduler = */ null, /* name = */ null)
+                );
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);

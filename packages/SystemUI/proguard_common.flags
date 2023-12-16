@@ -38,6 +38,11 @@
 -keepnames class com.android.internal.protolog.** { *; }
 -keepnames class android.hardware.common.** { *; }
 
+# TODO(b/316553881): Statically linking flags into SystemUI and bootclasspath might not be a
+# good idea in the first place
+-keepnames class com.android.window.flags.Flags { public *; }
+
+
 # Allows proguard to make private and protected methods and fields public as
 # part of optimization. This lets proguard inline trivial getter/setter methods.
 -allowaccessmodification

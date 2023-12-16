@@ -543,12 +543,16 @@
 
     <!--  ID for the camera of outer display that needs extra protection -->
     <string translatable="false" name="config_protectedCameraId"></string>
+    <!--  Physical ID for the camera of outer display that needs extra protection -->
+    <string translatable="false" name="config_protectedPhysicalCameraId"></string>
 
     <!-- Similar to config_frontBuiltInDisplayCutoutProtection but for inner display. -->
     <string translatable="false" name="config_innerBuiltInDisplayCutoutProtection"></string>
 
     <!-- ID for the camera of inner display that needs extra protection -->
     <string translatable="false" name="config_protectedInnerCameraId"></string>
+    <!-- Physical ID for the camera of inner display that needs extra protection -->
+    <string translatable="false" name="config_protectedInnerPhysicalCameraId"></string>
 
     <!-- Comma-separated list of packages to exclude from camera protection e.g.
     "com.android.systemui,com.android.xyz" -->
@@ -979,6 +983,11 @@
     Width in pixels of the Side FPS sensor.
     -->
     <integer name="config_sfpsSensorWidth">200</integer>
+
+    <!-- Component name for Home Panel Dream -->
+    <string name="config_homePanelDreamComponent" translatable="false">
+        @null
+    </string>
 
     <!--
     They are service names that, if enabled, will cause the magnification settings button

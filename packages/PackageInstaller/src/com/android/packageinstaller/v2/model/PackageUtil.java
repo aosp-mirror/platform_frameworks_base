@@ -30,6 +30,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import java.io.File;
@@ -205,9 +207,6 @@ public class PackageUtil {
      */
     public static boolean isCallerSessionOwner(PackageInstaller pi, int originatingUid,
         int sessionId) {
-        if (sessionId == SessionInfo.INVALID_ID) {
-            return false;
-        }
         if (originatingUid == Process.ROOT_UID) {
             return true;
         }
@@ -404,6 +403,24 @@ public class PackageUtil {
         } catch (Exception ignored) {
             return null;
         }
+    }
+
+    /**
+     * Is a profile part of a user?
+     *
+     * @param userManager The user manager
+     * @param userHandle The handle of the user
+     * @param profileHandle The handle of the profile
+     *
+     * @return If the profile is part of the user or the profile parent of the user
+     */
+    public static boolean isProfileOfOrSame(UserManager userManager, UserHandle userHandle,
+        UserHandle profileHandle) {
+        if (userHandle.equals(profileHandle)) {
+            return true;
+        }
+        return userManager.getProfileParent(profileHandle) != null
+            && userManager.getProfileParent(profileHandle).equals(userHandle);
     }
 
     /**

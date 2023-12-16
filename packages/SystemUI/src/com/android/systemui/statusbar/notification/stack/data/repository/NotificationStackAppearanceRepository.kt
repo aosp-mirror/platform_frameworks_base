@@ -17,14 +17,17 @@
 
 package com.android.systemui.statusbar.notification.stack.data.repository
 
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
+import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/** A repository which holds state about and controlling the appearance of the NSSL */
+/** A repository which holds state about and controlling the appearance of the notification stack */
 @SysUISingleton
 class NotificationStackAppearanceRepository @Inject constructor() {
-    /** The position of the notification stack in the current scene */
-    val stackPosition = MutableStateFlow(SharedNotificationContainerPosition(0f, 0f))
+    /** The bounds of the notification stack in the current scene. */
+    val stackBounds = MutableStateFlow(NotificationContainerBounds())
+
+    /** The corner radius of the notification stack, in dp. */
+    val cornerRadiusDp = MutableStateFlow(32f)
 }

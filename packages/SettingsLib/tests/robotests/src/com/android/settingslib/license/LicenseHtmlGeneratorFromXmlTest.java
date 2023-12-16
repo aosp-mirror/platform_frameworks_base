@@ -168,10 +168,10 @@ public class LicenseHtmlGeneratorFromXmlTest {
     private static final String EXPECTED_NEW_HTML_STRING = HTML_HEAD_STRING + HTML_NEW_BODY_STRING;
 
     private static final String EXPECTED_OLD_HTML_STRING_WITH_CUSTOM_HEADING =
-            HTML_HEAD_STRING + HTML_CUSTOM_HEADING + "\n" + HTML_OLD_BODY_STRING;
+            HTML_HEAD_STRING + HTML_CUSTOM_HEADING + "\n<br/>\n" + HTML_OLD_BODY_STRING;
 
     private static final String EXPECTED_NEW_HTML_STRING_WITH_CUSTOM_HEADING =
-            HTML_HEAD_STRING + HTML_CUSTOM_HEADING + "\n" + HTML_NEW_BODY_STRING;
+            HTML_HEAD_STRING + HTML_CUSTOM_HEADING + "\n<br/>\n" + HTML_NEW_BODY_STRING;
 
     @Test
     public void testParseValidXmlStream() throws XmlPullParserException, IOException {

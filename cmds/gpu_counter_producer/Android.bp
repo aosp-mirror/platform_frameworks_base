@@ -19,6 +19,4 @@ cc_binary {
         "-Wunused",
         "-Wunreachable-code",
     ],
-
-    soc_specific: true,
 }

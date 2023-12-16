@@ -490,16 +490,32 @@ public class TelephonyRegistryManager {
     /**
      * Notify changes to activity state changes on certain subscription.
      *
+     * @param subId for which data activity state changed.
+     * @param dataActivityType indicates the latest data activity type e.g. {@link
+     * TelephonyManager#DATA_ACTIVITY_IN}
+     */
+    public void notifyDataActivityChanged(int subId, @DataActivityType int dataActivityType) {
+        try {
+            sRegistry.notifyDataActivityForSubscriber(subId, dataActivityType);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify changes to activity state changes on certain subscription.
+     *
      * @param slotIndex for which data activity changed. Can be derived from subId except
      * when subId is invalid.
      * @param subId for which data activity state changed.
-     * @param dataActivityType indicates the latest data activity type e.g, {@link
+     * @param dataActivityType indicates the latest data activity type e.g. {@link
      * TelephonyManager#DATA_ACTIVITY_IN}
      */
     public void notifyDataActivityChanged(int slotIndex, int subId,
             @DataActivityType int dataActivityType) {
         try {
-            sRegistry.notifyDataActivityForSubscriber(slotIndex, subId, dataActivityType);
+            sRegistry.notifyDataActivityForSubscriberWithSlot(slotIndex, subId, dataActivityType);
         } catch (RemoteException ex) {
             // system process is dead
             throw ex.rethrowFromSystemServer();

@@ -1813,6 +1813,9 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 SecureSettingsProto.Accessibility.BUTTON_TARGETS);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_QS_TARGETS,
+                SecureSettingsProto.Accessibility.QS_TARGETS);
+        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_MAGNIFICATION_CAPABILITY);
         dumpSetting(s, p,
@@ -1863,8 +1866,8 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.HEARING_AID_MEDIA_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_MEDIA_ROUTING);
         dumpSetting(s, p,
-                Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
-                SecureSettingsProto.Accessibility.HEARING_AID_SYSTEM_SOUNDS_ROUTING);
+                Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_NOTIFICATION_ROUTING);
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED);
@@ -2134,6 +2137,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ENHANCED_VOICE_PRIVACY_ENABLED,
                 SecureSettingsProto.ENHANCED_VOICE_PRIVACY_ENABLED);
+
+        final long evenDimmerToken = p.start(SecureSettingsProto.EVEN_DIMMER);
+        dumpSetting(s, p,
+                Settings.Secure.EVEN_DIMMER_ACTIVATED,
+                SecureSettingsProto.EvenDimmer.EVEN_DIMMER_ACTIVATED);
+        dumpSetting(s, p,
+                Settings.Secure.EVEN_DIMMER_MIN_NITS,
+                SecureSettingsProto.EvenDimmer.EVEN_DIMMER_MIN_NITS);
+        p.end(evenDimmerToken);
 
         final long gestureToken = p.start(SecureSettingsProto.GESTURE);
         dumpSetting(s, p,

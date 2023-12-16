@@ -45,6 +45,7 @@ import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.traceSection
 import com.android.settingslib.Utils
 import com.android.systemui.FontSizeUtils
 import com.android.systemui.animation.LaunchableView
@@ -707,7 +708,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     inner class StateChangeRunnable(private val state: QSTile.State) : Runnable {
         override fun run() {
-            handleStateChanged(state)
+            traceSection("QSTileViewImpl#handleStateChanged") { handleStateChanged(state) }
         }
 
         // We want all instances of this runnable to be equal to each other, so they can be used to

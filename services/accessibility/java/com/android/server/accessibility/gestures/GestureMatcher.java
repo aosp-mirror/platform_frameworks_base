@@ -328,13 +328,21 @@ public abstract class GestureMatcher {
                                 + getStateSymbolicName(mTargetState));
             }
             mHandler.removeCallbacks(this);
+            recycleEvent();
         }
 
         public void post(
                 int state, long delay, MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+            // Recycle the old event first if necessary, to handle duplicate calls to post.
+            recycleEvent();
             mTargetState = state;
-            mEvent = event;
-            mRawEvent = rawEvent;
+            if (android.view.accessibility.Flags.copyEventsForGestureDetection()) {
+                mEvent = event.copy();
+                mRawEvent = rawEvent.copy();
+            } else {
+                mEvent = event;
+                mRawEvent = rawEvent;
+            }
             mPolicyFlags = policyFlags;
             mHandler.postDelayed(this, delay);
             if (DEBUG) {
@@ -367,6 +375,19 @@ public abstract class GestureMatcher {
                                 + getStateSymbolicName(mTargetState));
             }
             setState(mTargetState, mEvent, mRawEvent, mPolicyFlags);
+            recycleEvent();
+        }
+
+        private void recycleEvent() {
+            if (android.view.accessibility.Flags.copyEventsForGestureDetection()) {
+                if (mEvent == null || mRawEvent == null) {
+                    return;
+                }
+                mEvent.recycle();
+                mRawEvent.recycle();
+                mEvent = null;
+                mRawEvent = null;
+            }
         }
     }
 

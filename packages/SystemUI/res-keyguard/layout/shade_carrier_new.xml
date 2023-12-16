@@ -22,13 +22,15 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:gravity="center_vertical"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:theme="@style/Theme.SystemUI.QuickSettings.Header" >
 
     <com.android.systemui.util.AutoMarqueeTextView
         android:id="@+id/mobile_carrier_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:textAppearance="@style/TextAppearance.QS.Status.Carriers"
         android:layout_marginEnd="@dimen/qs_carrier_margin_width"
         android:visibility="gone"
         android:textDirection="locale"

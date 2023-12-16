@@ -4871,7 +4871,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     private int pullCachedAppsHighWatermark(int atomTag, List<StatsEvent> pulledData) {
-        pulledData.add(LocalServices.getService(ActivityManagerInternal.class)
+        pulledData.add((StatsEvent) LocalServices.getService(ActivityManagerInternal.class)
                 .getCachedAppsHighWatermarkStats(atomTag, true));
         return StatsManager.PULL_SUCCESS;
     }

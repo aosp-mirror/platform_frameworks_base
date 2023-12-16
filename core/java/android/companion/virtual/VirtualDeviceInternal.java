@@ -19,6 +19,7 @@ package android.companion.virtual;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.virtual.audio.VirtualAudioDevice;
@@ -52,6 +53,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.ArrayMap;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -340,15 +342,29 @@ public class VirtualDeviceInternal {
         return mVirtualAudioDevice;
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualCamera createVirtualCamera(@NonNull VirtualCameraConfig config) {
-        return new VirtualCamera(mVirtualDevice, config);
+        try {
+            mVirtualDevice.registerVirtualCamera(config);
+            return new VirtualCamera(mVirtualDevice,
+                            Integer.toString(mVirtualDevice.getVirtualCameraId(config)), config);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
-    @NonNull
     void setShowPointerIcon(boolean showPointerIcon) {
         try {
             mVirtualDevice.setShowPointerIcon(showPointerIcon);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
+        try {
+            mVirtualDevice.setDisplayImePolicy(displayId, policy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

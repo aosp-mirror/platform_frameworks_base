@@ -17,6 +17,7 @@
 package android.hardware.camera2;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -35,6 +36,7 @@ import android.hardware.CameraIdRemapping;
 import android.hardware.CameraStatus;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
+import android.hardware.camera2.CameraDevice.RequestTemplate;
 import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.hardware.camera2.impl.CameraInjectionSessionImpl;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -61,6 +63,7 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Display;
 
+import com.android.internal.camera.flags.Flags;
 import com.android.internal.util.ArrayUtils;
 
 import java.lang.ref.WeakReference;
@@ -346,6 +349,71 @@ public final class CameraManager {
             throws CameraAccessException {
         return CameraManagerGlobal.get().isConcurrentSessionConfigurationSupported(
                 cameraIdAndSessionConfig, mContext.getApplicationInfo().targetSdkVersion);
+    }
+
+    /**
+     * Checks whether a particular {@link SessionConfiguration} is supported by a camera device.
+     *
+     * <p>This method performs a runtime check of a given {@link SessionConfiguration}. The result
+     * confirms whether or not the session configuration, including the
+     * {@link SessionConfiguration#setSessionParameters specified session parameters}, can
+     * be successfully used to create a camera capture session using
+     * {@link CameraDevice#createCaptureSession(
+     * android.hardware.camera2.params.SessionConfiguration)}.
+     * </p>
+     *
+     * <p>Supported if the {@link CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION}
+     * is at least {@code android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM}. If less or equal to
+     * {@code android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE}, this function throws
+     * {@code UnsupportedOperationException}.</p>
+     *
+     * <p>Although this method is much faster than creating a new capture session, it is not
+     * trivial cost: the latency is less than 5 milliseconds in most cases. As a result, the
+     * app should not use this to explore the entire space of supported session combinations.</p>
+     *
+     * <p>Instead, the application should use this method to query whether the
+     * combination of certain features are supported. See {@link
+     * CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION} for the list of feature
+     * combinations the camera device will reliably report.</p>
+     *
+     * <p>IMPORTANT:</p>
+     *
+     * <ul>
+     *
+     * <li>If a feature support can be queried with {@code CameraCharacteristics},
+     * the application must directly use {@code CameraCharacteristics} rather than
+     * calling this function. The reasons are: (1) using {@code CameraCharacteristics} is more
+     * efficient, and (2) calling this function with a non-supported feature will throw a {@code
+     * IllegalArgumentException}.</li>
+     *
+     * <li>To minimize latency for {@code SessionConfiguration} creation, the application should
+     * use deferred surfaces for SurfaceView and SurfaceTexture to avoid delays. Alternatively,
+     * the application can create {@code ImageReader} with {@code USAGE_COMPOSER_OVERLAY} and
+     * {@code USAGE_GPU_SAMPLED_IMAGE} usage respectively. For {@code MediaRecorder} and {@code
+     * MediaCodec}, the application can use {@code ImageReader} with {@code
+     * USAGE_VIDEO_ENCODE}. The lightweight nature of {@code ImageReader} helps minimize the
+     * latency cost.</li>
+     *
+     * </ul>
+     *
+     *
+     * @return {@code true} if the given session configuration is supported by the camera device
+     *         {@code false} otherwise.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalArgumentException if the session configuration is invalid
+     * @throws UnsupportedOperationException if the query operation is not supported by the camera
+     *                                       device
+     *
+     * @see CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION
+     */
+    @RequiresPermission(android.Manifest.permission.CAMERA)
+    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
+    public boolean isSessionConfigurationWithParametersSupported(@NonNull String cameraId,
+            @NonNull SessionConfiguration sessionConfig) throws CameraAccessException {
+        //TODO: b/298033056: restructure the OutputConfiguration API for better usability
+        return CameraManagerGlobal.get().isSessionConfigurationWithParametersSupported(
+                cameraId, sessionConfig);
     }
 
     /**
@@ -1242,6 +1310,48 @@ public final class CameraManager {
     }
 
     /**
+     * Create a {@link CaptureRequest.Builder} for new capture requests,
+     * initialized with template for a target use case.
+     *
+     * <p>The settings are chosen to be the best options for the specific camera device,
+     * so it is not recommended to reuse the same request for a different camera device;
+     * create a builder specific for that device and template and override the
+     * settings as desired, instead.</p>
+     *
+     * <p>Supported if the {@link CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION}
+     * is at least {@code android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM}. If less or equal to
+     * {@code android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE}, this function throws a
+     * {@code UnsupportedOperationException}.
+     *
+     * @param cameraId The camera ID to create capture request for.
+     * @param templateType An enumeration selecting the use case for this request. Not all template
+     * types are supported on every device. See the documentation for each template type for
+     * details.
+     * @return a builder for a capture request, initialized with default
+     * settings for that template, and no output streams
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalArgumentException if the cameraId is not valid, or the templateType is
+     *                                  not supported by this device.
+     * @throws UnsupportedOperationException if this method is not supported by the camera device,
+     *     for example, if {@link CameraCharacteristics#INFO_SESSION_CONFIGURATION_QUERY_VERSION}
+     *     is less than {@code android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM}.
+     */
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.CAMERA)
+    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
+    public CaptureRequest.Builder createCaptureRequest(@NonNull String cameraId,
+            @RequestTemplate int templateType) throws CameraAccessException {
+        if (CameraManagerGlobal.sCameraServiceDisabled) {
+            throw new IllegalArgumentException("No camera available on device.");
+        }
+
+        return CameraManagerGlobal.get().createCaptureRequest(cameraId, templateType,
+                mContext.getApplicationInfo().targetSdkVersion);
+    }
+
+    /**
      * @hide
      */
     public static boolean shouldOverrideToPortrait(@Nullable Context context) {
@@ -1734,11 +1844,34 @@ public final class CameraManager {
      * Remaps Camera Ids in the CameraService.
      *
      * @hide
-    */
+     */
     @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
     public void remapCameraIds(@NonNull CameraIdRemapping cameraIdRemapping)
             throws CameraAccessException, SecurityException, IllegalArgumentException {
         CameraManagerGlobal.get().remapCameraIds(cameraIdRemapping);
+    }
+
+    /**
+     * Injects session params into existing clients in the CameraService.
+     *
+     * @param cameraId       The camera id of client to inject session params into.
+     *                       If no such client exists for cameraId, no injection will
+     *                       take place.
+     * @param sessionParams  A {@link CaptureRequest} object containing the
+     *                       the sessionParams to inject into the existing client.
+     *
+     * @throws CameraAccessException    {@link CameraAccessException#CAMERA_DISCONNECTED} will be
+     *                                  thrown if camera service is not available. Further, if
+     *                                  if no such client exists for cameraId,
+     *                                  {@link CameraAccessException#CAMERA_ERROR} will be thrown.
+     * @throws SecurityException        If the caller does not have permission to inject session
+     *                                  params
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
+    public void injectSessionParams(@NonNull String cameraId, @NonNull CaptureRequest sessionParams)
+            throws CameraAccessException, SecurityException {
+        CameraManagerGlobal.get().injectSessionParams(cameraId, sessionParams);
     }
 
     /**
@@ -2000,6 +2133,30 @@ public final class CameraManager {
             }
         }
 
+        /** Injects session params into an existing client for cameraid. */
+        public void injectSessionParams(@NonNull String cameraId,
+                @NonNull CaptureRequest sessionParams)
+                throws CameraAccessException, SecurityException {
+            synchronized (mLock) {
+                ICameraService cameraService = getCameraService();
+                if (cameraService == null) {
+                    throw new CameraAccessException(
+                            CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable.");
+                }
+
+                try {
+                    cameraService.injectSessionParams(cameraId, sessionParams.getNativeMetadata());
+                } catch (ServiceSpecificException e) {
+                    throwAsPublicException(e);
+                } catch (RemoteException e) {
+                    throw new CameraAccessException(
+                            CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable.");
+                }
+            }
+        }
+
         private String[] extractCameraIdListLocked() {
             String[] cameraIds = null;
             int idCount = 0;
@@ -2245,6 +2402,26 @@ public final class CameraManager {
             return false;
         }
 
+        public boolean isSessionConfigurationWithParametersSupported(
+                @NonNull String cameraId, @NonNull SessionConfiguration sessionConfiguration)
+                throws CameraAccessException {
+
+            synchronized (mLock) {
+                try {
+                    return mCameraService.isSessionConfigurationWithParametersSupported(
+                            cameraId, sessionConfiguration);
+                } catch (ServiceSpecificException e) {
+                    throwAsPublicException(e);
+                } catch (RemoteException e) {
+                    // Camera service died - act as if the camera was disconnected
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                          "Camera service is currently unavailable", e);
+                }
+            }
+
+            return false;
+        }
+
       /**
         * Helper function to find out if a camera id is in the set of combinations returned by
         * getConcurrentCameraIds()
@@ -2342,6 +2519,45 @@ public final class CameraManager {
                 }
             }
             return torchStrength;
+        }
+
+        public CaptureRequest.Builder createCaptureRequest(@NonNull String cameraId,
+                @RequestTemplate int templateType, int targetSdkVersion)
+                throws CameraAccessException {
+            CaptureRequest.Builder builder = null;
+            synchronized (mLock) {
+                if (cameraId == null) {
+                    throw new IllegalArgumentException("cameraId was null");
+                }
+
+                ICameraService cameraService = getCameraService();
+                if (cameraService == null) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                        "Camera service is currently unavailable.");
+                }
+
+                try {
+                    CameraMetadataNative defaultRequest =
+                            cameraService.createDefaultRequest(cameraId, templateType);
+
+                    CameraDeviceImpl.disableZslIfNeeded(defaultRequest,
+                            targetSdkVersion, templateType);
+
+                    builder = new CaptureRequest.Builder(defaultRequest, /*reprocess*/false,
+                            CameraCaptureSession.SESSION_ID_NONE, cameraId,
+                            /*physicalCameraIdSet*/null);
+                } catch (ServiceSpecificException e) {
+                    if (e.errorCode == ICameraService.ERROR_INVALID_OPERATION) {
+                        throw new UnsupportedOperationException(e.getMessage());
+                    }
+
+                    throwAsPublicException(e);
+                } catch (RemoteException e) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable.");
+                }
+            }
+            return builder;
         }
 
         private void handleRecoverableSetupErrors(ServiceSpecificException e) {

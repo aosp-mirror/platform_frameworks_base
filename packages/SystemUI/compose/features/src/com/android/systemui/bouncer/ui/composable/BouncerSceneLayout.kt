@@ -26,8 +26,8 @@ import com.android.systemui.bouncer.ui.helper.calculateLayoutInternal
 
 /**
  * Returns the [BouncerSceneLayout] that should be used by the bouncer scene. If
- * [isSideBySideSupported] is `false`, then [BouncerSceneLayout.SIDE_BY_SIDE] is replaced by
- * [BouncerSceneLayout.STANDARD].
+ * [isSideBySideSupported] is `false`, then [BouncerSceneLayout.BESIDE_USER_SWITCHER] is replaced by
+ * [BouncerSceneLayout.STANDARD_BOUNCER].
  */
 @Composable
 fun calculateLayout(

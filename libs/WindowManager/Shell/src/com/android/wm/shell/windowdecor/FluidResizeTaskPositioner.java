@@ -87,7 +87,7 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
             mDisplayController.getDisplayLayout(mWindowDecoration.mDisplay.getDisplayId())
                     .getStableBounds(mStableBounds);
         }
-        return mRepositionTaskBounds;
+        return new Rect(mRepositionTaskBounds);
     }
 
     @Override

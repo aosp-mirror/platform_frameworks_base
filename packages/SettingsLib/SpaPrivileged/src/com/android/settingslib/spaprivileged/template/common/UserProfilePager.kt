@@ -72,7 +72,8 @@ private fun UserManager.getUserGroups(): List<UserGroup> {
 
 private fun UserManager.showInSettings(userInfo: UserInfo): Int {
     val userProperties = getUserProperties(userInfo.userHandle)
-    return if (userInfo.isQuietModeEnabled && userProperties.hideInSettingsInQuietMode) {
+    return if (userInfo.isQuietModeEnabled && userProperties.showInQuietMode
+            == UserProperties.SHOW_IN_QUIET_MODE_HIDDEN) {
         UserProperties.SHOW_IN_SETTINGS_NO
     } else {
         userProperties.showInSettings

@@ -20,7 +20,7 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACH
 import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 
 /**

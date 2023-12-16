@@ -16,9 +16,8 @@
 
 package com.android.compose.nestedscroll
 
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 
 /**
  * A [NestedScrollConnection] that listens for all vertical scroll events and responds in the
@@ -34,59 +33,44 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
  *
  * @sample com.android.compose.animation.scene.demo.Shade
  */
-class LargeTopAppBarNestedScrollConnection(
-    private val height: () -> Float,
-    private val onChangeHeight: (Float) -> Unit,
-    private val minHeight: Float,
-    private val maxHeight: Float,
-) : NestedScrollConnection {
-
-    constructor(
-        height: () -> Float,
-        onHeightChanged: (Float) -> Unit,
-        heightRange: ClosedFloatingPointRange<Float>,
-    ) : this(
-        height = height,
-        onChangeHeight = onHeightChanged,
-        minHeight = heightRange.start,
-        maxHeight = heightRange.endInclusive,
+fun LargeTopAppBarNestedScrollConnection(
+    height: () -> Float,
+    onHeightChanged: (Float) -> Unit,
+    heightRange: ClosedFloatingPointRange<Float>,
+): PriorityNestedScrollConnection {
+    val minHeight = heightRange.start
+    val maxHeight = heightRange.endInclusive
+    return PriorityNestedScrollConnection(
+        orientation = Orientation.Vertical,
+        // When swiping up, the LargeTopAppBar will shrink (to [minHeight]) and the content will
+        // expand. Then, you can then scroll down the content.
+        canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
+            offsetAvailable < 0 && offsetBeforeStart == 0f && height() > minHeight
+        },
+        // When swiping down, the content will scroll up until it reaches the top. Then, the
+        // LargeTopAppBar will expand until it reaches its [maxHeight].
+        canStartPostScroll = { offsetAvailable, _ -> offsetAvailable > 0 && height() < maxHeight },
+        canStartPostFling = { false },
+        canContinueScroll = {
+            val currentHeight = height()
+            minHeight < currentHeight && currentHeight < maxHeight
+        },
+        canScrollOnFling = true,
+        onStart = { /* do nothing */},
+        onScroll = { offsetAvailable ->
+            val currentHeight = height()
+            val amountConsumed =
+                if (offsetAvailable > 0) {
+                    val amountLeft = maxHeight - currentHeight
+                    offsetAvailable.coerceAtMost(amountLeft)
+                } else {
+                    val amountLeft = minHeight - currentHeight
+                    offsetAvailable.coerceAtLeast(amountLeft)
+                }
+            onHeightChanged(currentHeight + amountConsumed)
+            amountConsumed
+        },
+        // Don't consume the velocity on pre/post fling
+        onStop = { 0f },
     )
-
-    /**
-     * When swiping up, the LargeTopAppBar will shrink (to [minHeight]) and the content will expand.
-     * Then, you can then scroll down the content.
-     */
-    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        val y = available.y
-        val currentHeight = height()
-        if (y >= 0 || currentHeight <= minHeight) {
-            return Offset.Zero
-        }
-
-        val amountLeft = minHeight - currentHeight
-        val amountConsumed = y.coerceAtLeast(amountLeft)
-        onChangeHeight(currentHeight + amountConsumed)
-        return Offset(0f, amountConsumed)
-    }
-
-    /**
-     * When swiping down, the content will scroll up until it reaches the top. Then, the
-     * LargeTopAppBar will expand until it reaches its [maxHeight].
-     */
-    override fun onPostScroll(
-        consumed: Offset,
-        available: Offset,
-        source: NestedScrollSource
-    ): Offset {
-        val y = available.y
-        val currentHeight = height()
-        if (y <= 0 || currentHeight >= maxHeight) {
-            return Offset.Zero
-        }
-
-        val amountLeft = maxHeight - currentHeight
-        val amountConsumed = y.coerceAtMost(amountLeft)
-        onChangeHeight(currentHeight + amountConsumed)
-        return Offset(0f, amountConsumed)
-    }
 }

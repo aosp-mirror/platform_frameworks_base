@@ -268,6 +268,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     /** Master list of jobs. */
     final JobStore mJobs;
     private final CountDownLatch mJobStoreLoadedLatch;
+    private final CountDownLatch mStartControllerTrackingLatch;
     /** Tracking the standby bucket state of each app */
     final StandbyTracker mStandbyTracker;
     /** Tracking amount of time each package runs for. */
@@ -1432,10 +1433,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                         Slog.d(TAG, "Removing jobs for pkg " + pkgName + " at uid " + pkgUid);
                     }
                     synchronized (mLock) {
-                        // Exclude jobs scheduled on behalf of this app for now because SyncManager
+                        // Exclude jobs scheduled on behalf of this app because SyncManager
                         // and other job proxy agents may not know to reschedule the job properly
                         // after force stop.
-                        // TODO(209852664): determine how to best handle syncs & other proxied jobs
+                        // Proxied jobs will not be allowed to run if the source app is stopped.
                         cancelJobsForPackageAndUidLocked(pkgName, pkgUid,
                                 /* includeSchedulingApp */ true, /* includeSourceApp */ false,
                                 JobParameters.STOP_REASON_USER,
@@ -1447,7 +1448,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     };
 
-    private String getPackageName(Intent intent) {
+    /** Returns the package name stored in the intent's data. */
+    @Nullable
+    public static String getPackageName(Intent intent) {
         Uri uri = intent.getData();
         String pkg = uri != null ? uri.getSchemeSpecificPart() : null;
         return pkg;
@@ -2521,6 +2524,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mBatteryStateTracker.startTracking();
 
         // Create the controllers.
+        mStartControllerTrackingLatch = new CountDownLatch(1);
         mControllers = new ArrayList<StateController>();
         mPrefetchController = new PrefetchController(this);
         mControllers.add(mPrefetchController);
@@ -2551,6 +2555,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         mTareController =
                 new TareController(this, backgroundJobsController, mConnectivityController);
         mControllers.add(mTareController);
+
+        startControllerTrackingAsync();
 
         mRestrictiveControllers = new ArrayList<>();
         mRestrictiveControllers.add(batteryController);
@@ -2623,7 +2629,13 @@ public class JobSchedulerService extends com.android.server.SystemService
     public void onBootPhase(int phase) {
         if (PHASE_LOCK_SETTINGS_READY == phase) {
             // This is the last phase before PHASE_SYSTEM_SERVICES_READY. We need to ensure that
+            // controllers have started tracking and that
             // persisted jobs are loaded before we can proceed to PHASE_SYSTEM_SERVICES_READY.
+            try {
+                mStartControllerTrackingLatch.await();
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Couldn't wait on controller tracking start latch");
+            }
             try {
                 mJobStoreLoadedLatch.await();
             } catch (InterruptedException e) {
@@ -2631,8 +2643,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         } else if (PHASE_SYSTEM_SERVICES_READY == phase) {
             mConstantsObserver.start();
-            for (StateController controller : mControllers) {
-                controller.onSystemServicesReady();
+            for (int i = mControllers.size() - 1; i >= 0; --i) {
+                mControllers.get(i).onSystemServicesReady();
             }
 
             mAppStateTracker = (AppStateTrackerImpl) Objects.requireNonNull(
@@ -2693,6 +2705,17 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
             }
         }
+    }
+
+    private void startControllerTrackingAsync() {
+        mHandler.post(() -> {
+            synchronized (mLock) {
+                for (int i = mControllers.size() - 1; i >= 0; --i) {
+                    mControllers.get(i).startTrackingLocked();
+                }
+            }
+            mStartControllerTrackingLatch.countDown();
+        });
     }
 
     /**
@@ -4358,7 +4381,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         private JobInfo enforceBuilderApiPermissions(int uid, int pid, JobInfo job) {
             if (job.getBias() != JobInfo.BIAS_DEFAULT
                         && !hasPermission(uid, pid, Manifest.permission.UPDATE_DEVICE_STATS)) {
-                if (CompatChanges.isChangeEnabled(THROW_ON_UNSUPPORTED_BIAS_USAGE, uid)) {
+                if (CompatChanges.isChangeEnabled(THROW_ON_UNSUPPORTED_BIAS_USAGE, uid)
+                        && Flags.throwOnUnsupportedBiasUsage()) {
                     throw new SecurityException("Apps may not call setBias()");
                 } else {
                     // We can't throw the exception. Log the issue and modify the job to remove
@@ -4366,7 +4390,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.w(TAG, "Uid " + uid + " set bias on its job");
                     return new JobInfo.Builder(job)
                             .setBias(JobInfo.BIAS_DEFAULT)
-                            .build(false, false);
+                            .build(false, false, false);
                 }
             }
 
@@ -4388,7 +4412,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             job.enforceValidity(
                     CompatChanges.isChangeEnabled(
                             JobInfo.DISALLOW_DEADLINES_FOR_PREFETCH_JOBS, callingUid),
-                    rejectNegativeNetworkEstimates);
+                    rejectNegativeNetworkEstimates,
+                    CompatChanges.isChangeEnabled(
+                            JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS, callingUid));
             if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
@@ -5175,6 +5201,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         return mTareController;
     }
 
+    @VisibleForTesting
+    protected void waitOnAsyncLoadingForTesting() throws Exception {
+        mStartControllerTrackingLatch.await();
+        // Ignore the job store loading for testing.
+    }
+
     // Shell command infrastructure
     int getJobState(PrintWriter pw, String pkgName, int userId, @Nullable String namespace,
             int jobId) {
@@ -5333,6 +5365,14 @@ public class JobSchedulerService extends com.android.server.SystemService
                 controller.dumpConstants(pw);
                 pw.decreaseIndent();
             }
+            pw.println();
+
+            pw.println("Aconfig flags:");
+            pw.increaseIndent();
+            pw.print(Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE,
+                    Flags.throwOnUnsupportedBiasUsage());
+            pw.println();
+            pw.decreaseIndent();
             pw.println();
 
             for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {

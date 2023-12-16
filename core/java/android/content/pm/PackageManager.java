@@ -34,6 +34,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.annotation.XmlRes;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -96,6 +97,7 @@ import com.android.internal.util.DataClass;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.cert.Certificate;
@@ -108,6 +110,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Class for retrieving various kinds of information related to the application
@@ -728,7 +731,7 @@ public abstract class PackageManager {
          * @see VirtualDeviceManager.VirtualDevice#getPersistentDeviceId()
          * @see VirtualDeviceManager#PERSISTENT_DEVICE_ID_DEFAULT
          */
-        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
         default void onPermissionsChanged(int uid, @NonNull String persistentDeviceId) {
             Objects.requireNonNull(persistentDeviceId);
             if (Objects.equals(persistentDeviceId,
@@ -915,6 +918,10 @@ public abstract class PackageManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstrumentationInfoFlags {}
+
+    //-------------------------------------------------------------------------
+    // Beginning of GET_ and MATCH_ flags
+    //-------------------------------------------------------------------------
 
     /**
      * {@link PackageInfo} flag: return information about
@@ -1213,28 +1220,17 @@ public abstract class PackageManager {
      */
     public static final int MATCH_DIRECT_BOOT_AUTO = 0x10000000;
 
-    /**
-     * {@link ResolveInfo} flag: allow matching components across clone profile
-     * <p>
-     * This flag is used only for query and not resolution, the default behaviour would be to
-     * restrict querying across clone profile. This flag would be honored only if caller have
-     * permission {@link Manifest.permission.QUERY_CLONED_APPS}.
-     *
-     *  @hide
-     * <p>
-     */
-    @SystemApi
-    public static final int MATCH_CLONE_PROFILE = 0x20000000;
-
-    /**
-     * @deprecated Use {@link #GET_ATTRIBUTIONS_LONG} to avoid unintended sign extension.
-     */
-    @Deprecated
-    public static final int GET_ATTRIBUTIONS = 0x80000000;
-
     /** @hide */
     @Deprecated
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
+
+    /**
+     * Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
     /**
      * {@link PackageInfo} flag: include system apps that are in the uninstalled state and have
@@ -1254,24 +1250,26 @@ public abstract class PackageManager {
     public static final int MATCH_APEX = 0x40000000;
 
     /**
+     * @deprecated Use {@link #GET_ATTRIBUTIONS_LONG} to avoid unintended sign extension.
+     */
+    @Deprecated
+    public static final int GET_ATTRIBUTIONS = 0x80000000;
+
+    /**
      * {@link PackageInfo} flag: return all attributions declared in the package manifest
      */
     public static final long GET_ATTRIBUTIONS_LONG = 0x80000000L;
 
     /**
      * Flag parameter to also retrieve some information about archived packages.
-     * Packages can be archived through
-     * {@link PackageInstaller#requestArchive(String, IntentSender)} and do not have any APKs stored
-     * on the device, but do keep the data directory.
+     * Packages can be archived through {@link PackageInstaller#requestArchive} and do not have any
+     * APKs stored on the device, but do keep the data directory.
      * <p> Note: Archived apps are a subset of apps returned by {@link #MATCH_UNINSTALLED_PACKAGES}.
      * <p> Note: this flag may cause less information about currently installed
      * applications to be returned.
      * <p> Note: use of this flag requires the android.permission.QUERY_ALL_PACKAGES
      * permission to see uninstalled packages.
-     * @hide
      */
-    // TODO(b/278553670) Unhide and update @links before launch.
-    @SystemApi
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public static final long MATCH_ARCHIVED_PACKAGES = 1L << 32;
 
@@ -1280,7 +1278,24 @@ public abstract class PackageManager {
      * @see #isPackageQuarantined
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
-    public static final long MATCH_QUARANTINED_COMPONENTS = 0x100000000L;
+    public static final long MATCH_QUARANTINED_COMPONENTS = 1L << 33;
+
+    /**
+     * {@link ResolveInfo} flag: allow matching components across clone profile
+     * <p>
+     * This flag is used only for query and not resolution, the default behaviour would be to
+     * restrict querying across clone profile. This flag would be honored only if caller have
+     * permission {@link Manifest.permission.QUERY_CLONED_APPS}.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_FIX_DUPLICATED_FLAGS)
+    @SystemApi
+    public static final long MATCH_CLONE_PROFILE_LONG = 1L << 34;
+
+    //-------------------------------------------------------------------------
+    // End of GET_ and MATCH_ flags
+    //-------------------------------------------------------------------------
 
     /**
      * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when
@@ -1502,6 +1517,7 @@ public abstract class PackageManager {
             INSTALL_REQUEST_UPDATE_OWNERSHIP,
             INSTALL_IGNORE_DEXOPT_PROFILE,
             INSTALL_UNARCHIVE_DRAFT,
+            INSTALL_UNARCHIVE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -1749,11 +1765,20 @@ public abstract class PackageManager {
      * If set, then the session is a draft session created for an upcoming unarchival by its
      * installer.
      *
-     * @see PackageInstaller#requestUnarchive(String)
+     * @see PackageInstaller#requestUnarchive
      *
      * @hide
      */
     public static final int INSTALL_UNARCHIVE_DRAFT = 1 << 29;
+
+    /**
+     * If set, then the {@link PackageInstaller.Session} is an unarchival.
+     *
+     * @see PackageInstaller#requestUnarchive
+     *
+     * @hide
+     */
+    public static final int INSTALL_UNARCHIVE = 1 << 30;
 
     /**
      * Flag parameter for {@link #installPackage} to force a non-staged update of an APEX. This is
@@ -2553,6 +2578,7 @@ public abstract class PackageManager {
             DELETE_SYSTEM_APP,
             DELETE_DONT_KILL_APP,
             DELETE_CHATTY,
+            DELETE_SHOW_DIALOG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeleteFlags {}
@@ -2596,13 +2622,19 @@ public abstract class PackageManager {
     public static final int DELETE_DONT_KILL_APP = 0x00000008;
 
     /**
-     * Flag parameter for {@link #deletePackage} to indicate that the deletion is an archival. This
+     * Flag parameter for {@link PackageInstaller#uninstall(VersionedPackage, int, IntentSender)} to
+     * indicate that the deletion is an archival. This
      * flag is only for internal usage as part of
-     * {@link PackageInstaller#requestArchive(String, IntentSender)}.
-     *
-     * @hide
+     * {@link PackageInstaller#requestArchive}.
      */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public static final int DELETE_ARCHIVE = 0x00000010;
+
+    /**
+     * Show a confirmation dialog to the user when app is being deleted.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public static final int DELETE_SHOW_DIALOG = 0x00000020;
 
     /**
      * Flag parameter for {@link #deletePackage} to indicate that package deletion
@@ -4869,7 +4901,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID =
             "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
 
@@ -6278,6 +6310,11 @@ public abstract class PackageManager {
     /**
      * Check whether a particular package has been granted a particular
      * permission.
+     * <p>
+     * <strong>Note: </strong>This API returns the underlying permission state
+     * as-is and is mostly intended for permission managing system apps. To
+     * perform an access check for a certain app, please use the
+     * {@link Context#checkPermission} APIs instead.
      *
      * @param permName The name of the permission you are checking for.
      * @param packageName The name of the package you are checking against.
@@ -8965,11 +9002,8 @@ public abstract class PackageManager {
      * Returns true if an app is archivable.
      *
      * @throws NameNotFoundException if the given package name is not available to the caller.
-     * @see PackageInstaller#requestArchive(String, IntentSender)
-     *
-     * @hide
+     * @see PackageInstaller#requestArchive
      */
-    @SystemApi
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public boolean isAppArchivable(@NonNull String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException("isAppArchivable not implemented");
@@ -9959,6 +9993,21 @@ public abstract class PackageManager {
      */
     public @Nullable Bundle getSuspendedPackageAppExtras() {
         throw new UnsupportedOperationException("getSuspendedPackageAppExtras not implemented");
+    }
+
+    /**
+     * Get the name of the package that suspended the given package. Packages can be suspended by
+     * device administrators or apps holding {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#SUSPEND_APPS}.
+     *
+     * @param suspendedPackage The package that has been suspended.
+     * @return Name of the package that suspended the given package. Returns {@code null} if the
+     * given package is not currently suspended and the platform package name - i.e.
+     * {@code "android"} - if the package was suspended by a device admin.
+     * @hide
+     */
+    public @Nullable String getSuspendingPackage(@NonNull String suspendedPackage) {
+        throw new UnsupportedOperationException("getSuspendingPackage not implemented");
     }
 
     /**
@@ -11425,5 +11474,61 @@ public abstract class PackageManager {
     public void unregisterPackageMonitorCallback(@NonNull IRemoteCallback callback) {
         throw new UnsupportedOperationException(
                 "unregisterPackageMonitorCallback not implemented in subclass");
+    }
+
+    /**
+     * Retrieve AndroidManifest.xml information for the given application apk path.
+     *
+     * <p>Example:
+     *
+     * <pre><code>
+     * Bundle result;
+     * try {
+     *     result = getContext().getPackageManager().parseAndroidManifest(apkFilePath,
+     *             xmlResourceParser -> {
+     *                 Bundle bundle = new Bundle();
+     *                 // Search the start tag
+     *                 int type;
+     *                 while ((type = xmlResourceParser.next()) != XmlPullParser.START_TAG
+     *                         &amp;&amp; type != XmlPullParser.END_DOCUMENT) {
+     *                 }
+     *                 if (type != XmlPullParser.START_TAG) {
+     *                     return bundle;
+     *                 }
+     *
+     *                 // Start to read the tags and attributes from the xmlResourceParser
+     *                 if (!xmlResourceParser.getName().equals("manifest")) {
+     *                     return bundle;
+     *                 }
+     *                 String packageName = xmlResourceParser.getAttributeValue(null, "package");
+     *                 bundle.putString("package", packageName);
+     *
+     *                 // Continue to read the tags and attributes from the xmlResourceParser
+     *
+     *                 return bundle;
+     *             });
+     * } catch (IOException e) {
+     * }
+     * </code></pre>
+     *
+     * Note: When the parserFunction is invoked, the client can read the AndroidManifest.xml
+     * information by the XmlResourceParser object. After leaving the parserFunction, the
+     * XmlResourceParser object will be closed.
+     *
+     * @param apkFilePath The path of an application apk file.
+     * @param parserFunction The parserFunction will be invoked with the XmlResourceParser object
+     *        after getting the AndroidManifest.xml of an application package.
+     *
+     * @return Returns the result of the {@link Function#apply(Object)}.
+     *
+     * @throws IOException if the AndroidManifest.xml of an application package cannot be
+     *             read or accessed.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_GET_PACKAGE_INFO)
+    @WorkerThread
+    public <T> T parseAndroidManifest(@NonNull String apkFilePath,
+            @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
+        throw new UnsupportedOperationException(
+                "parseAndroidManifest not implemented in subclass");
     }
 }

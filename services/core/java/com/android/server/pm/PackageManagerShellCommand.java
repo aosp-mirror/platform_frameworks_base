@@ -2872,16 +2872,16 @@ class PackageManagerShellCommand extends ShellCommand {
                 UserHandle.USER_NULL, "runGrantRevokePermission"));
 
         List<PackageInfo> packageInfos;
+        PackageManager pm = mContext.createContextAsUser(translatedUser, 0).getPackageManager();
         if (pkg == null) {
-            packageInfos = mContext.getPackageManager().getInstalledPackages(
-                    PackageManager.GET_PERMISSIONS);
+            packageInfos = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS);
         } else {
             try {
-                packageInfos = Collections.singletonList(
-                        mContext.getPackageManager().getPackageInfo(pkg,
-                                PackageManager.GET_PERMISSIONS));
+                packageInfos = Collections.singletonList(pm.getPackageInfo(pkg,
+                        PackageManager.GET_PERMISSIONS));
             } catch (NameNotFoundException e) {
                 getErrPrintWriter().println("Error: package not found");
+                getOutPrintWriter().println("Failure [package not found]");
                 return 1;
             }
         }
@@ -4639,7 +4639,7 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             mInterface.getPackageInstaller().requestArchive(packageName,
                     /* callerPackageName= */ "", receiver.getIntentSender(),
-                    new UserHandle(translatedUserId));
+                    new UserHandle(translatedUserId), 0);
         } catch (Exception e) {
             pw.println("Failure [" + e.getMessage() + "]");
             return 1;
@@ -4689,10 +4689,12 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final int translatedUserId =
                 translateUserId(userId, UserHandle.USER_SYSTEM, "runArchive");
+        final LocalIntentReceiver receiver = new LocalIntentReceiver();
 
         try {
             mInterface.getPackageInstaller().requestUnarchive(packageName,
-                    /* callerPackageName= */ "", new UserHandle(translatedUserId));
+                    mContext.getPackageName(), receiver.getIntentSender(),
+                    new UserHandle(translatedUserId));
         } catch (Exception e) {
             pw.println("Failure [" + e.getMessage() + "]");
             return 1;

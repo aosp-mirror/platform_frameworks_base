@@ -28,6 +28,14 @@ public abstract class TvAdService extends Service {
     private static final String TAG = "TvAdService";
 
     /**
+     * Name under which a TvAdService component publishes information about itself. This meta-data
+     * must reference an XML resource containing an
+     * <code>&lt;{@link android.R.styleable#TvAdService tv-ad-service}&gt;</code> tag.
+     * @hide
+     */
+    public static final String SERVICE_META_DATA = "android.media.tv.ad.service";
+
+    /**
      * Base class for derived classes to implement to provide a TV AD session.
      */
     public abstract static class Session implements KeyEvent.Callback {

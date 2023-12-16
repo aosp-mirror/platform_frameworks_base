@@ -50,3 +50,10 @@ flag {
     bug: "290220798"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_left_right_split_in_portrait"
+    namespace: "multitasking"
+    description: "Enables left/right split in portrait"
+    bug: "291018646"
+}

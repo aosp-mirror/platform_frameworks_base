@@ -48,7 +48,10 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpPhoneListenerChange;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -115,11 +118,15 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             VisualStabilityProvider visualStabilityProvider,
             ConfigurationController configurationController,
             @Main Handler handler,
+            GlobalSettings globalSettings,
+            SystemClock systemClock,
+            @Main DelayableExecutor executor,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             UiEventLogger uiEventLogger,
             JavaAdapter javaAdapter,
             ShadeInteractor shadeInteractor) {
-        super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
+        super(context, logger, handler, globalSettings, systemClock, executor,
+                accessibilityManagerWrapper, uiEventLogger);
         Resources resources = mContext.getResources();
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
         statusBarStateController.addCallback(mStatusBarStateListener);
@@ -206,7 +213,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
     @Override
     public boolean shouldSwallowClick(@NonNull String key) {
         BaseHeadsUpManager.HeadsUpEntry entry = getHeadsUpEntry(key);
-        return entry != null && mClock.currentTimeMillis() < entry.mPostTime;
+        return entry != null && mSystemClock.elapsedRealtime() < entry.mPostTime;
     }
 
     public void onExpandingFinished() {

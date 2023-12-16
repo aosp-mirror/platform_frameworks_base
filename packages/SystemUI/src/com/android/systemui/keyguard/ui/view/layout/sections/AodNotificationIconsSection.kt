@@ -26,9 +26,9 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
@@ -40,7 +40,7 @@ import com.android.systemui.statusbar.notification.icon.ui.viewmodel.Notificatio
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 
@@ -49,13 +49,13 @@ class AodNotificationIconsSection
 constructor(
     private val context: Context,
     private val configurationState: ConfigurationState,
-    private val configurationController: ConfigurationController,
     private val featureFlags: FeatureFlagsClassic,
     private val iconBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
     private val notificationIconAreaController: NotificationIconAreaController,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
+    private val systemBarUtilsState: SystemBarUtilsState,
 ) : KeyguardSection() {
 
     private var nicBindingDisposable: DisposableHandle? = null
@@ -89,11 +89,11 @@ constructor(
         if (NotificationIconContainerRefactor.isEnabled) {
             nicBindingDisposable?.dispose()
             nicBindingDisposable =
-                NotificationIconContainerViewBinder.bind(
+                NotificationIconContainerViewBinder.bindWhileAttached(
                     nic,
                     nicAodViewModel,
                     configurationState,
-                    configurationController,
+                    systemBarUtilsState,
                     iconBindingFailureTracker,
                     nicAodIconViewStore,
                 )
@@ -118,7 +118,7 @@ constructor(
                 BOTTOM
             }
         constraintSet.apply {
-            if (featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            if (migrateClocksToBlueprint()) {
                 connect(
                     nicId,
                     TOP,

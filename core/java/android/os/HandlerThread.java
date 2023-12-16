@@ -25,6 +25,7 @@ import android.annotation.Nullable;
  * <p>
  * Note that just like with a regular {@link Thread}, {@link #start()} must still be called.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class HandlerThread extends Thread {
     int mPriority;
     int mTid = -1;

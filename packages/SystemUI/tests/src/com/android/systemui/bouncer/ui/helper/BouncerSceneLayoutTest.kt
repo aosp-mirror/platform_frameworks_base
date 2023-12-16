@@ -18,10 +18,10 @@ package com.android.systemui.bouncer.ui.helper
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.SIDE_BY_SIDE
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.SPLIT
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.STACKED
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.STANDARD
+import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.BELOW_USER_SWITCHER
+import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.BESIDE_USER_SWITCHER
+import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.SPLIT_BOUNCER
+import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.STANDARD_BOUNCER
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import org.junit.Test
@@ -84,33 +84,33 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
             listOf(
                     Phone to
                         Expected(
-                            whenNaturallyHeld = STANDARD,
-                            whenUnnaturallyHeld = SPLIT,
+                            whenNaturallyHeld = STANDARD_BOUNCER,
+                            whenUnnaturallyHeld = SPLIT_BOUNCER,
                         ),
                     Tablet to
                         Expected(
-                            whenNaturallyHeld = SIDE_BY_SIDE,
-                            whenUnnaturallyHeld = STACKED,
+                            whenNaturallyHeld = BESIDE_USER_SWITCHER,
+                            whenUnnaturallyHeld = BELOW_USER_SWITCHER,
                         ),
                     Folded to
                         Expected(
-                            whenNaturallyHeld = STANDARD,
-                            whenUnnaturallyHeld = SPLIT,
+                            whenNaturallyHeld = STANDARD_BOUNCER,
+                            whenUnnaturallyHeld = SPLIT_BOUNCER,
                         ),
                     Unfolded to
                         Expected(
-                            whenNaturallyHeld = SIDE_BY_SIDE,
-                            whenUnnaturallyHeld = STANDARD,
+                            whenNaturallyHeld = BESIDE_USER_SWITCHER,
+                            whenUnnaturallyHeld = STANDARD_BOUNCER,
                         ),
                     TallerFolded to
                         Expected(
-                            whenNaturallyHeld = STANDARD,
-                            whenUnnaturallyHeld = SPLIT,
+                            whenNaturallyHeld = STANDARD_BOUNCER,
+                            whenUnnaturallyHeld = SPLIT_BOUNCER,
                         ),
                     TallerUnfolded to
                         Expected(
-                            whenNaturallyHeld = SIDE_BY_SIDE,
-                            whenUnnaturallyHeld = SIDE_BY_SIDE,
+                            whenNaturallyHeld = BESIDE_USER_SWITCHER,
+                            whenUnnaturallyHeld = BESIDE_USER_SWITCHER,
                         ),
                 )
                 .flatMap { (device, expected) ->
@@ -124,13 +124,13 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
                             )
                         )
 
-                        if (expected.whenNaturallyHeld == SIDE_BY_SIDE) {
+                        if (expected.whenNaturallyHeld == BESIDE_USER_SWITCHER) {
                             add(
                                 TestCase(
                                     device = device,
                                     held = device.naturallyHeld,
                                     isSideBySideSupported = false,
-                                    expected = STANDARD,
+                                    expected = STANDARD_BOUNCER,
                                 )
                             )
                         }
@@ -144,13 +144,13 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
                             )
                         )
 
-                        if (expected.whenUnnaturallyHeld == SIDE_BY_SIDE) {
+                        if (expected.whenUnnaturallyHeld == BESIDE_USER_SWITCHER) {
                             add(
                                 TestCase(
                                     device = device,
                                     held = device.naturallyHeld.flip(),
                                     isSideBySideSupported = false,
-                                    expected = STANDARD,
+                                    expected = STANDARD_BOUNCER,
                                 )
                             )
                         }

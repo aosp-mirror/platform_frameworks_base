@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
  * href="https://www.kernel.org/doc/html/latest/admin-guide/pm/cpufreq.html
  * #policy-interface-in-sysfs">Policy Interface in sysfs</a>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class CpuScalingPolicyReader {
     private static final String TAG = "CpuScalingPolicyReader";
     private static final String CPUFREQ_DIR = "/sys/devices/system/cpu/cpufreq";

@@ -45,9 +45,9 @@ import android.util.SparseArray;
 
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.KnownPackages;
+import com.android.server.pm.PackageArchiver;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.dex.DynamicCodeLogger;
@@ -218,6 +218,14 @@ public abstract class PackageManagerInternal {
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
      */
     public abstract List<ApplicationInfo> getInstalledApplications(
+            @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
+            int callingUid);
+
+    /**
+     * Like {@link #getInstalledApplications}, but allows the fetching of apps
+     * cross user.
+     */
+    public abstract List<ApplicationInfo> getInstalledApplicationsCrossUser(
             @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
             int callingUid);
 
@@ -1103,7 +1111,9 @@ public abstract class PackageManagerInternal {
      * Read legacy permission states for permissions migration to new permission subsystem.
      * Note that this api is supposed to be used for permissions state migration only.
      */
-    public abstract RuntimePermissionsState getLegacyPermissionsState(@UserIdInt int userId);
+    // TODO: restore to com.android.permission.persistence.RuntimePermissionsState
+    // once Ravenwood includes Mainline stubs
+    public abstract Object getLegacyPermissionsState(@UserIdInt int userId);
 
     /**
      * @return permissions file version for the given user.
@@ -1416,14 +1426,19 @@ public abstract class PackageManagerInternal {
 
     /**
      * Checks if package is quarantined for a specific user.
+     *
+     * @throws PackageManager.NameNotFoundException if the package is not found
      */
-    public abstract boolean isPackageQuarantined(@NonNull String packageName,
-            @UserIdInt int userId);
+    public abstract boolean isPackageQuarantined(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
 
     /**
      * Checks if package is stopped for a specific user.
+     *
+     * @throws PackageManager.NameNotFoundException if the package is not found
      */
-    public abstract boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId);
+    public abstract boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
 
     /**
      * Sends the PACKAGE_RESTARTED broadcast.
@@ -1442,4 +1457,10 @@ public abstract class PackageManagerInternal {
      */
     public abstract void sendPackageDataClearedBroadcast(@NonNull String packageName,
             int uid, int userId, boolean isRestore, boolean isInstantApp);
+
+    /**
+     * Returns an instance of {@link PackageArchiver} to be used for archiving related operations.
+     */
+    @NonNull
+    public abstract PackageArchiver getPackageArchiver();
 }

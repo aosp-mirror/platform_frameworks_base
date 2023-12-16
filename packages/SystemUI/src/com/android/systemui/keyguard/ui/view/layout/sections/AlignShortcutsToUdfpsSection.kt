@@ -61,7 +61,7 @@ constructor(
                 KeyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.start_button),
                     keyguardQuickAffordancesCombinedViewModel.startButton,
-                    keyguardRootViewModel.alpha,
+                    keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
                 ) {
@@ -71,7 +71,7 @@ constructor(
                 KeyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.end_button),
                     keyguardQuickAffordancesCombinedViewModel.endButton,
-                    keyguardRootViewModel.alpha,
+                    keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
                 ) {

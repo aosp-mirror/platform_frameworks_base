@@ -25,6 +25,9 @@ import com.android.hoststubgen.asm.writeByteCodeToReturn
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.FilterPolicyWithReason
 import com.android.hoststubgen.filters.OutputFilter
+import com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+import com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+import com.android.hoststubgen.hosthelper.HostStubGenProcessedAsThrow
 import com.android.hoststubgen.hosthelper.HostTestUtils
 import com.android.hoststubgen.log
 import org.objectweb.asm.ClassVisitor
@@ -135,6 +138,7 @@ class ImplGeneratingAdapter(
             signature: String?,
             exceptions: Array<String>?,
             policy: FilterPolicyWithReason,
+            substituted: Boolean,
             superVisitor: MethodVisitor?,
     ): MethodVisitor? {
         // Inject method log, if needed.
@@ -182,29 +186,46 @@ class ImplGeneratingAdapter(
             )
         }
 
+        fun MethodVisitor.withAnnotation(descriptor: String): MethodVisitor {
+            this.visitAnnotation(descriptor, true)
+            return this
+        }
+
         log.withIndent {
+            var willThrow = false
+            if (policy.policy == FilterPolicy.Throw) {
+                log.v("Making method throw...")
+                willThrow = true
+                innerVisitor = ThrowingMethodAdapter(
+                    access, name, descriptor, signature, exceptions, innerVisitor)
+                    .withAnnotation(HostStubGenProcessedAsThrow.CLASS_DESCRIPTOR)
+            }
             if ((access and Opcodes.ACC_NATIVE) != 0 && nativeSubstitutionClass != null) {
                 log.v("Rewriting native method...")
                 return NativeSubstitutingMethodAdapter(
                         access, name, descriptor, signature, exceptions, innerVisitor)
+                    .withAnnotation(HostStubGenProcessedAsSubstitute.CLASS_DESCRIPTOR)
             }
-            if (policy.policy == FilterPolicy.Throw) {
-                log.v("Making method throw...")
-                return ThrowingMethodAdapter(
-                        access, name, descriptor, signature, exceptions, innerVisitor)
+            if (willThrow) {
+                return innerVisitor
             }
+
             if (policy.policy == FilterPolicy.Ignore) {
                 when (Type.getReturnType(descriptor)) {
                     Type.VOID_TYPE -> {
                         log.v("Making method ignored...")
                         return IgnoreMethodAdapter(
                                 access, name, descriptor, signature, exceptions, innerVisitor)
+                            .withAnnotation(HostStubGenProcessedAsIgnore.CLASS_DESCRIPTOR)
                     }
                     else -> {
                         throw RuntimeException("Ignored policy only allowed for void methods")
                     }
                 }
             }
+        }
+        if (substituted) {
+            innerVisitor?.withAnnotation(HostStubGenProcessedAsSubstitute.CLASS_DESCRIPTOR)
         }
 
         return innerVisitor
@@ -294,13 +315,13 @@ class ImplGeneratingAdapter(
             next: MethodVisitor?
     ) : MethodVisitor(OPCODE_VERSION, next) {
         override fun visitCode() {
-            super.visitCode()
-
             throw RuntimeException("NativeSubstitutingMethodVisitor should be called on " +
                     " native method, where visitCode() shouldn't be called.")
         }
 
         override fun visitEnd() {
+            super.visitCode()
+
             var targetDescriptor = descriptor
             var argOffset = 0
 

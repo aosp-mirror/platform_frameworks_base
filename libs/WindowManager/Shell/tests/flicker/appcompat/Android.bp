@@ -36,6 +36,8 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker",
     instrumentation_target_package: "com.android.wm.shell.flicker",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [":WMShellFlickerTestsAppCompat-src"],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }

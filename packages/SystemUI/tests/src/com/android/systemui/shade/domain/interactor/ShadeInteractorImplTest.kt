@@ -105,10 +105,7 @@ class ShadeInteractorImplTest : SysuiTestCase() {
             .create(
                 test = this,
                 featureFlags =
-                    FakeFeatureFlagsClassicModule {
-                        set(Flags.FACE_AUTH_REFACTOR, false)
-                        set(Flags.FULL_SCREEN_USER_SWITCHER, true)
-                    },
+                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
                 mocks =
                     TestMocksModule(
                         dozeParameters = dozeParameters,

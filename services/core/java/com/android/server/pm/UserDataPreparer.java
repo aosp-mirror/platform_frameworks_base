@@ -23,10 +23,10 @@ import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.RecoverySystem;
-import android.os.storage.StorageManager;
-import android.os.storage.VolumeInfo;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -35,6 +35,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.utils.Slogf;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Helper class for preparing and destroying user storage
@@ -65,31 +65,37 @@ class UserDataPreparer {
     /**
      * Prepare storage areas for given user on all mounted devices.
      */
-    void prepareUserData(int userId, int userSerial, int flags) {
+    void prepareUserData(UserInfo userInfo, int flags) {
         synchronized (mInstallLock) {
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
             /*
              * Internal storage must be prepared before adoptable storage, since the user's volume
              * keys are stored in their internal storage.
              */
-            prepareUserDataLI(null /* internal storage */, userId, userSerial, flags, true);
+            prepareUserDataLI(null /* internal storage */, userInfo, flags, true);
             for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
                 final String volumeUuid = vol.getFsUuid();
                 if (volumeUuid != null) {
-                    prepareUserDataLI(volumeUuid, userId, userSerial, flags, true);
+                    prepareUserDataLI(volumeUuid, userInfo, flags, true);
                 }
             }
         }
     }
 
-    private void prepareUserDataLI(String volumeUuid, int userId, int userSerial, int flags,
+    private void prepareUserDataLI(String volumeUuid, UserInfo userInfo, int flags,
             boolean allowRecover) {
-        // Prepare storage and verify that serial numbers are consistent; if
-        // there's a mismatch we need to destroy to avoid leaking data
+        final int userId = userInfo.id;
+        final int userSerial = userInfo.serialNumber;
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final boolean isNewUser = userInfo.lastLoggedInTime == 0;
+        Slogf.d(TAG, "Preparing user data; volumeUuid=%s, userId=%d, flags=0x%x, isNewUser=%s",
+                volumeUuid, userId, flags, isNewUser);
         try {
+            // Prepare CE and/or DE storage.
             storage.prepareUserStorage(volumeUuid, userId, userSerial, flags);
 
+            // Ensure that the data directories of a removed user with the same ID are not being
+            // reused.  New users must get fresh data directories, to avoid leaking data.
             if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
                 enforceSerialNumber(getDataUserDeDirectory(volumeUuid, userId), userSerial);
                 if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
@@ -103,9 +109,10 @@ class UserDataPreparer {
                 }
             }
 
+            // Prepare the app data directories.
             mInstaller.createUserData(volumeUuid, userId, userSerial, flags);
 
-            // CE storage is available after they are prepared.
+            // If applicable, record that the system user's CE storage has been prepared.
             if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 &&
                     (userId == UserHandle.USER_SYSTEM)) {
                 String propertyName = "sys.user." + userId + ".ce_available";
@@ -113,20 +120,31 @@ class UserDataPreparer {
                 SystemProperties.set(propertyName, "true");
             }
         } catch (Exception e) {
-            logCriticalInfo(Log.WARN, "Destroying user " + userId + " on volume " + volumeUuid
-                    + " because we failed to prepare: " + e);
-            destroyUserDataLI(volumeUuid, userId, flags);
-
+            // Failed to prepare user data.  For new users, specifically users that haven't ever
+            // been unlocked, destroy the user data, and try again (if not already retried).  This
+            // might be effective at resolving some errors, such as stale directories from a reused
+            // user ID.  Don't auto-destroy data for existing users, since issues with existing
+            // users might be fixable via an OTA without having to wipe the user's data.
+            if (isNewUser) {
+                logCriticalInfo(Log.ERROR, "Destroying user " + userId + " on volume " + volumeUuid
+                        + " because we failed to prepare: " + e);
+                destroyUserDataLI(volumeUuid, userId, flags);
+            } else {
+                logCriticalInfo(Log.ERROR, "Failed to prepare user " + userId + " on volume "
+                        + volumeUuid + ": " + e);
+            }
             if (allowRecover) {
                 // Try one last time; if we fail again we're really in trouble
-                prepareUserDataLI(volumeUuid, userId, userSerial,
-                    flags | StorageManager.FLAG_STORAGE_DE, false);
+                prepareUserDataLI(volumeUuid, userInfo, flags | StorageManager.FLAG_STORAGE_DE,
+                        false);
             } else {
+                // If internal storage of the system user fails to prepare on first boot, then
+                // things are *really* broken, so we might as well reboot to recovery right away.
                 try {
                     Log.wtf(TAG, "prepareUserData failed for user " + userId, e);
-                    if (userId == UserHandle.USER_SYSTEM) {
+                    if (isNewUser && userId == UserHandle.USER_SYSTEM && volumeUuid == null) {
                         RecoverySystem.rebootPromptAndWipeUserData(mContext,
-                                "prepareUserData failed for system user");
+                                "failed to prepare internal storage for system user");
                     }
                 } catch (IOException e2) {
                     throw new RuntimeException("error rebooting into recovery", e2);

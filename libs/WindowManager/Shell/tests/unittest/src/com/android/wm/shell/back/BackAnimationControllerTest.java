@@ -182,8 +182,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     private void triggerBackGesture() {
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        doMotionEvent(MotionEvent.ACTION_MOVE, 0);
+        doStartEvents(0, 0);
         mController.setTriggerBack(true);
     }
 
@@ -244,10 +243,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 /* enableAnimation = */ true,
                 /* isAnimationCallback = */ false);
 
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-
-        // Check that back start and progress is dispatched when first move.
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        doStartEvents(0, 100);
 
         simulateRemoteAnimationStart();
 
@@ -270,10 +266,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 /* enableAnimation = */ true,
                 /* isAnimationCallback = */ true);
 
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-
         // Check that back start and progress is dispatched when first move.
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100, 3000);
+        doStartEvents(0, 100);
 
         simulateRemoteAnimationStart();
 
@@ -359,8 +353,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 .injectInputEvent(any(KeyEvent.class), any(Integer.class));
 
         // Verify that we start accepting gestures again once transition finishes.
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        doStartEvents(0, 100);
 
         simulateRemoteAnimationStart();
         verify(mAnimatorCallback).onBackStarted(any());
@@ -399,8 +392,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 .injectInputEvent(any(KeyEvent.class), any(Integer.class));
 
         // Verify that we start accepting gestures again once transition finishes.
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        doStartEvents(0, 100);
 
         simulateRemoteAnimationStart();
         verify(mAnimatorCallback).onBackStarted(any());
@@ -427,8 +419,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mShellExecutor.flushAll();
         reset(mAnimatorCallback);
 
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        doStartEvents(0, 100);
         simulateRemoteAnimationStart();
         verify(mAnimatorCallback).onBackStarted(any());
     }
@@ -441,9 +432,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 /* enableAnimation = */ true,
                 /* isAnimationCallback = */ false);
 
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-        // Check that back start and progress is dispatched when first move.
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        doStartEvents(0, 100);
 
         simulateRemoteAnimationStart();
         verify(mAnimatorCallback).onBackStarted(any());
@@ -563,10 +552,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 /* enableAnimation = */ true,
                 /* isAnimationCallback = */ false);
 
-        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
-
         // Check that back start and progress is dispatched when first move.
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        doStartEvents(0, 100);
 
         simulateRemoteAnimationStart();
 
@@ -591,6 +578,15 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 /* velocityY = */ velocity,
                 /* keyAction */ actionDown,
                 /* swipeEdge */ BackEvent.EDGE_LEFT);
+    }
+
+    /**
+     * Simulate event sequence that starts a back navigation.
+     */
+    private void doStartEvents(int startX, int moveX) {
+        doMotionEvent(MotionEvent.ACTION_DOWN, startX);
+        mController.onPilferPointers();
+        doMotionEvent(MotionEvent.ACTION_MOVE, moveX);
     }
 
     private void simulateRemoteAnimationStart() throws RemoteException {

@@ -14,15 +14,44 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.app.AlarmManager;
 import android.testing.LeakCheck;
 
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FakeNextAlarmController extends BaseLeakChecker<NextAlarmChangeCallback>
         implements NextAlarmController {
+
+    private AlarmManager.AlarmClockInfo mNextAlarm = null;
+    private List<NextAlarmChangeCallback> mCallbacks = new ArrayList<>();
 
     public FakeNextAlarmController(LeakCheck test) {
         super(test, "alarm");
     }
+
+    /**
+     * Helper method for setting the next alarm
+     */
+    public void setNextAlarm(AlarmManager.AlarmClockInfo nextAlarm) {
+        this.mNextAlarm = nextAlarm;
+        for (var callback: mCallbacks) {
+            callback.onNextAlarmChanged(nextAlarm);
+        }
+    }
+
+    @Override
+    public void addCallback(NextAlarmChangeCallback listener) {
+        mCallbacks.add(listener);
+        listener.onNextAlarmChanged(mNextAlarm);
+    }
+
+    @Override
+    public void removeCallback(NextAlarmChangeCallback listener) {
+        mCallbacks.remove(listener);
+    }
+
 }

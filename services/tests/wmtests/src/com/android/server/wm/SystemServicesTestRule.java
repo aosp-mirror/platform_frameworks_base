@@ -38,6 +38,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.nullable;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -57,7 +58,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.hardware.devicestate.DeviceStateManager;
-import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.Uri;
 import android.os.Handler;
@@ -69,6 +70,7 @@ import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.Log;
+import android.view.DisplayInfo;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
 
@@ -101,6 +103,7 @@ import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -239,6 +242,12 @@ public class SystemServicesTestRule implements TestRule {
         doNothing().when(contentResolver)
                 .registerContentObserver(any(Uri.class), anyBoolean(), any(ContentObserver.class),
                         anyInt());
+
+        // Unit test should not register listener to the real service.
+        final DisplayManagerGlobal dmg = DisplayManagerGlobal.getInstance();
+        spyOn(dmg);
+        doNothing().when(dmg).registerDisplayListener(
+                any(), any(Executor.class), anyLong(), anyString());
     }
 
     private void setUpLocalServices() {
@@ -267,6 +276,12 @@ public class SystemServicesTestRule implements TestRule {
         // DisplayManagerInternal
         final DisplayManagerInternal dmi = mock(DisplayManagerInternal.class);
         doReturn(dmi).when(() -> LocalServices.getService(eq(DisplayManagerInternal.class)));
+        doAnswer(invocation -> {
+            int displayId = invocation.getArgument(0);
+            DisplayInfo displayInfo = invocation.getArgument(1);
+            mWmService.mRoot.getDisplayContent(displayId).getDisplay().getDisplayInfo(displayInfo);
+            return null;
+        }).when(dmi).getNonOverrideDisplayInfo(anyInt(), any());
 
         // ColorDisplayServiceInternal
         final ColorDisplayService.ColorDisplayServiceInternal cds =
@@ -376,9 +391,6 @@ public class SystemServicesTestRule implements TestRule {
 
         mWmService.onInitReady();
         mAtmService.setWindowManager(mWmService);
-        // Avoid real display events interfering with the test. Also avoid leaking registration.
-        mContext.getSystemService(DisplayManager.class)
-                .unregisterDisplayListener(mAtmService.mRootWindowContainer);
         mWmService.mDisplayEnabled = true;
         mWmService.mDisplayReady = true;
         mAtmService.getTransitionController().mIsWaitingForDisplayEnabled = false;
@@ -432,7 +444,9 @@ public class SystemServicesTestRule implements TestRule {
         SurfaceAnimationThread.dispose();
         AnimationThread.dispose();
         UiThread.dispose();
-        mInputChannel.dispose();
+        if (mInputChannel != null) {
+            mInputChannel.dispose();
+        }
 
         tearDownLocalServices();
         // Reset priority booster because animation thread has been changed.

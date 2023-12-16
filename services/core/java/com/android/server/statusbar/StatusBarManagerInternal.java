@@ -196,10 +196,10 @@ public interface StatusBarManagerInternal {
     void hideToast(String packageName, IBinder token);
 
     /**
-     * @see com.android.internal.statusbar.IStatusBar#requestWindowMagnificationConnection(boolean
+     * @see com.android.internal.statusbar.IStatusBar#requestMagnificationConnection(boolean
      * request)
      */
-    boolean requestWindowMagnificationConnection(boolean request);
+    boolean requestMagnificationConnection(boolean request);
 
     /**
      * @see com.android.internal.statusbar.IStatusBar#setNavigationBarLumaSamplingEnabled(int,

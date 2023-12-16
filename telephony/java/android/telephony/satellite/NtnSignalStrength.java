@@ -86,6 +86,9 @@ public final class NtnSignalStrength implements Parcelable {
         readFromParcel(in);
     }
 
+    /**
+     * Returns notified non-terrestrial network signal strength level.
+     */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     @NtnSignalStrengthLevel public int getLevel() {
         return mLevel;

@@ -20,6 +20,7 @@ import com.android.systemui.authentication.data.FakeAuthenticationDataLayerModul
 import com.android.systemui.bouncer.data.repository.FakeBouncerDataLayerModule
 import com.android.systemui.common.ui.data.FakeCommonDataLayerModule
 import com.android.systemui.deviceentry.data.FakeDeviceEntryDataLayerModule
+import com.android.systemui.keyevent.data.repository.FakeKeyEventDataLayerModule
 import com.android.systemui.keyguard.data.FakeKeyguardDataLayerModule
 import com.android.systemui.power.data.FakePowerDataLayerModule
 import com.android.systemui.shade.data.repository.FakeShadeDataLayerModule
@@ -44,6 +45,7 @@ import dagger.Module
             FakeStatusBarDataLayerModule::class,
             FakeTelephonyDataLayerModule::class,
             FakeUserDataLayerModule::class,
+            FakeKeyEventDataLayerModule::class,
         ]
 )
 object FakeSystemUiDataLayerModule

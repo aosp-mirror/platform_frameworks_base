@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_NULL;
 import static android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
 import static android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS;
@@ -46,6 +47,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
@@ -155,8 +157,22 @@ public class NotificationLockscreenUserManagerImpl implements
 
             if (ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action)) {
                 if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
-                    boolean changed = updateDpcSettings(getSendingUserId());
-                    if (mCurrentUserId == getSendingUserId()) {
+                    boolean changed = false;
+                    int sendingUserId = getSendingUserId();
+                    if (sendingUserId == USER_ALL) {
+                        // When a Device Owner triggers changes it's sent as USER_ALL. Normalize
+                        // the user before calling into DPM
+                        sendingUserId = mCurrentUserId;
+                        @SuppressLint("MissingPermission")
+                        List<UserInfo> users = mUserManager.getUsers();
+                        for (int i = users.size() - 1; i >= 0; i--) {
+                            changed |= updateDpcSettings(users.get(i).id);
+                        }
+                    } else {
+                        changed |= updateDpcSettings(sendingUserId);
+                    }
+
+                    if (mCurrentUserId == sendingUserId) {
                         changed |= updateLockscreenNotificationSetting();
                     }
                     if (changed) {
@@ -374,13 +390,13 @@ public class NotificationLockscreenUserManagerImpl implements
         mContext.getContentResolver().registerContentObserver(
                 SHOW_LOCKSCREEN, false,
                 mLockscreenSettingsObserver,
-                UserHandle.USER_ALL);
+                USER_ALL);
 
         mContext.getContentResolver().registerContentObserver(
                 SHOW_PRIVATE_LOCKSCREEN,
                 true,
                 mLockscreenSettingsObserver,
-                UserHandle.USER_ALL);
+                USER_ALL);
 
         if (!mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
             mContext.getContentResolver().registerContentObserver(
@@ -441,7 +457,7 @@ public class NotificationLockscreenUserManagerImpl implements
 
     public boolean isCurrentProfile(int userId) {
         synchronized (mLock) {
-            return userId == UserHandle.USER_ALL || mCurrentProfiles.get(userId) != null;
+            return userId == USER_ALL || mCurrentProfiles.get(userId) != null;
         }
     }
 
@@ -526,25 +542,21 @@ public class NotificationLockscreenUserManagerImpl implements
      */
     public boolean userAllowsPrivateNotificationsInPublic(int userHandle) {
         if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
-            if (userHandle == UserHandle.USER_ALL) {
+            if (userHandle == USER_ALL) {
                 userHandle = mCurrentUserId;
             }
             if (mUsersUsersAllowingPrivateNotifications.indexOfKey(userHandle) < 0) {
-                // TODO(b/301955929): STOP_SHIP (stop flag flip): remove this read and use a safe
-                // default value before moving to 'released'
-                Log.wtf(TAG, "Asking for redact notifs setting too early", new Throwable());
-                updateUserShowPrivateSettings(userHandle);
+                Log.i(TAG, "Asking for redact notifs setting too early", new Throwable());
+                return false;
             }
             if (mUsersDpcAllowingPrivateNotifications.indexOfKey(userHandle) < 0) {
-                // TODO(b/301955929): STOP_SHIP (stop flag flip): remove this read and use a safe
-                // default value before moving to 'released'
-                Log.wtf(TAG, "Asking for redact notifs dpm override too early", new Throwable());
-                updateDpcSettings(userHandle);
+                Log.i(TAG, "Asking for redact notifs dpm override too early", new Throwable());
+                return false;
             }
             return mUsersUsersAllowingPrivateNotifications.get(userHandle)
                     && mUsersDpcAllowingPrivateNotifications.get(userHandle);
         } else {
-            if (userHandle == UserHandle.USER_ALL) {
+            if (userHandle == USER_ALL) {
                 return true;
             }
 
@@ -578,7 +590,7 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     private boolean adminAllowsKeyguardFeature(int userHandle, int feature) {
-        if (userHandle == UserHandle.USER_ALL) {
+        if (userHandle == USER_ALL) {
             return true;
         }
         final int dpmFlags =
@@ -595,7 +607,7 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     public boolean isLockscreenPublicMode(int userId) {
-        if (userId == UserHandle.USER_ALL) {
+        if (userId == USER_ALL) {
             return mLockscreenPublicMode.get(mCurrentUserId, false);
         }
         return mLockscreenPublicMode.get(userId, false);
@@ -614,7 +626,7 @@ public class NotificationLockscreenUserManagerImpl implements
         if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
             // Unlike 'show private', settings does not show a copy of this setting for each
             // profile, so it inherits from the parent user.
-            if (userHandle == UserHandle.USER_ALL || mCurrentManagedProfiles.contains(userHandle)) {
+            if (userHandle == USER_ALL || mCurrentManagedProfiles.contains(userHandle)) {
                 userHandle = mCurrentUserId;
             }
             if (mUsersUsersAllowingNotifications.indexOfKey(userHandle) < 0) {

@@ -177,7 +177,8 @@ public class RecordingController
                 activityStarter,
                 mUserContextProvider,
                 onStartRecordingClicked,
-                mMediaProjectionMetricsLogger))
+                mMediaProjectionMetricsLogger,
+                mDialogFactory))
                 : new ScreenRecordDialog(
                         context,
                         /* controller= */ this,

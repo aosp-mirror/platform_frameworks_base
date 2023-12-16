@@ -32,9 +32,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 
 @RunWith(AndroidJUnit4::class)
 class BroadcastReceiverAsUserFlowTest {
@@ -81,6 +83,18 @@ class BroadcastReceiverAsUserFlowTest {
         delay(100)
 
         assertThat(onReceiveIsCalled).isTrue()
+    }
+
+    @Test
+    fun broadcastReceiverAsUserFlow_unregisterReceiverThrowException_noCrash() = runBlocking {
+        context.stub {
+            on { unregisterReceiver(any()) } doThrow IllegalArgumentException()
+        }
+        val flow = context.broadcastReceiverAsUserFlow(INTENT_FILTER, USER_HANDLE)
+
+        flow.firstWithTimeoutOrNull()
+
+        assertThat(registeredBroadcastReceiver).isNotNull()
     }
 
     private companion object {

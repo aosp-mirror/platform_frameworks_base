@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package com.android.systemui.qs.tiles.impl.flashlight.domain.interactor
+
 import android.os.UserHandle
 import android.testing.LeakCheck
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -22,7 +24,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
-import com.android.systemui.qs.tiles.impl.flashlight.domain.interactor.FlashlightTileDataInteractor
 import com.android.systemui.qs.tiles.impl.flashlight.domain.model.FlashlightTileModel
 import com.android.systemui.utils.leaks.FakeFlashlightController
 import com.google.common.truth.Truth.assertThat

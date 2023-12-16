@@ -745,6 +745,16 @@ public class Notification implements Parcelable
     @TestApi
     public static final int FLAG_USER_INITIATED_JOB = 0x00008000;
 
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be
+     * set if this notification has been lifetime extended due to a direct reply.
+     *
+     * This flag is for internal use only; applications cannot set this flag directly.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public static final int FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY = 0x00010000;
+
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
             DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
@@ -2195,6 +2205,9 @@ public class Notification implements Parcelable
 
         private void visitUris(@NonNull Consumer<Uri> visitor) {
             visitIconUri(visitor, getIcon());
+            if (actionIntent != null) {
+                actionIntent.visitUris(visitor);
+            }
         }
 
         @Override
@@ -2888,6 +2901,21 @@ public class Notification implements Parcelable
             }
         }
 
+        // allPendingIntents should contain all associated intents after parcelling, but it may also
+        // contain intents added by the app to extras for their own purposes. We only care about
+        // checking the intents known and used by system_server, to avoid the confused deputy issue.
+        List<PendingIntent> pendingIntents = Arrays.asList(contentIntent, deleteIntent,
+                fullScreenIntent);
+        for (PendingIntent intent : pendingIntents) {
+            if (intent != null) {
+                intent.visitUris(visitor);
+            }
+        }
+
+        if (mBubbleMetadata != null) {
+            mBubbleMetadata.visitUris(visitor);
+        }
+
         if (extras != null) {
             visitIconUri(visitor, extras.getParcelable(EXTRA_LARGE_ICON_BIG, Icon.class));
             visitIconUri(visitor, extras.getParcelable(EXTRA_PICTURE_ICON, Icon.class));
@@ -2959,15 +2987,28 @@ public class Notification implements Parcelable
                 callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
-        }
 
-        if (mBubbleMetadata != null) {
-            visitIconUri(visitor, mBubbleMetadata.getIcon());
-        }
+            // Extras for MediaStyle.
+            PendingIntent deviceIntent = extras.getParcelable(EXTRA_MEDIA_REMOTE_INTENT,
+                    PendingIntent.class);
+            if (deviceIntent != null) {
+                deviceIntent.visitUris(visitor);
+            }
 
-        if (extras != null && extras.containsKey(WearableExtender.EXTRA_WEARABLE_EXTENSIONS)) {
-            WearableExtender extender = new WearableExtender(this);
-            extender.visitUris(visitor);
+            if (extras.containsKey(WearableExtender.EXTRA_WEARABLE_EXTENSIONS)) {
+                WearableExtender extender = new WearableExtender(this);
+                extender.visitUris(visitor);
+            }
+
+            if (extras.containsKey(TvExtender.EXTRA_TV_EXTENDER)) {
+                TvExtender extender = new TvExtender(this);
+                extender.visitUris(visitor);
+            }
+
+            if (extras.containsKey(CarExtender.EXTRA_CAR_EXTENDER)) {
+                CarExtender extender = new CarExtender(this);
+                extender.visitUris(visitor);
+            }
         }
     }
 
@@ -9199,12 +9240,6 @@ public class Notification implements Parcelable
      * You can opt-out of this behavior by using {@link Notification.Builder#setColorized(boolean)}.
      * <p>
      *
-     * <p>
-     * Starting at {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM Android V} the
-     * {@link Notification#FLAG_NO_CLEAR NO_CLEAR flag} will be set for valid MediaStyle
-     * notifications.
-     * <p>
-     *
      * To use this style with your Notification, feed it to
      * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
      * <pre class="prettyprint">
@@ -10373,16 +10408,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @deprecated use {@link #getIntent()} instead.
-         * @removed Removed from the R SDK but was never publicly stable.
-         */
-        @Nullable
-        @Deprecated
-        public PendingIntent getBubbleIntent() {
-            return mPendingIntent;
-        }
-
-        /**
          * @return the pending intent to send when the bubble is dismissed by a user, if one exists.
          */
         @Nullable
@@ -10397,16 +10422,6 @@ public class Notification implements Parcelable
         @SuppressLint("InvalidNullConversion")
         @Nullable
         public Icon getIcon() {
-            return mIcon;
-        }
-
-        /**
-         * @deprecated use {@link #getIcon()} instead.
-         * @removed Removed from the R SDK but was never publicly stable.
-         */
-        @Nullable
-        @Deprecated
-        public Icon getBubbleIcon() {
             return mIcon;
         }
 
@@ -10574,6 +10589,16 @@ public class Notification implements Parcelable
             }
         }
 
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            visitIconUri(visitor, getIcon());
+            if (mPendingIntent != null) {
+                mPendingIntent.visitUris(visitor);
+            }
+            if (mDeleteIntent != null) {
+                mDeleteIntent.visitUris(visitor);
+            }
+        }
+
         /**
          * Builder to construct a {@link BubbleMetadata} object.
          */
@@ -10664,48 +10689,6 @@ public class Notification implements Parcelable
                 }
                 mPendingIntent = intent;
                 mIcon = icon;
-            }
-
-            /**
-             * @deprecated use {@link Builder#Builder(String)} instead.
-             * @removed Removed from the R SDK but was never publicly stable.
-             */
-            @NonNull
-            @Deprecated
-            public BubbleMetadata.Builder createShortcutBubble(@NonNull String shortcutId) {
-                if (!TextUtils.isEmpty(shortcutId)) {
-                    // If shortcut id is set, we don't use these if they were previously set.
-                    mPendingIntent = null;
-                    mIcon = null;
-                }
-                mShortcutId = shortcutId;
-                return this;
-            }
-
-            /**
-             * @deprecated use {@link Builder#Builder(PendingIntent, Icon)} instead.
-             * @removed Removed from the R SDK but was never publicly stable.
-             */
-            @NonNull
-            @Deprecated
-            public BubbleMetadata.Builder createIntentBubble(@NonNull PendingIntent intent,
-                    @NonNull Icon icon) {
-                if (intent == null) {
-                    throw new IllegalArgumentException("Bubble requires non-null pending intent");
-                }
-                if (icon == null) {
-                    throw new IllegalArgumentException("Bubbles require non-null icon");
-                }
-                if (icon.getType() != TYPE_URI_ADAPTIVE_BITMAP
-                        && icon.getType() != TYPE_URI) {
-                    Log.w(TAG, "Bubbles work best with icons of TYPE_URI or "
-                            + "TYPE_URI_ADAPTIVE_BITMAP. "
-                            + "In the future, using an icon of this type will be required.");
-                }
-                mShortcutId = null;
-                mPendingIntent = intent;
-                mIcon = icon;
-                return this;
             }
 
             /**
@@ -11814,6 +11797,9 @@ public class Notification implements Parcelable
         }
 
         private void visitUris(@NonNull Consumer<Uri> visitor) {
+            if (mDisplayIntent != null) {
+                mDisplayIntent.visitUris(visitor);
+            }
             for (Action action : mActions) {
                 action.visitUris(visitor);
             }
@@ -11966,10 +11952,17 @@ public class Notification implements Parcelable
 
         /**
          * Returns the unread conversation conveyed by this notification.
+         *
          * @see #setUnreadConversation(UnreadConversation)
          */
         public UnreadConversation getUnreadConversation() {
             return mUnreadConversation;
+        }
+
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            if (mUnreadConversation != null) {
+                mUnreadConversation.visitUris(visitor);
+            }
         }
 
         /**
@@ -12123,7 +12116,16 @@ public class Notification implements Parcelable
                         onRead,
                         participants, b.getLong(KEY_TIMESTAMP));
             }
-        };
+
+            private void visitUris(@NonNull Consumer<Uri> visitor) {
+                if (mReadPendingIntent != null) {
+                    mReadPendingIntent.visitUris(visitor);
+                }
+                if (mReplyPendingIntent != null) {
+                    mReplyPendingIntent.visitUris(visitor);
+                }
+            }
+        }
 
         /**
          * Builder class for {@link CarExtender.UnreadConversation} objects.
@@ -12445,6 +12447,15 @@ public class Notification implements Parcelable
          */
         public boolean isSuppressShowOverApps() {
             return mSuppressShowOverApps;
+        }
+
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            if (mContentIntent != null) {
+                mContentIntent.visitUris(visitor);
+            }
+            if (mDeleteIntent != null) {
+                mDeleteIntent.visitUris(visitor);
+            }
         }
     }
 

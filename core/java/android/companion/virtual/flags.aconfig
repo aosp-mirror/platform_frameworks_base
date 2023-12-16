@@ -1,3 +1,12 @@
+# Do not add new flags to this file.
+#
+# Due to "virtual" keyword in the package name flags
+# added to this file cannot be accessed from C++
+# code.
+#
+# Use frameworks/base/core/java/android/companion/virtual/flags/flags.aconfig
+# instead.
+
 package: "android.companion.virtual.flags"
 
 flag {
@@ -20,6 +29,20 @@ flag {
   namespace: "virtual_devices"
   description: "Enable cross-device clipboard API"
   bug: "306622082"
+}
+
+flag {
+  name: "consistent_display_flags"
+  namespace: "virtual_devices"
+  description: "Make virtual display flags consistent with display manager"
+  bug: "300905478"
+}
+
+flag {
+  name: "vdm_custom_ime"
+  namespace: "virtual_devices"
+  description: "Enable custom IME API"
+  bug: "287269288"
 }
 
 flag {

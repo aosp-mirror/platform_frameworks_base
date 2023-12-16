@@ -73,17 +73,13 @@ fun SceneTransitionLayoutState.observableTransitionState(): Flow<ObservableTrans
             when (val state = transitionState) {
                 is TransitionState.Idle -> ObservableTransitionState.Idle(state.currentScene)
                 is TransitionState.Transition -> {
-                    if (state.fromScene == state.toScene) {
-                        ObservableTransitionState.Idle(state.currentScene)
-                    } else {
-                        ObservableTransitionState.Transition(
-                            fromScene = state.fromScene,
-                            toScene = state.toScene,
-                            progress = snapshotFlow { state.progress },
-                            isInitiatedByUserInput = state.isInitiatedByUserInput,
-                            isUserInputOngoing = snapshotFlow { state.isUserInputOngoing },
-                        )
-                    }
+                    ObservableTransitionState.Transition(
+                        fromScene = state.fromScene,
+                        toScene = state.toScene,
+                        progress = snapshotFlow { state.progress },
+                        isInitiatedByUserInput = state.isInitiatedByUserInput,
+                        isUserInputOngoing = snapshotFlow { state.isUserInputOngoing },
+                    )
                 }
             }
         }

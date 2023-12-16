@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,8 @@
  */
 
 package android.service.notification;
+
+import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -117,7 +119,7 @@ public final class Condition implements Parcelable {
 
     /** The source of, or reason for, the state change represented by this Condition. **/
     @FlaggedApi(Flags.FLAG_MODES_API)
-    public final @Source int source;
+    public final @Source int source; // default = SOURCE_UNKNOWN
 
     /**
      * The maximum string length for any string contained in this condition.
@@ -179,7 +181,7 @@ public final class Condition implements Parcelable {
         this.line2 = getTrimmedString(line2);
         this.icon = icon;
         this.state = state;
-        this.source = source;
+        this.source = checkValidSource(source);
         this.flags = flags;
     }
 
@@ -197,8 +199,24 @@ public final class Condition implements Parcelable {
                 source.readInt());
     }
 
+    /** @hide */
+    public void validate() {
+        if (Flags.modesApi()) {
+            checkValidSource(source);
+        }
+    }
+
     private static boolean isValidState(int state) {
         return state >= STATE_FALSE && state <= STATE_ERROR;
+    }
+
+    private static int checkValidSource(@Source int source) {
+        if (Flags.modesApi()) {
+            checkArgument(source >= SOURCE_UNKNOWN && source <= SOURCE_CONTEXT,
+                    "Condition source must be one of SOURCE_UNKNOWN, SOURCE_USER_ACTION, "
+                            + "SOURCE_SCHEDULE, or SOURCE_CONTEXT");
+        }
+        return source;
     }
 
     @Override
@@ -257,7 +275,10 @@ public final class Condition implements Parcelable {
         throw new IllegalArgumentException("state is invalid: " + state);
     }
 
-    /** Provides a human-readable string version of the Source enum. */
+    /**
+     * Provides a human-readable string version of the Source enum.
+     * @hide
+     */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static @NonNull String sourceToString(@Source int source) {
         if (source == SOURCE_UNKNOWN) return "SOURCE_UNKNOWN";

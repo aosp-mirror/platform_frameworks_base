@@ -31,15 +31,16 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.plugins.ClockAnimations
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockEvents
-import com.android.systemui.plugins.ClockFaceConfig
-import com.android.systemui.plugins.ClockFaceController
-import com.android.systemui.plugins.ClockFaceEvents
-import com.android.systemui.plugins.ClockTickRate
+import com.android.systemui.plugins.clocks.ClockAnimations
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockEvents
+import com.android.systemui.plugins.clocks.ClockFaceConfig
+import com.android.systemui.plugins.clocks.ClockFaceController
+import com.android.systemui.plugins.clocks.ClockFaceEvents
+import com.android.systemui.plugins.clocks.ClockTickRate
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -97,6 +98,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var largeLogBuffer: LogBuffer
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     private lateinit var underTest: ClockEventController
+    @Mock private lateinit var zenModeController: ZenModeController
 
     @Before
     fun setUp() {
@@ -125,10 +127,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 repository = repository,
             )
 
-        withDeps.featureFlags.apply {
-            set(Flags.REGION_SAMPLING, false)
-            set(Flags.FACE_AUTH_REFACTOR, false)
-        }
+        withDeps.featureFlags.apply { set(Flags.REGION_SAMPLING, false) }
         underTest =
             ClockEventController(
                 withDeps.keyguardInteractor,
@@ -143,7 +142,8 @@ class ClockEventControllerTest : SysuiTestCase() {
                 bgExecutor,
                 smallLogBuffer,
                 largeLogBuffer,
-                withDeps.featureFlags
+                withDeps.featureFlags,
+                zenModeController
             )
         underTest.clock = clock
 

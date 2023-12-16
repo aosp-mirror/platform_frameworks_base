@@ -398,8 +398,8 @@ status_t BootAnimation::initTexture(FileMap* map, int* width, int* height,
             break;
     }
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -675,7 +675,11 @@ ui::Rotation BootAnimation::parseOrientationProperty() {
         ss << "ro.bootanim.set_orientation_" << displayId.value;
         return ss.str();
     }();
-    const auto syspropValue = android::base::GetProperty(syspropName, "ORIENTATION_0");
+    auto syspropValue = android::base::GetProperty(syspropName, "");
+    if (syspropValue == "") {
+        syspropValue = android::base::GetProperty("ro.bootanim.set_orientation_logical_0", "");
+    }
+
     if (syspropValue == "ORIENTATION_90") {
         return ui::ROTATION_90;
     } else if (syspropValue == "ORIENTATION_180") {

@@ -22,12 +22,14 @@ import android.content.pm.PackageManager.PERMISSION_DENIED
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.pm.UserInfo
 import android.os.Build
+import android.os.UserHandle
 import android.os.UserHandle.USER_SYSTEM
 import android.util.Log
 import com.android.server.testutils.any
 import com.android.server.testutils.spy
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -176,5 +178,14 @@ class DeletePackageHelperTest {
             PackageManager.DELETE_SYSTEM_APP, false)
 
         assertThat(result).isEqualTo(PackageManager.DELETE_FAILED_INTERNAL_ERROR)
+    }
+
+    @Test
+    fun deletePackageLIFWithNonExistantPackage_isFalse() {
+        val dph = DeletePackageHelper(mPms, mock(RemovePackageHelper::class.java),
+                                      mock(BroadcastHelper::class.java))
+        val result = dph.deletePackageLIF("a.nonexistent.package", UserHandle.of(USER_SYSTEM), true,
+                                          intArrayOf(0), 0, PackageRemovedInfo(), true)
+        assertFalse(result)
     }
 }

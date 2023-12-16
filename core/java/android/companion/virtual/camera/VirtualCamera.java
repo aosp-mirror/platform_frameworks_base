@@ -54,6 +54,8 @@ import java.util.concurrent.Executor;
 public final class VirtualCamera implements Closeable {
 
     private final IVirtualDevice mVirtualDevice;
+
+    private final String mCameraId;
     private final VirtualCameraConfig mConfig;
 
     /**
@@ -63,24 +65,28 @@ public final class VirtualCamera implements Closeable {
      * @param config Configuration for the new virtual camera
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public VirtualCamera(
-            @NonNull IVirtualDevice virtualDevice, @NonNull VirtualCameraConfig config) {
-        mVirtualDevice = virtualDevice;
+            @NonNull IVirtualDevice virtualDevice,
+            @NonNull String cameraId,
+            @NonNull VirtualCameraConfig config) {
+        mVirtualDevice = Objects.requireNonNull(virtualDevice);
+        mCameraId = Objects.requireNonNull(cameraId);
         mConfig = Objects.requireNonNull(config);
-        Objects.requireNonNull(virtualDevice);
-        // TODO(b/310857519): Avoid registration inside constructor.
-        try {
-            mVirtualDevice.registerVirtualCamera(config);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
     }
 
     /** Returns the configuration of this virtual camera instance. */
     @NonNull
     public VirtualCameraConfig getConfig() {
         return mConfig;
+    }
+
+    /**
+     * Returns the id of this virtual camera instance.
+     * @hide
+     */
+    @NonNull
+    public String getId() {
+        return mCameraId;
     }
 
     @Override

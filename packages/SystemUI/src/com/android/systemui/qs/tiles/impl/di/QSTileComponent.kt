@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.impl.di
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Base QS tile component. It should be used with [QSTileScope] to create a custom tile scoped
@@ -32,4 +33,12 @@ interface QSTileComponent<T> {
     fun userActionInteractor(): QSTileUserActionInteractor<T>
 
     fun dataToStateMapper(): QSTileDataToStateMapper<T>
+
+    /**
+     * Use [com.android.systemui.qs.tiles.base.viewmodel.QSTileCoroutineScopeFactory] to create a
+     * [CoroutineScope] provided by this method. This enables you to use the same scope the
+     * [com.android.systemui.qs.tiles.viewmodel.QSTileViewModel] uses. This scope is cancelled when
+     * the view model is destroyed.
+     */
+    @QSTileScope fun coroutineScope(): CoroutineScope
 }

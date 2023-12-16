@@ -255,6 +255,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         private ArrayList<TaskState> mOpeningTasks = null;
 
         private WindowContainerToken mPipTask = null;
+        private int mPipTaskId = -1;
         private WindowContainerToken mRecentsTask = null;
         private int mRecentsTaskId = -1;
         private TransitionInfo mInfo = null;
@@ -590,7 +591,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 cancel("transit_sleep");
                 return;
             }
-            if (mKeyguardLocked) {
+            if (mKeyguardLocked || (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.merge: keyguard is locked", mInstanceId);
                 // We will not accept new changes if we are swiping over the keyguard.
@@ -627,7 +628,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         && mRecentsTask.equals(change.getContainer());
                 hasTaskChange = hasTaskChange || isRootTask;
                 final boolean isLeafTask = leafTaskFilter.test(change);
-                if (TransitionUtil.isOpeningType(change.getMode())) {
+                if (TransitionUtil.isOpeningType(change.getMode())
+                        || TransitionUtil.isOrderOnly(change)) {
                     if (isRecentsTask) {
                         recentsOpening = change;
                     } else if (isRootTask || isLeafTask) {
@@ -821,8 +823,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             } else if (!didMergeThings) {
                 // Didn't recognize anything in incoming transition so don't merge it.
                 Slog.w(TAG, "Don't know how to merge this transition, foundRecentsClosing="
-                        + foundRecentsClosing);
-                if (foundRecentsClosing) {
+                        + foundRecentsClosing + " recentsTaskId=" + mRecentsTaskId);
+                if (foundRecentsClosing || mRecentsTaskId < 0) {
                     mWillFinishToHome = false;
                     cancel(false /* toHome */, false /* withScreenshots */, "didn't merge");
                 }
@@ -903,12 +905,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         @Override
         public void setFinishTaskTransaction(int taskId,
                 PictureInPictureSurfaceTransaction finishTransaction, SurfaceControl overlay) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                    "[%d] RecentsController.setFinishTaskTransaction: taskId=%d",
-                    mInstanceId, taskId);
             mExecutor.execute(() -> {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.setFinishTaskTransaction: taskId=%d,"
+                                + " [mFinishCB is non-null]=%b",
+                        mInstanceId, taskId, mFinishCB != null);
                 if (mFinishCB == null) return;
                 mPipTransaction = finishTransaction;
+                mPipTaskId = taskId;
             });
         }
 
@@ -991,21 +995,40 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     t.show(mOpeningTasks.get(i).mTaskSurface);
                 }
                 for (int i = 0; i < mPausingTasks.size(); ++i) {
-                    if (!sendUserLeaveHint && mPausingTasks.get(i).isLeaf()) {
-                        // This means recents is not *actually* finishing, so of course we gotta
-                        // do special stuff in WMCore to accommodate.
-                        wct.setDoNotPip(mPausingTasks.get(i).mToken);
-                    }
-                    // Since we will reparent out of the leashes, pre-emptively hide the child
-                    // surface to match the leash. Otherwise, there will be a flicker before the
-                    // visibility gets committed in Core when using split-screen (in splitscreen,
-                    // the leaf-tasks are not "independent" so aren't hidden by normal setup).
-                    t.hide(mPausingTasks.get(i).mTaskSurface);
+                    cleanUpPausingOrClosingTask(mPausingTasks.get(i), wct, t, sendUserLeaveHint);
                 }
-                if (mPipTask != null && mPipTransaction != null && sendUserLeaveHint) {
-                    t.show(mInfo.getChange(mPipTask).getLeash());
-                    PictureInPictureSurfaceTransaction.apply(mPipTransaction,
-                            mInfo.getChange(mPipTask).getLeash(), t);
+                for (int i = 0; i < mClosingTasks.size(); ++i) {
+                    cleanUpPausingOrClosingTask(mClosingTasks.get(i), wct, t, sendUserLeaveHint);
+                }
+                if (mPipTransaction != null && sendUserLeaveHint) {
+                    SurfaceControl pipLeash = null;
+                    if (mPipTask != null) {
+                        pipLeash = mInfo.getChange(mPipTask).getLeash();
+                    } else if (mPipTaskId != -1) {
+                        // find a task with taskId from #setFinishTaskTransaction()
+                        for (TransitionInfo.Change change : mInfo.getChanges()) {
+                            if (change.getTaskInfo() != null
+                                    && change.getTaskInfo().taskId == mPipTaskId) {
+                                pipLeash = change.getLeash();
+                                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                        "RecentsController.finishInner:"
+                                                + " found a change with taskId=%d", mPipTaskId);
+                            }
+                        }
+                    }
+                    if (pipLeash == null) {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "RecentsController.finishInner: no valid PiP leash;"
+                                        + "mPipTransaction=%s, mPipTask=%s, mPipTaskId=%d",
+                                mPipTransaction.toString(), mPipTask.toString(), mPipTaskId);
+                    } else {
+                        t.show(pipLeash);
+                        PictureInPictureSurfaceTransaction.apply(mPipTransaction, pipLeash, t);
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "RecentsController.finishInner: PiP transaction %s merged",
+                                mPipTransaction);
+                    }
+                    mPipTaskId = -1;
                     mPipTask = null;
                     mPipTransaction = null;
                 }
@@ -1022,6 +1045,20 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     Slog.e(TAG, "Failed to report transition finished", e);
                 }
             }
+        }
+
+        private void cleanUpPausingOrClosingTask(TaskState task, WindowContainerTransaction wct,
+                SurfaceControl.Transaction finishTransaction, boolean sendUserLeaveHint) {
+            if (!sendUserLeaveHint && task.isLeaf()) {
+                // This means recents is not *actually* finishing, so of course we gotta
+                // do special stuff in WMCore to accommodate.
+                wct.setDoNotPip(task.mToken);
+            }
+            // Since we will reparent out of the leashes, pre-emptively hide the child
+            // surface to match the leash. Otherwise, there will be a flicker before the
+            // visibility gets committed in Core when using split-screen (in splitscreen,
+            // the leaf-tasks are not "independent" so aren't hidden by normal setup).
+            finishTransaction.hide(task.mTaskSurface);
         }
 
         @Override

@@ -16,6 +16,9 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -104,7 +107,7 @@ public class BrightnessMappingStrategyTest {
         468.5f,
     };
 
-    private static final int[] DISPLAY_LEVELS_BACKLIGHT = {
+    private static final int[] DISPLAY_LEVELS_INT = {
         9,
         30,
         45,
@@ -116,6 +119,20 @@ public class BrightnessMappingStrategyTest {
         178,
         221,
         255
+    };
+
+    private static final float[] DISPLAY_LEVELS = {
+        0.03f,
+        0.11f,
+        0.17f,
+        0.24f,
+        0.3f,
+        0.37f,
+        0.46f,
+        0.57f,
+        0.7f,
+        0.87f,
+        1
     };
 
     private static final float[] DISPLAY_RANGE_NITS = { 2.685f, 478.5f };
@@ -155,40 +172,77 @@ public class BrightnessMappingStrategyTest {
     DisplayWhiteBalanceController mMockDwbc;
 
     @Test
-    public void testSimpleStrategyMappingAtControlPoints() {
-        Resources res = createResources(DISPLAY_LEVELS_BACKLIGHT);
+    public void testSimpleStrategyMappingAtControlPoints_IntConfig() {
+        Resources res = createResources(DISPLAY_LEVELS_INT);
         DisplayDeviceConfig ddc = createDdc();
-        BrightnessMappingStrategy simple = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy simple = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
         assertNotNull("BrightnessMappingStrategy should not be null", simple);
         for (int i = 0; i < LUX_LEVELS.length; i++) {
             final float expectedLevel = MathUtils.map(PowerManager.BRIGHTNESS_OFF + 1,
                     PowerManager.BRIGHTNESS_ON, PowerManager.BRIGHTNESS_MIN,
-                    PowerManager.BRIGHTNESS_MAX, DISPLAY_LEVELS_BACKLIGHT[i]);
+                    PowerManager.BRIGHTNESS_MAX, DISPLAY_LEVELS_INT[i]);
             assertEquals(expectedLevel,
                     simple.getBrightness(LUX_LEVELS[i]), 0.0001f /*tolerance*/);
         }
     }
 
     @Test
-    public void testSimpleStrategyMappingBetweenControlPoints() {
-        Resources res = createResources(DISPLAY_LEVELS_BACKLIGHT);
+    public void testSimpleStrategyMappingBetweenControlPoints_IntConfig() {
+        Resources res = createResources(DISPLAY_LEVELS_INT);
         DisplayDeviceConfig ddc = createDdc();
-        BrightnessMappingStrategy simple = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy simple = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
         assertNotNull("BrightnessMappingStrategy should not be null", simple);
         for (int i = 1; i < LUX_LEVELS.length; i++) {
             final float lux = (LUX_LEVELS[i - 1] + LUX_LEVELS[i]) / 2;
             final float backlight = simple.getBrightness(lux) * PowerManager.BRIGHTNESS_ON;
             assertTrue("Desired brightness should be between adjacent control points.",
-                    backlight > DISPLAY_LEVELS_BACKLIGHT[i - 1]
-                            && backlight < DISPLAY_LEVELS_BACKLIGHT[i]);
+                    backlight > DISPLAY_LEVELS_INT[i - 1]
+                            && backlight < DISPLAY_LEVELS_INT[i]);
+        }
+    }
+
+    @Test
+    public void testSimpleStrategyMappingAtControlPoints_FloatConfig() {
+        Resources res = createResources(EMPTY_INT_ARRAY);
+        DisplayDeviceConfig ddc = createDdc(EMPTY_FLOAT_ARRAY, EMPTY_FLOAT_ARRAY, LUX_LEVELS,
+                EMPTY_FLOAT_ARRAY, DISPLAY_LEVELS);
+        BrightnessMappingStrategy simple = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
+        assertNotNull("BrightnessMappingStrategy should not be null", simple);
+        for (int i = 0; i < LUX_LEVELS.length; i++) {
+            assertEquals(DISPLAY_LEVELS[i], simple.getBrightness(LUX_LEVELS[i]),
+                    /* tolerance= */ 0.0001f);
+        }
+    }
+
+    @Test
+    public void testSimpleStrategyMappingBetweenControlPoints_FloatConfig() {
+        Resources res = createResources(EMPTY_INT_ARRAY);
+        DisplayDeviceConfig ddc = createDdc(EMPTY_FLOAT_ARRAY, EMPTY_FLOAT_ARRAY, LUX_LEVELS,
+                EMPTY_FLOAT_ARRAY, DISPLAY_LEVELS);
+        BrightnessMappingStrategy simple = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
+        assertNotNull("BrightnessMappingStrategy should not be null", simple);
+        for (int i = 1; i < LUX_LEVELS.length; i++) {
+            final float lux = (LUX_LEVELS[i - 1] + LUX_LEVELS[i]) / 2;
+            final float brightness = simple.getBrightness(lux);
+            assertTrue("Desired brightness should be between adjacent control points.",
+                    brightness > DISPLAY_LEVELS[i - 1] && brightness < DISPLAY_LEVELS[i]);
         }
     }
 
     @Test
     public void testSimpleStrategyIgnoresNewConfiguration() {
-        Resources res = createResources(DISPLAY_LEVELS_BACKLIGHT);
+        Resources res = createResources(DISPLAY_LEVELS_INT);
         DisplayDeviceConfig ddc = createDdc();
-        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
 
         final float[] lux = { 0f, 1f };
         final float[] nits = { 0, PowerManager.BRIGHTNESS_ON };
@@ -201,14 +255,15 @@ public class BrightnessMappingStrategyTest {
 
     @Test
     public void testSimpleStrategyIgnoresNullConfiguration() {
-        Resources res = createResources(DISPLAY_LEVELS_BACKLIGHT);
+        Resources res = createResources(DISPLAY_LEVELS_INT);
         DisplayDeviceConfig ddc = createDdc();
-        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
 
         strategy.setBrightnessConfiguration(null);
-        final int n = DISPLAY_LEVELS_BACKLIGHT.length;
+        final int n = DISPLAY_LEVELS_INT.length;
         final float expectedBrightness =
-                (float) DISPLAY_LEVELS_BACKLIGHT[n - 1] / PowerManager.BRIGHTNESS_ON;
+                (float) DISPLAY_LEVELS_INT[n - 1] / PowerManager.BRIGHTNESS_ON;
         assertEquals(expectedBrightness,
                 strategy.getBrightness(LUX_LEVELS[n - 1]), 0.0001f /*tolerance*/);
     }
@@ -219,7 +274,8 @@ public class BrightnessMappingStrategyTest {
         DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS,
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT,
                 LUX_LEVELS, DISPLAY_LEVELS_NITS);
-        BrightnessMappingStrategy physical = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy physical = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         assertNotNull("BrightnessMappingStrategy should not be null", physical);
         for (int i = 0; i < LUX_LEVELS.length; i++) {
             final float expectedLevel = MathUtils.map(DISPLAY_RANGE_NITS[0], DISPLAY_RANGE_NITS[1],
@@ -237,7 +293,8 @@ public class BrightnessMappingStrategyTest {
         Resources res = createResources(EMPTY_INT_ARRAY);
         DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS, BACKLIGHT_RANGE_ZERO_TO_ONE,
                 LUX_LEVELS, DISPLAY_LEVELS_NITS);
-        BrightnessMappingStrategy physical = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy physical = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         assertNotNull("BrightnessMappingStrategy should not be null", physical);
         Spline brightnessToNits =
                 Spline.createSpline(BACKLIGHT_RANGE_ZERO_TO_ONE, DISPLAY_RANGE_NITS);
@@ -255,7 +312,8 @@ public class BrightnessMappingStrategyTest {
         Resources res = createResources(EMPTY_INT_ARRAY);
         DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS,
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, LUX_LEVELS, DISPLAY_LEVELS_NITS);
-        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
 
         final float[] lux = {0f, 1f};
         final float[] nits = {
@@ -281,7 +339,8 @@ public class BrightnessMappingStrategyTest {
         Resources res = createResources(EMPTY_INT_ARRAY);
         DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS,
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, LUX_LEVELS, DISPLAY_LEVELS_NITS);
-        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         float[] adjustedNits50p = new float[DISPLAY_RANGE_NITS.length];
         for (int i = 0; i < DISPLAY_RANGE_NITS.length; i++) {
             adjustedNits50p[i] = DISPLAY_RANGE_NITS[i] * 0.5f;
@@ -322,10 +381,11 @@ public class BrightnessMappingStrategyTest {
 
     @Test
     public void testDefaultStrategyIsPhysical() {
-        Resources res = createResources(DISPLAY_LEVELS_BACKLIGHT);
+        Resources res = createResources(DISPLAY_LEVELS_INT);
         DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS,
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, LUX_LEVELS, DISPLAY_LEVELS_NITS);
-        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         assertTrue(strategy instanceof BrightnessMappingStrategy.PhysicalMappingStrategy);
     }
 
@@ -339,14 +399,16 @@ public class BrightnessMappingStrategyTest {
         Resources res = createResources(EMPTY_INT_ARRAY);
         DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS,
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, lux, DISPLAY_LEVELS_NITS);
-        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         assertNull(strategy);
 
         // And make sure we get the same result even if it's monotone but not increasing.
         lux[idx] = lux[idx + 1];
         ddc = createDdc(DISPLAY_RANGE_NITS, DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, lux,
                 DISPLAY_LEVELS_NITS);
-        strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        strategy = BrightnessMappingStrategy.create(res, ddc, AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
         assertNull(strategy);
     }
 
@@ -360,21 +422,24 @@ public class BrightnessMappingStrategyTest {
         Resources res = createResources(EMPTY_INT_ARRAY);
         DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS,
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, lux, DISPLAY_LEVELS_NITS);
-        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         assertNull(strategy);
 
-        res = createResources(DISPLAY_LEVELS_BACKLIGHT);
-        strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        res = createResources(DISPLAY_LEVELS_INT);
+        strategy = BrightnessMappingStrategy.create(res, ddc, AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
         assertNull(strategy);
 
         // Extra backlight level
         final int[] backlight = Arrays.copyOf(
-                DISPLAY_LEVELS_BACKLIGHT, DISPLAY_LEVELS_BACKLIGHT.length + 1);
+                DISPLAY_LEVELS_INT, DISPLAY_LEVELS_INT.length + 1);
         backlight[backlight.length - 1] = backlight[backlight.length - 2] + 1;
         res = createResources(backlight);
         ddc = createDdc(DISPLAY_RANGE_NITS,
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, LUX_LEVELS, EMPTY_FLOAT_ARRAY);
-        strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        strategy = BrightnessMappingStrategy.create(res, ddc, AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
         assertNull(strategy);
 
         // Extra nits level
@@ -383,7 +448,8 @@ public class BrightnessMappingStrategyTest {
         res = createResources(EMPTY_INT_ARRAY);
         ddc = createDdc(DISPLAY_RANGE_NITS,
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, LUX_LEVELS, nits);
-        strategy = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        strategy = BrightnessMappingStrategy.create(res, ddc, AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
         assertNull(strategy);
     }
 
@@ -391,15 +457,18 @@ public class BrightnessMappingStrategyTest {
     public void testPhysicalStrategyRequiresNitsMapping() {
         Resources res = createResources(EMPTY_INT_ARRAY /*brightnessLevelsBacklight*/);
         DisplayDeviceConfig ddc = createDdc(EMPTY_FLOAT_ARRAY /*nitsRange*/);
-        BrightnessMappingStrategy physical = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        BrightnessMappingStrategy physical = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         assertNull(physical);
 
         res = createResources(EMPTY_INT_ARRAY /*brightnessLevelsBacklight*/);
-        physical = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        physical = BrightnessMappingStrategy.create(res, ddc, AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
         assertNull(physical);
 
         res = createResources(EMPTY_INT_ARRAY /*brightnessLevelsBacklight*/);
-        physical = BrightnessMappingStrategy.create(res, ddc, mMockDwbc);
+        physical = BrightnessMappingStrategy.create(res, ddc, AUTO_BRIGHTNESS_MODE_DEFAULT,
+                mMockDwbc);
         assertNull(physical);
     }
 
@@ -408,10 +477,12 @@ public class BrightnessMappingStrategyTest {
         Resources res = createResources(EMPTY_INT_ARRAY /*brightnessLevelsBacklight*/);
         DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS, BACKLIGHT_RANGE_ZERO_TO_ONE,
                 LUX_LEVELS, DISPLAY_LEVELS_NITS);
-        assertStrategyAdaptsToUserDataPoints(BrightnessMappingStrategy.create(res, ddc, mMockDwbc));
+        assertStrategyAdaptsToUserDataPoints(BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc));
         ddc = createDdc(DISPLAY_RANGE_NITS, BACKLIGHT_RANGE_ZERO_TO_ONE);
-        res = createResources(DISPLAY_LEVELS_BACKLIGHT);
-        assertStrategyAdaptsToUserDataPoints(BrightnessMappingStrategy.create(res, ddc, mMockDwbc));
+        res = createResources(DISPLAY_LEVELS_INT);
+        assertStrategyAdaptsToUserDataPoints(BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc));
     }
 
     @Test
@@ -421,7 +492,8 @@ public class BrightnessMappingStrategyTest {
 
         // Create an idle mode bms
         // This will fail if it tries to fetch the wrong configuration.
-        BrightnessMappingStrategy bms = BrightnessMappingStrategy.createForIdleMode(res, ddc,
+        BrightnessMappingStrategy bms = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_IDLE,
                 mMockDwbc);
         assertNotNull("BrightnessMappingStrategy should not be null", bms);
 
@@ -546,16 +618,24 @@ public class BrightnessMappingStrategyTest {
         when(mockDdc.getBrightness()).thenReturn(backlightArray);
         when(mockDdc.getAutoBrightnessBrighteningLevelsLux()).thenReturn(LUX_LEVELS);
         when(mockDdc.getAutoBrightnessBrighteningLevelsNits()).thenReturn(EMPTY_FLOAT_ARRAY);
+        when(mockDdc.getAutoBrightnessBrighteningLevels()).thenReturn(EMPTY_FLOAT_ARRAY);
         return mockDdc;
     }
 
     private DisplayDeviceConfig createDdc(float[] nitsArray, float[] backlightArray,
             float[] luxLevelsFloat, float[] brightnessLevelsNits) {
+        return createDdc(nitsArray, backlightArray, luxLevelsFloat, brightnessLevelsNits,
+                EMPTY_FLOAT_ARRAY);
+    }
+
+    private DisplayDeviceConfig createDdc(float[] nitsArray, float[] backlightArray,
+            float[] luxLevelsFloat, float[] brightnessLevelsNits, float[] brightnessLevels) {
         DisplayDeviceConfig mockDdc = mock(DisplayDeviceConfig.class);
         when(mockDdc.getNits()).thenReturn(nitsArray);
         when(mockDdc.getBrightness()).thenReturn(backlightArray);
         when(mockDdc.getAutoBrightnessBrighteningLevelsLux()).thenReturn(luxLevelsFloat);
         when(mockDdc.getAutoBrightnessBrighteningLevelsNits()).thenReturn(brightnessLevelsNits);
+        when(mockDdc.getAutoBrightnessBrighteningLevels()).thenReturn(brightnessLevels);
         return mockDdc;
     }
 
@@ -602,7 +682,7 @@ public class BrightnessMappingStrategyTest {
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, GAMMA_CORRECTION_LUX,
                 GAMMA_CORRECTION_NITS);
         BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources, ddc,
-                mMockDwbc);
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         // Let's start with a validity check:
         assertEquals(y1, strategy.getBrightness(x1), 0.0001f /* tolerance */);
         assertEquals(y2, strategy.getBrightness(x2), 0.0001f /* tolerance */);
@@ -633,7 +713,7 @@ public class BrightnessMappingStrategyTest {
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, GAMMA_CORRECTION_LUX,
                 GAMMA_CORRECTION_NITS);
         BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources, ddc,
-                mMockDwbc);
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         // Validity check:
         assertEquals(y1, strategy.getBrightness(x1), 0.0001f /* tolerance */);
         assertEquals(y2, strategy.getBrightness(x2), 0.0001f /* tolerance */);
@@ -661,7 +741,7 @@ public class BrightnessMappingStrategyTest {
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, GAMMA_CORRECTION_LUX,
                 GAMMA_CORRECTION_NITS);
         BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources, ddc,
-                mMockDwbc);
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         assertEquals(0.0f, strategy.getAutoBrightnessAdjustment(), /* delta= */ 0.0001f);
         strategy.addUserDataPoint(/* lux= */ 2500, /* brightness= */ 1.0f);
         assertEquals(+1.0f, strategy.getAutoBrightnessAdjustment(), /* delta= */ 0.0001f);
@@ -685,7 +765,7 @@ public class BrightnessMappingStrategyTest {
                 DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT, GAMMA_CORRECTION_LUX,
                 GAMMA_CORRECTION_NITS);
         BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources, ddc,
-                mMockDwbc);
+                AUTO_BRIGHTNESS_MODE_DEFAULT, mMockDwbc);
         // Validity, as per tradition:
         assertEquals(y0, strategy.getBrightness(x0), 0.0001f /* tolerance */);
         assertEquals(y2, strategy.getBrightness(x2), 0.0001f /* tolerance */);
@@ -706,5 +786,15 @@ public class BrightnessMappingStrategyTest {
         assertEquals(MathUtils.pow(y2, gamma), strategy.getBrightness(x2), 0.0001f /* tolerance */);
         assertEquals(1.0f, strategy.getBrightness(x4), 0.0001f /* tolerance */);
         assertEquals(adjustment, strategy.getAutoBrightnessAdjustment(), 0.0001f /* tolerance */);
+    }
+
+    @Test
+    public void testGetMode() {
+        Resources res = createResourcesIdle(LUX_LEVELS_IDLE, DISPLAY_LEVELS_NITS_IDLE);
+        DisplayDeviceConfig ddc = createDdc(DISPLAY_RANGE_NITS, BACKLIGHT_RANGE_ZERO_TO_ONE);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res, ddc,
+                AUTO_BRIGHTNESS_MODE_IDLE,
+                mMockDwbc);
+        assertEquals(AUTO_BRIGHTNESS_MODE_IDLE, strategy.getMode());
     }
 }

@@ -82,6 +82,7 @@ import com.android.systemui.qs.FgsManagerControllerImpl;
 import com.android.systemui.qs.QSFragmentStartableModule;
 import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recordissue.RecordIssueModule;
 import com.android.systemui.retail.dagger.RetailModeModule;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
 import com.android.systemui.screenrecord.ScreenRecordModule;
@@ -209,6 +210,7 @@ import javax.inject.Named;
         PrivacyModule.class,
         QRCodeScannerModule.class,
         QSFragmentStartableModule.class,
+        RecordIssueModule.class,
         ReferenceModule.class,
         RetailModeModule.class,
         ScreenshotModule.class,

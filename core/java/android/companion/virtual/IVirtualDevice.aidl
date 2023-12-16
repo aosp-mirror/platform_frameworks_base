@@ -219,6 +219,10 @@ interface IVirtualDevice {
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void setShowPointerIcon(boolean showPointerIcon);
 
+    /** Sets an IME policy for the given display. */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void setDisplayImePolicy(int displayId, int policy);
+
     /**
      * Registers an intent interceptor that will intercept an intent attempting to launch
      * when matching the provided IntentFilter and calls the callback with the intercepted
@@ -246,4 +250,10 @@ interface IVirtualDevice {
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void unregisterVirtualCamera(in VirtualCameraConfig camera);
+
+    /**
+     * Returns the id of the virtual camera with given config.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    int getVirtualCameraId(in VirtualCameraConfig camera);
 }

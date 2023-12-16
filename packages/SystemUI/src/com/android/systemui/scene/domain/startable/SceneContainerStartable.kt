@@ -44,6 +44,11 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICA
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.printSection
+import com.android.systemui.util.println
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -94,6 +99,15 @@ constructor(
         }
     }
 
+    override fun dump(pw: PrintWriter, args: Array<out String>) =
+        pw.asIndenting().run {
+            printSection("SceneContainerFlags") {
+                println("isEnabled", flags.isEnabled())
+                printSection("requirementDescription") { println(flags.requirementDescription()) }
+                println("flexiNotifsEnabled", flags.flexiNotifsEnabled())
+            }
+        }
+
     /** Updates the visibility of the scene container. */
     private fun hydrateVisibility() {
         applicationScope.launch {
@@ -128,7 +142,7 @@ constructor(
     private fun automaticallySwitchScenes() {
         applicationScope.launch {
             // TODO (b/308001302): Move this to a bouncer specific interactor.
-            bouncerInteractor.onImeHidden.collectLatest {
+            bouncerInteractor.onImeHiddenByUser.collectLatest {
                 if (sceneInteractor.desiredScene.value.key == SceneKey.Bouncer) {
                     sceneInteractor.changeScene(
                         scene = SceneModel(SceneKey.Lockscreen),
@@ -146,19 +160,21 @@ constructor(
                     isAnySimLocked -> {
                         switchToScene(
                             targetSceneKey = SceneKey.Bouncer,
-                            loggingReason = "Need to authenticate locked sim card."
+                            loggingReason = "Need to authenticate locked SIM card."
                         )
                     }
-                    isUnlocked && !canSwipeToEnter -> {
+                    isUnlocked && canSwipeToEnter == false -> {
                         switchToScene(
                             targetSceneKey = SceneKey.Gone,
-                            loggingReason = "Sim cards are unlocked."
+                            loggingReason = "All SIM cards unlocked and device already" +
+                                " unlocked and lockscreen doesn't require a swipe to dismiss."
                         )
                     }
                     else -> {
                         switchToScene(
                             targetSceneKey = SceneKey.Lockscreen,
-                            loggingReason = "Sim cards are unlocked."
+                            loggingReason = "All SIM cards unlocked and device still locked" +
+                                " or lockscreen still requires a swipe to dismiss."
                         )
                     }
                 }
@@ -205,11 +221,17 @@ constructor(
                             //    when the user is passively authenticated, the false value here
                             //    when the unlock state changes indicates this is an active
                             //    authentication attempt.
-                            if (isBypassEnabled || !canSwipeToEnter)
-                                SceneKey.Gone to
-                                    "device has been unlocked on lockscreen with either " +
-                                        "bypass enabled or using an active authentication mechanism"
-                            else null
+                            when {
+                                isBypassEnabled ->
+                                    SceneKey.Gone to
+                                        "device has been unlocked on lockscreen with bypass" +
+                                            " enabled"
+                                canSwipeToEnter == false ->
+                                    SceneKey.Gone to
+                                        "device has been unlocked on lockscreen using an active" +
+                                            " authentication mechanism"
+                                else -> null
+                            }
                         // Not on lockscreen or bouncer, so remain in the current scene.
                         else -> null
                     }
@@ -232,7 +254,7 @@ constructor(
                 } else {
                     val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
                     val isUnlocked = deviceEntryInteractor.isUnlocked.value
-                    if (isUnlocked && !canSwipeToEnter) {
+                    if (isUnlocked && canSwipeToEnter == false) {
                         switchToScene(
                             targetSceneKey = SceneKey.Gone,
                             loggingReason =

@@ -29,12 +29,14 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -66,8 +68,8 @@ import java.util.function.Consumer;
  * TODO(241117292): Remove or cut down during simultaneous user refactoring.
  */
 public class ProxyManager {
-    private static final boolean DEBUG = false;
     private static final String LOG_TAG = "ProxyManager";
+    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG) && Build.IS_DEBUGGABLE;
 
     // Names used to populate ComponentName and ResolveInfo in connection.mA11yServiceInfo and in
     // the infos of connection.setInstalledAndEnabledServices

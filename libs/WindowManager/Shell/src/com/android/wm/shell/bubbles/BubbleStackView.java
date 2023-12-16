@@ -61,6 +61,7 @@ import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -536,8 +537,8 @@ public class BubbleStackView extends FrameLayout
                 return;
             }
 
-            final boolean clickedBubbleIsCurrentlyExpandedBubble =
-                    clickedBubble.getKey().equals(mExpandedBubble.getKey());
+            final boolean clickedBubbleIsCurrentlyExpandedBubble = mExpandedBubble != null
+                            && clickedBubble.getKey().equals(mExpandedBubble.getKey());
 
             if (isExpanded()) {
                 mExpandedAnimationController.onGestureFinished();
@@ -1001,7 +1002,8 @@ public class BubbleStackView extends FrameLayout
 
         mOrientationChangedListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                    mPositioner.update();
+                    mPositioner.update(DeviceConfig.create(mContext, mContext.getSystemService(
+                            WindowManager.class)));
                     onDisplaySizeChanged();
                     mExpandedAnimationController.updateResources();
                     mStackAnimationController.updateResources();
@@ -1021,7 +1023,13 @@ public class BubbleStackView extends FrameLayout
                         updateOverflowVisibility();
                         updatePointerPosition(false);
                         requestUpdate();
-                        showManageMenu(mShowingManage);
+                        if (mShowingManage) {
+                            // if we're showing the menu after rotation, post it to the looper
+                            // to make sure that the location of the menu button is correct
+                            post(() -> showManageMenu(true));
+                        } else {
+                            showManageMenu(false);
+                        }
 
                         PointF p = mPositioner.getExpandedBubbleXY(getBubbleIndex(mExpandedBubble),
                                 getState());
@@ -1508,6 +1516,11 @@ public class BubbleStackView extends FrameLayout
             updateExpandedView();
         }
         setUpManageMenu();
+        if (mShowingManage) {
+            // the manage menu location depends on the manage button location which may need a
+            // layout pass, so post this to the looper
+            post(() -> showManageMenu(true));
+        }
     }
 
     @Override
@@ -1522,7 +1535,8 @@ public class BubbleStackView extends FrameLayout
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mPositioner.update();
+        WindowManager windowManager = mContext.getSystemService(WindowManager.class);
+        mPositioner.update(DeviceConfig.create(mContext, Objects.requireNonNull(windowManager)));
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
         getViewTreeObserver().addOnDrawListener(mSystemGestureExcludeUpdater);
     }
@@ -2448,6 +2462,7 @@ public class BubbleStackView extends FrameLayout
         final Runnable collapseBackToStack = () ->
                 mExpandedAnimationController.collapseBackToStack(
                         mStackAnimationController.getStackPositionAlongNearestHorizontalEdge(),
+                        /* fadeBubblesDuringCollapse= */ mRemovingLastBubbleWhileExpanded,
                         () -> {
                             mBubbleContainer.setActiveController(mStackAnimationController);
                             updateOverflowVisibility();
@@ -3285,6 +3300,7 @@ public class BubbleStackView extends FrameLayout
             mExpandedViewContainer.setTranslationY(mPositioner.getExpandedViewY(mExpandedBubble,
                     mPositioner.showBubblesVertically() ? p.y : p.x));
             mExpandedViewContainer.setTranslationX(0f);
+            mExpandedBubble.getExpandedView().updateTaskViewContentWidth();
             mExpandedBubble.getExpandedView().updateView(
                     mExpandedViewContainer.getLocationOnScreen());
             updatePointerPosition(false /* forIme */);

@@ -18,7 +18,7 @@ package android.view.menu;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.ListScenario;
+import android.widget.ListScenario;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;

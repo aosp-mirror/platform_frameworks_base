@@ -34,6 +34,7 @@ import java.io.IOException;
  * 3: POSIX  ADVISORY  READ  3888 fd:09:13992 128 128
  * 4: POSIX  ADVISORY  READ  3888 fd:09:14230 1073741826 1073742335
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ProcLocksReader {
     private final String mPath;
     private ProcFileReader mReader = null;

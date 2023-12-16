@@ -88,6 +88,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.BroadcastProcessQueue.BroadcastConsumer;
 import com.android.server.am.BroadcastProcessQueue.BroadcastPredicate;
 import com.android.server.am.BroadcastRecord.DeliveryState;
+import com.android.server.utils.AnrTimer;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -193,6 +194,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private @Nullable BroadcastProcessQueue mRunningColdStart;
 
     /**
+     * Indicates whether we have queued a message to check pending cold start validity.
+     */
+    @GuardedBy("mService")
+    private boolean mCheckPendingColdStartQueued;
+
+    /**
      * Collection of latches waiting for device to reach specific state. The
      * first argument is a function to test for the desired state, and the
      * second argument is the latch to release once that state is reached.
@@ -221,6 +228,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     @GuardedBy("mService")
     private final AtomicReference<ArrayMap<BroadcastRecord, Boolean>> mRecordsLookupCache =
+            new AtomicReference<>();
+
+    /**
+     * Container for holding the set of broadcast records that matches an enqueueing record.
+     * @see BroadcastRecord#isMatchingRecord(BroadcastRecord)
+     */
+    @GuardedBy("mService")
+    private final AtomicReference<ArrayMap<BroadcastRecord, Boolean>> mMatchingRecordsCache =
             new AtomicReference<>();
 
     /**
@@ -302,7 +317,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return true;
             }
             case MSG_CHECK_PENDING_COLD_START_VALIDITY: {
-                checkPendingColdStartValidity();
+                synchronized (mService) {
+                    /* Clear this as we have just received the broadcast. */
+                    mCheckPendingColdStartQueued = false;
+                    checkPendingColdStartValidityLocked();
+                }
                 return true;
             }
             case MSG_PROCESS_FREEZABLE_CHANGED: {
@@ -549,7 +568,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_RECEIVER);
         }
 
-        checkPendingColdStartValidity();
+        checkPendingColdStartValidityLocked();
         checkAndRemoveWaitingFor();
 
         traceEnd(cookie);
@@ -573,22 +592,24 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         enqueueUpdateRunningList();
     }
 
-    private void checkPendingColdStartValidity() {
+    @GuardedBy("mService")
+    private void checkPendingColdStartValidityLocked() {
         // There are a few cases where a starting process gets killed but AMS doesn't report
         // this event. So, once we start waiting for a pending cold start, periodically check
         // if the pending start is still valid and if not, clear it so that the queue doesn't
         // keep waiting for the process start forever.
-        synchronized (mService) {
-            // If there is no pending cold start, then nothing to do.
-            if (mRunningColdStart == null) {
-                return;
-            }
-            if (isPendingColdStartValid()) {
+        // If there is no pending cold start, then nothing to do.
+        if (mRunningColdStart == null) {
+            return;
+        }
+        if (isPendingColdStartValid()) {
+            if (!mCheckPendingColdStartQueued) {
                 mLocalHandler.sendEmptyMessageDelayed(MSG_CHECK_PENDING_COLD_START_VALIDITY,
                         mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS);
-            } else {
-                clearInvalidPendingColdStart();
+                mCheckPendingColdStartQueued = true;
             }
+        } else {
+            clearInvalidPendingColdStart();
         }
     }
 
@@ -735,6 +756,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (replacedBroadcasts == null) {
             replacedBroadcasts = new ArraySet<>();
         }
+        ArrayMap<BroadcastRecord, Boolean> matchingBroadcasts =
+                mMatchingRecordsCache.getAndSet(null);
+        if (matchingBroadcasts == null) {
+            matchingBroadcasts = new ArrayMap<>();
+        }
+        r.setMatchingRecordsCache(matchingBroadcasts);
         boolean enqueuedBroadcast = false;
 
         for (int i = 0; i < r.receivers.size(); i++) {
@@ -768,6 +795,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         skipAndCancelReplacedBroadcasts(replacedBroadcasts);
         replacedBroadcasts.clear();
         mReplacedBroadcastsCache.compareAndSet(null, replacedBroadcasts);
+        matchingBroadcasts.clear();
+        r.clearMatchingRecordsCache();
+        mMatchingRecordsCache.compareAndSet(null, matchingBroadcasts);
 
         // If nothing to dispatch, send any pending result immediately
         if (r.receivers.isEmpty() || !enqueuedBroadcast) {

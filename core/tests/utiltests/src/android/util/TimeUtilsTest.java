@@ -18,8 +18,12 @@ package android.util;
 
 import static org.junit.Assert.assertEquals;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -29,6 +33,9 @@ import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
 public class TimeUtilsTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     public static final long SECOND_IN_MILLIS = 1000;
     public static final long MINUTE_IN_MILLIS = SECOND_IN_MILLIS * 60;
     public static final long HOUR_IN_MILLIS = MINUTE_IN_MILLIS * 60;
@@ -78,6 +85,7 @@ public class TimeUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testDumpTime() {
         assertEquals("2023-01-01 00:00:00.000", runWithPrintWriter((pw) -> {
             TimeUtils.dumpTime(pw, 1672556400000L);
@@ -91,6 +99,7 @@ public class TimeUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testFormatForLogging() {
         assertEquals("unknown", TimeUtils.formatForLogging(0));
         assertEquals("unknown", TimeUtils.formatForLogging(-1));
@@ -99,6 +108,7 @@ public class TimeUtilsTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testLogTimeOfDay() {
         assertEquals("01-01 00:00:00.000", TimeUtils.logTimeOfDay(1672556400000L));
     }

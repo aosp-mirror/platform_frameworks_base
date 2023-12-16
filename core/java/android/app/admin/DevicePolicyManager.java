@@ -9146,7 +9146,7 @@ public class DevicePolicyManager {
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     public boolean isDeviceOwnerApp(String packageName) {
         throwIfParentInstance("isDeviceOwnerApp");
-        if (android.permission.flags.Flags.roleControllerInSystemServer()
+        if (android.permission.flags.Flags.systemServerRoleControllerEnabled()
                 && CompatChanges.isChangeEnabled(IS_DEVICE_OWNER_USER_AWARE)) {
             return isDeviceOwnerAppOnContextUser(packageName);
         }
@@ -9381,7 +9381,7 @@ public class DevicePolicyManager {
     @Deprecated
     @SystemApi
     @RequiresPermission(MANAGE_DEVICE_ADMINS)
-    public boolean setActiveProfileOwner(@NonNull ComponentName admin, @Deprecated String ownerName)
+    public boolean setActiveProfileOwner(@NonNull ComponentName admin, String ownerName)
             throws IllegalArgumentException {
         throwIfParentInstance("setActiveProfileOwner");
         if (mService != null) {
@@ -16640,6 +16640,7 @@ public class DevicePolicyManager {
                 == DEVICE_OWNER_TYPE_FINANCED;
     }
 
+    // TODO(b/315298076): revert ag/25574027 and update the doc
     /**
      * Called by a device owner or profile owner of an organization-owned managed profile to enable
      * or disable USB data signaling for the device. When disabled, USB data connections
@@ -16649,12 +16650,11 @@ public class DevicePolicyManager {
      * {@link #canUsbDataSignalingBeDisabled()} to check whether enabling or disabling USB data
      * signaling is supported on the device.
      *
-     * Starting from {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, after the USB data signaling
+     * Starting from Android 15, after the USB data signaling
      * policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
      * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
      * successfully set or not. This callback will contain:
      * <ul>
-     * li> The policy identifier {@link DevicePolicyIdentifiers#USB_DATA_SIGNALING_POLICY}
      * <li> The {@link TargetUser} that this policy relates to
      * <li> The {@link PolicyUpdateResult}, which will be
      * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the

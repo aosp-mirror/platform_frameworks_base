@@ -19,9 +19,9 @@ package com.android.systemui.smartspace.data.repository
 import android.app.smartspace.SmartspaceTarget
 import android.os.Parcelable
 import android.widget.RemoteViews
+import com.android.systemui.communal.smartspace.CommunalSmartspaceController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
-import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,37 +32,37 @@ interface SmartspaceRepository {
     /** Whether [RemoteViews] are passed through smartspace targets. */
     val isSmartspaceRemoteViewsEnabled: Boolean
 
-    /** Smartspace targets for the lockscreen surface. */
-    val lockscreenSmartspaceTargets: Flow<List<SmartspaceTarget>>
+    /** Smartspace targets for the communal surface. */
+    val communalSmartspaceTargets: Flow<List<SmartspaceTarget>>
 }
 
 @SysUISingleton
 class SmartspaceRepositoryImpl
 @Inject
 constructor(
-    private val lockscreenSmartspaceController: LockscreenSmartspaceController,
+    private val communalSmartspaceController: CommunalSmartspaceController,
 ) : SmartspaceRepository, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     override val isSmartspaceRemoteViewsEnabled: Boolean
         get() = android.app.smartspace.flags.Flags.remoteViews()
 
-    private val _lockscreenSmartspaceTargets: MutableStateFlow<List<SmartspaceTarget>> =
+    private val _communalSmartspaceTargets: MutableStateFlow<List<SmartspaceTarget>> =
         MutableStateFlow(emptyList())
-    override val lockscreenSmartspaceTargets: Flow<List<SmartspaceTarget>> =
-        _lockscreenSmartspaceTargets
+    override val communalSmartspaceTargets: Flow<List<SmartspaceTarget>> =
+        _communalSmartspaceTargets
             .onStart {
-                lockscreenSmartspaceController.addListener(listener = this@SmartspaceRepositoryImpl)
+                communalSmartspaceController.addListener(listener = this@SmartspaceRepositoryImpl)
             }
             .onCompletion {
-                lockscreenSmartspaceController.removeListener(
+                communalSmartspaceController.removeListener(
                     listener = this@SmartspaceRepositoryImpl
                 )
             }
 
     override fun onSmartspaceTargetsUpdated(targetsNullable: MutableList<out Parcelable>?) {
         targetsNullable?.let { targets ->
-            _lockscreenSmartspaceTargets.value = targets.filterIsInstance<SmartspaceTarget>()
+            _communalSmartspaceTargets.value = targets.filterIsInstance<SmartspaceTarget>()
         }
-            ?: run { _lockscreenSmartspaceTargets.value = emptyList() }
+            ?: run { _communalSmartspaceTargets.value = emptyList() }
     }
 }

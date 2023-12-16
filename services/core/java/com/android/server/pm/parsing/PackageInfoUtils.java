@@ -28,6 +28,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
@@ -52,6 +53,9 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.pkg.component.ComponentParseUtils;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedAttribution;
 import com.android.internal.pm.pkg.component.ParsedComponent;
@@ -63,11 +67,12 @@ import com.android.internal.pm.pkg.component.ParsedProcess;
 import com.android.internal.pm.pkg.component.ParsedProvider;
 import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.internal.pm.pkg.component.ParsedUsesPermission;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.internal.pm.pkg.parsing.ParsingUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageArchiver;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUnserialized;
@@ -75,9 +80,6 @@ import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.PackageUserStateUtils;
 import com.android.server.pm.pkg.SELinuxUtil;
-import com.android.server.pm.pkg.component.ComponentParseUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -152,7 +154,9 @@ public class PackageInfoUtils {
         info.compileSdkVersionCodename = pkg.getCompileSdkVersionCodeName();
         info.firstInstallTime = firstInstallTime;
         info.lastUpdateTime = lastUpdateTime;
-        info.setArchiveTimeMillis(state.getArchiveTimeMillis());
+        if (state.getArchiveState() != null) {
+            info.setArchiveTimeMillis(state.getArchiveState().getArchiveTimeMillis());
+        }
         if ((flags & PackageManager.GET_GIDS) != 0) {
             info.gids = gids;
         }
@@ -264,17 +268,20 @@ public class PackageInfoUtils {
         if ((flags & PackageManager.GET_ACTIVITIES) != 0) {
             final int N = pkg.getActivities().size();
             if (N > 0) {
+                // Allow to match activities of quarantined packages.
+                long aflags = flags | PackageManager.MATCH_QUARANTINED_COMPONENTS;
+
                 int num = 0;
                 final ActivityInfo[] res = new ActivityInfo[N];
                 for (int i = 0; i < N; i++) {
                     final ParsedActivity a = pkg.getActivities().get(i);
-                    if (ComponentParseUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(), a,
-                            flags)) {
+                    if (PackageUserStateUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(),
+                            a.isEnabled(), a.isDirectBootAware(), a.getName(), aflags)) {
                         if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(
                                 a.getName())) {
                             continue;
                         }
-                        res[num++] = generateActivityInfo(pkg, a, flags, state,
+                        res[num++] = generateActivityInfo(pkg, a, aflags, state,
                                 applicationInfo, userId, pkgSetting);
                     }
                 }
@@ -288,8 +295,8 @@ public class PackageInfoUtils {
                 final ActivityInfo[] res = new ActivityInfo[size];
                 for (int i = 0; i < size; i++) {
                     final ParsedActivity a = pkg.getReceivers().get(i);
-                    if (ComponentParseUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(), a,
-                            flags)) {
+                    if (PackageUserStateUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(),
+                            a.isEnabled(), a.isDirectBootAware(), a.getName(), flags)) {
                         res[num++] = generateActivityInfo(pkg, a, flags, state, applicationInfo,
                                 userId, pkgSetting);
                     }
@@ -304,8 +311,8 @@ public class PackageInfoUtils {
                 final ServiceInfo[] res = new ServiceInfo[size];
                 for (int i = 0; i < size; i++) {
                     final ParsedService s = pkg.getServices().get(i);
-                    if (ComponentParseUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(), s,
-                            flags)) {
+                    if (PackageUserStateUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(),
+                            s.isEnabled(), s.isDirectBootAware(), s.getName(), flags)) {
                         res[num++] = generateServiceInfo(pkg, s, flags, state, applicationInfo,
                                 userId, pkgSetting);
                     }
@@ -321,8 +328,8 @@ public class PackageInfoUtils {
                 for (int i = 0; i < size; i++) {
                     final ParsedProvider pr = pkg.getProviders()
                             .get(i);
-                    if (ComponentParseUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(), pr,
-                            flags)) {
+                    if (PackageUserStateUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(),
+                            pr.isEnabled(), pr.isDirectBootAware(), pr.getName(), flags)) {
                         res[num++] = generateProviderInfo(pkg, pr, flags, state, applicationInfo,
                                 userId, pkgSetting);
                     }
@@ -346,7 +353,7 @@ public class PackageInfoUtils {
     }
 
     /**
-     *  Retrieve the deprecated {@link PackageInfo.signatures} field of signing certificates
+     * Retrieve the deprecated {@link PackageInfo.signatures} field of signing certificates
      */
     public static Signature[] getDeprecatedSignatures(SigningDetails signingDetails, long flags) {
         if ((flags & PackageManager.GET_SIGNATURES) == 0) {
@@ -411,6 +418,9 @@ public class PackageInfoUtils {
             ai.overlayPaths = overlayPaths.getOverlayPaths().toArray(new String[0]);
         }
         ai.isArchived = PackageArchiver.isArchived(state);
+        if (ai.isArchived) {
+            ai.nonLocalizedLabel = state.getArchiveState().getActivityInfos().get(0).getTitle();
+        }
     }
 
     @Nullable
@@ -465,7 +475,34 @@ public class PackageInfoUtils {
         }
         info.sharedLibraryFiles = usesLibraryFiles.isEmpty()
                 ? null : usesLibraryFiles.toArray(new String[0]);
-        info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+
+
+        if (!Flags.sdkLibIndependence()) {
+            info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+            info.optionalSharedLibraryInfos = null;
+        } else {
+            // sharedLibraryInfos contains all shared libraries that the app depends on (including
+            // the optional sdk libraries)
+            info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+            String[] libsNames = pkgSetting.getUsesSdkLibraries();
+            boolean[] libsOptional = pkgSetting.getUsesSdkLibrariesOptional();
+            List<SharedLibraryInfo> optionalSdkLibraries = null;
+            if (!ArrayUtils.isEmpty(libsOptional) && !ArrayUtils.isEmpty(libsNames)
+                    && libsNames.length == libsOptional.length) {
+                for (SharedLibraryInfo info1 : usesLibraryInfos) {
+                    if (info1.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
+                        int index = ArrayUtils.indexOf(libsNames, info1.getName());
+                        if (index >= 0 && libsOptional[index]) {
+                            if (optionalSdkLibraries == null) {
+                                optionalSdkLibraries = new ArrayList<>();
+                            }
+                            optionalSdkLibraries.add(info1);
+                        }
+                    }
+                }
+            }
+            info.optionalSharedLibraryInfos = optionalSdkLibraries;
+        }
         if (info.category == ApplicationInfo.CATEGORY_UNDEFINED) {
             info.category = pkgSetting.getCategoryOverride();
         }
@@ -915,7 +952,7 @@ public class PackageInfoUtils {
                 | flag(pkg.isExtraLargeScreensSupported(), ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS)
                 | flag(pkg.isResizeable(), ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS)
                 | flag(pkg.isAnyDensity(), ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES)
-                | flag(AndroidPackageUtils.isSystem(pkg), ApplicationInfo.FLAG_SYSTEM)
+                | flag(AndroidPackageLegacyUtils.isSystem(pkg), ApplicationInfo.FLAG_SYSTEM)
                 | flag(pkg.isFactoryTest(), ApplicationInfo.FLAG_FACTORY_TEST);
 
         return appInfoFlags(pkgWithoutStateFlags, pkgSetting);
@@ -956,12 +993,12 @@ public class PackageInfoUtils {
                 | flag(pkg.isSaveStateDisallowed(), ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)
                 | flag(pkg.isResizeableActivityViaSdkVersion(), ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION)
                 | flag(pkg.isAllowNativeHeapPointerTagging(), ApplicationInfo.PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING)
-                | flag(AndroidPackageUtils.isSystemExt(pkg), ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT)
-                | flag(AndroidPackageUtils.isPrivileged(pkg), ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
-                | flag(AndroidPackageUtils.isOem(pkg), ApplicationInfo.PRIVATE_FLAG_OEM)
-                | flag(AndroidPackageUtils.isVendor(pkg), ApplicationInfo.PRIVATE_FLAG_VENDOR)
-                | flag(AndroidPackageUtils.isProduct(pkg), ApplicationInfo.PRIVATE_FLAG_PRODUCT)
-                | flag(AndroidPackageUtils.isOdm(pkg), ApplicationInfo.PRIVATE_FLAG_ODM)
+                | flag(AndroidPackageLegacyUtils.isSystemExt(pkg), ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT)
+                | flag(AndroidPackageLegacyUtils.isPrivileged(pkg), ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
+                | flag(AndroidPackageLegacyUtils.isOem(pkg), ApplicationInfo.PRIVATE_FLAG_OEM)
+                | flag(AndroidPackageLegacyUtils.isVendor(pkg), ApplicationInfo.PRIVATE_FLAG_VENDOR)
+                | flag(AndroidPackageLegacyUtils.isProduct(pkg), ApplicationInfo.PRIVATE_FLAG_PRODUCT)
+                | flag(AndroidPackageLegacyUtils.isOdm(pkg), ApplicationInfo.PRIVATE_FLAG_ODM)
                 | flag(pkg.isSignedWithPlatformKey(), ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY);
 
         Boolean resizeableActivity = pkg.getResizeableActivity();

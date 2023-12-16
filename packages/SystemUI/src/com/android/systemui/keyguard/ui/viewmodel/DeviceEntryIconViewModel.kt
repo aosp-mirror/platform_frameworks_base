@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.animation.FloatEvaluator
 import android.animation.IntEvaluator
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
@@ -56,8 +55,6 @@ constructor(
     val shadeDependentFlows: ShadeDependentFlows,
     private val sceneContainerFlags: SceneContainerFlags,
     private val keyguardViewController: Lazy<KeyguardViewController>,
-    private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
-    udfpsInteractor: DeviceEntryUdfpsInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
 ) {
     private val intEvaluator = IntEvaluator()
@@ -149,7 +146,7 @@ constructor(
         }
     val iconType: Flow<DeviceEntryIconView.IconType> =
         combine(
-            udfpsInteractor.isListeningForUdfps,
+            deviceEntryUdfpsInteractor.isListeningForUdfps,
             deviceEntryInteractor.isUnlocked,
         ) { isListeningForUdfps, isUnlocked ->
             if (isUnlocked) {
@@ -183,8 +180,6 @@ constructor(
         }
 
     fun onLongPress() {
-        deviceEntryHapticsInteractor.vibrateSuccess()
-
         // TODO (b/309804148): play auth ripple via an interactor
 
         if (sceneContainerFlags.isEnabled()) {

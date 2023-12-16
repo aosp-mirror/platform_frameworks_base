@@ -84,7 +84,9 @@ import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_MIN_DIMENS
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskStackToFg;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -103,6 +105,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
@@ -128,6 +131,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
+import com.android.server.pm.PackageArchiver;
 import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
@@ -138,6 +142,8 @@ import com.android.server.wm.LaunchParamsController.LaunchParams;
 import com.android.server.wm.TaskFragment.EmbeddingCheckResult;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -228,7 +234,26 @@ class ActivityStarter {
     private boolean mIsTaskCleared;
     private boolean mMovedToFront;
     private boolean mNoAnimation;
-    private boolean mAvoidMoveToFront;
+
+    // TODO mAvoidMoveToFront before V is changed from a boolean to a int code mCanMoveToFrontCode
+    // for the purpose of attribution of new BAL V feature. This should be reverted back to the
+    // boolean flag post V.
+    @IntDef(prefix = {"MOVE_TO_FRONT_"}, value = {
+            MOVE_TO_FRONT_ALLOWED,
+            MOVE_TO_FRONT_AVOID_PI_ONLY_CREATOR_ALLOWS,
+            MOVE_TO_FRONT_AVOID_LEGACY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MoveToFrontCode {}
+
+    // Allows a task move to front.
+    private static final int MOVE_TO_FRONT_ALLOWED = 0;
+    // Avoid a task move to front because the Pending Intent that starts the activity only
+    // its creator has the BAL privilege, its sender does not.
+    private static final int MOVE_TO_FRONT_AVOID_PI_ONLY_CREATOR_ALLOWS = 1;
+    // Avoid a task move to front because of all other legacy reasons.
+    private static final int MOVE_TO_FRONT_AVOID_LEGACY = 2;
+    private @MoveToFrontCode int mCanMoveToFrontCode = MOVE_TO_FRONT_ALLOWED;
     private boolean mFrozeTaskList;
     private boolean mTransientLaunch;
     // The task which was above the targetTask before starting this activity. null if the targetTask
@@ -640,7 +665,7 @@ class ActivityStarter {
         mIsTaskCleared = starter.mIsTaskCleared;
         mMovedToFront = starter.mMovedToFront;
         mNoAnimation = starter.mNoAnimation;
-        mAvoidMoveToFront = starter.mAvoidMoveToFront;
+        mCanMoveToFrontCode = starter.mCanMoveToFrontCode;
         mFrozeTaskList = starter.mFrozeTaskList;
 
         mVoiceSession = starter.mVoiceSession;
@@ -958,6 +983,17 @@ class ActivityStarter {
             }
         }
 
+        if (Flags.archiving()) {
+            PackageArchiver packageArchiver = mService
+                    .getPackageManagerInternalLocked()
+                    .getPackageArchiver();
+            if (packageArchiver.isIntentResolvedToArchivedApp(intent, mRequest.userId)) {
+                return packageArchiver
+                        .requestUnarchiveOnActivityStart(
+                                intent, callingPackage, mRequest.userId, realCallingUid);
+            }
+        }
+
         final int launchFlags = intent.getFlags();
         if ((launchFlags & Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0 && sourceRecord != null) {
             // Transfer the result target from the source activity to the new one being started,
@@ -1108,6 +1144,7 @@ class ActivityStarter {
                             callerApp,
                             request.originatingPendingIntent,
                             request.forcedBalByPiSender,
+                            resultRecord,
                             intent,
                             checkedOptions);
                 request.logMessage.append(" (").append(balVerdict).append(")");
@@ -1485,6 +1522,14 @@ class ActivityStarter {
         return result;
     }
 
+    private boolean avoidMoveToFront() {
+        return mCanMoveToFrontCode != MOVE_TO_FRONT_ALLOWED;
+    }
+
+    private boolean avoidMoveToFrontPIOnlyCreatorAllows() {
+        return mCanMoveToFrontCode == MOVE_TO_FRONT_AVOID_PI_ONLY_CREATOR_ALLOWS;
+    }
+
     /**
      * If the start result is success, ensure that the configuration of the started activity matches
      * the current display. Otherwise clean up unassociated containers to avoid leakage.
@@ -1535,11 +1580,10 @@ class ActivityStarter {
         final ActivityRecord currentTop = startedActivityRootTask.topRunningActivity();
         if (currentTop != null && currentTop.shouldUpdateConfigForDisplayChanged()) {
             mRootWindowContainer.ensureVisibilityAndConfig(
-                    currentTop, currentTop.getDisplayId(),
-                    true /* markFrozenIfConfigChanged */, false /* deferResume */);
+                    currentTop, currentTop.getDisplayId(), false /* deferResume */);
         }
 
-        if (!mAvoidMoveToFront && mDoResume && mRootWindowContainer
+        if (!avoidMoveToFront() && mDoResume && mRootWindowContainer
                 .hasVisibleWindowAboveButDoesNotOwnNotificationShade(started.launchedFromUid)) {
             // If the UID launching the activity has a visible window on top of the notification
             // shade and it's launching an activity that's going to be at the front, we should move
@@ -1569,6 +1613,7 @@ class ActivityStarter {
                 // An activity has changed order/visibility or the task is occluded by a transient
                 // activity, so this isn't just deliver-to-top
                 && mMovedToTopActivity == null
+                && !transitionController.hasOrderChanges()
                 && !transitionController.isTransientHide(startedActivityRootTask)) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {
@@ -1675,10 +1720,18 @@ class ActivityStarter {
             }
             // When running transient transition, the transient launch target should keep on top.
             // So disallow the transient hide activity to move itself to front, e.g. trampoline.
-            if (!mAvoidMoveToFront && (mService.mHomeProcess == null
+            if (!avoidMoveToFront() && (mService.mHomeProcess == null
                     || mService.mHomeProcess.mUid != realCallingUid)
                     && r.mTransitionController.isTransientHide(targetTask)) {
-                mAvoidMoveToFront = true;
+                mCanMoveToFrontCode = MOVE_TO_FRONT_AVOID_LEGACY;
+            }
+            // If the activity is started by sending a pending intent and only its creator has the
+            // privilege to allow BAL (its sender does not), avoid move it to the front. Only do
+            // this when it is not a new task and not already been marked as avoid move to front.
+            // Guarded by a flag: balDontBringExistingBackgroundTaskStackToFg
+            if (balDontBringExistingBackgroundTaskStackToFg() && !avoidMoveToFront()
+                    && balVerdict.onlyCreatorAllows()) {
+                mCanMoveToFrontCode = MOVE_TO_FRONT_AVOID_PI_ONLY_CREATOR_ALLOWS;
             }
             mPriorAboveTask = TaskDisplayArea.getRootTaskAbove(targetTask.getRootTask());
         }
@@ -1732,15 +1785,19 @@ class ActivityStarter {
         // After activity is attached to task, but before actual start
         recordTransientLaunchIfNeeded(mLastStartActivityRecord);
 
-        if (!mAvoidMoveToFront && mDoResume) {
-            logOnlyCreatorAllowsBAL(balVerdict, realCallingUid, newTask);
-            mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
-            if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.isDreaming()
-                    && !dreamStopping) {
-                // Launching underneath dream activity (fullscreen, always-on-top). Run the launch-
-                // -behind transition so the Activity gets created and starts in visible state.
-                mLaunchTaskBehind = true;
-                r.mLaunchTaskBehind = true;
+        if (mDoResume) {
+            if (!avoidMoveToFront()) {
+                mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
+                if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.isDreaming()
+                        && !dreamStopping) {
+                    // Launching underneath dream activity (fullscreen, always-on-top). Run the
+                    // launch--behind transition so the Activity gets created and starts
+                    // in visible state.
+                    mLaunchTaskBehind = true;
+                    r.mLaunchTaskBehind = true;
+                }
+            } else {
+                logPIOnlyCreatorAllowsBAL();
             }
         }
 
@@ -1802,10 +1859,13 @@ class ActivityStarter {
                 // root-task to the will not update the focused root-task.  If starting the new
                 // activity now allows the task root-task to be focusable, then ensure that we
                 // now update the focused root-task accordingly.
-                if (!mAvoidMoveToFront && mTargetRootTask.isTopActivityFocusable()
+                if (mTargetRootTask.isTopActivityFocusable()
                         && !mRootWindowContainer.isTopDisplayFocusedRootTask(mTargetRootTask)) {
-                    logOnlyCreatorAllowsBAL(balVerdict, realCallingUid, newTask);
-                    mTargetRootTask.moveToFront("startActivityInner");
+                    if (!avoidMoveToFront()) {
+                        mTargetRootTask.moveToFront("startActivityInner");
+                    } else {
+                        logPIOnlyCreatorAllowsBAL();
+                    }
                 }
                 mRootWindowContainer.resumeFocusedTasksTopActivities(
                         mTargetRootTask, mStartActivity, mOptions, mTransientLaunch);
@@ -1833,22 +1893,24 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
-    private void logOnlyCreatorAllowsBAL(BalVerdict balVerdict,
-            int realCallingUid, boolean newTask) {
-        // TODO (b/296478675) eventually, we will prevent such case from happening
-        // and probably also log that a BAL is prevented by android V.
-        if (!newTask && balVerdict.onlyCreatorAllows()) {
-            String realCallingPackage =
-                    mService.mContext.getPackageManager().getNameForUid(realCallingUid);
-            if (realCallingPackage == null) {
-                realCallingPackage = "uid=" + realCallingUid;
-            }
-            Slog.wtf(TAG, "A background app is brought to the foreground due to a "
-                    + "PendingIntent. However, only the creator of the PendingIntent allows BAL, "
-                    + "while the sender does not allow BAL. realCallingPackage: "
-                    + realCallingPackage + "; callingPackage: " + mRequest.callingPackage
-                    + "; mTargetRootTask:" + mTargetRootTask);
+    // TODO (b/316135632) Post V release, remove this log method.
+    private void logPIOnlyCreatorAllowsBAL() {
+        if (!avoidMoveToFrontPIOnlyCreatorAllows()) return;
+        String realCallingPackage =
+                mService.mContext.getPackageManager().getNameForUid(mRealCallingUid);
+        if (realCallingPackage == null) {
+            realCallingPackage = "uid=" + mRealCallingUid;
         }
+        Slog.wtf(TAG, "Without Android 15 BAL hardening this activity would be moved to the "
+                + "foreground. The activity is started by a PendingIntent. However, only the "
+                + "creator of the PendingIntent allows BAL while the sender does not allow BAL. "
+                + "realCallingPackage: " + realCallingPackage
+                + "; callingPackage: " + mRequest.callingPackage
+                + "; mTargetRootTask:" + mTargetRootTask
+                + "; mIntent: " + mIntent
+                + "; mTargetRootTask.getTopNonFinishingActivity: "
+                + mTargetRootTask.getTopNonFinishingActivity()
+                + "; mTargetRootTask.getRootActivity: " + mTargetRootTask.getRootActivity());
     }
 
     private void recordTransientLaunchIfNeeded(ActivityRecord r) {
@@ -2047,7 +2109,7 @@ class ActivityStarter {
         mRootWindowContainer.startPowerModeLaunchIfNeeded(false /* forceSend */,
                 targetTaskTop);
 
-        setTargetRootTaskIfNeeded(targetTaskTop, balVerdict);
+        setTargetRootTaskIfNeeded(targetTaskTop);
 
         // When there is a reused activity and the current result is a trampoline activity,
         // set the reused activity as the result.
@@ -2063,13 +2125,12 @@ class ActivityStarter {
             if (!mMovedToFront && mDoResume) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Bring to front target: %s from %s", mTargetRootTask,
                         targetTaskTop);
-                logOnlyCreatorAllowsBAL(balVerdict, mRealCallingUid, false);
                 mTargetRootTask.moveToFront("intentActivityFound");
             }
+
             resumeTargetRootTaskIfNeeded();
             return START_RETURN_INTENT_TO_CALLER;
         }
-
         complyActivityFlags(targetTask,
                 reusedTask != null ? reusedTask.getTopNonFinishingActivity() : null, intentGrants);
 
@@ -2092,7 +2153,6 @@ class ActivityStarter {
             targetTaskTop.showStartingWindow(true /* taskSwitch */);
         } else if (mDoResume) {
             // Make sure the root task and its belonging display are moved to topmost.
-            logOnlyCreatorAllowsBAL(balVerdict, mRealCallingUid, false);
             mTargetRootTask.moveToFront("intentActivityFound");
         }
         // We didn't do anything...  but it was needed (a.k.a., client don't use that intent!)
@@ -2327,7 +2387,7 @@ class ActivityStarter {
         mIsTaskCleared = false;
         mMovedToFront = false;
         mNoAnimation = false;
-        mAvoidMoveToFront = false;
+        mCanMoveToFrontCode = MOVE_TO_FRONT_ALLOWED;
         mFrozeTaskList = false;
         mTransientLaunch = false;
         mPriorAboveTask = null;
@@ -2439,12 +2499,12 @@ class ActivityStarter {
                         // The caller specifies that we'd like to be avoided to be moved to the
                         // front, so be it!
                         mDoResume = false;
-                        mAvoidMoveToFront = true;
+                        mCanMoveToFrontCode = MOVE_TO_FRONT_AVOID_LEGACY;
                     }
                 }
             } else if (mOptions.getAvoidMoveToFront()) {
                 mDoResume = false;
-                mAvoidMoveToFront = true;
+                mCanMoveToFrontCode = MOVE_TO_FRONT_AVOID_LEGACY;
             }
             mTransientLaunch = mOptions.getTransientLaunch();
             final KeyguardController kc = mSupervisor.getKeyguardController();
@@ -2454,7 +2514,7 @@ class ActivityStarter {
             if (mTransientLaunch && mDisplayLockAndOccluded
                     && mService.getTransitionController().isShellTransitionsEnabled()) {
                 mDoResume = false;
-                mAvoidMoveToFront = true;
+                mCanMoveToFrontCode = MOVE_TO_FRONT_AVOID_LEGACY;
             }
             mTargetRootTask = Task.fromWindowContainerToken(mOptions.getLaunchRootTask());
 
@@ -2511,7 +2571,7 @@ class ActivityStarter {
         mNoAnimation = (mLaunchFlags & FLAG_ACTIVITY_NO_ANIMATION) != 0;
 
         if (mBalCode == BAL_BLOCK && !mService.isBackgroundActivityStartsEnabled()) {
-            mAvoidMoveToFront = true;
+            mCanMoveToFrontCode = MOVE_TO_FRONT_AVOID_LEGACY;
             mDoResume = false;
         }
     }
@@ -2688,7 +2748,7 @@ class ActivityStarter {
      * @param intentActivity Existing matching activity.
      * @return {@link ActivityRecord} brought to front.
      */
-    private void setTargetRootTaskIfNeeded(ActivityRecord intentActivity, BalVerdict balVerdict) {
+    private void setTargetRootTaskIfNeeded(ActivityRecord intentActivity) {
         intentActivity.getTaskFragment().clearLastPausedActivity();
         Task intentTask = intentActivity.getTask();
         // The intent task might be reparented while in getOrCreateRootTask, caches the original
@@ -2725,7 +2785,7 @@ class ActivityStarter {
             differentTopTask = true;
         }
 
-        if (differentTopTask && !mAvoidMoveToFront) {
+        if (differentTopTask && !avoidMoveToFront()) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
             if (mSourceRecord == null || inTopNonFinishingTask(mSourceRecord)) {
                 // We really do want to push this one into the user's face, right now.
@@ -2755,7 +2815,6 @@ class ActivityStarter {
                     // task on top there.
                     // Defer resuming the top activity while moving task to top, since the
                     // current task-top activity may not be the activity that should be resumed.
-                    logOnlyCreatorAllowsBAL(balVerdict, mRealCallingUid, false);
                     mTargetRootTask.moveTaskToFront(intentTask, mNoAnimation, mOptions,
                             mStartActivity.appTimeTracker, DEFER_RESUME,
                             "bringingFoundTaskToFront");
@@ -2772,7 +2831,9 @@ class ActivityStarter {
                 mOptions = null;
             }
         }
-
+        if (differentTopTask) {
+            logPIOnlyCreatorAllowsBAL();
+        }
         // Update the target's launch cookie and pending remote animation to those specified in the
         // options if set.
         if (mStartActivity.mLaunchCookie != null) {
@@ -2823,7 +2884,7 @@ class ActivityStarter {
     }
 
     private void setNewTask(Task taskToAffiliate) {
-        final boolean toTop = !mLaunchTaskBehind && !mAvoidMoveToFront;
+        final boolean toTop = !mLaunchTaskBehind && !avoidMoveToFront();
         final Task task = mTargetRootTask.reuseOrCreateTask(
                 mStartActivity.info, mIntent, mVoiceSession,
                 mVoiceInteractor, toTop, mStartActivity, mSourceRecord, mOptions);

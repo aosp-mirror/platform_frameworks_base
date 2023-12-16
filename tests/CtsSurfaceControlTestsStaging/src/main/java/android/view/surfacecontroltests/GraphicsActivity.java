@@ -235,13 +235,17 @@ public class GraphicsActivity extends Activity {
         }
 
         public int setFrameRate(float frameRate) {
+            return setFrameRate(frameRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+        }
+
+        public int setFrameRate(
+                float frameRate, @Surface.FrameRateCompatibility int compatibility) {
             Log.i(TAG,
                     String.format("Setting frame rate for %s: frameRate=%.2f", mName, frameRate));
 
             int rc = 0;
             try (SurfaceControl.Transaction transaction = new SurfaceControl.Transaction()) {
-                transaction.setFrameRate(
-                        mSurfaceControl, frameRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+                transaction.setFrameRate(mSurfaceControl, frameRate, compatibility);
                 transaction.apply();
             }
             return rc;
@@ -668,12 +672,34 @@ public class GraphicsActivity extends Activity {
         }
     }
 
-    private void testSurfaceControlFrameRateCategoryInternal(int category)
-            throws InterruptedException {
+    private void testSurfaceControlFrameRateCompatibilityInternal(
+            @Surface.FrameRateCompatibility int compatibility) throws InterruptedException {
+        runOneSurfaceTest((TestSurface surface) -> {
+            Log.i(TAG,
+                    "**** Running testSurfaceControlFrameRateCompatibility with compatibility "
+                            + compatibility);
+
+            float expectedFrameRate = getExpectedFrameRateForCompatibility(compatibility);
+            int initialNumEvents = mModeChangedEvents.size();
+            surface.setFrameRate(30.f, compatibility);
+            verifyExactAndStableFrameRate(expectedFrameRate, surface);
+            verifyModeSwitchesDontChangeResolution(initialNumEvents, mModeChangedEvents.size());
+        });
+    }
+
+    public void testSurfaceControlFrameRateCompatibility(
+            @Surface.FrameRateCompatibility int compatibility) throws InterruptedException {
+        runTestsWithPreconditions(
+                () -> testSurfaceControlFrameRateCompatibilityInternal(compatibility),
+                "frame rate compatibility=" + compatibility);
+    }
+
+    private void testSurfaceControlFrameRateCategoryInternal(
+            @Surface.FrameRateCategory int category) throws InterruptedException {
         runOneSurfaceTest((TestSurface surface) -> {
             Log.i(TAG, "**** Running testSurfaceControlFrameRateCategory for category " + category);
 
-            float expectedFrameRate = getExpectedFrameRate(category);
+            float expectedFrameRate = getExpectedFrameRateForCategory(category);
             int initialNumEvents = mModeChangedEvents.size();
             surface.setFrameRateCategory(category);
             verifyCompatibleAndStableFrameRate(expectedFrameRate, surface);
@@ -681,7 +707,8 @@ public class GraphicsActivity extends Activity {
         });
     }
 
-    public void testSurfaceControlFrameRateCategory(int category) throws InterruptedException {
+    public void testSurfaceControlFrameRateCategory(@Surface.FrameRateCategory int category)
+            throws InterruptedException {
         runTestsWithPreconditions(()
                 -> testSurfaceControlFrameRateCategoryInternal(category),
                 "frame rate category=" + category);
@@ -710,9 +737,15 @@ public class GraphicsActivity extends Activity {
             float childFrameRate = Collections.max(frameRates);
             float parentFrameRate = childFrameRate / 2;
             int initialNumEvents = mModeChangedEvents.size();
-            parent.setFrameRate(parentFrameRate);
             parent.setFrameRateSelectionStrategy(parentStrategy);
-            child.setFrameRate(childFrameRate);
+
+            // For Self case, we want to test that child gets default behavior
+            if (parentStrategy == SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF) {
+                parent.setFrameRateCategory(Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            } else {
+                parent.setFrameRate(parentFrameRate);
+                child.setFrameRate(childFrameRate);
+            }
 
             // Verify
             float expectedFrameRate =
@@ -738,7 +771,24 @@ public class GraphicsActivity extends Activity {
                 "frame rate strategy=" + parentStrategy);
     }
 
-    private float getExpectedFrameRate(int category) {
+    private float getExpectedFrameRateForCompatibility(int compatibility) {
+        assumeTrue("**** testSurfaceControlFrameRateCompatibility SKIPPED for compatibility "
+                        + compatibility,
+                compatibility == Surface.FRAME_RATE_COMPATIBILITY_GTE);
+
+        Display display = getDisplay();
+        Optional<Float> expectedFrameRate = getRefreshRates(display.getMode(), display)
+                                                    .stream()
+                                                    .filter(rate -> rate >= 30.f)
+                                                    .min(Comparator.naturalOrder());
+
+        assumeTrue("**** testSurfaceControlFrameRateCompatibility SKIPPED because no refresh rate "
+                        + "is >= 30",
+                expectedFrameRate.isPresent());
+        return expectedFrameRate.get();
+    }
+
+    private float getExpectedFrameRateForCategory(int category) {
         Display display = getDisplay();
         List<Float> frameRates = getRefreshRates(display.getMode(), display);
 

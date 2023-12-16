@@ -23,7 +23,7 @@ import static java.util.Collections.EMPTY_LIST;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.annotation.Hide;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -752,6 +752,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *     {@link #isGranularScrollingSupported()} to check if granular scrolling is supported.
      * </p>
      */
+    @FlaggedApi(Flags.FLAG_GRANULAR_SCROLLING)
     public static final String ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT =
             "android.view.accessibility.action.ARGUMENT_SCROLL_AMOUNT_FLOAT";
 
@@ -2608,6 +2609,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if all scroll actions that could support
      * {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT} have done so, false otherwise.
      */
+    @FlaggedApi(Flags.FLAG_GRANULAR_SCROLLING)
     public boolean isGranularScrollingSupported() {
         return getBooleanProperty(BOOLEAN_PROPERTY_SUPPORTS_GRANULAR_SCROLLING);
     }
@@ -2626,6 +2628,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
+    @FlaggedApi(Flags.FLAG_GRANULAR_SCROLLING)
     public void setGranularScrollingSupported(boolean granularScrollingSupported) {
         setBooleanProperty(BOOLEAN_PROPERTY_SUPPORTS_GRANULAR_SCROLLING,
                 granularScrollingSupported);
@@ -6119,6 +6122,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * This should be used for {@code mItemCount} and
          * {@code mImportantForAccessibilityItemCount} when values for those fields are not known.
          */
+        @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
         public static final int UNDEFINED = -1;
 
         private int mRowCount;
@@ -6229,8 +6233,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          *                  the item count is not known.
          * @param importantForAccessibilityItemCount The count of the collection's views considered
          *                                           important for accessibility.
+         * @hide
          */
-        @Hide
         public CollectionInfo(int rowCount, int columnCount, boolean hierarchical,
                 int selectionMode, int itemCount, int importantForAccessibilityItemCount) {
             mRowCount = rowCount;
@@ -6287,6 +6291,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *
          * @return The count of items, which may be {@code UNDEFINED} if the count is not known.
          */
+        @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
         public int getItemCount() {
             return mItemCount;
         }
@@ -6297,6 +6302,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @return The count of items important for accessibility, which may be {@code UNDEFINED}
          * if the count is not known.
          */
+        @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
         public int getImportantForAccessibilityItemCount() {
             return mImportantForAccessibilityItemCount;
         }
@@ -6323,6 +6329,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * The builder for CollectionInfo.
          */
 
+        @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
         public static final class Builder {
             private int mRowCount = 0;
             private int mColumnCount = 0;
@@ -6334,6 +6341,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             /**
              * Creates a new Builder.
              */
+            @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
             public Builder() {
             }
 
@@ -6343,6 +6351,7 @@ public class AccessibilityNodeInfo implements Parcelable {
              * @return This builder.
              */
             @NonNull
+            @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
             public CollectionInfo.Builder setRowCount(int rowCount) {
                 mRowCount = rowCount;
                 return this;
@@ -6354,6 +6363,7 @@ public class AccessibilityNodeInfo implements Parcelable {
              * @return This builder.
              */
             @NonNull
+            @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
             public CollectionInfo.Builder setColumnCount(int columnCount) {
                 mColumnCount = columnCount;
                 return this;
@@ -6364,6 +6374,7 @@ public class AccessibilityNodeInfo implements Parcelable {
              * @return This builder.
              */
             @NonNull
+            @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
             public CollectionInfo.Builder setHierarchical(boolean hierarchical) {
                 mHierarchical = hierarchical;
                 return this;
@@ -6375,6 +6386,7 @@ public class AccessibilityNodeInfo implements Parcelable {
              * @return This builder.
              */
             @NonNull
+            @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
             public CollectionInfo.Builder setSelectionMode(int selectionMode) {
                 mSelectionMode = selectionMode;
                 return this;
@@ -6389,6 +6401,7 @@ public class AccessibilityNodeInfo implements Parcelable {
              * @return This builder.
              */
             @NonNull
+            @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
             public CollectionInfo.Builder setItemCount(int itemCount) {
                 mItemCount = itemCount;
                 return this;
@@ -6401,6 +6414,7 @@ public class AccessibilityNodeInfo implements Parcelable {
              * @return This builder.
              */
             @NonNull
+            @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
             public CollectionInfo.Builder setImportantForAccessibilityItemCount(
                     int importantForAccessibilityItemCount) {
                 mImportantForAccessibilityItemCount = importantForAccessibilityItemCount;
@@ -6411,6 +6425,7 @@ public class AccessibilityNodeInfo implements Parcelable {
              * Creates a new {@link CollectionInfo} instance.
              */
             @NonNull
+            @FlaggedApi(Flags.FLAG_COLLECTION_INFO_ITEM_COUNTS)
             public CollectionInfo build() {
                 CollectionInfo collectionInfo = new CollectionInfo(mRowCount, mColumnCount,
                         mHierarchical);

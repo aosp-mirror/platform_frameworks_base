@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ಮೂಲಕ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ಮೂಲಕ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"ಟಿವಿ ಡೀಫಾಲ್ಟ್"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI ಔಟ್‌‌ಪುಟ್"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"ಆಂತರಿಕ ಸ್ಪೀಕರ್‌ಗಳು"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ಟಿವಿ ಡೀಫಾಲ್ಟ್"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ಔಟ್‌‌ಪುಟ್"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ಆಂತರಿಕ ಸ್ಪೀಕರ್‌ಗಳು"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ಕನೆಕ್ಟ್ ಮಾಡುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ ಸಾಧನವನ್ನು ಆಫ್ ಮಾಡಿ ಹಾಗೂ ನಂತರ ಪುನಃ ಆನ್ ಮಾಡಿ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ವೈರ್ ಹೊಂದಿರುವ ಆಡಿಯೋ ಸಾಧನ"</string>
     <string name="help_label" msgid="3528360748637781274">"ಸಹಾಯ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆ"</string>
@@ -634,7 +634,7 @@
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ಅತಿಥಿ ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬೇಕೆ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ನೀವು ಪ್ರಸ್ತುತ ಸೆಶನ್‌ನ ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬಹುದು ಅಥವಾ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಬಹುದು"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ಅಳಿಸಿ"</string>
-    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ಉಳಿಸಿ"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ಸೇವ್ ಮಾಡಿ"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"ಅತಿಥಿ ಸೆಷನ್ ಅನ್ನು ರೀಸೆಟ್ ಮಾಡಿ"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>

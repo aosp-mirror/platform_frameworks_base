@@ -45,12 +45,15 @@
         <option name="run-command" value="settings put secure show_ime_with_hard_keyboard 1"/>
         <option name="run-command" value="settings put system show_touches 1"/>
         <option name="run-command" value="settings put system pointer_location 1"/>
+        <option name="run-command" value="settings put global package_verifier_user_consent -1"/>
         <option name="teardown-command"
                 value="settings delete secure show_ime_with_hard_keyboard"/>
         <option name="teardown-command" value="settings delete system show_touches"/>
         <option name="teardown-command" value="settings delete system pointer_location"/>
         <option name="teardown-command"
                 value="cmd overlay enable com.android.internal.systemui.navbar.gestural"/>
+        <option name="teardown-command"
+                value="settings put global package_verifier_user_consent 1"/>
     </target_preparer>
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true"/>
@@ -75,6 +78,17 @@
         <option name="teardown-command"
                 value="appops set com.android.shell android:mock_location deny"/>
     </target_preparer>
+
+    <!-- Use app crawler to log into Netflix -->
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command"
+                value="am start -n com.netflix.mediaclient/com.netflix.mediaclient.ui.login.LoginActivity"/>
+    </target_preparer>
+    <test class="com.android.tradefed.testtype.HostTest" >
+        <option name="set-option" value="package-name:com.netflix.mediaclient"/>
+        <option name="set-option" value="ui-automator-mode:true"/>
+        <option name="class" value="com.android.csuite.tests.AppCrawlTest" />
+    </test>
 
     <!-- Needed for pushing the trace config file -->
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>

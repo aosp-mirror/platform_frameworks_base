@@ -18,17 +18,17 @@ package com.android.systemui.statusbar;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.time.SystemClock;
 
 import java.util.stream.Stream;
 
@@ -39,20 +39,21 @@ import java.util.stream.Stream;
  */
 public abstract class AlertingNotificationManager {
     private static final String TAG = "AlertNotifManager";
-    protected final Clock mClock = new Clock();
+    protected final SystemClock mSystemClock;
     protected final ArrayMap<String, AlertEntry> mAlertEntries = new ArrayMap<>();
     protected final HeadsUpManagerLogger mLogger;
 
-    public AlertingNotificationManager(HeadsUpManagerLogger logger, @Main Handler handler) {
-        mLogger = logger;
-        mHandler = handler;
-    }
-
     protected int mMinimumDisplayTime;
-    protected int mStickyDisplayTime;
-    protected int mAutoDismissNotificationDecay;
-    @VisibleForTesting
-    public Handler mHandler;
+    protected int mStickyForSomeTimeAutoDismissTime;
+    protected int mAutoDismissTime;
+    private DelayableExecutor mExecutor;
+
+    public AlertingNotificationManager(HeadsUpManagerLogger logger,
+            SystemClock systemClock, @Main DelayableExecutor executor) {
+        mLogger = logger;
+        mExecutor = executor;
+        mSystemClock = systemClock;
+    }
 
     /**
      * Called when posting a new notification that should alert the user and appear on screen.
@@ -251,7 +252,7 @@ public abstract class AlertingNotificationManager {
     public long getEarliestRemovalTime(String key) {
         AlertEntry alerting = mAlertEntries.get(key);
         if (alerting != null) {
-            return Math.max(0, alerting.mEarliestRemovaltime - mClock.currentTimeMillis());
+            return Math.max(0, alerting.mEarliestRemovalTime - mSystemClock.elapsedRealtime());
         }
         return 0;
     }
@@ -259,9 +260,10 @@ public abstract class AlertingNotificationManager {
     protected class AlertEntry implements Comparable<AlertEntry> {
         @Nullable public NotificationEntry mEntry;
         public long mPostTime;
-        public long mEarliestRemovaltime;
+        public long mEarliestRemovalTime;
 
         @Nullable protected Runnable mRemoveAlertRunnable;
+        @Nullable private Runnable mCancelRemoveAlertRunnable;
 
         public void setEntry(@NonNull final NotificationEntry entry) {
             setEntry(entry, () -> removeAlertEntry(entry.getKey()));
@@ -283,19 +285,21 @@ public abstract class AlertingNotificationManager {
         public void updateEntry(boolean updatePostTime, @Nullable String reason) {
             mLogger.logUpdateEntry(mEntry, updatePostTime, reason);
 
-            final long now = mClock.currentTimeMillis();
-            mEarliestRemovaltime = now + mMinimumDisplayTime;
+            final long now = mSystemClock.elapsedRealtime();
+            mEarliestRemovalTime = now + mMinimumDisplayTime;
 
             if (updatePostTime) {
                 mPostTime = Math.max(mPostTime, now);
             }
-            removeAutoRemovalCallbacks("updateEntry (will be rescheduled)");
 
-            if (!isSticky()) {
-                final long finishTime = calculateFinishTime();
-                final long timeLeft = Math.max(finishTime - now, mMinimumDisplayTime);
-                mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
+            if (isSticky()) {
+                removeAutoRemovalCallbacks("updateEntry (sticky)");
+                return;
             }
+
+            final long finishTime = calculateFinishTime();
+            final long timeLeft = Math.max(finishTime - now, mMinimumDisplayTime);
+            scheduleAutoRemovalCallback(timeLeft, "updateEntry (not sticky)");
         }
 
         /**
@@ -318,7 +322,7 @@ public abstract class AlertingNotificationManager {
          * @return true if the notification has been on screen long enough
          */
         public boolean wasShownLongEnough() {
-            return mEarliestRemovaltime < mClock.currentTimeMillis();
+            return mEarliestRemovalTime < mSystemClock.elapsedRealtime();
         }
 
         @Override
@@ -338,10 +342,41 @@ public abstract class AlertingNotificationManager {
          * Clear any pending removal runnables.
          */
         public void removeAutoRemovalCallbacks(@Nullable String reason) {
-            if (mRemoveAlertRunnable != null) {
+            final boolean removed = removeAutoRemovalCallbackInternal();
+
+            if (removed) {
                 mLogger.logAutoRemoveCanceled(mEntry, reason);
-                mHandler.removeCallbacks(mRemoveAlertRunnable);
             }
+        }
+
+        private void scheduleAutoRemovalCallback(long delayMillis, @NonNull String reason) {
+            if (mRemoveAlertRunnable == null) {
+                Log.wtf(TAG, "scheduleAutoRemovalCallback with no callback set");
+                return;
+            }
+
+            final boolean removed = removeAutoRemovalCallbackInternal();
+
+            if (removed) {
+                mLogger.logAutoRemoveRescheduled(mEntry, delayMillis, reason);
+            } else {
+                mLogger.logAutoRemoveScheduled(mEntry, delayMillis, reason);
+            }
+
+
+            mCancelRemoveAlertRunnable = mExecutor.executeDelayed(mRemoveAlertRunnable,
+                    delayMillis);
+        }
+
+        private boolean removeAutoRemovalCallbackInternal() {
+            final boolean scheduled = (mCancelRemoveAlertRunnable != null);
+
+            if (scheduled) {
+                mCancelRemoveAlertRunnable.run();
+                mCancelRemoveAlertRunnable = null;
+            }
+
+            return scheduled;
         }
 
         /**
@@ -349,10 +384,8 @@ public abstract class AlertingNotificationManager {
          */
         public void removeAsSoonAsPossible() {
             if (mRemoveAlertRunnable != null) {
-                removeAutoRemovalCallbacks("removeAsSoonAsPossible (will be rescheduled)");
-
-                final long timeLeft = mEarliestRemovaltime - mClock.currentTimeMillis();
-                mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
+                final long timeLeft = mEarliestRemovalTime - mSystemClock.elapsedRealtime();
+                scheduleAutoRemovalCallback(timeLeft, "removeAsSoonAsPossible");
             }
         }
 
@@ -361,22 +394,16 @@ public abstract class AlertingNotificationManager {
          * @return the post time
          */
         protected long calculatePostTime() {
-            return mClock.currentTimeMillis();
+            return mSystemClock.elapsedRealtime();
         }
 
         /**
          * @return When the notification should auto-dismiss itself, based on
-         * {@link SystemClock#elapsedRealTime()}
+         * {@link SystemClock#elapsedRealtime()}
          */
         protected long calculateFinishTime() {
             // Overridden by HeadsUpManager HeadsUpEntry #calculateFinishTime
             return 0;
-        }
-    }
-
-    protected final static class Clock {
-        public long currentTimeMillis() {
-            return SystemClock.elapsedRealtime();
         }
     }
 }

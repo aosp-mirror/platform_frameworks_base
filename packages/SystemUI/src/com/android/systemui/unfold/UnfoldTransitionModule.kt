@@ -20,10 +20,13 @@ import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.SystemProperties
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.LifecycleScreenStatusProvider
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.dagger.UnfoldBgProgressFlag
+import com.android.systemui.unfold.dagger.UnfoldMain
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepository
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
@@ -62,6 +65,11 @@ import javax.inject.Singleton
 class UnfoldTransitionModule {
 
     @Provides @UnfoldTransitionATracePrefix fun tracingTagPrefix() = "systemui"
+
+    @Provides
+    @UnfoldBgProgressFlag
+    @Singleton
+    fun unfoldBgProgressFlag() = Flags.unfoldAnimationBackgroundProgress()
 
     /** A globally available FoldStateListener that allows one to query the fold state. */
     @Provides
@@ -102,7 +110,7 @@ class UnfoldTransitionModule {
     @Singleton
     fun provideNaturalRotationProgressProvider(
         context: Context,
-        rotationChangeProvider: RotationChangeProvider,
+        @UnfoldMain rotationChangeProvider: RotationChangeProvider,
         unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
     ): Optional<NaturalRotationUnfoldProgressProvider> =
         unfoldTransitionProgressProvider.map { provider ->
@@ -153,7 +161,8 @@ class UnfoldTransitionModule {
 
         return resultingProvider?.get()?.orElse(null)?.let { unfoldProgressProvider ->
             UnfoldProgressProvider(unfoldProgressProvider, foldProvider)
-        } ?: ShellUnfoldProgressProvider.NO_PROVIDER
+        }
+            ?: ShellUnfoldProgressProvider.NO_PROVIDER
     }
 
     @Provides

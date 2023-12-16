@@ -84,13 +84,13 @@ public class MagnificationProcessor {
                     .setCenterX(fullScreenMagnificationController.getCenterX(displayId))
                     .setCenterY(fullScreenMagnificationController.getCenterY(displayId));
         } else if (mode == MAGNIFICATION_MODE_WINDOW) {
-            final WindowMagnificationManager windowMagnificationManager =
-                    mController.getWindowMagnificationMgr();
+            final MagnificationConnectionManager magnificationConnectionManager =
+                    mController.getMagnificationConnectionManager();
             builder.setMode(mode)
                     .setActivated(mController.isActivated(displayId, MAGNIFICATION_MODE_WINDOW))
-                    .setScale(windowMagnificationManager.getScale(displayId))
-                    .setCenterX(windowMagnificationManager.getCenterX(displayId))
-                    .setCenterY(windowMagnificationManager.getCenterY(displayId));
+                    .setScale(magnificationConnectionManager.getScale(displayId))
+                    .setCenterX(magnificationConnectionManager.getCenterX(displayId))
+                    .setCenterY(magnificationConnectionManager.getCenterY(displayId));
         } else {
             // For undefined mode, set enabled to false
             builder.setActivated(false);
@@ -135,12 +135,12 @@ public class MagnificationProcessor {
             }
         } else if (configMode == MAGNIFICATION_MODE_WINDOW) {
             if (configActivated) {
-                return mController.getWindowMagnificationMgr().enableWindowMagnification(displayId,
-                        config.getScale(), config.getCenterX(), config.getCenterY(),
+                return mController.getMagnificationConnectionManager().enableWindowMagnification(
+                        displayId, config.getScale(), config.getCenterX(), config.getCenterY(),
                         animate ? STUB_ANIMATION_CALLBACK : null,
                         id);
             } else {
-                return mController.getWindowMagnificationMgr()
+                return mController.getMagnificationConnectionManager()
                         .disableWindowMagnification(displayId, false);
             }
         }
@@ -256,7 +256,7 @@ public class MagnificationProcessor {
         if (currentMode == MAGNIFICATION_MODE_FULLSCREEN) {
             getFullscreenMagnificationRegion(displayId, outRegion, canControlMagnification);
         } else if (currentMode == MAGNIFICATION_MODE_WINDOW) {
-            mController.getWindowMagnificationMgr().getMagnificationSourceBounds(displayId,
+            mController.getMagnificationConnectionManager().getMagnificationSourceBounds(displayId,
                     outRegion);
         }
     }
@@ -297,8 +297,8 @@ public class MagnificationProcessor {
         if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             return mController.getFullScreenMagnificationController().reset(displayId, animate);
         } else if (mode == MAGNIFICATION_MODE_WINDOW) {
-            return mController.getWindowMagnificationMgr().disableWindowMagnification(displayId,
-                    false, animate ? STUB_ANIMATION_CALLBACK : null);
+            return mController.getMagnificationConnectionManager().disableWindowMagnification(
+                    displayId, false, animate ? STUB_ANIMATION_CALLBACK : null);
         }
         return false;
     }
@@ -325,19 +325,20 @@ public class MagnificationProcessor {
      */
     public void resetAllIfNeeded(int connectionId) {
         mController.getFullScreenMagnificationController().resetAllIfNeeded(connectionId);
-        mController.getWindowMagnificationMgr().resetAllIfNeeded(connectionId);
+        mController.getMagnificationConnectionManager().resetAllIfNeeded(connectionId);
     }
 
     /**
      * {@link FullScreenMagnificationController#isActivated(int)}
-     * {@link WindowMagnificationManager#isWindowMagnifierEnabled(int)}
+     * {@link MagnificationConnectionManager#isWindowMagnifierEnabled(int)}
      */
     public boolean isMagnifying(int displayId) {
         int mode = getControllingMode(displayId);
         if (mode == MAGNIFICATION_MODE_FULLSCREEN) {
             return mController.getFullScreenMagnificationController().isActivated(displayId);
         } else if (mode == MAGNIFICATION_MODE_WINDOW) {
-            return mController.getWindowMagnificationMgr().isWindowMagnifierEnabled(displayId);
+            return mController.getMagnificationConnectionManager().isWindowMagnifierEnabled(
+                    displayId);
         }
         return false;
     }
@@ -416,22 +417,23 @@ public class MagnificationProcessor {
         pw.append("    SupportWindowMagnification="
                 + mController.supportWindowMagnification()).println();
         pw.append("    WindowMagnificationConnectionState="
-                + mController.getWindowMagnificationMgr().getConnectionState()).println();
+                + mController.getMagnificationConnectionManager().getConnectionState()).println();
     }
 
     private int getIdOfLastServiceToMagnify(int mode, int displayId) {
         return (mode == MAGNIFICATION_MODE_FULLSCREEN)
                 ? mController.getFullScreenMagnificationController()
                 .getIdOfLastServiceToMagnify(displayId)
-                : mController.getWindowMagnificationMgr().getIdOfLastServiceToMagnify(
+                : mController.getMagnificationConnectionManager().getIdOfLastServiceToMagnify(
                         displayId);
     }
 
     private void dumpTrackingTypingFocusEnabledState(final PrintWriter pw, int displayId,
             int mode) {
         if (mode == MAGNIFICATION_MODE_WINDOW) {
-            pw.append("    TrackingTypingFocusEnabled="  + mController
-                            .getWindowMagnificationMgr().isTrackingTypingFocusEnabled(displayId))
+            pw.append("    TrackingTypingFocusEnabled="
+                            + mController.getMagnificationConnectionManager()
+                                .isTrackingTypingFocusEnabled(displayId))
                     .println();
         }
     }

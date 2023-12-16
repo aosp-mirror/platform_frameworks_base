@@ -38,6 +38,7 @@ import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.ad.ITvAdManager;
 import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManager;
@@ -345,6 +346,7 @@ public class TvInteractiveAppManagerService extends SystemService {
             Slogf.d(TAG, "onStart");
         }
         publishBinderService(Context.TV_INTERACTIVE_APP_SERVICE, new BinderService());
+        publishBinderService(Context.TV_AD_SERVICE, new TvAdBinderService());
     }
 
     @Override
@@ -687,6 +689,12 @@ public class TvInteractiveAppManagerService extends SystemService {
                     + sessionState.mSessionToken);
         }
         return session;
+    }
+    private final class TvAdBinderService extends ITvAdManager.Stub {
+        @Override
+        public void startAdService(IBinder sessionToken, int userId) {
+        }
+
     }
 
     private final class BinderService extends ITvInteractiveAppManager.Stub {

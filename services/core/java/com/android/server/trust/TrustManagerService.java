@@ -827,7 +827,7 @@ public class TrustManagerService extends SystemService {
             }
 
             final boolean trusted;
-            if (android.security.Flags.fixUnlockedDeviceRequiredKeys()) {
+            if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()) {
                 trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
             } else {
                 trusted = aggregateIsTrusted(id);
@@ -865,21 +865,19 @@ public class TrustManagerService extends SystemService {
             mDeviceLockedForUser.put(userId, locked);
         }
         if (changed) {
-            dispatchDeviceLocked(userId, locked);
-            Authorization.onLockScreenEvent(locked, userId, null,
-                    getBiometricSids(userId));
+            notifyTrustAgentsOfDeviceLockState(userId, locked);
+            notifyKeystoreOfDeviceLockState(userId, locked);
             // Also update the user's profiles who have unified challenge, since they
             // share the same unlocked state (see {@link #isDeviceLocked(int)})
             for (int profileHandle : mUserManager.getEnabledProfileIds(userId)) {
                 if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(profileHandle)) {
-                    Authorization.onLockScreenEvent(locked, profileHandle, null,
-                            getBiometricSids(profileHandle));
+                    notifyKeystoreOfDeviceLockState(profileHandle, locked);
                 }
             }
         }
     }
 
-    private void dispatchDeviceLocked(int userId, boolean isLocked) {
+    private void notifyTrustAgentsOfDeviceLockState(int userId, boolean isLocked) {
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo agent = mActiveAgents.valueAt(i);
             if (agent.userId == userId) {
@@ -889,6 +887,17 @@ public class TrustManagerService extends SystemService {
                     agent.agent.onDeviceUnlocked();
                 }
             }
+        }
+    }
+
+    private void notifyKeystoreOfDeviceLockState(int userId, boolean isLocked) {
+        if (isLocked) {
+            Authorization.onDeviceLocked(userId, getBiometricSids(userId));
+        } else {
+            // Notify Keystore that the device is now unlocked for the user.  Note that for unlocks
+            // with LSKF, this is redundant with the call from LockSettingsService which provides
+            // the password.  However, for unlocks with biometric or trust agent, this is required.
+            Authorization.onDeviceUnlocked(userId, /* password= */ null);
         }
     }
 
@@ -1425,10 +1434,10 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private long[] getBiometricSids(int userId) {
+    private @NonNull long[] getBiometricSids(int userId) {
         BiometricManager biometricManager = mContext.getSystemService(BiometricManager.class);
         if (biometricManager == null) {
-            return null;
+            return new long[0];
         }
         return biometricManager.getAuthenticatorIds(userId);
     }
@@ -1598,8 +1607,20 @@ public class TrustManagerService extends SystemService {
             fout.printf(" User \"%s\" (id=%d, flags=%#x)",
                     user.name, user.id, user.flags);
             if (!user.supportsSwitchToByUser()) {
-                fout.println("(managed profile)");
-                fout.println("   disabled because switching to this user is not possible.");
+                final boolean locked;
+                if (mLockPatternUtils.isProfileWithUnifiedChallenge(user.id)) {
+                    fout.print(" (profile with unified challenge)");
+                    locked = isDeviceLockedInner(resolveProfileParent(user.id));
+                } else if (mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id)) {
+                    fout.print(" (profile with separate challenge)");
+                    locked = isDeviceLockedInner(user.id);
+                } else {
+                    fout.println(" (user that cannot be switched to)");
+                    locked = isDeviceLockedInner(user.id);
+                }
+                fout.println(": deviceLocked=" + dumpBool(locked));
+                fout.println(
+                        "   Trust agents disabled because switching to this user is not possible.");
                 return;
             }
             if (isCurrent) {
@@ -1666,8 +1687,7 @@ public class TrustManagerService extends SystemService {
                         mDeviceLockedForUser.put(userId, locked);
                     }
 
-                    Authorization.onLockScreenEvent(locked, userId, null,
-                            getBiometricSids(userId));
+                    notifyKeystoreOfDeviceLockState(userId, locked);
 
                     if (locked) {
                         try {

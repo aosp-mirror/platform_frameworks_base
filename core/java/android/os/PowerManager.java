@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.FlaggedApi;
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
@@ -3103,7 +3102,8 @@ public final class PowerManager {
 
     /**
      * Intent that is broadcast when Low Power Standby is enabled or disabled.
-     * This broadcast is only sent to registered receivers.
+     * This broadcast is only sent to registered receivers and receivers holding
+     * {@code android.permission.MANAGE_LOW_POWER_STANDBY}.
      *
      * @see #isLowPowerStandbyEnabled()
      */
@@ -3113,7 +3113,8 @@ public final class PowerManager {
 
     /**
      * Intent that is broadcast when Low Power Standby policy is changed.
-     * This broadcast is only sent to registered receivers.
+     * This broadcast is only sent to registered receivers and receivers holding
+     * {@code android.permission.MANAGE_LOW_POWER_STANDBY}.
      *
      * @see #isExemptFromLowPowerStandby()
      * @see #isAllowedInLowPowerStandby(int)
@@ -3125,7 +3126,6 @@ public final class PowerManager {
 
     /**
      * Intent that is broadcast when Low Power Standby exempt ports change.
-     * This broadcast is only sent to registered receivers.
      *
      * @see #getActiveLowPowerStandbyPorts
      * @hide

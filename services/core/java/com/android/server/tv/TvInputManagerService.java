@@ -41,7 +41,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -1851,14 +1850,14 @@ public final class TvInputManagerService extends SystemService {
                             sessionState.currentChannel = channelUri;
                             notifyCurrentChannelInfosUpdatedLocked(userState);
                             if (!sessionState.isRecordingSession) {
-                                String actualInputId = getActualInputId(sessionState);
-                                if (!TextUtils.equals(mOnScreenInputId, actualInputId)) {
+                                String sessionActualInputId = getSessionActualInputId(sessionState);
+                                if (!TextUtils.equals(mOnScreenInputId, sessionActualInputId)) {
                                     logExternalInputEvent(
                                             FrameworkStatsLog
                                                     .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
-                                            actualInputId, sessionState);
+                                            sessionActualInputId, sessionState);
                                 }
-                                mOnScreenInputId = actualInputId;
+                                mOnScreenInputId = sessionActualInputId;
                                 mOnScreenSessionState = sessionState;
                             }
                         }
@@ -2073,6 +2072,45 @@ public final class TvInputManagerService extends SystemService {
                                 .removeOverlayView();
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in removeOverlayView", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void stopPlayback(IBinder sessionToken, int mode, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "stopPlayback");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).stopPlayback(
+                                mode);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in stopPlayback(mode)", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void startPlayback(IBinder sessionToken, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "stopPlayback");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).startPlayback();
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in startPlayback()", e);
                     }
                 }
             } finally {
@@ -2985,11 +3023,20 @@ public final class TvInputManagerService extends SystemService {
     // e.g. if an HDMI port has a CEC device plugged in, the actual input id of the HDMI
     // session should be the input id of CEC device instead of the default HDMI input id.
     @GuardedBy("mLock")
-    private String getActualInputId(SessionState sessionState) {
+    private String getSessionActualInputId(SessionState sessionState) {
         UserState userState = getOrCreateUserStateLocked(sessionState.userId);
         TvInputState tvInputState = userState.inputMap.get(sessionState.inputId);
+        if (tvInputState == null) {
+            Slog.w(TAG, "No TvInputState for sessionState.inputId " + sessionState.inputId);
+            return sessionState.inputId;
+        }
         TvInputInfo tvInputInfo = tvInputState.info;
-        String actualInputId = sessionState.inputId;
+        if (tvInputInfo == null) {
+            Slog.w(TAG, "TvInputInfo is null for input id " + sessionState.inputId);
+            return sessionState.inputId;
+        }
+
+        String sessionActualInputId = sessionState.inputId;
         switch (tvInputInfo.getType()) {
             case TvInputInfo.TYPE_HDMI:
                 // TODO: find a better approach towards active CEC device in future
@@ -2997,13 +3044,13 @@ public final class TvInputManagerService extends SystemService {
                         mTvInputHardwareManager.getHdmiParentInputMap();
                 if (hdmiParentInputMap.containsKey(sessionState.inputId)) {
                     List<String> parentInputList = hdmiParentInputMap.get(sessionState.inputId);
-                    actualInputId = parentInputList.get(0);
+                    sessionActualInputId = parentInputList.get(0);
                 }
                 break;
             default:
                 break;
         }
-        return actualInputId;
+        return sessionActualInputId;
     }
 
     @Nullable
@@ -3111,7 +3158,21 @@ public final class TvInputManagerService extends SystemService {
     private void logExternalInputEvent(int eventType, String inputId, SessionState sessionState) {
         UserState userState = getOrCreateUserStateLocked(sessionState.userId);
         TvInputState tvInputState = userState.inputMap.get(inputId);
+        if (tvInputState == null) {
+            Slog.w(TAG, "Cannot find input state for input id " + inputId);
+            // If input id is not found, try to find the input id of this sessionState.
+            inputId = sessionState.inputId;
+            tvInputState = userState.inputMap.get(inputId);
+        }
+        if (tvInputState == null) {
+            Slog.w(TAG, "Cannot find input state for sessionState.inputId " + inputId);
+            return;
+        }
         TvInputInfo tvInputInfo = tvInputState.info;
+        if (tvInputInfo == null) {
+            Slog.w(TAG, "TvInputInfo is null for input id " + inputId);
+            return;
+        }
         int inputState = tvInputState.state;
         int inputType = tvInputInfo.getType();
         String displayName = tvInputInfo.loadLabel(mContext).toString();
@@ -3647,14 +3708,14 @@ public final class TvInputManagerService extends SystemService {
                         mSessionState.currentChannel = channelUri;
                         notifyCurrentChannelInfosUpdatedLocked(userState);
                         if (!mSessionState.isRecordingSession) {
-                            String actualInputId = getActualInputId(mSessionState);
-                            if (!TextUtils.equals(mOnScreenInputId, actualInputId)) {
+                            String sessionActualInputId = getSessionActualInputId(mSessionState);
+                            if (!TextUtils.equals(mOnScreenInputId, sessionActualInputId)) {
                                 logExternalInputEvent(
                                         FrameworkStatsLog
                                                 .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
-                                        actualInputId, mSessionState);
+                                        sessionActualInputId, mSessionState);
                             }
-                            mOnScreenInputId = actualInputId;
+                            mOnScreenInputId = sessionActualInputId;
                             mOnScreenSessionState = mSessionState;
                         }
                     }

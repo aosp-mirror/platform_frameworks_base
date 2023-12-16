@@ -18,6 +18,8 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -30,7 +32,6 @@ import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
 
-import com.android.settingslib.utils.BuildCompatUtils;
 import com.android.settingslib.widget.mainswitch.R;
 
 import java.util.ArrayList;
@@ -72,11 +73,18 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
 
         LayoutInflater.from(context).inflate(R.layout.settingslib_main_switch_bar, this);
 
-        if (!BuildCompatUtils.isAtLeastS()) {
-            final TypedArray a = context.obtainStyledAttributes(
-                    new int[]{android.R.attr.colorAccent});
-            mBackgroundActivatedColor = a.getColor(0, 0);
-            mBackgroundColor = context.getColor(androidx.appcompat.R.color.material_grey_600);
+        if (Build.VERSION.SDK_INT < VERSION_CODES.S) {
+            TypedArray a;
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+                a = context.obtainStyledAttributes(
+                        new int[]{android.R.attr.colorAccent});
+                mBackgroundActivatedColor = a.getColor(0, 0);
+                mBackgroundColor = context.getColor(androidx.appcompat.R.color.material_grey_600);
+            } else {
+                a = context.obtainStyledAttributes(new int[]{android.R.attr.colorPrimary});
+                mBackgroundActivatedColor = a.getColor(0, 0);
+                mBackgroundColor = a.getColor(0, 0);
+            }
             a.recycle();
         }
 
@@ -148,7 +156,7 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
      * Set icon space reserved for title
      */
     public void setIconSpaceReserved(boolean iconSpaceReserved) {
-        if (mTextView != null && !BuildCompatUtils.isAtLeastS()) {
+        if (mTextView != null && (Build.VERSION.SDK_INT < VERSION_CODES.S)) {
             LayoutParams params = (LayoutParams) mTextView.getLayoutParams();
             int iconSpace = getContext().getResources().getDimensionPixelSize(
                     R.dimen.settingslib_switchbar_subsettings_margin_start);
@@ -207,7 +215,7 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
         mTextView.setEnabled(enabled);
         mSwitch.setEnabled(enabled);
 
-        if (BuildCompatUtils.isAtLeastS()) {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.S) {
             mFrameView.setEnabled(enabled);
             mFrameView.setActivated(isChecked());
         }
@@ -222,7 +230,7 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
     }
 
     private void setBackground(boolean isChecked) {
-        if (!BuildCompatUtils.isAtLeastS()) {
+        if (Build.VERSION.SDK_INT < VERSION_CODES.S) {
             setBackgroundColor(isChecked ? mBackgroundActivatedColor : mBackgroundColor);
         } else {
             mFrameView.setActivated(isChecked);

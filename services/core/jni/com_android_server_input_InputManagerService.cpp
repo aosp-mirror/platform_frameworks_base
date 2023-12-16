@@ -26,6 +26,7 @@
 // Log debug messages about InputDispatcherPolicy
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
+#include <android-base/logging.h>
 #include <android-base/parseint.h>
 #include <android-base/stringprintf.h>
 #include <android/os/IInputConstants.h>
@@ -87,6 +88,7 @@ namespace input_flags = com::android::input::flags;
 namespace android {
 
 static const bool ENABLE_POINTER_CHOREOGRAPHER = input_flags::enable_pointer_choreographer();
+static const bool ENABLE_INPUT_FILTER_RUST = input_flags::enable_input_filter_rust_impl();
 
 // The exponent used to calculate the pointer speed scaling factor.
 // The scaling factor is calculated as 2 ^ (speed * exponent),
@@ -308,6 +310,9 @@ public:
     void reloadPointerIcons();
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
+    bool setPointerIcon(std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon,
+                        int32_t displayId, DeviceId deviceId, int32_t pointerId,
+                        const sp<IBinder>& inputToken);
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
@@ -1345,6 +1350,20 @@ void NativeInputManager::setCustomPointerIcon(const SpriteIcon& icon) {
     if (controller != nullptr) {
         controller->setCustomPointerIcon(icon);
     }
+}
+
+bool NativeInputManager::setPointerIcon(
+        std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon, int32_t displayId,
+        DeviceId deviceId, int32_t pointerId, const sp<IBinder>& inputToken) {
+    if (!mInputManager->getDispatcher().isPointerInWindow(inputToken, displayId, deviceId,
+                                                          pointerId)) {
+        LOG(WARNING) << "Attempted to change the pointer icon for deviceId " << deviceId
+                     << " on display " << displayId << " from input token " << inputToken.get()
+                     << ", but the pointer is not in the window.";
+        return false;
+    }
+
+    return mInputManager->getChoreographer().setPointerIcon(std::move(icon), displayId, deviceId);
 }
 
 TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
@@ -2511,6 +2530,32 @@ static void nativeSetCustomPointerIcon(JNIEnv* env, jobject nativeImplObj, jobje
     im->setCustomPointerIcon(spriteIcon);
 }
 
+static bool nativeSetPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject iconObj,
+                                 jint displayId, jint deviceId, jint pointerId,
+                                 jobject inputTokenObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    PointerIcon pointerIcon;
+    status_t result = android_view_PointerIcon_getLoadedIcon(env, iconObj, &pointerIcon);
+    if (result) {
+        jniThrowRuntimeException(env, "Failed to load pointer icon.");
+        return false;
+    }
+
+    std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon;
+    if (pointerIcon.style == PointerIconStyle::TYPE_CUSTOM) {
+        icon = std::make_unique<SpriteIcon>(pointerIcon.bitmap.copy(
+                                                    ANDROID_BITMAP_FORMAT_RGBA_8888),
+                                            pointerIcon.style, pointerIcon.hotSpotX,
+                                            pointerIcon.hotSpotY);
+    } else {
+        icon = pointerIcon.style;
+    }
+
+    return im->setPointerIcon(std::move(icon), displayId, deviceId, pointerId,
+                              ibinderForJavaObject(env, inputTokenObj));
+}
+
 static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jobject nativeImplObj, jint deviceId,
                                            jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
@@ -2693,6 +2738,23 @@ static void nativeSetStylusPointerIconEnabled(JNIEnv* env, jobject nativeImplObj
     im->setStylusPointerIconEnabled(enabled);
 }
 
+static void nativeSetAccessibilityBounceKeysThreshold(JNIEnv* env, jobject nativeImplObj,
+                                                      jint thresholdTimeMs) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    if (ENABLE_INPUT_FILTER_RUST) {
+        im->getInputManager()->getInputFilter().setAccessibilityBounceKeysThreshold(
+                static_cast<nsecs_t>(thresholdTimeMs) * 1000000);
+    }
+}
+
+static void nativeSetAccessibilityStickyKeysEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                    jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    if (ENABLE_INPUT_FILTER_RUST) {
+        im->getInputManager()->getInputFilter().setAccessibilityStickyKeysEnabled(enabled);
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2769,6 +2831,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"reloadPointerIcons", "()V", (void*)nativeReloadPointerIcons},
         {"setCustomPointerIcon", "(Landroid/view/PointerIcon;)V",
          (void*)nativeSetCustomPointerIcon},
+        {"setPointerIcon", "(Landroid/view/PointerIcon;IIILandroid/os/IBinder;)Z",
+         (void*)nativeSetPointerIcon},
         {"canDispatchToDisplay", "(II)Z", (void*)nativeCanDispatchToDisplay},
         {"notifyPortAssociationsChanged", "()V", (void*)nativeNotifyPortAssociationsChanged},
         {"changeUniqueIdAssociation", "()V", (void*)nativeChangeUniqueIdAssociation},
@@ -2790,6 +2854,10 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetStylusButtonMotionEventsEnabled},
         {"getMouseCursorPosition", "()[F", (void*)nativeGetMouseCursorPosition},
         {"setStylusPointerIconEnabled", "(Z)V", (void*)nativeSetStylusPointerIconEnabled},
+        {"setAccessibilityBounceKeysThreshold", "(I)V",
+         (void*)nativeSetAccessibilityBounceKeysThreshold},
+        {"setAccessibilityStickyKeysEnabled", "(Z)V",
+         (void*)nativeSetAccessibilityStickyKeysEnabled},
 };
 
 #define FIND_CLASS(var, className) \

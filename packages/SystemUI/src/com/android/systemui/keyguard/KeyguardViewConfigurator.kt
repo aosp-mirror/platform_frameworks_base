@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -81,6 +82,7 @@ constructor(
     private val interactionJankMonitor: InteractionJankMonitor,
     private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
     private val vibratorHelper: VibratorHelper,
+    private val falsingManager: FalsingManager,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -155,6 +157,7 @@ constructor(
                 interactionJankMonitor,
                 deviceEntryHapticsInteractor,
                 vibratorHelper,
+                falsingManager,
             )
     }
 

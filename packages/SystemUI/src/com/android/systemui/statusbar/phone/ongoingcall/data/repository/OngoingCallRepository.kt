@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
  *
  * This class is used to break a dependency cycle between
  * [com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController] and
- * [com.android.systemui.statusbar.data.repository.StatusBarModeRepository]. Instead, those two
+ * [com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore]. Instead, those two
  * classes both refer to this repository.
  */
 @SysUISingleton

@@ -548,8 +548,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     private PointF offsetCaptionLocation(MotionEvent ev) {
         final PointF result = new PointF(ev.getX(), ev.getY());
-        final Point positionInParent = mTaskOrganizer.getRunningTaskInfo(mTaskInfo.taskId)
-                .positionInParent;
+        final ActivityManager.RunningTaskInfo taskInfo =
+                mTaskOrganizer.getRunningTaskInfo(mTaskInfo.taskId);
+        if (taskInfo == null) return result;
+        final Point positionInParent = taskInfo.positionInParent;
         result.offset(-mRelayoutParams.mCaptionX, -mRelayoutParams.mCaptionY);
         result.offset(-positionInParent.x, -positionInParent.y);
         return result;

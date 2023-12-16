@@ -19,7 +19,9 @@ package com.android.systemui.communal.widgets
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.os.Bundle
+import android.os.RemoteException
 import android.util.Log
+import android.view.IWindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -34,6 +36,7 @@ class EditWidgetsActivity
 constructor(
     private val communalViewModel: CommunalEditModeViewModel,
     private val communalInteractor: CommunalInteractor,
+    private var windowManagerService: IWindowManager? = null,
 ) : ComponentActivity() {
     companion object {
         /**
@@ -76,6 +79,14 @@ constructor(
                     Intent(applicationContext, WidgetPickerActivity::class.java)
                 )
             },
+            onEditDone = {
+                try {
+                    checkNotNull(windowManagerService).lockNow(/* options */ null)
+                    finish()
+                } catch (e: RemoteException) {
+                    Log.e(TAG, "Couldn't lock the device as WindowManager is dead.")
+                }
+            }
         )
     }
 }

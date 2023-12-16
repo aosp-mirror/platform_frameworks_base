@@ -39,31 +39,41 @@ constructor(
     interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     shadeDependentFlows: ShadeDependentFlows,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = FromLockscreenTransitionInteractor.TO_AOD_DURATION,
-            transitionFlow = interactor.lockscreenToAodTransition,
+        animationFlow.setup(
+            duration = FromLockscreenTransitionInteractor.TO_AOD_DURATION,
+            stepFlow = interactor.lockscreenToAodTransition,
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         shadeDependentFlows.transitionFlow(
             flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
             flowWhenShadeIsNotExpanded =
-                transitionAnimation.createFlow(
+                transitionAnimation.sharedFlow(
                     duration = 300.milliseconds,
                     onStep = { 1 - it },
                     onFinish = { 0f },
                 ),
         )
+
+    val shortcutsAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = 250.milliseconds,
+            onStep = { 1 - it },
+            onFinish = { 0f },
+            onCancel = { 1f },
+        )
+
     override val deviceEntryParentViewAlpha: Flow<Float> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest {
             isUdfpsEnrolledAndEnabled ->
             if (isUdfpsEnrolledAndEnabled) {
                 shadeDependentFlows.transitionFlow(
                     flowWhenShadeIsExpanded = // fade in
-                    transitionAnimation.createFlow(
+                    transitionAnimation.sharedFlow(
                             duration = 300.milliseconds,
                             onStep = { it },
                             onFinish = { 1f },
@@ -74,7 +84,7 @@ constructor(
                 shadeDependentFlows.transitionFlow(
                     flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
                     flowWhenShadeIsNotExpanded = // fade out
-                    transitionAnimation.createFlow(
+                    transitionAnimation.sharedFlow(
                             duration = 200.milliseconds,
                             onStep = { 1f - it },
                             onFinish = { 0f },

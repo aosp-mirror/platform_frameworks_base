@@ -26,6 +26,9 @@ aconfig_srcjars = [
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
+    ":android.server.app.flags-aconfig-java{.generated_srcjars}",
+    ":android.service.chooser.flags-aconfig-java{.generated_srcjars}",
+    ":android.service.dreams.flags-aconfig-java{.generated_srcjars}",
     ":android.service.notification.flags-aconfig-java{.generated_srcjars}",
     ":android.view.flags-aconfig-java{.generated_srcjars}",
     ":android.view.accessibility.flags-aconfig-java{.generated_srcjars}",
@@ -54,6 +57,8 @@ aconfig_srcjars = [
     ":android.app.flags-aconfig-java{.generated_srcjars}",
     ":android.credentials.flags-aconfig-java{.generated_srcjars}",
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.server.flags.pinner-aconfig-java{.generated_srcjars}",
+    ":android.service.controls.flags-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
     ":android.media.tv.flags-aconfig-java{.generated_srcjars}",
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
@@ -64,6 +69,8 @@ aconfig_srcjars = [
     ":android.hardware.usb.flags-aconfig-java{.generated_srcjars}",
     ":android.tracing.flags-aconfig-java{.generated_srcjars}",
     ":android.appwidget.flags-aconfig-java{.generated_srcjars}",
+    ":android.webkit.flags-aconfig-java{.generated_srcjars}",
+    ":android.provider.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -226,7 +233,6 @@ java_aconfig_library {
     name: "android.security.flags-aconfig-java-host",
     aconfig_declarations: "android.security.flags-aconfig",
     host_supported: true,
-    mode: "test",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -264,6 +270,23 @@ java_aconfig_library {
 }
 
 // VirtualDeviceManager
+cc_aconfig_library {
+    name: "android.companion.virtualdevice.flags-aconfig-cc",
+    aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",
+}
+
+java_aconfig_library {
+    name: "android.companion.virtualdevice.flags-aconfig-java",
+    aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+aconfig_declarations {
+    name: "android.companion.virtualdevice.flags-aconfig",
+    package: "android.companion.virtualdevice.flags",
+    srcs: ["core/java/android/companion/virtual/flags/*.aconfig"],
+}
+
 java_aconfig_library {
     name: "android.companion.virtual.flags-aconfig-java",
     aconfig_declarations: "android.companion.virtual.flags-aconfig",
@@ -407,7 +430,10 @@ java_aconfig_library {
 aconfig_declarations {
     name: "com.android.media.flags.bettertogether-aconfig",
     package: "com.android.media.flags",
-    srcs: ["media/java/android/media/flags/media_better_together.aconfig"],
+    srcs: [
+        "media/java/android/media/flags/media_better_together.aconfig",
+        "media/java/android/media/flags/fade_manager_configuration.aconfig",
+    ],
 }
 
 java_aconfig_library {
@@ -565,6 +591,32 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+// Pinner Service
+aconfig_declarations {
+    name: "com.android.server.flags.pinner-aconfig",
+    package: "com.android.server.flags",
+    srcs: ["services/core/java/com/android/server/flags/pinner.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.server.flags.pinner-aconfig-java",
+    aconfig_declarations: "com.android.server.flags.pinner-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Controls
+aconfig_declarations {
+    name: "android.service.controls.flags-aconfig",
+    package: "android.service.controls.flags",
+    srcs: ["core/java/android/service/controls/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.controls.flags-aconfig-java",
+    aconfig_declarations: "android.service.controls.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Voice
 aconfig_declarations {
     name: "android.service.voice.flags-aconfig",
@@ -607,7 +659,13 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
-// CoreNetworking
+// Networking
+aconfig_declarations {
+    name: "com.android.net.flags-aconfig",
+    package: "com.android.net.flags",
+    srcs: ["core/java/android/net/flags.aconfig"],
+}
+
 java_aconfig_library {
     name: "com.android.net.flags-aconfig-java",
     aconfig_declarations: "com.android.net.flags-aconfig",
@@ -665,6 +723,19 @@ cc_aconfig_library {
     aconfig_declarations: "device_policy_aconfig_flags",
 }
 
+// Chooser / "Sharesheet"
+aconfig_declarations {
+    name: "android.service.chooser.flags-aconfig",
+    package: "android.service.chooser",
+    srcs: ["core/java/android/service/chooser/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.chooser.flags-aconfig-java",
+    aconfig_declarations: "android.service.chooser.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // JobScheduler
 aconfig_declarations {
     name: "framework-jobscheduler-job.flags-aconfig",
@@ -675,6 +746,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "framework-jobscheduler-job.flags-aconfig-java",
     aconfig_declarations: "framework-jobscheduler-job.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Dreams
+aconfig_declarations {
+    name: "android.service.dreams.flags-aconfig",
+    package: "android.service.dreams",
+    srcs: ["core/java/android/service/dreams/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.dreams.flags-aconfig-java",
+    aconfig_declarations: "android.service.dreams.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -737,6 +821,13 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "android.hardware.usb.flags-aconfig-java-host",
+    aconfig_declarations: "android.hardware.usb.flags-aconfig",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // WindowingTools
 aconfig_declarations {
     name: "android.tracing.flags-aconfig",
@@ -760,5 +851,47 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.appwidget.flags-aconfig-java",
     aconfig_declarations: "android.appwidget.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// App
+aconfig_declarations {
+    name: "android.server.app.flags-aconfig",
+    package: "android.server.app",
+    srcs: ["services/core/java/com/android/server/app/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.server.app.flags-aconfig-java",
+    aconfig_declarations: "android.server.app.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// WebView
+aconfig_declarations {
+    name: "android.webkit.flags-aconfig",
+    package: "android.webkit",
+    srcs: [
+        "core/java/android/webkit/*.aconfig",
+        "services/core/java/com/android/server/webkit/*.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "android.webkit.flags-aconfig-java",
+    aconfig_declarations: "android.webkit.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Provider
+aconfig_declarations {
+    name: "android.provider.flags-aconfig",
+    package: "android.provider",
+    srcs: ["core/java/android/provider/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.provider.flags-aconfig-java",
+    aconfig_declarations: "android.provider.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

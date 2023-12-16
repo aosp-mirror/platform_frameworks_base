@@ -23,6 +23,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -53,6 +55,8 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -74,6 +78,7 @@ import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
@@ -137,6 +142,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private UserTracker mUserTracker;
+    @Mock private SceneContainerFlags mSceneContainerFlags;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
 
@@ -188,10 +194,9 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 keyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                featureFlags,
                 sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
-                configurationRepository,
+                new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
                 () -> sceneInteractor);
 
@@ -233,6 +238,11 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mKeyguardSecurityModel,
                 mSelectedUserInteractor,
                 powerInteractor);
+
+        DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
+                mock(DeviceEntryUdfpsInteractor.class);
+        when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(emptyFlow());
+
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 new FakeDeviceProvisioningRepository(),
@@ -249,7 +259,9 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
-                                new ResourcesSplitShadeStateController()),
+                                new ResourcesSplitShadeStateController(),
+                                keyguardInteractor,
+                                deviceEntryUdfpsInteractor),
                         shadeRepository
                 )
         );
@@ -274,7 +286,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 () -> mShadeInteractor,
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
-                mUserTracker) {
+                mUserTracker,
+                mSceneContainerFlags) {
                     @Override
                     protected boolean isDebuggable() {
                         return false;

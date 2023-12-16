@@ -274,6 +274,22 @@ java_library_host {
     ],
 }
 
+java_library_host {
+    name: "hoststubgen-helper-libcore-runtime",
+    defaults: ["hoststubgen-for-prototype-only-java"],
+    srcs: [
+        "helper-framework-runtime-src/libcore-fake/**/*.java",
+    ],
+}
+
+java_host_for_device {
+    name: "hoststubgen-helper-libcore-runtime.ravenwood",
+    defaults: ["hoststubgen-for-prototype-only-java"],
+    libs: [
+        "hoststubgen-helper-libcore-runtime",
+    ],
+}
+
 java_library {
     name: "hoststubgen-helper-framework-runtime.ravenwood",
     defaults: ["hoststubgen-for-prototype-only-java"],
@@ -286,6 +302,7 @@ java_library {
     ],
     static_libs: [
         "core-xml-for-device",
+        "hoststubgen-helper-libcore-runtime.ravenwood",
     ],
 }
 

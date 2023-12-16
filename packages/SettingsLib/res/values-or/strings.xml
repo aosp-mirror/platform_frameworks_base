@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ମାଧ୍ୟମରେ କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ମାଧ୍ୟମରେ କନେକ୍ଟ କରାଯାଇଛି"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"ଟିଭିର ଡିଫଲ୍ଟ ଅଡିଓ ଆଉଟପୁଟ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI ଆଉଟପୁଟ"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"ଇଣ୍ଟର୍ନଲ ସ୍ପିକର"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ଟିଭିର ଡିଫଲ୍ଟ ଅଡିଓ ଆଉଟପୁଟ"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ଆଉଟପୁଟ"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ଇଣ୍ଟର୍ନଲ ସ୍ପିକର"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ସଂଯୋଗ କରିବାରେ ସମସ୍ୟା ହେଉଛି। ଡିଭାଇସ୍ ବନ୍ଦ କରି ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ତାରଯୁକ୍ତ ଅଡିଓ ଡିଭାଇସ୍"</string>
     <string name="help_label" msgid="3528360748637781274">"ସାହାଯ୍ୟ ଓ ମତାମତ"</string>
@@ -683,7 +683,7 @@
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ଇଥରନେଟ୍।"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"କୌଣସି କଲିଂ ନାହିଁ।"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"ଏକ ପ୍ରୋଫାଇଲ ଛବି ବାଛନ୍ତୁ"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"ଡିଫଲ୍ଟ ଉପଯୋଗକର୍ତ୍ତା ଆଇକନ"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"ଡିଫଲ୍ଟ ୟୁଜର ଆଇକନ"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ଫିଜିକାଲ କୀବୋର୍ଡ"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"କୀବୋର୍ଡ ଲେଆଉଟ ବାଛନ୍ତୁ"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ଡିଫଲ୍ଟ"</string>

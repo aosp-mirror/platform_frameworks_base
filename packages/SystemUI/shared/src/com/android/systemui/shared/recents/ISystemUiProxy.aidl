@@ -149,10 +149,11 @@ interface ISystemUiProxy {
      *
      * @param isTouchDown {@code true} if the button is starting to be pressed ({@code false} if
      *                                released or canceled)
+     * @param shrink {@code true} if the handle should shrink, {@code false} if it should grow
      * @param durationMs how long the animation should take (for the {@code isTouchDown} case, this
      *                   should be the same as the amount of time to trigger a long-press)
      */
-    oneway void animateNavBarLongPress(boolean isTouchDown, long durationMs) = 54;
+    oneway void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) = 54;
 
     // Next id = 55
 }

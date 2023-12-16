@@ -7,11 +7,26 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+filegroup {
+    name: "InputScreenshotTestRNGFiles",
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+    exclude_srcs: [
+        "src/android/input/screenshot/KeyboardLayoutPreviewAnsiScreenshotTest.kt",
+        "src/android/input/screenshot/KeyboardLayoutPreviewJisScreenshotTest.kt",
+    ],
+}
+
 android_test {
     name: "InputScreenshotTests",
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
+    ],
+    exclude_srcs: [
+        "src/android/input/screenshot/package-info.java",
     ],
     platform_apis: true,
     certificate: "platform",
@@ -43,6 +58,7 @@ android_test {
         "hamcrest-library",
         "kotlin-test",
         "flag-junit",
+        "platform-parametric-runner-lib",
         "platform-test-annotations",
         "services.core.unboosted",
         "testables",

@@ -181,8 +181,11 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.om.OverlayConfig;
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -220,9 +223,7 @@ import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.local.PackageManagerLocalImpl;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerService;
 import com.android.server.pm.permission.LegacyPermissionSettings;
@@ -238,7 +239,6 @@ import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.mutate.PackageStateMutator;
 import com.android.server.pm.pkg.mutate.PackageStateWrite;
 import com.android.server.pm.pkg.mutate.PackageUserStateWrite;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.resolution.ComponentResolver;
 import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
@@ -522,6 +522,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      */
     private static final String PROPERTY_IS_UPDATE_OWNERSHIP_ENFORCEMENT_AVAILABLE =
             "is_update_ownership_enforcement_available";
+
+    private static final String PROPERTY_DEFERRED_NO_KILL_POST_DELETE_DELAY_MS_EXTENDED =
+            "deferred_no_kill_post_delete_delay_ms_extended";
 
     /**
      * The default response for package verification timeout.
@@ -924,7 +927,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     static final int WRITE_USER_PACKAGE_RESTRICTIONS = 30;
 
-    static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
+    private static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
+
+    private static final long DEFERRED_NO_KILL_POST_DELETE_DELAY_MS_EXTENDED =
+            TimeUnit.DAYS.toMillis(1);
+
     private static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
     private static final int DEFERRED_PENDING_KILL_INSTALL_OBSERVER_DELAY_MS = 1000;
 
@@ -1288,7 +1295,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     void scheduleDeferredNoKillPostDelete(InstallArgs args) {
         Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_POST_DELETE, args);
-        mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_POST_DELETE_DELAY_MS);
+        // If the feature flag is on, retain the old files for a day. Otherwise, delete the old
+        // files after a few seconds.
+        long deleteDelayMillis = DEFERRED_NO_KILL_POST_DELETE_DELAY_MS;
+        if (Flags.improveInstallDontKill()) {
+            deleteDelayMillis = Binder.withCleanCallingIdentity(() -> {
+                return DeviceConfig.getLong(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                        /* name= */ PROPERTY_DEFERRED_NO_KILL_POST_DELETE_DELAY_MS_EXTENDED,
+                        /* defaultValue= */ DEFERRED_NO_KILL_POST_DELETE_DELAY_MS_EXTENDED);
+            });
+            Slog.w(TAG, "Delaying the deletion of <" + args.getCodePath() + "> by "
+                    + deleteDelayMillis + "ms or till the next reboot");
+        }
+        mHandler.sendMessageDelayed(message, deleteDelayMillis);
     }
 
     void schedulePruneUnusedStaticSharedLibraries(boolean delay) {
@@ -1360,9 +1379,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName,
                 userId);
-        final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
         final String installerPackageName;
         if (installSourceInfo != null) {
+            final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
             if (!isInstalledByAdb(initiatingPackageName)) {
                 installerPackageName = initiatingPackageName;
             } else {
@@ -1499,8 +1518,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return archPkg;
     }
 
-    void createArchiveStateIfNeeded(PackageSetting pkgSetting, ArchivedPackageParcel archivePackage,
-            int[] userIds) {
+    void markPackageAsArchivedIfNeeded(PackageSetting pkgSetting,
+                                       ArchivedPackageParcel archivePackage, int[] userIds) {
         if (pkgSetting == null || archivePackage == null
                 || archivePackage.archivedActivities == null || userIds == null
                 || userIds.length == 0) {
@@ -1515,13 +1534,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return;
         }
         for (int userId : userIds) {
-            var archiveState = PackageArchiver.createArchiveState(archivePackage, userId,
-                    responsibleInstallerPackage);
+            var archiveState = mInstallerService.mPackageArchiver.createArchiveState(
+                    archivePackage, userId, responsibleInstallerPackage);
             if (archiveState == null) {
                 continue;
             }
             pkgSetting
+                    .setPkg(null)
                     .modifyUserState(userId)
+                    .setInstalled(false)
                     .setArchiveState(archiveState);
         }
     }
@@ -1991,6 +2012,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             @Override
             public boolean hasFeature(String feature) {
                 return PackageManagerService.this.hasSystemFeature(feature, 0);
+            }
+
+            @Override
+            public Set<String> getHiddenApiWhitelistedApps() {
+                return SystemConfig.getInstance().getHiddenApiWhitelistedApps();
+            }
+
+            @Override
+            public Set<String> getInstallConstraintsAllowlist() {
+                return SystemConfig.getInstance().getInstallConstraintsAllowlist();
             }
         };
 
@@ -3023,6 +3054,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
+    @NonNull
     int[] resolveUserIds(int userId) {
         return (userId == UserHandle.USER_ALL) ? mUserManager.getUserIds() : new int[] { userId };
     }
@@ -4584,6 +4616,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             userIds, null, broadcastAllowList, null,
                             null);
                 });
+                mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_UNSTOPPED,
+                        packageName, extras, userIds, null /* instantUserIds */,
+                        broadcastAllowList, mHandler);
             }
         }
     }
@@ -5213,6 +5248,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             return SuspendPackageHelper
                     .getSuspendedPackageAppExtras(snapshot, packageName, userId, callingUid);
+        }
+
+        @Override
+        public String getSuspendingPackage(String packageName, int userId) {
+            try {
+                final int callingUid = Binder.getCallingUid();
+                final Computer snapshot = snapshot();
+                // This will do visibility checks as well.
+                if (!snapshot.isPackageSuspendedForUser(packageName, userId)) {
+                    return null;
+                }
+                return mSuspendPackageHelper.getSuspendingPackage(snapshot, packageName, userId,
+                        callingUid);
+            } catch (PackageManager.NameNotFoundException e) {
+                return null;
+            }
         }
 
         @Override
@@ -6976,6 +7027,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        public PackageArchiver getPackageArchiver() {
+            return mInstallerService.mPackageArchiver;
+        }
+
+        @Override
         public void sendPackageRestartedBroadcast(@NonNull String packageName,
                 int uid, @Intent.Flags int flags) {
             final int userId = UserHandle.getUserId(uid);
@@ -7072,9 +7128,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         if (info == null) {
                             continue;
                         }
-                        final List<VersionedPackage> dependents =
-                                computer.getPackagesUsingSharedLibrary(info, 0, Process.SYSTEM_UID,
-                                        userId);
+                        var usingSharedLibraryPair = computer.getPackagesUsingSharedLibrary(info, 0,
+                                Process.SYSTEM_UID, userId);
+                        final List<VersionedPackage> dependents = usingSharedLibraryPair.first;
                         if (dependents == null) {
                             continue;
                         }

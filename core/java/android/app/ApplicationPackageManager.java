@@ -80,6 +80,8 @@ import android.content.pm.SuspendDialogInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.res.ApkAssets;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -144,6 +146,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /** @hide */
 public class ApplicationPackageManager extends PackageManager {
@@ -2931,6 +2934,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String getSuspendingPackage(String suspendedPackage) {
+        try {
+            return mPM.getSuspendingPackage(suspendedPackage, getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public boolean isPackageSuspendedForUser(String packageName, int userId) {
         try {
             return mPM.isPackageSuspendedForUser(packageName, userId);
@@ -4022,6 +4034,36 @@ public class ApplicationPackageManager extends PackageManager {
                     mPM.getArchivedAppIcon(packageName, new UserHandle(getUserId())));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public <T> T parseAndroidManifest(@NonNull String apkFilePath,
+            @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
+        Objects.requireNonNull(apkFilePath, "apkFilePath cannot be null");
+        Objects.requireNonNull(parserFunction, "parserFunction cannot be null");
+        try (XmlResourceParser xmlResourceParser = getAndroidManifestParser(apkFilePath)) {
+            return parserFunction.apply(xmlResourceParser);
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to get the android manifest parser", e);
+            throw e;
+        }
+    }
+
+    private static XmlResourceParser getAndroidManifestParser(@NonNull String apkFilePath)
+            throws IOException {
+        ApkAssets apkAssets = null;
+        try {
+            apkAssets = ApkAssets.loadFromPath(apkFilePath);
+            return apkAssets.openXml(ApkLiteParseUtils.ANDROID_MANIFEST_FILENAME);
+        } finally {
+            if (apkAssets != null) {
+                try {
+                    apkAssets.close();
+                } catch (Throwable ignored) {
+                    Log.w(TAG, "Failed to close apkAssets", ignored);
+                }
+            }
         }
     }
 }

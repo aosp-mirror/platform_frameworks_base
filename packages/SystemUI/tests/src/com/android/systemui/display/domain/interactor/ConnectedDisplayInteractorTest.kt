@@ -18,6 +18,7 @@ package com.android.systemui.display.domain.interactor
 
 import android.companion.virtual.VirtualDeviceManager
 import android.companion.virtual.flags.Flags.FLAG_INTERACTIVE_SCREEN_MIRROR
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
@@ -28,6 +29,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.display.data.repository.DeviceStateRepository
+import com.android.systemui.display.data.repository.DeviceStateRepository.DeviceState.CONCURRENT_DISPLAY
+import com.android.systemui.display.data.repository.FakeDeviceStateRepository
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.display.data.repository.createPendingDisplay
 import com.android.systemui.display.data.repository.display
@@ -59,18 +63,19 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
 
     private val fakeDisplayRepository = FakeDisplayRepository()
     private val fakeKeyguardRepository = FakeKeyguardRepository()
+    private val fakeDeviceStateRepository = FakeDeviceStateRepository()
     private val connectedDisplayStateProvider: ConnectedDisplayInteractor =
         ConnectedDisplayInteractorImpl(
             virtualDeviceManager,
             fakeKeyguardRepository,
             fakeDisplayRepository,
+            fakeDeviceStateRepository,
             UnconfinedTestDispatcher(),
         )
     private val testScope = TestScope(UnconfinedTestDispatcher())
 
     @Before
     fun setup() {
-        mSetFlagsRule.disableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
         whenever(virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(anyInt())).thenReturn(false)
         fakeKeyguardRepository.setKeyguardShowing(false)
     }
@@ -155,9 +160,9 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
     fun displayState_virtualDeviceOwnedMirrorVirtualDisplay_connected() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
             whenever(virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(anyInt()))
                 .thenReturn(true)
             val value by lastValue()
@@ -178,9 +183,9 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
     fun virtualDeviceOwnedMirrorVirtualDisplay_emitsConnectedDisplayAddition() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
             whenever(virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(anyInt()))
                 .thenReturn(true)
             var count = 0
@@ -281,6 +286,44 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
             fakeKeyguardRepository.setKeyguardShowing(true)
 
             assertThat(pendingDisplay).isNull()
+        }
+
+    @Test
+    fun concurrentDisplaysInProgress_started_returnsTrue() =
+        testScope.runTest {
+            val concurrentDisplaysInProgress =
+                collectLastValue(connectedDisplayStateProvider.concurrentDisplaysInProgress)
+
+            fakeDeviceStateRepository.emit(CONCURRENT_DISPLAY)
+
+            assertThat(concurrentDisplaysInProgress()).isTrue()
+        }
+
+    @Test
+    fun concurrentDisplaysInProgress_stopped_returnsFalse() =
+        testScope.runTest {
+            val concurrentDisplaysInProgress =
+                collectLastValue(connectedDisplayStateProvider.concurrentDisplaysInProgress)
+
+            fakeDeviceStateRepository.emit(CONCURRENT_DISPLAY)
+            fakeDeviceStateRepository.emit(DeviceStateRepository.DeviceState.UNKNOWN)
+
+            assertThat(concurrentDisplaysInProgress()).isFalse()
+        }
+
+    @Test
+    fun concurrentDisplaysInProgress_otherStates_returnsFalse() =
+        testScope.runTest {
+            val concurrentDisplaysInProgress =
+                collectLastValue(connectedDisplayStateProvider.concurrentDisplaysInProgress)
+
+            DeviceStateRepository.DeviceState.entries
+                .filter { it != CONCURRENT_DISPLAY }
+                .forEach { deviceState ->
+                    fakeDeviceStateRepository.emit(deviceState)
+
+                    assertThat(concurrentDisplaysInProgress()).isFalse()
+                }
         }
 
     private fun TestScope.lastValue(): FlowValue<State?> =

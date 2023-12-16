@@ -75,7 +75,6 @@ import android.companion.IOnMessageReceivedListener;
 import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.companion.datatransfer.PermissionSyncRequest;
-import android.companion.utils.FeatureUtils;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -94,9 +93,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerWhitelistManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -829,22 +826,20 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
                 int userId, int associationId) {
-            if (!FeatureUtils.isPermSyncEnabled()) {
-                throw new UnsupportedOperationException("Calling"
-                        + " buildPermissionTransferUserConsentIntent, but this API is disabled by"
-                        + " the system.");
-            }
             return mSystemDataTransferProcessor.buildPermissionTransferUserConsentIntent(
                     packageName, userId, associationId);
         }
 
         @Override
+        public boolean isPermissionTransferUserConsented(String packageName, int userId,
+                int associationId) {
+            return mSystemDataTransferProcessor.isPermissionTransferUserConsented(packageName,
+                    userId, associationId);
+        }
+
+        @Override
         public void startSystemDataTransfer(String packageName, int userId, int associationId,
                 ISystemDataTransferCallback callback) {
-            if (!FeatureUtils.isPermSyncEnabled()) {
-                throw new UnsupportedOperationException("Calling startSystemDataTransfer, but this"
-                        + " API is disabled by the system.");
-            }
             mSystemDataTransferProcessor.startSystemDataTransfer(packageName, userId,
                     associationId, callback);
         }
@@ -1067,13 +1062,14 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-                String[] args, ShellCallback callback, ResultReceiver resultReceiver)
-                throws RemoteException {
-            new CompanionDeviceShellCommand(CompanionDeviceManagerService.this, mAssociationStore,
-                    mDevicePresenceMonitor, mTransportManager, mSystemDataTransferProcessor,
-                    mAssociationRequestsProcessor)
-                    .exec(this, in, out, err, args, callback, resultReceiver);
+        public int handleShellCommand(@NonNull ParcelFileDescriptor in,
+                @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+                @NonNull String[] args) {
+            return new CompanionDeviceShellCommand(CompanionDeviceManagerService.this,
+                    mAssociationStore, mDevicePresenceMonitor, mTransportManager,
+                    mSystemDataTransferProcessor, mAssociationRequestsProcessor)
+                    .exec(this, in.getFileDescriptor(), out.getFileDescriptor(),
+                            err.getFileDescriptor(), args);
         }
 
         @Override

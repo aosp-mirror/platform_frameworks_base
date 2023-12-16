@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
@@ -38,6 +38,7 @@ import com.android.systemui.runTest
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.user.domain.interactor.HeadlessSystemUserModeModule
@@ -55,6 +56,7 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
+@EnableFlags(FooterViewRefactor.FLAG_NAME)
 class FooterViewModelTest : SysuiTestCase() {
     private lateinit var footerViewModel: FooterViewModel
 
@@ -106,8 +108,6 @@ class FooterViewModelTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        mSetFlagsRule.enableFlags(Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR)
-
         // The underTest in the component is Optional, because that matches the provider we
         // currently have for the footer view model.
         footerViewModel = testComponent.underTest.get()
@@ -116,27 +116,27 @@ class FooterViewModelTest : SysuiTestCase() {
     @Test
     fun testMessageVisible_whenFilteredNotifications() =
         testComponent.runTest {
-            val message by collectLastValue(footerViewModel.message)
+            val visible by collectLastValue(footerViewModel.message.isVisible)
 
             activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
 
-            assertThat(message?.visible).isTrue()
+            assertThat(visible).isTrue()
         }
 
     @Test
     fun testMessageVisible_whenNoFilteredNotifications() =
         testComponent.runTest {
-            val message by collectLastValue(footerViewModel.message)
+            val visible by collectLastValue(footerViewModel.message.isVisible)
 
             activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false
 
-            assertThat(message?.visible).isFalse()
+            assertThat(visible).isFalse()
         }
 
     @Test
     fun testClearAllButtonVisible_whenHasClearableNotifs() =
         testComponent.runTest {
-            val button by collectLastValue(footerViewModel.clearAllButton)
+            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
@@ -148,13 +148,13 @@ class FooterViewModelTest : SysuiTestCase() {
                 )
             runCurrent()
 
-            assertThat(button?.isVisible?.value).isTrue()
+            assertThat(visible?.value).isTrue()
         }
 
     @Test
     fun testClearAllButtonVisible_whenHasNoClearableNotifs() =
         testComponent.runTest {
-            val button by collectLastValue(footerViewModel.clearAllButton)
+            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
@@ -166,13 +166,13 @@ class FooterViewModelTest : SysuiTestCase() {
                 )
             runCurrent()
 
-            assertThat(button?.isVisible?.value).isFalse()
+            assertThat(visible?.value).isFalse()
         }
 
     @Test
     fun testClearAllButtonAnimating_whenShadeExpandedAndTouchable() =
         testComponent.runTest {
-            val button by collectLastValue(footerViewModel.clearAllButton)
+            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
             runCurrent()
 
             // WHEN shade is expanded
@@ -200,13 +200,13 @@ class FooterViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN button visibility should animate
-            assertThat(button?.isVisible?.isAnimating).isTrue()
+            assertThat(visible?.isAnimating).isTrue()
         }
 
     @Test
     fun testClearAllButtonAnimating_whenShadeNotExpanded() =
         testComponent.runTest {
-            val button by collectLastValue(footerViewModel.clearAllButton)
+            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
             runCurrent()
 
             // WHEN shade is collapsed
@@ -234,6 +234,6 @@ class FooterViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN button visibility should not animate
-            assertThat(button?.isVisible?.isAnimating).isFalse()
+            assertThat(visible?.isAnimating).isFalse()
         }
 }

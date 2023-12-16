@@ -30,14 +30,16 @@ class LoopedAnimatable2DrawableWrapper private constructor(private val animatabl
 
     private val loopedCallback = LoopedCallback()
 
+    private var isLoopedCallbackRegistered: Boolean = false
+
     override fun start() {
         animatable2.start()
-        animatable2.registerAnimationCallback(loopedCallback)
+        setLoopingRegistered(true)
     }
 
     override fun stop() {
         // stop looping if someone stops the animation
-        animatable2.unregisterAnimationCallback(loopedCallback)
+        setLoopingRegistered(false)
         animatable2.stop()
     }
 
@@ -49,7 +51,25 @@ class LoopedAnimatable2DrawableWrapper private constructor(private val animatabl
     override fun unregisterAnimationCallback(callback: Animatable2.AnimationCallback): Boolean =
         animatable2.unregisterAnimationCallback(callback)
 
-    override fun clearAnimationCallbacks() = animatable2.clearAnimationCallbacks()
+    override fun clearAnimationCallbacks() {
+        animatable2.clearAnimationCallbacks()
+        // re-register looped callback to maintain looped behaviour. LoopedCallback is a static
+        // class and it has no extra references, so it doesn't provoke a memory leak.
+        isLoopedCallbackRegistered = false
+        setLoopingRegistered(true)
+    }
+
+    private fun setLoopingRegistered(isLooping: Boolean) {
+        if (isLooping == isLoopedCallbackRegistered) {
+            return
+        }
+        isLoopedCallbackRegistered = isLooping
+        if (isLooping) {
+            animatable2.registerAnimationCallback(loopedCallback)
+        } else {
+            animatable2.unregisterAnimationCallback(loopedCallback)
+        }
+    }
 
     override fun getConstantState(): ConstantState? =
         drawable!!.constantState?.let(LoopedAnimatable2DrawableWrapper::LoopedDrawableState)

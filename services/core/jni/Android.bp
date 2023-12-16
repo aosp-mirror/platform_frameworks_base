@@ -37,6 +37,7 @@ cc_library_static {
         "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_biometrics_SurfaceToNativeHandleConverter.cpp",
+        "com_android_server_BootReceiver.cpp",
         "com_android_server_ConsumerIrService.cpp",
         "com_android_server_companion_virtual_InputController.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
@@ -93,6 +94,16 @@ cc_library_static {
     header_libs: [
         "bionic_libc_platform_headers",
     ],
+
+    static_libs: [
+        "libunwindstack",
+    ],
+
+    whole_static_libs: [
+        "libdebuggerd_tombstone_proto_to_text",
+    ],
+
+    runtime_libs: ["libdexfile"],
 }
 
 cc_defaults {
@@ -187,7 +198,7 @@ cc_defaults {
         "android.hardware.power.stats@1.0",
         "android.hardware.power.stats-V1-ndk",
         "android.hardware.thermal@1.0",
-        "android.hardware.thermal-V1-ndk",
+        "android.hardware.thermal-V2-ndk",
         "android.hardware.tv.input@1.0",
         "android.hardware.tv.input-V2-ndk",
         "android.hardware.vibrator-V2-cpp",

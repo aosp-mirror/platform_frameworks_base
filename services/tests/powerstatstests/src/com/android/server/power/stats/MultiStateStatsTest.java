@@ -26,8 +26,6 @@ import android.os.BatteryConsumer;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.MultiStateStats;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -38,7 +36,6 @@ import java.util.Arrays;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MultiStateStatsTest {
-
     public static final int DIMENSION_COUNT = 2;
 
     @Test

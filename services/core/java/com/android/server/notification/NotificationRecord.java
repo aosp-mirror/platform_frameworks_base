@@ -24,7 +24,9 @@ import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
+import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
+import android.app.Flags;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -1257,8 +1259,25 @@ public final class NotificationRecord {
         mStats.setExpanded();
     }
 
+    /** Run when the notification is direct replied. */
     public void recordDirectReplied() {
+        if (Flags.lifetimeExtensionRefactor()) {
+            // Mark the NotificationRecord as lifetime extended.
+            Notification notification = getSbn().getNotification();
+            notification.flags |= Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        }
+
         mStats.setDirectReplied();
+    }
+
+
+    /** Run when the notification is smart replied. */
+    @FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void recordSmartReplied() {
+        Notification notification = getSbn().getNotification();
+        notification.flags |= Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+
+        mStats.setSmartReplied();
     }
 
     public void recordDismissalSurface(@NotificationStats.DismissalSurface int surface) {

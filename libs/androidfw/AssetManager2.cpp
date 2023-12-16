@@ -603,7 +603,7 @@ std::unique_ptr<Asset> AssetManager2::OpenNonAsset(const std::string& filename,
     std::unique_ptr<Asset> asset = assets->GetAssetsProvider()->Open(filename, mode);
     if (asset) {
       if (out_cookie != nullptr) {
-        *out_cookie = i;
+        *out_cookie = i - 1;
       }
       return asset;
     }

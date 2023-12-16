@@ -943,7 +943,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             int sinkDevice = mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC);
             for (AudioDevicePort port : devicePorts) {
                 if ((port.type() & sinkDevice) != 0 &&
-                    (port.type() & AudioSystem.DEVICE_BIT_IN) == 0) {
+                        !AudioSystem.isInputDevice(port.type())) {
                     sinks.add(port);
                 }
             }

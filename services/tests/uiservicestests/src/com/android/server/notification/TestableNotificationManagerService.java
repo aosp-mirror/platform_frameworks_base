@@ -82,7 +82,7 @@ public class TestableNotificationManagerService extends NotificationManagerServi
     }
 
     @Override
-    protected boolean isCallerIsSystemOrSystemUi() {
+    protected boolean isCallerSystemOrSystemUi() {
         countSystemChecks++;
         return isSystemUid || isSystemAppId;
     }

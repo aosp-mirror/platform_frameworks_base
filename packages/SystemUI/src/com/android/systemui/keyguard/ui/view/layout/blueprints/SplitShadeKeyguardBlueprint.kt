@@ -23,7 +23,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntryIconSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
@@ -47,7 +47,7 @@ class SplitShadeKeyguardBlueprint
 @Inject
 constructor(
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
-    defaultDeviceEntryIconSection: DefaultDeviceEntryIconSection,
+    defaultDeviceEntrySection: DefaultDeviceEntrySection,
     defaultShortcutsSection: DefaultShortcutsSection,
     @Named(KeyguardSectionsModule.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION)
     defaultAmbientIndicationAreaSection: Optional<KeyguardSection>,
@@ -75,7 +75,7 @@ constructor(
             aodNotificationIconsSection,
             aodBurnInSection,
             communalTutorialIndicatorSection,
-            defaultDeviceEntryIconSection, // Add LAST: Intentionally has z-order above other views.
+            defaultDeviceEntrySection, // Add LAST: Intentionally has z-order above other views.
         )
 
     companion object {

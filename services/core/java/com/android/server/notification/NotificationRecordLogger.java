@@ -530,16 +530,13 @@ interface NotificationRecordLogger {
             this.timeout_millis = p.r.getSbn().getNotification().getTimeoutAfter();
             this.is_non_dismissible = NotificationRecordLogger.isNonDismissible(p.r);
 
-            final boolean isStickyHunFlagEnabled = SystemUiSystemPropertiesFlags.getResolver()
-                    .isEnabled(NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI);
-
             final boolean hasFullScreenIntent =
                     p.r.getSbn().getNotification().fullScreenIntent != null;
 
             final boolean hasFsiRequestedButDeniedFlag =  (p.r.getSbn().getNotification().flags
                     & Notification.FLAG_FSI_REQUESTED_BUT_DENIED) != 0;
 
-            this.fsi_state = NotificationRecordLogger.getFsiState(isStickyHunFlagEnabled,
+            this.fsi_state = NotificationRecordLogger.getFsiState(
                     hasFullScreenIntent, hasFsiRequestedButDeniedFlag, eventType);
 
             this.is_locked = p.r.isLocked();
@@ -587,13 +584,10 @@ interface NotificationRecordLogger {
      * @return FrameworkStatsLog enum of the state of the full screen intent posted with this
      * notification.
      */
-    static int getFsiState(boolean isStickyHunFlagEnabled,
-                           boolean hasFullScreenIntent,
+    static int getFsiState(boolean hasFullScreenIntent,
                            boolean hasFsiRequestedButDeniedFlag,
                            NotificationReportedEvent eventType) {
-
-        if (!isStickyHunFlagEnabled
-                || eventType == NotificationReportedEvent.NOTIFICATION_UPDATED) {
+        if (eventType == NotificationReportedEvent.NOTIFICATION_UPDATED) {
             // Zeroes in protos take zero bandwidth, but non-zero numbers take bandwidth,
             // so we should log 0 when possible.
             return 0;

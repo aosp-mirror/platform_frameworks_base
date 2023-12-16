@@ -37,17 +37,25 @@ constructor(
 
     @MainThread
     fun enable(onShadeInteraction: Runnable) {
-        if (shadeExpansionCollectorJob == null) {
-            shadeExpansionCollectorJob =
-                scope.launch {
-                    // wait for it to emit true once
-                    shadeInteractorLazy.get().isUserInteracting.first { it }
-                    onShadeInteraction.run()
-                }
-            shadeExpansionCollectorJob?.invokeOnCompletion { shadeExpansionCollectorJob = null }
-        } else {
+        if (shadeExpansionCollectorJob != null) {
             Log.e(TAG, "Already enabled")
+            return
         }
+        //TODO(b/313957306) delete this check
+        if (shadeInteractorLazy.get().isUserInteracting.value) {
+            // Workaround for b/311266890. This flow is in an error state that breaks this.
+            Log.e(TAG, "isUserInteracting already true, skipping enable")
+            return
+        }
+        shadeExpansionCollectorJob =
+            scope.launch {
+                Log.i(TAG, "Enable detector")
+                // wait for it to emit true once
+                shadeInteractorLazy.get().isUserInteracting.first { it }
+                Log.i(TAG, "Detector detected shade interaction")
+                onShadeInteraction.run()
+            }
+        shadeExpansionCollectorJob?.invokeOnCompletion { shadeExpansionCollectorJob = null }
     }
 
     @MainThread

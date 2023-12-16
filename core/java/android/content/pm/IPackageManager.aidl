@@ -312,6 +312,8 @@ interface IPackageManager {
 
     Bundle getSuspendedPackageAppExtras(String packageName, int userId);
 
+    String getSuspendingPackage(String packageName, int userId);
+
     /**
      * Backup/restore support - only the system uid may use these.
      */

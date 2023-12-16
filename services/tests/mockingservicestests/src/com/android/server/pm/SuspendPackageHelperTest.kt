@@ -16,12 +16,14 @@
 
 package com.android.server.pm
 
+import android.app.AppOpsManager
 import android.content.Intent
 import android.content.pm.SuspendDialogInfo
 import android.os.Binder
 import android.os.PersistableBundle
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
+import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +34,12 @@ import org.mockito.Mockito.verify
 
 @RunWith(JUnit4::class)
 class SuspendPackageHelperTest : PackageHelperTestBase() {
+    override fun setup() {
+        super.setup()
+        whenever(rule.mocks().appOpsManager.checkOpNoThrow(
+                eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_SUSPENSION), any(), any()))
+                .thenReturn(AppOpsManager.MODE_DEFAULT)
+    }
 
     @Test
     fun setPackagesSuspended() {
@@ -272,6 +280,72 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
 
         assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
             TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(DEVICE_OWNER_PACKAGE)
+    }
+
+    @Test
+    fun getSuspendingPackagePrecedence() {
+        val launcherExtras = PersistableBundle()
+        launcherExtras.putString(TEST_PACKAGE_2, TEST_PACKAGE_2)
+        val targetPackages = arrayOf(TEST_PACKAGE_2)
+        // Suspend.
+        var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
+                targetPackages, true /* suspended */, null /* appExtras */, launcherExtras,
+                null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
+                false /* quarantined */)
+        assertThat(failedNames).isEmpty()
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(DEVICE_OWNER_PACKAGE)
+
+        // Suspend by system.
+        failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
+                targetPackages, true /* suspended */, null /* appExtras */, launcherExtras,
+                null /* dialogInfo */, PLATFORM_PACKAGE_NAME, TEST_USER_ID, deviceOwnerUid,
+                false /* quarantined */)
+        assertThat(failedNames).isEmpty()
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(PLATFORM_PACKAGE_NAME)
+
+        // QAS by package1.
+        failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
+                targetPackages, true /* suspended */, null /* appExtras */, launcherExtras,
+                null /* dialogInfo */, TEST_PACKAGE_1, TEST_USER_ID, deviceOwnerUid,
+                true /* quarantined */)
+        assertThat(failedNames).isEmpty()
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(TEST_PACKAGE_1)
+
+        // Un-QAS by package1.
+        suspendPackageHelper.removeSuspensionsBySuspendingPackage(pms.snapshotComputer(),
+                targetPackages, { suspendingPackage -> suspendingPackage == TEST_PACKAGE_1 },
+                TEST_USER_ID)
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(PLATFORM_PACKAGE_NAME)
+
+        // Un-suspend by system.
+        suspendPackageHelper.removeSuspensionsBySuspendingPackage(pms.snapshotComputer(),
+                targetPackages, { suspendingPackage -> suspendingPackage == PLATFORM_PACKAGE_NAME },
+                TEST_USER_ID)
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(DEVICE_OWNER_PACKAGE)
+
+        // Unsuspend.
+        suspendPackageHelper.removeSuspensionsBySuspendingPackage(pms.snapshotComputer(),
+                targetPackages, { suspendingPackage -> suspendingPackage == DEVICE_OWNER_PACKAGE },
+                TEST_USER_ID)
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isNull()
     }
 
     @Test

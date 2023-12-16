@@ -56,9 +56,9 @@ import java.util.List;
  *
  * <pre>
  *   {@code
- *     <vibration>
+ *     <vibration-effect>
  *       <predefined-effect name="click" />
- *     </vibration>
+ *     </vibration-effect>
  *   }
  * </pre>
  *
@@ -66,7 +66,7 @@ import java.util.List;
  *
  * <pre>
  *   {@code
- *     <vibration>
+ *     <vibration-effect>
  *       <waveform-effect>
  *         <waveform-entry amplitude="default" durationMs="10" />
  *         <waveform-entry amplitude="0" durationMs="10" />
@@ -77,7 +77,7 @@ import java.util.List;
  *           <waveform-entry amplitude="255" durationMs="20" />
  *         </repeating>
  *       </waveform-effect>
- *     </vibration>
+ *     </vibration-effect>
  *   }
  * </pre>
  *
@@ -85,31 +85,31 @@ import java.util.List;
  *
  * <pre>
  *   {@code
- *     <vibration>
+ *     <vibration-effect>
  *       <primitive-effect name="click" />
  *       <primitive-effect name="slow_rise" scale="0.8" />
  *       <primitive-effect name="quick_fall" delayMs="50" />
  *       <primitive-effect name="tick" scale="0.5" delayMs="100" />
- *     </vibration>
+ *     </vibration-effect>
  *   }
  * </pre>
  *
  * <p>When the root element represents a selection list of vibration effects, the root tag should be
  * a <vibration-select> tag. The root element should contain a list of vibration serializations.
- * Each vibration within the root-element should follow the format discussed for the <vibration> tag
- * above. See example below:
+ * Each vibration within the root-element should follow the format discussed for the
+ * <vibration-effect> tag above. See example below:
  *
  * <pre>
  *   {@code
  *     <vibration-select>
- *       <vibration>
+ *       <vibration-effect>
  *         <predefined-effect name="click" />
- *       </vibration>
- *       <vibration>
+ *       </vibration-effect>
+ *       <vibration-effect>
  *         <waveform-effect>
  *           <waveform-entry amplitude="default" durationMs="10" />
  *         </waveform-effect>
- *       </vibration>
+ *       </vibration-effect>
  *     </vibration-select>
  *   }
  * </pre>
@@ -262,12 +262,12 @@ public final class VibrationXmlParser {
      * {@link ParsedVibration}.
      *
      * <p>Same as {@link #parseDocument(Reader, int)}, but, instead of parsing the full XML content,
-     * it takes a parser that points to either a <vibration> or a <vibration-select> start tag. No
-     * other parser position, including start of document, is considered valid.
+     * it takes a parser that points to either a <vibration-effect> or a <vibration-select> start
+     * tag. No other parser position, including start of document, is considered valid.
      *
-     * <p>This method parses until an end "vibration" or "vibration-select" tag (depending on the
-     * start tag found at the start of parsing). After a successful parsing, the parser will point
-     * to the end tag.
+     * <p>This method parses until an end "vibration-effect" or "vibration-select" tag (depending
+     * on the start tag found at the start of parsing). After a successful parsing, the parser
+     * will point to the end tag.
      *
      * @throws IOException error parsing from given {@link TypedXmlPullParser}.
      * @throws VibrationXmlParserException if the XML tag cannot be parsed into a
@@ -308,7 +308,7 @@ public final class VibrationXmlParser {
 
         String tagName = parser.getName();
         switch(tagName) {
-            case XmlConstants.TAG_VIBRATION:
+            case XmlConstants.TAG_VIBRATION_EFFECT:
                 return new ParsedVibration(parseVibrationEffectInternal(parser, flags));
             case XmlConstants.TAG_VIBRATION_SELECT:
                 return parseVibrationSelectInternal(parser, flags);

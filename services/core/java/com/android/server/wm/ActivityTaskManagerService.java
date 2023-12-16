@@ -76,6 +76,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityManagerServiceDumpActivitiesProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE;
@@ -102,6 +103,7 @@ import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORD
 import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_LAST_ORDERED_ID;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ROOT_TASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
@@ -117,6 +119,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
@@ -125,7 +128,6 @@ import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_R
 import static com.android.server.wm.Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
-import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -1051,6 +1053,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mWindowManager = wm;
             mRootWindowContainer = wm.mRoot;
             mWindowOrganizerController.mTransitionController.setWindowManager(wm);
+            mLifecycleManager.setWindowManager(wm);
             mTempConfig.setToDefaults();
             mTempConfig.setLocales(LocaleList.getDefault());
             mConfigurationSeq = mTempConfig.seq = 1;
@@ -1261,10 +1264,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 true /*validateIncomingUser*/);
     }
 
-    static boolean isSdkSandboxActivity(Context context, Intent intent) {
+    static boolean isSdkSandboxActivityIntent(Context context, Intent intent) {
         return intent != null
                 && (sandboxActivitySdkBasedContext()
-                        ? SdkSandboxActivityAuthority.isSdkSandboxActivity(context, intent)
+                        ? SdkSandboxActivityAuthority.isSdkSandboxActivityIntent(context, intent)
                         : intent.isSandboxActivity(context));
     }
 
@@ -1272,13 +1275,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @Nullable String callingFeatureId, Intent intent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
             ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
-
         final SafeActivityOptions opts = SafeActivityOptions.fromBundle(bOptions);
 
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
 
-        if (isSdkSandboxActivity(mContext, intent)) {
+        if (isSdkSandboxActivityIntent(mContext, intent)) {
             SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
                     SdkSandboxManagerLocal.class);
             sdkSandboxManagerLocal.enforceAllowedToHostSandboxedActivity(
@@ -1313,7 +1315,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setActivityOptions(opts)
                 .setUserId(userId)
                 .execute();
-
     }
 
     @Override
@@ -2242,7 +2243,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         final BackgroundActivityStartController balController =
                 mTaskSupervisor.getBackgroundActivityLaunchController();
-        if (balController.shouldAbortBackgroundActivityStart(
+        final BalVerdict balVerdict = balController.checkBackgroundActivityStart(
                 callingUid,
                 callingPid,
                 callingPackage,
@@ -2252,10 +2253,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 null,
                 BackgroundStartPrivileges.NONE,
                 null,
-                null)) {
-            if (!isBackgroundActivityStartsEnabled()) {
-                return;
-            }
+                null,
+                null);
+        if (balVerdict.blocks() && !isBackgroundActivityStartsEnabled()) {
+            Slog.w(TAG, "moveTaskToFront blocked: " + balVerdict);
+            return;
+        }
+        if (DEBUG_ACTIVITY_STARTS) {
+            Slog.d(TAG, "moveTaskToFront allowed: " + balVerdict);
         }
         try {
             final Task task = mRootWindowContainer.anyTaskForId(taskId);
@@ -3618,8 +3623,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * @hide
      */
     @Override
-    public void onSplashScreenViewCopyFinished(int taskId, SplashScreenViewParcelable parcelable)
-            throws RemoteException {
+    public void onSplashScreenViewCopyFinished(int taskId,
+            @Nullable SplashScreenViewParcelable parcelable)
+                throws RemoteException {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_TASKS,
                 "copySplashScreenViewFinish()");
         synchronized (mGlobalLock) {
@@ -3688,6 +3694,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // the app is PAUSING, so detect that case here.
         boolean originallyFromClient = fromClient
                 && (!r.isState(PAUSING) || params.isAutoEnterEnabled());
+
+        // If PiP2 flag is on and client-request to enter PiP came via onUserLeaveHint(),
+        // we request a direct transition from Shell to TRANSIT_PIP_LEGACY to get the startWct
+        // with the right entry bounds.
+        if (isPip2ExperimentEnabled() && !originallyFromClient && !params.isAutoEnterEnabled()) {
+            final Transition legacyEnterPipTransition = new Transition(TRANSIT_PIP,
+                    0 /* flags */, getTransitionController(),
+                    mWindowManager.mSyncEngine);
+            legacyEnterPipTransition.setPipActivity(r);
+            getTransitionController().startCollectOrQueue(legacyEnterPipTransition, (deferred) -> {
+                getTransitionController().requestStartTransition(legacyEnterPipTransition,
+                        r.getTask(), null /* remoteTransition */, null /* displayChange */);
+            });
+            return true;
+        }
 
         // Create a transition only for this pip entry if it is coming from the app without the
         // system requesting that the app enter-pip. If the system requested it, that means it
@@ -4258,7 +4279,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void dumpActivityContainersLocked(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER CONTAINERS (dumpsys activity containers)");
-        mRootWindowContainer.dumpChildrenNames(pw, " ");
+        mRootWindowContainer.dumpChildrenNames(pw, "");
         pw.println(" ");
     }
 
@@ -5279,6 +5300,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** Applies latest configuration and/or visibility updates if needed. */
     boolean ensureConfigAndVisibilityAfterUpdate(ActivityRecord starting, int changes) {
+        if (starting == null && mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
+            return true;
+        }
         boolean kept = true;
         final Task mainRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
         // mainRootTask is null during startup.

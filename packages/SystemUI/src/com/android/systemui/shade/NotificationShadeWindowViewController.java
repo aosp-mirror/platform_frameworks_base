@@ -42,9 +42,6 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.bouncer.ui.binder.KeyguardBouncerViewBinder;
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.communal.data.repository.CommunalRepository;
-import com.android.systemui.communal.ui.viewmodel.CommunalViewModel;
-import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dock.DockManager;
@@ -108,14 +105,14 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PulsingGestureListener mPulsingGestureListener;
     private final LockscreenHostedDreamGestureListener mLockscreenHostedDreamGestureListener;
     private final NotificationInsetsController mNotificationInsetsController;
-    private final CommunalViewModel mCommunalViewModel;
-    private final CommunalRepository mCommunalRepository;
     private final boolean mIsTrackpadCommonEnabled;
     private final FeatureFlagsClassic mFeatureFlagsClassic;
     private final SysUIKeyEventHandler mSysUIKeyEventHandler;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final QuickSettingsController mQuickSettingsController;
+    private final GlanceableHubContainerController
+            mGlanceableHubContainerController;
     private GestureDetector mPulsingWakeupGestureHandler;
     private GestureDetector mDreamingWakeupGestureHandler;
     private View mBrightnessMirror;
@@ -183,8 +180,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
-            CommunalViewModel communalViewModel,
-            CommunalRepository communalRepository,
+            GlanceableHubContainerController glanceableHubContainerController,
             NotificationLaunchAnimationInteractor notificationLaunchAnimationInteractor,
             FeatureFlagsClassic featureFlagsClassic,
             SystemClock clock,
@@ -217,8 +213,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mPulsingGestureListener = pulsingGestureListener;
         mLockscreenHostedDreamGestureListener = lockscreenHostedDreamGestureListener;
         mNotificationInsetsController = notificationInsetsController;
-        mCommunalViewModel = communalViewModel;
-        mCommunalRepository = communalRepository;
+        mGlanceableHubContainerController = glanceableHubContainerController;
         mIsTrackpadCommonEnabled = featureFlagsClassic.isEnabled(TRACKPAD_GESTURE_COMMON);
         mFeatureFlagsClassic = featureFlagsClassic;
         mSysUIKeyEventHandler = sysUIKeyEventHandler;
@@ -311,6 +306,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     mTouchActive = true;
                     mTouchCancelled = false;
                     mDownEvent = ev;
+                    if (KeyguardShadeMigrationNssl.isEnabled()) {
+                        mService.userActivity();
+                    }
                 } else if (ev.getActionMasked() == MotionEvent.ACTION_UP
                         || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
                     mTouchActive = false;
@@ -344,6 +342,10 @@ public class NotificationShadeWindowViewController implements Dumpable {
 
                 mFalsingCollector.onTouchEvent(ev);
                 mPulsingWakeupGestureHandler.onTouchEvent(ev);
+
+                if (mGlanceableHubContainerController.onTouchEvent(ev)) {
+                    return logDownDispatch(ev, "dispatched to glanceable hub container", true);
+                }
                 if (mDreamingWakeupGestureHandler != null
                         && mDreamingWakeupGestureHandler.onTouchEvent(ev)) {
                     return logDownDispatch(ev, "dream wakeup gesture handled", true);
@@ -584,14 +586,13 @@ public class NotificationShadeWindowViewController implements Dumpable {
     }
 
     /**
-     * Sets up the communal hub UI if the {@link com.android.systemui.Flags#FLAG_COMMUNAL_HUB} flag
-     * is enabled.
+     * Sets up the glanceable hub UI if the {@link com.android.systemui.Flags#FLAG_COMMUNAL_HUB}
+     * flag is enabled.
      *
-     * The layout lives in {@link R.id.communal_ui_container}.
+     * The layout lives in {@link R.id.communal_ui_stub}.
      */
     public void setupCommunalHubLayout() {
-        if (!mCommunalRepository.isCommunalEnabled()
-                || !ComposeFacade.INSTANCE.isComposeAvailable()) {
+        if (!mGlanceableHubContainerController.isEnabled()) {
             return;
         }
 
@@ -599,8 +600,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
         View communalPlaceholder = mView.findViewById(R.id.communal_ui_stub);
         int index = mView.indexOfChild(communalPlaceholder);
         mView.removeView(communalPlaceholder);
-        mView.addView(ComposeFacade.INSTANCE.createCommunalContainer(mView.getContext(),
-                mCommunalViewModel), index);
+
+        mView.addView(mGlanceableHubContainerController.initView(mView.getContext()), index);
     }
 
     private boolean didNotificationPanelInterceptEvent(MotionEvent ev) {

@@ -16,14 +16,33 @@
 
 package com.android.systemui.statusbar.data.repository
 
+import android.view.Display
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.data.model.StatusBarAppearance
 import com.android.systemui.statusbar.data.model.StatusBarMode
+import com.google.common.truth.Truth.assertThat
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeStatusBarModeRepository @Inject constructor() : StatusBarModeRepository {
+@SysUISingleton
+class FakeStatusBarModeRepository @Inject constructor() : StatusBarModeRepositoryStore {
+
+    companion object {
+        const val DISPLAY_ID = Display.DEFAULT_DISPLAY
+    }
+
+    override val defaultDisplay: FakeStatusBarModePerDisplayRepository =
+        FakeStatusBarModePerDisplayRepository()
+
+    override fun forDisplay(displayId: Int): FakeStatusBarModePerDisplayRepository {
+        assertThat(displayId).isEqualTo(DISPLAY_ID)
+        return defaultDisplay
+    }
+}
+
+class FakeStatusBarModePerDisplayRepository : StatusBarModePerDisplayRepository {
     override val isTransientShown = MutableStateFlow(false)
     override val isInFullscreenMode = MutableStateFlow(false)
     override val statusBarAppearance = MutableStateFlow<StatusBarAppearance?>(null)
@@ -39,5 +58,5 @@ class FakeStatusBarModeRepository @Inject constructor() : StatusBarModeRepositor
 
 @Module
 interface FakeStatusBarModeRepositoryModule {
-    @Binds fun bindFake(fake: FakeStatusBarModeRepository): StatusBarModeRepository
+    @Binds fun bindFake(fake: FakeStatusBarModeRepository): StatusBarModeRepositoryStore
 }

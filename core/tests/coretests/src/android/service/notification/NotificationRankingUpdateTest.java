@@ -472,6 +472,9 @@ public class NotificationRankingUpdateTest {
         NotificationRankingUpdate nru = generateUpdate(getContext());
         Parcel parcel = Parcel.obtain();
         nru.writeToParcel(parcel, 0);
+        if (Flags.rankingUpdateAshmem()) {
+            assertTrue(nru.isFdNotNullAndClosed());
+        }
         parcel.setDataPosition(0);
         NotificationRankingUpdate nru1 = NotificationRankingUpdate.CREATOR.createFromParcel(parcel);
         // The rankingUpdate file descriptor is only non-null in the new path.

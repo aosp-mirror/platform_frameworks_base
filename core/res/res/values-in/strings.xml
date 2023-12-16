@@ -1247,7 +1247,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Selalu tampilkan"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> dibuat untuk versi OS Android yang tidak kompatibel dan mungkin berperilaku tak terduga. Versi aplikasi yang diupdate mungkin tersedia."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Selalu tampilkan"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Periksa apakah ada update"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Periksa update"</string>
     <string name="smv_application" msgid="3775183542777792638">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar kebijakan StrictMode yang diberlakukannya sendiri."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar kebijakan StrictMode yang diberlakukan secara otomatis."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Mengupdate ponsel…"</string>
@@ -1710,10 +1710,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Voice Access dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi untuk Anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Izinkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
-    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
-    <skip />
-    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
-    <skip />
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Uninstal"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikasi menghalangi permintaan izin sehingga respons Anda tidak dapat diverifikasi."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketuk fitur untuk mulai menggunakannya:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Pilih fitur yang akan digunakan dengan tombol aksesibilitas"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Pilih fitur yang akan digunakan dengan pintasan tombol volume"</string>
@@ -1908,10 +1906,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Akhir pekan"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Acara"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Tidur"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
     <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aktif"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Nonaktif"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> mematikan beberapa suara"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Ada masalah dengan perangkat. Hal ini mungkin membuat perangkat jadi tidak stabil dan perlu dikembalikan ke setelan pabrik."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Ada masalah dengan perangkat. Hubungi produsen perangkat untuk informasi selengkapnya."</string>
@@ -1993,7 +1991,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Setelan ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g>. Coba di tablet."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Setelan ini tidak dapat diakses di <xliff:g id="DEVICE">%1$s</xliff:g>. Coba di ponsel."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Aplikasi ini dibuat untuk versi lama Android. Aplikasi mungkin tidak berfungsi dengan baik dan tidak menyertakan perlindungan privasi dan keamanan terbaru. Periksa update, atau hubungi developer aplikasi."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Periksa apakah ada update"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Periksa update"</string>
     <string name="deprecated_abi_message" msgid="6820548011196218091">"Aplikasi ini tidak kompatibel dengan versi terbaru Android. Periksa update atau hubungi developer aplikasi."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Ada pesan baru"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Buka aplikasi SMS untuk melihat"</string>
@@ -2344,10 +2342,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon diblokir"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Tidak dapat mencerminkan ke layar"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Gunakan kabel lain dan coba lagi"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kabel mungkin tidak mendukung layar"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Kabel USB-C mungkin tidak terhubung dengan benar ke layar"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Perangkat terlalu panas dan tidak dapat mencerminkan ke layar sampai cukup dingin"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen aktif"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> menggunakan kedua layar untuk menampilkan konten"</string>
@@ -2364,4 +2359,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Tata letak keyboard disetel ke <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Ketuk untuk mengubah."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Keyboard fisik telah dikonfigurasi"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Ketuk untuk melihat keyboard"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Pribadi"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Clone"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Kerja"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Kerja 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Kerja 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Pengujian"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Umum"</string>
 </resources>

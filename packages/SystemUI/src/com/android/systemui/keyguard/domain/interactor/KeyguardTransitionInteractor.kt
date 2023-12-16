@@ -72,6 +72,10 @@ constructor(
     val fromDreamingTransition: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.from == DREAMING }
 
+    /** LOCKSCREEN->(any) transition information. */
+    val fromLockscreenTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.from == LOCKSCREEN }
+
     /** (any)->Lockscreen transition information */
     val anyStateToLockscreenTransition: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.to == LOCKSCREEN }
@@ -113,8 +117,15 @@ constructor(
     val goneToDreamingLockscreenHostedTransition: Flow<TransitionStep> =
         repository.transition(GONE, DREAMING_LOCKSCREEN_HOSTED)
 
+    /** GONE->LOCKSCREEN transition information. */
+    val goneToLockscreenTransition: Flow<TransitionStep> = repository.transition(GONE, LOCKSCREEN)
+
     /** LOCKSCREEN->AOD transition information. */
     val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
+
+    /** LOCKSCREEN->DOZING transition information. */
+    val lockscreenToDozingTransition: Flow<TransitionStep> =
+        repository.transition(LOCKSCREEN, DOZING)
 
     /** LOCKSCREEN->DREAMING transition information. */
     val lockscreenToDreamingTransition: Flow<TransitionStep> =
@@ -302,4 +313,11 @@ constructor(
     fun isFinishedInState(state: KeyguardState): Flow<Boolean> {
         return finishedKeyguardState.map { it == state }.distinctUntilChanged()
     }
+
+    /**
+     * Whether we've FINISHED a transition to a state that matches the given predicate. Consider
+     * using [isFinishedInStateWhere] whenever possible instead
+     */
+    fun isFinishedInStateWhereValue(stateMatcher: (KeyguardState) -> Boolean) =
+        stateMatcher(finishedKeyguardState.replayCache.last())
 }

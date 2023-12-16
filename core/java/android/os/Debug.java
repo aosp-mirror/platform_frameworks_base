@@ -2702,4 +2702,13 @@ public final class Debug
      * @hide
      */
     public static native boolean isVmapStack();
+
+    /**
+     * Log internal statistics about the allocator.
+     * @return true if the statistics were logged properly, false if not.
+     *
+     * @hide
+     */
+    public static native boolean logAllocatorStats();
+
 }

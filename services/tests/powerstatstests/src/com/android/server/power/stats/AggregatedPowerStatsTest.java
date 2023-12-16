@@ -90,6 +90,10 @@ public class AggregatedPowerStatsTest {
 
     private AggregatedPowerStats prepareAggregatePowerStats() {
         AggregatedPowerStats stats = new AggregatedPowerStats(mAggregatedPowerStatsConfig);
+
+        PowerStats ps = new PowerStats(mPowerComponentDescriptor);
+        stats.addPowerStats(ps, 0);
+
         stats.addClockUpdate(1000, 456);
         stats.setDuration(789);
 
@@ -100,7 +104,6 @@ public class AggregatedPowerStatsTest {
         stats.setUidState(APP_2, AggregatedPowerStatsConfig.STATE_PROCESS_STATE,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND, 2000);
 
-        PowerStats ps = new PowerStats(mPowerComponentDescriptor);
         ps.stats[0] = 100;
         ps.stats[1] = 987;
 

@@ -63,13 +63,27 @@ public interface DeviceStateProvider {
      */
     int SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED = 5;
 
+    /**
+     * Indicating that the supported device states have changed because an external display was
+     * added.
+     */
+    int SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED = 6;
+
+    /**
+     * Indicating that the supported device states have changed because an external display was
+     * removed.
+     */
+    int SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_REMOVED = 7;
+
     @IntDef(prefix = { "SUPPORTED_DEVICE_STATES_CHANGED_" }, value = {
             SUPPORTED_DEVICE_STATES_CHANGED_DEFAULT,
             SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED,
             SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL,
             SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL,
             SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED,
-            SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED
+            SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED,
+            SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED,
+            SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_REMOVED
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface SupportedStatesUpdatedReason {}

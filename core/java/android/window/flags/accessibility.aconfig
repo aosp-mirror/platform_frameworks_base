@@ -1,0 +1,8 @@
+package: "com.android.window.flags"
+
+flag {
+  name: "do_not_check_intersection_when_non_magnifiable_window_transitions"
+  namespace: "accessibility"
+  description: "The flag controls whether the intersection check for non-magnifiable windows is needed when onWindowTransition,"
+  bug: "312624253"
+}

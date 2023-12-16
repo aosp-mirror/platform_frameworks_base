@@ -72,6 +72,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * All interfaces in BatteryStatsHistory should only be called by BatteryStatsImpl and protected by
  * locks on BatteryStatsImpl object.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BatteryStatsHistory {
     private static final boolean DEBUG = false;
     private static final String TAG = "BatteryStatsHistory";
@@ -259,6 +260,7 @@ public class BatteryStatsHistory {
      * until the first change occurs.
      */
     @VisibleForTesting
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static class TraceDelegate {
         // Note: certain tests currently run as platform_app which is not allowed
         // to set debug system properties. To ensure that system properties are set
@@ -391,10 +393,18 @@ public class BatteryStatsHistory {
     public BatteryStatsHistory(int maxHistoryFiles, int maxHistoryBufferSize,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
             MonotonicClock monotonicClock) {
+        this(maxHistoryFiles, maxHistoryBufferSize, stepDetailsCalculator, clock, monotonicClock,
+                new TraceDelegate());
+    }
+
+    @VisibleForTesting
+    public BatteryStatsHistory(int maxHistoryFiles, int maxHistoryBufferSize,
+            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
+            MonotonicClock monotonicClock, TraceDelegate traceDelegate) {
         mMaxHistoryFiles = maxHistoryFiles;
         mMaxHistoryBufferSize = maxHistoryBufferSize;
         mStepDetailsCalculator = stepDetailsCalculator;
-        mTracer = new TraceDelegate();
+        mTracer = traceDelegate;
         mClock = clock;
         mMonotonicClock = monotonicClock;
 
@@ -619,7 +629,7 @@ public class BatteryStatsHistory {
      * @param startTimeMs monotonic time (the HistoryItem.time field) to start iterating from,
      *                    inclusive
      * @param endTimeMs monotonic time to stop iterating, exclusive.
-     *                  Pass 0 to indicate current time.
+     *                  Pass {@link MonotonicClock#UNDEFINED} to indicate current time.
      */
     @NonNull
     public BatteryStatsHistoryIterator iterate(long startTimeMs, long endTimeMs) {
@@ -2096,6 +2106,7 @@ public class BatteryStatsHistory {
      * fewer bytes.  It is a bit more expensive than just writing the long into the parcel,
      * but at scale saves a lot of storage and allows recording of longer battery history.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class VarintParceler {
         /**
          * Writes an array of longs into Parcel using the varint format, see

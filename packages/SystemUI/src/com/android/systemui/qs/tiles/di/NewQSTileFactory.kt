@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.di
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.qs.QSFactory
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
 import com.android.systemui.qs.tiles.impl.custom.di.CustomTileComponent
@@ -44,6 +45,7 @@ constructor(
 ) : QSFactory {
 
     init {
+        QSPipelineFlagsRepository.assertNewTiles()
         for (viewModelTileSpec in tileMap.keys) {
             require(qsTileConfigProvider.hasConfig(viewModelTileSpec)) {
                 "No config for $viewModelTileSpec"
@@ -54,7 +56,7 @@ constructor(
     override fun createTile(tileSpec: String): QSTile? {
         val viewModel: QSTileViewModel =
             when (val spec = TileSpec.create(tileSpec)) {
-                is TileSpec.CustomTileSpec -> createCustomTileViewModel(spec)
+                is TileSpec.CustomTileSpec -> null
                 is TileSpec.PlatformTileSpec -> tileMap[tileSpec]?.get()
                 is TileSpec.Invalid -> null
             }

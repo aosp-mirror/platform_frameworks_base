@@ -20,6 +20,8 @@ import android.app.Instrumentation
 import android.app.WallpaperManager
 import android.content.res.Resources
 import android.platform.test.annotations.Presubmit
+import android.tools.common.datatypes.Region
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.SPLASH_SCREEN
@@ -125,27 +127,19 @@ class TaskTransitionTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
         val backgroundColorLayer = ComponentNameMatcher("", "animation-background")
         val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
         flicker.assertLayers {
-            this.invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
-                    it.visibleRegion(launchNewTaskApp.componentMatcher).coversExactly(displayBounds)
-                }
+            visibleRegionCovers(launchNewTaskApp.componentMatcher, displayBounds)
                 .isInvisible(backgroundColorLayer)
-                .hasNoColor(backgroundColorLayer)
                 .then()
                 // Transitioning
                 .isVisible(backgroundColorLayer)
-                .hasColor(backgroundColorLayer)
                 .then()
                 // Fully transitioned to simple SIMPLE_ACTIVITY
-                .invoke(
-                    "SIMPLE_ACTIVITY's splashscreen coversExactly displayBounds",
+                .visibleRegionCovers(
+                    ComponentSplashScreenMatcher(simpleApp.componentMatcher),
+                    displayBounds,
                     isOptional = true
-                ) {
-                    it.visibleRegion(ComponentSplashScreenMatcher(simpleApp.componentMatcher))
-                        .coversExactly(displayBounds)
-                }
-                .invoke("SIMPLE_ACTIVITY coversExactly displayBounds") {
-                    it.visibleRegion(simpleApp.componentMatcher).coversExactly(displayBounds)
-                }
+                )
+                .visibleRegionCovers(simpleApp.componentMatcher, displayBounds)
                 .isInvisible(backgroundColorLayer)
                 .hasNoColor(backgroundColorLayer)
                 .then()
@@ -154,18 +148,12 @@ class TaskTransitionTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
                 .hasColor(backgroundColorLayer)
                 .then()
                 // Fully transitioned back to LAUNCH_NEW_TASK_ACTIVITY
-                .invoke(
-                    "LAUNCH_NEW_TASK_ACTIVITY's splashscreen coversExactly displayBounds",
+                .visibleRegionCovers(
+                    ComponentSplashScreenMatcher(launchNewTaskApp.componentMatcher),
+                    displayBounds,
                     isOptional = true
-                ) {
-                    it.visibleRegion(
-                            ComponentSplashScreenMatcher(launchNewTaskApp.componentMatcher)
-                        )
-                        .coversExactly(displayBounds)
-                }
-                .invoke("LAUNCH_NEW_TASK_ACTIVITY coversExactly displayBounds") {
-                    it.visibleRegion(launchNewTaskApp.componentMatcher).coversExactly(displayBounds)
-                }
+                )
+                .visibleRegionCovers(launchNewTaskApp.componentMatcher, displayBounds)
                 .isInvisible(backgroundColorLayer)
                 .hasNoColor(backgroundColorLayer)
         }
@@ -221,6 +209,14 @@ class TaskTransitionTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
                 )
 
             return ComponentNameMatcher(rawComponentMatcher.className)
+        }
+
+        private fun LayersTraceSubject.visibleRegionCovers(
+            component: IComponentMatcher,
+            expectedArea: Region,
+            isOptional: Boolean = true
+        ): LayersTraceSubject = invoke("$component coversExactly $expectedArea", isOptional) {
+            it.visibleRegion(component).coversExactly(expectedArea)
         }
 
         @Parameterized.Parameters(name = "{0}")

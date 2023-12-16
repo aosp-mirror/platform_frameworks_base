@@ -8,16 +8,6 @@ package android.app {
     method @Deprecated public void setLatestEventInfo(android.content.Context, CharSequence, CharSequence, android.app.PendingIntent);
   }
 
-  public static final class Notification.BubbleMetadata implements android.os.Parcelable {
-    method @Deprecated @Nullable public android.graphics.drawable.Icon getBubbleIcon();
-    method @Deprecated @Nullable public android.app.PendingIntent getBubbleIntent();
-  }
-
-  public static final class Notification.BubbleMetadata.Builder {
-    method @Deprecated @NonNull public android.app.Notification.BubbleMetadata.Builder createIntentBubble(@NonNull android.app.PendingIntent, @NonNull android.graphics.drawable.Icon);
-    method @Deprecated @NonNull public android.app.Notification.BubbleMetadata.Builder createShortcutBubble(@NonNull String);
-  }
-
   public static class Notification.Builder {
     method @Deprecated public android.app.Notification.Builder setChannel(String);
     method @Deprecated public android.app.Notification.Builder setTimeout(long);
@@ -26,50 +16,6 @@ package android.app {
   public static final class Notification.WearableExtender implements android.app.Notification.Extender {
     method @Deprecated public android.graphics.Bitmap getBackground();
     method @Deprecated public android.app.Notification.WearableExtender setBackground(android.graphics.Bitmap);
-  }
-
-}
-
-package android.app.slice {
-
-  public final class Slice implements android.os.Parcelable {
-    field @Deprecated public static final String EXTRA_SLIDER_VALUE = "android.app.slice.extra.SLIDER_VALUE";
-    field @Deprecated public static final String SUBTYPE_SLIDER = "slider";
-  }
-
-  public static class Slice.Builder {
-    ctor @Deprecated public Slice.Builder(@NonNull android.net.Uri);
-    method @Deprecated public android.app.slice.Slice.Builder addTimestamp(long, @Nullable String, java.util.List<java.lang.String>);
-    method @Deprecated public android.app.slice.Slice.Builder setSpec(android.app.slice.SliceSpec);
-  }
-
-  public final class SliceItem implements android.os.Parcelable {
-    method @Deprecated public long getTimestamp();
-    field @Deprecated public static final String FORMAT_TIMESTAMP = "long";
-  }
-
-  public class SliceManager {
-    method @Deprecated @Nullable public android.app.slice.Slice bindSlice(@NonNull android.net.Uri, @NonNull java.util.List<android.app.slice.SliceSpec>);
-    method @Deprecated @Nullable public android.app.slice.Slice bindSlice(@NonNull android.content.Intent, @NonNull java.util.List<android.app.slice.SliceSpec>);
-    method @Deprecated public void pinSlice(@NonNull android.net.Uri, @NonNull java.util.List<android.app.slice.SliceSpec>);
-  }
-
-  public abstract class SliceProvider extends android.content.ContentProvider {
-    method @Deprecated public android.app.slice.Slice onBindSlice(android.net.Uri, java.util.List<android.app.slice.SliceSpec>);
-  }
-
-}
-
-package android.app.usage {
-
-  public class StorageStatsManager {
-    method @Deprecated public long getFreeBytes(String) throws java.io.IOException;
-    method @Deprecated public long getTotalBytes(String) throws java.io.IOException;
-    method @Deprecated public boolean isQuotaSupported(String);
-    method @Deprecated public android.app.usage.ExternalStorageStats queryExternalStatsForUser(String, android.os.UserHandle) throws java.io.IOException;
-    method @Deprecated public android.app.usage.StorageStats queryStatsForPackage(String, String, android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
-    method @Deprecated public android.app.usage.StorageStats queryStatsForUid(String, int) throws java.io.IOException;
-    method @Deprecated public android.app.usage.StorageStats queryStatsForUser(String, android.os.UserHandle) throws java.io.IOException;
   }
 
 }
@@ -153,28 +99,6 @@ package android.graphics {
     field @Deprecated public static final int FULL_COLOR_LAYER_SAVE_FLAG = 8; // 0x8
     field @Deprecated public static final int HAS_ALPHA_LAYER_SAVE_FLAG = 4; // 0x4
     field @Deprecated public static final int MATRIX_SAVE_FLAG = 1; // 0x1
-  }
-
-  public final class ImageDecoder implements java.lang.AutoCloseable {
-    method @Deprecated public boolean getAsAlphaMask();
-    method @Deprecated public boolean getConserveMemory();
-    method @Deprecated public boolean getDecodeAsAlphaMask();
-    method @Deprecated public boolean getMutable();
-    method @Deprecated public boolean getRequireUnpremultiplied();
-    method @Deprecated public android.graphics.ImageDecoder setAsAlphaMask(boolean);
-    method @Deprecated public void setConserveMemory(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setDecodeAsAlphaMask(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setMutable(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setRequireUnpremultiplied(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setResize(int, int);
-    method @Deprecated public android.graphics.ImageDecoder setResize(int);
-    field @Deprecated public static final int ERROR_SOURCE_ERROR = 3; // 0x3
-    field @Deprecated public static final int ERROR_SOURCE_EXCEPTION = 1; // 0x1
-    field @Deprecated public static final int ERROR_SOURCE_INCOMPLETE = 2; // 0x2
-  }
-
-  @Deprecated public static class ImageDecoder.IncompleteException extends java.io.IOException {
-    ctor public ImageDecoder.IncompleteException();
   }
 
   @Deprecated public class LayerRasterizer extends android.graphics.Rasterizer {

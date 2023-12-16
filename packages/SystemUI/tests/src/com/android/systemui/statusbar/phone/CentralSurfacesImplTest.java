@@ -155,8 +155,9 @@ import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionLogger;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProviderTestUtil;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -355,24 +356,25 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFakeGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
 
         mVisualInterruptionDecisionProvider =
-                new NotificationInterruptStateProviderWrapper(
-                        new TestableNotificationInterruptStateProviderImpl(
-                                mPowerManager,
-                                mAmbientDisplayConfiguration,
-                                mStatusBarStateController,
-                                mKeyguardStateController,
-                                mBatteryController,
-                                mHeadsUpManager,
-                                mock(NotificationInterruptLogger.class),
-                                new Handler(TestableLooper.get(this).getLooper()),
-                                mock(NotifPipelineFlags.class),
-                                mock(KeyguardNotificationVisibilityProvider.class),
-                                mock(UiEventLogger.class),
-                                mUserTracker,
-                                mDeviceProvisionedController,
-                                mFakeSystemClock,
-                                mFakeGlobalSettings,
-                                mFakeEventLog));
+                VisualInterruptionDecisionProviderTestUtil.INSTANCE.createProviderByFlag(
+                        mAmbientDisplayConfiguration,
+                        mBatteryController,
+                        mDeviceProvisionedController,
+                        mFakeEventLog,
+                        mock(NotifPipelineFlags.class),
+                        mFakeGlobalSettings,
+                        mHeadsUpManager,
+                        mock(KeyguardNotificationVisibilityProvider.class),
+                        mKeyguardStateController,
+                        new Handler(TestableLooper.get(this).getLooper()),
+                        mock(VisualInterruptionDecisionLogger.class),
+                        mock(NotificationInterruptLogger.class),
+                        mPowerManager,
+                        mStatusBarStateController,
+                        mFakeSystemClock,
+                        mock(UiEventLogger.class),
+                        mUserTracker);
+        mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));

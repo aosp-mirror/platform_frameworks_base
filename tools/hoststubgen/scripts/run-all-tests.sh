@@ -18,14 +18,17 @@ source "${0%/*}"/../common.sh
 # Move to the top directory of hoststubgen
 cd ..
 
+ATEST_ARGS="--host"
+
 # These tests are known to pass.
 READY_TEST_MODULES=(
   HostStubGenTest-framework-all-test-host-test
   hoststubgen-test-tiny-test
+  CtsUtilTestCasesRavenwood
+  CtsOsTestCasesRavenwood # This one uses native sustitution, so let's run it too.
 )
 
 MUST_BUILD_MODULES=(
-    run-ravenwood-test
     "${NOT_READY_TEST_MODULES[*]}"
     HostStubGenTest-framework-test
 )
@@ -34,7 +37,7 @@ MUST_BUILD_MODULES=(
 run m "${MUST_BUILD_MODULES[@]}"
 
 # Run the hoststubgen unittests / etc
-run atest hoststubgentest hoststubgen-invoke-test
+run atest $ATEST_ARGS hoststubgentest hoststubgen-invoke-test
 
 # Next, run the golden check. This should always pass too.
 # The following scripts _should_ pass too, but they depend on the internal paths to soong generated
@@ -44,15 +47,13 @@ run ./hoststubgen/test-tiny-framework/diff-and-update-golden.sh
 run ./hoststubgen/test-framework/run-test-without-atest.sh
 
 run ./hoststubgen/test-tiny-framework/run-test-manually.sh
-run atest tiny-framework-dump-test
+run atest $ATEST_ARGS tiny-framework-dump-test
 run ./scripts/build-framework-hostside-jars-and-extract.sh
 
 # This script is already broken on goog/master
 # run ./scripts/build-framework-hostside-jars-without-genrules.sh
 
 # These tests should all pass.
-run-ravenwood-test ${READY_TEST_MODULES[*]}
+run atest $ATEST_ARGS ${READY_TEST_MODULES[*]}
 
-run atest CtsUtilTestCasesRavenwood
-
-echo ""${0##*/}" finished, with no unexpected failures. Ready to submit!"
+echo ""${0##*/}" finished, with no failures. Ready to submit!"

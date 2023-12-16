@@ -21,10 +21,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags.MIGRATE_CLOCKS_TO_BLUEPRINT
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.ui.view.layout.items.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
@@ -32,7 +29,6 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Utils
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import dagger.Lazy
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +43,6 @@ class ClockSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
     @Mock private lateinit var smartspaceViewModel: KeyguardSmartspaceViewModel
     @Mock private lateinit var splitShadeStateController: SplitShadeStateController
-    @Mock private lateinit var keyguardBlueprintInteractor: Lazy<KeyguardBlueprintInteractor>
     private var featureFlags: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic()
 
     private lateinit var underTest: ClockSection
@@ -86,7 +81,6 @@ class ClockSectionTest : SysuiTestCase() {
             .thenReturn(SMART_SPACE_DATE_WEATHER_HEIGHT)
         whenever(smartspaceViewModel.getDimen("enhanced_smartspace_height"))
             .thenReturn(ENHANCED_SMART_SPACE_HEIGHT)
-        featureFlags.set(MIGRATE_CLOCKS_TO_BLUEPRINT, true)
         underTest =
             ClockSection(
                 keyguardClockInteractor,
@@ -94,7 +88,6 @@ class ClockSectionTest : SysuiTestCase() {
                 smartspaceViewModel,
                 mContext,
                 splitShadeStateController,
-                keyguardBlueprintInteractor,
                 featureFlags
             )
     }

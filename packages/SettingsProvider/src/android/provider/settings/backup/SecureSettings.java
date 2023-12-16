@@ -73,6 +73,8 @@ public class SecureSettings {
         Settings.Secure.TTS_ENABLED_PLUGINS,
         Settings.Secure.TTS_DEFAULT_LOCALE,
         Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
+        Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS,
+        Settings.Secure.ACCESSIBILITY_STICKY_KEYS,
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
         Settings.Secure.WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
@@ -105,6 +107,9 @@ public class SecureSettings {
         Settings.Secure.CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
         Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
         Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
+        // ACCESSIBILITY_QS_TARGETS needs to be restored after ENABLED_ACCESSIBILITY_SERVICES
+        // but before QS_TILES
+        Settings.Secure.ACCESSIBILITY_QS_TARGETS,
         Settings.Secure.QS_TILES,
         Settings.Secure.QS_AUTO_ADDED_TILES,
         Settings.Secure.CONTROLS_ENABLED,
@@ -242,13 +247,17 @@ public class SecureSettings {
         Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
         Settings.Secure.HEARING_AID_CALL_ROUTING,
         Settings.Secure.HEARING_AID_MEDIA_ROUTING,
-        Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+        Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING,
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
         Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
         Settings.Secure.HUB_MODE_TUTORIAL_STATE,
         Settings.Secure.STYLUS_BUTTONS_ENABLED,
         Settings.Secure.STYLUS_HANDWRITING_ENABLED,
-        Settings.Secure.DEFAULT_NOTE_TASK_PROFILE
+        Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
+        Settings.Secure.CREDENTIAL_SERVICE,
+        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+        Settings.Secure.EVEN_DIMMER_ACTIVATED,
+        Settings.Secure.EVEN_DIMMER_MIN_NITS
     };
 }

@@ -5,6 +5,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.LaunchAnimator
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
 
 /**
@@ -14,6 +15,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 class StatusBarLaunchAnimatorController(
     private val delegate: ActivityLaunchAnimator.Controller,
     private val shadeViewController: ShadeViewController,
+    private val shadeAnimationInteractor: ShadeAnimationInteractor,
     private val shadeController: ShadeController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val isLaunchForActivity: Boolean = true
@@ -26,7 +28,7 @@ class StatusBarLaunchAnimatorController(
     override fun onIntentStarted(willAnimate: Boolean) {
         delegate.onIntentStarted(willAnimate)
         if (willAnimate) {
-            shadeViewController.setIsLaunchAnimationRunning(true)
+            shadeAnimationInteractor.setIsLaunchingActivity(true)
         } else {
             shadeController.collapseOnMainThread()
         }
@@ -34,7 +36,7 @@ class StatusBarLaunchAnimatorController(
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
-        shadeViewController.setIsLaunchAnimationRunning(true)
+        shadeAnimationInteractor.setIsLaunchingActivity(true)
         if (!isExpandingFullyAbove) {
             shadeViewController.collapseWithDuration(
                 ActivityLaunchAnimator.TIMINGS.totalDuration.toInt())
@@ -43,7 +45,7 @@ class StatusBarLaunchAnimatorController(
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
         delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
-        shadeViewController.setIsLaunchAnimationRunning(false)
+        shadeAnimationInteractor.setIsLaunchingActivity(false)
         shadeController.onLaunchAnimationEnd(isExpandingFullyAbove)
     }
 
@@ -58,7 +60,7 @@ class StatusBarLaunchAnimatorController(
 
     override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
         delegate.onLaunchAnimationCancelled()
-        shadeViewController.setIsLaunchAnimationRunning(false)
+        shadeAnimationInteractor.setIsLaunchingActivity(false)
         shadeController.onLaunchAnimationCancelled(isLaunchForActivity)
     }
 }

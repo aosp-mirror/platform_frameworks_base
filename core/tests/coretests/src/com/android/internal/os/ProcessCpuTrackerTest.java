@@ -18,15 +18,23 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.SmallTest;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @SmallTest
 @RunWith(JUnit4.class)
+@IgnoreUnderRavenwood(reason = "Needs kernel support")
 public class ProcessCpuTrackerTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     @Test
     public void testGetCpuTime() throws Exception {
         final ProcessCpuTracker tracker = new ProcessCpuTracker(false);

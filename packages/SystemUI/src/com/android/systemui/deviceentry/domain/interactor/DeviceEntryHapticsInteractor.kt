@@ -19,7 +19,6 @@ import com.android.keyguard.logging.BiometricUnlockLogger
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.deviceentry.data.repository.DeviceEntryHapticsRepository
 import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -34,11 +33,12 @@ import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 
 /**
  * Business logic for device entry haptic events. Determines whether the haptic should play. In
- * particular, there are extra guards for whether device entry error and successes hatpics should
+ * particular, there are extra guards for whether device entry error and successes haptics should
  * play when the physical fingerprint sensor is located on the power button.
  */
 @ExperimentalCoroutinesApi
@@ -46,7 +46,9 @@ import kotlinx.coroutines.flow.onStart
 class DeviceEntryHapticsInteractor
 @Inject
 constructor(
-    private val repository: DeviceEntryHapticsRepository,
+    deviceEntryInteractor: DeviceEntryInteractor,
+    deviceEntryFingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
+    deviceEntryBiometricAuthInteractor: DeviceEntryBiometricAuthInteractor,
     fingerprintPropertyRepository: FingerprintPropertyRepository,
     biometricSettingsRepository: BiometricSettingsRepository,
     keyEventInteractor: KeyEventInteractor,
@@ -77,9 +79,8 @@ constructor(
                 emit(recentPowerButtonPressThresholdMs * -1L - 1L)
             }
 
-    val playSuccessHaptic: Flow<Boolean> =
-        repository.successHapticRequest
-            .filter { it }
+    val playSuccessHaptic: Flow<Unit> =
+        deviceEntryInteractor.enteringDeviceFromBiometricUnlock
             .sample(
                 combine(
                     powerButtonSideFpsEnrolled,
@@ -88,7 +89,7 @@ constructor(
                     ::Triple
                 )
             )
-            .map { (sideFpsEnrolled, powerButtonDown, lastPowerButtonWakeup) ->
+            .filter { (sideFpsEnrolled, powerButtonDown, lastPowerButtonWakeup) ->
                 val sideFpsAllowsHaptic =
                     !powerButtonDown &&
                         systemClock.uptimeMillis() - lastPowerButtonWakeup >
@@ -96,38 +97,28 @@ constructor(
                 val allowHaptic = !sideFpsEnrolled || sideFpsAllowsHaptic
                 if (!allowHaptic) {
                     logger.d("Skip success haptic. Recent power button press or button is down.")
-                    handleSuccessHaptic() // immediately handle, don't vibrate
                 }
                 allowHaptic
             }
-    val playErrorHaptic: Flow<Boolean> =
-        repository.errorHapticRequest
-            .filter { it }
+            .map {} // map to Unit
+
+    private val playErrorHapticForBiometricFailure: Flow<Unit> =
+        merge(
+                deviceEntryFingerprintAuthInteractor.fingerprintFailure,
+                deviceEntryBiometricAuthInteractor.faceOnlyFaceFailure,
+            )
+            .map {} // map to Unit
+    val playErrorHaptic: Flow<Unit> =
+        playErrorHapticForBiometricFailure
             .sample(combine(powerButtonSideFpsEnrolled, powerButtonDown, ::Pair))
-            .map { (sideFpsEnrolled, powerButtonDown) ->
+            .filter { (sideFpsEnrolled, powerButtonDown) ->
                 val allowHaptic = !sideFpsEnrolled || !powerButtonDown
                 if (!allowHaptic) {
                     logger.d("Skip error haptic. Power button is down.")
-                    handleErrorHaptic() // immediately handle, don't vibrate
                 }
                 allowHaptic
             }
-
-    fun vibrateSuccess() {
-        repository.requestSuccessHaptic()
-    }
-
-    fun vibrateError() {
-        repository.requestErrorHaptic()
-    }
-
-    fun handleSuccessHaptic() {
-        repository.handleSuccessHaptic()
-    }
-
-    fun handleErrorHaptic() {
-        repository.handleErrorHaptic()
-    }
+            .map {} // map to Unit
 
     private val recentPowerButtonPressThresholdMs = 400L
 }

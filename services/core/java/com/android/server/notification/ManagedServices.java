@@ -1249,6 +1249,21 @@ abstract public class ManagedServices {
                     }
                 }
             }
+            // Remove uninstalled components from user-set list
+            final ArraySet<String> userSet = mUserSetServices.get(uninstalledUserId);
+            if (userSet != null) {
+                int numServices = userSet.size();
+                for (int i = numServices - 1; i >= 0; i--) {
+                    String pkgOrComponent = userSet.valueAt(i);
+                    if (TextUtils.equals(pkg, getPackageName(pkgOrComponent))) {
+                        userSet.removeAt(i);
+                        if (DEBUG) {
+                            Slog.v(TAG, "Removing " + pkgOrComponent
+                                    + " from user-set list; uninstalled");
+                        }
+                    }
+                }
+            }
         }
         return removed;
     }

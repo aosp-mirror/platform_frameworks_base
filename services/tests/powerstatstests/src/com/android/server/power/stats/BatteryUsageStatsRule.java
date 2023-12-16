@@ -28,6 +28,8 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
 import android.util.SparseArray;
@@ -57,6 +59,7 @@ public class BatteryUsageStatsRule implements TestRule {
     private final PowerProfile mPowerProfile;
     private final MockClock mMockClock = new MockClock();
     private final MockBatteryStatsImpl mBatteryStats;
+    private final Handler mHandler;
 
     private BatteryUsageStats mBatteryUsageStats;
     private boolean mScreenOn;
@@ -73,10 +76,13 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     public BatteryUsageStatsRule(long currentTime, File historyDir) {
+        HandlerThread bgThread = new HandlerThread("bg thread");
+        bgThread.start();
+        mHandler = new Handler(bgThread.getLooper());
         mContext = InstrumentationRegistry.getContext();
         mPowerProfile = spy(new PowerProfile(mContext, true /* forTest */));
         mMockClock.currentTime = currentTime;
-        mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir);
+        mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir, mHandler);
         mBatteryStats.setPowerProfile(mPowerProfile);
 
         mCpusByPolicy.put(0, new int[]{0, 1, 2, 3});
@@ -90,6 +96,10 @@ public class BatteryUsageStatsRule implements TestRule {
 
     public MockClock getMockClock() {
         return mMockClock;
+    }
+
+    public Handler getHandler() {
+        return mHandler;
     }
 
     public BatteryUsageStatsRule setTestPowerProfile(@XmlRes int xmlId) {

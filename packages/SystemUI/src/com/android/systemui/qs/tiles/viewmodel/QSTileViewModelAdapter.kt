@@ -22,6 +22,7 @@ import android.util.Log
 import android.view.View
 import androidx.annotation.GuardedBy
 import com.android.internal.logging.InstanceId
+import com.android.systemui.Dumpable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.qs.QSTile
@@ -31,6 +32,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.io.PrintWriter
 import java.util.function.Supplier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -47,7 +49,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val qsHost: QSHost,
     @Assisted private val qsTileViewModel: QSTileViewModel,
-) : QSTile {
+) : QSTile, Dumpable {
 
     private val context
         get() = qsHost.context
@@ -101,7 +103,10 @@ constructor(
 
     override fun addCallback(callback: QSTile.Callback?) {
         callback ?: return
-        synchronized(callbacks) { callbacks.add(callback) }
+        synchronized(callbacks) {
+            callbacks.add(callback)
+            state?.let(callback::onStateChanged)
+        }
     }
 
     override fun removeCallback(callback: QSTile.Callback?) {
@@ -197,6 +202,10 @@ constructor(
         }
 
     override fun getTileSpec(): String = qsTileViewModel.config.tileSpec.spec
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) =
+        (qsTileViewModel as? Dumpable)?.dump(pw, args)
+            ?: pw.println("${getTileSpec()}: QSTileViewModel isn't dumpable")
 
     private companion object {
 

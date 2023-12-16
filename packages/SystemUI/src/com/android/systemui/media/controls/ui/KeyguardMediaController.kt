@@ -23,7 +23,6 @@ import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
@@ -63,22 +62,21 @@ constructor(
     @Main private val handler: Handler,
     configurationController: ConfigurationController,
     private val splitShadeStateController: SplitShadeStateController,
+    private val logger: KeyguardMediaControllerLogger,
     dumpManager: DumpManager,
 ) : Dumpable {
-    /** It's added for debugging purpose to directly see last received StatusBarState. */
-    private var lastReceivedStatusBarState = -1
+    private var lastUsedStatusBarState = -1
 
     init {
         dumpManager.registerDumpable(this)
         statusBarStateController.addCallback(
             object : StatusBarStateController.StateListener {
                 override fun onStateChanged(newState: Int) {
-                    lastReceivedStatusBarState = newState
-                    refreshMediaPosition()
+                    refreshMediaPosition(reason = "StatusBarState.onStateChanged")
                 }
 
                 override fun onDozingChanged(isDozing: Boolean) {
-                    refreshMediaPosition()
+                    refreshMediaPosition(reason = "StatusBarState.onDozingChanged")
                 }
             }
         )
@@ -100,7 +98,7 @@ constructor(
                                 true,
                                 UserHandle.USER_CURRENT
                             )
-                        refreshMediaPosition()
+                        refreshMediaPosition(reason = "allowMediaPlayerOnLockScreen changed")
                     }
                 }
             }
@@ -132,7 +130,7 @@ constructor(
             }
             field = value
             reattachHostView()
-            refreshMediaPosition()
+            refreshMediaPosition(reason = "useSplitShade changed")
         }
 
     /** Is the media player visible? */
@@ -147,7 +145,7 @@ constructor(
     var isDozeWakeUpAnimationWaiting: Boolean = false
         set(value) {
             field = value
-            refreshMediaPosition()
+            refreshMediaPosition(reason = "isDozeWakeUpAnimationWaiting changed")
         }
 
     /** single pane media container placed at the top of the notifications list */
@@ -181,7 +179,7 @@ constructor(
 
     /** Called whenever the media hosts visibility changes */
     private fun onMediaHostVisibilityChanged(visible: Boolean) {
-        refreshMediaPosition()
+        refreshMediaPosition(reason = "onMediaHostVisibilityChanged")
         if (visible) {
             mediaHost.hostView.layoutParams.apply {
                 height = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -194,7 +192,7 @@ constructor(
     fun attachSplitShadeContainer(container: ViewGroup) {
         splitShadeContainer = container
         reattachHostView()
-        refreshMediaPosition()
+        refreshMediaPosition(reason = "attachSplitShadeContainer")
     }
 
     private fun reattachHostView() {
@@ -217,30 +215,41 @@ constructor(
         }
     }
 
-    fun refreshMediaPosition() {
+    fun refreshMediaPosition(reason: String) {
         val currentState = statusBarStateController.state
-        if (lastReceivedStatusBarState != -1 && currentState != lastReceivedStatusBarState) {
-            Log.wtfStack(
-                TAG,
-                "currentState[${StatusBarState.toString(currentState)}] is " +
-                    "different from the last " +
-                    "received one[${StatusBarState.toString(lastReceivedStatusBarState)}]."
-            )
-        }
 
         val keyguardOrUserSwitcher = (currentState == StatusBarState.KEYGUARD)
         // mediaHost.visible required for proper animations handling
+        val isMediaHostVisible = mediaHost.visible
+        val isBypassNotEnabled = !bypassController.bypassEnabled
+        val currentAllowMediaPlayerOnLockScreen = allowMediaPlayerOnLockScreen
+        val useSplitShade = useSplitShade
+        val shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade()
+
         visible =
-            mediaHost.visible &&
-                !bypassController.bypassEnabled &&
+            isMediaHostVisible &&
+                isBypassNotEnabled &&
                 keyguardOrUserSwitcher &&
-                allowMediaPlayerOnLockScreen &&
-                shouldBeVisibleForSplitShade()
+                currentAllowMediaPlayerOnLockScreen &&
+                shouldBeVisibleForSplitShade
         if (visible) {
             showMediaPlayer()
         } else {
             hideMediaPlayer()
         }
+        logger.logRefreshMediaPosition(
+            reason = reason,
+            visible = visible,
+            useSplitShade = useSplitShade,
+            currentState = currentState,
+            keyguardOrUserSwitcher = keyguardOrUserSwitcher,
+            mediaHostVisible = isMediaHostVisible,
+            bypassNotEnabled = isBypassNotEnabled,
+            currentAllowMediaPlayerOnLockScreen = currentAllowMediaPlayerOnLockScreen,
+            shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade
+        )
+
+        lastUsedStatusBarState = currentState
     }
 
     private fun shouldBeVisibleForSplitShade(): Boolean {
@@ -298,10 +307,10 @@ constructor(
                 println("isDozeWakeUpAnimationWaiting", isDozeWakeUpAnimationWaiting)
                 println("singlePaneContainer", singlePaneContainer)
                 println("splitShadeContainer", splitShadeContainer)
-                if (lastReceivedStatusBarState != -1) {
+                if (lastUsedStatusBarState != -1) {
                     println(
-                        "lastReceivedStatusBarState",
-                        StatusBarState.toString(lastReceivedStatusBarState)
+                        "lastUsedStatusBarState",
+                        StatusBarState.toString(lastUsedStatusBarState)
                     )
                 }
                 println(
@@ -310,9 +319,5 @@ constructor(
                 )
             }
         }
-    }
-
-    private companion object {
-        private const val TAG = "KeyguardMediaController"
     }
 }

@@ -35,8 +35,32 @@ flag {
 
 flag {
     namespace: "window_surfaces"
-    name: "remove_capture_display"
-    description: "Remove uses of ScreenCapture#captureDisplay"
+    name: "delete_capture_display"
+    description: "Delete uses of ScreenCapture#captureDisplay"
     is_fixed_read_only: true
     bug: "293445881"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "allow_disable_activity_record_input_sink"
+    description: "Whether to allow system activity to disable ActivityRecordInputSink"
+    is_fixed_read_only: true
+    bug: "262477923"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "secure_window_state"
+    description: "Move SC secure flag to WindowState level"
+    is_fixed_read_only: true
+    bug: "308662081"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "trusted_presentation_listener_for_window"
+    description: "Enable trustedPresentationListener on windows public API"
+    is_fixed_read_only: true
+    bug: "278027319"
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--- Include all the namespaces we will ever need anywhere, because this is the source the manifest merger uses for namespaces -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.android.input.screenshot"
+          coreApp="true">
+  <application>
+    <activity
+        android:name="androidx.activity.ComponentActivity"
+        android:exported="true">
+    </activity>
+  </application>
+</manifest>

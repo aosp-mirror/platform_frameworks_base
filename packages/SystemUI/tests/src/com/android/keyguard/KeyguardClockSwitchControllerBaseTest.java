@@ -18,9 +18,7 @@ package com.android.keyguard;
 
 import static android.view.View.INVISIBLE;
 
-import static com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
-import static com.android.systemui.flags.Flags.MIGRATE_CLOCKS_TO_BLUEPRINT;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
@@ -45,13 +43,13 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel;
 import com.android.systemui.log.LogBuffer;
-import com.android.systemui.plugins.ClockAnimations;
-import com.android.systemui.plugins.ClockController;
-import com.android.systemui.plugins.ClockEvents;
-import com.android.systemui.plugins.ClockFaceConfig;
-import com.android.systemui.plugins.ClockFaceController;
-import com.android.systemui.plugins.ClockFaceEvents;
-import com.android.systemui.plugins.ClockTickRate;
+import com.android.systemui.plugins.clocks.ClockAnimations;
+import com.android.systemui.plugins.clocks.ClockController;
+import com.android.systemui.plugins.clocks.ClockEvents;
+import com.android.systemui.plugins.clocks.ClockFaceConfig;
+import com.android.systemui.plugins.clocks.ClockFaceController;
+import com.android.systemui.plugins.clocks.ClockFaceEvents;
+import com.android.systemui.plugins.clocks.ClockTickRate;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.AnimatableClockView;
@@ -65,7 +63,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.ui.SystemBarUtilsState;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -179,9 +177,7 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
         mExecutor = new FakeExecutor(new FakeSystemClock());
         mFakeFeatureFlags = new FakeFeatureFlags();
-        mFakeFeatureFlags.set(FACE_AUTH_REFACTOR, false);
         mFakeFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
-        mFakeFeatureFlags.set(MIGRATE_CLOCKS_TO_BLUEPRINT, false);
         mController = new KeyguardClockSwitchController(
                 mView,
                 mStatusBarStateController,
@@ -189,7 +185,7 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
                 mKeyguardSliceViewController,
                 mNotificationIconAreaController,
                 mSmartspaceController,
-                mock(ConfigurationController.class),
+                mock(SystemBarUtilsState.class),
                 mock(ScreenOffAnimationController.class),
                 mock(StatusBarIconViewBindingFailureTracker.class),
                 mKeyguardUnlockAnimationController,

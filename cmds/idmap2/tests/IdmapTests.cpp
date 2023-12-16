@@ -269,7 +269,7 @@ TEST(IdmapTests, FabricatedOverlay) {
                   .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U, "land-xxhdpi-v7")
                   .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000, "land")
                   .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar", "xxhdpi-v7")
-                  .SetResourceValue("drawable/dr1", fd, 0, 8341, "port-xxhdpi-v7")
+                  .SetResourceValue("drawable/dr1", fd, 0, 8341, "port-xxhdpi-v7", false)
                   .setFrroPath("/foo/bar/biz.frro")
                   .Build();
 

@@ -86,16 +86,26 @@ private class SceneScopeImpl(
         return element(layoutImpl, scene, key)
     }
 
-    override fun Modifier.nestedScrollToScene(
-        orientation: Orientation,
-        startBehavior: NestedScrollBehavior,
-        endBehavior: NestedScrollBehavior,
+    override fun Modifier.horizontalNestedScrollToScene(
+        leftBehavior: NestedScrollBehavior,
+        rightBehavior: NestedScrollBehavior,
     ): Modifier =
         nestedScrollToScene(
             layoutImpl = layoutImpl,
-            orientation = orientation,
-            startBehavior = startBehavior,
-            endBehavior = endBehavior,
+            orientation = Orientation.Horizontal,
+            topOrLeftBehavior = leftBehavior,
+            bottomOrRightBehavior = rightBehavior,
+        )
+
+    override fun Modifier.verticalNestedScrollToScene(
+        topBehavior: NestedScrollBehavior,
+        bottomBehavior: NestedScrollBehavior
+    ): Modifier =
+        nestedScrollToScene(
+            layoutImpl = layoutImpl,
+            orientation = Orientation.Vertical,
+            topOrLeftBehavior = topBehavior,
+            bottomOrRightBehavior = bottomBehavior,
         )
 
     @Composable

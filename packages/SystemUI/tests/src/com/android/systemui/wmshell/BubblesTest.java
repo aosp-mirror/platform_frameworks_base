@@ -29,6 +29,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -96,6 +98,8 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
@@ -118,6 +122,7 @@ import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
@@ -145,7 +150,9 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionLogger;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProviderTestUtil;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor;
@@ -340,6 +347,8 @@ public class BubblesTest extends SysuiTestCase {
     private Icon mAppBubbleIcon;
     @Mock
     private Display mDefaultDisplay;
+    @Mock
+    private SceneContainerFlags mSceneContainerFlags;
 
     private final SceneTestUtils mUtils = new SceneTestUtils(this);
     private final TestScope mTestScope = mUtils.getTestScope();
@@ -411,10 +420,9 @@ public class BubblesTest extends SysuiTestCase {
                 keyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                featureFlags,
                 sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
-                configurationRepository,
+                new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
                 () -> sceneInteractor);
 
@@ -460,6 +468,10 @@ public class BubblesTest extends SysuiTestCase {
         ResourcesSplitShadeStateController splitShadeStateController =
                 new ResourcesSplitShadeStateController();
 
+        DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
+                mock(DeviceEntryUdfpsInteractor.class);
+        when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(emptyFlow());
+
         mShadeInteractor =
                 new ShadeInteractorImpl(
                         mTestScope.getBackgroundScope(),
@@ -476,7 +488,9 @@ public class BubblesTest extends SysuiTestCase {
                                 new SharedNotificationContainerInteractor(
                                         configurationRepository,
                                         mContext,
-                                        splitShadeStateController),
+                                        splitShadeStateController,
+                                        keyguardInteractor,
+                                        deviceEntryUdfpsInteractor),
                                 shadeRepository
                         )
                 );
@@ -501,7 +515,8 @@ public class BubblesTest extends SysuiTestCase {
                 () -> mShadeInteractor,
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
-                mUserTracker
+                mUserTracker,
+                mSceneContainerFlags
         );
         mNotificationShadeWindowController.fetchWindowRootView();
         mNotificationShadeWindowController.attach();
@@ -521,7 +536,8 @@ public class BubblesTest extends SysuiTestCase {
                     (sysUiFlags & QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED) != 0;
         });
 
-        mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
+        mPositioner = new TestableBubblePositioner(mContext,
+                mContext.getSystemService(WindowManager.class));
         mPositioner.setMaxBubbles(5);
         mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, mEducationController,
                 syncExecutor);
@@ -532,25 +548,26 @@ public class BubblesTest extends SysuiTestCase {
         final FakeGlobalSettings fakeGlobalSettings = new FakeGlobalSettings();
         fakeGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
 
-        TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
-                new TestableNotificationInterruptStateProviderImpl(
-                        mock(PowerManager.class),
+        final VisualInterruptionDecisionProvider interruptionDecisionProvider =
+                VisualInterruptionDecisionProviderTestUtil.INSTANCE.createProviderByFlag(
                         mock(AmbientDisplayConfiguration.class),
-                        mock(StatusBarStateController.class),
-                        mock(KeyguardStateController.class),
                         mock(BatteryController.class),
-                        mock(HeadsUpManager.class),
-                        mock(NotificationInterruptLogger.class),
-                        mock(Handler.class),
-                        mock(NotifPipelineFlags.class),
-                        mock(KeyguardNotificationVisibilityProvider.class),
-                        mock(UiEventLogger.class),
-                        mock(UserTracker.class),
                         mock(DeviceProvisionedController.class),
-                        mock(SystemClock.class),
+                        new FakeEventLog(),
+                        mock(NotifPipelineFlags.class),
                         fakeGlobalSettings,
-                        new FakeEventLog()
-                );
+                        mock(HeadsUpManager.class),
+                        mock(KeyguardNotificationVisibilityProvider.class),
+                        mock(KeyguardStateController.class),
+                        mock(Handler.class),
+                        mock(VisualInterruptionDecisionLogger.class),
+                        mock(NotificationInterruptLogger.class),
+                        mock(PowerManager.class),
+                        mock(StatusBarStateController.class),
+                        mock(SystemClock.class),
+                        mock(UiEventLogger.class),
+                        mock(UserTracker.class));
+        interruptionDecisionProvider.start();
 
         mShellTaskOrganizer = new ShellTaskOrganizer(mock(ShellInit.class),
                 mock(ShellCommandHandler.class),
@@ -599,7 +616,7 @@ public class BubblesTest extends SysuiTestCase {
                 mock(INotificationManager.class),
                 mIDreamManager,
                 mVisibilityProvider,
-                new NotificationInterruptStateProviderWrapper(interruptionStateProvider),
+                interruptionDecisionProvider,
                 mZenModeController,
                 mLockscreenUserManager,
                 mCommonNotifCollection,

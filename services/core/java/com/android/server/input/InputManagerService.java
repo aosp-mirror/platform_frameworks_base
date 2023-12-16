@@ -295,6 +295,8 @@ public class InputManagerService extends IInputManager.Stub
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
     private final AdditionalDisplayInputProperties mCurrentDisplayProperties =
             new AdditionalDisplayInputProperties();
+    // TODO(b/293587049): Pointer Icon Refactor: There can be more than one pointer icon
+    // visible at once. Update this to support multi-pointer use cases.
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
     private int mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
@@ -1753,6 +1755,21 @@ public class InputManagerService extends IInputManager.Stub
             if (!mCurrentDisplayProperties.pointerIconVisible) return;
 
             mNative.setCustomPointerIcon(mPointerIcon);
+        }
+    }
+
+    // Binder call
+    @Override
+    public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
+            IBinder inputToken) {
+        Objects.requireNonNull(icon);
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            mPointerIconType = icon.getType();
+            mPointerIcon = mPointerIconType == PointerIcon.TYPE_CUSTOM ? icon : null;
+
+            if (!mCurrentDisplayProperties.pointerIconVisible) return false;
+
+            return mNative.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
         }
     }
 
@@ -3485,6 +3502,20 @@ public class InputManagerService extends IInputManager.Stub
         lp.setTitle("FocusEventDebugView - display " + mContext.getDisplayId());
         lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
         wm.addView(view, lp);
+    }
+
+    /**
+     * Sets Accessibility bounce keys threshold in milliseconds.
+     */
+    public void setAccessibilityBounceKeysThreshold(int thresholdTimeMs) {
+        mNative.setAccessibilityBounceKeysThreshold(thresholdTimeMs);
+    }
+
+    /**
+     * Sets whether Accessibility sticky keys is enabled.
+     */
+    public void setAccessibilityStickyKeysEnabled(boolean enabled) {
+        mNative.setAccessibilityStickyKeysEnabled(enabled);
     }
 
     interface KeyboardBacklightControllerInterface {

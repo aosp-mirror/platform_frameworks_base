@@ -21,6 +21,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -43,7 +44,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
@@ -54,7 +54,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.log.dagger.KeyguardClockLog;
-import com.android.systemui.plugins.ClockController;
+import com.android.systemui.plugins.clocks.ClockController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.ClockRegistry;
@@ -72,7 +72,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.ui.SystemBarUtilsState;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -105,7 +105,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final NotificationIconContainerAlwaysOnDisplayViewModel mAodIconsViewModel;
     private final KeyguardRootViewModel mKeyguardRootViewModel;
     private final ConfigurationState mConfigurationState;
-    private final ConfigurationController mConfigurationController;
+    private final SystemBarUtilsState mSystemBarUtilsState;
     private final DozeParameters mDozeParameters;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final AlwaysOnDisplayNotificationIconViewStore mAodIconViewStore;
@@ -183,7 +183,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             KeyguardSliceViewController keyguardSliceViewController,
             NotificationIconAreaController notificationIconAreaController,
             LockscreenSmartspaceController smartspaceController,
-            ConfigurationController configurationController,
+            SystemBarUtilsState systemBarUtilsState,
             ScreenOffAnimationController screenOffAnimationController,
             StatusBarIconViewBindingFailureTracker iconViewBindingFailureTracker,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -208,7 +208,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mKeyguardSliceViewController = keyguardSliceViewController;
         mNotificationIconAreaController = notificationIconAreaController;
         mSmartspaceController = smartspaceController;
-        mConfigurationController = configurationController;
+        mSystemBarUtilsState = systemBarUtilsState;
         mScreenOffAnimationController = screenOffAnimationController;
         mIconViewBindingFailureTracker = iconViewBindingFailureTracker;
         mSecureSettings = secureSettings;
@@ -232,7 +232,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockChangedListener = new ClockRegistry.ClockChangeListener() {
             @Override
             public void onCurrentClockChanged() {
-                if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+                if (!migrateClocksToBlueprint()) {
                     setClock(mClockRegistry.createCurrentClock());
                 }
             }
@@ -367,7 +367,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 addDateWeatherView();
             }
         }
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (!migrateClocksToBlueprint()) {
             setDateWeatherVisibility();
             setWeatherVisibility();
         }
@@ -418,7 +418,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addDateWeatherView() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
         mDateWeatherView = (ViewGroup) mSmartspaceController.buildAndConnectDateView(mView);
@@ -434,7 +434,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addWeatherView() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -447,7 +447,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addSmartspaceView() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
 
@@ -619,13 +619,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     mAodIconsBindHandle.dispose();
                 }
                 if (nic != null) {
-                    final DisposableHandle viewHandle = NotificationIconContainerViewBinder.bind(
-                            nic,
-                            mAodIconsViewModel,
-                            mConfigurationState,
-                            mConfigurationController,
-                            mIconViewBindingFailureTracker,
-                            mAodIconViewStore);
+                    final DisposableHandle viewHandle =
+                            NotificationIconContainerViewBinder.bindWhileAttached(
+                                    nic,
+                                    mAodIconsViewModel,
+                                    mConfigurationState,
+                                    mSystemBarUtilsState,
+                                    mIconViewBindingFailureTracker,
+                                    mAodIconViewStore);
                     final DisposableHandle visHandle = KeyguardRootViewBinder.bindAodIconVisibility(
                             nic,
                             mKeyguardRootViewModel.isNotifIconContainerVisible(),
@@ -650,7 +651,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void setClock(ClockController clock) {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
         if (clock != null && mLogBuffer != null) {
@@ -664,7 +665,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     @Nullable
     public ClockController getClock() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return mKeyguardClockInteractor.getClock();
         } else {
             return mClockEventController.getClock();
@@ -676,7 +677,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateDoubleLineClock() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
         mCanShowDoubleLineClock = mSecureSettings.getIntForUser(

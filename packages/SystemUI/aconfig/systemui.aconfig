@@ -61,10 +61,27 @@ flag {
 }
 
 flag {
+    name: "refactor_get_current_user"
+    namespace: "systemui"
+    description: "KeyguardUpdateMonitor.getCurrentUser() was providing outdated results."
+    bug: "305984787"
+}
+
+flag {
     name: "notification_throttle_hun"
     namespace: "systemui"
     description: "During notification avalanche, throttle HUNs showing in fast succession."
     bug: "307288824"
+}
+
+flag {
+    name: "notification_background_tint_optimization"
+    namespace: "systemui"
+    description: "Re-enable the codepath that removed tinting of notifications when the"
+        " standard background color is desired.  This was the behavior before we discovered"
+        " a resources threading issue, which we worked around by tinting the notification"
+        " backgrounds and footer buttons."
+    bug: "294347738"
 }
 
 flag {
@@ -114,10 +131,24 @@ flag {
 }
 
 flag {
+    name: "unfold_animation_background_progress"
+    namespace: "systemui"
+    description: "Moves unfold animation progress calculation to a background thread"
+    bug: "277879146"
+}
+
+flag {
     name: "qs_new_pipeline"
     namespace: "systemui"
     description: "Use the new pipeline for Quick Settings. Should have no behavior changes."
     bug: "241772429"
+}
+
+flag {
+   name: "qs_new_tiles"
+   namespace: "systemui"
+   description: "Use the new tiles in the Quick Settings. Should have no behavior changes."
+   bug: "241772429"
 }
 
 flag {
@@ -126,6 +157,15 @@ flag {
     description: "Adds thread-local data to System UI's global coroutine scopes to "
         "allow for tracing of coroutine continuations using System UI's tracinglib"
     bug: "289353932"
+}
+
+flag {
+    name: "edge_back_gesture_handler_thread"
+    namespace: "systemui"
+    description: "Moves the EdgeBackGestureHandler window, which is used for rendering the back "
+        "arrow, to a separate thread. Previously, the EdgeBackGestureHandler window would share "
+        "the main thread with the rest of System UI."
+    bug: "304583132"
 }
 
 flag {
@@ -143,8 +183,59 @@ flag {
 }
 
 flag {
+   name: "theme_overlay_controller_wakefulness_deprecation"
+   namespace: "systemui"
+   description: "Replacing WakefulnessLifecycle by KeyguardTransitionInteractor in "
+        "ThemOverlayController to mitigate flickering when locking the device"
+   bug: "308676488"
+}
+
+flag {
    name: "media_in_scene_container"
    namespace: "systemui"
    description: "Enable media in the scene container framework"
    bug: "296122467"
+}
+
+flag {
+   name: "rest_to_unlock"
+   namespace: "systemui"
+   description: "Require prolonged touch for fingerprint authentication"
+   bug: "303672286"
+}
+
+flag {
+   name: "record_issue_qs_tile"
+   namespace: "systemui"
+   description: "Replace Record Trace QS Tile with expanded Record Issue QS Tile"
+   bug: "305049544"
+}
+
+flag {
+   name: "migrate_clocks_to_blueprint"
+   namespace: "systemui"
+   description: "Move clock related views from KeyguardStatusView to KeyguardRootView, "
+        "and use modern architecture for lockscreen clocks"
+   bug: "301502635"
+}
+
+flag {
+   name: "fast_unlock_transition"
+   namespace: "systemui"
+   description: "Faster wallpaper unlock transition"
+   bug: "298186160"
+}
+
+flag {
+  name: "enable_layout_tracing"
+  namespace: "systemui"
+  description: "Enables detailed traversal slices during measure and layout in perfetto traces"
+  bug: "315274804"
+}
+
+flag {
+   name: "quick_settings_visual_haptics_longpress"
+   namespace: "systemui"
+   description: "Enable special visual and haptic effects for quick settings tiles with long-press actions"
+   bug: "229856884"
 }

@@ -23,15 +23,14 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static org.junit.Assert.assertTrue;
 
-import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.server.wm.BuildUtils;
 import android.view.Gravity;
 import android.view.IWindow;
 import android.view.SurfaceControl;
@@ -46,12 +45,12 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.server.wm.utils.CommonUtils;
+import com.android.server.wm.utils.TestActivity;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,11 +58,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Presubmit
 @SmallTest
 @RunWith(WindowTestRunner.class)
 public class SurfaceControlViewHostTests {
+    private static final long WAIT_TIME_S = 5L * BuildUtils.HW_TIMEOUT_MULTIPLIER;
+
     private static final String TAG = "SurfaceControlViewHostTests";
 
     private final ActivityTestRule<TestActivity> mActivityRule = new ActivityTestRule<>(
@@ -75,6 +77,8 @@ public class SurfaceControlViewHostTests {
     private View mView2;
     private SurfaceControlViewHost mScvh1;
     private SurfaceControlViewHost mScvh2;
+
+    private SurfaceView mSurfaceView;
 
     @Before
     public void setUp() throws Exception {
@@ -96,15 +100,17 @@ public class SurfaceControlViewHostTests {
         mView1 = new Button(mActivity);
         mView2 = new Button(mActivity);
 
-        mInstrumentation.runOnMainSync(() -> {
-            try {
-                mActivity.attachToSurfaceView(sc);
-            } catch (InterruptedException e) {
-            }
+        CountDownLatch svReadyLatch = new CountDownLatch(1);
+        mActivity.runOnUiThread(() -> addSurfaceView(svReadyLatch));
+        assertTrue("Failed to wait for SV to get created",
+                svReadyLatch.await(WAIT_TIME_S, TimeUnit.SECONDS));
+        new SurfaceControl.Transaction().reparent(sc, mSurfaceView.getSurfaceControl())
+                .show(sc).apply();
 
+        mInstrumentation.runOnMainSync(() -> {
             TestWindowlessWindowManager wwm = new TestWindowlessWindowManager(
                     mActivity.getResources().getConfiguration(), sc,
-                    mActivity.mSurfaceView.getHostToken());
+                    mSurfaceView.getHostToken());
 
             mScvh1 = new SurfaceControlViewHost(mActivity, mActivity.getDisplay(),
                     wwm, "requestFocusWithMultipleWindows");
@@ -131,19 +137,29 @@ public class SurfaceControlViewHostTests {
 
         wasVisible = waitForWindowVisible(mView2);
         if (!wasVisible) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows");
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-not visible");
         }
         assertTrue("Failed to wait for view2", wasVisible);
 
-        IWindow window = IWindow.Stub.asInterface(mActivity.mSurfaceView.getWindowToken());
+        IWindow window = IWindow.Stub.asInterface(mSurfaceView.getWindowToken());
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh1.getInputTransferToken(), true);
-        assertTrue("Failed to gain focus for view1", waitForWindowFocus(mView1, true));
+
+        boolean gainedFocus = waitForWindowFocus(mView1, true);
+        if (!gainedFocus) {
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-view1 not focus");
+        }
+        assertTrue("Failed to gain focus for view1", gainedFocus);
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh2.getInputTransferToken(), true);
-        assertTrue("Failed to gain focus for view2", waitForWindowFocus(mView2, true));
+
+        gainedFocus = waitForWindowFocus(mView2, true);
+        if (!gainedFocus) {
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-view2 not focus");
+        }
+        assertTrue("Failed to gain focus for view2", gainedFocus);
     }
 
     private static class TestWindowlessWindowManager extends WindowlessWindowManager {
@@ -162,43 +178,30 @@ public class SurfaceControlViewHostTests {
         }
     }
 
-    public static class TestActivity extends Activity implements SurfaceHolder.Callback {
-        private SurfaceView mSurfaceView;
-        private final CountDownLatch mSvReadyLatch = new CountDownLatch(1);
+    private void addSurfaceView(CountDownLatch svReadyLatch) {
+        final FrameLayout content = mActivity.getParentLayout();
+        mSurfaceView = new SurfaceView(mActivity);
+        mSurfaceView.setZOrderOnTop(true);
+        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(500, 500,
+                Gravity.LEFT | Gravity.TOP);
+        mSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(@NonNull SurfaceHolder holder) {
+                svReadyLatch.countDown();
+            }
 
-        @Override
-        protected void onCreate(@Nullable Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            final FrameLayout content = new FrameLayout(this);
-            mSurfaceView = new SurfaceView(this);
-            mSurfaceView.setBackgroundColor(Color.BLACK);
-            mSurfaceView.setZOrderOnTop(true);
-            final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(500, 500,
-                    Gravity.LEFT | Gravity.TOP);
-            content.addView(mSurfaceView, lp);
-            setContentView(content);
-            mSurfaceView.getHolder().addCallback(this);
-        }
+            @Override
+            public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width,
+                    int height) {
 
-        @Override
-        public void surfaceCreated(@NonNull SurfaceHolder holder) {
-            mSvReadyLatch.countDown();
-        }
+            }
 
-        @Override
-        public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width,
-                int height) {
-        }
+            @Override
+            public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
 
-        @Override
-        public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-        }
-
-        public void attachToSurfaceView(SurfaceControl sc) throws InterruptedException {
-            mSvReadyLatch.await();
-            new SurfaceControl.Transaction().reparent(sc, mSurfaceView.getSurfaceControl())
-                    .show(sc).apply();
-        }
+            }
+        });
+        content.addView(mSurfaceView, lp);
     }
 }
 

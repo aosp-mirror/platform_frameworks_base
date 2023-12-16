@@ -769,7 +769,7 @@ public class PipAnimationController {
                         getSurfaceTransactionHelper().crop(tx, leash, destBounds);
                     }
                     if (mContentOverlay != null) {
-                        mContentOverlay.onAnimationEnd(tx, destBounds);
+                        clearContentOverlay();
                     }
                 }
 

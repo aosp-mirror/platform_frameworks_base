@@ -55,6 +55,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
@@ -842,7 +843,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // We don't want to perform a redundant launch of the same record while ensuring
                 // configurations and trying to resume top activity of focused root task.
                 mRootWindowContainer.ensureVisibilityAndConfig(r, r.getDisplayId(),
-                        false /* markFrozenIfConfigChanged */, true /* deferResume */);
+                        true /* deferResume */);
             }
 
             if (mKeyguardController.checkKeyguardVisibility(r) && r.allowMoveToFront()) {
@@ -1084,7 +1085,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Remove the process record so it won't be considered as alive.
             mService.mProcessNames.remove(wpc.mName, wpc.mUid);
             mService.mProcessMap.remove(wpc.getPid());
-        } else if (ActivityTaskManagerService.isSdkSandboxActivity(mService.mContext, r.intent)) {
+        } else if (ActivityTaskManagerService.isSdkSandboxActivityIntent(
+                mService.mContext, r.intent)) {
             Slog.e(TAG, "Abort sandbox activity launching as no sandbox process to host it.");
             r.finishIfPossible("No sandbox process for the activity", false /* oomAdj */);
             r.launchFailed = true;
@@ -1681,7 +1683,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             ArrayList<ActivityRecord> activities = null;
             for (int i = mStoppingActivities.size() - 1; i >= 0; i--) {
                 final ActivityRecord r = mStoppingActivities.get(i);
-                if (r.getTask() == task) {
+                if (!r.finishing && r.isState(RESUMED) && r.getTask() == task) {
                     if (activities == null) {
                         activities = new ArrayList<>();
                     }

@@ -58,9 +58,12 @@ fun createFilterFromTextPolicyFile(
         ): OutputFilter {
     log.i("Loading offloaded annotations from $filename ...")
     log.withIndent {
-        val ret = InMemoryOutputFilter(classes, fallback)
+        val imf = InMemoryOutputFilter(classes, fallback)
 
         var lineNo = 0
+
+        var aidlPolicy: FilterPolicyWithReason? = null
+        var featureFlagsPolicy: FilterPolicyWithReason? = null
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
@@ -79,6 +82,9 @@ fun createFilterFromTextPolicyFile(
                         continue // skip empty lines.
                     }
 
+
+                    // TODO: Method too long, break it up.
+
                     val fields = line.split(whitespaceRegex).toTypedArray()
                     when (fields[0].lowercase()) {
                         "c", "class" -> {
@@ -86,14 +92,27 @@ fun createFilterFromTextPolicyFile(
                                 throw ParseException("Class ('c') expects 2 fields.")
                             }
                             className = fields[1]
+
+                            val classType = resolveSpecialClass(className)
+
                             if (fields[2].startsWith("!")) {
+                                if (classType != SpecialClass.NotSpecial) {
+                                    // We could support it, but not needed at least for now.
+                                    throw ParseException(
+                                            "Special class can't have a substitution")
+                                }
                                 // It's a native-substitution.
                                 val toClass = fields[2].substring(1)
-                                ret.setNativeSubstitutionClass(className, toClass)
+                                imf.setNativeSubstitutionClass(className, toClass)
                             } else if (fields[2].startsWith("~")) {
+                                if (classType != SpecialClass.NotSpecial) {
+                                    // We could support it, but not needed at least for now.
+                                    throw ParseException(
+                                            "Special class can't have a class load hook")
+                                }
                                 // It's a class-load hook
                                 val callback = fields[2].substring(1)
-                                ret.setClassLoadHook(className, callback)
+                                imf.setClassLoadHook(className, callback)
                             } else {
                                 val policy = parsePolicy(fields[2])
                                 if (!policy.isUsableWithClasses) {
@@ -101,8 +120,28 @@ fun createFilterFromTextPolicyFile(
                                 }
                                 Objects.requireNonNull(className)
 
-                                // TODO: Duplicate check, etc
-                                ret.setPolicyForClass(className, policy.withReason(FILTER_REASON))
+                                when (classType) {
+                                    SpecialClass.NotSpecial -> {
+                                        // TODO: Duplicate check, etc
+                                        imf.setPolicyForClass(
+                                                className, policy.withReason(FILTER_REASON))
+                                    }
+                                    SpecialClass.Aidl -> {
+                                        if (aidlPolicy != null) {
+                                            throw ParseException(
+                                                    "Policy for AIDL classes already defined")
+                                        }
+                                        aidlPolicy = policy.withReason("$FILTER_REASON (AIDL)")
+                                    }
+                                    SpecialClass.FeatureFlags -> {
+                                        if (featureFlagsPolicy != null) {
+                                            throw ParseException(
+                                                    "Policy for feature flags already defined")
+                                        }
+                                        featureFlagsPolicy =
+                                                policy.withReason("$FILTER_REASON (feature flags)")
+                                    }
+                                }
                             }
                         }
 
@@ -118,7 +157,7 @@ fun createFilterFromTextPolicyFile(
                             Objects.requireNonNull(className)
 
                             // TODO: Duplicate check, etc
-                            ret.setPolicyForField(className, name, policy.withReason(FILTER_REASON))
+                            imf.setPolicyForField(className, name, policy.withReason(FILTER_REASON))
                         }
 
                         "m", "method" -> {
@@ -135,7 +174,7 @@ fun createFilterFromTextPolicyFile(
 
                             Objects.requireNonNull(className)
 
-                            ret.setPolicyForMethod(className, name, signature,
+                            imf.setPolicyForMethod(className, name, signature,
                                     policy.withReason(FILTER_REASON))
                             if (policy.isSubstitute) {
                                 val fromName = fields[3].substring(1)
@@ -146,12 +185,12 @@ fun createFilterFromTextPolicyFile(
                                 }
 
                                 // Set the policy  for the "from" method.
-                                ret.setPolicyForMethod(className, fromName, signature,
+                                imf.setPolicyForMethod(className, fromName, signature,
                                         policy.getSubstitutionBasePolicy()
                                                 .withReason(FILTER_REASON))
 
                                 // Keep "from" -> "to" mapping.
-                                ret.setRenameTo(className, fromName, signature, name)
+                                imf.setRenameTo(className, fromName, signature, name)
                             }
                         }
 
@@ -164,8 +203,32 @@ fun createFilterFromTextPolicyFile(
         } catch (e: ParseException) {
             throw e.withSourceInfo(filename, lineNo)
         }
+
+        var ret: OutputFilter = imf
+        if (aidlPolicy != null || featureFlagsPolicy != null) {
+            log.d("AndroidHeuristicsFilter enabled")
+            ret = AndroidHeuristicsFilter(
+                    classes, aidlPolicy, featureFlagsPolicy, imf)
+        }
         return ret
     }
+}
+
+private enum class SpecialClass {
+    NotSpecial,
+    Aidl,
+    FeatureFlags,
+}
+
+private fun resolveSpecialClass(className: String): SpecialClass {
+    if (!className.startsWith(":")) {
+        return SpecialClass.NotSpecial
+    }
+    when (className.lowercase()) {
+        ":aidl" -> return SpecialClass.Aidl
+        ":feature_flags" -> return SpecialClass.FeatureFlags
+    }
+    throw ParseException("Invalid special class name \"$className\"")
 }
 
 private fun parsePolicy(s: String): FilterPolicy {

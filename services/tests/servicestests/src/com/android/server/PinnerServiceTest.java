@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import android.app.ActivityManagerInternal;
+import android.app.pinner.PinnedFileStat;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -47,22 +48,19 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.io.BufferedReader;
 import java.io.CharArrayWriter;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Optional;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
@@ -138,6 +136,13 @@ public class PinnerServiceTest {
             protected void publishBinderService(PinnerService service, Binder binderService) {
                 // Suppress this for testing, it's not needed and causes conflitcs.
             }
+
+            @Override
+            protected PinnerService.PinnedFile pinFileInternal(String fileToPin,
+                    int maxBytesToPin, boolean attemptPinIntrospection) {
+                return new PinnerService.PinnedFile(-1,
+                        maxBytesToPin, fileToPin, maxBytesToPin);
+            }
         };
     }
 
@@ -202,20 +207,27 @@ public class PinnerServiceTest {
         return cw.toString();
     }
 
-    private int getPinnedSize(PinnerService pinnerService) throws Exception {
-        return getPinnedSizeImpl(pinnerService, "Total size: ");
+    private long getPinnedSize(PinnerService pinnerService) {
+        long totalBytesPinned = 0;
+        for (PinnedFileStat stat : pinnerService.getPinnerStats()) {
+            totalBytesPinned += stat.getBytesPinned();
+        }
+        return totalBytesPinned;
     }
 
-    private int getPinnedAnonSize(PinnerService pinnerService) throws Exception {
-        return getPinnedSizeImpl(pinnerService, "Pinned anon region: ");
+    private int getPinnedAnonSize(PinnerService pinnerService) {
+        List<PinnedFileStat> anonStats = pinnerService.getPinnerStats().stream()
+                .filter(pf -> pf.getGroupName().equals(PinnerService.ANON_REGION_STAT_NAME))
+                .toList();
+        int totalAnon = 0;
+        for (PinnedFileStat anonStat : anonStats) {
+            totalAnon += anonStat.getBytesPinned();
+        }
+        return totalAnon;
     }
 
-    private int getPinnedSizeImpl(PinnerService pinnerService, String sizeToken) throws Exception {
-        String dumpOutput = getPinnerServiceDump(pinnerService);
-        BufferedReader bufReader = new BufferedReader(new StringReader(dumpOutput));
-        Optional<Integer> size = bufReader.lines().filter(s -> s.contains(sizeToken))
-                .map(s -> Integer.valueOf(s.substring(sizeToken.length()))).findAny();
-        return size.orElse(-1);
+    private long getTotalPinnedFiles(PinnerService pinnerService) {
+        return pinnerService.getPinnerStats().stream().count();
     }
 
     private void setDeviceConfigPinnedAnonSize(long size) {
@@ -227,7 +239,6 @@ public class PinnerServiceTest {
     }
 
     @Test
-    @Ignore("b/309853498, pinning home app can fail with ENOMEM")
     public void testPinHomeApp() throws Exception {
         // Enable HOME app pinning
         mContext.getOrCreateTestableResources()
@@ -245,15 +256,13 @@ public class PinnerServiceTest {
         ArrayMap<Integer, Object> pinnedApps = getPinnedApps(pinnerService);
         assertThat(pinnedApps.get(KEY_HOME)).isNotNull();
 
-        // Check if dump() reports total pinned bytes
-        int totalPinnedSizeBytes = getPinnedSize(pinnerService);
-        assertThat(totalPinnedSizeBytes).isGreaterThan(0);
+        assertThat(getPinnedSize(pinnerService)).isGreaterThan(0);
+        assertThat(getTotalPinnedFiles(pinnerService)).isGreaterThan(0);
 
         unpinAll(pinnerService);
     }
 
     @Test
-    @Ignore("b/309853498, pinning home app can fail with ENOMEM")
     public void testPinHomeAppOnBootCompleted() throws Exception {
         // Enable HOME app pinning
         mContext.getOrCreateTestableResources()
@@ -271,9 +280,7 @@ public class PinnerServiceTest {
         ArrayMap<Integer, Object> pinnedApps = getPinnedApps(pinnerService);
         assertThat(pinnedApps.get(KEY_HOME)).isNotNull();
 
-        // Check if dump() reports total pinned bytes
-        int totalPinnedSizeBytes = getPinnedSize(pinnerService);
-        assertThat(totalPinnedSizeBytes).isGreaterThan(0);
+        assertThat(getPinnedSize(pinnerService)).isGreaterThan(0);
 
         unpinAll(pinnerService);
     }
@@ -294,12 +301,24 @@ public class PinnerServiceTest {
         ArrayMap<Integer, Object> pinnedApps = getPinnedApps(pinnerService);
         assertThat(pinnedApps).isEmpty();
 
-        // Check if dump() reports total pinned bytes
-        int totalPinnedSizeBytes = getPinnedSize(pinnerService);
+        long totalPinnedSizeBytes = getPinnedSize(pinnerService);
         assertThat(totalPinnedSizeBytes).isEqualTo(0);
 
         int pinnedAnonSizeBytes = getPinnedAnonSize(pinnerService);
-        assertThat(pinnedAnonSizeBytes).isEqualTo(-1);
+        assertThat(pinnedAnonSizeBytes).isEqualTo(0);
+
+        unpinAll(pinnerService);
+    }
+
+    @Test
+    public void testPinFile() throws Exception {
+        PinnerService pinnerService = new PinnerService(mContext, mInjector);
+        pinnerService.onStart();
+
+        pinnerService.pinFile("test_file", 4096, null, "my_group");
+
+        assertThat(getPinnedSize(pinnerService)).isGreaterThan(0);
+        assertThat(getTotalPinnedFiles(pinnerService)).isGreaterThan(0);
 
         unpinAll(pinnerService);
     }
@@ -341,11 +360,8 @@ public class PinnerServiceTest {
         waitForPinnerService(pinnerService);
         // An empty anon region should clear the associated status entry.
         pinnedAnonSizeBytes = getPinnedAnonSize(pinnerService);
-        assertThat(pinnedAnonSizeBytes).isEqualTo(-1);
+        assertThat(pinnedAnonSizeBytes).isEqualTo(0);
 
         unpinAll(pinnerService);
     }
-
-    // TODO: Add test to check that the pages we expect to be pinned are actually pinned
-
 }

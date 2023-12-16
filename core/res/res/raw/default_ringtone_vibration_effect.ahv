@@ -18,7 +18,7 @@
 */
 -->
 
-<vibration>
+<vibration-effect>
     <waveform-effect>
         <waveform-entry amplitude="0" durationMs="0" />
         <waveform-entry amplitude="255" durationMs="12" />
@@ -44,4 +44,4 @@
             <waveform-entry amplitude="0" durationMs="1000" />
         </repeating>
     </waveform-effect>
-</vibration>
+</vibration-effect>

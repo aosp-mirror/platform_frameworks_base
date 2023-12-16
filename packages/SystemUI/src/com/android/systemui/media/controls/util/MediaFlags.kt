@@ -55,7 +55,7 @@ constructor(
     /** Check whether we allow remote media to generate resume controls */
     fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
 
-    /** Check whether to use flexiglass layout */
-    fun isFlexiglassEnabled() =
+    /** Check whether to use scene framework */
+    fun isSceneContainerEnabled() =
         sceneContainerFlags.isEnabled() && MediaInSceneContainerFlag.isEnabled
 }

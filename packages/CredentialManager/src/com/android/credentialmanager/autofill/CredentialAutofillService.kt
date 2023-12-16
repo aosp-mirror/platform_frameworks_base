@@ -48,10 +48,11 @@ import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.android.credentialmanager.GetFlowUtils
-import com.android.credentialmanager.getflow.CredentialEntryInfo
+import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
-import com.android.credentialmanager.getflow.ProviderInfo
+import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.getflow.toProviderDisplayInfo
+import com.android.credentialmanager.ktx.credentialEntry
 import org.json.JSONObject
 import java.util.concurrent.Executors
 
@@ -122,8 +123,7 @@ class CredentialAutofillService : AutofillService() {
         val entryIconMap: MutableMap<String, Icon> = mutableMapOf()
         candidateProviderDataList.forEach { provider ->
             provider.credentialEntries.forEach { entry ->
-                val credentialEntry = GetFlowUtils.parseCredentialEntryFromSlice(entry.slice)
-                when (credentialEntry) {
+                when (val credentialEntry = entry.slice.credentialEntry) {
                     is PasswordCredentialEntry -> {
                         entryIconMap[entry.key + entry.subkey] = credentialEntry.icon
                     }
@@ -172,11 +172,11 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun processProvidersForAutofillId(
-            filLRequest: FillRequest,
-            autofillId: AutofillId,
-            providerList: List<ProviderInfo>,
-            entryIconMap: Map<String, Icon>,
-            fillResponseBuilder: FillResponse.Builder
+        filLRequest: FillRequest,
+        autofillId: AutofillId,
+        providerList: List<ProviderInfo>,
+        entryIconMap: Map<String, Icon>,
+        fillResponseBuilder: FillResponse.Builder
     ): Boolean {
         if (providerList.isEmpty()) {
             return false
@@ -200,7 +200,8 @@ class CredentialAutofillService : AutofillService() {
         providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach usernameLoop@ {
             val primaryEntry = it.sortedCredentialEntryList.first()
             val pendingIntent = primaryEntry.pendingIntent
-            if (pendingIntent == null || primaryEntry.fillInIntent == null) {
+            val fillInIntent = primaryEntry.fillInIntent
+            if (pendingIntent == null || fillInIntent == null) {
                 // FillInIntent will not be null because autofillId was retrieved from it.
                 Log.e(TAG, "PendingIntent was missing from the entry.")
                 return@usernameLoop
@@ -245,7 +246,7 @@ class CredentialAutofillService : AutofillService() {
                                             presentationBuilder.build())
                                             .build())
                             .setAuthentication(pendingIntent.intentSender)
-                            .setAuthenticationExtras(primaryEntry.fillInIntent.extras)
+                            .setAuthenticationExtras(fillInIntent.extras)
                             .build())
             datasetAdded = true
         }
@@ -322,8 +323,8 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun copyProviderInfo(
-            providerInfo: ProviderInfo,
-            credentialList: List<CredentialEntryInfo>
+        providerInfo: ProviderInfo,
+        credentialList: List<CredentialEntryInfo>
     ): ProviderInfo {
         return ProviderInfo(
                 providerInfo.id,

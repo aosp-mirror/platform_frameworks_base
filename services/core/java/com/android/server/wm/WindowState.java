@@ -109,6 +109,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RESIZE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
@@ -177,6 +178,8 @@ import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_ARE
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
+import static com.android.window.flags.Flags.explicitRefreshRateHints;
+import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.surfaceTrustedOverlay;
 
 import android.annotation.CallSuper;
@@ -664,6 +667,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * and false until the transaction to resize is sent.
      */
     boolean mSeamlesslyRotated = false;
+
+    /**
+     * Whether the IME insets have been consumed. If {@code true}, this window won't be able to
+     * receive visible IME insets; {@code false}, otherwise.
+     */
+    boolean mImeInsetsConsumed = false;
 
     /**
      * The insets state of sources provided by windows above the current window.
@@ -1187,6 +1196,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", this, parentWindow);
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
+
+        if (token.mRoundedCornerOverlay) {
+            mWmService.mTrustedPresentationListenerController.addIgnoredWindowTokens(
+                    getWindowToken());
+        }
     }
 
     @Override
@@ -1194,6 +1208,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.setInitialSurfaceControlProperties(b);
         if (surfaceTrustedOverlay() && isWindowTrustedOverlay()) {
             getPendingTransaction().setTrustedOverlay(mSurfaceControl, true);
+        }
+        if (secureWindowState()) {
+            getPendingTransaction().setSecure(mSurfaceControl, isSecureLocked());
         }
     }
 
@@ -1482,7 +1499,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             if (insetsChanged) {
                 mWindowFrames.setInsetsChanged(false);
-                mWmService.mWindowsInsetsChanged--;
+                if (mWmService.mWindowsInsetsChanged > 0) {
+                    mWmService.mWindowsInsetsChanged--;
+                }
                 if (mWmService.mWindowsInsetsChanged == 0) {
                     mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
                 }
@@ -2388,6 +2407,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mWmService.postWindowRemoveCleanupLocked(this);
+
+        mWmService.mTrustedPresentationListenerController.removeIgnoredWindowTokens(
+                getWindowToken());
     }
 
     @Override
@@ -3276,7 +3298,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // just kill it. And if it is a window of foreground activity, the activity can be
             // restarted automatically if needed.
             Slog.w(TAG, "Exception thrown during dispatchAppVisibility " + this, e);
-            android.os.Process.killProcess(mSession.mPid);
+            if (android.os.Process.getUidForPid(mSession.mPid) == mSession.mUid) {
+                android.os.Process.killProcess(mSession.mPid);
+            }
         }
     }
 
@@ -3789,13 +3813,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void notifyInsetsChanged() {
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "notifyInsetsChanged for %s ", this);
-        mWindowFrames.setInsetsChanged(true);
+        if (!mWindowFrames.hasInsetsChanged()) {
+            mWindowFrames.setInsetsChanged(true);
 
-        // If the new InsetsState won't be dispatched before releasing WM lock, the following
-        // message will be executed.
-        mWmService.mWindowsInsetsChanged++;
-        mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
-        mWmService.mH.sendEmptyMessage(WindowManagerService.H.INSETS_CHANGED);
+            // If the new InsetsState won't be dispatched before releasing WM lock, the following
+            // message will be executed.
+            mWmService.mWindowsInsetsChanged++;
+            mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
+            mWmService.mH.sendEmptyMessage(WindowManagerService.H.INSETS_CHANGED);
+        }
 
         final WindowContainer p = getParent();
         if (p != null) {
@@ -4185,6 +4211,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             pw.print("null");
         }
+        pw.println();
 
         if (mXOffset != 0 || mYOffset != 0) {
             pw.println(prefix + "mXOffset=" + mXOffset + " mYOffset=" + mYOffset);
@@ -4217,6 +4244,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (computeDragResizing()) {
             pw.println(prefix + "computeDragResizing=" + computeDragResizing());
+        }
+        if (mImeInsetsConsumed) {
+            pw.println(prefix + "mImeInsetsConsumed=true");
         }
         pw.println(prefix + "isOnScreen=" + isOnScreen());
         pw.println(prefix + "isVisible=" + isVisible());
@@ -5178,9 +5208,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         boolean voteChanged = refreshRatePolicy.updateFrameRateVote(this);
         if (voteChanged) {
-            getPendingTransaction().setFrameRate(
-                    mSurfaceControl, mFrameRateVote.mRefreshRate,
-                    mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS);
+            getPendingTransaction()
+                    .setFrameRate(mSurfaceControl, mFrameRateVote.mRefreshRate,
+                        mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS);
+            if (explicitRefreshRateHints()) {
+                getPendingTransaction().setFrameRateSelectionStrategy(mSurfaceControl,
+                        mFrameRateVote.mSelectionStrategy);
+            }
 
         }
     }
@@ -5615,9 +5649,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mKeyInterceptionInfo == null
                 || mKeyInterceptionInfo.layoutParamsPrivateFlags != getAttrs().privateFlags
                 || mKeyInterceptionInfo.layoutParamsType != getAttrs().type
-                || mKeyInterceptionInfo.windowTitle != getWindowTag()) {
+                || mKeyInterceptionInfo.windowTitle != getWindowTag()
+                || mKeyInterceptionInfo.windowOwnerUid != getOwningUid()) {
             mKeyInterceptionInfo = new KeyInterceptionInfo(getAttrs().type, getAttrs().privateFlags,
-                    getWindowTag().toString());
+                    getWindowTag().toString(), getOwningUid());
         }
         return mKeyInterceptionInfo;
     }
@@ -6039,5 +6074,26 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public boolean cancelAndRedraw() {
         // Cancel any draw requests during a sync.
         return mPrepareSyncSeqId > 0;
+    }
+
+    void setSecureLocked(boolean isSecure) {
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isSecure=%b: %s", isSecure, getName());
+        if (secureWindowState()) {
+            if (mSurfaceControl == null) {
+                return;
+            }
+            getPendingTransaction().setSecure(mSurfaceControl, isSecure);
+        } else {
+            if (mWinAnimator.mSurfaceController == null
+                    || mWinAnimator.mSurfaceController.mSurfaceControl == null) {
+                return;
+            }
+            getPendingTransaction().setSecure(mWinAnimator.mSurfaceController.mSurfaceControl,
+                    isSecure);
+        }
+        if (mDisplayContent != null) {
+            mDisplayContent.refreshImeSecureFlag(getSyncTransaction());
+        }
+        mWmService.scheduleAnimationLocked();
     }
 }

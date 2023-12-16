@@ -61,7 +61,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
-import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
@@ -795,13 +794,6 @@ public class QuickSettingsController implements Dumpable {
 
     /** update Qs height state */
     public void setExpansionHeight(float height) {
-        // TODO(b/277909752): remove below log when bug is fixed
-        if (mSplitShadeEnabled && mShadeExpandedFraction == 1.0f && height == 0
-                && mBarState == SHADE) {
-            Log.wtf(TAG,
-                    "setting QS height to 0 in split shade while shade is open(ing). "
-                            + "Value of isExpandImmediate() = " + isExpandImmediate());
-        }
         int maxHeight = getMaxExpansionHeight();
         height = Math.min(Math.max(
                 height, getMinExpansionHeight()), maxHeight);
@@ -981,7 +973,6 @@ public class QuickSettingsController implements Dumpable {
         // this will speed up notification actions.
         if (height == 0 && !mKeyguardStateController.canDismissLockScreen()) {
             mKeyguardFaceAuthInteractor.onQsExpansionStared();
-            mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.QS_EXPANDED);
         }
     }
 

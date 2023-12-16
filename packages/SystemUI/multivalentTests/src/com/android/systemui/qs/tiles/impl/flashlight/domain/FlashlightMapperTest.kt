@@ -16,7 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.flashlight.domain
 
-import android.graphics.drawable.Drawable
+import android.graphics.drawable.TestStubDrawable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -26,7 +26,6 @@ import com.android.systemui.qs.tiles.impl.flashlight.domain.model.FlashlightTile
 import com.android.systemui.qs.tiles.impl.flashlight.qsFlashlightTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import org.junit.Test
@@ -37,7 +36,17 @@ import org.junit.runner.RunWith
 class FlashlightMapperTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val qsTileConfig = kosmos.qsFlashlightTileConfig
-    private val mapper by lazy { FlashlightMapper(context) }
+    private val mapper by lazy {
+        FlashlightMapper(
+            context.orCreateTestableResources
+                .apply {
+                    addOverride(R.drawable.qs_flashlight_icon_off, TestStubDrawable())
+                    addOverride(R.drawable.qs_flashlight_icon_on, TestStubDrawable())
+                }
+                .resources,
+            context.theme
+        )
+    }
 
     @Test
     fun mapsDisabledDataToInactiveState() {
@@ -58,30 +67,20 @@ class FlashlightMapperTest : SysuiTestCase() {
 
     @Test
     fun mapsEnabledDataToOnIconState() {
-        val fakeDrawable = mock<Drawable>()
-        context.orCreateTestableResources.addOverride(
-            R.drawable.qs_flashlight_icon_on,
-            fakeDrawable
-        )
-        val expectedIcon = Icon.Loaded(fakeDrawable, null)
-
         val tileState: QSTileState = mapper.map(qsTileConfig, FlashlightTileModel(true))
 
+        val expectedIcon =
+            Icon.Loaded(context.getDrawable(R.drawable.qs_flashlight_icon_on)!!, null)
         val actualIcon = tileState.icon()
         assertThat(actualIcon).isEqualTo(expectedIcon)
     }
 
     @Test
     fun mapsDisabledDataToOffIconState() {
-        val fakeDrawable = mock<Drawable>()
-        context.orCreateTestableResources.addOverride(
-            R.drawable.qs_flashlight_icon_off,
-            fakeDrawable
-        )
-        val expectedIcon = Icon.Loaded(fakeDrawable, null)
-
         val tileState: QSTileState = mapper.map(qsTileConfig, FlashlightTileModel(false))
 
+        val expectedIcon =
+            Icon.Loaded(context.getDrawable(R.drawable.qs_flashlight_icon_off)!!, null)
         val actualIcon = tileState.icon()
         assertThat(actualIcon).isEqualTo(expectedIcon)
     }

@@ -1,0 +1,8 @@
+package: "com.android.media.flags"
+
+flag {
+    namespace: "media_solutions"
+    name: "enable_fade_manager_configuration"
+    description: "Enable Fade Manager Configuration support to determine fade properties"
+    bug: "307354764"
+}

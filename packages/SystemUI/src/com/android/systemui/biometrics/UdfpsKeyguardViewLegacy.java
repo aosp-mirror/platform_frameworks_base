@@ -133,7 +133,7 @@ public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
 
         // if we're animating from screen off, we can immediately place the icon in the
         // AoD-burn in location, else we need to translate the icon from LS => AoD.
-        final float darkAmountForAnimation = mAnimationType == ANIMATION_UNLOCKED_SCREEN_OFF
+        final float darkAmountForAnimation = mAnimationType == ANIMATE_APPEAR_ON_SCREEN_OFF
                 ? 1f : mInterpolatedDarkAmount;
         final float burnInOffsetX = MathUtils.lerp(0f,
             getBurnInOffset(mMaxBurnInOffsetX * 2, true /* xAxis */)
@@ -171,7 +171,7 @@ public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
                 mAnimationType == ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN
                         && (mInterpolatedDarkAmount == 0f || mInterpolatedDarkAmount == 1f);
         final boolean doneAnimatingUnlockedScreenOff =
-                mAnimationType == ANIMATION_UNLOCKED_SCREEN_OFF
+                mAnimationType == ANIMATE_APPEAR_ON_SCREEN_OFF
                         && (mInterpolatedDarkAmount == 1f);
         if (doneAnimatingBetweenAodAndLS || doneAnimatingUnlockedScreenOff) {
             mAnimationType = ANIMATION_NONE;
@@ -243,10 +243,10 @@ public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
 
     static final int ANIMATION_NONE = 0;
     static final int ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN = 1;
-    static final int ANIMATION_UNLOCKED_SCREEN_OFF = 2;
+    static final int ANIMATE_APPEAR_ON_SCREEN_OFF = 2;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ANIMATION_NONE, ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN, ANIMATION_UNLOCKED_SCREEN_OFF})
+    @IntDef({ANIMATION_NONE, ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN, ANIMATE_APPEAR_ON_SCREEN_OFF})
     private @interface AnimationType {}
 
     void onDozeAmountChanged(float linear, float eased, @AnimationType int animationType) {

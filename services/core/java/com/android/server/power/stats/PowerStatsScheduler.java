@@ -18,9 +18,6 @@ package com.android.server.power.stats;
 
 import android.annotation.DurationMillisLong;
 import android.app.AlarmManager;
-import android.content.Context;
-import android.os.BatteryUsageStats;
-import android.os.BatteryUsageStatsQuery;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.util.IndentingPrintWriter;
@@ -32,6 +29,7 @@ import com.android.internal.os.MonotonicClock;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * Controls the frequency at which {@link PowerStatsSpan}'s are generated and stored in
@@ -41,7 +39,7 @@ public class PowerStatsScheduler {
     private static final long MINUTE_IN_MILLIS = TimeUnit.MINUTES.toMillis(1);
     private static final long HOUR_IN_MILLIS = TimeUnit.HOURS.toMillis(1);
 
-    private final Context mContext;
+    private final AlarmScheduler mAlarmScheduler;
     private boolean mEnablePeriodicPowerStatsCollection;
     @DurationMillisLong
     private final long mAggregatedPowerStatsSpanDuration;
@@ -51,43 +49,54 @@ public class PowerStatsScheduler {
     private final Clock mClock;
     private final MonotonicClock mMonotonicClock;
     private final Handler mHandler;
-    private final BatteryStatsImpl mBatteryStats;
-    private final BatteryUsageStatsProvider mBatteryUsageStatsProvider;
+    private final Runnable mPowerStatsCollector;
+    private final Supplier<Long> mEarliestAvailableBatteryHistoryTimeMs;
     private final PowerStatsAggregator mPowerStatsAggregator;
     private long mLastSavedSpanEndMonotonicTime;
 
-    public PowerStatsScheduler(Context context, PowerStatsAggregator powerStatsAggregator,
+    /**
+     * External dependency on AlarmManager.
+     */
+    public interface AlarmScheduler {
+        /**
+         * Should use AlarmManager to schedule an inexact, non-wakeup alarm.
+         */
+        void scheduleAlarm(long triggerAtMillis, String tag,
+                AlarmManager.OnAlarmListener onAlarmListener, Handler handler);
+    }
+
+    public PowerStatsScheduler(Runnable powerStatsCollector,
+            PowerStatsAggregator powerStatsAggregator,
             @DurationMillisLong long aggregatedPowerStatsSpanDuration,
             @DurationMillisLong long powerStatsAggregationPeriod, PowerStatsStore powerStatsStore,
-            Clock clock, MonotonicClock monotonicClock, Handler handler,
-            BatteryStatsImpl batteryStats, BatteryUsageStatsProvider batteryUsageStatsProvider) {
-        mContext = context;
+            AlarmScheduler alarmScheduler, Clock clock, MonotonicClock monotonicClock,
+            Supplier<Long> earliestAvailableBatteryHistoryTimeMs, Handler handler) {
         mPowerStatsAggregator = powerStatsAggregator;
         mAggregatedPowerStatsSpanDuration = aggregatedPowerStatsSpanDuration;
         mPowerStatsAggregationPeriod = powerStatsAggregationPeriod;
         mPowerStatsStore = powerStatsStore;
+        mAlarmScheduler = alarmScheduler;
         mClock = clock;
         mMonotonicClock = monotonicClock;
         mHandler = handler;
-        mBatteryStats = batteryStats;
-        mBatteryUsageStatsProvider = batteryUsageStatsProvider;
+        mPowerStatsCollector = powerStatsCollector;
+        mEarliestAvailableBatteryHistoryTimeMs = earliestAvailableBatteryHistoryTimeMs;
     }
 
     /**
      * Kicks off the scheduling of power stats aggregation spans.
      */
     public void start(boolean enablePeriodicPowerStatsCollection) {
-        mBatteryStats.setBatteryResetListener(this::storeBatteryUsageStatsOnReset);
         mEnablePeriodicPowerStatsCollection = enablePeriodicPowerStatsCollection;
         if (mEnablePeriodicPowerStatsCollection) {
+            schedulePowerStatsAggregation();
             scheduleNextPowerStatsAggregation();
         }
     }
 
     private void scheduleNextPowerStatsAggregation() {
-        AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME,
-                mClock.elapsedRealtime() + mPowerStatsAggregationPeriod, "PowerStats",
+        mAlarmScheduler.scheduleAlarm(mClock.elapsedRealtime() + mPowerStatsAggregationPeriod,
+                "PowerStats",
                 () -> {
                     schedulePowerStatsAggregation();
                     mHandler.post(this::scheduleNextPowerStatsAggregation);
@@ -100,7 +109,7 @@ public class PowerStatsScheduler {
     @VisibleForTesting
     public void schedulePowerStatsAggregation() {
         // Catch up the power stats collectors
-        mBatteryStats.schedulePowerStatsSampleCollection();
+        mPowerStatsCollector.run();
         mHandler.post(this::aggregateAndStorePowerStats);
     }
 
@@ -109,7 +118,7 @@ public class PowerStatsScheduler {
         long currentMonotonicTime = mMonotonicClock.monotonicTime();
         long startTime = getLastSavedSpanEndMonotonicTime();
         if (startTime < 0) {
-            startTime = mBatteryStats.getHistory().getStartTime();
+            startTime = mEarliestAvailableBatteryHistoryTimeMs.get();
         }
         long endTimeMs = alignToWallClock(startTime + mAggregatedPowerStatsSpanDuration,
                 mAggregatedPowerStatsSpanDuration, currentMonotonicTime, currentTimeMillis);
@@ -144,7 +153,8 @@ public class PowerStatsScheduler {
             mPowerStatsStore.dump(ipw);
             // Aggregate the remainder of power stats and dump the results without storing them yet.
             long powerStoreEndMonotonicTime = getLastSavedSpanEndMonotonicTime();
-            mPowerStatsAggregator.aggregatePowerStats(powerStoreEndMonotonicTime, 0,
+            mPowerStatsAggregator.aggregatePowerStats(powerStoreEndMonotonicTime,
+                    MonotonicClock.UNDEFINED,
                     stats -> {
                         // Create a PowerStatsSpan for consistency of the textual output
                         PowerStatsSpan span = PowerStatsStore.createPowerStatsSpan(stats);
@@ -233,28 +243,6 @@ public class PowerStatsScheduler {
 
     private void storeAggregatedPowerStats(AggregatedPowerStats stats) {
         mPowerStatsStore.storeAggregatedPowerStats(stats);
-    }
-
-    private void storeBatteryUsageStatsOnReset(int resetReason) {
-        if (resetReason == BatteryStatsImpl.RESET_REASON_CORRUPT_FILE) {
-            return;
-        }
-
-        final BatteryUsageStats batteryUsageStats =
-                mBatteryUsageStatsProvider.getBatteryUsageStats(
-                        new BatteryUsageStatsQuery.Builder()
-                                .setMaxStatsAgeMs(0)
-                                .includePowerModels()
-                                .includeProcessStateData()
-                                .build());
-
-        // TODO(b/188068523): BatteryUsageStats should use monotonic time for start and end
-        // Once that change is made, we will be able to use the BatteryUsageStats' monotonic
-        // start time
-        long monotonicStartTime =
-                mMonotonicClock.monotonicTime() - batteryUsageStats.getStatsDuration();
-        mHandler.post(() ->
-                mPowerStatsStore.storeBatteryUsageStats(monotonicStartTime, batteryUsageStats));
     }
 
     private void awaitCompletion() {

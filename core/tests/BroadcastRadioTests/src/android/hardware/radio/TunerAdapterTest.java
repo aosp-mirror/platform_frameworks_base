@@ -36,10 +36,7 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.RemoteException;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,7 +81,7 @@ public final class TunerAdapterTest {
     private RadioTuner.Callback mCallbackMock;
 
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -613,9 +610,9 @@ public final class TunerAdapterTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void isConfigFlagSet_withForceAnalogWhenFmForceAnalogSupported()
             throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         when(mTunerMock.isConfigFlagSupported(anyInt())).thenReturn(true);
         when(mTunerMock.isConfigFlagSet(RadioManager.CONFIG_FORCE_ANALOG_FM))
                 .thenReturn(true);
@@ -626,9 +623,9 @@ public final class TunerAdapterTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void isConfigFlagSet_withForceAnalogWhenFmForceAnalogNotSupported()
             throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         when(mTunerMock.isConfigFlagSupported(RadioManager.CONFIG_FORCE_ANALOG_FM))
                 .thenReturn(false);
         when(mTunerMock.isConfigFlagSupported(RadioManager.CONFIG_FORCE_ANALOG)).thenReturn(true);
@@ -640,9 +637,9 @@ public final class TunerAdapterTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void isConfigFlagSet_withForceAnalogWhenHdRadioImprovedFeatureNotEnabled()
             throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         when(mTunerMock.isConfigFlagSupported(anyInt())).thenReturn(true);
         when(mTunerMock.isConfigFlagSet(RadioManager.CONFIG_FORCE_ANALOG)).thenReturn(false);
 
@@ -683,8 +680,8 @@ public final class TunerAdapterTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void setConfigFlag_withForceAnalogWhenFmForceAnalogSupported() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         when(mTunerMock.isConfigFlagSupported(anyInt())).thenReturn(true);
 
         mRadioTuner.setConfigFlag(RadioManager.CONFIG_FORCE_ANALOG, /* value= */ false);
@@ -695,8 +692,8 @@ public final class TunerAdapterTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void setConfigFlag_withForceAnalogWhenFmForceAnalogNotSupported() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         when(mTunerMock.isConfigFlagSupported(anyInt())).thenReturn(true);
         when(mTunerMock.isConfigFlagSupported(RadioManager.CONFIG_FORCE_ANALOG_FM))
                 .thenReturn(false);
@@ -709,9 +706,9 @@ public final class TunerAdapterTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void setConfigFlag_withForceAnalogWhenHdRadioImprovedFeatureNotEnabled()
             throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         when(mTunerMock.isConfigFlagSupported(anyInt())).thenReturn(true);
 
         mRadioTuner.setConfigFlag(RadioManager.CONFIG_FORCE_ANALOG, /* value= */ false);

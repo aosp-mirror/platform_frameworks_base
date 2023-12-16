@@ -1390,7 +1390,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     // recents, in case IME icon may missing if the moving task has already been
                     // the current focused task.
                     InputMethodManagerInternal.get().updateImeWindowStatus(
-                            false /* disableImeIcon */);
+                            false /* disableImeIcon */, dc.getDisplayId());
                 }
                 // An uncommitted transient launch can leave incomplete lifecycles if visibilities
                 // didn't change (eg. re-ordering with translucent tasks will leave launcher
@@ -1737,8 +1737,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Since we created root-leash but no longer reference it from core, release it now
         info.releaseAnimSurfaces();
 
-        mLogger.logOnSendAsync(mController.mLoggerHandler);
         if (mLogger.mInfo != null) {
+            mLogger.logOnSendAsync(mController.mLoggerHandler);
             mController.mTransitionTracer.logSentTransition(this, mTargets);
         }
     }
@@ -1753,6 +1753,27 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 asyncRotationController.onTransactionCommitTimeout(mCleanupTransaction);
             }
         }
+    }
+
+    /**
+     * Checks if the transition contains order changes.
+     *
+     * This is a shallow check that doesn't account for collection in parallel, unlike
+     * {@code collectOrderChanges}
+     */
+    boolean hasOrderChanges() {
+        ArrayList<Task> onTopTasks = new ArrayList<>();
+        // Iterate over target displays to get up to date on top tasks.
+        // Cannot use `mOnTopTasksAtReady` as it's not populated before the `applyReady` is called.
+        for (DisplayContent dc : mTargetDisplays) {
+            addOnTopTasks(dc, onTopTasks);
+        }
+        for (Task task : onTopTasks) {
+            if (!mOnTopTasksStart.contains(task)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -2836,13 +2857,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return false;
     }
 
-    /** Applies the new configuration for the changed displays. */
-    void applyDisplayChangeIfNeeded() {
+    /**
+     * Applies the new configuration for the changed displays. Returns the activities that should
+     * check whether to deliver the new configuration to clients.
+     */
+    @Nullable
+    ArrayList<ActivityRecord> applyDisplayChangeIfNeeded() {
+        ArrayList<ActivityRecord> activitiesMayChange = null;
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WindowContainer<?> wc = mParticipants.valueAt(i);
             final DisplayContent dc = wc.asDisplayContent();
             if (dc == null || !mChanges.get(dc).hasChanged()) continue;
-            dc.sendNewConfiguration();
+            final boolean changed = dc.sendNewConfiguration();
             // Set to ready if no other change controls the ready state. But if there is, such as
             // if an activity is pausing, it will call setReady(ar, false) and wait for the next
             // resumed activity. Then do not set to ready because the transition only contains
@@ -2850,7 +2876,22 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (!mReadyTrackerOld.mUsed) {
                 setReady(dc, true);
             }
+            if (!changed) continue;
+            // If the update is deferred, sendNewConfiguration won't deliver new configuration to
+            // clients, then it is the caller's responsibility to deliver the changes.
+            if (mController.mAtm.mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
+                if (activitiesMayChange == null) {
+                    activitiesMayChange = new ArrayList<>();
+                }
+                final ArrayList<ActivityRecord> visibleActivities = activitiesMayChange;
+                dc.forAllActivities(r -> {
+                    if (r.isVisibleRequested()) {
+                        visibleActivities.add(r);
+                    }
+                });
+            }
         }
+        return activitiesMayChange;
     }
 
     boolean getLegacyIsReady() {
@@ -3305,7 +3346,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
          */
         void addGroup(WindowContainer wc) {
             if (mReadyGroups.containsKey(wc)) {
-                Slog.e(TAG, "Trying to add a ready-group twice: " + wc);
                 return;
             }
             mReadyGroups.put(wc, false);

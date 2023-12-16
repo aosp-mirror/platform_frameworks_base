@@ -147,11 +147,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                 resetOrExitSessionReceiver = resetOrExitSessionReceiver,
             )
 
-        val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-                set(Flags.FACE_AUTH_REFACTOR, true)
-            }
+        val featureFlags = FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         val reply = KeyguardInteractorFactory.create(featureFlags = featureFlags)
         keyguardRepository = reply.repository
 

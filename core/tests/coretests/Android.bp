@@ -7,19 +7,35 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+filegroup {
+    name: "FrameworksCoreTests-aidl",
+    srcs: [
+        "src/**/I*.aidl",
+        "aidl/**/I*.aidl",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "FrameworksCoreTests-helpers",
+    srcs: [
+        "DisabledTestApp/src/**/*.java",
+        "EnabledTestApp/src/**/*.java",
+        "BinderProxyCountingTestApp/src/**/*.java",
+        "BinderProxyCountingTestService/src/**/*.java",
+        "BinderDeathRecipientHelperApp/src/**/*.java",
+    ],
+    visibility: ["//visibility:private"],
+}
+
 android_test {
     name: "FrameworksCoreTests",
 
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
-        "src/**/I*.aidl",
-        "DisabledTestApp/src/**/*.java",
-        "EnabledTestApp/src/**/*.java",
-        "BinderProxyCountingTestApp/src/**/*.java",
-        "BinderProxyCountingTestService/src/**/*.java",
-        "BinderDeathRecipientHelperApp/src/**/*.java",
-        "aidl/**/I*.aidl",
+        ":FrameworksCoreTests-aidl",
+        ":FrameworksCoreTests-helpers",
         ":FrameworksCoreTestDoubles-sources",
     ],
 
@@ -66,6 +82,7 @@ android_test {
         "testables",
         "com.android.text.flags-aconfig-java",
         "flag-junit",
+        "ravenwood-junit",
     ],
 
     libs: [
@@ -162,4 +179,43 @@ android_library {
         "framework",
         "framework-res",
     ],
+}
+
+android_ravenwood_test {
+    name: "FrameworksCoreTestsRavenwood",
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+    static_libs: [
+        "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
+        "androidx.core_core",
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "androidx.test.uiautomator_uiautomator",
+        "compatibility-device-util-axt",
+        "flag-junit",
+        "mockito_ravenwood",
+        "platform-test-annotations",
+        "flag-junit",
+        "testng",
+    ],
+    srcs: [
+        "src/android/os/**/*.java",
+        "src/com/android/internal/os/**/*.java",
+        "src/android/util/**/*.java",
+        "src/com/android/internal/os/LongArrayMultiStateCounterTest.java",
+        "src/com/android/internal/util/**/*.java",
+        "src/com/android/internal/power/EnergyConsumerStatsTest.java",
+        ":FrameworksCoreTests{.aapt.srcjar}",
+        ":FrameworksCoreTests-aidl",
+        ":FrameworksCoreTests-helpers",
+        ":FrameworksCoreTestDoubles-sources",
+    ],
+    aidl: {
+        generate_get_transaction_name: true,
+        local_include_dirs: ["aidl"],
+    },
+    auto_gen_config: true,
 }

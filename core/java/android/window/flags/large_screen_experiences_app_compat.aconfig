@@ -15,3 +15,24 @@ flag {
   bug: "302387383"
   is_fixed_read_only: true
 }
+
+flag {
+  name: "density_390_api"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the API DisplayMetrics.DENSITY_390 is available"
+  bug: "297550533"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "app_compat_properties_api"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether app compat property APIs are public. Which includes: /n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE,/n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED,/n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES,/n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE,/n"
+                 "WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE"
+  bug: "316139088"
+  is_fixed_read_only: true
+}

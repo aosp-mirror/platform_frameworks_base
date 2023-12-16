@@ -27,9 +27,9 @@ import static org.mockito.Mockito.when;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.PackageState;
 
 import org.junit.Test;

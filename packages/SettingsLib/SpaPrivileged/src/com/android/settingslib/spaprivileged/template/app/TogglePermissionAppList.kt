@@ -36,6 +36,9 @@ interface TogglePermissionAppListModel<T : AppRecord> {
     val switchRestrictionKeys: List<String>
         get() = emptyList()
 
+    val enhancedConfirmationKey: String?
+        get() = null
+
     /**
      * Loads the extra info for the App List, and generates the [AppRecord] List.
      *

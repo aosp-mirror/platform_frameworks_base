@@ -63,7 +63,7 @@ std::unique_ptr<IData> ZipFile::OpenAsData() {
   }
 }
 
-std::unique_ptr<io::InputStream> ZipFile::OpenInputStream() {
+std::unique_ptr<android::InputStream> ZipFile::OpenInputStream() {
   return OpenAsData();
 }
 

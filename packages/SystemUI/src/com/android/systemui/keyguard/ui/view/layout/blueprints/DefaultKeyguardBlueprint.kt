@@ -21,10 +21,10 @@ import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialInd
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
-import com.android.systemui.keyguard.ui.view.layout.items.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntryIconSection
+import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
@@ -49,7 +49,7 @@ class DefaultKeyguardBlueprint
 @Inject
 constructor(
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
-    defaultDeviceEntryIconSection: DefaultDeviceEntryIconSection,
+    defaultDeviceEntrySection: DefaultDeviceEntrySection,
     defaultShortcutsSection: DefaultShortcutsSection,
     @Named(KEYGUARD_AMBIENT_INDICATION_AREA_SECTION)
     defaultAmbientIndicationAreaSection: Optional<KeyguardSection>,
@@ -75,11 +75,11 @@ constructor(
             defaultStatusBarSection,
             defaultNotificationStackScrollLayoutSection,
             aodNotificationIconsSection,
+            smartspaceSection,
             aodBurnInSection,
             communalTutorialIndicatorSection,
             clockSection,
-            smartspaceSection,
-            defaultDeviceEntryIconSection, // Add LAST: Intentionally has z-order above other views.
+            defaultDeviceEntrySection, // Add LAST: Intentionally has z-order above other views.
         )
 
     companion object {

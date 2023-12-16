@@ -57,6 +57,9 @@ public class DisplayDeviceTest {
     @Mock
     private SurfaceControl.Transaction mMockTransaction;
 
+    @Mock
+    private DisplayAdapter mMockDisplayAdapter;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -67,34 +70,39 @@ public class DisplayDeviceTest {
 
     @Test
     public void testGetDisplaySurfaceDefaultSizeLocked_notRotated() {
-        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo);
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter);
         assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(PORTRAIT_SIZE);
     }
 
     @Test
     public void testGetDisplaySurfaceDefaultSizeLocked_rotation0() {
-        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo);
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter);
         displayDevice.setProjectionLocked(mMockTransaction, ROTATION_0, new Rect(), new Rect());
         assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(PORTRAIT_SIZE);
     }
 
     @Test
     public void testGetDisplaySurfaceDefaultSizeLocked_rotation90() {
-        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo);
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter);
         displayDevice.setProjectionLocked(mMockTransaction, ROTATION_90, new Rect(), new Rect());
         assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(LANDSCAPE_SIZE);
     }
 
     @Test
     public void testGetDisplaySurfaceDefaultSizeLocked_rotation180() {
-        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo);
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter);
         displayDevice.setProjectionLocked(mMockTransaction, ROTATION_180, new Rect(), new Rect());
         assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(PORTRAIT_SIZE);
     }
 
     @Test
     public void testGetDisplaySurfaceDefaultSizeLocked_rotation270() {
-        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo);
+        DisplayDevice displayDevice = new FakeDisplayDevice(mDisplayDeviceInfo,
+                mMockDisplayAdapter);
         displayDevice.setProjectionLocked(mMockTransaction, ROTATION_270, new Rect(), new Rect());
         assertThat(displayDevice.getDisplaySurfaceDefaultSizeLocked()).isEqualTo(LANDSCAPE_SIZE);
     }
@@ -102,8 +110,9 @@ public class DisplayDeviceTest {
     private static class FakeDisplayDevice extends DisplayDevice {
         private final DisplayDeviceInfo mDisplayDeviceInfo;
 
-        FakeDisplayDevice(DisplayDeviceInfo displayDeviceInfo) {
-            super(null, null, "", InstrumentationRegistry.getInstrumentation().getContext());
+        FakeDisplayDevice(DisplayDeviceInfo displayDeviceInfo, DisplayAdapter displayAdapter) {
+            super(displayAdapter, /* displayToken= */ null, /* uniqueId= */ "",
+                    InstrumentationRegistry.getInstrumentation().getContext());
             mDisplayDeviceInfo = displayDeviceInfo;
         }
 

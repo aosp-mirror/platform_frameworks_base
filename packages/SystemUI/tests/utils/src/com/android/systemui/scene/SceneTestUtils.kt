@@ -47,6 +47,7 @@ import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
@@ -120,7 +121,6 @@ class SceneTestUtils(
     val testScope = kosmos.testScope
     val featureFlags =
         FakeFeatureFlagsClassic().apply {
-            set(Flags.FACE_AUTH_REFACTOR, false)
             set(Flags.FULL_SCREEN_USER_SWITCHER, false)
             set(Flags.NSSL_DEBUG_LINES, false)
         }
@@ -133,6 +133,9 @@ class SceneTestUtils(
     }
     val configurationRepository: FakeConfigurationRepository by lazy {
         FakeConfigurationRepository()
+    }
+    val configurationInteractor: ConfigurationInteractor by lazy {
+        ConfigurationInteractor(configurationRepository)
     }
     private val emergencyServicesRepository: EmergencyServicesRepository by lazy {
         EmergencyServicesRepository(
@@ -245,10 +248,9 @@ class SceneTestUtils(
         return KeyguardInteractor(
             repository = repository,
             commandQueue = FakeCommandQueue(),
-            featureFlags = featureFlags,
             sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = FakeKeyguardBouncerRepository(),
-            configurationRepository = configurationRepository,
+            configurationInteractor = configurationInteractor,
             shadeRepository = FakeShadeRepository(),
             sceneInteractorProvider = { sceneInteractor() },
             powerInteractor = PowerInteractorFactory.create().powerInteractor,
@@ -385,7 +387,7 @@ class SceneTestUtils(
     }
 
     fun selectedUserInteractor(): SelectedUserInteractor {
-        return SelectedUserInteractor(userRepository, featureFlags)
+        return SelectedUserInteractor(userRepository)
     }
 
     fun bouncerActionButtonInteractor(

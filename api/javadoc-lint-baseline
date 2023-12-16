@@ -1,17 +1,3 @@
-// b/303477132
-android/app/appsearch/AppSearchSchema.java:402: lint: Unresolved link/see tag "#getIndexableNestedProperties()" in android.app.appsearch.AppSearchSchema.DocumentPropertyConfig.Builder [101]
-android/app/appsearch/AppSearchSession.java:55: lint: Unresolved link/see tag "Features#LIST_FILTER_QUERY_LANGUAGE" in android.app.appsearch.AppSearchSession [101]
-android/app/appsearch/AppSearchSession.java:55: lint: Unresolved link/see tag "Features#NUMERIC_SEARCH" in android.app.appsearch.AppSearchSession [101]
-android/app/appsearch/AppSearchSession.java:55: lint: Unresolved link/see tag "Features#VERBATIM_SEARCH" in android.app.appsearch.AppSearchSession [101]
-android/app/appsearch/AppSearchSession.java:55: lint: Unresolved link/see tag "Features#isFeatureSupported" in android.app.appsearch.AppSearchSession [101]
-android/app/appsearch/JoinSpec.java:219: lint: Unresolved link/see tag "android.app.appsearch.SearchSpec.RankingStrategy#RANKING_STRATEGY_JOIN_AGGREGATE_SCORE SearchSpec.RankingStrategy#RANKING_STRATEGY_JOIN_AGGREGATE_SCORE" in android.app.appsearch.JoinSpec.Builder [101]
-android/app/appsearch/SearchSpec.java:230: lint: Unresolved link/see tag "Features#NUMERIC_SEARCH" in android.app.appsearch.SearchSpec [101]
-android/app/appsearch/SearchSpec.java:237: lint: Unresolved link/see tag "Features#VERBATIM_SEARCH" in android.app.appsearch.SearchSpec [101]
-android/app/appsearch/SearchSpec.java:244: lint: Unresolved link/see tag "Features#LIST_FILTER_QUERY_LANGUAGE" in android.app.appsearch.SearchSpec [101]
-android/app/appsearch/SearchSpec.java:913: lint: Unresolved link/see tag "Features#NUMERIC_SEARCH" in android.app.appsearch.SearchSpec.Builder [101]
-android/app/appsearch/SearchSpec.java:925: lint: Unresolved link/see tag "Features#VERBATIM_SEARCH" in android.app.appsearch.SearchSpec.Builder [101]
-android/app/appsearch/SearchSpec.java:929: lint: Unresolved link/see tag "Features#LIST_FILTER_QUERY_LANGUAGE" in android.app.appsearch.SearchSpec.Builder [101]
-
 // b/303582215
 android/hardware/camera2/CameraCharacteristics.java:2169: lint: Unresolved link/see tag "android.hardware.camera2.CameraDevice#stream-use-case-capability-additional-guaranteed-configurations guideline" in android.hardware.camera2.CameraCharacteristics [101]
 android/hardware/camera2/CameraCharacteristics.java:2344: lint: Unresolved link/see tag "android.hardware.camera2.CameraDevice#concurrent-stream-guaranteed-configurations guideline" in android.hardware.camera2.CameraCharacteristics [101]

@@ -101,10 +101,8 @@ class InsetsPolicy {
         mPolicy = displayContent.getDisplayPolicy();
         final Resources r = mPolicy.getContext().getResources();
         mHideNavBarForKeyboard = r.getBoolean(R.bool.config_hideNavBarForKeyboard);
-        mTransientControlTarget = new ControlTarget(
-                stateController, displayContent.mWmService.mH, "TransientControlTarget");
-        mPermanentControlTarget = new ControlTarget(
-                stateController, displayContent.mWmService.mH, "PermanentControlTarget");
+        mTransientControlTarget = new ControlTarget(displayContent, "TransientControlTarget");
+        mPermanentControlTarget = new ControlTarget(displayContent, "PermanentControlTarget");
     }
 
     /** Updates the target which can control system bars. */
@@ -393,10 +391,23 @@ class InsetsPolicy {
 
             if (originalImeSource != null) {
                 final boolean imeVisibility = w.isRequestedVisible(Type.ime());
-                final InsetsState state = copyState ? new InsetsState(originalState)
+                final InsetsState state = copyState
+                        ? new InsetsState(originalState)
                         : originalState;
                 final InsetsSource imeSource = new InsetsSource(originalImeSource);
                 imeSource.setVisible(imeVisibility);
+                state.addSource(imeSource);
+                return state;
+            }
+        } else if (w.mImeInsetsConsumed) {
+            // Set the IME source (if there is one) to be invisible if it has been consumed.
+            final InsetsSource originalImeSource = originalState.peekSource(ID_IME);
+            if (originalImeSource != null && originalImeSource.isVisible()) {
+                final InsetsState state = copyState
+                        ? new InsetsState(originalState)
+                        : originalState;
+                final InsetsSource imeSource = new InsetsSource(originalImeSource);
+                imeSource.setVisible(false);
                 state.addSource(imeSource);
                 return state;
             }
@@ -699,24 +710,35 @@ class InsetsPolicy {
         }
     }
 
-    private static class ControlTarget implements InsetsControlTarget {
+    private static class ControlTarget implements InsetsControlTarget, Runnable {
 
+        private final Handler mHandler;
+        private final Object mGlobalLock;
         private final InsetsState mState = new InsetsState();
-        private final InsetsController mInsetsController;
         private final InsetsStateController mStateController;
+        private final InsetsController mInsetsController;
         private final String mName;
 
-        ControlTarget(InsetsStateController stateController, Handler handler, String name) {
-            mStateController = stateController;
-            mInsetsController = new InsetsController(new Host(handler, name));
+        ControlTarget(DisplayContent displayContent, String name) {
+            mHandler = displayContent.mWmService.mH;
+            mGlobalLock = displayContent.mWmService.mGlobalLock;
+            mStateController = displayContent.getInsetsStateController();
+            mInsetsController = new InsetsController(new Host(mHandler, name));
             mName = name;
         }
 
         @Override
         public void notifyInsetsControlChanged() {
-            mState.set(mStateController.getRawInsetsState(), true /* copySources */);
-            mInsetsController.onStateChanged(mState);
-            mInsetsController.onControlsChanged(mStateController.getControlsForDispatch(this));
+            mHandler.post(this);
+        }
+
+        @Override
+        public void run() {
+            synchronized (mGlobalLock) {
+                mState.set(mStateController.getRawInsetsState(), true /* copySources */);
+                mInsetsController.onStateChanged(mState);
+                mInsetsController.onControlsChanged(mStateController.getControlsForDispatch(this));
+            }
         }
 
         @Override
@@ -730,6 +752,8 @@ class InsetsPolicy {
         private final float[] mTmpFloat9 = new float[9];
         private final Handler mHandler;
         private final String mName;
+
+        private boolean mInsetsAnimationRunning;
 
         Host(Handler handler, String name) {
             mHandler = handler;
@@ -831,6 +855,11 @@ class InsetsPolicy {
         @Override
         public IBinder getWindowToken() {
             return null;
+        }
+
+        @Override
+        public void notifyAnimationRunningStateChanged(boolean running) {
+            mInsetsAnimationRunning = running;
         }
     }
 }

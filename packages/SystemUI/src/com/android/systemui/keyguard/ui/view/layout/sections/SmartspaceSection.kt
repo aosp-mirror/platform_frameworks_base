@@ -26,8 +26,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardSmartspaceViewBinder
@@ -45,14 +44,13 @@ constructor(
     private val context: Context,
     val smartspaceController: LockscreenSmartspaceController,
     val keyguardUnlockAnimationController: KeyguardUnlockAnimationController,
-    val featureFlags: FeatureFlagsClassic,
 ) : KeyguardSection() {
-    var smartspaceView: View? = null
-    var weatherView: View? = null
-    var dateView: View? = null
+    private var smartspaceView: View? = null
+    private var weatherView: View? = null
+    private var dateView: View? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (!migrateClocksToBlueprint()) {
             return
         }
         smartspaceView = smartspaceController.buildAndConnectView(constraintLayout)
@@ -65,16 +63,11 @@ constructor(
                 constraintLayout.addView(dateView)
             }
         }
-
         keyguardUnlockAnimationController.lockscreenSmartspace = smartspaceView
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        KeyguardSmartspaceViewBinder.bind(
-            this,
-            constraintLayout,
-            keyguardClockViewModel,
-        )
+        KeyguardSmartspaceViewBinder.bind(this, constraintLayout, keyguardClockViewModel)
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {

@@ -145,6 +145,8 @@ public:
         return mImpl && mImpl->hasText();
     }
 
+    [[nodiscard]] bool hasFill() const { return mImpl && mImpl->hasFill(); }
+
     void applyColorTransform(ColorTransform transform) {
         if (mImpl) {
             mImpl->applyColorTransform(transform);

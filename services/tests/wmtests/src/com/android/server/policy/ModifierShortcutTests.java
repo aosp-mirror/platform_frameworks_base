@@ -61,6 +61,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
         META_SHORTCUTS.append(KEYCODE_P, Intent.CATEGORY_APP_MUSIC);
         META_SHORTCUTS.append(KEYCODE_S, Intent.CATEGORY_APP_MESSAGING);
     }
+    private static final int ANY_DISPLAY_ID = 123;
 
     @Before
     public void setUp() {
@@ -96,8 +97,9 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      */
     @Test
     public void testCtrlSpace() {
-        sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(1);
+        sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SPACE}, /* duration= */ 0,
+                ANY_DISPLAY_ID);
+        mPhoneWindowManager.assertSwitchKeyboardLayout(/* direction= */ 1, ANY_DISPLAY_ID);
     }
 
     /**
@@ -105,26 +107,9 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      */
     @Test
     public void testCtrlShiftSpace() {
-        sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(-1);
-    }
-
-    /**
-     * META + SPACE to switch keyboard layout.
-     */
-    @Test
-    public void testMetaSpace() {
-        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(1);
-    }
-
-    /**
-     * META + SHIFT + SPACE to switch keyboard layout backwards.
-     */
-    @Test
-    public void testMetaShiftSpace() {
-        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(-1);
+        sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE},
+                /* duration= */ 0, ANY_DISPLAY_ID);
+        mPhoneWindowManager.assertSwitchKeyboardLayout(/* direction= */ -1, ANY_DISPLAY_ID);
     }
 
     /**

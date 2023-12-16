@@ -23,16 +23,13 @@ import android.app.StatusBarManager
 import android.graphics.Point
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
-import com.android.keyguard.KeyguardClockSwitch.ClockSize
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.shared.model.Position
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
@@ -76,24 +73,22 @@ class KeyguardInteractor
 constructor(
     private val repository: KeyguardRepository,
     private val commandQueue: CommandQueue,
-    private val powerInteractor: PowerInteractor,
-    featureFlags: FeatureFlags,
+    powerInteractor: PowerInteractor,
     sceneContainerFlags: SceneContainerFlags,
     bouncerRepository: KeyguardBouncerRepository,
-    configurationRepository: ConfigurationRepository,
+    configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
     sceneInteractorProvider: Provider<SceneInteractor>,
 ) {
     // TODO(b/296118689): move to a repository
-    private val _sharedNotificationContainerPosition =
-        MutableStateFlow(SharedNotificationContainerPosition())
+    private val _sharedNotificationContainerBounds = MutableStateFlow(NotificationContainerBounds())
 
-    /** Position information for the shared notification container. */
-    val sharedNotificationContainerPosition: StateFlow<SharedNotificationContainerPosition> =
-        _sharedNotificationContainerPosition.asStateFlow()
+    /** Bounds of the notification container. */
+    val notificationContainerBounds: StateFlow<NotificationContainerBounds> =
+        _sharedNotificationContainerBounds.asStateFlow()
 
-    fun setSharedNotificationContainerPosition(position: SharedNotificationContainerPosition) {
-        _sharedNotificationContainerPosition.value = position
+    fun setNotificationContainerBounds(position: NotificationContainerBounds) {
+        _sharedNotificationContainerBounds.value = position
     }
 
     /**
@@ -176,6 +171,12 @@ constructor(
     /** Whether the keyguard is going away. */
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
 
+    /** Last point that [KeyguardRootView] view was tapped */
+    val lastRootViewTapPosition: Flow<Point?> = repository.lastRootViewTapPosition.asStateFlow()
+
+    /** Is the ambient indication area visible? */
+    val ambientIndicationVisible: Flow<Boolean> = repository.ambientIndicationVisible.asStateFlow()
+
     /** Whether the primary bouncer is showing or not. */
     val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
 
@@ -197,22 +198,18 @@ constructor(
 
     /** Whether camera is launched over keyguard. */
     val isSecureCameraActive: Flow<Boolean> by lazy {
-        if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
-            combine(
-                    isKeyguardVisible,
-                    primaryBouncerShowing,
-                    onCameraLaunchDetected,
-                ) { isKeyguardVisible, isPrimaryBouncerShowing, cameraLaunchEvent ->
-                    when {
-                        isKeyguardVisible -> false
-                        isPrimaryBouncerShowing -> false
-                        else -> cameraLaunchEvent == CameraLaunchSourceModel.POWER_DOUBLE_TAP
-                    }
+        combine(
+                isKeyguardVisible,
+                primaryBouncerShowing,
+                onCameraLaunchDetected,
+            ) { isKeyguardVisible, isPrimaryBouncerShowing, cameraLaunchEvent ->
+                when {
+                    isKeyguardVisible -> false
+                    isPrimaryBouncerShowing -> false
+                    else -> cameraLaunchEvent == CameraLaunchSourceModel.POWER_DOUBLE_TAP
                 }
-                .onStart { emit(false) }
-        } else {
-            flowOf(false)
-        }
+            }
+            .onStart { emit(false) }
     }
 
     /** The approximate location on the screen of the fingerprint sensor, if one is available. */
@@ -221,37 +218,29 @@ constructor(
     /** The approximate location on the screen of the face unlock sensor, if one is available. */
     val faceSensorLocation: Flow<Point?> = repository.faceSensorLocation
 
-    /** Notifies when a new configuration is set */
-    val configurationChange: Flow<Unit> =
-        configurationRepository.onAnyConfigurationChange.onStart { emit(Unit) }
-
     /** The position of the keyguard clock. */
     val clockPosition: Flow<Position> = repository.clockPosition
 
     val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
 
     val keyguardTranslationY: Flow<Float> =
-        configurationChange.flatMapLatest {
-            val translationDistance =
-                configurationRepository.getDimensionPixelSize(
-                    R.dimen.keyguard_translate_distance_on_swipe_up
-                )
-            shadeRepository.shadeModel.map {
-                if (it.expansionAmount == 0f) {
-                    // Reset the translation value
-                    0f
-                } else {
-                    // On swipe up, translate the keyguard to reveal the bouncer
-                    MathUtils.lerp(
-                        translationDistance,
-                        0,
-                        Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(it.expansionAmount)
-                    )
+        configurationInteractor
+            .dimensionPixelSize(R.dimen.keyguard_translate_distance_on_swipe_up)
+            .flatMapLatest { translationDistance ->
+                shadeRepository.legacyShadeExpansion.map {
+                    if (it == 0f) {
+                        // Reset the translation value
+                        0f
+                    } else {
+                        // On swipe up, translate the keyguard to reveal the bouncer
+                        MathUtils.lerp(
+                            translationDistance,
+                            0,
+                            Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(it)
+                        )
+                    }
                 }
             }
-        }
-
-    val clockSize: Flow<Int> = repository.clockSize.distinctUntilChanged()
 
     val clockShouldBeCentered: Flow<Boolean> = repository.clockShouldBeCentered
 
@@ -305,18 +294,6 @@ constructor(
         repository.setQuickSettingsVisible(isVisible)
     }
 
-    fun setKeyguardRootVisibility(
-        statusBarState: Int,
-        goingToFullShade: Boolean,
-        isOcclusionTransitionRunning: Boolean
-    ) {
-        repository.setKeyguardVisibility(
-            statusBarState,
-            goingToFullShade,
-            isOcclusionTransitionRunning
-        )
-    }
-
     fun setClockPosition(x: Int, y: Int) {
         repository.setClockPosition(x, y)
     }
@@ -329,12 +306,20 @@ constructor(
         repository.setAnimateDozingTransitions(animate)
     }
 
-    fun setClockSize(@ClockSize size: Int) {
-        repository.setClockSize(size)
-    }
-
     fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
         repository.setClockShouldBeCentered(shouldBeCentered)
+    }
+
+    fun setLastRootViewTapPosition(point: Point?) {
+        repository.lastRootViewTapPosition.value = point
+    }
+
+    fun setAmbientIndicationVisible(isVisible: Boolean) {
+        repository.ambientIndicationVisible.value = isVisible
+    }
+
+    fun keyguardDoneAnimationsFinished() {
+        repository.keyguardDoneAnimationsFinished()
     }
 
     companion object {

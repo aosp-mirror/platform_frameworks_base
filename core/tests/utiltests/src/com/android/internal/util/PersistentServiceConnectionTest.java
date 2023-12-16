@@ -30,6 +30,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ObservableServiceConnection.ServiceTransformer;
 import com.android.server.testutils.OffsettableClock;
@@ -37,7 +41,9 @@ import com.android.server.testutils.TestHandler;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -45,7 +51,12 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.Executor;
 
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = PersistentServiceConnection.class)
 public class PersistentServiceConnectionTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private static final ComponentName COMPONENT_NAME =
             new ComponentName("test.package", "component");
     private static final int MAX_RETRIES = 2;

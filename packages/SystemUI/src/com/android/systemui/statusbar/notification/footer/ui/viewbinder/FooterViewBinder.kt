@@ -34,34 +34,38 @@ object FooterViewBinder {
         viewModel: FooterViewModel,
         clearAllNotifications: View.OnClickListener,
     ): DisposableHandle {
-        // Listen for changes when the view is attached.
+        // Bind the resource IDs
+        footer.setMessageString(viewModel.message.messageId)
+        footer.setMessageIcon(viewModel.message.iconId)
+        footer.setClearAllButtonText(viewModel.clearAllButton.labelId)
+        footer.setClearAllButtonDescription(viewModel.clearAllButton.accessibilityDescriptionId)
+
+        // Bind the click listeners
+        footer.setClearAllButtonClickListener(clearAllNotifications)
+
+        // Listen for visibility changes when the view is attached.
         return footer.repeatWhenAttached {
             lifecycleScope.launch {
-                viewModel.clearAllButton.collect { button ->
-                    if (button.isVisible.isAnimating) {
+                viewModel.clearAllButton.isVisible.collect { isVisible ->
+                    if (isVisible.isAnimating) {
                         footer.setClearAllButtonVisible(
-                            button.isVisible.value,
+                            isVisible.value,
                             /* animate = */ true,
                         ) { _ ->
-                            button.isVisible.stopAnimating()
+                            isVisible.stopAnimating()
                         }
                     } else {
                         footer.setClearAllButtonVisible(
-                            button.isVisible.value,
+                            isVisible.value,
                             /* animate = */ false,
                         )
                     }
-                    footer.setClearAllButtonText(button.labelId)
-                    footer.setClearAllButtonDescription(button.accessibilityDescriptionId)
-                    footer.setClearAllButtonClickListener(clearAllNotifications)
                 }
             }
 
             lifecycleScope.launch {
-                viewModel.message.collect { message ->
-                    footer.setFooterLabelVisible(message.visible)
-                    footer.setMessageString(message.messageId)
-                    footer.setMessageIcon(message.iconId)
+                viewModel.message.isVisible.collect { visible ->
+                    footer.setFooterLabelVisible(visible)
                 }
             }
         }

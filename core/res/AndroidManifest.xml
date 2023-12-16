@@ -102,6 +102,7 @@
     <protected-broadcast android:name="android.intent.action.OVERLAY_PRIORITY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
+    <protected-broadcast android:name="android.intent.action.UNARCHIVE_PACKAGE" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
@@ -2301,6 +2302,7 @@
     <!-- Allows system apps to call methods to register itself as a mDNS offload engine.
         <p>Not for use by third-party or privileged applications.
         @SystemApi
+        @FlaggedApi("com.android.net.flags.register_nsd_offload_engine")
         @hide This should only be used by system apps.
     -->
     <permission android:name="android.permission.REGISTER_NSD_OFFLOAD_ENGINE"
@@ -2364,7 +2366,7 @@
          @hide
     -->
     <permission android:name="android.permission.SUSPEND_APPS"
-        android:protectionLevel="signature|role" />
+        android:protectionLevel="signature|role|verifier" />
 
     <!-- @SystemApi
          @hide
@@ -4804,6 +4806,13 @@
     <permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME"
                 android:protectionLevel="signature" />
 
+    <!-- @FlaggedApi("com.android.server.accessibility.motion_event_observing")
+    @hide
+    @TestApi
+    Allows an accessibility service to observe motion events without consuming them. -->
+    <permission android:name="android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING"
+                android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to collect frame statistics -->
     <permission android:name="android.permission.FRAME_STATS"
          android:protectionLevel="signature" />
@@ -5180,7 +5189,9 @@
          this permission, it must hold the permission and be the active VoiceInteractionService in
          the system.
          {@see Settings.Secure.VOICE_INTERACTION_SERVICE}
-         @hide -->
+         @hide @SystemApi Intended for OEM and system apps.
+         <p>Protection level: signature|privileged
+    -->
     <permission android:name="android.permission.MANAGE_VOICE_KEYPHRASES"
         android:protectionLevel="signature|privileged" />
 
@@ -5189,7 +5200,9 @@
          sound models at any time. This permission should be reserved for system enrollment
          applications detected by {@link android.hardware.soundtrigger.KeyphraseEnrollmentInfo}
          only.
-         @hide <p>Not for use by third-party applications.</p> -->
+         @hide @SystemApi Intended for OEM and system apps.
+         <p>Protection level: signature|privileged
+    -->
     <permission android:name="android.permission.KEYPHRASE_ENROLLMENT_APPLICATION"
         android:protectionLevel="signature|privileged" />
 
@@ -5693,11 +5706,10 @@
                 android:protectionLevel="normal" />
 
     <!-- @hide @FlaggedApi("android.companion.flags.companion_transport_apis")
-         @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES)
          Allows an application to send and receive messages via CDM transports.
     -->
     <permission android:name="android.permission.USE_COMPANION_TRANSPORTS"
-        android:protectionLevel="signature|module" />
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to create new companion device associations.
          @SystemApi
@@ -7467,6 +7479,13 @@
     <permission android:name="android.permission.SIGNAL_REBOOT_READINESS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows the holder to launch an Intent Resolver flow with custom presentation
+         and/or targets.
+         @FlaggedApi("android.service.chooser.support_nfc_resolver")
+         @hide -->
+    <permission android:name="android.permission.SHOW_CUSTOMIZED_RESOLVER"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @hide Allows an application to get a People Tile preview for a given shortcut. -->
     <permission android:name="android.permission.GET_PEOPLE_TILE_PREVIEW"
         android:protectionLevel="signature|recents" />
@@ -7816,6 +7835,40 @@
     <permission android:name="android.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an app to track all preparations for a complete factory reset.
+     <p>Protection level: signature|privileged
+     @FlaggedApi("android.permission.flags.factory_reset_prep_permission_apis")
+     @hide -->
+    <permission android:name="android.permission.PREPARE_FACTORY_RESET"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows focused window to override the default behavior of supported system keys.
+        The following keycodes are supported:
+        <p> KEYCODE_STEM_PRIMARY
+        <p>If an app is granted this permission and has a focused window, it will be allowed to
+           receive supported key events that are otherwise handled by the system. The app can choose
+           to consume the key events and trigger its own behavior, in which case the default key
+           behavior will be skipped.
+        <p>For example, KEYCODE_STEM_PRIMARY by default opens recent app launcher. If the foreground
+           fitness app is granted this permission, it can repurpose the KEYCODE_STEM_PRIMARY button
+           to pause/resume the current fitness session.
+        <p>Protection level: signature|privileged
+        @FlaggedApi("com.android.input.flags.override_key_behavior_permission_apis")
+        @hide -->
+    <permission android:name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @hide @SystemApi
+        @FlaggedApi("com.android.server.notification.flags.redact_otp_notifications_from_untrusted_listeners")
+        Allows apps with a NotificationListenerService to receive notifications with sensitive
+        information
+        <p>Apps with a NotificationListenerService without this permission will not be able
+        to view certain types of sensitive information contained in notifications
+        <p>Protection level: signature|role
+    -->
+    <permission android:name="android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS"
+        android:protectionLevel="signature|role" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
@@ -7879,6 +7932,18 @@
                   android:visibleToInstantApps="true">
             <intent-filter>
                 <action android:name="com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.android.internal.app.NfcResolverActivity"
+                android:theme="@style/Theme.Dialog.Alert"
+                android:finishOnCloseSystemDialogs="true"
+                android:excludeFromRecents="true"
+                android:multiprocess="true"
+                android:permission="android.permission.SHOW_CUSTOMIZED_RESOLVER"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.chooser.action.SHOW_CUSTOMIZED_RESOLVER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -344,7 +344,9 @@ class TaskFragmentContainer {
         if (activities == null) {
             return null;
         }
-        return new ActivityStack(activities, isEmpty(), mToken);
+        // Already checked nullity in collectNonFinishingActivities.
+        final Rect bounds = getInfo().getConfiguration().windowConfiguration.getBounds();
+        return new ActivityStack(activities, isEmpty(), mToken, bounds, mOverlayTag);
     }
 
     /** Adds the activity that will be reparented to this container. */

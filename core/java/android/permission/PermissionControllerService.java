@@ -318,7 +318,7 @@ public abstract class PermissionControllerService extends Service {
      *                 a virtual device. See {@link Context#DEVICE_ID_DEFAULT}
      */
     @BinderThread
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public void onOneTimePermissionSessionTimeout(@NonNull String packageName,
             int deviceId) {
         onOneTimePermissionSessionTimeout(packageName);
@@ -393,7 +393,7 @@ public abstract class PermissionControllerService extends Service {
      * @see android.content.Context#revokeSelfPermissionsOnKill(java.util.Collection)
      */
     @BinderThread
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public void onRevokeSelfPermissionsOnKill(@NonNull String packageName,
             @NonNull List<String> permissions, int deviceId, @NonNull Runnable callback) {
         onRevokeSelfPermissionsOnKill(packageName, permissions, callback);

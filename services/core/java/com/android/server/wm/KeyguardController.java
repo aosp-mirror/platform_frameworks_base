@@ -240,7 +240,8 @@ class KeyguardController {
         // state when evaluating visibilities.
         updateKeyguardSleepToken();
         mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-        InputMethodManagerInternal.get().updateImeWindowStatus(false /* disableImeIcon */);
+        InputMethodManagerInternal.get().updateImeWindowStatus(false /* disableImeIcon */,
+                displayId);
         setWakeTransitionReady();
         if (aodChanged) {
             // Ensure the new state takes effect.

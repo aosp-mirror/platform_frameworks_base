@@ -99,4 +99,7 @@ android_test {
         enabled: false,
     },
 
+    data: [
+        ":OverlayTestApp",
+    ],
 }

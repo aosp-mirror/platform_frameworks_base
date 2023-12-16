@@ -29,10 +29,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
+data class EnhancedConfirmation(
+    val key: String,
+    val uid: Int,
+    val packageName: String,
+)
 data class Restrictions(
     val userId: Int = UserHandle.myUserId(),
     val keys: List<String>,
-)
+    val enhancedConfirmation: EnhancedConfirmation? = null,
+) {
+    fun isEmpty(): Boolean {
+        return keys.isEmpty() && enhancedConfirmation == null
+    }
+}
 
 interface RestrictionsProvider {
     @Composable
@@ -77,6 +87,14 @@ internal class RestrictionsProviderImpl(
                 .checkIfRestrictionEnforced(context, key, restrictions.userId)
                 ?.let { return BlockedByAdminImpl(context = context, enforcedAdmin = it) }
         }
+
+        restrictions.enhancedConfirmation?.let { ec ->
+            RestrictedLockUtilsInternal
+                    .checkIfRequiresEnhancedConfirmation(context, ec.key,
+                        ec.uid, ec.packageName)
+                    ?.let { intent -> return BlockedByEcmImpl(context = context, intent = intent) }
+        }
+
         return NoRestricted
     }
 }

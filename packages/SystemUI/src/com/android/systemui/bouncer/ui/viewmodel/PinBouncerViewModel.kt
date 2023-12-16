@@ -104,7 +104,7 @@ class PinBouncerViewModel(
 
     override val authenticationMethod: AuthenticationMethodModel = authenticationMethod
 
-    override val throttlingMessageId = R.string.kg_too_many_failed_pin_attempts_dialog_message
+    override val lockoutMessageId = R.string.kg_too_many_failed_pin_attempts_dialog_message
 
     init {
         viewModelScope.launch { simBouncerInteractor.subId.collect { onResetSimFlow() } }

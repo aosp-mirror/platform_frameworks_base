@@ -722,6 +722,7 @@ public class FaceService extends SystemService {
             if (Flags.faceVhalFeature() && Utils.isVirtualEnabled(getContext())) {
                 if (virtualAt != -1) {
                     //only virtual instance should be returned
+                    Slog.i(TAG, "virtual hal is used");
                     return new Pair(new ArrayList<>(), List.of(aidlInstances.get(virtualAt)));
                 } else {
                     Slog.e(TAG, "Could not find virtual interface while it is enabled");

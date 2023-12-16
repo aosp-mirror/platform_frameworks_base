@@ -11,6 +11,7 @@ import javax.inject.Inject
 class FakeConfigurationController @Inject constructor() : ConfigurationController {
 
     private var listeners = mutableListOf<ConfigurationController.ConfigurationListener>()
+    private var isRtl = false
 
     override fun addCallback(listener: ConfigurationController.ConfigurationListener) {
         listeners += listener
@@ -36,7 +37,12 @@ class FakeConfigurationController @Inject constructor() : ConfigurationControlle
         onConfigurationChanged(newConfiguration = null)
     }
 
-    override fun isLayoutRtl(): Boolean = false
+    fun notifyLayoutDirectionChanged(isRtl: Boolean) {
+        this.isRtl = isRtl
+        listeners.forEach { it.onLayoutDirectionChanged(isRtl) }
+    }
+
+    override fun isLayoutRtl(): Boolean = isRtl
 }
 
 @Module

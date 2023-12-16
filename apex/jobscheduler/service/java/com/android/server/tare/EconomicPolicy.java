@@ -33,9 +33,9 @@ import android.content.ContentResolver;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
-import android.util.KeyValueListParser;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.utils.UserSettingDeviceConfigMediator;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -197,10 +197,17 @@ public abstract class EconomicPolicy {
     }
 
     protected final InternalResourceService mIrs;
+    protected final UserSettingDeviceConfigMediator mUserSettingDeviceConfigMediator;
     private static final Modifier[] COST_MODIFIER_BY_INDEX = new Modifier[NUM_COST_MODIFIERS];
 
     EconomicPolicy(@NonNull InternalResourceService irs) {
         mIrs = irs;
+        // Don't cross the streams! Mixing Settings/local user config changes with DeviceConfig
+        // config can cause issues since the scales may be different, so use one or the other.
+        // If user settings exist, then just stick with the Settings constants, even if there
+        // are invalid values.
+        mUserSettingDeviceConfigMediator =
+                new UserSettingDeviceConfigMediator.SettingsOverridesAllMediator(',');
         for (int mId : getCostModifiers()) {
             initModifier(mId, irs);
         }
@@ -464,28 +471,14 @@ public abstract class EconomicPolicy {
         return "UNKNOWN_REWARD:" + Integer.toHexString(eventId);
     }
 
-    protected long getConstantAsCake(@NonNull KeyValueListParser parser,
-            @Nullable DeviceConfig.Properties properties, String key, long defaultValCake) {
-        return getConstantAsCake(parser, properties, key, defaultValCake, 0);
+    protected long getConstantAsCake(String key, long defaultValCake) {
+        return getConstantAsCake(key, defaultValCake, 0);
     }
 
-    protected long getConstantAsCake(@NonNull KeyValueListParser parser,
-            @Nullable DeviceConfig.Properties properties, String key, long defaultValCake,
-            long minValCake) {
-        // Don't cross the streams! Mixing Settings/local user config changes with DeviceConfig
-        // config can cause issues since the scales may be different, so use one or the other.
-        if (parser.size() > 0) {
-            // User settings take precedence. Just stick with the Settings constants, even if there
-            // are invalid values. It's not worth the time to evaluate all the key/value pairs to
-            // make sure there are valid ones before deciding.
-            return Math.max(minValCake,
-                parseCreditValue(parser.getString(key, null), defaultValCake));
-        }
-        if (properties != null) {
-            return Math.max(minValCake,
-                parseCreditValue(properties.getString(key, null), defaultValCake));
-        }
-        return Math.max(minValCake, defaultValCake);
+    protected long getConstantAsCake(String key, long defaultValCake, long minValCake) {
+        return Math.max(minValCake,
+                parseCreditValue(
+                        mUserSettingDeviceConfigMediator.getString(key, null), defaultValCake));
     }
 
     @VisibleForTesting

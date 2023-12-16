@@ -75,7 +75,6 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
     /**
      * Adds a message to the end of the sequence of transaction items.
      * @param item A single message that can contain a client activity/window request/callback.
-     * TODO(b/260873529): replace both {@link #addCallback} and {@link #setLifecycleStateRequest}.
      */
     public void addTransactionItem(@NonNull ClientTransactionItem item) {
         if (mTransactionItems == null) {

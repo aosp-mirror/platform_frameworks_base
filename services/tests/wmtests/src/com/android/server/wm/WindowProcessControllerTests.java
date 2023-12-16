@@ -306,7 +306,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
     @Test
     public void testCachedStateConfigurationChange() throws RemoteException {
-        doNothing().when(mClientLifecycleManager).scheduleTransactionItem(any(), any());
+        doNothing().when(mClientLifecycleManager).scheduleTransactionItemUnlocked(any(), any());
         final IApplicationThread thread = mWpc.getThread();
         final Configuration newConfig = new Configuration(mWpc.getConfiguration());
         newConfig.densityDpi += 100;
@@ -322,18 +322,17 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         newConfig.densityDpi += 100;
         mWpc.onConfigurationChanged(newConfig);
         verify(mClientLifecycleManager, never()).scheduleTransactionItem(eq(thread), any());
+        verify(mClientLifecycleManager, never()).scheduleTransactionItemUnlocked(eq(thread), any());
 
         // Cached -> non-cached will send the previous deferred config immediately.
         mWpc.setReportedProcState(ActivityManager.PROCESS_STATE_RECEIVER);
         final ArgumentCaptor<ConfigurationChangeItem> captor =
                 ArgumentCaptor.forClass(ConfigurationChangeItem.class);
-        verify(mClientLifecycleManager).scheduleTransactionItem(eq(thread), captor.capture());
+        verify(mClientLifecycleManager).scheduleTransactionItemUnlocked(
+                eq(thread), captor.capture());
         final ClientTransactionHandler client = mock(ClientTransactionHandler.class);
         captor.getValue().preExecute(client);
-        final ArgumentCaptor<Configuration> configCaptor =
-                ArgumentCaptor.forClass(Configuration.class);
-        verify(client).updatePendingConfiguration(configCaptor.capture());
-        assertEquals(newConfig, configCaptor.getValue());
+        verify(client).updatePendingConfiguration(newConfig);
     }
 
     @Test

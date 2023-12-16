@@ -47,7 +47,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.logging.BiometricUnlockLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -122,8 +121,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private ViewRootImpl mViewRootImpl;
     @Mock
-    private DeviceEntryHapticsInteractor mDeviceEntryHapticsInteractor;
-    @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
     @Mock
     private BiometricUnlockInteractor mBiometricUnlockInteractor;
@@ -135,7 +132,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
-        when(mKeyguardStateController.isFaceEnrolled()).thenReturn(true);
+        when(mKeyguardStateController.isFaceEnrolledAndEnabled()).thenReturn(true);
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
         when(mKeyguardBypassController.onBiometricAuthenticated(any(), anyBoolean()))
                 .thenReturn(true);
@@ -160,7 +157,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mAuthController, mStatusBarStateController,
                 mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper,
                 mSystemClock,
-                mDeviceEntryHapticsInteractor,
                 () -> mSelectedUserInteractor,
                 mBiometricUnlockInteractor
         );
@@ -463,26 +459,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
 
         // THEN never wakeup the device
         verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
-    }
-
-    @Test
-    public void onFingerprintSuccess_requestSuccessHaptic() {
-        // WHEN biometric fingerprint succeeds
-        givenFingerprintModeUnlockCollapsing();
-        mBiometricUnlockController.startWakeAndUnlock(BiometricSourceType.FINGERPRINT,
-                true);
-
-        // THEN always vibrate the device
-        verify(mDeviceEntryHapticsInteractor).vibrateSuccess();
-    }
-
-    @Test
-    public void onFingerprintFail_requestErrorHaptic() {
-        // WHEN biometric fingerprint fails
-        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
-
-        // THEN always vibrate the device
-        verify(mDeviceEntryHapticsInteractor).vibrateError();
     }
 
     @Test

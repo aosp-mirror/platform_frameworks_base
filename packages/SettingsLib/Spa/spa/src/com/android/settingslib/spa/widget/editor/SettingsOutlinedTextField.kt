@@ -34,6 +34,7 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 fun SettingsOutlinedTextField(
     value: String,
     label: String,
+    errorMessage: String? = null,
     singleLine: Boolean = true,
     enabled: Boolean = true,
     onTextChange: (String) -> Unit,
@@ -49,6 +50,12 @@ fun SettingsOutlinedTextField(
         },
         singleLine = singleLine,
         enabled = enabled,
+        isError = errorMessage != null,
+        supportingText = {
+            if (errorMessage != null) {
+                Text(text = errorMessage)
+            }
+        }
     )
 }
 

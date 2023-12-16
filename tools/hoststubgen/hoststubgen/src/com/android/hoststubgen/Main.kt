@@ -17,6 +17,8 @@
 
 package com.android.hoststubgen
 
+import java.io.PrintWriter
+
 const val COMMAND_NAME = "HostStubGen"
 
 /**
@@ -25,12 +27,11 @@ const val COMMAND_NAME = "HostStubGen"
 fun main(args: Array<String>) {
     var success = false
     var clanupOnError = false
+
     try {
         // Parse the command line arguments.
         val options = HostStubGenOptions.parseArgs(args)
-        clanupOnError = options.cleanUpOnError
-
-        log.level = options.logLevel
+        clanupOnError = options.cleanUpOnError.get
 
         log.v("HostStubGen started")
         log.v("Options: $options")
@@ -39,17 +40,18 @@ fun main(args: Array<String>) {
         HostStubGen(options).run()
 
         success = true
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         log.e("$COMMAND_NAME: Error: ${e.message}")
         if (e !is UserErrorException) {
-            e.printStackTrace(log.getErrorPrintStream())
+            e.printStackTrace(PrintWriter(log.getWriter(LogLevel.Error)))
         }
         if (clanupOnError) {
-            TODO("clanupOnError is not implemented yet")
+            TODO("Remove output jars here")
         }
+    } finally {
+        log.i("$COMMAND_NAME finished")
+        log.flush()
     }
-
-    log.v("HostStubGen finished")
 
     System.exit(if (success) 0 else 1 )
 }

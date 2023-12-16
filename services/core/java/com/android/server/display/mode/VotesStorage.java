@@ -157,13 +157,19 @@ class VotesStorage {
         }
     }
 
-    private int getMaxPhysicalRefreshRate(@Nullable Vote vote) {
+    private static int getMaxPhysicalRefreshRate(@Nullable Vote vote) {
         if (vote == null) {
             return -1;
-        } else if (vote.refreshRateRanges.physical.max == Float.POSITIVE_INFINITY) {
-            return 1000; // for visualisation, otherwise e.g. -1 -> 60 will be unnoticeable
+        } else if (vote instanceof RefreshRateVote.PhysicalVote physicalVote) {
+            return (int) physicalVote.mMaxRefreshRate;
+        } else if (vote instanceof CombinedVote combinedVote) {
+            return combinedVote.mVotes.stream()
+                    .filter(v -> v instanceof RefreshRateVote.PhysicalVote)
+                    .map(pv -> (int) (((RefreshRateVote.PhysicalVote) pv).mMaxRefreshRate))
+                    .min(Integer::compare)
+                    .orElse(1000); // for visualisation
         }
-        return (int) vote.refreshRateRanges.physical.max;
+        return 1000; // for visualisation, otherwise e.g. -1 -> 60 will be unnoticeable
     }
 
     interface Listener {

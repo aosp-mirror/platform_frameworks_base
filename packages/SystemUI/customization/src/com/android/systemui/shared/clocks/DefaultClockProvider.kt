@@ -18,11 +18,11 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import com.android.systemui.customization.R
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockId
-import com.android.systemui.plugins.ClockMetadata
-import com.android.systemui.plugins.ClockProvider
-import com.android.systemui.plugins.ClockSettings
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockId
+import com.android.systemui.plugins.clocks.ClockMetadata
+import com.android.systemui.plugins.clocks.ClockProvider
+import com.android.systemui.plugins.clocks.ClockSettings
 
 private val TAG = DefaultClockProvider::class.simpleName
 const val DEFAULT_CLOCK_ID = "DEFAULT"
@@ -32,7 +32,8 @@ class DefaultClockProvider(
     val ctx: Context,
     val layoutInflater: LayoutInflater,
     val resources: Resources,
-    val hasStepClockAnimation: Boolean = false
+    val hasStepClockAnimation: Boolean = false,
+    val migratedClocks: Boolean = false
 ) : ClockProvider {
     override fun getClocks(): List<ClockMetadata> = listOf(ClockMetadata(DEFAULT_CLOCK_ID))
 
@@ -47,6 +48,7 @@ class DefaultClockProvider(
             resources,
             settings,
             hasStepClockAnimation,
+            migratedClocks,
         )
     }
 

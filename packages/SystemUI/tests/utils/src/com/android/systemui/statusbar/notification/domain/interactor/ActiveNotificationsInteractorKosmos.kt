@@ -17,7 +17,10 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 
 val Kosmos.activeNotificationsInteractor by
-    Kosmos.Fixture { ActiveNotificationsInteractor(activeNotificationListRepository) }
+    Kosmos.Fixture {
+        ActiveNotificationsInteractor(activeNotificationListRepository, testDispatcher)
+    }

@@ -105,7 +105,6 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
                 test = this,
                 featureFlags =
                     FakeFeatureFlagsClassicModule {
-                        setDefault(Flags.FACE_AUTH_REFACTOR)
                         set(Flags.FULL_SCREEN_USER_SWITCHER, value = false)
                     },
                 mocks =
@@ -286,28 +285,13 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
             assertThat(iconColors.tint).isEqualTo(0xAABBCC)
 
-            val staticDrawableColor = iconColors.staticDrawableColor(Rect(), isColorized = true)
+            val staticDrawableColor = iconColors.staticDrawableColor(Rect())
 
             assertThat(staticDrawableColor).isEqualTo(0xAABBCC)
         }
 
     @Test
-    fun iconColors_staticDrawableColor_nonColorized() =
-        testComponent.runTest {
-            darkIconRepository.darkState.value =
-                SysuiDarkIconDispatcher.DarkChange(
-                    emptyList(),
-                    0f,
-                    0xAABBCC,
-                )
-            val iconColorsLookup by collectLastValue(underTest.iconColors)
-            val iconColors = iconColorsLookup?.iconColors(Rect())
-            val staticDrawableColor = iconColors?.staticDrawableColor(Rect(), isColorized = false)
-            assertThat(staticDrawableColor).isEqualTo(DarkIconDispatcher.DEFAULT_ICON_TINT)
-        }
-
-    @Test
-    fun iconColors_staticDrawableColor_isColorized_notInDarkTintArea() =
+    fun iconColors_staticDrawableColor_notInDarkTintArea() =
         testComponent.runTest {
             darkIconRepository.darkState.value =
                 SysuiDarkIconDispatcher.DarkChange(
@@ -317,8 +301,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
                 )
             val iconColorsLookup by collectLastValue(underTest.iconColors)
             val iconColors = iconColorsLookup?.iconColors(Rect(1, 1, 4, 4))
-            val staticDrawableColor =
-                iconColors?.staticDrawableColor(Rect(6, 6, 7, 7), isColorized = true)
+            val staticDrawableColor = iconColors?.staticDrawableColor(Rect(6, 6, 7, 7))
             assertThat(staticDrawableColor).isEqualTo(DarkIconDispatcher.DEFAULT_ICON_TINT)
         }
 

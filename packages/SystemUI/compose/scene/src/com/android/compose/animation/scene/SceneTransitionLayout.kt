@@ -19,6 +19,8 @@ package com.android.compose.animation.scene
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
@@ -27,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
+import kotlinx.coroutines.channels.Channel
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever
@@ -126,14 +129,24 @@ interface SceneScope {
      * Adds a [NestedScrollConnection] to intercept scroll events not handled by the scrollable
      * component.
      *
-     * @param orientation is used to determine if we handle top/bottom or left/right events.
-     * @param startBehavior when we should perform the overscroll animation at the top/left.
-     * @param endBehavior when we should perform the overscroll animation at the bottom/right.
+     * @param leftBehavior when we should perform the overscroll animation at the left.
+     * @param rightBehavior when we should perform the overscroll animation at the right.
      */
-    fun Modifier.nestedScrollToScene(
-        orientation: Orientation,
-        startBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoOverscroll,
-        endBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoOverscroll,
+    fun Modifier.horizontalNestedScrollToScene(
+        leftBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        rightBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+    ): Modifier
+
+    /**
+     * Adds a [NestedScrollConnection] to intercept scroll events not handled by the scrollable
+     * component.
+     *
+     * @param topBehavior when we should perform the overscroll animation at the top.
+     * @param bottomBehavior when we should perform the overscroll animation at the bottom.
+     */
+    fun Modifier.verticalNestedScrollToScene(
+        topBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
     ): Modifier
 
     /**
@@ -256,24 +269,45 @@ internal fun SceneTransitionLayoutForTesting(
     val coroutineScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
+                state = state as SceneTransitionLayoutStateImpl,
                 onChangeScene = onChangeScene,
-                builder = scenes,
-                transitions = transitions,
-                state = state,
                 density = density,
                 edgeDetector = edgeDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
+                builder = scenes,
                 coroutineScope = coroutineScope,
             )
             .also { onLayoutImpl?.invoke(it) }
     }
 
-    layoutImpl.onChangeScene = onChangeScene
-    layoutImpl.transitions = transitions
-    layoutImpl.density = density
-    layoutImpl.edgeDetector = edgeDetector
+    val targetSceneChannel = remember { Channel<SceneKey>(Channel.CONFLATED) }
+    SideEffect {
+        if (state != layoutImpl.state) {
+            error(
+                "This SceneTransitionLayout was bound to a different SceneTransitionLayoutState" +
+                    " that was used when creating it, which is not supported"
+            )
+        }
 
-    layoutImpl.setScenes(scenes)
-    layoutImpl.setCurrentScene(currentScene)
+        layoutImpl.onChangeScene = onChangeScene
+        (state as SceneTransitionLayoutStateImpl).transitions = transitions
+        layoutImpl.density = density
+        layoutImpl.edgeDetector = edgeDetector
+        layoutImpl.updateScenes(scenes)
+
+        state.transitions = transitions
+
+        targetSceneChannel.trySend(currentScene)
+    }
+
+    LaunchedEffect(targetSceneChannel) {
+        for (newKey in targetSceneChannel) {
+            // Inspired by AnimateAsState.kt: let's poll the last value to avoid being one frame
+            // late.
+            val newKey = targetSceneChannel.tryReceive().getOrNull() ?: newKey
+            animateToScene(layoutImpl.state, newKey)
+        }
+    }
+
     layoutImpl.Content(modifier)
 }

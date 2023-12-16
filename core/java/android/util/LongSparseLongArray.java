@@ -46,6 +46,7 @@ import com.android.internal.util.Preconditions;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LongSparseLongArray implements Cloneable {
     @UnsupportedAppUsage(maxTargetSdk = 28) // The type isn't even public.
     private long[] mKeys;

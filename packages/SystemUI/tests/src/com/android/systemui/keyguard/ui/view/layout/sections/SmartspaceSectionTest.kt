@@ -23,9 +23,8 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.GONE
 import androidx.constraintlayout.widget.ConstraintSet.VISIBLE
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags.MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
@@ -44,14 +43,12 @@ import org.mockito.MockitoAnnotations
 @RunWith(JUnit4::class)
 @SmallTest
 class SmartspaceSectionTest : SysuiTestCase() {
-
     private lateinit var underTest: SmartspaceSection
     @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
     @Mock private lateinit var keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel
     @Mock private lateinit var lockscreenSmartspaceController: LockscreenSmartspaceController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var hasCustomWeatherDataDisplay: StateFlow<Boolean>
-    private lateinit var mFakeFeatureFlags: FakeFeatureFlagsClassic
 
     private val smartspaceView = View(mContext).also { it.id = View.generateViewId() }
     private val weatherView = View(mContext).also { it.id = View.generateViewId() }
@@ -62,8 +59,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        mFakeFeatureFlags = FakeFeatureFlagsClassic()
-        mFakeFeatureFlags.set(MIGRATE_CLOCKS_TO_BLUEPRINT, true)
+        mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         underTest =
             SmartspaceSection(
                 keyguardClockViewModel,
@@ -71,7 +67,6 @@ class SmartspaceSectionTest : SysuiTestCase() {
                 mContext,
                 lockscreenSmartspaceController,
                 keyguardUnlockAnimationController,
-                mFakeFeatureFlags
             )
         constraintLayout = ConstraintLayout(mContext)
         whenever(lockscreenSmartspaceController.buildAndConnectView(constraintLayout))

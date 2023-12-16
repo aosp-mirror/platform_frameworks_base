@@ -22,9 +22,9 @@ import android.os.Process;
 import android.os.Trace;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;

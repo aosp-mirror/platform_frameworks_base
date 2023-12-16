@@ -17,7 +17,7 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import com.android.internal.pm.pkg.component.ParsedMainComponent
-import com.android.server.pm.pkg.component.ParsedMainComponentImpl
+import com.android.internal.pm.pkg.component.ParsedMainComponentImpl
 import android.os.Parcelable
 import java.util.Arrays
 import kotlin.contracts.ExperimentalContracts

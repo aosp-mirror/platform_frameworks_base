@@ -149,11 +149,14 @@
     <!-- Nearby devices' permission will be granted of corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_nearby_devices">Nearby devices</string>
 
+    <!-- Change media output permission will be granted to the corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_media_routing_control">Change media output</string>
+
     <!-- Storage permission will be granted of corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_storage">Photos and media</string>
 
     <!-- Notification permission will be granted of corresponding profile [CHAR LIMIT=30] -->
-    <string name="permission_notification">Notifications</string>
+    <string name="permission_notifications">Notifications</string>
 
     <!-- Apps permission will be granted of corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_app_streaming">Apps</string>
@@ -162,28 +165,31 @@
     <string name="permission_nearby_device_streaming">Streaming</string>
 
     <!-- Description of phone permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_phone_summary">Can make and manage phone calls</string>
+    <string name="permission_phone_summary">Make and manage phone calls</string>
 
     <!-- Description of Call logs permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_call_logs_summary">Can read and write phone call log</string>
+    <string name="permission_call_logs_summary">Read and write phone call log</string>
 
     <!-- Description of SMS permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_sms_summary">Can send and view SMS messages</string>
+    <string name="permission_sms_summary">Send and view SMS messages</string>
 
     <!-- Description of contacts permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_contacts_summary">Can access your contacts</string>
+    <string name="permission_contacts_summary">Access your contacts</string>
 
     <!-- Description of calendar permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_calendar_summary">Can access your calendar</string>
+    <string name="permission_calendar_summary">Access your calendar</string>
 
     <!-- Description of microphone permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_microphone_summary">Can record audio</string>
+    <string name="permission_microphone_summary">Record audio</string>
 
     <!-- Description of nearby devices' permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_nearby_devices_summary">Can find, connect to, and determine the relative position of nearby devices</string>
+    <string name="permission_nearby_devices_summary">Find, connect to, and determine the relative position of nearby devices</string>
 
-    <!-- Description of notification permission of corresponding profile [CHAR LIMIT=NONE] -->
-    <string name="permission_notification_summary">Can read all notifications, including information like contacts, messages, and photos</string>
+    <!-- Description of NLA (notification listener access) of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_notification_listener_access_summary">Read all notifications, including information like contacts, messages, and photos</string>
+
+    <!-- Description of NLA & POST_NOTIFICATION of corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_notifications_summary">\u2022 Read all notifications, including info like contacts, messages, and photos&lt;br/>\u2022 Send notifications&lt;br/>&lt;br/>You can manage this app\'s ability to read and send notifications anytime in Settings > Notifications.</string>
 
     <!-- Description of app streaming permission of corresponding profile [CHAR LIMIT=NONE] -->
     <string name="permission_app_streaming_summary">Stream your phone\u2019s apps</string>
@@ -193,6 +199,9 @@
 
     <!-- Description of nearby_device_streaming permission of corresponding profile [CHAR LIMIT=NONE] -->
     <string name="permission_nearby_device_streaming_summary">Stream apps and other system features from your phone</string>
+
+    <!-- Description of change media output permission to be granted to the corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_media_routing_control_summary">Access a list of available devices and control which one streams or casts audio or video from other apps</string>
 
     <!-- The type of the device for phone [CHAR LIMIT=30] -->
     <string name="device_type" product="default">phone</string>

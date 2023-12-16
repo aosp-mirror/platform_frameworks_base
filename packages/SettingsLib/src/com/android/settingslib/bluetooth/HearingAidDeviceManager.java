@@ -26,6 +26,7 @@ import android.media.AudioDeviceAttributes;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.os.ParcelUuid;
 import android.provider.Settings;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -42,11 +43,13 @@ public class HearingAidDeviceManager {
     private static final boolean DEBUG = BluetoothUtils.D;
 
     private final ContentResolver mContentResolver;
+    private final Context mContext;
     private final LocalBluetoothManager mBtManager;
     private final List<CachedBluetoothDevice> mCachedDevices;
     private final HearingAidAudioRoutingHelper mRoutingHelper;
     HearingAidDeviceManager(Context context, LocalBluetoothManager localBtManager,
             List<CachedBluetoothDevice> CachedDevices) {
+        mContext = context;
         mContentResolver = context.getContentResolver();
         mBtManager = localBtManager;
         mCachedDevices = CachedDevices;
@@ -56,6 +59,7 @@ public class HearingAidDeviceManager {
     @VisibleForTesting
     HearingAidDeviceManager(Context context, LocalBluetoothManager localBtManager,
             List<CachedBluetoothDevice> cachedDevices, HearingAidAudioRoutingHelper routingHelper) {
+        mContext = context;
         mContentResolver = context.getContentResolver();
         mBtManager = localBtManager;
         mCachedDevices = cachedDevices;
@@ -285,11 +289,13 @@ public class HearingAidDeviceManager {
     }
 
     void onActiveDeviceChanged(CachedBluetoothDevice device) {
-        if (device.isActiveDevice(BluetoothProfile.HEARING_AID) || device.isActiveDevice(
-                BluetoothProfile.LE_AUDIO)) {
-            setAudioRoutingConfig(device);
-        } else {
-            clearAudioRoutingConfig();
+        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_AUDIO_ROUTING)) {
+            if (device.isActiveDevice(BluetoothProfile.HEARING_AID) || device.isActiveDevice(
+                    BluetoothProfile.LE_AUDIO)) {
+                setAudioRoutingConfig(device);
+            } else {
+                clearAudioRoutingConfig();
+            }
         }
     }
 
@@ -312,7 +318,7 @@ public class HearingAidDeviceManager {
                 Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
                 HearingAidAudioRoutingConstants.RoutingValue.AUTO);
         final int systemSoundsRoutingValue = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+                Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING,
                 HearingAidAudioRoutingConstants.RoutingValue.AUTO);
 
         setPreferredDeviceRoutingStrategies(
@@ -322,10 +328,10 @@ public class HearingAidDeviceManager {
                 HearingAidAudioRoutingConstants.MEDIA_ROUTING_ATTRIBUTES,
                 hearingDeviceAttributes, mediaRoutingValue);
         setPreferredDeviceRoutingStrategies(
-                HearingAidAudioRoutingConstants.RINGTONE_ROUTING_ATTRIBUTE,
+                HearingAidAudioRoutingConstants.RINGTONE_ROUTING_ATTRIBUTES,
                 hearingDeviceAttributes, ringtoneRoutingValue);
         setPreferredDeviceRoutingStrategies(
-                HearingAidAudioRoutingConstants.SYSTEM_SOUNDS_ROUTING_ATTRIBUTES,
+                HearingAidAudioRoutingConstants.NOTIFICATION_ROUTING_ATTRIBUTES,
                 hearingDeviceAttributes, systemSoundsRoutingValue);
     }
 
@@ -338,10 +344,10 @@ public class HearingAidDeviceManager {
                 HearingAidAudioRoutingConstants.MEDIA_ROUTING_ATTRIBUTES,
                 /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
         setPreferredDeviceRoutingStrategies(
-                HearingAidAudioRoutingConstants.RINGTONE_ROUTING_ATTRIBUTE,
+                HearingAidAudioRoutingConstants.RINGTONE_ROUTING_ATTRIBUTES,
                 /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
         setPreferredDeviceRoutingStrategies(
-                HearingAidAudioRoutingConstants.SYSTEM_SOUNDS_ROUTING_ATTRIBUTES,
+                HearingAidAudioRoutingConstants.NOTIFICATION_ROUTING_ATTRIBUTES,
                 /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
     }
 

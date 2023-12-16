@@ -89,6 +89,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.pkg.component.ParsedComponent;
 import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.pm.pkg.component.ParsedPermission;
@@ -339,6 +340,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String ATTR_DISTRACTION_FLAGS = "distraction_flags";
     private static final String ATTR_SUSPENDED = "suspended";
     private static final String ATTR_SUSPENDING_PACKAGE = "suspending-package";
+
+    private static final String ATTR_OPTIONAL = "optional";
     /**
      * @deprecated Legacy attribute, kept only for upgrading from P builds.
      */
@@ -372,7 +375,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String ATTR_ARCHIVE_INSTALLER_TITLE = "installer-title";
     private static final String ATTR_ARCHIVE_ICON_PATH = "icon-path";
     private static final String ATTR_ARCHIVE_MONOCHROME_ICON_PATH = "monochrome-icon-path";
-
     private static final String ATTR_ARCHIVE_TIME = "archive-time";
 
     private final Handler mHandler;
@@ -943,6 +945,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ret.setLongVersionCode(p.getVersionCode());
             ret.setUsesSdkLibraries(p.getUsesSdkLibraries());
             ret.setUsesSdkLibrariesVersionsMajor(p.getUsesSdkLibrariesVersionsMajor());
+            ret.setUsesSdkLibrariesOptional(p.getUsesSdkLibrariesOptional());
             ret.setUsesStaticLibraries(p.getUsesStaticLibraries());
             ret.setUsesStaticLibrariesVersions(p.getUsesStaticLibrariesVersions());
             ret.setMimeGroups(p.getMimeGroups());
@@ -1062,9 +1065,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             UserHandle installUser, boolean allowInstall, boolean instantApp,
             boolean virtualPreload, boolean isStoppedSystemApp, UserManagerService userManager,
             String[] usesSdkLibraries, long[] usesSdkLibrariesVersions,
-            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
-            Set<String> mimeGroupNames, @NonNull UUID domainSetId,
-            int targetSdkVersion, byte[] restrictUpdatedHash) {
+            boolean[] usesSdkLibrariesOptional, String[] usesStaticLibraries,
+            long[] usesStaticLibrariesVersions, Set<String> mimeGroupNames,
+            @NonNull UUID domainSetId, int targetSdkVersion, byte[] restrictUpdatedHash) {
         final PackageSetting pkgSetting;
         if (originalPkg != null) {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
@@ -1080,6 +1083,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setLongVersionCode(versionCode)
                     .setUsesSdkLibraries(usesSdkLibraries)
                     .setUsesSdkLibrariesVersionsMajor(usesSdkLibrariesVersions)
+                    .setUsesSdkLibrariesOptional(usesSdkLibrariesOptional)
                     .setUsesStaticLibraries(usesStaticLibraries)
                     .setUsesStaticLibrariesVersions(usesStaticLibrariesVersions)
                     // Update new package state.
@@ -1097,6 +1101,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     pkgPrivateFlags, domainSetId)
                     .setUsesSdkLibraries(usesSdkLibraries)
                     .setUsesSdkLibrariesVersionsMajor(usesSdkLibrariesVersions)
+                    .setUsesSdkLibrariesOptional(usesSdkLibrariesOptional)
                     .setUsesStaticLibraries(usesStaticLibraries)
                     .setUsesStaticLibrariesVersions(usesStaticLibrariesVersions)
                     .setLegacyNativeLibraryPath(legacyNativeLibraryPath)
@@ -1219,6 +1224,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi, int pkgFlags,
             int pkgPrivateFlags, @NonNull UserManagerService userManager,
             @Nullable String[] usesSdkLibraries, @Nullable long[] usesSdkLibrariesVersions,
+            @Nullable boolean[] usesSdkLibrariesOptional,
             @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions,
             @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId,
             int targetSdkVersion, byte[] restrictUpdatedHash)
@@ -1278,12 +1284,17 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 .setRestrictUpdateHash(restrictUpdatedHash);
         // Update SDK library dependencies if needed.
         if (usesSdkLibraries != null && usesSdkLibrariesVersions != null
-                && usesSdkLibraries.length == usesSdkLibrariesVersions.length) {
+                && usesSdkLibrariesOptional != null
+                && usesSdkLibraries.length == usesSdkLibrariesVersions.length
+                && usesSdkLibraries.length == usesSdkLibrariesOptional.length) {
             pkgSetting.setUsesSdkLibraries(usesSdkLibraries)
-                    .setUsesSdkLibrariesVersionsMajor(usesSdkLibrariesVersions);
+                    .setUsesSdkLibrariesVersionsMajor(usesSdkLibrariesVersions)
+                    .setUsesSdkLibrariesOptional(usesSdkLibrariesOptional);
         } else {
             pkgSetting.setUsesSdkLibraries(null)
-                    .setUsesSdkLibrariesVersionsMajor(null);
+                    .setUsesSdkLibrariesVersionsMajor(null)
+                    .setUsesSdkLibrariesOptional(null);
+
         }
 
         // Update static shared library dependencies if needed.
@@ -1933,8 +1944,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 ATTR_SPLASH_SCREEN_THEME);
                         final long firstInstallTime = parser.getAttributeLongHex(null,
                                 ATTR_FIRST_INSTALL_TIME, 0);
-                        final long archiveTime = parser.getAttributeLongHex(null,
-                                ATTR_ARCHIVE_TIME, 0);
                         final int minAspectRatio = parser.getAttributeInt(null,
                                 ATTR_MIN_ASPECT_RATIO,
                                 PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
@@ -2022,7 +2031,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 firstInstallTime != 0 ? firstInstallTime
                                         : origFirstInstallTimes.getOrDefault(name, 0L),
                                 minAspectRatio, archiveState);
-                        ps.setArchiveTimeMillis(archiveTime, userId);
                         mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                     } else if (tagName.equals("preferred-activities")) {
                         readPreferredActivitiesLPw(parser, userId);
@@ -2054,6 +2062,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             throws XmlPullParserException, IOException {
         String installerTitle = parser.getAttributeValue(null,
                 ATTR_ARCHIVE_INSTALLER_TITLE);
+        final long archiveTimeMillis = parser.getAttributeLongHex(null, ATTR_ARCHIVE_TIME, 0);
         List<ArchiveState.ArchiveActivityInfo> activityInfos =
                 parseArchiveActivityInfos(parser);
 
@@ -2067,7 +2076,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             return null;
         }
 
-        return new ArchiveState(activityInfos, installerTitle);
+        return new ArchiveState(activityInfos, installerTitle, archiveTimeMillis);
     }
 
     private static List<ArchiveState.ArchiveActivityInfo> parseArchiveActivityInfos(
@@ -2385,8 +2394,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         }
                         serializer.attributeLongHex(null, ATTR_FIRST_INSTALL_TIME,
                                 ustate.getFirstInstallTimeMillis());
-                        serializer.attributeLongHex(null, ATTR_ARCHIVE_TIME,
-                                ustate.getArchiveTimeMillis());
                         if (ustate.getUninstallReason()
                                 != PackageManager.UNINSTALL_REASON_UNKNOWN) {
                             serializer.attributeInt(null, ATTR_UNINSTALL_REASON,
@@ -2488,6 +2495,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
         serializer.startTag(null, TAG_ARCHIVE_STATE);
         serializer.attribute(null, ATTR_ARCHIVE_INSTALLER_TITLE, archiveState.getInstallerTitle());
+        serializer.attributeLongHex(null, ATTR_ARCHIVE_TIME, archiveState.getArchiveTimeMillis());
         for (ArchiveState.ArchiveActivityInfo activityInfo : archiveState.getActivityInfos()) {
             serializer.startTag(null, TAG_ARCHIVE_ACTIVITY_INFO);
             serializer.attribute(null, ATTR_ARCHIVE_ACTIVITY_TITLE, activityInfo.getTitle());
@@ -2541,12 +2549,15 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             throws IOException, XmlPullParserException {
         String libName = parser.getAttributeValue(null, ATTR_NAME);
         long libVersion = parser.getAttributeLong(null, ATTR_VERSION, -1);
+        boolean optional = parser.getAttributeBoolean(null, ATTR_OPTIONAL, true);
 
         if (libName != null && libVersion >= 0) {
             outPs.setUsesSdkLibraries(ArrayUtils.appendElement(String.class,
                     outPs.getUsesSdkLibraries(), libName));
             outPs.setUsesSdkLibrariesVersionsMajor(ArrayUtils.appendLong(
                     outPs.getUsesSdkLibrariesVersionsMajor(), libVersion));
+            outPs.setUsesSdkLibrariesOptional(ArrayUtils.appendBoolean(
+                    outPs.getUsesSdkLibrariesOptional(), optional));
         }
 
         XmlUtils.skipCurrentTag(parser);
@@ -2568,7 +2579,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     }
 
     void writeUsesSdkLibLPw(TypedXmlSerializer serializer, String[] usesSdkLibraries,
-            long[] usesSdkLibraryVersions) throws IOException {
+            long[] usesSdkLibraryVersions, boolean[] usesSdkLibrariesOptional) throws IOException {
         if (ArrayUtils.isEmpty(usesSdkLibraries) || ArrayUtils.isEmpty(usesSdkLibraryVersions)
                 || usesSdkLibraries.length != usesSdkLibraryVersions.length) {
             return;
@@ -2577,9 +2588,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         for (int i = 0; i < libCount; i++) {
             final String libName = usesSdkLibraries[i];
             final long libVersion = usesSdkLibraryVersions[i];
+            boolean libOptional = usesSdkLibrariesOptional[i];
             serializer.startTag(null, TAG_USES_SDK_LIB);
             serializer.attribute(null, ATTR_NAME, libName);
             serializer.attributeLong(null, ATTR_VERSION, libVersion);
+            serializer.attributeBoolean(null, ATTR_OPTIONAL, libOptional);
             serializer.endTag(null, TAG_USES_SDK_LIB);
         }
     }
@@ -3110,7 +3123,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
 
         writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
-                pkg.getUsesSdkLibrariesVersionsMajor());
+                pkg.getUsesSdkLibrariesVersionsMajor(), pkg.getUsesSdkLibrariesOptional());
+
 
         writeUsesStaticLibLPw(serializer, pkg.getUsesStaticLibraries(),
                 pkg.getUsesStaticLibrariesVersions());
@@ -3210,7 +3224,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         }
 
         writeUsesSdkLibLPw(serializer, pkg.getUsesSdkLibraries(),
-                pkg.getUsesSdkLibrariesVersionsMajor());
+                pkg.getUsesSdkLibrariesVersionsMajor(), pkg.getUsesSdkLibrariesOptional());
 
         writeUsesStaticLibLPw(serializer, pkg.getUsesStaticLibraries(),
                 pkg.getUsesStaticLibrariesVersions());
@@ -5095,12 +5109,14 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
             List<String> usesSdkLibraries = pkg.getUsesSdkLibraries();
             long[] usesSdkLibrariesVersionsMajor = pkg.getUsesSdkLibrariesVersionsMajor();
+            boolean[] usesSdkLibrariesOptional = pkg.getUsesSdkLibrariesOptional();
             if (usesSdkLibraries.size() > 0) {
                 pw.print(prefix); pw.println("  usesSdkLibraries:");
                 for (int i = 0, size = usesSdkLibraries.size(); i < size; ++i) {
                     pw.print(prefix); pw.print("    ");
                     pw.print(usesSdkLibraries.get(i)); pw.print(" version:");
-                    pw.println(usesSdkLibrariesVersionsMajor[i]);
+                    pw.println(usesSdkLibrariesVersionsMajor[i]); pw.print(" optional:");
+                    pw.println(usesSdkLibrariesOptional[i]);
                 }
             }
 
@@ -5293,9 +5309,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             date.setTime(pus.getFirstInstallTimeMillis());
             pw.println(sdf.format(date));
 
-            pw.print("      archiveTime=");
-            date.setTime(pus.getArchiveTimeMillis());
-            pw.println(sdf.format(date));
+            if (pus.getArchiveState() != null) {
+                pw.print("      archiveTime=");
+                date.setTime(pus.getArchiveState().getArchiveTimeMillis());
+                pw.println(sdf.format(date));
+            }
 
             pw.print("      uninstallReason=");
             pw.println(userState.getUninstallReason());

@@ -63,6 +63,7 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS
+import com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_DESKTOP_MODE
 import com.android.wm.shell.transition.Transitions.TransitionHandler
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.google.common.truth.Truth.assertThat
@@ -392,8 +393,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToFullscreen_displayFullscreen_windowingModeSetToUndefined() {
         val task = setUpFreeformTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FULLSCREEN
-        controller.moveToFullscreen(task)
-        val wct = getLatestWct(type = TRANSIT_CHANGE)
+        controller.moveToFullscreen(task.taskId, desktopModeWindowDecoration)
+        val wct = getLatestExitDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_UNDEFINED)
     }
@@ -402,15 +403,15 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToFullscreen_displayFreeform_windowingModeSetToFullscreen() {
         val task = setUpFreeformTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FREEFORM
-        controller.moveToFullscreen(task)
-        val wct = getLatestWct(type = TRANSIT_CHANGE)
+        controller.moveToFullscreen(task.taskId, desktopModeWindowDecoration)
+        val wct = getLatestExitDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
                 .isEqualTo(WINDOWING_MODE_FULLSCREEN)
     }
 
     @Test
     fun moveToFullscreen_nonExistentTask_doesNothing() {
-        controller.moveToFullscreen(999)
+        controller.moveToFullscreen(999, desktopModeWindowDecoration)
         verifyWCTNotExecuted()
     }
 
@@ -419,9 +420,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val taskDefaultDisplay = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val taskSecondDisplay = setUpFreeformTask(displayId = SECOND_DISPLAY)
 
-        controller.moveToFullscreen(taskDefaultDisplay)
+        controller.moveToFullscreen(taskDefaultDisplay.taskId, desktopModeWindowDecoration)
 
-        with(getLatestWct(type = TRANSIT_CHANGE)) {
+        with(getLatestExitDesktopWct()) {
             assertThat(changes.keys).contains(taskDefaultDisplay.token.asBinder())
             assertThat(changes.keys).doesNotContain(taskSecondDisplay.token.asBinder())
         }
@@ -802,6 +803,17 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         if (ENABLE_SHELL_TRANSITIONS) {
             verify(enterDesktopTransitionHandler).moveToDesktop(arg.capture(), any())
+        } else {
+            verify(shellTaskOrganizer).applyTransaction(arg.capture())
+        }
+        return arg.value
+    }
+
+    private fun getLatestExitDesktopWct(): WindowContainerTransaction {
+        val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+        if (ENABLE_SHELL_TRANSITIONS) {
+            verify(exitDesktopTransitionHandler)
+                    .startTransition(eq(TRANSIT_EXIT_DESKTOP_MODE), arg.capture(), any(), any())
         } else {
             verify(shellTaskOrganizer).applyTransaction(arg.capture())
         }

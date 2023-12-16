@@ -281,7 +281,7 @@ public class DisplayRotation {
         mDeskDockRotation = readRotation(R.integer.config_deskDockRotation);
         mUndockedHdmiRotation = readRotation(R.integer.config_undockedHdmiRotation);
 
-        int defaultRotation = readDefaultDisplayRotation(displayAddress);
+        int defaultRotation = readDefaultDisplayRotation(displayAddress, displayContent);
         mRotation = defaultRotation;
 
         mDisplayRotationCoordinator = displayRotationCoordinator;
@@ -327,22 +327,31 @@ public class DisplayRotation {
     }
 
     // Change the default value to the value specified in the sysprop
-    // ro.bootanim.set_orientation_<display_id>. Four values are supported: ORIENTATION_0,
+    // ro.bootanim.set_orientation_<physical_display_id> or
+    // ro.bootanim.set_orientation_logical_<logical_display_id>.
+    // Four values are supported: ORIENTATION_0,
     // ORIENTATION_90, ORIENTATION_180 and ORIENTATION_270.
     // If the value isn't specified or is ORIENTATION_0, nothing will be changed.
     // This is needed to support having default orientation different from the natural
     // device orientation. For example, on tablets that may want to keep natural orientation
     // portrait for applications compatibility but have landscape orientation as a default choice
     // from the UX perspective.
+    // On watches that may want to keep the wrist orientation as the default.
     @Surface.Rotation
-    private int readDefaultDisplayRotation(DisplayAddress displayAddress) {
-        if (!(displayAddress instanceof DisplayAddress.Physical)) {
-            return Surface.ROTATION_0;
+    private int readDefaultDisplayRotation(DisplayAddress displayAddress,
+            DisplayContent displayContent) {
+        String syspropValue = "";
+        if (displayAddress instanceof DisplayAddress.Physical) {
+            final DisplayAddress.Physical physicalAddress =
+                    (DisplayAddress.Physical) displayAddress;
+            syspropValue = SystemProperties.get(
+                    "ro.bootanim.set_orientation_" + physicalAddress.getPhysicalDisplayId(), "");
         }
-        final DisplayAddress.Physical physicalAddress = (DisplayAddress.Physical) displayAddress;
-        String syspropValue = SystemProperties.get(
-                "ro.bootanim.set_orientation_" + physicalAddress.getPhysicalDisplayId(),
-                "ORIENTATION_0");
+        if ("".equals(syspropValue) && displayContent.isDefaultDisplay) {
+            syspropValue = SystemProperties.get(
+                    "ro.bootanim.set_orientation_logical_" + displayContent.getDisplayId(), "");
+        }
+
         if (syspropValue.equals("ORIENTATION_90")) {
             return Surface.ROTATION_90;
         } else if (syspropValue.equals("ORIENTATION_180")) {

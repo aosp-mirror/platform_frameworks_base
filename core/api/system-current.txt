@@ -158,6 +158,7 @@ package android {
     field public static final String INTERACT_ACROSS_USERS_FULL = "android.permission.INTERACT_ACROSS_USERS_FULL";
     field public static final String INTERNAL_SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW";
     field public static final String INVOKE_CARRIER_SETUP = "android.permission.INVOKE_CARRIER_SETUP";
+    field public static final String KEYPHRASE_ENROLLMENT_APPLICATION = "android.permission.KEYPHRASE_ENROLLMENT_APPLICATION";
     field public static final String KILL_ALL_BACKGROUND_PROCESSES = "android.permission.KILL_ALL_BACKGROUND_PROCESSES";
     field public static final String KILL_UID = "android.permission.KILL_UID";
     field public static final String LAUNCH_DEVICE_MANAGER_SETUP = "android.permission.LAUNCH_DEVICE_MANAGER_SETUP";
@@ -214,6 +215,7 @@ package android {
     field public static final String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final String MANAGE_USERS = "android.permission.MANAGE_USERS";
     field public static final String MANAGE_USER_OEM_UNLOCK_STATE = "android.permission.MANAGE_USER_OEM_UNLOCK_STATE";
+    field public static final String MANAGE_VOICE_KEYPHRASES = "android.permission.MANAGE_VOICE_KEYPHRASES";
     field public static final String MANAGE_WALLPAPER_EFFECTS_GENERATION = "android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION";
     field public static final String MANAGE_WEAK_ESCROW_TOKEN = "android.permission.MANAGE_WEAK_ESCROW_TOKEN";
     field public static final String MANAGE_WEARABLE_SENSING_SERVICE = "android.permission.MANAGE_WEARABLE_SENSING_SERVICE";
@@ -251,6 +253,7 @@ package android {
     field public static final String OBSERVE_SENSOR_PRIVACY = "android.permission.OBSERVE_SENSOR_PRIVACY";
     field public static final String OPEN_ACCESSIBILITY_DETAILS_SETTINGS = "android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS";
     field public static final String OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD = "android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD";
+    field @FlaggedApi("com.android.input.flags.override_key_behavior_permission_apis") public static final String OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW = "android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW";
     field public static final String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
     field public static final String PACKET_KEEPALIVE_OFFLOAD = "android.permission.PACKET_KEEPALIVE_OFFLOAD";
     field public static final String PEERS_MAC_ADDRESS = "android.permission.PEERS_MAC_ADDRESS";
@@ -258,6 +261,7 @@ package android {
     field public static final String PERFORM_IMS_SINGLE_REGISTRATION = "android.permission.PERFORM_IMS_SINGLE_REGISTRATION";
     field public static final String PERFORM_SIM_ACTIVATION = "android.permission.PERFORM_SIM_ACTIVATION";
     field public static final String POWER_SAVER = "android.permission.POWER_SAVER";
+    field @FlaggedApi("android.permission.flags.factory_reset_prep_permission_apis") public static final String PREPARE_FACTORY_RESET = "android.permission.PREPARE_FACTORY_RESET";
     field public static final String PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE = "android.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE";
     field public static final String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
@@ -301,13 +305,14 @@ package android {
     field public static final String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
     field @FlaggedApi("android.permission.flags.voice_activation_permission_apis") public static final String RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA = "android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA";
     field @FlaggedApi("android.permission.flags.voice_activation_permission_apis") public static final String RECEIVE_SANDBOX_TRIGGER_AUDIO = "android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO";
+    field @FlaggedApi("com.android.server.notification.flags.redact_otp_notifications_from_untrusted_listeners") public static final String RECEIVE_SENSITIVE_NOTIFICATIONS = "android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS";
     field public static final String RECEIVE_WIFI_CREDENTIAL_CHANGE = "android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE";
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String RECOVERY = "android.permission.RECOVERY";
     field public static final String RECOVER_KEYSTORE = "android.permission.RECOVER_KEYSTORE";
     field public static final String REGISTER_CALL_PROVIDER = "android.permission.REGISTER_CALL_PROVIDER";
     field public static final String REGISTER_CONNECTION_MANAGER = "android.permission.REGISTER_CONNECTION_MANAGER";
-    field public static final String REGISTER_NSD_OFFLOAD_ENGINE = "android.permission.REGISTER_NSD_OFFLOAD_ENGINE";
+    field @FlaggedApi("com.android.net.flags.register_nsd_offload_engine") public static final String REGISTER_NSD_OFFLOAD_ENGINE = "android.permission.REGISTER_NSD_OFFLOAD_ENGINE";
     field public static final String REGISTER_SIM_SUBSCRIPTION = "android.permission.REGISTER_SIM_SUBSCRIPTION";
     field public static final String REGISTER_STATS_PULL_ATOM = "android.permission.REGISTER_STATS_PULL_ATOM";
     field public static final String REMOTE_DISPLAY_PROVIDER = "android.permission.REMOTE_DISPLAY_PROVIDER";
@@ -350,6 +355,7 @@ package android {
     field public static final String SET_VOLUME_KEY_LONG_PRESS_LISTENER = "android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER";
     field public static final String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
     field public static final String SET_WALLPAPER_DIM_AMOUNT = "android.permission.SET_WALLPAPER_DIM_AMOUNT";
+    field @FlaggedApi("android.service.chooser.support_nfc_resolver") public static final String SHOW_CUSTOMIZED_RESOLVER = "android.permission.SHOW_CUSTOMIZED_RESOLVER";
     field public static final String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
     field public static final String SHUTDOWN = "android.permission.SHUTDOWN";
     field public static final String SIGNAL_REBOOT_READINESS = "android.permission.SIGNAL_REBOOT_READINESS";
@@ -415,6 +421,7 @@ package android {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
     field public static final int gameSessionService = 16844373; // 0x1010655
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
+    field @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public static final int isVirtualDeviceOnly;
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
     field public static final int playHomeTransitionSound = 16844358; // 0x1010646
@@ -652,6 +659,7 @@ package android.app {
     field public static final String OPSTR_PLAY_AUDIO = "android:play_audio";
     field public static final String OPSTR_POST_NOTIFICATION = "android:post_notification";
     field public static final String OPSTR_PROJECT_MEDIA = "android:project_media";
+    field @FlaggedApi("android.view.contentprotection.flags.rapid_clear_notifications_by_listener_app_op_enabled") public static final String OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER = "android:rapid_clear_notifications_by_listener";
     field public static final String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
     field public static final String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
     field public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
@@ -3228,6 +3236,7 @@ package android.companion.virtual {
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName);
     method public void removeSoundEffectListener(@NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int);
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDisplayImePolicy(int, int);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
   }
@@ -3244,6 +3253,7 @@ package android.companion.virtual {
     method @Deprecated public int getDefaultNavigationPolicy();
     method public int getDevicePolicy(int);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @Nullable public android.content.ComponentName getHomeComponent();
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @Nullable public android.content.ComponentName getInputMethodComponent();
     method public int getLockState();
     method @Nullable public String getName();
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
@@ -3277,6 +3287,7 @@ package android.companion.virtual {
     method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setHomeComponent(@Nullable android.content.ComponentName);
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setInputMethodComponent(@Nullable android.content.ComponentName);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setName(@NonNull String);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
@@ -3613,7 +3624,6 @@ package android.content {
     field public static final String ACTION_SHOW_SUSPENDED_APP_DETAILS = "android.intent.action.SHOW_SUSPENDED_APP_DETAILS";
     field @Deprecated public static final String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
     field public static final String ACTION_SPLIT_CONFIGURATION_CHANGED = "android.intent.action.SPLIT_CONFIGURATION_CHANGED";
-    field @FlaggedApi("android.content.pm.archiving") public static final String ACTION_UNARCHIVE_PACKAGE = "android.intent.action.UNARCHIVE_PACKAGE";
     field public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
     field public static final String ACTION_USER_ADDED = "android.intent.action.USER_ADDED";
     field public static final String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
@@ -3861,15 +3871,9 @@ package android.content.pm {
     field @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS) public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
   }
 
-  public class PackageInfo implements android.os.Parcelable {
-    method @FlaggedApi("android.content.pm.archiving") public long getArchiveTimeMillis();
-  }
-
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
-    method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
-    method @FlaggedApi("android.content.pm.archiving") @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void requestArchive(@NonNull String, @NonNull android.content.IntentSender) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @FlaggedApi("android.content.pm.archiving") @RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES, android.Manifest.permission.REQUEST_INSTALL_PACKAGES}) public void requestUnarchive(@NonNull String) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
+    method @FlaggedApi("android.content.pm.read_install_info") @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
     field public static final String ACTION_CONFIRM_PRE_APPROVAL = "android.content.pm.action.CONFIRM_PRE_APPROVAL";
@@ -3878,11 +3882,9 @@ package android.content.pm {
     field public static final int DATA_LOADER_TYPE_STREAMING = 1; // 0x1
     field public static final String EXTRA_CALLBACK = "android.content.pm.extra.CALLBACK";
     field public static final String EXTRA_DATA_LOADER_TYPE = "android.content.pm.extra.DATA_LOADER_TYPE";
+    field @FlaggedApi("android.content.pm.archiving") public static final String EXTRA_DELETE_FLAGS = "android.content.pm.extra.DELETE_FLAGS";
     field public static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
     field @Deprecated public static final String EXTRA_RESOLVED_BASE_PATH = "android.content.pm.extra.RESOLVED_BASE_PATH";
-    field @FlaggedApi("android.content.pm.archiving") public static final String EXTRA_UNARCHIVE_ALL_USERS = "android.content.pm.extra.UNARCHIVE_ALL_USERS";
-    field @FlaggedApi("android.content.pm.archiving") public static final String EXTRA_UNARCHIVE_ID = "android.content.pm.extra.UNARCHIVE_ID";
-    field @FlaggedApi("android.content.pm.archiving") public static final String EXTRA_UNARCHIVE_PACKAGE_NAME = "android.content.pm.extra.UNARCHIVE_PACKAGE_NAME";
     field public static final int LOCATION_DATA_APP = 0; // 0x0
     field public static final int LOCATION_MEDIA_DATA = 2; // 0x2
     field public static final int LOCATION_MEDIA_OBB = 1; // 0x1
@@ -3893,7 +3895,7 @@ package android.content.pm {
 
   public static class PackageInstaller.InstallInfo {
     method public long calculateInstalledSize(@NonNull android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;
-    method public long calculateInstalledSize(@NonNull android.content.pm.PackageInstaller.SessionParams, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
+    method @FlaggedApi("android.content.pm.read_install_info") public long calculateInstalledSize(@NonNull android.content.pm.PackageInstaller.SessionParams, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
     method public int getInstallLocation();
     method @NonNull public String getPackageName();
   }
@@ -3938,14 +3940,12 @@ package android.content.pm {
     method public void setRequestDowngrade(boolean);
     method @FlaggedApi("android.content.pm.rollback_lifetime") @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void setRollbackLifetimeMillis(long);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
-    method @FlaggedApi("android.content.pm.archiving") public void setUnarchiveId(int);
   }
 
   public class PackageItemInfo {
     method public static void forceSafeLabels();
     method @Deprecated @NonNull public CharSequence loadSafeLabel(@NonNull android.content.pm.PackageManager);
     method @NonNull public CharSequence loadSafeLabel(@NonNull android.content.pm.PackageManager, @FloatRange(from=0) float, int);
-    field @FlaggedApi("android.content.pm.archiving") public boolean isArchived;
   }
 
   public abstract class PackageManager {
@@ -3977,7 +3977,6 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @Deprecated public abstract int installExistingPackage(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @Deprecated public abstract int installExistingPackage(@NonNull String, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method @FlaggedApi("android.content.pm.archiving") public boolean isAppArchivable(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(@NonNull android.content.Intent, int, android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(@NonNull android.content.Intent, @NonNull android.content.pm.PackageManager.ResolveInfoFlags, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryIntentActivitiesAsUser(@NonNull android.content.Intent, int, @NonNull android.os.UserHandle);
@@ -4014,7 +4013,7 @@ package android.content.pm {
     field public static final int DELETE_FAILED_OWNER_BLOCKED = -4; // 0xfffffffc
     field public static final int DELETE_KEEP_DATA = 1; // 0x1
     field public static final int DELETE_SUCCEEDED = 1; // 0x1
-    field @FlaggedApi("android.permission.flags.device_aware_permission_apis") public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID = "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
+    field @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID = "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
     field public static final String EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
@@ -4095,8 +4094,8 @@ package android.content.pm {
     field @Deprecated public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1; // 0x1
     field @Deprecated public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
-    field @FlaggedApi("android.content.pm.archiving") public static final long MATCH_ARCHIVED_PACKAGES = 4294967296L; // 0x100000000L
     field public static final int MATCH_CLONE_PROFILE = 536870912; // 0x20000000
+    field @FlaggedApi("android.content.pm.fix_duplicated_flags") public static final long MATCH_CLONE_PROFILE_LONG = 17179869184L; // 0x400000000L
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS = 536870912; // 0x20000000
     field public static final int MATCH_INSTANT = 8388608; // 0x800000
@@ -4120,7 +4119,7 @@ package android.content.pm {
 
   public static interface PackageManager.OnPermissionsChangedListener {
     method public void onPermissionsChanged(int);
-    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") public default void onPermissionsChanged(int, @NonNull String);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public default void onPermissionsChanged(int, @NonNull String);
   }
 
   public static final class PackageManager.UninstallCompleteCallback implements android.os.Parcelable {
@@ -4202,10 +4201,21 @@ package android.content.pm {
 
   public final class UserProperties implements android.os.Parcelable {
     method public int describeContents();
+    method public int getCrossProfileContentSharingStrategy();
+    method public int getShowInQuietMode();
+    method public int getShowInSharingSurfaces();
     method public boolean isCredentialShareableWithParent();
     method public boolean isMediaSharedWithParent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserProperties> CREATOR;
+    field public static final int CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT = 1; // 0x1
+    field public static final int CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION = 0; // 0x0
+    field public static final int SHOW_IN_QUIET_MODE_DEFAULT = 2; // 0x2
+    field public static final int SHOW_IN_QUIET_MODE_HIDDEN = 1; // 0x1
+    field public static final int SHOW_IN_QUIET_MODE_PAUSED = 0; // 0x0
+    field public static final int SHOW_IN_SHARING_SURFACES_NO = 2; // 0x2
+    field public static final int SHOW_IN_SHARING_SURFACES_SEPARATE = 1; // 0x1
+    field public static final int SHOW_IN_SHARING_SURFACES_WITH_PARENT = 0; // 0x0
   }
 
 }
@@ -4479,6 +4489,95 @@ package android.hardware.camera2 {
   public abstract static class CameraManager.AvailabilityCallback {
     method @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER) public void onCameraClosed(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER) public void onCameraOpened(@NonNull String, @NonNull String);
+  }
+
+}
+
+package android.hardware.camera2.extension {
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract class AdvancedExtender {
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") protected AdvancedExtender(@NonNull android.hardware.camera2.CameraManager);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.List<android.hardware.camera2.CaptureRequest.Key> getAvailableCaptureRequestKeys(@NonNull String);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.List<android.hardware.camera2.CaptureResult.Key> getAvailableCaptureResultKeys(@NonNull String);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public long getMetadataVendorId(@NonNull String);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract android.hardware.camera2.extension.SessionProcessor getSessionProcessor();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.Map<java.lang.Integer,java.util.List<android.util.Size>> getSupportedCaptureOutputResolutions(@NonNull String);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract java.util.Map<java.lang.Integer,java.util.List<android.util.Size>> getSupportedPreviewOutputResolutions(@NonNull String);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void init(@NonNull String, @NonNull android.hardware.camera2.extension.CharacteristicsMap);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract boolean isExtensionAvailable(@NonNull String, @NonNull android.hardware.camera2.extension.CharacteristicsMap);
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract class CameraExtensionService extends android.app.Service {
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") protected CameraExtensionService();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract android.hardware.camera2.extension.AdvancedExtender onInitializeAdvancedExtension(int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract boolean onRegisterClient(@NonNull android.os.IBinder);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void onUnregisterClient(@NonNull android.os.IBinder);
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public final class CameraOutputSurface {
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public CameraOutputSurface(@NonNull android.view.Surface, @Nullable android.util.Size);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int getImageFormat();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @Nullable public android.util.Size getSize();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @Nullable public android.view.Surface getSurface();
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public class CharacteristicsMap {
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @Nullable public android.hardware.camera2.CameraCharacteristics get(@NonNull String);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public java.util.Set<java.lang.String> getCameraIds();
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public class ExtensionConfiguration {
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public ExtensionConfiguration(int, int, @NonNull java.util.List<android.hardware.camera2.extension.ExtensionOutputConfiguration>, @Nullable android.hardware.camera2.CaptureRequest);
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public class ExtensionOutputConfiguration {
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public ExtensionOutputConfiguration(@NonNull java.util.List<android.hardware.camera2.extension.CameraOutputSurface>, int, @Nullable String, int);
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public final class RequestProcessor {
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void abortCaptures();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int setRepeating(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, @Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.RequestProcessor.RequestCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void stopRepeating();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int submit(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, @Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.RequestProcessor.RequestCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int submitBurst(@NonNull java.util.List<android.hardware.camera2.extension.RequestProcessor.Request>, @Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.RequestProcessor.RequestCallback);
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public static final class RequestProcessor.Request {
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public RequestProcessor.Request(@NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<android.util.Pair<android.hardware.camera2.CaptureRequest.Key,java.lang.Object>>, int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public java.util.List<android.util.Pair<android.hardware.camera2.CaptureRequest.Key,java.lang.Object>> getParameters();
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public static interface RequestProcessor.RequestCallback {
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureBufferLost(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, long, int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureCompleted(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, @Nullable android.hardware.camera2.TotalCaptureResult);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureFailed(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, @NonNull android.hardware.camera2.CaptureFailure);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureProgressed(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, @NonNull android.hardware.camera2.CaptureResult);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureSequenceAborted(int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureSequenceCompleted(int, long);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureStarted(@NonNull android.hardware.camera2.extension.RequestProcessor.Request, long, long);
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract class SessionProcessor {
+    ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") protected SessionProcessor();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void deInitSession(@NonNull android.os.IBinder);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public abstract android.hardware.camera2.extension.ExtensionConfiguration initSession(@NonNull android.os.IBinder, @NonNull String, @NonNull android.hardware.camera2.extension.CharacteristicsMap, @NonNull android.hardware.camera2.extension.CameraOutputSurface, @NonNull android.hardware.camera2.extension.CameraOutputSurface);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void onCaptureSessionEnd();
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void onCaptureSessionStart(@NonNull android.hardware.camera2.extension.RequestProcessor, @NonNull String);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void setParameters(@NonNull android.hardware.camera2.CaptureRequest);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract int startCapture(@Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.SessionProcessor.CaptureCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract int startRepeating(@Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.SessionProcessor.CaptureCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract int startTrigger(@NonNull android.hardware.camera2.CaptureRequest, @Nullable java.util.concurrent.Executor, @NonNull android.hardware.camera2.extension.SessionProcessor.CaptureCallback);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public abstract void stopRepeating();
+  }
+
+  @FlaggedApi("com.android.internal.camera.flags.concert_mode") public static interface SessionProcessor.CaptureCallback {
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureCompleted(long, int, @NonNull android.hardware.camera2.CaptureResult);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureFailed(int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureProcessStarted(int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureSequenceAborted(int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureSequenceCompleted(int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public void onCaptureStarted(int, long);
   }
 
 }
@@ -8890,9 +8989,9 @@ package android.media.tv.tuner.frontend {
 package android.media.voice {
 
   public final class KeyphraseModelManager {
-    method @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public void deleteKeyphraseSoundModel(int, @NonNull java.util.Locale);
-    method @Nullable @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int, @NonNull java.util.Locale);
-    method @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public void updateKeyphraseSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public void deleteKeyphraseSoundModel(int, @NonNull java.util.Locale);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int, @NonNull java.util.Locale);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public void updateKeyphraseSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel);
   }
 
 }
@@ -9782,8 +9881,8 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<java.lang.String> getSubsetAids();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public int getUid();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean hasCategory(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean isCategoryOtherServiceEnabled();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean isOnHost();
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean isOtherServiceEnabled();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public CharSequence loadAppLabel(@NonNull android.content.pm.PackageManager);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadBanner(@NonNull android.content.pm.PackageManager);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
@@ -9792,9 +9891,9 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean requiresScreenOn();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean requiresUnlock();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void resetOffHostSecureElement();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setCategoryOtherServiceEnabled(boolean);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setDynamicAidGroup(@NonNull android.nfc.cardemulation.AidGroup);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setOffHostSecureElement(@NonNull String);
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setOtherServiceEnabled(boolean);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeToParcel(@NonNull android.os.Parcel, int);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.ApduServiceInfo> CREATOR;
   }
@@ -10551,6 +10650,7 @@ package android.os {
     method @NonNull public java.util.List<android.os.UserHandle> getEnabledProfiles();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getMainUser();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getPreviousForegroundUser();
+    method @NonNull public String getProfileLabel();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableProfileCount(@NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableUserCount(@NonNull String);
@@ -10559,6 +10659,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.PersistableBundle getSeedAccountOptions();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getSeedAccountType();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public long[] getSerialNumbersOfUsers(boolean);
+    method @NonNull public android.graphics.drawable.Drawable getUserBadge();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.os.UserHandle> getUserHandles(boolean);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public android.graphics.Bitmap getUserIcon();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public android.content.pm.UserProperties getUserProperties(@NonNull android.os.UserHandle);
@@ -10830,13 +10931,13 @@ package android.permission {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void onGetUnusedAppCount(@NonNull java.util.function.IntConsumer);
     method @BinderThread public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable);
     method @Deprecated @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String);
-    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String, int);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String, int);
     method @Deprecated @BinderThread public void onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @Deprecated @BinderThread public void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
     method @Deprecated @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, @NonNull Runnable);
-    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, int, @NonNull Runnable);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, int, @NonNull Runnable);
     method @Deprecated @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull android.permission.AdminPermissionControlParams, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onStageAndApplyRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
@@ -11263,8 +11364,8 @@ package android.provider {
 
   public static final class Settings.System extends android.provider.Settings.NameValueTable {
     method @RequiresPermission(android.Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, boolean, boolean);
-    method public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
+    method @FlaggedApi("android.provider.system_settings_default") @RequiresPermission(android.Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, boolean, boolean);
+    method @FlaggedApi("android.provider.system_settings_default") public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
   }
 
   public static final class SimPhonebookContract.SimRecords {
@@ -11785,6 +11886,14 @@ package android.service.carrier {
 
 }
 
+package android.service.chooser {
+
+  @FlaggedApi("android.service.chooser.support_nfc_resolver") public class CustomChoosers {
+    method @FlaggedApi("android.service.chooser.support_nfc_resolver") @NonNull public static android.content.Intent createNfcResolverIntent(@NonNull android.content.Intent, @Nullable CharSequence, @NonNull java.util.List<android.content.pm.ResolveInfo>);
+  }
+
+}
+
 package android.service.cloudsearch {
 
   public abstract class CloudSearchService extends android.app.Service {
@@ -12195,6 +12304,7 @@ package android.service.notification {
     method public boolean hasExpanded();
     method public boolean hasInteracted();
     method public boolean hasSeen();
+    method @FlaggedApi("android.app.lifetime_extension_refactor") public boolean hasSmartReplied();
     method public boolean hasSnoozed();
     method public boolean hasViewedSettings();
     method public void setDirectReplied();
@@ -12202,6 +12312,7 @@ package android.service.notification {
     method public void setDismissalSurface(int);
     method public void setExpanded();
     method public void setSeen();
+    method @FlaggedApi("android.app.lifetime_extension_refactor") public void setSmartReplied();
     method public void setSnoozed();
     method public void setViewedSettings();
     method public void writeToParcel(android.os.Parcel, int);
@@ -12789,6 +12900,7 @@ package android.service.voice {
     field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final int ERROR_CODE_ON_TRAINING_DATA_EGRESS_LIMIT_EXCEEDED = 8; // 0x8
     field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final int ERROR_CODE_ON_TRAINING_DATA_SECURITY_EXCEPTION = 9; // 0x9
     field public static final int ERROR_CODE_REMOTE_EXCEPTION = 7; // 0x7
+    field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final int ERROR_CODE_SHUTDOWN_HDS_ON_VOICE_ACTIVATION_OP_DISABLED = 10; // 0xa
     field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
   }
 
@@ -12821,6 +12933,7 @@ package android.service.voice {
     field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
     field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
     field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
+    field @FlaggedApi("android.service.voice.flags.allow_hotword_bump_egress") public static final int CONFIDENCE_LEVEL_VERY_HIGH = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordRejectedResult> CREATOR;
   }
 
@@ -12940,8 +13053,9 @@ package android.service.voice {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(@NonNull String, @NonNull java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.service.voice.HotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.HotwordDetector.Callback);
-    method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.VisualQueryDetector createVisualQueryDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.VisualQueryDetector.Callback);
+    method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public void setShouldReceiveSandboxedTrainingData(boolean);
   }
 
 }
@@ -13402,6 +13516,7 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccount> getAllPhoneAccounts();
     method public int getAllPhoneAccountsCount();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts(boolean);
+    method @FlaggedApi("com.android.internal.telephony.flags.work_profile_api_split") @NonNull @RequiresPermission(allOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.INTERACT_ACROSS_PROFILES}) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccountsAcrossProfiles(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}, conditional=true) public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCurrentTtyMode();
@@ -13591,6 +13706,7 @@ package android.telephony {
     method @NonNull public java.util.List<java.lang.Boolean> areCarrierIdentifiersAllowed(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
     method public int describeContents();
     method @NonNull public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers();
+    method @FlaggedApi("com.android.internal.telephony.flags.carrier_restriction_status") public int getCarrierRestrictionStatus();
     method public int getDefaultCarrierRestriction();
     method @NonNull public java.util.List<android.service.carrier.CarrierIdentifier> getExcludedCarriers();
     method public int getMultiSimPolicy();
@@ -14485,6 +14601,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAnyRadioPoweredOn();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApnMetered(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
+    method @FlaggedApi("com.android.internal.telephony.flags.enable_identifier_disclosure_transparency") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCellularIdentifierDisclosureNotificationsEnabled();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
@@ -14532,6 +14649,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataActivationState(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataRoamingEnabled(boolean);
+    method @FlaggedApi("com.android.internal.telephony.flags.enable_identifier_disclosure_transparency") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setEnableCellularIdentifierDisclosureNotifications(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult setIccLockEnabled(boolean, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMobileDataPolicyEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
@@ -15608,6 +15726,7 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAvailable(int, int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCapable(int, int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void isSupported(int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>) throws android.telephony.ims.ImsException;
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") public void registerImsEmergencyRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.RegistrationCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAdvancedCallingSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCrossSimCallingEnabled(boolean) throws android.telephony.ims.ImsException;
@@ -15618,6 +15737,7 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoWiFiRoamingSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoWiFiSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVtSettingEnabled(boolean);
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") public void unregisterImsEmergencyRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.ImsMmTelManager.RegistrationCallback);
   }
 
@@ -15650,6 +15770,8 @@ package android.telephony.ims {
     ctor public ImsRegistrationAttributes.Builder(int);
     method @NonNull public android.telephony.ims.ImsRegistrationAttributes build();
     method @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setFeatureTags(@NonNull java.util.Set<java.lang.String>);
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setFlagRegistrationTypeEmergency();
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setFlagVirtualRegistrationForEmergencyCall();
     method @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setSipDetails(@NonNull android.telephony.ims.SipDetails);
   }
 
@@ -16142,8 +16264,10 @@ package android.telephony.ims {
 
   public interface RegistrationManager {
     field public static final int SUGGESTED_ACTION_NONE = 0; // 0x0
+    field @FlaggedApi("com.android.internal.telephony.flags.add_rat_related_suggested_action_to_ims_registration") public static final int SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCK = 4; // 0x4
     field public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK = 1; // 0x1
     field public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT = 2; // 0x2
+    field @FlaggedApi("com.android.internal.telephony.flags.add_rat_related_suggested_action_to_ims_registration") public static final int SUGGESTED_ACTION_TRIGGER_RAT_BLOCK = 3; // 0x3
   }
 
   public static class RegistrationManager.RegistrationCallback {
@@ -16574,6 +16698,7 @@ package android.telephony.ims.stub {
     ctor public ImsRegistrationImplBase(@NonNull java.util.concurrent.Executor);
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
     method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, int);
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, @NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, @NonNull android.telephony.ims.SipDetails);
     method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, int, @NonNull android.telephony.ims.SipDetails);
     method public final void onRegistered(int);
@@ -16582,6 +16707,7 @@ package android.telephony.ims.stub {
     method public final void onRegistering(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onSubscriberAssociatedUriChanged(android.net.Uri[]);
     method public final void onTechnologyChangeFailed(int, android.telephony.ims.ImsReasonInfo);
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") public final void onTechnologyChangeFailed(@Nullable android.telephony.ims.ImsReasonInfo, @NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public void triggerFullNetworkRegistration(@IntRange(from=100, to=699) int, @Nullable String);
     method public void triggerSipDelegateDeregistration();
     method public void updateSipDelegateRegistration();
@@ -16873,7 +16999,7 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") @NonNull @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public java.util.Set<java.lang.Integer> getSatelliteAttachRestrictionReasonsForCarrier(int);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void pollPendingSatelliteDatagrams(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void provisionSatelliteService(@NonNull String, @NonNull byte[], @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public int registerForNtnSignalStrengthChanged(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.NtnSignalStrengthCallback);
+    method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void registerForNtnSignalStrengthChanged(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.NtnSignalStrengthCallback) throws android.telephony.satellite.SatelliteManager.SatelliteException;
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public int registerForSatelliteCapabilitiesChanged(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.SatelliteCapabilitiesCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public int registerForSatelliteDatagram(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.SatelliteDatagramCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public int registerForSatelliteModemStateChanged(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.SatelliteStateCallback);
@@ -16885,7 +17011,7 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void requestIsSatelliteEnabled(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void requestIsSatelliteProvisioned(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public void requestIsSatelliteSupported(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>);
-    method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @NonNull @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void requestNtnSignalStrength(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.satellite.NtnSignalStrength,android.telephony.satellite.SatelliteManager.SatelliteException>);
+    method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void requestNtnSignalStrength(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.satellite.NtnSignalStrength,android.telephony.satellite.SatelliteManager.SatelliteException>);
     method @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void requestSatelliteAttachEnabledForCarrier(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void requestSatelliteCapabilities(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.telephony.satellite.SatelliteCapabilities,android.telephony.satellite.SatelliteManager.SatelliteException>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void requestSatelliteEnabled(boolean, boolean, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
@@ -17068,6 +17194,9 @@ package android.view {
     method @NonNull public default java.util.List<android.content.ComponentName> notifyScreenshotListeners(int);
     method public default void registerTaskFpsCallback(@IntRange(from=0) int, @NonNull java.util.concurrent.Executor, @NonNull android.window.TaskFpsCallback);
     method public default void unregisterTaskFpsCallback(@NonNull android.window.TaskFpsCallback);
+    field public static final int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1; // 0x1
+    field public static final int DISPLAY_IME_POLICY_HIDE = 2; // 0x2
+    field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0
   }
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
@@ -17187,6 +17316,10 @@ package android.view.displayhash {
 }
 
 package android.view.inputmethod {
+
+  public final class InputMethodInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public boolean isVirtualDeviceOnly();
+  }
 
   public final class InputMethodManager {
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.view.inputmethod.InputMethodInfo getCurrentInputMethodInfoAsUser(@NonNull android.os.UserHandle);

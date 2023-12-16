@@ -40,6 +40,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Surface;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,6 +78,11 @@ public class VirtualCameraControllerTest {
         when(mVirtualCameraServiceMock.registerCamera(any(), any())).thenReturn(true);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        mVirtualCameraController.close();
+    }
+
     @Test
     public void registerCamera_registersCamera() throws Exception {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
@@ -95,6 +101,8 @@ public class VirtualCameraControllerTest {
     public void unregisterCamera_unregistersCamera() throws Exception {
         VirtualCameraConfig config = createVirtualCameraConfig(
                 CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_1);
+        mVirtualCameraController.registerCamera(config);
+
         mVirtualCameraController.unregisterCamera(config);
 
         verify(mVirtualCameraServiceMock).unregisterCamera(any());
@@ -107,9 +115,10 @@ public class VirtualCameraControllerTest {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
                 CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_2));
 
+        mVirtualCameraController.close();
+
         ArgumentCaptor<VirtualCameraConfiguration> configurationCaptor =
                 ArgumentCaptor.forClass(VirtualCameraConfiguration.class);
-        mVirtualCameraController.close();
         verify(mVirtualCameraServiceMock, times(2)).registerCamera(any(),
                 configurationCaptor.capture());
         List<VirtualCameraConfiguration> virtualCameraConfigurations =

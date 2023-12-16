@@ -5252,6 +5252,8 @@
     <!-- Zen mode - name of default automatic calendar time-based rule that is triggered every night (when sleeping). [CHAR LIMIT=40] -->
     <string name="zen_mode_default_every_night_name">Sleeping</string>
 
+    <!-- Zen mode - Trigger description of the rule, indicating which app owns it. [CHAR_LIMIT=100] -->
+    <string name="zen_mode_implicit_trigger_description">Managed by <xliff:g id="app_name">%1$s</xliff:g></string>
     <!-- Zen mode - Condition summary when a rule is activated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
     <string name="zen_mode_implicit_activated">On</string>
     <!-- Zen mode - Condition summary when a rule is deactivated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
@@ -6312,11 +6314,6 @@ ul.</string>
     <!-- Content of connected display unavailable due to thermals notification. [CHAR LIMIT=NONE] -->
     <string name="connected_display_thermally_unavailable_notification_content">Your device is too warm and can\'t mirror to the display until it cools down</string>
 
-    <!-- Title of cable don't support displays notifications. [CHAR LIMIT=NONE] -->
-    <string name="connected_display_cable_dont_support_displays_notification_title">Cable may not support displays</string>
-    <!-- Content of cable don't support displays notification. [CHAR LIMIT=NONE] -->
-    <string name="connected_display_cable_dont_support_displays_notification_content">Your USB-C cable may not connect to displays properly</string>
-
     <!-- Name of concurrent display notifications. [CHAR LIMIT=NONE] -->
     <string name="concurrent_display_notification_name">Dual screen</string>
     <!-- Title of concurrent display active notification. [CHAR LIMIT=NONE] -->
@@ -6350,4 +6347,26 @@ ul.</string>
     <string name="keyboard_layout_notification_multiple_selected_title">Physical keyboards configured</string>
     <!-- Notification message when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_BODY] -->
     <string name="keyboard_layout_notification_multiple_selected_message">Tap to view keyboards</string>
+
+    <!-- Private profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_private">Private</string>
+    <!-- Clone profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_clone">Clone</string>
+    <!-- Work profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work">Work</string>
+    <!-- 2nd Work profile label on a screen in case a device has more than one work profiles. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work_2">Work 2</string>
+    <!-- 3rd Work profile label on a screen in case a device has more than two work profiles. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work_3">Work 3</string>
+    <!-- Test profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20]  -->
+    <string name="profile_label_test">Test</string>
+    <!-- Communal profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_communal">Communal</string>
+
+    <!-- Notification message used when a notification's normal message contains sensitive information. -->
+    <!-- TODO b/301960090: replace with redacted message string and action title, when/if UX provides one -->
+    <!-- DO NOT TRANSLATE -->
+    <string name="redacted_notification_message"></string>
+    <!-- Notification action title used instead of a notification's normal title sensitive [CHAR_LIMIT=NOTIF_BODY] -->
+    <string name="redacted_notification_action_title"></string>
 </resources>

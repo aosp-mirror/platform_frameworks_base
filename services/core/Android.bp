@@ -125,6 +125,9 @@ java_library_static {
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/wm/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
+
+        // Java/AIDL sources to be moved out to CrashRecovery module
+        ":services-crashrecovery-sources",
     ],
 
     libs: [
@@ -133,7 +136,6 @@ java_library_static {
         "android.hardware.light-V2.0-java",
         "android.hardware.gnss-V2-java",
         "android.hardware.vibrator-V2-java",
-        "android.nfc.flags-aconfig-java",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
         "service-art.stubs.system_server",
@@ -152,6 +154,7 @@ java_library_static {
 
     static_libs: [
         "android.frameworks.location.altitude-V1-java", // AIDL
+        "android.frameworks.vibrator-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.authsecret-V1-java",
         "android.hardware.boot-V1.0-java", // HIDL
@@ -163,7 +166,7 @@ java_library_static {
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
-        "android.hardware.health-V2-java", // AIDL
+        "android.hardware.health-V3-java", // AIDL
         "android.hardware.health-translate-java",
         "android.hardware.light-V1-java",
         "android.hardware.security.rkp-V3-java",
@@ -191,14 +194,15 @@ java_library_static {
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
-        "ImmutabilityAnnotation",
         "securebox",
         "apache-commons-math",
         "backstage_power_flags_lib",
         "notification_flags_lib",
         "biometrics_flags_lib",
         "am_flags_lib",
+        "com_android_systemui_shared_flags_lib",
         "com_android_wm_shell_flags_lib",
+        "com.android.server.utils_aconfig-java",
         "service-jobscheduler-deviceidle.flags-aconfig-java",
     ],
     javac_shard_size: 50,

@@ -528,7 +528,7 @@
     <string name="back" msgid="5554327870352703710">"ਪਿੱਛੇ ਜਾਓ"</string>
     <string name="save" msgid="3745809743277153149">"ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="okay" msgid="949938843324579502">"ਠੀਕ ਹੈ"</string>
-    <string name="done" msgid="381184316122520313">"ਹੋ ਗਿਆ"</string>
+    <string name="done" msgid="381184316122520313">"ਸਮਝ ਲਿਆ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ ਸੈੱਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤੇ ਗਏ ਡੀਵਾਈਸ"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤੇ ਗਏ ਡੀਵਾਈਸ"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"ਟੀਵੀ ਦਾ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਆਊਟਪੁੱਟ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI ਆਊਟਪੁੱਟ"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"ਅੰਦਰੂਨੀ ਸਪੀਕਰ"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ਟੀਵੀ ਦਾ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਆਊਟਪੁੱਟ"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ਆਊਟਪੁੱਟ"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ਅੰਦਰੂਨੀ ਸਪੀਕਰ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ਕਨੈਕਟ ਕਰਨ ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ। ਡੀਵਾਈਸ ਨੂੰ ਬੰਦ ਕਰਕੇ ਵਾਪਸ ਚਾਲੂ ਕਰੋ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ਤਾਰ ਵਾਲਾ ਆਡੀਓ ਡੀਵਾਈਸ"</string>
     <string name="help_label" msgid="3528360748637781274">"ਮਦਦ ਅਤੇ ਵਿਚਾਰ"</string>

@@ -48,8 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
-import com.android.credentialmanager.common.BaseEntry
-import com.android.credentialmanager.common.CredentialType
+import com.android.credentialmanager.model.EntryInfo
+import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
 import com.android.credentialmanager.common.ui.ActionButton
@@ -68,6 +68,8 @@ import com.android.credentialmanager.common.ui.SheetContainerCard
 import com.android.credentialmanager.common.ui.PasskeyBenefitRow
 import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.logging.CreateCredentialEvent
+import com.android.credentialmanager.model.creation.CreateOptionInfo
+import com.android.credentialmanager.model.creation.RemoteInfo
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
@@ -259,15 +261,15 @@ fun PasskeyIntroCard(
 
 @Composable
 fun MoreOptionsSelectionCard(
-        requestDisplayInfo: RequestDisplayInfo,
-        enabledProviderList: List<EnabledProviderInfo>,
-        disabledProviderList: List<DisabledProviderInfo>?,
-        sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-        onBackCreationSelectionButtonSelected: () -> Unit,
-        onOptionSelected: (ActiveEntry) -> Unit,
-        onDisabledProvidersSelected: () -> Unit,
-        onRemoteEntrySelected: (BaseEntry) -> Unit,
-        onLog: @Composable (UiEventEnum) -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    enabledProviderList: List<EnabledProviderInfo>,
+    disabledProviderList: List<DisabledProviderInfo>?,
+    sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
+    onBackCreationSelectionButtonSelected: () -> Unit,
+    onOptionSelected: (ActiveEntry) -> Unit,
+    onDisabledProvidersSelected: () -> Unit,
+    onRemoteEntrySelected: (EntryInfo) -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     SheetContainerCard(topAppBar = {
         MoreOptionTopAppBar(
@@ -378,14 +380,14 @@ fun NonDefaultUsageConfirmationCard(
 
 @Composable
 fun CreationSelectionCard(
-        requestDisplayInfo: RequestDisplayInfo,
-        enabledProviderList: List<EnabledProviderInfo>,
-        providerInfo: EnabledProviderInfo,
-        createOptionInfo: CreateOptionInfo,
-        onOptionSelected: (BaseEntry) -> Unit,
-        onConfirm: () -> Unit,
-        onMoreOptionsSelected: () -> Unit,
-        onLog: @Composable (UiEventEnum) -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    enabledProviderList: List<EnabledProviderInfo>,
+    providerInfo: EnabledProviderInfo,
+    createOptionInfo: CreateOptionInfo,
+    onOptionSelected: (EntryInfo) -> Unit,
+    onConfirm: () -> Unit,
+    onMoreOptionsSelected: () -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     SheetContainerCard {
         item {
@@ -474,11 +476,11 @@ fun CreationSelectionCard(
 
 @Composable
 fun ExternalOnlySelectionCard(
-        requestDisplayInfo: RequestDisplayInfo,
-        activeRemoteEntry: BaseEntry,
-        onOptionSelected: (BaseEntry) -> Unit,
-        onConfirm: () -> Unit,
-        onLog: @Composable (UiEventEnum) -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    activeRemoteEntry: EntryInfo,
+    onOptionSelected: (EntryInfo) -> Unit,
+    onConfirm: () -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     SheetContainerCard {
         item { HeadlineIcon(imageVector = Icons.Outlined.QrCodeScanner) }
@@ -575,17 +577,14 @@ fun MoreAboutPasskeysIntroCard(
 @Composable
 fun PrimaryCreateOptionRow(
     requestDisplayInfo: RequestDisplayInfo,
-    entryInfo: BaseEntry,
-    onOptionSelected: (BaseEntry) -> Unit
+    entryInfo: EntryInfo,
+    onOptionSelected: (EntryInfo) -> Unit
 ) {
     Entry(
         onClick = { onOptionSelected(entryInfo) },
-        iconImageBitmap =
-        if (entryInfo is CreateOptionInfo && entryInfo.profileIcon != null) {
-            entryInfo.profileIcon.toBitmap().asImageBitmap()
-        } else {
-            requestDisplayInfo.typeIcon.toBitmap().asImageBitmap()
-        },
+        iconImageBitmap = ((entryInfo as? CreateOptionInfo)?.profileIcon
+            ?: requestDisplayInfo.typeIcon)
+            .toBitmap().asImageBitmap(),
         shouldApplyIconImageBitmapTint = !(entryInfo is CreateOptionInfo &&
             entryInfo.profileIcon != null),
         entryHeadlineText = requestDisplayInfo.title,
@@ -627,32 +626,33 @@ fun MoreOptionsInfoRow(
         entryThirdLineText =
         if (requestDisplayInfo.type == CredentialType.PASSKEY ||
             requestDisplayInfo.type == CredentialType.PASSWORD) {
-            if (createOptionInfo.passwordCount != null &&
-                createOptionInfo.passkeyCount != null
-            ) {
+            val passwordCount = createOptionInfo.passwordCount
+            val passkeyCount = createOptionInfo.passkeyCount
+            if (passwordCount != null && passkeyCount != null) {
                 stringResource(
                     R.string.more_options_usage_passwords_passkeys,
-                    createOptionInfo.passwordCount,
-                    createOptionInfo.passkeyCount
+                    passwordCount,
+                    passkeyCount
                 )
-            } else if (createOptionInfo.passwordCount != null) {
+            } else if (passwordCount != null) {
                 stringResource(
                     R.string.more_options_usage_passwords,
-                    createOptionInfo.passwordCount
+                    passwordCount
                 )
-            } else if (createOptionInfo.passkeyCount != null) {
+            } else if (passkeyCount != null) {
                 stringResource(
                     R.string.more_options_usage_passkeys,
-                    createOptionInfo.passkeyCount
+                    passkeyCount
                 )
             } else {
                 null
             }
         } else {
-            if (createOptionInfo.totalCredentialCount != null) {
+            val totalCredentialCount = createOptionInfo.totalCredentialCount
+            if (totalCredentialCount != null) {
                 stringResource(
                     R.string.more_options_usage_credentials,
-                    createOptionInfo.totalCredentialCount
+                    totalCredentialCount
                 )
             } else {
                 null

@@ -51,6 +51,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
@@ -1253,7 +1254,8 @@ public class NotificationManager {
      * <p>
      * If this method returns true, calls to
      * {@link #updateAutomaticZenRule(String, AutomaticZenRule)} may fail and apps should defer
-     * rule management to system settings/uis.
+     * rule management to system settings/uis via
+     * {@link Settings#ACTION_AUTOMATIC_ZEN_RULE_SETTINGS}.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public boolean areAutomaticZenRulesUserManaged() {
@@ -2056,6 +2058,14 @@ public class NotificationManager {
         public static final int STATE_CHANNELS_BYPASSING_DND = 1 << 0;
 
         /**
+         * Whether the policy indicates that even priority channels are NOT permitted to bypass DND.
+         * Note that this state explicitly marks the "disallow" state because the default behavior
+         * is to allow priority channels to break through.
+         * @hide
+         */
+        public static final int STATE_PRIORITY_CHANNELS_BLOCKED = 1 << 1;
+
+        /**
          * @hide
          */
         public static final int STATE_UNSET = -1;
@@ -2270,20 +2280,34 @@ public class NotificationManager {
 
         @Override
         public String toString() {
-            return "NotificationManager.Policy["
-                    + "priorityCategories=" + priorityCategoriesToString(priorityCategories)
-                    + ",priorityCallSenders=" + prioritySendersToString(priorityCallSenders)
-                    + ",priorityMessageSenders=" + prioritySendersToString(priorityMessageSenders)
-                    + ",priorityConvSenders="
-                    + conversationSendersToString(priorityConversationSenders)
-                    + ",suppressedVisualEffects="
-                    + suppressedEffectsToString(suppressedVisualEffects)
-                    + ",areChannelsBypassingDnd=" + (state == STATE_UNSET
-                        ? "unset"
-                        : ((state & STATE_CHANNELS_BYPASSING_DND) != 0)
-                                ? "true"
-                                : "false")
-                    + "]";
+            StringBuilder sb = new StringBuilder().append("NotificationManager.Policy[")
+                    .append("priorityCategories=")
+                    .append(priorityCategoriesToString(priorityCategories))
+                    .append(",priorityCallSenders=")
+                    .append(prioritySendersToString(priorityCallSenders))
+                    .append(",priorityMessageSenders=")
+                    .append(prioritySendersToString(priorityMessageSenders))
+                    .append(",priorityConvSenders=")
+                    .append(conversationSendersToString(priorityConversationSenders))
+                    .append(",suppressedVisualEffects=")
+                    .append(suppressedEffectsToString(suppressedVisualEffects));
+            if (Flags.modesApi()) {
+                sb.append(",hasPriorityChannels=");
+            } else {
+                sb.append(",areChannelsBypassingDnd=");
+            }
+            sb.append((state == STATE_UNSET
+                    ? "unset"
+                    : ((state & STATE_CHANNELS_BYPASSING_DND) != 0)
+                            ? "true"
+                            : "false"));
+            if (Flags.modesApi()) {
+                sb.append(",allowPriorityChannels=")
+                        .append((state == STATE_UNSET
+                                ? "unset"
+                                : (allowPriorityChannels() ? "true" : "false")));
+            }
+            return sb.append("]").toString();
         }
 
         /** @hide */
@@ -2552,6 +2576,35 @@ public class NotificationManager {
         /** @hide **/
         public boolean showInNotificationList() {
             return (suppressedVisualEffects & SUPPRESSED_EFFECT_NOTIFICATION_LIST) == 0;
+        }
+
+        /** @hide **/
+        @FlaggedApi(Flags.FLAG_MODES_API)
+        @TestApi // so CTS tests can read this state without having to use implementation detail
+        public boolean allowPriorityChannels() {
+            if (state == STATE_UNSET) {
+                return true; // default
+            }
+            return (state & STATE_PRIORITY_CHANNELS_BLOCKED) == 0;
+        }
+
+        /** @hide */
+        @FlaggedApi(Flags.FLAG_MODES_API)
+        public boolean hasPriorityChannels() {
+            return (state & STATE_CHANNELS_BYPASSING_DND) != 0;
+        }
+
+        /** @hide **/
+        @FlaggedApi(Flags.FLAG_MODES_API)
+        public static int policyState(boolean hasPriorityChannels, boolean allowPriorityChannels) {
+            int state = 0;
+            if (hasPriorityChannels) {
+                state |= STATE_CHANNELS_BYPASSING_DND;
+            }
+            if (!allowPriorityChannels) {
+                state |= STATE_PRIORITY_CHANNELS_BLOCKED;
+            }
+            return state;
         }
 
         /**

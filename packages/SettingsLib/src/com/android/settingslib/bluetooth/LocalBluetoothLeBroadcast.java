@@ -28,10 +28,11 @@ import android.bluetooth.BluetoothLeBroadcast;
 import android.bluetooth.BluetoothLeBroadcastAssistant;
 import android.bluetooth.BluetoothLeBroadcastMetadata;
 import android.bluetooth.BluetoothLeBroadcastReceiveState;
+import android.bluetooth.BluetoothLeBroadcastSettings;
 import android.bluetooth.BluetoothLeBroadcastSubgroup;
+import android.bluetooth.BluetoothLeBroadcastSubgroupSettings;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfile.ServiceListener;
-import android.bluetooth.BluetoothStatusCodes;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -42,26 +43,30 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.R;
+
+import com.google.common.collect.ImmutableList;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * LocalBluetoothLeBroadcast provides an interface between the Settings app
- * and the functionality of the local {@link BluetoothLeBroadcast}.
- * Use the {@link BluetoothLeBroadcast.Callback} to get the result callback.
+ * LocalBluetoothLeBroadcast provides an interface between the Settings app and the functionality of
+ * the local {@link BluetoothLeBroadcast}. Use the {@link BluetoothLeBroadcast.Callback} to get the
+ * result callback.
  */
 public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     private static final String TAG = "LocalBluetoothLeBroadcast";
@@ -74,11 +79,12 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     // Order of this profile in device profiles list
     private static final int ORDINAL = 1;
     private static final int UNKNOWN_VALUE_PLACEHOLDER = -1;
-    private static final Uri[] SETTINGS_URIS = new Uri[]{
-            Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO),
-            Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE),
-            Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME),
-    };
+    private static final Uri[] SETTINGS_URIS =
+            new Uri[] {
+                Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO),
+                Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE),
+                Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME),
+            };
 
     private BluetoothLeBroadcast mServiceBroadcast;
     private BluetoothLeBroadcastAssistant mServiceBroadcastAssistant;
@@ -95,62 +101,82 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     private Executor mExecutor;
     private ContentResolver mContentResolver;
     private ContentObserver mSettingsObserver;
+    // Cached broadcast callbacks being register before service is connected.
+    private Map<BluetoothLeBroadcast.Callback, Executor> mCachedBroadcastCallbackExecutorMap =
+            new ConcurrentHashMap<>();
 
-    private final ServiceListener mServiceListener = new ServiceListener() {
-        @Override
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (DEBUG) {
-                Log.d(TAG, "Bluetooth service connected: " + profile);
-            }
-            if ((profile == BluetoothProfile.LE_AUDIO_BROADCAST) && !mIsBroadcastProfileReady) {
-                mServiceBroadcast = (BluetoothLeBroadcast) proxy;
-                mIsBroadcastProfileReady = true;
-                registerServiceCallBack(mExecutor, mBroadcastCallback);
-                List<BluetoothLeBroadcastMetadata> metadata = getAllBroadcastMetadata();
-                if (!metadata.isEmpty()) {
-                    updateBroadcastInfoFromBroadcastMetadata(metadata.get(0));
+    private final ServiceListener mServiceListener =
+            new ServiceListener() {
+                @Override
+                public void onServiceConnected(int profile, BluetoothProfile proxy) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Bluetooth service connected: " + profile);
+                    }
+                    if ((profile == BluetoothProfile.LE_AUDIO_BROADCAST)
+                            && !mIsBroadcastProfileReady) {
+                        mServiceBroadcast = (BluetoothLeBroadcast) proxy;
+                        mIsBroadcastProfileReady = true;
+                        registerServiceCallBack(mExecutor, mBroadcastCallback);
+                        List<BluetoothLeBroadcastMetadata> metadata = getAllBroadcastMetadata();
+                        if (!metadata.isEmpty()) {
+                            updateBroadcastInfoFromBroadcastMetadata(metadata.get(0));
+                        }
+                        registerContentObserver();
+                        if (DEBUG) {
+                            Log.d(
+                                    TAG,
+                                    "onServiceConnected: register "
+                                            + "mCachedBroadcastCallbackExecutorMap = "
+                                            + mCachedBroadcastCallbackExecutorMap);
+                        }
+                        mCachedBroadcastCallbackExecutorMap.forEach(
+                                (callback, executor) ->
+                                        registerServiceCallBack(executor, callback));
+                    } else if ((profile == BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT)
+                            && !mIsBroadcastAssistantProfileReady) {
+                        mIsBroadcastAssistantProfileReady = true;
+                        mServiceBroadcastAssistant = (BluetoothLeBroadcastAssistant) proxy;
+                        registerBroadcastAssistantCallback(mExecutor, mBroadcastAssistantCallback);
+                    }
                 }
-                registerContentObserver();
-            } else if ((profile == BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT)
-                    && !mIsBroadcastAssistantProfileReady) {
-                mIsBroadcastAssistantProfileReady = true;
-                mServiceBroadcastAssistant = (BluetoothLeBroadcastAssistant) proxy;
-                registerBroadcastAssistantCallback(mExecutor, mBroadcastAssistantCallback);
-            }
-        }
 
-        @Override
-        public void onServiceDisconnected(int profile) {
-            if (DEBUG) {
-                Log.d(TAG, "Bluetooth service disconnected");
-            }
-            if ((profile == BluetoothProfile.LE_AUDIO_BROADCAST) && mIsBroadcastProfileReady) {
-                mIsBroadcastProfileReady = false;
-                unregisterServiceCallBack(mBroadcastCallback);
-            }
-            if ((profile == BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT)
-                    && mIsBroadcastAssistantProfileReady) {
-                mIsBroadcastAssistantProfileReady = false;
-                unregisterBroadcastAssistantCallback(mBroadcastAssistantCallback);
-            }
+                @Override
+                public void onServiceDisconnected(int profile) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Bluetooth service disconnected: " + profile);
+                    }
+                    if ((profile == BluetoothProfile.LE_AUDIO_BROADCAST)
+                            && mIsBroadcastProfileReady) {
+                        mIsBroadcastProfileReady = false;
+                        unregisterServiceCallBack(mBroadcastCallback);
+                        mCachedBroadcastCallbackExecutorMap.clear();
+                    }
+                    if ((profile == BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT)
+                            && mIsBroadcastAssistantProfileReady) {
+                        mIsBroadcastAssistantProfileReady = false;
+                        unregisterBroadcastAssistantCallback(mBroadcastAssistantCallback);
+                    }
 
-            if (!mIsBroadcastAssistantProfileReady && !mIsBroadcastProfileReady) {
-                unregisterContentObserver();
-            }
-        }
-    };
+                    if (!mIsBroadcastAssistantProfileReady && !mIsBroadcastProfileReady) {
+                        unregisterContentObserver();
+                    }
+                }
+            };
 
     private final BluetoothLeBroadcast.Callback mBroadcastCallback =
             new BluetoothLeBroadcast.Callback() {
                 @Override
                 public void onBroadcastStarted(int reason, int broadcastId) {
                     if (DEBUG) {
-                        Log.d(TAG,
-                                "onBroadcastStarted(), reason = " + reason + ", broadcastId = "
+                        Log.d(
+                                TAG,
+                                "onBroadcastStarted(), reason = "
+                                        + reason
+                                        + ", broadcastId = "
                                         + broadcastId);
                     }
                     setLatestBroadcastId(broadcastId);
-                    setAppSourceName(mNewAppSourceName, /*updateContentResolver=*/ true);
+                    setAppSourceName(mNewAppSourceName, /* updateContentResolver= */ true);
                 }
 
                 @Override
@@ -161,8 +187,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 }
 
                 @Override
-                public void onBroadcastMetadataChanged(int broadcastId,
-                        @NonNull BluetoothLeBroadcastMetadata metadata) {
+                public void onBroadcastMetadataChanged(
+                        int broadcastId, @NonNull BluetoothLeBroadcastMetadata metadata) {
                     if (DEBUG) {
                         Log.d(TAG, "onBroadcastMetadataChanged(), broadcastId = " + broadcastId);
                     }
@@ -172,8 +198,11 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 @Override
                 public void onBroadcastStopped(int reason, int broadcastId) {
                     if (DEBUG) {
-                        Log.d(TAG,
-                                "onBroadcastStopped(), reason = " + reason + ", broadcastId = "
+                        Log.d(
+                                TAG,
+                                "onBroadcastStopped(), reason = "
+                                        + reason
+                                        + ", broadcastId = "
                                         + broadcastId);
                     }
 
@@ -191,37 +220,42 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 @Override
                 public void onBroadcastUpdated(int reason, int broadcastId) {
                     if (DEBUG) {
-                        Log.d(TAG,
-                                "onBroadcastUpdated(), reason = " + reason + ", broadcastId = "
+                        Log.d(
+                                TAG,
+                                "onBroadcastUpdated(), reason = "
+                                        + reason
+                                        + ", broadcastId = "
                                         + broadcastId);
                     }
                     setLatestBroadcastId(broadcastId);
-                    setAppSourceName(mNewAppSourceName, /*updateContentResolver=*/ true);
+                    setAppSourceName(mNewAppSourceName, /* updateContentResolver= */ true);
                 }
 
                 @Override
                 public void onBroadcastUpdateFailed(int reason, int broadcastId) {
                     if (DEBUG) {
-                        Log.d(TAG,
-                                "onBroadcastUpdateFailed(), reason = " + reason + ", broadcastId = "
+                        Log.d(
+                                TAG,
+                                "onBroadcastUpdateFailed(), reason = "
+                                        + reason
+                                        + ", broadcastId = "
                                         + broadcastId);
                     }
                 }
 
                 @Override
-                public void onPlaybackStarted(int reason, int broadcastId) {
-                }
+                public void onPlaybackStarted(int reason, int broadcastId) {}
 
                 @Override
-                public void onPlaybackStopped(int reason, int broadcastId) {
-                }
+                public void onPlaybackStopped(int reason, int broadcastId) {}
             };
 
     private final BluetoothLeBroadcastAssistant.Callback mBroadcastAssistantCallback =
             new BluetoothLeBroadcastAssistant.Callback() {
                 @Override
-                public void onSourceAdded(@NonNull BluetoothDevice sink, int sourceId,
-                        int reason) {}
+                public void onSourceAdded(
+                        @NonNull BluetoothDevice sink, int sourceId, int reason) {}
+
                 @Override
                 public void onSearchStarted(int reason) {}
 
@@ -238,38 +272,65 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 public void onSourceFound(@NonNull BluetoothLeBroadcastMetadata source) {}
 
                 @Override
-                public void onSourceAddFailed(@NonNull BluetoothDevice sink,
-                        @NonNull BluetoothLeBroadcastMetadata source, int reason) {}
-
-                @Override
-                public void onSourceModified(@NonNull BluetoothDevice sink, int sourceId,
+                public void onSourceAddFailed(
+                        @NonNull BluetoothDevice sink,
+                        @NonNull BluetoothLeBroadcastMetadata source,
                         int reason) {}
 
                 @Override
-                public void onSourceModifyFailed(@NonNull BluetoothDevice sink, int sourceId,
-                        int reason) {}
+                public void onSourceModified(
+                        @NonNull BluetoothDevice sink, int sourceId, int reason) {}
 
                 @Override
-                public void onSourceRemoved(@NonNull BluetoothDevice sink, int sourceId,
-                        int reason) {
+                public void onSourceModifyFailed(
+                        @NonNull BluetoothDevice sink, int sourceId, int reason) {}
+
+                @Override
+                public void onSourceRemoved(
+                        @NonNull BluetoothDevice sink, int sourceId, int reason) {
                     if (DEBUG) {
-                        Log.d(TAG, "onSourceRemoved(), sink = " + sink + ", reason = "
-                                + reason + ", sourceId = " + sourceId);
+                        Log.d(
+                                TAG,
+                                "onSourceRemoved(), sink = "
+                                        + sink
+                                        + ", reason = "
+                                        + reason
+                                        + ", sourceId = "
+                                        + sourceId);
                     }
                 }
 
                 @Override
-                public void onSourceRemoveFailed(@NonNull BluetoothDevice sink, int sourceId,
-                        int reason) {
+                public void onSourceRemoveFailed(
+                        @NonNull BluetoothDevice sink, int sourceId, int reason) {
                     if (DEBUG) {
-                        Log.d(TAG, "onSourceRemoveFailed(), sink = " + sink + ", reason = "
-                                + reason + ", sourceId = " + sourceId);
+                        Log.d(
+                                TAG,
+                                "onSourceRemoveFailed(), sink = "
+                                        + sink
+                                        + ", reason = "
+                                        + reason
+                                        + ", sourceId = "
+                                        + sourceId);
                     }
                 }
 
                 @Override
-                public void onReceiveStateChanged(@NonNull BluetoothDevice sink, int sourceId,
-                        @NonNull BluetoothLeBroadcastReceiveState state) {}
+                public void onReceiveStateChanged(
+                        @NonNull BluetoothDevice sink,
+                        int sourceId,
+                        @NonNull BluetoothLeBroadcastReceiveState state) {
+                    if (DEBUG) {
+                        Log.d(
+                                TAG,
+                                "onReceiveStateChanged(), sink = "
+                                        + sink
+                                        + ", sourceId = "
+                                        + sourceId
+                                        + ", state = "
+                                        + state);
+                    }
+                }
             };
 
     private class BroadcastSettingsObserver extends ContentObserver {
@@ -296,8 +357,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         BluetoothAdapter.getDefaultAdapter()
                 .getProfileProxy(context, mServiceListener, BluetoothProfile.LE_AUDIO_BROADCAST);
         BluetoothAdapter.getDefaultAdapter()
-                .getProfileProxy(context, mServiceListener,
-                BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
+                .getProfileProxy(
+                        context, mServiceListener, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
     }
 
     /**
@@ -312,12 +373,83 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         }
         String programInfo = getProgramInfo();
         if (DEBUG) {
-            Log.d(TAG,
-                    "startBroadcast: language = " + language + " ,programInfo = " + programInfo);
+            Log.d(TAG, "startBroadcast: language = " + language + " ,programInfo = " + programInfo);
         }
         buildContentMetadata(language, programInfo);
-        mServiceBroadcast.startBroadcast(mBluetoothLeAudioContentMetadata,
+        mServiceBroadcast.startBroadcast(
+                mBluetoothLeAudioContentMetadata,
                 (mBroadcastCode != null && mBroadcastCode.length > 0) ? mBroadcastCode : null);
+    }
+
+    /**
+     * Start the private Broadcast for personal audio sharing or qr code sharing.
+     *
+     * <p>The broadcast will use random string for both broadcast name and subgroup program info;
+     * The broadcast will use random string for broadcast code; The broadcast will only have one
+     * subgroup due to system limitation; The subgroup language will be null.
+     *
+     * <p>If the system started the LE Broadcast, then the system calls the corresponding callback
+     * {@link BluetoothLeBroadcast.Callback}.
+     */
+    public void startPrivateBroadcast(int quality) {
+        mNewAppSourceName = "Sharing audio";
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "The BluetoothLeBroadcast is null when starting the private broadcast.");
+            return;
+        }
+        if (mServiceBroadcast.getAllBroadcastMetadata().size()
+                >= mServiceBroadcast.getMaximumNumberOfBroadcasts()) {
+            Log.d(TAG, "Skip starting the broadcast due to number limit.");
+            return;
+        }
+        String programInfo = getProgramInfo();
+        if (DEBUG) {
+            Log.d(TAG, "startBroadcast: language = null ,programInfo = " + programInfo);
+        }
+        // Current broadcast framework only support one subgroup
+        BluetoothLeBroadcastSubgroupSettings subgroupSettings =
+                buildBroadcastSubgroupSettings(/* language= */ null, programInfo, quality);
+        BluetoothLeBroadcastSettings settings =
+                buildBroadcastSettings(
+                        true, // TODO: set to false after framework fix
+                        TextUtils.isEmpty(programInfo) ? null : programInfo,
+                        (mBroadcastCode != null && mBroadcastCode.length > 0)
+                                ? mBroadcastCode
+                                : null,
+                        ImmutableList.of(subgroupSettings));
+        mServiceBroadcast.startBroadcast(settings);
+    }
+
+    private BluetoothLeBroadcastSettings buildBroadcastSettings(
+            boolean isPublic,
+            @Nullable String broadcastName,
+            @Nullable byte[] broadcastCode,
+            List<BluetoothLeBroadcastSubgroupSettings> subgroupSettingsList) {
+        BluetoothLeBroadcastSettings.Builder builder =
+                new BluetoothLeBroadcastSettings.Builder()
+                        .setPublicBroadcast(isPublic)
+                        .setBroadcastName(broadcastName)
+                        .setBroadcastCode(broadcastCode);
+        for (BluetoothLeBroadcastSubgroupSettings subgroupSettings : subgroupSettingsList) {
+            builder.addSubgroupSettings(subgroupSettings);
+        }
+        return builder.build();
+    }
+
+    private BluetoothLeBroadcastSubgroupSettings buildBroadcastSubgroupSettings(
+            @Nullable String language, @Nullable String programInfo, int quality) {
+        BluetoothLeAudioContentMetadata metadata =
+                new BluetoothLeAudioContentMetadata.Builder()
+                        .setLanguage(language)
+                        .setProgramInfo(programInfo)
+                        .build();
+        // Current broadcast framework only support one subgroup, thus we still maintain the latest
+        // metadata to keep legacy UI working.
+        mBluetoothLeAudioContentMetadata = metadata;
+        return new BluetoothLeBroadcastSubgroupSettings.Builder()
+                .setPreferredQuality(quality)
+                .setContentMetadata(mBluetoothLeAudioContentMetadata)
+                .build();
     }
 
     public String getProgramInfo() {
@@ -325,7 +457,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     }
 
     public void setProgramInfo(String programInfo) {
-        setProgramInfo(programInfo, /*updateContentResolver=*/ true);
+        setProgramInfo(programInfo, /* updateContentResolver= */ true);
     }
 
     private void setProgramInfo(String programInfo, boolean updateContentResolver) {
@@ -344,8 +476,10 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 Log.d(TAG, "mContentResolver is null");
                 return;
             }
-            Settings.Secure.putString(mContentResolver,
-                    Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO, programInfo);
+            Settings.Secure.putString(
+                    mContentResolver,
+                    Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
+                    programInfo);
         }
     }
 
@@ -354,7 +488,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     }
 
     public void setBroadcastCode(byte[] broadcastCode) {
-        setBroadcastCode(broadcastCode, /*updateContentResolver=*/ true);
+        setBroadcastCode(broadcastCode, /* updateContentResolver= */ true);
     }
 
     private void setBroadcastCode(byte[] broadcastCode, boolean updateContentResolver) {
@@ -372,7 +506,9 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 Log.d(TAG, "mContentResolver is null");
                 return;
             }
-            Settings.Secure.putString(mContentResolver, Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
+            Settings.Secure.putString(
+                    mContentResolver,
+                    Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
                     new String(broadcastCode, StandardCharsets.UTF_8));
         }
     }
@@ -401,8 +537,10 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 Log.d(TAG, "mContentResolver is null");
                 return;
             }
-            Settings.Secure.putString(mContentResolver,
-                    Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME, mAppSourceName);
+            Settings.Secure.putString(
+                    mContentResolver,
+                    Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME,
+                    mAppSourceName);
         }
     }
 
@@ -427,10 +565,11 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         if (mBluetoothLeBroadcastMetadata == null) {
             final List<BluetoothLeBroadcastMetadata> metadataList =
                     mServiceBroadcast.getAllBroadcastMetadata();
-            mBluetoothLeBroadcastMetadata = metadataList.stream()
-                    .filter(i -> i.getBroadcastId() == mBroadcastId)
-                    .findFirst()
-                    .orElse(null);
+            mBluetoothLeBroadcastMetadata =
+                    metadataList.stream()
+                            .filter(i -> i.getBroadcastId() == mBroadcastId)
+                            .findFirst()
+                            .orElse(null);
         }
         return mBluetoothLeBroadcastMetadata;
     }
@@ -440,22 +579,27 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             Log.d(TAG, "updateBroadcastInfoFromContentProvider: mContentResolver is null");
             return;
         }
-        String programInfo = Settings.Secure.getString(mContentResolver,
-                Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO);
+        String programInfo =
+                Settings.Secure.getString(
+                        mContentResolver, Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO);
         if (programInfo == null) {
             programInfo = getDefaultValueOfProgramInfo();
         }
-        setProgramInfo(programInfo, /*updateContentResolver=*/ false);
+        setProgramInfo(programInfo, /* updateContentResolver= */ false);
 
-        String prefBroadcastCode = Settings.Secure.getString(mContentResolver,
-                Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE);
-        byte[] broadcastCode = (prefBroadcastCode == null) ? getDefaultValueOfBroadcastCode()
-                : prefBroadcastCode.getBytes(StandardCharsets.UTF_8);
-        setBroadcastCode(broadcastCode, /*updateContentResolver=*/ false);
+        String prefBroadcastCode =
+                Settings.Secure.getString(
+                        mContentResolver, Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE);
+        byte[] broadcastCode =
+                (prefBroadcastCode == null)
+                        ? getDefaultValueOfBroadcastCode()
+                        : prefBroadcastCode.getBytes(StandardCharsets.UTF_8);
+        setBroadcastCode(broadcastCode, /* updateContentResolver= */ false);
 
-        String appSourceName = Settings.Secure.getString(mContentResolver,
-                Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME);
-        setAppSourceName(appSourceName, /*updateContentResolver=*/ false);
+        String appSourceName =
+                Settings.Secure.getString(
+                        mContentResolver, Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME);
+        setAppSourceName(appSourceName, /* updateContentResolver= */ false);
     }
 
     private void updateBroadcastInfoFromBroadcastMetadata(
@@ -474,12 +618,12 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         }
         BluetoothLeAudioContentMetadata contentMetadata = subgroup.get(0).getContentMetadata();
         setProgramInfo(contentMetadata.getProgramInfo());
-        setAppSourceName(getAppSourceName(), /*updateContentResolver=*/ true);
+        setAppSourceName(getAppSourceName(), /* updateContentResolver= */ true);
     }
 
     /**
-     * Stop the latest LE Broadcast. If the system stopped the LE Broadcast, then the system
-     * calls the corresponding callback {@link BluetoothLeBroadcast.Callback}.
+     * Stop the latest LE Broadcast. If the system stopped the LE Broadcast, then the system calls
+     * the corresponding callback {@link BluetoothLeBroadcast.Callback}.
      */
     public void stopLatestBroadcast() {
         stopBroadcast(mBroadcastId);
@@ -511,7 +655,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         }
         String programInfo = getProgramInfo();
         if (DEBUG) {
-            Log.d(TAG,
+            Log.d(
+                    TAG,
                     "updateBroadcast: language = " + language + " ,programInfo = " + programInfo);
         }
         mNewAppSourceName = appSourceName;
@@ -519,50 +664,79 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         mServiceBroadcast.updateBroadcast(mBroadcastId, mBluetoothLeAudioContentMetadata);
     }
 
-    public void registerServiceCallBack(@NonNull @CallbackExecutor Executor executor,
-            @NonNull BluetoothLeBroadcast.Callback callback) {
-        if (mServiceBroadcast == null) {
-            Log.d(TAG, "The BluetoothLeBroadcast is null.");
-            return;
-        }
-
-        mServiceBroadcast.registerCallback(executor, callback);
-    }
-
     /**
-     * Register Broadcast Assistant Callbacks to track it's state and receivers
+     * Register Broadcast Callbacks to track its state and receivers
      *
      * @param executor Executor object for callback
      * @param callback Callback object to be registered
      */
-    public void registerBroadcastAssistantCallback(@NonNull @CallbackExecutor Executor executor,
+    public void registerServiceCallBack(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BluetoothLeBroadcast.Callback callback) {
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "registerServiceCallBack failed, the BluetoothLeBroadcast is null.");
+            mCachedBroadcastCallbackExecutorMap.putIfAbsent(callback, executor);
+            return;
+        }
+
+        try {
+            mServiceBroadcast.registerCallback(executor, callback);
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "registerServiceCallBack failed. " + e.getMessage());
+        }
+    }
+
+    /**
+     * Register Broadcast Assistant Callbacks to track its state and receivers
+     *
+     * @param executor Executor object for callback
+     * @param callback Callback object to be registered
+     */
+    private void registerBroadcastAssistantCallback(
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
         if (mServiceBroadcastAssistant == null) {
-            Log.d(TAG, "The BluetoothLeBroadcastAssisntant is null.");
+            Log.d(
+                    TAG,
+                    "registerBroadcastAssistantCallback failed, "
+                            + "the BluetoothLeBroadcastAssistant is null.");
             return;
         }
 
         mServiceBroadcastAssistant.registerCallback(executor, callback);
     }
 
-    public void unregisterServiceCallBack(@NonNull BluetoothLeBroadcast.Callback callback) {
-        if (mServiceBroadcast == null) {
-            Log.d(TAG, "The BluetoothLeBroadcast is null.");
-            return;
-        }
-
-        mServiceBroadcast.unregisterCallback(callback);
-    }
-
     /**
-     * Unregister previousely registered Broadcast Assistant Callbacks
+     * Unregister previously registered Broadcast Callbacks
      *
      * @param callback Callback object to be unregistered
      */
-    public void unregisterBroadcastAssistantCallback(
+    public void unregisterServiceCallBack(@NonNull BluetoothLeBroadcast.Callback callback) {
+        mCachedBroadcastCallbackExecutorMap.remove(callback);
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "unregisterServiceCallBack failed, the BluetoothLeBroadcast is null.");
+            return;
+        }
+
+        try {
+            mServiceBroadcast.unregisterCallback(callback);
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "unregisterServiceCallBack failed. " + e.getMessage());
+        }
+    }
+
+    /**
+     * Unregister previously registered Broadcast Assistant Callbacks
+     *
+     * @param callback Callback object to be unregistered
+     */
+    private void unregisterBroadcastAssistantCallback(
             @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
         if (mServiceBroadcastAssistant == null) {
-            Log.d(TAG, "The BluetoothLeBroadcastAssisntant is null.");
+            Log.d(
+                    TAG,
+                    "unregisterBroadcastAssistantCallback, "
+                            + "the BluetoothLeBroadcastAssistant is null.");
             return;
         }
 
@@ -570,8 +744,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     }
 
     private void buildContentMetadata(String language, String programInfo) {
-        mBluetoothLeAudioContentMetadata = mBuilder.setLanguage(language).setProgramInfo(
-                programInfo).build();
+        mBluetoothLeAudioContentMetadata =
+                mBuilder.setLanguage(language).setProgramInfo(programInfo).build();
     }
 
     public LocalBluetoothLeBroadcastMetadata getLocalBluetoothLeBroadcastMetaData() {
@@ -600,9 +774,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         return true;
     }
 
-    /**
-     * Not supported since LE Audio Broadcasts do not establish a connection.
-     */
+    /** Not supported since LE Audio Broadcasts do not establish a connection. */
     public int getConnectionStatus(BluetoothDevice device) {
         if (mServiceBroadcast == null) {
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -611,9 +783,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         return mServiceBroadcast.getConnectionState(device);
     }
 
-    /**
-     * Not supported since LE Audio Broadcasts do not establish a connection.
-     */
+    /** Not supported since LE Audio Broadcasts do not establish a connection. */
     public List<BluetoothDevice> getConnectedDevices() {
         if (mServiceBroadcast == null) {
             return new ArrayList<BluetoothDevice>(0);
@@ -622,8 +792,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         return mServiceBroadcast.getConnectedDevices();
     }
 
-    public @NonNull
-    List<BluetoothLeBroadcastMetadata> getAllBroadcastMetadata() {
+    /** Get all broadcast metadata. */
+    public @NonNull List<BluetoothLeBroadcastMetadata> getAllBroadcastMetadata() {
         if (mServiceBroadcast == null) {
             Log.d(TAG, "The BluetoothLeBroadcast is null.");
             return Collections.emptyList();
@@ -640,16 +810,14 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         return !mServiceBroadcast.getAllBroadcastMetadata().isEmpty();
     }
 
-    /**
-     * Service does not provide method to get/set policy.
-     */
+    /** Service does not provide method to get/set policy. */
     public int getConnectionPolicy(BluetoothDevice device) {
         return CONNECTION_POLICY_FORBIDDEN;
     }
 
     /**
-     * Service does not provide "setEnabled" method. Please use {@link #startBroadcast},
-     * {@link #stopBroadcast()} or {@link #updateBroadcast(String, String)}
+     * Service does not provide "setEnabled" method. Please use {@link #startBroadcast}, {@link
+     * #stopBroadcast()} or {@link #updateBroadcast(String, String)}
      */
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
         return false;
@@ -683,9 +851,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         }
         if (mServiceBroadcast != null) {
             try {
-                BluetoothAdapter.getDefaultAdapter().closeProfileProxy(
-                        BluetoothProfile.LE_AUDIO_BROADCAST,
-                        mServiceBroadcast);
+                BluetoothAdapter.getDefaultAdapter()
+                        .closeProfileProxy(BluetoothProfile.LE_AUDIO_BROADCAST, mServiceBroadcast);
                 mServiceBroadcast = null;
             } catch (Throwable t) {
                 Log.w(TAG, "Error cleaning up LeAudio proxy", t);
@@ -694,13 +861,13 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     }
 
     private String getDefaultValueOfProgramInfo() {
-        //set the default value;
+        // set the default value;
         int postfix = ThreadLocalRandom.current().nextInt(DEFAULT_CODE_MIN, DEFAULT_CODE_MAX);
         return BluetoothAdapter.getDefaultAdapter().getName() + UNDERLINE + postfix;
     }
 
     private byte[] getDefaultValueOfBroadcastCode() {
-        //set the default value;
+        // set the default value;
         return generateRandomPassword().getBytes(StandardCharsets.UTF_8);
     }
 
@@ -708,14 +875,14 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         if (DEBUG) {
             Log.d(TAG, "resetCacheInfo:");
         }
-        setAppSourceName("", /*updateContentResolver=*/ true);
+        setAppSourceName("", /* updateContentResolver= */ true);
         mBluetoothLeBroadcastMetadata = null;
         mBroadcastId = UNKNOWN_VALUE_PLACEHOLDER;
     }
 
     private String generateRandomPassword() {
         String randomUUID = UUID.randomUUID().toString();
-        //first 12 chars from xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+        // first 12 chars from xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
         return randomUUID.substring(0, 8) + randomUUID.substring(9, 13);
     }
 
@@ -752,5 +919,4 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             }
         }
     }
-
 }

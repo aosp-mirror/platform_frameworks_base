@@ -20,10 +20,10 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
@@ -40,9 +40,6 @@ class FakeAuthenticationRepository(
     private val currentTime: () -> Long,
 ) : AuthenticationRepository {
 
-    private val _isAutoConfirmFeatureEnabled = MutableStateFlow(false)
-    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
-        _isAutoConfirmFeatureEnabled.asStateFlow()
     override val authenticationChallengeResult = MutableSharedFlow<Boolean>()
 
     override val hintedPinLength: Int = HINTING_PIN_LENGTH
@@ -50,8 +47,13 @@ class FakeAuthenticationRepository(
     private val _isPatternVisible = MutableStateFlow(true)
     override val isPatternVisible: StateFlow<Boolean> = _isPatternVisible.asStateFlow()
 
-    private val _throttling = MutableStateFlow(AuthenticationThrottlingModel())
-    override val throttling: StateFlow<AuthenticationThrottlingModel> = _throttling.asStateFlow()
+    override val lockout: MutableStateFlow<AuthenticationLockoutModel?> = MutableStateFlow(null)
+
+    override val hasLockoutOccurred = MutableStateFlow(false)
+
+    private val _isAutoConfirmFeatureEnabled = MutableStateFlow(false)
+    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
+        _isAutoConfirmFeatureEnabled.asStateFlow()
 
     private val _authenticationMethod =
         MutableStateFlow<AuthenticationMethodModel>(DEFAULT_AUTHENTICATION_METHOD)
@@ -67,9 +69,11 @@ class FakeAuthenticationRepository(
         _isPinEnhancedPrivacyEnabled.asStateFlow()
 
     private var failedAttemptCount = 0
-    private var throttlingEndTimestamp = 0L
+    private var lockoutEndTimestamp = 0L
     private var credentialOverride: List<Any>? = null
     private var securityMode: SecurityMode = DEFAULT_AUTHENTICATION_METHOD.toSecurityMode()
+
+    var lockoutStartedReportCount = 0
 
     override suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
         return authenticationMethod.value
@@ -89,6 +93,10 @@ class FakeAuthenticationRepository(
         authenticationChallengeResult.emit(isSuccessful)
     }
 
+    override suspend fun reportLockoutStarted(durationMs: Int) {
+        lockoutStartedReportCount++
+    }
+
     override suspend fun getPinLength(): Int {
         return (credentialOverride ?: DEFAULT_PIN).size
     }
@@ -97,20 +105,19 @@ class FakeAuthenticationRepository(
         return failedAttemptCount
     }
 
-    override suspend fun getThrottlingEndTimestamp(): Long {
-        return throttlingEndTimestamp
-    }
-
-    override fun setThrottling(throttlingModel: AuthenticationThrottlingModel) {
-        _throttling.value = throttlingModel
+    override suspend fun getLockoutEndTimestamp(): Long {
+        return lockoutEndTimestamp
     }
 
     fun setAutoConfirmFeatureEnabled(isEnabled: Boolean) {
         _isAutoConfirmFeatureEnabled.value = isEnabled
     }
 
-    override suspend fun setThrottleDuration(durationMs: Int) {
-        throttlingEndTimestamp = if (durationMs > 0) currentTime() + durationMs else 0
+    override suspend fun setLockoutDuration(durationMs: Int) {
+        lockoutEndTimestamp = if (durationMs > 0) currentTime() + durationMs else 0
+        if (durationMs > 0) {
+            hasLockoutOccurred.value = true
+        }
     }
 
     override suspend fun checkCredential(
@@ -129,17 +136,16 @@ class FakeAuthenticationRepository(
                 else -> error("Unexpected credential type ${credential.type}!")
             }
 
-        return if (
-            isSuccessful || failedAttemptCount < MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING - 1
-        ) {
+        return if (isSuccessful || failedAttemptCount < MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
+            hasLockoutOccurred.value = false
             AuthenticationResultModel(
                 isSuccessful = isSuccessful,
-                throttleDurationMs = 0,
+                lockoutDurationMs = 0,
             )
         } else {
             AuthenticationResultModel(
                 isSuccessful = false,
-                throttleDurationMs = THROTTLE_DURATION_MS,
+                lockoutDurationMs = LOCKOUT_DURATION_MS,
             )
         }
     }
@@ -169,8 +175,9 @@ class FakeAuthenticationRepository(
                 AuthenticationPatternCoordinate(0, 1),
                 AuthenticationPatternCoordinate(0, 2),
             )
-        const val MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING = 5
-        const val THROTTLE_DURATION_MS = 30000
+        const val MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT = 5
+        const val LOCKOUT_DURATION_SECONDS = 30
+        const val LOCKOUT_DURATION_MS = LOCKOUT_DURATION_SECONDS * 1000
         const val HINTING_PIN_LENGTH = 6
         val DEFAULT_PIN = buildList { repeat(HINTING_PIN_LENGTH) { add(it + 1) } }
 

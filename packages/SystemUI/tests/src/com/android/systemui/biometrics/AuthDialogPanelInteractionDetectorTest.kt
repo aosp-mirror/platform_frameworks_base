@@ -65,10 +65,7 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
             .create(
                 test = this,
                 featureFlags =
-                    FakeFeatureFlagsClassicModule {
-                        set(Flags.FACE_AUTH_REFACTOR, false)
-                        set(Flags.FULL_SCREEN_USER_SWITCHER, true)
-                    },
+                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
             )
 
     private val detector: AuthDialogPanelInteractionDetector = testComponent.underTest
@@ -95,6 +92,18 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
 
             // THEN action was run
             verify(action).run()
+        }
+
+    @Test
+    fun enableDetector_isUserInteractingTrue_shouldNotPostRunnable() =
+        testComponent.runTest {
+            // GIVEN isInteracting starts true
+            shadeRepository.setLegacyShadeTracking(true)
+            runCurrent()
+            detector.enable(action)
+
+            // THEN action was not run
+            verifyZeroInteractions(action)
         }
 
     @Test

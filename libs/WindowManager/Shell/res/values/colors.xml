@@ -60,14 +60,6 @@
     <!-- Desktop Mode -->
     <color name="desktop_mode_caption_handle_bar_light">#EFF1F2</color>
     <color name="desktop_mode_caption_handle_bar_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_expand_button_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_expand_button_dark">#48473A</color>
-    <color name="desktop_mode_caption_close_button_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_close_button_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_maximize_button_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_maximize_button_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_app_name_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_app_name_dark">#1C1C17</color>
     <color name="desktop_mode_resize_veil_light">#EFF1F2</color>
     <color name="desktop_mode_resize_veil_dark">#1C1C17</color>
     <color name="desktop_mode_maximize_menu_button">#DDDACD</color>

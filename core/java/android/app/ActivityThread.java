@@ -232,6 +232,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.MemInfoDumpProto;
+import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.AppSpecializationHooks;
@@ -1543,11 +1544,12 @@ public final class ActivityThread extends ClientTransactionHandler
         @Override
         public void dumpMemInfo(ParcelFileDescriptor pfd, Debug.MemoryInfo mem, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
-                boolean dumpUnreachable, String[] args) {
+                boolean dumpUnreachable, boolean dumpAllocatorStats, String[] args) {
             FileOutputStream fout = new FileOutputStream(pfd.getFileDescriptor());
             PrintWriter pw = new FastPrintWriter(fout);
             try {
-                dumpMemInfo(pw, mem, checkin, dumpFullInfo, dumpDalvik, dumpSummaryOnly, dumpUnreachable);
+                dumpMemInfo(pw, mem, checkin, dumpFullInfo, dumpDalvik, dumpSummaryOnly,
+                            dumpUnreachable, dumpAllocatorStats);
             } finally {
                 pw.flush();
                 IoUtils.closeQuietly(pfd);
@@ -1556,7 +1558,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @NeverCompile
         private void dumpMemInfo(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
-                boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable) {
+                boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
+                boolean dumpUnreachable, boolean dumpAllocatorStats) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
             long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
@@ -1708,6 +1711,9 @@ public final class ActivityThread extends ClientTransactionHandler
                 pw.println(" ");
                 pw.println(" Unreachable memory");
                 pw.print(Debug.getUnreachableMemory(100, showContents));
+            }
+            if (dumpAllocatorStats) {
+                Debug.logAllocatorStats();
             }
         }
 
@@ -2291,7 +2297,8 @@ public final class ActivityThread extends ClientTransactionHandler
                     case DUMP_HEAP: return "DUMP_HEAP";
                     case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
                     case SET_CORE_SETTINGS: return "SET_CORE_SETTINGS";
-                    case UPDATE_PACKAGE_COMPATIBILITY_INFO: return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
+                    case UPDATE_PACKAGE_COMPATIBILITY_INFO:
+                        return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
                     case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
                     case REQUEST_ASSIST_CONTEXT_EXTRAS: return "REQUEST_ASSIST_CONTEXT_EXTRAS";
@@ -3713,7 +3720,13 @@ public final class ActivityThread extends ClientTransactionHandler
         final ArrayList<ResultInfo> list = new ArrayList<>();
         list.add(new ResultInfo(id, requestCode, resultCode, data));
         final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread);
-        clientTransaction.addCallback(ActivityResultItem.obtain(activityToken, list));
+        final ActivityResultItem activityResultItem = ActivityResultItem.obtain(
+                activityToken, list);
+        if (Flags.bundleClientTransactionFlag()) {
+            clientTransaction.addTransactionItem(activityResultItem);
+        } else {
+            clientTransaction.addCallback(activityResultItem);
+        }
         try {
             mAppThread.scheduleTransaction(clientTransaction);
         } catch (RemoteException e) {
@@ -3797,7 +3810,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         boolean isSandboxActivityContext =
                 sandboxActivitySdkBasedContext()
-                        && SdkSandboxActivityAuthority.isSdkSandboxActivity(
+                        && SdkSandboxActivityAuthority.isSdkSandboxActivityIntent(
                                 mSystemContext, r.intent);
         boolean isSandboxedSdkContextUsed = false;
         ContextImpl activityBaseContext;
@@ -4064,7 +4077,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final LoadedApk sdkApk = getPackageInfo(
                 contextInfo.getSdkApplicationInfo(),
                 r.packageInfo.getCompatibilityInfo(),
-                ActivityContextInfo.CONTEXT_FLAGS);
+                contextInfo.getContextFlags());
 
         final ContextImpl activityContext = ContextImpl.createActivityContext(
                 this, sdkApk, r.activityInfo, r.token, displayId, r.overrideConfig);
@@ -4492,16 +4505,26 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
-        transaction.setLifecycleStateRequest(PauseActivityItem.obtain(r.token,
+        final PauseActivityItem pauseActivityItem = PauseActivityItem.obtain(r.token,
                 r.activity.isFinishing(), /* userLeaving */ true, r.activity.mConfigChangeFlags,
-                /* dontReport */ false, /* autoEnteringPip */ false));
+                /* dontReport */ false, /* autoEnteringPip */ false);
+        if (Flags.bundleClientTransactionFlag()) {
+            transaction.addTransactionItem(pauseActivityItem);
+        } else {
+            transaction.setLifecycleStateRequest(pauseActivityItem);
+        }
         executeTransaction(transaction);
     }
 
     private void scheduleResume(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
-        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(r.token,
-                /* isForward */ false, /* shouldSendCompatFakeFocus */ false));
+        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(r.token,
+                /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
+        if (Flags.bundleClientTransactionFlag()) {
+            transaction.addTransactionItem(resumeActivityItem);
+        } else {
+            transaction.setLifecycleStateRequest(resumeActivityItem);
+        }
         executeTransaction(transaction);
     }
 
@@ -6092,8 +6115,13 @@ public final class ActivityThread extends ClientTransactionHandler
                 TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);
         // Schedule the transaction.
         final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
-        transaction.addCallback(activityRelaunchItem);
-        transaction.setLifecycleStateRequest(lifecycleRequest);
+        if (Flags.bundleClientTransactionFlag()) {
+            transaction.addTransactionItem(activityRelaunchItem);
+            transaction.addTransactionItem(lifecycleRequest);
+        } else {
+            transaction.addCallback(activityRelaunchItem);
+            transaction.setLifecycleStateRequest(lifecycleRequest);
+        }
         executeTransaction(transaction);
     }
 

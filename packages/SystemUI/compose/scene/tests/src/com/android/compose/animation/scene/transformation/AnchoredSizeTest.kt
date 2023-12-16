@@ -85,4 +85,50 @@ class AnchoredSizeTest {
             after { onElement(TestElements.Bar).assertDoesNotExist() }
         }
     }
+
+    @Test
+    fun testAnchoredWidthOnly() {
+        rule.testTransition(
+            fromSceneContent = { Box(Modifier.size(100.dp, 100.dp).element(TestElements.Foo)) },
+            toSceneContent = {
+                Box(Modifier.size(50.dp, 50.dp).element(TestElements.Foo))
+                Box(Modifier.size(200.dp, 60.dp).element(TestElements.Bar))
+            },
+            transition = {
+                spec = tween(16 * 4, easing = LinearEasing)
+                anchoredSize(TestElements.Bar, TestElements.Foo, anchorHeight = false)
+            },
+        ) {
+            before { onElement(TestElements.Bar).assertDoesNotExist() }
+            at(0) { onElement(TestElements.Bar).assertSizeIsEqualTo(100.dp, 60.dp) }
+            at(16) { onElement(TestElements.Bar).assertSizeIsEqualTo(125.dp, 60.dp) }
+            at(32) { onElement(TestElements.Bar).assertSizeIsEqualTo(150.dp, 60.dp) }
+            at(48) { onElement(TestElements.Bar).assertSizeIsEqualTo(175.dp, 60.dp) }
+            at(64) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
+            after { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
+        }
+    }
+
+    @Test
+    fun testAnchoredHeightOnly() {
+        rule.testTransition(
+            fromSceneContent = { Box(Modifier.size(100.dp, 100.dp).element(TestElements.Foo)) },
+            toSceneContent = {
+                Box(Modifier.size(50.dp, 50.dp).element(TestElements.Foo))
+                Box(Modifier.size(200.dp, 60.dp).element(TestElements.Bar))
+            },
+            transition = {
+                spec = tween(16 * 4, easing = LinearEasing)
+                anchoredSize(TestElements.Bar, TestElements.Foo, anchorWidth = false)
+            },
+        ) {
+            before { onElement(TestElements.Bar).assertDoesNotExist() }
+            at(0) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 100.dp) }
+            at(16) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 90.dp) }
+            at(32) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 80.dp) }
+            at(48) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 70.dp) }
+            at(64) { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
+            after { onElement(TestElements.Bar).assertSizeIsEqualTo(200.dp, 60.dp) }
+        }
+    }
 }

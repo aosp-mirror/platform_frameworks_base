@@ -46,7 +46,6 @@ import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.common.ui.ConfigurationState;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -70,8 +69,8 @@ import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentCom
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewModel;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.ui.SystemBarUtilsState;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.util.CarrierConfigTracker;
@@ -695,7 +694,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mLocationPublisher,
                 mMockNotificationAreaController,
                 mShadeExpansionStateManager,
-                mock(FeatureFlagsClassic.class),
                 mStatusBarIconController,
                 mIconManagerFactory,
                 mCollapsedStatusBarViewModel,
@@ -719,7 +717,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mKeyguardUpdateMonitor,
                 mock(NotificationIconContainerStatusBarViewModel.class),
                 mock(ConfigurationState.class),
-                mock(ConfigurationController.class),
+                mock(SystemBarUtilsState.class),
                 mock(StatusBarNotificationIconViewStore.class),
                 mock(DemoModeController.class));
     }

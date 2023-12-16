@@ -47,11 +47,11 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -256,13 +256,12 @@ public final class StorageEventHelper extends StorageEventListener {
 
                     final AndroidPackage pkg = ps.getPkg();
                     final int deleteFlags = PackageManager.DELETE_KEEP_DATA;
-                    final PackageRemovedInfo outInfo = new PackageRemovedInfo();
 
                     try (PackageFreezer freezer = mPm.freezePackageForDelete(ps.getPackageName(),
                              UserHandle.USER_ALL, deleteFlags,
                             "unloadPrivatePackagesInner", ApplicationExitInfo.REASON_OTHER)) {
                         if (mDeletePackageHelper.deletePackageLIF(ps.getPackageName(), null, false,
-                                userIds, deleteFlags, outInfo, false)) {
+                                userIds, deleteFlags, new PackageRemovedInfo(), false)) {
                             unloaded.add(pkg);
                         } else {
                             Slog.w(TAG, "Failed to unload " + ps.getPath());

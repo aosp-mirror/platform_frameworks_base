@@ -2,6 +2,7 @@
 package android {
 
   public static final class Manifest.permission {
+    field @FlaggedApi("com.android.server.accessibility.motion_event_observing") public static final String ACCESSIBILITY_MOTION_EVENT_OBSERVING = "android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING";
     field public static final String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
@@ -99,6 +100,8 @@ package android.accessibilityservice {
 
   public class AccessibilityServiceInfo implements android.os.Parcelable {
     method @NonNull public android.content.ComponentName getComponentName();
+    method @FlaggedApi("android.view.accessibility.motion_event_observing") public int getObservedMotionEventSources();
+    method @FlaggedApi("android.view.accessibility.motion_event_observing") public void setObservedMotionEventSources(int);
   }
 
 }
@@ -259,6 +262,7 @@ package android.app {
     field public static final String OPSTR_ACTIVITY_RECOGNITION_SOURCE = "android:activity_recognition_source";
     field public static final String OPSTR_MANAGE_ONGOING_CALLS = "android:manage_ongoing_calls";
     field public static final String OPSTR_RECORD_AUDIO_HOTWORD = "android:record_audio_hotword";
+    field public static final String OPSTR_RESERVED_FOR_TESTING = "android:reserved_for_testing";
     field public static final String OPSTR_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER = "android:use_icc_auth_with_device_identifier";
     field public static final int OP_COARSE_LOCATION = 0; // 0x0
     field public static final int OP_RECORD_AUDIO = 27; // 0x1b
@@ -371,6 +375,10 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING) public void setToastRateLimitingEnabled(boolean);
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
+  }
+
+  public static class NotificationManager.Policy implements android.os.Parcelable {
+    method @FlaggedApi("android.app.modes_api") public boolean allowPriorityChannels();
   }
 
   public final class PendingIntent implements android.os.Parcelable {
@@ -776,6 +784,25 @@ package android.app.job {
 
 }
 
+package android.app.pinner {
+
+  @FlaggedApi("android.app.pinner_service_client_api") public final class PinnedFileStat implements android.os.Parcelable {
+    ctor @FlaggedApi("android.app.pinner_service_client_api") public PinnedFileStat(@NonNull String, long, @NonNull String);
+    method @FlaggedApi("android.app.pinner_service_client_api") public int describeContents();
+    method @FlaggedApi("android.app.pinner_service_client_api") public long getBytesPinned();
+    method @FlaggedApi("android.app.pinner_service_client_api") @NonNull public String getFilename();
+    method @FlaggedApi("android.app.pinner_service_client_api") @NonNull public String getGroupName();
+    method @FlaggedApi("android.app.pinner_service_client_api") public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi("android.app.pinner_service_client_api") @NonNull public static final android.os.Parcelable.Creator<android.app.pinner.PinnedFileStat> CREATOR;
+  }
+
+  @FlaggedApi("android.app.pinner_service_client_api") public class PinnerServiceClient {
+    ctor @FlaggedApi("android.app.pinner_service_client_api") public PinnerServiceClient();
+    method @FlaggedApi("android.app.pinner_service_client_api") @NonNull public java.util.List<android.app.pinner.PinnedFileStat> getPinnerStats();
+  }
+
+}
+
 package android.app.prediction {
 
   public final class AppPredictor {
@@ -855,7 +882,6 @@ package android.companion {
 
   public final class CompanionDeviceManager {
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void enableSecureTransport(boolean);
-    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_PING = 1669362552; // 0x63807378
   }
 
   public abstract class CompanionDeviceService extends android.app.Service {
@@ -879,7 +905,7 @@ package android.content {
     ctor public AttributionSource(int, @Nullable String, @Nullable String, @NonNull android.os.IBinder);
     ctor public AttributionSource(int, @Nullable String, @Nullable String, @Nullable java.util.Set<java.lang.String>, @Nullable android.content.AttributionSource);
     ctor @FlaggedApi("android.permission.flags.attribution_source_constructor") public AttributionSource(int, int, @Nullable String, @Nullable String, @NonNull android.os.IBinder, @Nullable String[], @Nullable android.content.AttributionSource);
-    ctor @FlaggedApi("android.permission.flags.device_aware_permission_apis") public AttributionSource(int, int, @Nullable String, @Nullable String, @NonNull android.os.IBinder, @Nullable String[], int, @Nullable android.content.AttributionSource);
+    ctor @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public AttributionSource(int, int, @Nullable String, @Nullable String, @NonNull android.os.IBinder, @Nullable String[], int, @Nullable android.content.AttributionSource);
     method public void enforceCallingPid();
   }
 
@@ -1137,6 +1163,14 @@ package android.content.pm {
     field public static final int SHOW_IN_LAUNCHER_NO = 2; // 0x2
     field public static final int SHOW_IN_LAUNCHER_SEPARATE = 1; // 0x1
     field public static final int SHOW_IN_LAUNCHER_WITH_PARENT = 0; // 0x0
+  }
+
+  public static final class UserProperties.Builder {
+    ctor public UserProperties.Builder();
+    method @NonNull public android.content.pm.UserProperties build();
+    method @NonNull public android.content.pm.UserProperties.Builder setCrossProfileContentSharingStrategy(int);
+    method @NonNull public android.content.pm.UserProperties.Builder setShowInQuietMode(int);
+    method @NonNull public android.content.pm.UserProperties.Builder setShowInSharingSurfaces(int);
   }
 
 }
@@ -1572,6 +1606,10 @@ package android.hardware.display {
     method public void disableDozeSettings(int);
     method public void disableDozeSettings(boolean, int);
     method public void restoreDozeSettings(int);
+  }
+
+  public final class ColorDisplayManager {
+    method @FlaggedApi("android.app.modes_api") @RequiresPermission(android.Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS) public boolean isSaturationActivated();
   }
 
   public final class DisplayManager {
@@ -2094,7 +2132,7 @@ package android.media.tv.tuner {
 package android.media.voice {
 
   public final class KeyphraseModelManager {
-    method @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public void setModelDatabaseForTestEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public void setModelDatabaseForTestEnabled(boolean);
   }
 
 }
@@ -3078,6 +3116,10 @@ package android.service.watchdog {
 
 package android.speech {
 
+  public abstract class RecognitionService extends android.app.Service {
+    method public void onBindInternal();
+  }
+
   public class SpeechRecognizer {
     method @MainThread @NonNull public static android.speech.SpeechRecognizer createOnDeviceTestingSpeechRecognizer(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SPEECH_RECOGNITION) public void setTemporaryOnDeviceRecognizer(@Nullable android.content.ComponentName);
@@ -3579,9 +3621,6 @@ package android.view {
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
     method public default boolean shouldShowSystemDecors(int);
     method @Nullable public default android.graphics.Bitmap snapshotTaskForRecents(@IntRange(from=0) int);
-    field public static final int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1; // 0x1
-    field public static final int DISPLAY_IME_POLICY_HIDE = 2; // 0x2
-    field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0
     field public static final int LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP = 600; // 0x258
   }
 
@@ -4197,8 +4236,13 @@ package android.window {
   public static class WindowInfosListenerForTest.WindowInfo {
     field @NonNull public final android.graphics.Rect bounds;
     field public final int displayId;
+    field public final boolean isDuplicateTouchToWallpaper;
+    field public final boolean isFocusable;
+    field public final boolean isPreventSplitting;
+    field public final boolean isTouchable;
     field public final boolean isTrustedOverlay;
     field public final boolean isVisible;
+    field public final boolean isWatchOutsideTouch;
     field @NonNull public final String name;
     field @NonNull public final android.graphics.Matrix transform;
     field @NonNull public final android.os.IBinder windowToken;

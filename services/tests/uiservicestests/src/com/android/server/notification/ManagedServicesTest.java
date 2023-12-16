@@ -1077,6 +1077,26 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testPackageUninstall_componentNoLongerUserSetList() throws Exception {
+        final String pkg = "this.is.a.package.name";
+        final String component = pkg + "/Ba";
+        for (int approvalLevel : new int[] { APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
+            ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                    mIpm, approvalLevel);
+            writeExpectedValuesToSettings(approvalLevel);
+            service.migrateToXml();
+
+            final String verifyValue = (approvalLevel == APPROVAL_BY_COMPONENT) ? component : pkg;
+
+            assertThat(service.isPackageOrComponentAllowed(verifyValue, 0)).isTrue();
+            assertThat(service.isPackageOrComponentUserSet(verifyValue, 0)).isTrue();
+
+            service.onPackagesChanged(true, new String[]{pkg}, new int[]{103});
+            assertThat(service.isPackageOrComponentUserSet(verifyValue, 0)).isFalse();
+        }
+    }
+
+    @Test
     public void testIsPackageAllowed() {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,

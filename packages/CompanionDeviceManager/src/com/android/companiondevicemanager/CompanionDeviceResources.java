@@ -22,22 +22,12 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_GLASSES;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
-
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_APP_STREAMING;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALENDAR;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALL_LOGS;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CONTACTS;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_MICROPHONE;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICES;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICE_STREAMING;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NOTIFICATION;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_PHONE;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_SMS;
-import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_STORAGE;
+import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 
+import android.os.Build;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -51,7 +41,85 @@ import java.util.Set;
  * for the corresponding profile.
  */
 final class CompanionDeviceResources {
-    static final Map<String, Integer> TITLES;
+
+    // Permission resources
+    private static final int PERMISSION_NOTIFICATION_LISTENER_ACCESS = 0;
+    private static final int PERMISSION_STORAGE = 1;
+    private static final int PERMISSION_APP_STREAMING = 2;
+    private static final int PERMISSION_PHONE = 3;
+    private static final int PERMISSION_SMS = 4;
+    private static final int PERMISSION_CONTACTS = 5;
+    private static final int PERMISSION_CALENDAR = 6;
+    private static final int PERMISSION_NEARBY_DEVICES = 7;
+    private static final int PERMISSION_NEARBY_DEVICE_STREAMING = 8;
+    private static final int PERMISSION_MICROPHONE = 9;
+    private static final int PERMISSION_CALL_LOGS = 10;
+    // Notification Listener Access & POST_NOTIFICATION permission
+    private static final int PERMISSION_NOTIFICATIONS = 11;
+    private static final int PERMISSION_CHANGE_MEDIA_OUTPUT = 12;
+
+    static final Map<Integer, Integer> PERMISSION_TITLES;
+    static {
+        final Map<Integer, Integer> map = new ArrayMap<>();
+        map.put(PERMISSION_NOTIFICATION_LISTENER_ACCESS, R.string.permission_notifications);
+        map.put(PERMISSION_STORAGE, R.string.permission_storage);
+        map.put(PERMISSION_APP_STREAMING, R.string.permission_app_streaming);
+        map.put(PERMISSION_PHONE, R.string.permission_phone);
+        map.put(PERMISSION_SMS, R.string.permission_sms);
+        map.put(PERMISSION_CONTACTS, R.string.permission_contacts);
+        map.put(PERMISSION_CALENDAR, R.string.permission_calendar);
+        map.put(PERMISSION_NEARBY_DEVICES, R.string.permission_nearby_devices);
+        map.put(PERMISSION_NEARBY_DEVICE_STREAMING, R.string.permission_nearby_device_streaming);
+        map.put(PERMISSION_MICROPHONE, R.string.permission_microphone);
+        map.put(PERMISSION_CALL_LOGS, R.string.permission_call_logs);
+        map.put(PERMISSION_NOTIFICATIONS, R.string.permission_notifications);
+        map.put(PERMISSION_CHANGE_MEDIA_OUTPUT, R.string.permission_media_routing_control);
+        PERMISSION_TITLES = unmodifiableMap(map);
+    }
+
+    static final Map<Integer, Integer> PERMISSION_SUMMARIES;
+    static {
+        final Map<Integer, Integer> map = new ArrayMap<>();
+        map.put(PERMISSION_NOTIFICATION_LISTENER_ACCESS,
+                R.string.permission_notification_listener_access_summary);
+        map.put(PERMISSION_STORAGE, R.string.permission_storage_summary);
+        map.put(PERMISSION_APP_STREAMING, R.string.permission_app_streaming_summary);
+        map.put(PERMISSION_PHONE, R.string.permission_phone_summary);
+        map.put(PERMISSION_SMS, R.string.permission_sms_summary);
+        map.put(PERMISSION_CONTACTS, R.string.permission_contacts_summary);
+        map.put(PERMISSION_CALENDAR, R.string.permission_calendar_summary);
+        map.put(PERMISSION_NEARBY_DEVICES, R.string.permission_nearby_devices_summary);
+        map.put(PERMISSION_NEARBY_DEVICE_STREAMING,
+                R.string.permission_nearby_device_streaming_summary);
+        map.put(PERMISSION_MICROPHONE, R.string.permission_microphone_summary);
+        map.put(PERMISSION_CALL_LOGS, R.string.permission_call_logs_summary);
+        map.put(PERMISSION_NOTIFICATIONS, R.string.permission_notifications_summary);
+        map.put(PERMISSION_CHANGE_MEDIA_OUTPUT, R.string.permission_media_routing_control_summary);
+        PERMISSION_SUMMARIES = unmodifiableMap(map);
+    }
+
+    static final Map<Integer, Integer> PERMISSION_ICONS;
+    static {
+        final Map<Integer, Integer> map = new ArrayMap<>();
+        map.put(PERMISSION_NOTIFICATION_LISTENER_ACCESS, R.drawable.ic_permission_notifications);
+        map.put(PERMISSION_STORAGE, R.drawable.ic_permission_storage);
+        map.put(PERMISSION_APP_STREAMING, R.drawable.ic_permission_app_streaming);
+        map.put(PERMISSION_PHONE, R.drawable.ic_permission_phone);
+        map.put(PERMISSION_SMS, R.drawable.ic_permission_sms);
+        map.put(PERMISSION_CONTACTS, R.drawable.ic_permission_contacts);
+        map.put(PERMISSION_CALENDAR, R.drawable.ic_permission_calendar);
+        map.put(PERMISSION_NEARBY_DEVICES, R.drawable.ic_permission_nearby_devices);
+        map.put(PERMISSION_NEARBY_DEVICE_STREAMING,
+                R.drawable.ic_permission_nearby_device_streaming);
+        map.put(PERMISSION_MICROPHONE, R.drawable.ic_permission_microphone);
+        map.put(PERMISSION_CALL_LOGS, R.drawable.ic_permission_call_logs);
+        map.put(PERMISSION_NOTIFICATIONS, R.drawable.ic_permission_notifications);
+        map.put(PERMISSION_CHANGE_MEDIA_OUTPUT, R.drawable.ic_permission_media_routing_control);
+        PERMISSION_ICONS = unmodifiableMap(map);
+    }
+
+    // Profile resources
+    static final Map<String, Integer> PROFILE_TITLES;
     static {
         final Map<String, Integer> map = new ArrayMap<>();
         map.put(DEVICE_PROFILE_APP_STREAMING, R.string.title_app_streaming);
@@ -62,65 +130,61 @@ final class CompanionDeviceResources {
         map.put(DEVICE_PROFILE_GLASSES, R.string.confirmation_title_glasses);
         map.put(null, R.string.confirmation_title);
 
-        TITLES = unmodifiableMap(map);
+        PROFILE_TITLES = unmodifiableMap(map);
     }
 
-    static final Map<String, List<Integer>> PERMISSION_TYPES;
-    static {
-        final Map<String, List<Integer>> map = new ArrayMap<>();
-        map.put(DEVICE_PROFILE_APP_STREAMING, Arrays.asList(PERMISSION_APP_STREAMING));
-        map.put(DEVICE_PROFILE_COMPUTER, Arrays.asList(
-                PERMISSION_NOTIFICATION, PERMISSION_STORAGE));
-        map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
-                Arrays.asList(PERMISSION_NEARBY_DEVICE_STREAMING));
-        map.put(DEVICE_PROFILE_WATCH, Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_PHONE,
-                PERMISSION_CALL_LOGS, PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_CALENDAR,
-                PERMISSION_NEARBY_DEVICES));
-        map.put(DEVICE_PROFILE_GLASSES, Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_PHONE,
-                PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_MICROPHONE,
-                PERMISSION_NEARBY_DEVICES));
-
-        PERMISSION_TYPES = unmodifiableMap(map);
-    }
-
-    static final Map<String, Integer> SUMMARIES;
+    static final Map<String, Integer> PROFILE_SUMMARIES;
     static {
         final Map<String, Integer> map = new ArrayMap<>();
         map.put(DEVICE_PROFILE_WATCH, R.string.summary_watch);
         map.put(DEVICE_PROFILE_GLASSES, R.string.summary_glasses);
         map.put(null, R.string.summary_generic);
 
-        SUMMARIES = unmodifiableMap(map);
+        PROFILE_SUMMARIES = unmodifiableMap(map);
     }
 
-    static final Map<String, Integer> PROFILES_NAME;
+    static final Map<String, List<Integer>> PROFILE_PERMISSIONS;
+    static {
+        final Map<String, List<Integer>> map = new ArrayMap<>();
+        map.put(DEVICE_PROFILE_APP_STREAMING, Arrays.asList(PERMISSION_APP_STREAMING));
+        map.put(DEVICE_PROFILE_COMPUTER, Arrays.asList(
+                PERMISSION_NOTIFICATION_LISTENER_ACCESS, PERMISSION_STORAGE));
+        map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
+                Arrays.asList(PERMISSION_NEARBY_DEVICE_STREAMING));
+        if (Build.VERSION.SDK_INT > UPSIDE_DOWN_CAKE) {
+            map.put(DEVICE_PROFILE_WATCH, Arrays.asList(PERMISSION_NOTIFICATIONS, PERMISSION_PHONE,
+                    PERMISSION_CALL_LOGS, PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_CALENDAR,
+                    PERMISSION_NEARBY_DEVICES, PERMISSION_CHANGE_MEDIA_OUTPUT));
+        } else {
+            map.put(DEVICE_PROFILE_WATCH, Arrays.asList(PERMISSION_NOTIFICATION_LISTENER_ACCESS,
+                    PERMISSION_PHONE, PERMISSION_CALL_LOGS, PERMISSION_SMS, PERMISSION_CONTACTS,
+                    PERMISSION_CALENDAR, PERMISSION_NEARBY_DEVICES));
+        }
+        map.put(DEVICE_PROFILE_GLASSES, Arrays.asList(PERMISSION_NOTIFICATION_LISTENER_ACCESS,
+                PERMISSION_PHONE, PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_MICROPHONE,
+                PERMISSION_NEARBY_DEVICES));
+
+        PROFILE_PERMISSIONS = unmodifiableMap(map);
+    }
+
+    static final Map<String, Integer> PROFILE_NAMES;
     static {
         final Map<String, Integer> map = new ArrayMap<>();
         map.put(DEVICE_PROFILE_WATCH, R.string.profile_name_watch);
         map.put(DEVICE_PROFILE_GLASSES, R.string.profile_name_glasses);
         map.put(null, R.string.profile_name_generic);
 
-        PROFILES_NAME = unmodifiableMap(map);
+        PROFILE_NAMES = unmodifiableMap(map);
     }
 
-    static final Map<String, Integer> PROFILES_NAME_MULTI;
-    static {
-        final Map<String, Integer> map = new ArrayMap<>();
-        map.put(DEVICE_PROFILE_GLASSES, R.string.profile_name_generic);
-        map.put(DEVICE_PROFILE_WATCH, R.string.profile_name_watch);
-        map.put(null, R.string.profile_name_generic);
-
-        PROFILES_NAME_MULTI = unmodifiableMap(map);
-    }
-
-    static final Map<String, Integer> PROFILE_ICON;
+    static final Map<String, Integer> PROFILE_ICONS;
     static {
         final Map<String, Integer> map = new ArrayMap<>();
         map.put(DEVICE_PROFILE_WATCH, R.drawable.ic_watch);
         map.put(DEVICE_PROFILE_GLASSES, R.drawable.ic_glasses);
         map.put(null, R.drawable.ic_device_other);
 
-        PROFILE_ICON = unmodifiableMap(map);
+        PROFILE_ICONS = unmodifiableMap(map);
     }
 
     static final Set<String> SUPPORTED_PROFILES;

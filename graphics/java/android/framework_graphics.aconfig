@@ -6,3 +6,10 @@ flag {
      description: "Add a function without unused exact param for computeBounds."
      bug: "304478551"
 }
+
+flag {
+     name: "yuv_image_compress_to_ultra_hdr"
+     namespace: "core_graphics"
+     description: "Feature flag for YUV image compress to Ultra HDR."
+     bug: "308978825"
+}

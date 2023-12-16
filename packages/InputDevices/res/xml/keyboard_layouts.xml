@@ -94,7 +94,7 @@
         android:name="keyboard_layout_swiss_german"
         android:label="@string/keyboard_layout_swiss_german_label"
         android:keyboardLayout="@raw/keyboard_layout_swiss_german"
-        android:keyboardLocale="de-Latn-CH"
+        android:keyboardLocale="de-Latn-CH|gsw-Latn-CH"
         android:keyboardLayoutType="qwertz" />
 
     <keyboard-layout

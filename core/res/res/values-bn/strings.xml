@@ -1710,10 +1710,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"এটি কোনও একটি অ্যাপের সাথে অথবা হার্ডওয়্যার সেন্সরের সাথে আপনার ইন্টার‍্যাকশন ট্র্যাক করতে এবং আপনার হয়ে বিভিন্ন অ্যাপের সাথে ইন্টার‍্যাক্ট করতে পারে।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"অনুমতি দিন"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"খারিজ করুন"</string>
-    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
-    <skip />
-    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
-    <skip />
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"আনইনস্টল করুন"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"কোনও অ্যাপ অনুমতির অনুরোধ আড়াল করছে তাই আপনার উত্তর যাচাই করা যাবে না।"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"কোনও ফিচার ব্যবহার করা শুরু করতে, সেটিতে ট্যাপ করুন:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"অ্যাক্সেসিবিলিটি বোতামের সাহায্যে আপনি যেসব ফিচার ব্যবহার করতে চান সেগুলি বেছে নিন"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ভলিউম কী শর্টকাটের সাহায্যে আপনি যেসব ফিচার ব্যবহার করতে চান সেগুলি বেছে নিন"</string>
@@ -1908,10 +1906,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহান্ত"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ইভেন্ট"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ঘুমানোর সময়"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
     <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"চালু আছে"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"বন্ধ আছে"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> কিছু সাউন্ডকে মিউট করে দিচ্ছে"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে৷ বিস্তারিত জানার জন্য প্রস্তুতকারকের সাথে যোগাযোগ করুন৷"</string>
@@ -2344,10 +2342,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"মাইক্রোফোন ব্লক করা হয়েছে"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ডিসপ্লে মিরর করা যাচ্ছে না"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"অন্য কোনও কেবল ব্যবহার করে আবার চেষ্টা করুন"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"কেবল, ডিসপ্লের সাথে কাজ নাও করতে পারে"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"আপনার USB-C কেবল, ডিসপ্লেতে সঠিকভাবে কানেক্ট নাও হতে পারে"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"আপনার ডিভাইস খুব গরম হয়ে আছে এবং সেটি ঠাণ্ডা না হওয়া পর্যন্ত ডিসপ্লে মিরর করা যাবে না"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen চালু করা আছে"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"কন্টেন্ট দেখানোর জন্য <xliff:g id="APP_NAME">%1$s</xliff:g> দুটি ডিসপ্লে ব্যবহার করছে"</string>
@@ -2364,4 +2359,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"কীবোর্ড লেআউট <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>-এ সেট করা আছে… পালটাতে ট্যাপ করুন।"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ফিজিক্যাল কীবোর্ড কনফিগার করা হয়েছে"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"কীবোর্ড দেখতে ট্যাপ করুন"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ব্যক্তিগত"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"ক্লোন করুন"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"অফিস"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"২য় অফিস"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"৩য় অফিস"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"পরীক্ষা"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"কমিউনাল"</string>
 </resources>

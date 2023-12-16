@@ -35,5 +35,5 @@ interface NotificationIconColors {
      * Returns the color to be applied to an icon, based on that icon's view bounds and whether or
      * not the notification icon is colorized.
      */
-    fun staticDrawableColor(viewBounds: Rect, isColorized: Boolean): Int
+    fun staticDrawableColor(viewBounds: Rect): Int
 }

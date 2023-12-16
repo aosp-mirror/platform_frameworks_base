@@ -159,7 +159,8 @@ public class ResourcesManager {
      * Loads {@link ApkAssets} and caches them to prevent their garbage collection while the
      * instance is alive and reachable.
      */
-    private class ApkAssetsSupplier {
+    @VisibleForTesting
+    protected class ApkAssetsSupplier {
         final ArrayMap<ApkKey, ApkAssets> mLocalCache = new ArrayMap<>();
 
         /**
@@ -544,7 +545,10 @@ public class ResourcesManager {
      * from an {@link ApkAssetsSupplier} if non-null; otherwise ApkAssets are loaded using
      * {@link #loadApkAssets(ApkKey)}.
      */
-    private @Nullable AssetManager createAssetManager(@NonNull final ResourcesKey key,
+
+    @VisibleForTesting
+    @UnsupportedAppUsage
+    protected @Nullable AssetManager createAssetManager(@NonNull final ResourcesKey key,
             @Nullable ApkAssetsSupplier apkSupplier) {
         final AssetManager.Builder builder = new AssetManager.Builder();
 

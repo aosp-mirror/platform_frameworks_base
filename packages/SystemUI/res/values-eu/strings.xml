@@ -197,10 +197,8 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetootha konektatuta."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Bluetooth bidezko gailuaren ikonoa"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Gailuaren xehetasuna konfiguratzeko, sakatu hau"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"Egin klik gailu guztiak ikusteko"</string>
+    <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"Egin klik beste gailu bat parekatzeko"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Bateriaren ehunekoa ezezaguna da."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> gailura konektatuta."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Hona konektatuta: <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -259,10 +257,8 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Erabili Bluetootha"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Konektatuta"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gordeta"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"deskonektatu"</string>
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktibatu"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audioa"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Entzungailua"</string>
@@ -334,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Pantaila-grabaketa"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Hasi"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Gelditu"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Esku bakarreko modua"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"Kontrastea"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Arrunta"</string>
@@ -405,9 +407,12 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mantso kargatzen • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Kargatzen • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Tutorial komuna hasteko, pasatu hatza ezkerrera"</string>
-    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Ireki widget-editorea"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
     <skip />
-    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Aldatu erabiltzailea"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"zabaldu menua"</string>
@@ -645,10 +650,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> botoia"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Hasiera"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atzera"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Gora"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Behera"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Ezkerrera"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Eskuinera"</string>
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"Gora egiteko gezi-tekla"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"Behera egiteko gezi-tekla"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"Ezkerrera egiteko gezi-tekla"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"Eskuinera egiteko gezi-tekla"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Erdiratu"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Zuriunea"</string>
@@ -676,7 +681,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Jakinarazpenak"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Lasterbideak"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Aldatu tekl. diseinua"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Garbitu testua"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"edo"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Garbitu bilaketa-kontsulta"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Lasterbideak"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Bilatu lasterbideak"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Ez da aurkitu lasterbiderik"</string>
@@ -684,35 +690,40 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Sarrera"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Irekitako aplikazioak"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Uneko aplikazioa"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Atzitu jakinarazpenen panela"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Atera pantaila osoaren argazki bat"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Atzitu sistemaren edo aplikazioetarako lasterbideen zerrenda"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"Atzera: itzuli aurreko egoerara (atzera egiteko botoia)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Atzitu hasierako pantaila"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Ikusi irekitako aplikazioen ikuspegi orokorra"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Joan azkenaldian erabilitako aplikazio batetik bestera (aurrera)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Joan azkenaldian erabilitako aplikazio batetik bestera (atzera)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Atzitu aplikazio guztien zerrenda eta bilatu (adibidez, bilatzeko aukeraren edo Exekutatzeko tresna aplikazioaren bidez)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Ezkutatu eta erakutsi (berriro) zereginen barra"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Atzitu sistemaren ezarpenak"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Atzitu Google-ren Laguntzailea"</string>
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"Bilaketa-emaitzak daude ikusgai"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"Sistemaren lasterbideak daude ikusgai"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Informazioa sartzeko lasterbideak daude ikusgai"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Aplikazioak irekitzen dituzten lasterbideak daude ikusgai"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Oraingo aplikaziorako lasterbideak daude ikusgai"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Ikusi jakinarazpenak"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Atera pantaila-argazki bat"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Erakutsi lasterbideak"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Egin atzera"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Joan hasierako pantailara"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Ikusi azkenaldiko aplikazioak"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Ikusi azken aplikazioak banan-banan (aurrerantz)"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Ikusi azken aplikazioak banan-banan (atzerantz)"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ireki aplikazioen zerrenda"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Erakutsi zereginen barra"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ireki ezarpenak"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Ireki Laguntzailea"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Blokeatu pantaila"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Ireki Oharrak aplikazioa oharrak bizkor idazteko"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"Ireki oharrak"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Zereginen aldibereko sistemaren exekuzioa"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Sartu pantaila zatituaren eskuineko aldean uneko aplikazioarekin"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Sartu pantaila zatituaren ezkerreko aldean uneko aplikazioarekin"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Aldatu pantaila zatitutik pantaila osora"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Pantaila zatituan zaudela: ordeztu aplikazio bat beste batekin"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Sartu pantaila zatituaren eskuineko aldean oraingo aplikazioarekin"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Sartu pantaila zatituaren ezkerreko aldean oraingo aplikazioarekin"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Aldatu pantaila zatitutik pantaila osora"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"Pantaila zatituan zaudela, ordeztu aplikazio bat beste batekin"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Sarrera"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Aldatu idazteko hizkuntza (hurrengo hizkuntza)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Aldatu idazteko hizkuntza (aurreko hizkuntza)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Aldatu hurrengo hizkuntzara"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Aldatu aurreko hizkuntzara"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Atzitu emojiak"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Atzitu ahozko idazketa"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikazioak"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Laguntzailea"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Ireki arakatzailea (Chrome, modu lehenetsian)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Laguntzailea"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Arakatzailea"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontaktuak"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Ireki posta elektronikoa (Gmail, modu lehenetsian)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Posta"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMSak"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musika"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
@@ -1196,6 +1207,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Ezarri oharren aplikazio lehenetsia ezarpenetan"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalatu aplikazioa"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Kanpoko pantailan islatu nahi duzu?"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"Une honetan exekutatzen ari diren pantaila bikoitzeko jarduera guztiak geldituko dira"</string>
     <string name="mirror_display" msgid="2515262008898122928">"Islatu pantaila"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Baztertu"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Konektatutako pantaila"</string>
@@ -1217,8 +1229,6 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) aplikazioak erabili du duela gutxi"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioak darabil (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) aplikazioak erabili du duela gutxi"</string>
-    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
-    <skip />
-    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
-    <skip />
+    <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Teklatuaren hondoko argia"</string>
+    <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d/%2$d maila"</string>
 </resources>

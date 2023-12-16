@@ -37,5 +37,6 @@
         <item name="tabIndicatorAnimationDuration">0</item>
         <item name="tabTextAppearance">@style/SettingsLibTabsTextAppearance</item>
         <item name="tabTextColor">@color/settingslib_tabs_text_color</item>
+        <item name="tabRippleColor">@android:color/transparent</item>
     </style>
 </resources>

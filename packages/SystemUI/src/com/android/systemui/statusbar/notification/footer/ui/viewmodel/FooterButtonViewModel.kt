@@ -18,9 +18,10 @@ package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
 import android.annotation.StringRes
 import com.android.systemui.util.ui.AnimatedValue
+import kotlinx.coroutines.flow.Flow
 
 data class FooterButtonViewModel(
     @StringRes val labelId: Int,
     @StringRes val accessibilityDescriptionId: Int,
-    val isVisible: AnimatedValue<Boolean>,
+    val isVisible: Flow<AnimatedValue<Boolean>>,
 )

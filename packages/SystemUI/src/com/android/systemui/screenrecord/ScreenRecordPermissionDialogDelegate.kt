@@ -15,6 +15,7 @@
  */
 package com.android.systemui.screenrecord
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
@@ -23,9 +24,12 @@ import android.os.Handler
 import android.os.Looper
 import android.os.ResultReceiver
 import android.os.UserHandle
+import android.view.MotionEvent.ACTION_MOVE
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
@@ -52,6 +56,7 @@ class ScreenRecordPermissionDialogDelegate(
     private val userContextProvider: UserContextProvider,
     private val onStartRecordingClicked: Runnable?,
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
+    private val systemUIDialogFactory: SystemUIDialog.Factory
 ) :
     BaseMediaProjectionPermissionDialogDelegate<SystemUIDialog>(
         createOptionList(),
@@ -60,14 +65,21 @@ class ScreenRecordPermissionDialogDelegate(
         mediaProjectionMetricsLogger,
         R.drawable.ic_screenrecord,
         R.color.screenrecord_icon_color
-    ) {
+    ),
+    SystemUIDialog.Delegate {
     private lateinit var tapsSwitch: Switch
+    private lateinit var tapsSwitchContainer: ViewGroup
     private lateinit var tapsView: View
     private lateinit var audioSwitch: Switch
+    private lateinit var audioSwitchContainer: ViewGroup
     private lateinit var options: Spinner
 
+    override fun createDialog(): SystemUIDialog {
+        return systemUIDialogFactory.create(this)
+    }
+
     override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
-        super.onCreate(dialog, savedInstanceState)
+        super<BaseMediaProjectionPermissionDialogDelegate>.onCreate(dialog, savedInstanceState)
         setDialogTitle(R.string.screenrecord_permission_dialog_title)
         dialog.setTitle(R.string.screenrecord_title)
         setStartButtonText(R.string.screenrecord_permission_dialog_continue)
@@ -102,11 +114,24 @@ class ScreenRecordPermissionDialogDelegate(
 
     @LayoutRes override fun getOptionsViewLayoutId(): Int = R.layout.screen_record_options
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initRecordOptionsView() {
         audioSwitch = dialog.requireViewById(R.id.screenrecord_audio_switch)
         tapsSwitch = dialog.requireViewById(R.id.screenrecord_taps_switch)
+        audioSwitchContainer = dialog.requireViewById(R.id.screenrecord_audio_switch_container)
+        tapsSwitchContainer = dialog.requireViewById(R.id.screenrecord_taps_switch_container)
+
+        // Add these listeners so that the switch only responds to movement
+        // within its target region, to meet accessibility requirements
+        audioSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
+        tapsSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
+
+        audioSwitchContainer.setOnClickListener { audioSwitch.toggle() }
+        tapsSwitchContainer.setOnClickListener { tapsSwitch.toggle() }
+
         tapsView = dialog.requireViewById(R.id.show_taps)
         updateTapsViewVisibility()
+
         options = dialog.requireViewById(R.id.screen_recording_options)
         val a: ArrayAdapter<*> =
             ScreenRecordingAdapter(
@@ -119,6 +144,19 @@ class ScreenRecordPermissionDialogDelegate(
         options.setOnItemClickListenerInt { _: AdapterView<*>?, _: View?, _: Int, _: Long ->
             audioSwitch.isChecked = true
         }
+
+        // disable redundant Touch & Hold accessibility action for Switch Access
+        options.accessibilityDelegate =
+            object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo
+                ) {
+                    info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK)
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                }
+            }
+        options.isLongClickable = false
     }
 
     override fun onItemSelected(adapterView: AdapterView<*>?, view: View, pos: Int, id: Long) {

@@ -41,6 +41,7 @@ package android.util;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SparseDoubleArray implements Cloneable {
     /**
      * The int->double map, but storing the doubles as longs using

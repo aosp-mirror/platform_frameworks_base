@@ -109,7 +109,6 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.provider.DeviceConfig;
 import android.util.IndentingPrintWriter;
-import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -154,7 +153,6 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
     private long mMinSatiatedConsumptionLimit;
     private long mMaxSatiatedConsumptionLimit;
 
-    private final KeyValueListParser mParser = new KeyValueListParser(',');
     private final Injector mInjector;
 
     private final SparseArray<Action> mActions = new SparseArray<>();
@@ -241,35 +239,36 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         mRewards.clear();
 
         try {
-            mParser.setString(policyValuesString);
+            mUserSettingDeviceConfigMediator.setSettingsString(policyValuesString);
+            mUserSettingDeviceConfigMediator.setDeviceConfigProperties(properties);
         } catch (IllegalArgumentException e) {
             Slog.e(TAG, "Global setting key incorrect: ", e);
         }
 
-        mMinSatiatedBalanceOther = getConstantAsCake(mParser, properties,
+        mMinSatiatedBalanceOther = getConstantAsCake(
             KEY_AM_MIN_SATIATED_BALANCE_OTHER_APP, DEFAULT_AM_MIN_SATIATED_BALANCE_OTHER_APP_CAKES);
-        mMinSatiatedBalanceHeadlessSystemApp = getConstantAsCake(mParser, properties,
+        mMinSatiatedBalanceHeadlessSystemApp = getConstantAsCake(
                 KEY_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
                 DEFAULT_AM_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES,
                 mMinSatiatedBalanceOther);
-        mMinSatiatedBalanceExempted = getConstantAsCake(mParser, properties,
+        mMinSatiatedBalanceExempted = getConstantAsCake(
                 KEY_AM_MIN_SATIATED_BALANCE_EXEMPTED,
                 DEFAULT_AM_MIN_SATIATED_BALANCE_EXEMPTED_CAKES,
                 mMinSatiatedBalanceHeadlessSystemApp);
-        mMaxSatiatedBalance = getConstantAsCake(mParser, properties,
+        mMaxSatiatedBalance = getConstantAsCake(
             KEY_AM_MAX_SATIATED_BALANCE, DEFAULT_AM_MAX_SATIATED_BALANCE_CAKES,
             Math.max(arcToCake(1), mMinSatiatedBalanceExempted));
-        mMinSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+        mMinSatiatedConsumptionLimit = getConstantAsCake(
                 KEY_AM_MIN_CONSUMPTION_LIMIT, DEFAULT_AM_MIN_CONSUMPTION_LIMIT_CAKES,
                 arcToCake(1));
-        mInitialSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+        mInitialSatiatedConsumptionLimit = getConstantAsCake(
                 KEY_AM_INITIAL_CONSUMPTION_LIMIT, DEFAULT_AM_INITIAL_CONSUMPTION_LIMIT_CAKES,
                 mMinSatiatedConsumptionLimit);
-        mMaxSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+        mMaxSatiatedConsumptionLimit = getConstantAsCake(
                 KEY_AM_MAX_CONSUMPTION_LIMIT, DEFAULT_AM_MAX_CONSUMPTION_LIMIT_CAKES,
                 mInitialSatiatedConsumptionLimit);
 
-        final long exactAllowWhileIdleWakeupBasePrice = getConstantAsCake(mParser, properties,
+        final long exactAllowWhileIdleWakeupBasePrice = getConstantAsCake(
                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE,
                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_BASE_PRICE_CAKES);
 
@@ -279,49 +278,49 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
         // run out of credits, and not when the system has run out of stock.
         mActions.put(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_WAKEUP_CTP_CAKES),
                         exactAllowWhileIdleWakeupBasePrice,
                         /* respectsStockLimit */ false));
         mActions.put(ACTION_ALARM_WAKEUP_EXACT,
                 new Action(ACTION_ALARM_WAKEUP_EXACT,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_EXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_CTP_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_EXACT_WAKEUP_BASE_PRICE_CAKES),
                         /* respectsStockLimit */ false));
 
         final long inexactAllowWhileIdleWakeupBasePrice =
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE,
                         DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_BASE_PRICE_CAKES);
 
         mActions.put(ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_WAKEUP_INEXACT_ALLOW_WHILE_IDLE,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_WAKEUP_CTP_CAKES),
                         inexactAllowWhileIdleWakeupBasePrice,
                         /* respectsStockLimit */ false));
         mActions.put(ACTION_ALARM_WAKEUP_INEXACT,
                 new Action(ACTION_ALARM_WAKEUP_INEXACT,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_CTP_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_INEXACT_WAKEUP_BASE_PRICE_CAKES),
                         /* respectsStockLimit */ false));
 
-        final long exactAllowWhileIdleNonWakeupBasePrice = getConstantAsCake(mParser, properties,
+        final long exactAllowWhileIdleNonWakeupBasePrice = getConstantAsCake(
                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_BASE_PRICE,
                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE_CAKES);
         mActions.put(ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE,
                 new Action(ACTION_ALARM_NONWAKEUP_EXACT_ALLOW_WHILE_IDLE,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_EXACT_NONWAKEUP_CTP_CAKES),
                         exactAllowWhileIdleNonWakeupBasePrice,
@@ -329,18 +328,18 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
 
         mActions.put(ACTION_ALARM_NONWAKEUP_EXACT,
                 new Action(ACTION_ALARM_NONWAKEUP_EXACT,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_CTP_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_EXACT_NONWAKEUP_BASE_PRICE_CAKES),
                         /* respectsStockLimit */ false));
 
-        final long inexactAllowWhileIdleNonWakeupBasePrice = getConstantAsCake(mParser, properties,
+        final long inexactAllowWhileIdleNonWakeupBasePrice = getConstantAsCake(
                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE,
                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_BASE_PRICE_CAKES);
-        final long inexactAllowWhileIdleNonWakeupCtp = getConstantAsCake(mParser, properties,
+        final long inexactAllowWhileIdleNonWakeupCtp = getConstantAsCake(
                 KEY_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP,
                 DEFAULT_AM_ACTION_ALARM_ALLOW_WHILE_IDLE_INEXACT_NONWAKEUP_CTP_CAKES);
         mActions.put(ACTION_ALARM_NONWAKEUP_INEXACT_ALLOW_WHILE_IDLE,
@@ -350,72 +349,72 @@ public class AlarmManagerEconomicPolicy extends EconomicPolicy {
 
         mActions.put(ACTION_ALARM_NONWAKEUP_INEXACT,
                 new Action(ACTION_ALARM_NONWAKEUP_INEXACT,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP,
                                 DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_CTP_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_INEXACT_NONWAKEUP_BASE_PRICE_CAKES)));
         mActions.put(ACTION_ALARM_CLOCK,
                 new Action(ACTION_ALARM_CLOCK,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_ALARMCLOCK_CTP,
                                 DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_CTP_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE,
                                 DEFAULT_AM_ACTION_ALARM_ALARMCLOCK_BASE_PRICE_CAKES),
                         /* respectsStockLimit */ false));
 
         mRewards.put(REWARD_TOP_ACTIVITY, new Reward(REWARD_TOP_ACTIVITY,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_REWARD_TOP_ACTIVITY_INSTANT,
                         DEFAULT_AM_REWARD_TOP_ACTIVITY_INSTANT_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_REWARD_TOP_ACTIVITY_ONGOING,
                         DEFAULT_AM_REWARD_TOP_ACTIVITY_ONGOING_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_REWARD_TOP_ACTIVITY_MAX,
                         DEFAULT_AM_REWARD_TOP_ACTIVITY_MAX_CAKES)));
         mRewards.put(REWARD_NOTIFICATION_SEEN, new Reward(REWARD_NOTIFICATION_SEEN,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_REWARD_NOTIFICATION_SEEN_INSTANT,
                         DEFAULT_AM_REWARD_NOTIFICATION_SEEN_INSTANT_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_REWARD_NOTIFICATION_SEEN_ONGOING,
                         DEFAULT_AM_REWARD_NOTIFICATION_SEEN_ONGOING_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_REWARD_NOTIFICATION_SEEN_MAX,
                         DEFAULT_AM_REWARD_NOTIFICATION_SEEN_MAX_CAKES)));
         mRewards.put(REWARD_NOTIFICATION_INTERACTION,
                 new Reward(REWARD_NOTIFICATION_INTERACTION,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT,
                                 DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING,
                                 DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_ONGOING_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_REWARD_NOTIFICATION_INTERACTION_MAX,
                                 DEFAULT_AM_REWARD_NOTIFICATION_INTERACTION_MAX_CAKES)));
         mRewards.put(REWARD_WIDGET_INTERACTION, new Reward(REWARD_WIDGET_INTERACTION,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_REWARD_WIDGET_INTERACTION_INSTANT,
                         DEFAULT_AM_REWARD_WIDGET_INTERACTION_INSTANT_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_REWARD_WIDGET_INTERACTION_ONGOING,
                         DEFAULT_AM_REWARD_WIDGET_INTERACTION_ONGOING_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_AM_REWARD_WIDGET_INTERACTION_MAX,
                         DEFAULT_AM_REWARD_WIDGET_INTERACTION_MAX_CAKES)));
         mRewards.put(REWARD_OTHER_USER_INTERACTION,
                 new Reward(REWARD_OTHER_USER_INTERACTION,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_REWARD_OTHER_USER_INTERACTION_INSTANT,
                                 DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_INSTANT_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_REWARD_OTHER_USER_INTERACTION_ONGOING,
                                 DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_AM_REWARD_OTHER_USER_INTERACTION_MAX,
                                 DEFAULT_AM_REWARD_OTHER_USER_INTERACTION_MAX_CAKES)));
     }

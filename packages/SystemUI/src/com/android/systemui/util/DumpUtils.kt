@@ -60,6 +60,12 @@ fun IndentingPrintWriter.withIncreasedIndent(runnable: Runnable) {
 fun IndentingPrintWriter.println(label: String, value: Any?) =
     append(label).append('=').println(value)
 
+/** Print a section with a header using the given name and an indented body */
+inline fun IndentingPrintWriter.printSection(sectionName: String, block: () -> Unit) {
+    append(sectionName).println(":")
+    withIncreasedIndent(block)
+}
+
 @JvmOverloads
 inline fun <T> IndentingPrintWriter.printCollection(
     label: String,

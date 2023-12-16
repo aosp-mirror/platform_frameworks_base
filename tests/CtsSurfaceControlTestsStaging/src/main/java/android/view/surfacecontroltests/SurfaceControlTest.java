@@ -16,11 +16,8 @@
 
 package android.view.surfacecontroltests;
 
-import static org.junit.Assume.assumeTrue;
-
 import android.Manifest;
 import android.hardware.display.DisplayManager;
-import android.os.SystemProperties;
 import android.support.test.uiautomator.UiDevice;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -54,10 +51,6 @@ public class SurfaceControlTest {
 
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
-        // TODO(b/290634611): clean this up once SF new front end is enabled by default
-        assumeTrue(SystemProperties.getBoolean(
-                "persist.debug.sf.enable_layer_lifecycle_manager", false));
-
         uiDevice.wakeUp();
         uiDevice.executeShellCommand("wm dismiss-keyguard");
 
@@ -85,6 +78,12 @@ public class SurfaceControlTest {
         InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation()
                 .dropShellPermissionIdentity();
+    }
+
+    @Test
+    public void testSurfaceControlFrameRateCompatibilityGte() throws InterruptedException {
+        GraphicsActivity activity = mActivityRule.getActivity();
+        activity.testSurfaceControlFrameRateCompatibility(Surface.FRAME_RATE_COMPATIBILITY_GTE);
     }
 
     @Test
@@ -118,10 +117,11 @@ public class SurfaceControlTest {
     }
 
     @Test
-    public void testSurfaceControlFrameRateSelectionStrategySelf() throws InterruptedException {
+    public void testSurfaceControlFrameRateSelectionStrategyPropagate()
+            throws InterruptedException {
         GraphicsActivity activity = mActivityRule.getActivity();
         activity.testSurfaceControlFrameRateSelectionStrategy(
-                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF);
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_PROPAGATE);
     }
 
     @Test
@@ -130,5 +130,13 @@ public class SurfaceControlTest {
         GraphicsActivity activity = mActivityRule.getActivity();
         activity.testSurfaceControlFrameRateSelectionStrategy(
                 SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
+    }
+
+    @Test
+    public void testSurfaceControlFrameRateSelectionStrategySelf()
+            throws InterruptedException {
+        GraphicsActivity activity = mActivityRule.getActivity();
+        activity.testSurfaceControlFrameRateSelectionStrategy(
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF);
     }
 }

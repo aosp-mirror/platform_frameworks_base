@@ -18,7 +18,6 @@ package android.view.contentprotection;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UiThread;
 import android.content.ContentCaptureOptions;
 import android.content.pm.ParceledListSlice;
 import android.os.Handler;
@@ -102,7 +101,6 @@ public class ContentProtectionEventProcessor {
     }
 
     /** Main entry point for {@link ContentCaptureEvent} processing. */
-    @UiThread
     public void processEvent(@NonNull ContentCaptureEvent event) {
         if (EVENT_TYPES_TO_STORE.contains(event.getType())) {
             storeEvent(event);
@@ -112,7 +110,6 @@ public class ContentProtectionEventProcessor {
         }
     }
 
-    @UiThread
     private void storeEvent(@NonNull ContentCaptureEvent event) {
         // Ensure receiver gets the package name which might not be set
         ViewNode viewNode = (event.getViewNode() != null) ? event.getViewNode() : new ViewNode();
@@ -121,7 +118,6 @@ public class ContentProtectionEventProcessor {
         mEventBuffer.append(event);
     }
 
-    @UiThread
     private void processViewAppearedEvent(@NonNull ContentCaptureEvent event) {
         ViewNode viewNode = event.getViewNode();
         String eventText = ContentProtectionUtils.getEventTextLower(event);
@@ -154,7 +150,6 @@ public class ContentProtectionEventProcessor {
         }
     }
 
-    @UiThread
     private void loginDetected() {
         if (mLastFlushTime == null
                 || Instant.now().isAfter(mLastFlushTime.plus(MIN_DURATION_BETWEEN_FLUSHING))) {
@@ -163,13 +158,11 @@ public class ContentProtectionEventProcessor {
         resetLoginFlags();
     }
 
-    @UiThread
     private void resetLoginFlags() {
         mGroupsAll.forEach(group -> group.mFound = false);
         mAnyGroupFound = false;
     }
 
-    @UiThread
     private void maybeResetLoginFlags() {
         if (mAnyGroupFound) {
             if (mResetLoginRemainingEventsToProcess <= 0) {
@@ -183,7 +176,6 @@ public class ContentProtectionEventProcessor {
         }
     }
 
-    @UiThread
     private void flush() {
         mLastFlushTime = Instant.now();
 
@@ -192,7 +184,6 @@ public class ContentProtectionEventProcessor {
         mHandler.post(() -> handlerOnLoginDetected(events));
     }
 
-    @UiThread
     @NonNull
     private ParceledListSlice<ContentCaptureEvent> clearEvents() {
         List<ContentCaptureEvent> events = Arrays.asList(mEventBuffer.toArray());

@@ -1710,10 +1710,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यह आपके और किसी ऐप्लिकेशन या हार्डवेयर सेंसर के बीच होने वाले इंटरैक्शन को ट्रैक कर सकता है और आपकी तरफ़ से ऐप्लिकेशन के साथ इंटरैक्ट कर सकता है."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दें"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"इंकार करें"</string>
-    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
-    <skip />
-    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
-    <skip />
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"अनइंस्टॉल करें"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ऐप्लिकेशन की वजह से, अनुमति का अनुरोध समझने में परेशानी हो रही है. इसलिए, आपके जवाब की पुष्टि नहीं की जा सकी."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"किसी सुविधा का इस्तेमाल करने के लिए, उस पर टैप करें:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"सुलभता बटन पर टैप करके, इस्तेमाल करने के लिए सुविधाएं चुनें"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"चुनें कि आवाज़ कम या ज़्यादा करने वाले बटन के शॉर्टकट से आप किन सुविधाओं का इस्तेमाल करना चाहते हैं"</string>
@@ -1908,10 +1906,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"सप्ताहांत"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"इवेंट"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"सोते समय"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
     <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"चालू है"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"बंद है"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> कुछ आवाज़ें म्‍यूट कर रहा है"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"आपके डिवाइस में कोई अंदरूनी समस्या है और यह तब तक ठीक नहीं होगी जब तक आप फ़ैक्‍टरी डेटा रीसेट नहीं करते."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"आपके डिवाइस के साथ कोई आंतरिक गड़बड़ी हुई. विवरणों के लिए अपने निर्माता से संपर्क करें."</string>
@@ -1955,7 +1953,7 @@
     <string name="language_selection_title" msgid="52674936078683285">"भाषा जोड़ें"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"क्षेत्र प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषा का नाम लिखें"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"दिए गए सुझाव"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"सुझाई गई भाषाएं"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"सुझाए गए देश/इलाके"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"सुझाई गई भाषाएं"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"सुझाए गए इलाके"</string>
@@ -2344,10 +2342,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"माइक्रोफ़ोन को ब्लॉक किया गया है"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"डिसप्ले का कॉन्टेंट नहीं दिखाया जा सकता"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"कोई दूसरा केबल इस्तेमाल करके फिर से कोशिश करें"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ऐसा हो सकता है कि केबल, डिसप्ले के साथ ठीक से काम न करे"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ऐसा हो सकता है कि यूएसबी-सी केबल, डिसप्ले के साथ ठीक से कनेक्ट न हो पाए"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"आपका डिवाइस बहुत गर्म है. इसलिए, इसके ठंडा होने तक दूसरे डिसप्ले पर इसकी स्क्रीन शेयर नहीं की जा सकती"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen की सुविधा चालू है"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, कॉन्टेंट दिखाने के लिए दोनों स्क्रीन का इस्तेमाल कर रहा है"</string>
@@ -2364,4 +2359,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"कीबोर्ड का लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… पर सेट कर दिया गया है. इसे बदलने के लिए टैप करें."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"फ़िज़िकल कीबोर्ड कॉन्फ़िगर किए गए"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"कीबोर्ड देखने के लिए टैप करें"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"निजी"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"क्लोन"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"ऑफ़िस"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"ऑफ़िस 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"ऑफ़िस 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"टेस्ट"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"कम्यूनिटी"</string>
 </resources>

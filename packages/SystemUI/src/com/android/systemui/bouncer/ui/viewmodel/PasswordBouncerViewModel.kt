@@ -21,8 +21,11 @@ import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.res.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 /** Holds UI state and handles user input for the password bouncer UI. */
 class PasswordBouncerViewModel(
@@ -43,7 +46,30 @@ class PasswordBouncerViewModel(
 
     override val authenticationMethod = AuthenticationMethodModel.Password
 
-    override val throttlingMessageId = R.string.kg_too_many_failed_password_attempts_dialog_message
+    override val lockoutMessageId = R.string.kg_too_many_failed_password_attempts_dialog_message
+
+    /** Whether the input method editor (for example, the software keyboard) is visible. */
+    private var isImeVisible: Boolean = false
+
+    /** Whether the text field element currently has focus. */
+    private val isTextFieldFocused = MutableStateFlow(false)
+
+    /** Whether the UI should request focus on the text field element. */
+    val isTextFieldFocusRequested =
+        combine(interactor.lockout, isTextFieldFocused) { throttling, hasFocus ->
+                throttling == null && !hasFocus
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = interactor.lockout.value == null && !isTextFieldFocused.value,
+            )
+
+    override fun onHidden() {
+        super.onHidden()
+        isImeVisible = false
+        isTextFieldFocused.value = false
+    }
 
     override fun clearInput() {
         _password.value = ""
@@ -71,5 +97,22 @@ class PasswordBouncerViewModel(
         if (_password.value.isNotEmpty()) {
             tryAuthenticate()
         }
+    }
+
+    /**
+     * Notifies that the input method editor (for example, the software keyboard) has been shown or
+     * hidden.
+     */
+    suspend fun onImeVisibilityChanged(isVisible: Boolean) {
+        if (isImeVisible && !isVisible && interactor.lockout.value == null) {
+            interactor.onImeHiddenByUser()
+        }
+
+        isImeVisible = isVisible
+    }
+
+    /** Notifies that the password text field has gained or lost focus. */
+    fun onTextFieldFocusChanged(isFocused: Boolean) {
+        isTextFieldFocused.value = isFocused
     }
 }

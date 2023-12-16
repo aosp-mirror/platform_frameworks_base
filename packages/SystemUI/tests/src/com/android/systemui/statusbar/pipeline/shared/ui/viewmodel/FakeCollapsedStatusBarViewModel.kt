@@ -16,11 +16,20 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeCollapsedStatusBarViewModel : CollapsedStatusBarViewModel {
+    private val areNotificationLightsOut = MutableStateFlow(false)
+
     override val isTransitioningFromLockscreenToOccluded = MutableStateFlow(false)
 
     override val transitionFromLockscreenToDreamStartedEvent = MutableSharedFlow<Unit>()
+
+    override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> = areNotificationLightsOut
+
+    fun setNotificationLightsOut(lightsOut: Boolean) {
+        areNotificationLightsOut.value = lightsOut
+    }
 }

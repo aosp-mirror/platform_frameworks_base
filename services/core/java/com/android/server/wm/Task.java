@@ -422,6 +422,11 @@ class Task extends TaskFragment {
     // TODO: remove this once the recents animation is moved to the Shell
     SurfaceControl mLastRecentsAnimationOverlay;
 
+    // A surface that is used by TaskFragmentOrganizer to place content on top of own activities and
+    // trusted TaskFragments.
+    @Nullable
+    DecorSurfaceContainer mDecorSurfaceContainer;
+
     static final int LAYER_RANK_INVISIBLE = -1;
     // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
@@ -1540,6 +1545,11 @@ class Task extends TaskFragment {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
 
+        if (mDecorSurfaceContainer != null && r == mDecorSurfaceContainer.mOwnerTaskFragment) {
+            // Remove the decor surface if the owner TaskFragment is removed;
+            removeDecorSurface();
+        }
+
         if (hasChild()) {
             updateEffectiveIntent();
 
@@ -2638,6 +2648,9 @@ class Task extends TaskFragment {
         }
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
+        if (mDecorSurfaceContainer != null) {
+            mDecorSurfaceContainer.release();
+        }
 
         super.removeImmediately();
         mRemoving = false;
@@ -3644,7 +3657,8 @@ class Task extends TaskFragment {
      */
     TaskFragmentParentInfo getTaskFragmentParentInfo() {
         return new TaskFragmentParentInfo(getConfiguration(), getDisplayId(),
-                shouldBeVisible(null /* starting */), hasNonFinishingDirectActivity());
+                shouldBeVisible(null /* starting */), hasNonFinishingDirectActivity(),
+                getDecorSurface());
     }
 
     @Override
@@ -3664,6 +3678,62 @@ class Task extends TaskFragment {
         if (childOrganizedTf != null) {
             childOrganizedTf.sendTaskFragmentParentInfoChanged();
         }
+    }
+
+    @Override
+    void assignChildLayers(@NonNull SurfaceControl.Transaction t) {
+        int layer = 0;
+        boolean decorSurfacePlaced = false;
+
+        // We use two passes as a way to promote children which
+        // need Z-boosting to the end of the list.
+        for (int j = 0; j < mChildren.size(); ++j) {
+            final WindowContainer wc = mChildren.get(j);
+            wc.assignChildLayers(t);
+            if (!wc.needsZBoost()) {
+                // Place the decor surface under any untrusted content.
+                if (mDecorSurfaceContainer != null && !decorSurfacePlaced
+                        && shouldPlaceDecorSurfaceBelowContainer(wc)) {
+                    mDecorSurfaceContainer.assignLayer(t, layer++);
+                    decorSurfacePlaced = true;
+                }
+                wc.assignLayer(t, layer++);
+
+                // Place the decor surface just above the owner TaskFragment.
+                if (mDecorSurfaceContainer != null && !decorSurfacePlaced
+                        && wc == mDecorSurfaceContainer.mOwnerTaskFragment) {
+                    mDecorSurfaceContainer.assignLayer(t, layer++);
+                    decorSurfacePlaced = true;
+                }
+            }
+        }
+
+        // If not placed yet, the decor surface should be on top of all non-boosted children.
+        if (mDecorSurfaceContainer != null && !decorSurfacePlaced) {
+            mDecorSurfaceContainer.assignLayer(t, layer++);
+            decorSurfacePlaced = true;
+        }
+
+        for (int j = 0; j < mChildren.size(); ++j) {
+            final WindowContainer wc = mChildren.get(j);
+            if (wc.needsZBoost()) {
+                wc.assignLayer(t, layer++);
+            }
+        }
+        if (mOverlayHost != null) {
+            mOverlayHost.setLayer(t, layer++);
+        }
+    }
+
+    boolean shouldPlaceDecorSurfaceBelowContainer(@NonNull WindowContainer wc) {
+        boolean isOwnActivity =
+                wc.asActivityRecord() != null
+                        && wc.asActivityRecord().isUid(effectiveUid);
+        boolean isTrustedTaskFragment =
+                wc.asTaskFragment() != null
+                        && wc.asTaskFragment().isEmbedded()
+                        && wc.asTaskFragment().isAllowedToBeEmbeddedInTrustedMode();
+        return !isOwnActivity && !isTrustedTaskFragment;
     }
 
     boolean isTaskId(int taskId) {
@@ -5745,8 +5815,7 @@ class Task extends TaskFragment {
             }
 
             mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                    mDisplayContent.mDisplayId, false /* markFrozenIfConfigChanged */,
-                    false /* deferResume */);
+                    mDisplayContent.mDisplayId, false /* deferResume */);
         } finally {
             if (mTransitionController.isShellTransitionsEnabled()) {
                 mAtmService.continueWindowLayout();
@@ -6177,6 +6246,7 @@ class Task extends TaskFragment {
                 // Avoid resuming activities on secondary displays since we don't want bubble
                 // activities to be resumed while bubble is still collapsed.
                 // TODO(b/113840485): Having keyguard going away state for secondary displays.
+                && display != null
                 && display.isDefaultDisplay) {
             return false;
         }
@@ -6670,6 +6740,79 @@ class Task extends TaskFragment {
             final InsetsState s = originalChange.getInsetsState(true);
             getBounds(mTmpRect);
             mOverlayHost.dispatchInsetsChanged(s, mTmpRect);
+        }
+    }
+
+    /**
+     * Associates the decor surface with the given TF, or create one if there
+     * isn't one in the Task yet. The surface will be removed with the TF,
+     * and become invisible if the TF is invisible. */
+    void moveOrCreateDecorSurfaceFor(TaskFragment taskFragment) {
+        if (mDecorSurfaceContainer != null) {
+            mDecorSurfaceContainer.mOwnerTaskFragment = taskFragment;
+        } else {
+            mDecorSurfaceContainer = new DecorSurfaceContainer(taskFragment);
+            assignChildLayers();
+            sendTaskFragmentParentInfoChangedIfNeeded();
+        }
+    }
+
+    void removeDecorSurface() {
+        if (mDecorSurfaceContainer == null) {
+            return;
+        }
+        mDecorSurfaceContainer.release();
+        mDecorSurfaceContainer = null;
+        sendTaskFragmentParentInfoChangedIfNeeded();
+    }
+
+    @Nullable SurfaceControl getDecorSurface() {
+        return mDecorSurfaceContainer != null ? mDecorSurfaceContainer.mDecorSurface : null;
+    }
+
+    /**
+     * A decor surface that is requested by a {@code TaskFragmentOrganizer} which will be placed
+     * below children windows except for own Activities and TaskFragment in fully trusted mode.
+     */
+    @VisibleForTesting
+    class DecorSurfaceContainer {
+        @VisibleForTesting
+        @NonNull final SurfaceControl mContainerSurface;
+
+        @VisibleForTesting
+        @NonNull final SurfaceControl mDecorSurface;
+
+        // The TaskFragment that requested the decor surface. If it is destroyed, the decor surface
+        // is also released.
+        @VisibleForTesting
+        @NonNull TaskFragment mOwnerTaskFragment;
+
+        private DecorSurfaceContainer(@NonNull TaskFragment initialOwner) {
+            mOwnerTaskFragment = initialOwner;
+            mContainerSurface = makeSurface().setContainerLayer()
+                    .setParent(mSurfaceControl)
+                    .setName(mSurfaceControl + " - decor surface container")
+                    .setEffectLayer()
+                    .setHidden(false)
+                    .setCallsite("Task.DecorSurfaceContainer")
+                    .build();
+
+            mDecorSurface = makeSurface()
+                    .setParent(mContainerSurface)
+                    .setName(mSurfaceControl + " - decor surface")
+                    .setHidden(false)
+                    .setCallsite("Task.DecorSurfaceContainer")
+                    .build();
+        }
+
+        private void assignLayer(@NonNull SurfaceControl.Transaction t, int layer) {
+            t.setLayer(mContainerSurface, layer);
+            t.setVisibility(mContainerSurface, mOwnerTaskFragment.isVisible());
+        }
+
+        private void release() {
+            mDecorSurface.release();
+            mContainerSurface.release();
         }
     }
 }

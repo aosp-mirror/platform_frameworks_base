@@ -27,3 +27,10 @@ flag {
     description: "Enable device presence APIs"
     bug: "283000075"
 }
+
+flag {
+    name: "perm_sync_user_consent"
+    namespace: "companion"
+    description: "Expose perm sync user consent API"
+    bug: "309528663"
+}
