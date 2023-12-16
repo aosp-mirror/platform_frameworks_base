@@ -30,7 +30,7 @@ import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
 import android.util.Log
-import com.android.app.tracing.TraceUtils.Companion.runBlocking
+import com.android.app.tracing.coroutines.runBlocking
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
 import com.android.systemui.dagger.qualifiers.Main

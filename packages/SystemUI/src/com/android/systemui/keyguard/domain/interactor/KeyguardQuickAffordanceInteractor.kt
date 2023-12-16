@@ -22,7 +22,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.android.app.tracing.TraceUtils.Companion.withContext
+import com.android.app.tracing.coroutines.withContext
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
