@@ -100,7 +100,7 @@ java_library_static {
     name: "services.core.unboosted",
     defaults: [
         "platform_service_defaults",
-        "android.hardware.power-java_static",
+        "android.hardware.power-java_shared",
     ],
     srcs: [
         ":android.hardware.biometrics.face-V4-java-source",
