@@ -54,12 +54,11 @@ object KeyguardIndicationAreaBinder {
         keyguardRootViewModel: KeyguardRootViewModel,
         indicationController: KeyguardIndicationController,
     ): DisposableHandle {
-        val indicationArea: ViewGroup = view.requireViewById(R.id.keyguard_indication_area)
-        indicationController.setIndicationArea(indicationArea)
+        indicationController.setIndicationArea(view)
 
-        val indicationText: TextView = indicationArea.requireViewById(R.id.keyguard_indication_text)
+        val indicationText: TextView = view.requireViewById(R.id.keyguard_indication_text)
         val indicationTextBottom: TextView =
-            indicationArea.requireViewById(R.id.keyguard_indication_text_bottom)
+            view.requireViewById(R.id.keyguard_indication_text_bottom)
 
         view.clipChildren = false
         view.clipToPadding = false
@@ -71,7 +70,7 @@ object KeyguardIndicationAreaBinder {
                     launch {
                         if (keyguardBottomAreaRefactor()) {
                             keyguardRootViewModel.alpha.collect { alpha ->
-                                indicationArea.apply {
+                                view.apply {
                                     this.importantForAccessibility =
                                         if (alpha == 0f) {
                                             View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
@@ -83,7 +82,7 @@ object KeyguardIndicationAreaBinder {
                             }
                         } else {
                             viewModel.alpha.collect { alpha ->
-                                indicationArea.apply {
+                                view.apply {
                                     this.importantForAccessibility =
                                         if (alpha == 0f) {
                                             View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
@@ -98,7 +97,7 @@ object KeyguardIndicationAreaBinder {
 
                     launch {
                         viewModel.indicationAreaTranslationX.collect { translationX ->
-                            indicationArea.translationX = translationX
+                            view.translationX = translationX
                         }
                     }
 
@@ -113,9 +112,7 @@ object KeyguardIndicationAreaBinder {
                                     0
                                 }
                             }
-                            .collect { paddingPx ->
-                                indicationArea.setPadding(paddingPx, 0, paddingPx, 0)
-                            }
+                            .collect { paddingPx -> view.setPadding(paddingPx, 0, paddingPx, 0) }
                     }
 
                     launch {
@@ -124,7 +121,7 @@ object KeyguardIndicationAreaBinder {
                             .flatMapLatest { defaultBurnInOffsetY ->
                                 viewModel.indicationAreaTranslationY(defaultBurnInOffsetY)
                             }
-                            .collect { translationY -> indicationArea.translationY = translationY }
+                            .collect { translationY -> view.translationY = translationY }
                     }
 
                     launch {
