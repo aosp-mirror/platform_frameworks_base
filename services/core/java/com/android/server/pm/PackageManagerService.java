@@ -1293,7 +1293,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS);
     }
 
-    void scheduleDeferredNoKillPostDelete(InstallArgs args) {
+    void scheduleDeferredNoKillPostDelete(CleanUpArgs args) {
         Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_POST_DELETE, args);
         // If the feature flag is on, retain the old files for a day. Otherwise, delete the old
         // files after a few seconds.
@@ -7974,8 +7974,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mRemovePackageHelper.removeCodePath(codePath);
     }
 
-    void cleanUpResources(@Nullable File codeFile, @Nullable String[] instructionSets) {
-        mRemovePackageHelper.cleanUpResources(codeFile, instructionSets);
+    void cleanUpResources(@NonNull String packageName, @NonNull File codeFile,
+                          @NonNull String[] instructionSets) {
+        mRemovePackageHelper.cleanUpResources(packageName, codeFile, instructionSets);
     }
 
     void cleanUpForMoveInstall(String volumeUuid, String packageName, String fromCodePath) {

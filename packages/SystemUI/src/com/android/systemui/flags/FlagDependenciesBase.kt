@@ -133,6 +133,7 @@ constructor(
                 .setContentTitle(title)
                 .setContentText(details)
                 .setStyle(Notification.BigTextStyle().bigText(details))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .build()
         notifManager.createNotificationChannel(channel)
         notifManager.notify("flags", 0, notification)

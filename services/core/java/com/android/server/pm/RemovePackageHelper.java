@@ -30,6 +30,7 @@ import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
@@ -456,15 +457,25 @@ final class RemovePackageHelper {
         }
     }
 
-    void cleanUpResources(File codeFile, String[] instructionSets) {
+    void cleanUpResources(@Nullable String packageName, @Nullable File codeFile,
+                          @Nullable String[] instructionSets) {
         synchronized (mPm.mInstallLock) {
             cleanUpResourcesLI(codeFile, instructionSets);
+        }
+        if (packageName == null) {
+            return;
+        }
+        synchronized (mPm.mLock) {
+            PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+            if (ps != null) {
+                ps.removeOldPath(codeFile);
+            }
         }
     }
 
     // Need installer lock especially for dex file removal.
     @GuardedBy("mPm.mInstallLock")
-    private void cleanUpResourcesLI(File codeFile, String[] instructionSets) {
+    private void cleanUpResourcesLI(@Nullable File codeFile, @Nullable String[] instructionSets) {
         // Try enumerating all code paths before deleting
         List<String> allCodePaths = Collections.EMPTY_LIST;
         if (codeFile != null && codeFile.exists()) {
@@ -482,7 +493,8 @@ final class RemovePackageHelper {
     }
 
     @GuardedBy("mPm.mInstallLock")
-    private void removeDexFilesLI(List<String> allCodePaths, String[] instructionSets) {
+    private void removeDexFilesLI(@NonNull List<String> allCodePaths,
+                                  @Nullable  String[] instructionSets) {
         if (!allCodePaths.isEmpty()) {
             if (instructionSets == null) {
                 throw new IllegalStateException("instructionSet == null");

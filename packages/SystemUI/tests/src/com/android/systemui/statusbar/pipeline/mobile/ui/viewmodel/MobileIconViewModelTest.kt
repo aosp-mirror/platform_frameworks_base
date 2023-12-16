@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
@@ -24,6 +25,7 @@ import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons.G
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.settingslib.mobile.TelephonyIcons.UNKNOWN
+import com.android.systemui.Flags.FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -70,6 +72,8 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class MobileIconViewModelTest : SysuiTestCase() {
     private var connectivityRepository = FakeConnectivityRepository()
+
+    private val setFlagsRule = SetFlagsRule()
 
     private lateinit var underTest: MobileIconViewModel
     private lateinit var interactor: MobileIconInteractorImpl
@@ -557,8 +561,11 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun dataActivity_configOn_testIndicators() =
+    fun dataActivity_configOn_testIndicators_staticFlagOff() =
         testScope.runTest {
+            // GIVEN STATUS_BAR_STATIC_NETWORK_INDICATORS flag is off
+            setFlagsRule.disableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
+
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
@@ -604,6 +611,63 @@ class MobileIconViewModelTest : SysuiTestCase() {
             assertThat(inVisible).isFalse()
             assertThat(outVisible).isFalse()
             assertThat(containerVisible).isFalse()
+
+            inJob.cancel()
+            outJob.cancel()
+            containerJob.cancel()
+        }
+
+    @Test
+    fun dataActivity_configOn_testIndicators_staticFlagOn() =
+        testScope.runTest {
+            // GIVEN STATUS_BAR_STATIC_NETWORK_INDICATORS flag is on
+            setFlagsRule.enableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
+
+            // Create a new view model here so the constants are properly read
+            whenever(constants.shouldShowActivityConfig).thenReturn(true)
+            createAndSetViewModel()
+
+            var inVisible: Boolean? = null
+            val inJob = underTest.activityInVisible.onEach { inVisible = it }.launchIn(this)
+
+            var outVisible: Boolean? = null
+            val outJob = underTest.activityOutVisible.onEach { outVisible = it }.launchIn(this)
+
+            var containerVisible: Boolean? = null
+            val containerJob =
+                underTest.activityContainerVisible.onEach { containerVisible = it }.launchIn(this)
+
+            repository.dataActivityDirection.value =
+                DataActivityModel(
+                    hasActivityIn = true,
+                    hasActivityOut = false,
+                )
+
+            yield()
+
+            assertThat(inVisible).isTrue()
+            assertThat(outVisible).isFalse()
+            assertThat(containerVisible).isTrue()
+
+            repository.dataActivityDirection.value =
+                DataActivityModel(
+                    hasActivityIn = false,
+                    hasActivityOut = true,
+                )
+
+            assertThat(inVisible).isFalse()
+            assertThat(outVisible).isTrue()
+            assertThat(containerVisible).isTrue()
+
+            repository.dataActivityDirection.value =
+                DataActivityModel(
+                    hasActivityIn = false,
+                    hasActivityOut = false,
+                )
+
+            assertThat(inVisible).isFalse()
+            assertThat(outVisible).isFalse()
+            assertThat(containerVisible).isTrue()
 
             inJob.cancel()
             outJob.cancel()

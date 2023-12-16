@@ -294,13 +294,13 @@ final class InstallRequest {
     @Nullable
     public File getOldCodeFile() {
         return (mRemovedInfo != null && mRemovedInfo.mArgs != null)
-                ? mRemovedInfo.mArgs.mCodeFile : null;
+                ? mRemovedInfo.mArgs.getCodeFile() : null;
     }
 
     @Nullable
     public String[] getOldInstructionSet() {
         return (mRemovedInfo != null && mRemovedInfo.mArgs != null)
-                ? mRemovedInfo.mArgs.mInstructionSets : null;
+                ? mRemovedInfo.mArgs.getInstructionSets() : null;
     }
 
     public UserHandle getUser() {

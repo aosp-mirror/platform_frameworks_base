@@ -47,6 +47,17 @@ public class WatchedSparseSetArray<T> extends WatchableImpl implements Snappable
     }
 
     /**
+     * Create a new WatchedSparseSetArray from an existing SparseSetArray without copying.
+     * <p>
+     * Use with caution: Callers must ensure that no reference to {@code sparseSetArray} exists
+     * anywhere else in the system. If such a reference does exist, then changes to the storage via
+     * that reference will not be noticed by the new WatchedSpareSetArray.
+     */
+    public WatchedSparseSetArray(@NonNull SparseSetArray<T> sparseSetArray) {
+        mStorage = sparseSetArray;
+    }
+
+    /**
      * Return the underlying storage.  This breaks the wrapper but is necessary when
      * passing the array to distant methods.
      */
