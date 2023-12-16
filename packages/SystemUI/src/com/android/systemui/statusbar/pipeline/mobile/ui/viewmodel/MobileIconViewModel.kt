@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
+import com.android.systemui.Flags.statusBarStaticInoutIndicators
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -199,7 +200,10 @@ class MobileIconViewModel(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val activityContainerVisible: Flow<Boolean> =
-        activity
-            .map { it != null && (it.hasActivityIn || it.hasActivityOut) }
+        if (statusBarStaticInoutIndicators()) {
+                flowOf(constants.shouldShowActivityConfig)
+            } else {
+                activity.map { it != null && (it.hasActivityIn || it.hasActivityOut) }
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 }

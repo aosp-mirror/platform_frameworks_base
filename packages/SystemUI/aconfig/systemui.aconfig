@@ -239,3 +239,12 @@ flag {
    description: "Enable special visual and haptic effects for quick settings tiles with long-press actions"
    bug: "229856884"
 }
+
+flag {
+    name: "status_bar_static_inout_indicators"
+    namespace: "systemui"
+    description: "(Upstream request) Always show the network activity inout indicators and "
+        "prefer using alpha to distinguish network activity."
+    bug: "310715220"
+}
+
