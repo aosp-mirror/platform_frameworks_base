@@ -19,6 +19,8 @@ package com.android.server.location.altitude;
 import android.content.Context;
 import android.frameworks.location.altitude.AddMslAltitudeToLocationRequest;
 import android.frameworks.location.altitude.AddMslAltitudeToLocationResponse;
+import android.frameworks.location.altitude.GetGeoidHeightRequest;
+import android.frameworks.location.altitude.GetGeoidHeightResponse;
 import android.frameworks.location.altitude.IAltitudeService;
 import android.location.Location;
 import android.location.altitude.AltitudeConverter;
@@ -52,15 +54,47 @@ public class AltitudeService extends IAltitudeService.Stub {
         location.setLongitude(request.longitudeDegrees);
         location.setAltitude(request.altitudeMeters);
         location.setVerticalAccuracyMeters(request.verticalAccuracyMeters);
+
+        AddMslAltitudeToLocationResponse response = new AddMslAltitudeToLocationResponse();
         try {
             mAltitudeConverter.addMslAltitudeToLocation(mContext, location);
         } catch (IOException e) {
-            throw new RemoteException(e);
+            response.success = false;
+            return response;
         }
-
-        AddMslAltitudeToLocationResponse response = new AddMslAltitudeToLocationResponse();
         response.mslAltitudeMeters = location.getMslAltitudeMeters();
         response.mslAltitudeAccuracyMeters = location.getMslAltitudeAccuracyMeters();
+        response.success = true;
+        return response;
+    }
+
+    @Override
+    public GetGeoidHeightResponse getGeoidHeight(GetGeoidHeightRequest request)
+            throws RemoteException {
+        Location location = new Location("");
+        location.setLatitude(request.latitudeDegrees);
+        location.setLongitude(request.longitudeDegrees);
+        location.setAltitude(0.0);
+        location.setVerticalAccuracyMeters(0.0f);
+
+        GetGeoidHeightResponse response = new GetGeoidHeightResponse();
+        try {
+            mAltitudeConverter.addMslAltitudeToLocation(mContext, location);
+        } catch (IOException e) {
+            response.success = false;
+            return response;
+        }
+        // The geoid height for a location with zero WGS84 altitude is equal in value to the
+        // negative of the corresponding MSL altitude.
+        response.geoidHeightMeters = -location.getMslAltitudeMeters();
+        // The geoid height error for a location with zero vertical accuracy is equal in value to
+        // the corresponding MSL altitude accuracy.
+        response.geoidHeightErrorMeters = location.getMslAltitudeAccuracyMeters();
+        // The expiration distance and additional error are currently set to constants used by
+        // health services.
+        response.expirationDistanceMeters = 10000.0;
+        response.additionalGeoidHeightErrorMeters = 0.707f;
+        response.success = true;
         return response;
     }
 
