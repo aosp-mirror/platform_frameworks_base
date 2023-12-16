@@ -49,7 +49,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.UserPackage;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -196,7 +195,7 @@ public class ActivityStartInterceptorTest {
         mAInfo.applicationInfo.flags = FLAG_SUSPENDED;
 
         when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
-                .thenReturn(UserPackage.of(TEST_USER_ID, PLATFORM_PACKAGE_NAME));
+                .thenReturn(PLATFORM_PACKAGE_NAME);
 
         // THEN calling intercept returns true
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, null, 0, 0, null, null));
@@ -228,10 +227,9 @@ public class ActivityStartInterceptorTest {
                 .setMessage("Test Message")
                 .setIcon(0x11110001)
                 .build();
-        UserPackage suspender = UserPackage.of(TEST_USER_ID, suspendingPackage);
         when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
-                .thenReturn(suspender);
-        when(mPackageManagerInternal.getSuspendedDialogInfo(TEST_PACKAGE_NAME, suspender,
+                .thenReturn(suspendingPackage);
+        when(mPackageManagerInternal.getSuspendedDialogInfo(TEST_PACKAGE_NAME, suspendingPackage,
                 TEST_USER_ID)).thenReturn(dialogInfo);
         return dialogInfo;
     }

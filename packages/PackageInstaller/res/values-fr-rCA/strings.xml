@@ -44,6 +44,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Cet utilisateur ne peut pas installer d\'applications inconnues"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Cet utilisateur n\'est pas autorisé à installer des applications"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <!-- no translation found for archive (4447791830199354721) -->
+    <skip />
     <string name="update_anyway" msgid="8792432341346261969">"Mettre à jour malgré tout"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Gérer les applis"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Espace insuffisant"</string>
@@ -58,6 +60,16 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Désinstaller mise à jour"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> fait partie de l\'application suivante :"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Voulez-vous désinstaller cette application?"</string>
+    <!-- no translation found for archive_application_text (8482325710714386348) -->
+    <skip />
+    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
+    <skip />
+    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
+    <skip />
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Voulez-vous désinstaller cette application pour "<b>"tous"</b>" les utilisateurs? L\'application et ses données seront supprimées pour "<b>"tous"</b>" les utilisateurs de l\'appareil."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Voulez-vous désinstaller cette application pour l\'utilisateur <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Voulez-vous désinstaller cette application de votre profil professionnel?"</string>
@@ -86,8 +98,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Gérer les utilisateurs"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Impossible de désinstaller <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Un problème est survenu lors de l\'analyse du paquet."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Les actions d\'installation et de désinstallation ne sont pas prises en charge par Android Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Pré-production de l\'application en cours…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Inconnue"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"À des fins de sécurité, l\'installation d\'applications inconnues provenant de cette source n\'est pas autorisée sur cette tablette. Vous pouvez modifier cette option dans les paramètres."</string>
@@ -98,6 +108,8 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Votre tablette et vos données personnelles sont plus vulnérables aux attaques provenant d\'applications inconnues. En installant cette application, vous acceptez d\'être le seul responsable de tout dommage causé à votre tablette ou de toute perte de données pouvant découler de l\'utilisation de telles applications."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Votre téléviseur et vos données personnelles sont plus vulnérables aux attaques d\'applications inconnues. En installant cette application, vous acceptez d\'être le seul responsable de tout dommage causé à votre téléviseur ou de toute perte de données pouvant découler de son utilisation."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for archiving_app_label (1127085259724124725) -->
+    <skip />
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Continuer"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Paramètres"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Installer/désinstaller applis Google Wear"</string>
@@ -116,8 +128,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Action requise"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Suivez les étapes suivantes pour restaurer cette application"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> est désactivé"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Pour restaurer cette application, activez <xliff:g id="INSTALLERNAME">%1$s</xliff:g> dans les paramètres"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> est désinstallé"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Pour restaurer cette application, vous devrez installer <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Continuer"</string>

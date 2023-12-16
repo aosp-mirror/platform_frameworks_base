@@ -2909,7 +2909,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.setPackagesSuspendedAsUser(packageNames, suspended, appExtras,
                     launcherExtras, dialogInfo, flags, mContext.getOpPackageName(),
-                    UserHandle.myUserId() /* suspendingUserId */, getUserId() /* targetUserId */);
+                    getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

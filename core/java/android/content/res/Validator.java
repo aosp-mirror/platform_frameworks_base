@@ -81,7 +81,7 @@ public class Validator {
      * Validates the resource string of a manifest tag attribute.
      */
     public void validateResStrAttr(@NonNull XmlPullParser parser, @StyleableRes int index,
-            CharSequence stringValue) throws XmlPullParserException {
+            CharSequence stringValue) {
         if (parser.getDepth() > mElements.size()) {
             return;
         }

@@ -293,21 +293,21 @@ public final class DisplayBrightnessControllerTest {
     }
 
     @Test
-    public void testConvertToFloatScale() {
+    public void testGetBrightnessFromNits() {
         float brightness = 0.5f;
         float nits = 300;
 
         // ABC is null
         assertEquals(PowerManager.BRIGHTNESS_INVALID_FLOAT,
-                mDisplayBrightnessController.convertToFloatScale(nits), /* delta= */ 0);
+                mDisplayBrightnessController.getBrightnessFromNits(nits), /* delta= */ 0);
 
         AutomaticBrightnessController automaticBrightnessController =
                 mock(AutomaticBrightnessController.class);
-        when(automaticBrightnessController.convertToFloatScale(nits)).thenReturn(brightness);
+        when(automaticBrightnessController.getBrightnessFromNits(nits)).thenReturn(brightness);
         mDisplayBrightnessController.setAutomaticBrightnessController(
                 automaticBrightnessController);
 
-        assertEquals(brightness, mDisplayBrightnessController.convertToFloatScale(nits),
+        assertEquals(brightness, mDisplayBrightnessController.getBrightnessFromNits(nits),
                 /* delta= */ 0);
     }
 
@@ -329,7 +329,7 @@ public final class DisplayBrightnessControllerTest {
         float brightness = 0.3f;
         AutomaticBrightnessController automaticBrightnessController =
                 mock(AutomaticBrightnessController.class);
-        when(automaticBrightnessController.convertToFloatScale(nits)).thenReturn(brightness);
+        when(automaticBrightnessController.getBrightnessFromNits(nits)).thenReturn(brightness);
         when(mBrightnessSetting.getBrightnessNitsForDefaultDisplay()).thenReturn(nits);
         mDisplayBrightnessController.setAutomaticBrightnessController(
                 automaticBrightnessController);
@@ -340,7 +340,7 @@ public final class DisplayBrightnessControllerTest {
         // When the nits value is invalid, the brightness is resumed from where it was last set
         nits = -1;
         brightness = 0.4f;
-        when(automaticBrightnessController.convertToFloatScale(nits)).thenReturn(brightness);
+        when(automaticBrightnessController.getBrightnessFromNits(nits)).thenReturn(brightness);
         when(mBrightnessSetting.getBrightnessNitsForDefaultDisplay()).thenReturn(nits);
         when(mBrightnessSetting.getBrightness()).thenReturn(brightness);
         mDisplayBrightnessController.setAutomaticBrightnessController(

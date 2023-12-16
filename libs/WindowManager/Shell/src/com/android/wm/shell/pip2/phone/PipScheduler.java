@@ -96,7 +96,7 @@ public class PipScheduler {
 
     @Nullable
     private WindowContainerTransaction getExitPipViaExpandTransaction() {
-        if (mPipTaskToken == null || mPinnedTaskLeash == null) {
+        if (mPipTaskToken == null) {
             return null;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();

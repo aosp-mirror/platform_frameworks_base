@@ -74,6 +74,7 @@ public class SecureSettings {
         Settings.Secure.TTS_DEFAULT_LOCALE,
         Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
         Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS,
+        Settings.Secure.ACCESSIBILITY_STICKY_KEYS,
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
         Settings.Secure.WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
@@ -246,7 +247,7 @@ public class SecureSettings {
         Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
         Settings.Secure.HEARING_AID_CALL_ROUTING,
         Settings.Secure.HEARING_AID_MEDIA_ROUTING,
-        Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+        Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING,
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
         Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,

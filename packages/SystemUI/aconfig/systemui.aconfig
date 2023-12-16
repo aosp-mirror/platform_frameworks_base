@@ -160,6 +160,15 @@ flag {
 }
 
 flag {
+    name: "edge_back_gesture_handler_thread"
+    namespace: "systemui"
+    description: "Moves the EdgeBackGestureHandler window, which is used for rendering the back "
+        "arrow, to a separate thread. Previously, the EdgeBackGestureHandler window would share "
+        "the main thread with the rest of System UI."
+    bug: "304583132"
+}
+
+flag {
     name: "new_aod_transition"
     namespace: "systemui"
     description: "New LOCKSCREEN <=> AOD transition"

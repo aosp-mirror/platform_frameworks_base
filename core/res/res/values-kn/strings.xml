@@ -1364,7 +1364,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"ಯಾವುದೇ ಅನುಮತಿಗಳ ಅಗತ್ಯವಿಲ್ಲ"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ಇದು ನಿಮ್ಮ ಹಣವನ್ನು ವ್ಯಯಿಸಬಹುದು"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ಸರಿ"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"USB ಮೂಲಕ ಈ ಸಾಧನವು ಚಾರ್ಜ್‌ ಆಗುತ್ತಿದೆ"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"USB ಮೂಲಕ ಈ ಸಾಧನವನ್ನು ಚಾರ್ಜ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB ಮೂಲಕ ಸಂಪರ್ಕಗೊಂಡಿರುವ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ಫೈಲ್ ವರ್ಗಾವಣೆಯು ಆನ್‌ ಆಗಿದೆ"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB ಮೂಲಕ PTP ಆನ್‌ ಆಗಿದೆ"</string>
@@ -1906,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ವಾರಾಂತ್ಯ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ಈವೆಂಟ್"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ನಿದ್ರೆಯ ಸಮಯ"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ಆನ್ ಆಗಿದೆ"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ಆಫ್ ಆಗಿದೆ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಧ್ವನಿ ಮ್ಯೂಟ್ ಮಾಡುತ್ತಿದ್ದಾರೆ"</string>
@@ -2341,8 +2343,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"ಬೇರೆ ಕೇಬಲ್ ಬಳಸಿ ಹಾಗೂ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"ನಿಮ್ಮ ಸಾಧನವು ತುಂಬಾ ಬಿಸಿಯಾಗಿದೆ ಮತ್ತು ಅದು ತಣ್ಣಗಾಗುವವರೆಗೆ ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ಡಿಸ್‌ಪ್ಲೇಗಳನ್ನು ಕೇಬಲ್ ಬೆಂಬಲಿಸದಿರಬಹುದು"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ನಿಮ್ಮ USB-C ಕೇಬಲ್ ಡಿಸ್‌ಪ್ಲೇಗಳಿಗೆ ಸರಿಯಾಗಿ ಕನೆಕ್ಟ್ ಆಗದಿರಬಹುದು"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen ಆನ್ ಆಗಿದೆ"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ಕಂಟೆಂಟ್‌ ಅನ್ನು ತೋರಿಸಲು <xliff:g id="APP_NAME">%1$s</xliff:g> ಎರಡೂ ಡಿಸ್‌ಪ್ಲೇಗಳನ್ನು ಬಳಸುತ್ತಿದೆ"</string>

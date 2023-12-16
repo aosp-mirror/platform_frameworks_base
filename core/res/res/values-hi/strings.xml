@@ -1906,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"सप्ताहांत"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"इवेंट"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"सोते समय"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"चालू है"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"बंद है"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> कुछ आवाज़ें म्‍यूट कर रहा है"</string>
@@ -2341,8 +2343,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"डिसप्ले का कॉन्टेंट नहीं दिखाया जा सकता"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"कोई दूसरा केबल इस्तेमाल करके फिर से कोशिश करें"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"आपका डिवाइस बहुत गर्म है. इसलिए, इसके ठंडा होने तक दूसरे डिसप्ले पर इसकी स्क्रीन शेयर नहीं की जा सकती"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ऐसा हो सकता है कि केबल, डिसप्ले के साथ ठीक से काम न करे"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ऐसा हो सकता है कि यूएसबी-सी केबल, डिसप्ले के साथ ठीक से कनेक्ट न हो पाए"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen की सुविधा चालू है"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, कॉन्टेंट दिखाने के लिए दोनों स्क्रीन का इस्तेमाल कर रहा है"</string>

@@ -1907,6 +1907,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Eveniment"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Somn"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activată"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Dezactivată"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dezactivează anumite sunete"</string>
@@ -2342,8 +2344,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nu se poate oglindi pe ecran"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Folosește alt cablu și încearcă din nou"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Dispozitivul este prea cald și nu poate oglindi ecranul până când nu se răcește"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Cablul poate să nu fie compatibil cu ecranele"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Cablul USB-C poate să nu se conecteze corespunzător la ecrane"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Funcția Dual screen este activată"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> folosește ambele ecrane pentru a afișa conținut"</string>

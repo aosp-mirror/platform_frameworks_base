@@ -38,26 +38,75 @@ class CameraAvailabilityListener(
     excludedPackages: String,
     private val executor: Executor
 ) {
+    private var activeProtectionInfo: CameraProtectionInfo? = null
+    private var openCamera: OpenCameraInfo? = null
+    private val unavailablePhysicalCameras = mutableSetOf<String>()
     private val excludedPackageIds: Set<String>
     private val listeners = mutableListOf<CameraTransitionCallback>()
     private val availabilityCallback: CameraManager.AvailabilityCallback =
-            object : CameraManager.AvailabilityCallback() {
-                override fun onCameraClosed(cameraId: String) {
-                    cameraProtectionInfoList.forEach {
-                        if (cameraId == it.cameraId) {
-                            notifyCameraInactive()
-                        }
-                    }
+        object : CameraManager.AvailabilityCallback() {
+            override fun onCameraClosed(logicalCameraId: String) {
+                openCamera = null
+                if (activeProtectionInfo?.logicalCameraId == logicalCameraId) {
+                    notifyCameraInactive()
                 }
+                activeProtectionInfo = null
+            }
 
-                override fun onCameraOpened(cameraId: String, packageId: String) {
-                    cameraProtectionInfoList.forEach {
-                        if (cameraId == it.cameraId && !isExcluded(packageId)) {
-                            notifyCameraActive(it)
-                        }
-                    }
+            override fun onCameraOpened(logicalCameraId: String, packageId: String) {
+                openCamera = OpenCameraInfo(logicalCameraId, packageId)
+                if (isExcluded(packageId)) {
+                    return
                 }
-    }
+                val protectionInfo =
+                    cameraProtectionInfoList.firstOrNull {
+                        logicalCameraId == it.logicalCameraId &&
+                            it.physicalCameraId !in unavailablePhysicalCameras
+                    }
+                if (protectionInfo != null) {
+                    activeProtectionInfo = protectionInfo
+                    notifyCameraActive(protectionInfo)
+                }
+            }
+
+            override fun onPhysicalCameraAvailable(
+                logicalCameraId: String,
+                physicalCameraId: String
+            ) {
+                unavailablePhysicalCameras -= physicalCameraId
+                val openCamera = this@CameraAvailabilityListener.openCamera ?: return
+                if (openCamera.logicalCameraId != logicalCameraId) {
+                    return
+                }
+                if (isExcluded(openCamera.packageId)) {
+                    return
+                }
+                val newActiveInfo =
+                    cameraProtectionInfoList.find {
+                        it.logicalCameraId == logicalCameraId &&
+                            it.physicalCameraId == physicalCameraId
+                    }
+                if (newActiveInfo != null) {
+                    activeProtectionInfo = newActiveInfo
+                    notifyCameraActive(newActiveInfo)
+                }
+            }
+
+            override fun onPhysicalCameraUnavailable(
+                logicalCameraId: String,
+                physicalCameraId: String
+            ) {
+                unavailablePhysicalCameras += physicalCameraId
+                val activeInfo = activeProtectionInfo ?: return
+                if (
+                    activeInfo.logicalCameraId == logicalCameraId &&
+                        activeInfo.physicalCameraId == physicalCameraId
+                ) {
+                    activeProtectionInfo = null
+                    notifyCameraInactive()
+                }
+            }
+        }
 
     init {
         excludedPackageIds = excludedPackages.split(",").toSet()
@@ -106,24 +155,21 @@ class CameraAvailabilityListener(
         listeners.forEach { it.onHideCameraProtection() }
     }
 
-    /**
-     * Callbacks to tell a listener that a relevant camera turned on and off.
-     */
+    /** Callbacks to tell a listener that a relevant camera turned on and off. */
     interface CameraTransitionCallback {
         fun onApplyCameraProtection(protectionPath: Path, bounds: Rect)
+
         fun onHideCameraProtection()
     }
 
     companion object Factory {
         fun build(context: Context, executor: Executor): CameraAvailabilityListener {
-            val manager = context
-                    .getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
             val res = context.resources
             val cameraProtectionInfoList = loadCameraProtectionInfoList(res)
             val excluded = res.getString(R.string.config_cameraProtectionExcludedPackages)
 
-            return CameraAvailabilityListener(
-                    manager, cameraProtectionInfoList, excluded, executor)
+            return CameraAvailabilityListener(manager, cameraProtectionInfoList, excluded, executor)
         }
 
         private fun pathFromString(pathString: String): Path {
@@ -140,19 +186,23 @@ class CameraAvailabilityListener(
 
         private fun loadCameraProtectionInfoList(res: Resources): List<CameraProtectionInfo> {
             val list = mutableListOf<CameraProtectionInfo>()
-            val front = loadCameraProtectionInfo(
+            val front =
+                loadCameraProtectionInfo(
                     res,
                     R.string.config_protectedCameraId,
+                    R.string.config_protectedPhysicalCameraId,
                     R.string.config_frontBuiltInDisplayCutoutProtection
-            )
+                )
             if (front != null) {
                 list.add(front)
             }
-            val inner = loadCameraProtectionInfo(
+            val inner =
+                loadCameraProtectionInfo(
                     res,
                     R.string.config_protectedInnerCameraId,
+                    R.string.config_protectedInnerPhysicalCameraId,
                     R.string.config_innerBuiltInDisplayCutoutProtection
-            )
+                )
             if (inner != null) {
                 list.add(inner)
             }
@@ -160,30 +210,44 @@ class CameraAvailabilityListener(
         }
 
         private fun loadCameraProtectionInfo(
-                res: Resources,
-                cameraIdRes: Int,
-                pathRes: Int
+            res: Resources,
+            cameraIdRes: Int,
+            physicalCameraIdRes: Int,
+            pathRes: Int
         ): CameraProtectionInfo? {
-            val cameraId = res.getString(cameraIdRes)
-            if (cameraId == null || cameraId.isEmpty()) {
+            val logicalCameraId = res.getString(cameraIdRes)
+            if (logicalCameraId.isNullOrEmpty()) {
                 return null
             }
+            val physicalCameraId = res.getString(physicalCameraIdRes)
             val protectionPath = pathFromString(res.getString(pathRes))
             val computed = RectF()
             protectionPath.computeBounds(computed)
-            val protectionBounds = Rect(
+            val protectionBounds =
+                Rect(
                     computed.left.roundToInt(),
                     computed.top.roundToInt(),
                     computed.right.roundToInt(),
                     computed.bottom.roundToInt()
+                )
+            return CameraProtectionInfo(
+                logicalCameraId,
+                physicalCameraId,
+                protectionPath,
+                protectionBounds
             )
-            return CameraProtectionInfo(cameraId, protectionPath, protectionBounds)
         }
     }
 
-    data class CameraProtectionInfo (
-            val cameraId: String,
-            val cutoutProtectionPath: Path,
-            val cutoutBounds: Rect
+    data class CameraProtectionInfo(
+        val logicalCameraId: String,
+        val physicalCameraId: String?,
+        val cutoutProtectionPath: Path,
+        val cutoutBounds: Rect,
+    )
+
+    private data class OpenCameraInfo(
+        val logicalCameraId: String,
+        val packageId: String,
     )
 }

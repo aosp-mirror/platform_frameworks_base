@@ -1706,6 +1706,15 @@ public class HdmiControlServiceTest {
         verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(false), any());
     }
 
+    @Test
+    public void onHotplugIn_invalidPortId_noAddressAllocation() {
+        mHdmiControlServiceSpy.onHotplug(-1, true);
+        mTestLooper.dispatchAll();
+
+        verify(mHdmiControlServiceSpy, times(0))
+                .allocateLogicalAddress(any(), eq(INITIATED_BY_HOTPLUG));
+    }
+
     protected static class MockPlaybackDevice extends HdmiCecLocalDevicePlayback {
 
         private boolean mCanGoToStandby;

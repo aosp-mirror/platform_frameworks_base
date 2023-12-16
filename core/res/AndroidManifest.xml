@@ -5189,7 +5189,9 @@
          this permission, it must hold the permission and be the active VoiceInteractionService in
          the system.
          {@see Settings.Secure.VOICE_INTERACTION_SERVICE}
-         @hide -->
+         @hide @SystemApi Intended for OEM and system apps.
+         <p>Protection level: signature|privileged
+    -->
     <permission android:name="android.permission.MANAGE_VOICE_KEYPHRASES"
         android:protectionLevel="signature|privileged" />
 
@@ -5198,7 +5200,9 @@
          sound models at any time. This permission should be reserved for system enrollment
          applications detected by {@link android.hardware.soundtrigger.KeyphraseEnrollmentInfo}
          only.
-         @hide <p>Not for use by third-party applications.</p> -->
+         @hide @SystemApi Intended for OEM and system apps.
+         <p>Protection level: signature|privileged
+    -->
     <permission android:name="android.permission.KEYPHRASE_ENROLLMENT_APPLICATION"
         android:protectionLevel="signature|privileged" />
 
@@ -5702,11 +5706,10 @@
                 android:protectionLevel="normal" />
 
     <!-- @hide @FlaggedApi("android.companion.flags.companion_transport_apis")
-         @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES)
          Allows an application to send and receive messages via CDM transports.
     -->
     <permission android:name="android.permission.USE_COMPANION_TRANSPORTS"
-        android:protectionLevel="signature|module" />
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to create new companion device associations.
          @SystemApi
@@ -7854,6 +7857,17 @@
         @hide -->
     <permission android:name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW"
         android:protectionLevel="signature|privileged" />
+
+    <!-- @hide @SystemApi
+        @FlaggedApi("com.android.server.notification.flags.redact_otp_notifications_from_untrusted_listeners")
+        Allows apps with a NotificationListenerService to receive notifications with sensitive
+        information
+        <p>Apps with a NotificationListenerService without this permission will not be able
+        to view certain types of sensitive information contained in notifications
+        <p>Protection level: signature|role
+    -->
+    <permission android:name="android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS"
+        android:protectionLevel="signature|role" />
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

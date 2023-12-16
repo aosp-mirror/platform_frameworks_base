@@ -7330,7 +7330,7 @@ public final class Settings {
                 "hearing_aid_media_routing";
 
         /**
-         * System sounds routing value for hearing aid. It routes system sounds to hearing aid
+         * Notification routing value for hearing aid. It routes notification sounds to hearing aid
          * or device speaker.
          * <ul>
          *     <li> 0 = Default
@@ -7339,8 +7339,8 @@ public final class Settings {
          * </ul>
          * @hide
          */
-        public static final String HEARING_AID_SYSTEM_SOUNDS_ROUTING =
-                "hearing_aid_system_sounds_routing";
+        public static final String HEARING_AID_NOTIFICATION_ROUTING =
+                "hearing_aid_notification_routing";
 
         /**
          * Setting to indicate that on device captions are enabled.
@@ -7799,6 +7799,15 @@ public final class Settings {
          * @hide
          */
         public static final String ACCESSIBILITY_BOUNCE_KEYS = "accessibility_bounce_keys";
+
+        /**
+         * Whether to enable sticky keys for Physical Keyboard accessibility.
+         *
+         * This is a boolean value that determines if Sticky keys feature is enabled.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_STICKY_KEYS = "accessibility_sticky_keys";
 
         /**
          * Whether stylus button presses are disabled. This is a boolean that

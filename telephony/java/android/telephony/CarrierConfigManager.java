@@ -9577,14 +9577,20 @@ public class CarrierConfigManager {
             "satellite_attach_supported_bool";
 
     /**
-     * The carrier-enabled satellite connection hysteresis time in seconds to determine whether to
-     * recommend Dialer to prompt users to use satellite emergency messaging.
+     * The carrier-enabled satellite connection hysteresis time in seconds for which the device
+     * continues in satellite mode after it loses the connection with the satellite network.
      * <p>
-     * A timer is started when there is an ongoing emergency call, and the IMS is not registered,
-     * and cellular service is not available, and the device was connected to a satellite network
-     * within this time in the past. When the timer expires, Telephony will send the event
+     * If the device is in satellite mode, the following actions will be taken by the device:
+     * <ul>
+     * <li>System UI will continue showing the satellite icon.</li>
+     * <li>When there is an ongoing emergency call, and the IMS is not registered, and cellular
+     * service is not available, and the device is in satellite mode, a timer with a duration
+     * defined by the overlay config
+     * {@code config_emergency_call_wait_for_connection_timeout_millis} will be started. When the
+     * timer expires, Telephony will send the event
      * {@link TelephonyManager#EVENT_DISPLAY_EMERGENCY_MESSAGE} to Dialer, which will then prompt
-     * users to switch to using satellite emergency messaging.
+     * users to switch to using satellite emergency messaging.</li>
+     * </ul>
      * <p>
      * The default value is 300 seconds.
      */

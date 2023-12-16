@@ -6,7 +6,6 @@ package android {
     field public static final String CONTROL_AUTOMOTIVE_GNSS = "android.permission.CONTROL_AUTOMOTIVE_GNSS";
     field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
     field public static final String MAKE_UID_VISIBLE = "android.permission.MAKE_UID_VISIBLE";
-    field @FlaggedApi("android.companion.flags.companion_transport_apis") public static final String USE_COMPANION_TRANSPORTS = "android.permission.USE_COMPANION_TRANSPORTS";
   }
 
 }
@@ -78,29 +77,6 @@ package android.app.admin {
     method public boolean hasManagedProfileContactsAccess(@NonNull android.os.UserHandle, @NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public int logoutUser();
     field public static final String ACTION_SHOW_NEW_USER_DISCLAIMER = "android.app.action.SHOW_NEW_USER_DISCLAIMER";
-  }
-
-}
-
-package android.companion {
-
-  public final class CompanionDeviceManager {
-    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void addOnMessageReceivedListener(@NonNull java.util.concurrent.Executor, int, @NonNull android.companion.CompanionDeviceManager.OnMessageReceivedListener);
-    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void addOnTransportsChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.OnTransportsChangedListener);
-    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void removeOnMessageReceivedListener(int, @NonNull android.companion.CompanionDeviceManager.OnMessageReceivedListener);
-    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void removeOnTransportsChangedListener(@NonNull android.companion.CompanionDeviceManager.OnTransportsChangedListener);
-    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void sendMessage(int, @NonNull byte[], @NonNull int[]);
-    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 1667729539; // 0x63678883
-    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 1669491075; // 0x63826983
-    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_REMOTE_AUTHENTICATION = 1669494629; // 0x63827765
-  }
-
-  @FlaggedApi("android.companion.companion_transport_apis") public static interface CompanionDeviceManager.OnMessageReceivedListener {
-    method public void onMessageReceived(int, @NonNull byte[]);
-  }
-
-  @FlaggedApi("android.companion.companion_transport_apis") public static interface CompanionDeviceManager.OnTransportsChangedListener {
-    method public void onTransportsChanged(@NonNull java.util.List<android.companion.AssociationInfo>);
   }
 
 }

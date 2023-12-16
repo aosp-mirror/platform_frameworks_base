@@ -53,7 +53,7 @@ import java.util.Map;
  * as install) led to the request.
  */
 final class ReconcilePackageUtils {
-    private static final boolean ALLOW_NON_PRELOADS_SYSTEM_SIGNATURE = Build.IS_DEBUGGABLE || true;
+    private static final boolean ALLOW_NON_PRELOADS_SYSTEM_SIGNATURE = Build.IS_DEBUGGABLE;
 
     public static List<ReconciledPackage> reconcilePackages(
             List<InstallRequest> installRequests,
@@ -179,7 +179,8 @@ final class ReconcilePackageUtils {
                         removeAppKeySetData = true;
                     }
 
-                    if (!isSystemPackage && !isApex && signingDetails != null
+                    if (!installRequest.isInstallSystem() && !isSystemPackage && !isApex
+                            && signingDetails != null
                             && systemPackage != null && systemPackage.getSigningDetails() != null
                             && systemPackage.getSigningDetails().checkCapability(
                                     signingDetails,

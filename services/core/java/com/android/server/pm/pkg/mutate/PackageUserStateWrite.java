@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
-import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 
 import com.android.server.pm.pkg.PackageUserStateImpl;
@@ -39,11 +38,11 @@ public interface PackageUserStateWrite {
             @PackageManager.DistractionRestriction int restrictionFlags);
 
     @NonNull
-    PackageUserStateWrite putSuspendParams(@NonNull UserPackage suspendingPackage,
+    PackageUserStateWrite putSuspendParams(@NonNull String suspendingPackage,
             @Nullable SuspendParams suspendParams);
 
     @NonNull
-    PackageUserStateWrite removeSuspension(@NonNull UserPackage suspendingPackage);
+    PackageUserStateWrite removeSuspension(@NonNull String suspendingPackage);
 
     @NonNull
     PackageUserStateWrite setHidden(boolean hidden);

@@ -44,6 +44,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Người dùng này không thể cài đặt ứng dụng không xác định"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Người dùng này không được phép cài đặt ứng dụng"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <!-- no translation found for archive (4447791830199354721) -->
+    <skip />
     <string name="update_anyway" msgid="8792432341346261969">"Vẫn cập nhật"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Quản lý ứng dụng"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Hết dung lượng"</string>
@@ -58,6 +60,16 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Gỡ cài đặt bản cập nhật"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> là một phần của ứng dụng sau:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Bạn có muốn gỡ cài đặt ứng dụng này không?"</string>
+    <!-- no translation found for archive_application_text (8482325710714386348) -->
+    <skip />
+    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
+    <skip />
+    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
+    <skip />
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Bạn có muốn gỡ cài đặt ứng dụng này cho "<b>"tất cả"</b>" người dùng không? Ứng dụng và dữ liệu của ứng dụng sẽ bị xóa khỏi "<b>"tất cả"</b>" người dùng trên thiết bị."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Bạn có muốn gỡ cài đặt ứng dụng này cho người dùng <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Bạn có muốn gỡ cài đặt ứng dụng này khỏi hồ sơ công việc của mình không?"</string>
@@ -86,8 +98,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Quản lý người dùng"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Không thể gỡ cài đặt <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Đã xảy ra sự cố khi phân tích cú pháp gói."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Không hỗ trợ thao tác Cài đặt/Gỡ cài đặt trên ứng dụng Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Đang thử nghiệm ứng dụng…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Không xác định"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Để bảo mật, máy tính bảng của bạn hiện không được phép cài đặt các ứng dụng không xác định từ nguồn này. Bạn có thể thay đổi chế độ này trong phần Cài đặt."</string>
@@ -98,6 +108,8 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Máy tính bảng và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với máy tính bảng của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV và dữ liệu cá nhân của bạn dễ bị các ứng dụng không xác định tấn công hơn. Bằng cách cài đặt ứng dụng này, bạn đồng ý tự chịu trách nhiệm cho mọi hỏng hóc đối với TV của mình hoặc mất mát dữ liệu có thể phát sinh do sử dụng ứng dụng này."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Bản sao của <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for archiving_app_label (1127085259724124725) -->
+    <skip />
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Tiếp tục"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Cài đặt"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Cài đặt/gỡ cài đặt ứng dụng Wear"</string>
@@ -116,8 +128,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Việc cần làm"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Hãy làm theo các bước tiếp theo để khôi phục ứng dụng này"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> đã bị tắt"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Để khôi phục ứng dụng này, hãy bật <xliff:g id="INSTALLERNAME">%1$s</xliff:g> trong phần Cài đặt"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> đã bị gỡ cài đặt"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Để khôi phục ứng dụng này, bạn sẽ phải cài đặt <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Tiếp tục"</string>

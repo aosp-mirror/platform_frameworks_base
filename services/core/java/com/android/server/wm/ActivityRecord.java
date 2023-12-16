@@ -182,6 +182,7 @@ import static com.android.server.wm.ActivityRecordProto.PROVIDES_MAX_BOUNDS;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.REPORTED_VISIBLE;
 import static com.android.server.wm.ActivityRecordProto.SHOULD_FORCE_ROTATE_FOR_CAMERA_COMPAT;
+import static com.android.server.wm.ActivityRecordProto.SHOULD_OVERRIDE_MIN_ASPECT_RATIO;
 import static com.android.server.wm.ActivityRecordProto.SHOULD_REFRESH_ACTIVITY_FOR_CAMERA_COMPAT;
 import static com.android.server.wm.ActivityRecordProto.SHOULD_REFRESH_ACTIVITY_VIA_PAUSE_FOR_CAMERA_COMPAT;
 import static com.android.server.wm.ActivityRecordProto.SHOULD_SEND_COMPAT_FAKE_FOCUS;
@@ -353,6 +354,7 @@ import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 import android.window.TransitionInfo.AnimationOptions;
 import android.window.WindowContainerToken;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -978,6 +980,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     int mAllowedTouchUid;
     // Whether client has requested a scene transition when exiting.
     final boolean mHasSceneTransition;
+    // Whether the app has opt-in enableOnBackInvokedCallback.
+    final boolean mOptInOnBackInvoked;
 
     // Whether the ActivityEmbedding is enabled on the app.
     private final boolean mAppActivityEmbeddingSplitsEnabled;
@@ -2231,6 +2235,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // No such property name.
         }
         mAppActivityEmbeddingSplitsEnabled = appActivityEmbeddingEnabled;
+
+        mOptInOnBackInvoked = WindowOnBackInvokedDispatcher
+                .isOnBackInvokedCallbackEnabled(info, info.applicationInfo,
+                        () -> ent != null ? ent.array : null, false);
     }
 
     /**
@@ -10350,6 +10358,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mLetterboxUiController.shouldRefreshActivityForCameraCompat());
         proto.write(SHOULD_REFRESH_ACTIVITY_VIA_PAUSE_FOR_CAMERA_COMPAT,
                 mLetterboxUiController.shouldRefreshActivityViaPauseForCameraCompat());
+        proto.write(SHOULD_OVERRIDE_MIN_ASPECT_RATIO,
+                mLetterboxUiController.shouldOverrideMinAspectRatio());
     }
 
     @Override

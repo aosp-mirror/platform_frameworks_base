@@ -37,6 +37,9 @@
 // Android-specific addition that is used to show when frames began in systrace
 EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
 
+static constexpr auto P3_XRB = static_cast<android_dataspace>(
+        ADATASPACE_STANDARD_DCI_P3 | ADATASPACE_TRANSFER_SRGB | ADATASPACE_RANGE_EXTENDED);
+
 namespace android {
 namespace uirenderer {
 namespace renderthread {
@@ -497,9 +500,7 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
         // This relies on knowing that EGL will not re-set the dataspace after the call to
         // eglCreateWindowSurface. Since the handling of the colorspace extension is largely
         // implemented in libEGL in the platform, we can safely assume this is the case
-        int32_t err = ANativeWindow_setBuffersDataSpace(
-                window,
-                static_cast<android_dataspace>(STANDARD_DCI_P3 | TRANSFER_SRGB | RANGE_EXTENDED));
+        int32_t err = ANativeWindow_setBuffersDataSpace(window, P3_XRB);
         LOG_ALWAYS_FATAL_IF(err, "Failed to ANativeWindow_setBuffersDataSpace %d", err);
     }
 

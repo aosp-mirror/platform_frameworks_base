@@ -158,6 +158,7 @@ package android {
     field public static final String INTERACT_ACROSS_USERS_FULL = "android.permission.INTERACT_ACROSS_USERS_FULL";
     field public static final String INTERNAL_SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW";
     field public static final String INVOKE_CARRIER_SETUP = "android.permission.INVOKE_CARRIER_SETUP";
+    field public static final String KEYPHRASE_ENROLLMENT_APPLICATION = "android.permission.KEYPHRASE_ENROLLMENT_APPLICATION";
     field public static final String KILL_ALL_BACKGROUND_PROCESSES = "android.permission.KILL_ALL_BACKGROUND_PROCESSES";
     field public static final String KILL_UID = "android.permission.KILL_UID";
     field public static final String LAUNCH_DEVICE_MANAGER_SETUP = "android.permission.LAUNCH_DEVICE_MANAGER_SETUP";
@@ -214,6 +215,7 @@ package android {
     field public static final String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final String MANAGE_USERS = "android.permission.MANAGE_USERS";
     field public static final String MANAGE_USER_OEM_UNLOCK_STATE = "android.permission.MANAGE_USER_OEM_UNLOCK_STATE";
+    field public static final String MANAGE_VOICE_KEYPHRASES = "android.permission.MANAGE_VOICE_KEYPHRASES";
     field public static final String MANAGE_WALLPAPER_EFFECTS_GENERATION = "android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION";
     field public static final String MANAGE_WEAK_ESCROW_TOKEN = "android.permission.MANAGE_WEAK_ESCROW_TOKEN";
     field public static final String MANAGE_WEARABLE_SENSING_SERVICE = "android.permission.MANAGE_WEARABLE_SENSING_SERVICE";
@@ -303,6 +305,7 @@ package android {
     field public static final String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
     field @FlaggedApi("android.permission.flags.voice_activation_permission_apis") public static final String RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA = "android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA";
     field @FlaggedApi("android.permission.flags.voice_activation_permission_apis") public static final String RECEIVE_SANDBOX_TRIGGER_AUDIO = "android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO";
+    field @FlaggedApi("com.android.server.notification.flags.redact_otp_notifications_from_untrusted_listeners") public static final String RECEIVE_SENSITIVE_NOTIFICATIONS = "android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS";
     field public static final String RECEIVE_WIFI_CREDENTIAL_CHANGE = "android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE";
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String RECOVERY = "android.permission.RECOVERY";
@@ -8986,9 +8989,9 @@ package android.media.tv.tuner.frontend {
 package android.media.voice {
 
   public final class KeyphraseModelManager {
-    method @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public void deleteKeyphraseSoundModel(int, @NonNull java.util.Locale);
-    method @Nullable @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int, @NonNull java.util.Locale);
-    method @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public void updateKeyphraseSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public void deleteKeyphraseSoundModel(int, @NonNull java.util.Locale);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int, @NonNull java.util.Locale);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public void updateKeyphraseSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel);
   }
 
 }
@@ -9878,8 +9881,8 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<java.lang.String> getSubsetAids();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public int getUid();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean hasCategory(@NonNull String);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean isCategoryOtherServiceEnabled();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean isOnHost();
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean isOtherServiceEnabled();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public CharSequence loadAppLabel(@NonNull android.content.pm.PackageManager);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadBanner(@NonNull android.content.pm.PackageManager);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
@@ -9888,9 +9891,9 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean requiresScreenOn();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean requiresUnlock();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void resetOffHostSecureElement();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setCategoryOtherServiceEnabled(boolean);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setDynamicAidGroup(@NonNull android.nfc.cardemulation.AidGroup);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setOffHostSecureElement(@NonNull String);
-    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void setOtherServiceEnabled(boolean);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void writeToParcel(@NonNull android.os.Parcel, int);
     field @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.ApduServiceInfo> CREATOR;
   }
@@ -13050,7 +13053,7 @@ package android.service.voice {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(@NonNull String, @NonNull java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.service.voice.HotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.HotwordDetector.Callback);
-    method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES) public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.VisualQueryDetector createVisualQueryDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.VisualQueryDetector.Callback);
     method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public void setShouldReceiveSandboxedTrainingData(boolean);
   }
@@ -13513,6 +13516,7 @@ package android.telecom {
     method public java.util.List<android.telecom.PhoneAccount> getAllPhoneAccounts();
     method public int getAllPhoneAccountsCount();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts(boolean);
+    method @FlaggedApi("com.android.internal.telephony.flags.work_profile_api_split") @NonNull @RequiresPermission(allOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.INTERACT_ACROSS_PROFILES}) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccountsAcrossProfiles(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}, conditional=true) public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCurrentTtyMode();
@@ -15722,6 +15726,7 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAvailable(int, int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCapable(int, int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void isSupported(int, int, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>) throws android.telephony.ims.ImsException;
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") public void registerImsEmergencyRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RegistrationManager.RegistrationCallback) throws android.telephony.ims.ImsException;
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.RegistrationCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAdvancedCallingSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCrossSimCallingEnabled(boolean) throws android.telephony.ims.ImsException;
@@ -15732,6 +15737,7 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoWiFiRoamingSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoWiFiSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVtSettingEnabled(boolean);
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") public void unregisterImsEmergencyRegistrationCallback(@NonNull android.telephony.ims.RegistrationManager.RegistrationCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterImsRegistrationCallback(@NonNull android.telephony.ims.ImsMmTelManager.RegistrationCallback);
   }
 
@@ -15764,6 +15770,8 @@ package android.telephony.ims {
     ctor public ImsRegistrationAttributes.Builder(int);
     method @NonNull public android.telephony.ims.ImsRegistrationAttributes build();
     method @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setFeatureTags(@NonNull java.util.Set<java.lang.String>);
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setFlagRegistrationTypeEmergency();
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setFlagVirtualRegistrationForEmergencyCall();
     method @NonNull public android.telephony.ims.ImsRegistrationAttributes.Builder setSipDetails(@NonNull android.telephony.ims.SipDetails);
   }
 
@@ -16690,6 +16698,7 @@ package android.telephony.ims.stub {
     ctor public ImsRegistrationImplBase(@NonNull java.util.concurrent.Executor);
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
     method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, int);
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, @NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, @NonNull android.telephony.ims.SipDetails);
     method public final void onDeregistered(@Nullable android.telephony.ims.ImsReasonInfo, int, int, @NonNull android.telephony.ims.SipDetails);
     method public final void onRegistered(int);
@@ -16698,6 +16707,7 @@ package android.telephony.ims.stub {
     method public final void onRegistering(@NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public final void onSubscriberAssociatedUriChanged(android.net.Uri[]);
     method public final void onTechnologyChangeFailed(int, android.telephony.ims.ImsReasonInfo);
+    method @FlaggedApi("com.android.internal.telephony.flags.emergency_registration_state") public final void onTechnologyChangeFailed(@Nullable android.telephony.ims.ImsReasonInfo, @NonNull android.telephony.ims.ImsRegistrationAttributes);
     method public void triggerFullNetworkRegistration(@IntRange(from=100, to=699) int, @Nullable String);
     method public void triggerSipDelegateDeregistration();
     method public void updateSipDelegateRegistration();

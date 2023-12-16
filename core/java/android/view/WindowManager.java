@@ -122,7 +122,6 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.window.ITrustedPresentationListener;
 import android.window.TaskFpsCallback;
 import android.window.TrustedPresentationThresholds;
 
@@ -1280,9 +1279,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     * @hide
      */
-    // TODO(b/279428317): Make this public API.
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     String PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE";
 

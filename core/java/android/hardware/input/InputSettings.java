@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
 
 import android.Manifest;
 import android.annotation.FloatRange;
@@ -398,6 +399,51 @@ public class InputSettings {
         }
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS, thresholdTimeMillis,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether Accessibility sticky keys is enabled.
+     *
+     * <p>
+     * 'Sticky keys' is an accessibility feature that assists users who have physical
+     * disabilities or help users reduce repetitive strain injury. It serializes keystrokes
+     * instead of pressing multiple keys at a time, allowing the user to press and release a
+     * modifier key, such as Shift, Ctrl, Alt, or any other modifier key, and have it remain
+     * active until any other key is pressed.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilityStickyKeysEnabled(@NonNull Context context) {
+        if (!keyboardA11yStickyKeysFlag()) {
+            return false;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_STICKY_KEYS, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    /**
+     * Set Accessibility sticky keys feature enabled/disabled.
+     *
+     *  <p>
+     * 'Sticky keys' is an accessibility feature that assists users who have physical
+     * disabilities or help users reduce repetitive strain injury. It serializes keystrokes
+     * instead of pressing multiple keys at a time, allowing the user to press and release a
+     * modifier key, such as Shift, Ctrl, Alt, or any other modifier key, and have it remain
+     * active until any other key is pressed.
+     * </p>
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setAccessibilityStickyKeysEnabled(@NonNull Context context,
+            boolean enabled) {
+        if (!keyboardA11yStickyKeysFlag()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_STICKY_KEYS, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
 

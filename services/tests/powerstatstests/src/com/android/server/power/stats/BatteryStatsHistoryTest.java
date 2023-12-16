@@ -277,7 +277,7 @@ public class BatteryStatsHistoryTest {
         mReadFiles.clear();
 
         // Prepare history for iteration
-        mHistory.iterate(0, 0);
+        mHistory.iterate(0, MonotonicClock.UNDEFINED);
 
         Parcel parcel = mHistory.getNextParcel(0, Long.MAX_VALUE);
         assertThat(parcel).isNotNull();
@@ -399,7 +399,7 @@ public class BatteryStatsHistoryTest {
 
         mHistory.recordPowerStats(200, 200, powerStats);
 
-        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0);
+        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
         BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
@@ -429,7 +429,7 @@ public class BatteryStatsHistoryTest {
         mHistory.recordNrStateChangeEvent(500, 500,
                 NetworkRegistrationInfo.NR_STATE_NONE);
 
-        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0);
+        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
         BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
@@ -470,7 +470,7 @@ public class BatteryStatsHistoryTest {
         mHistory.recordNrStateChangeEvent(500, 500,
                 NetworkRegistrationInfo.NR_STATE_NONE);
 
-        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0);
+        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
         BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
@@ -552,7 +552,8 @@ public class BatteryStatsHistoryTest {
         int wakelockTagsUnpooled = 0;
         int wakeReasonTagsPooled = 0;
         int wakeReasonTagsUnpooled = 0;
-        for (BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0); iterator.hasNext(); ) {
+        for (BatteryStatsHistoryIterator iterator =
+                mHistory.iterate(0, MonotonicClock.UNDEFINED); iterator.hasNext(); ) {
             HistoryItem item = iterator.next();
             if (item.cmd != HistoryItem.CMD_UPDATE) {
                 continue;
@@ -608,7 +609,7 @@ public class BatteryStatsHistoryTest {
                 UserHandle.getUid(777, Process.LAST_ISOLATED_UID),
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
 
-        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, 0);
+        BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
         BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 

@@ -330,6 +330,12 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"螢幕錄影"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"開始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
+    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
+    <skip />
+    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
+    <skip />
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"單手模式"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"對比"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"標準"</string>
@@ -402,8 +408,12 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • 將於 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充飽"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"向左滑動即可啟動通用教學課程"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"開啟小工具編輯器"</string>
-    <string name="button_to_remove_widget" msgid="1511255853677835341">"移除小工具"</string>
-    <string name="hub_mode_add_widget_button_text" msgid="3956587989338301487">"新增小工具"</string>
+    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
+    <skip />
+    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
+    <skip />
+    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切換使用者"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉式選單"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會遭到刪除。"</string>
@@ -1197,6 +1207,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在「設定」中指定預設記事應用程式"</string>
     <string name="install_app" msgid="5066668100199613936">"安裝應用程式"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"要以鏡像方式投放至外部螢幕嗎？"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"目前進行的雙螢幕活動都會停止"</string>
     <string name="mirror_display" msgid="2515262008898122928">"鏡像顯示"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"關閉"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"螢幕已連結"</string>

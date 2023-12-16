@@ -1906,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"સપ્તાહાંત"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ઇવેન્ટ"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"નિષ્ક્રિય"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ચાલુ છે"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"બંધ છે"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> અમુક અવાજોને મ્યૂટ કરે છે"</string>
@@ -2341,8 +2343,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ડિસ્પ્લે પર મિરર કરી શકાતું નથી"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"બીજા કોઈ કેબલનો ઉપયોગ કરો અને ફરી પ્રયાસ કરો"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"તમારું ડિવાઇસ ખૂબ જ ગરમ છે અને જ્યાં સુધી તે ઠંડું ન પડે ત્યાં સુધી મિરર કરી શકશે નહીં"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"શક્ય છે કે કેબલ કદાચ ડિસ્પ્લેને સપોર્ટ ન આપતો હોય"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"તમારો USB-C કેબલ કદાચ ડિસ્પ્લે સાથે યોગ્ય રીતે કનેક્ટ ન થાય"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen ચાલુ છે"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"કન્ટેન્ટ બતાવવા માટે <xliff:g id="APP_NAME">%1$s</xliff:g> બન્ને ડિસ્પ્લેનો ઉપયોગ કરી રહી છે"</string>

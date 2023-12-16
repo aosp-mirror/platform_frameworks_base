@@ -41,7 +41,6 @@ import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
-import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ALLOWLIST;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_BACKUP;
@@ -3494,8 +3493,8 @@ public class OomAdjuster {
         int initialCapability =  PROCESS_CAPABILITY_NONE;
         boolean initialCached = true;
         final ProcessStateRecord state = app.mState;
-        final int prevProcState = PROCESS_STATE_UNKNOWN;
-        final int prevAdj = UNKNOWN_ADJ;
+        final int prevProcState = state.getCurRawProcState();
+        final int prevAdj = state.getCurRawAdj();
         // If the process has been marked as foreground, it is starting as the top app (with
         // Zygote#START_AS_TOP_APP_ARG), so boost the thread priority of its default UI thread.
         if (state.hasForegroundActivities()) {
@@ -3779,11 +3778,6 @@ public class OomAdjuster {
             mCachedAppOptimizer.unfreezeTemporarily(proc, reason);
         }
         processes.clear();
-    }
-
-    @GuardedBy("mService")
-    void onProcessBeginLocked(@NonNull ProcessRecord app) {
-        // Empty, the OomAdjusterModernImpl will have an implementation.
     }
 
     @GuardedBy("mService")

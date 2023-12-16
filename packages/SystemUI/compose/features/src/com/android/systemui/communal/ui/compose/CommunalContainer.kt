@@ -74,7 +74,7 @@ fun CommunalContainer(
 ) {
     val currentScene: SceneKey by
         viewModel.currentScene
-            .transform<CommunalSceneKey, SceneKey> { value -> value.toTransitionSceneKey() }
+            .transform { value -> emit(value.toTransitionSceneKey()) }
             .collectAsState(TransitionSceneKey.Blank)
     val sceneTransitionLayoutState = remember { SceneTransitionLayoutState(currentScene) }
     // Don't show hub mode UI if keyguard is present. This is important since we're in the shade,

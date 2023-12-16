@@ -1481,6 +1481,36 @@ public class BubbleController implements ConfigurationChangeListener,
         }
     }
 
+    // TODO(b/316358859): remove this method after task views are shared across modes
+    /**
+     * Removes the bubble with the given key after task removal, unless the task was removed as
+     * a result of mode switching, in which case, the bubble isn't removed because it will be
+     * re-inflated for the new mode.
+     */
+    @MainThread
+    public void removeFloatingBubbleAfterTaskRemoval(String key, int reason) {
+        // if we're floating remove the bubble. otherwise, we're here because the task was removed
+        // after switching modes. See b/316358859
+        if (!isShowingAsBubbleBar()) {
+            removeBubble(key, reason);
+        }
+    }
+
+    // TODO(b/316358859): remove this method after task views are shared across modes
+    /**
+     * Removes the bubble with the given key after task removal, unless the task was removed as
+     * a result of mode switching, in which case, the bubble isn't removed because it will be
+     * re-inflated for the new mode.
+     */
+    @MainThread
+    public void removeBarBubbleAfterTaskRemoval(String key, int reason) {
+        // if we're showing as bubble bar remove the bubble. otherwise, we're here because the task
+        // was removed after switching modes. See b/316358859
+        if (isShowingAsBubbleBar()) {
+            removeBubble(key, reason);
+        }
+    }
+
     /**
      * Removes all the bubbles.
      * <p>

@@ -31,10 +31,10 @@ import com.android.systemui.util.settings.SecureSettings
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
-/**
- * {@link SmartspaceTargetFilter} for smartspace targets that show above the lockscreen and dreams.
- */
-class LockscreenAndDreamTargetFilter @Inject constructor(
+/** {@link SmartspaceTargetFilter} for smartspace targets that show above the lockscreen. */
+class LockscreenTargetFilter
+@Inject
+constructor(
     private val secureSettings: SecureSettings,
     private val userTracker: UserTracker,
     private val execution: Execution,
@@ -60,12 +60,13 @@ class LockscreenAndDreamTargetFilter @Inject constructor(
             }
         }
 
-    private val settingsObserver = object : ContentObserver(handler) {
-        override fun onChange(selfChange: Boolean, uri: Uri?) {
-            execution.assertIsMainThread()
-            updateUserContentSettings()
+    private val settingsObserver =
+        object : ContentObserver(handler) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                execution.assertIsMainThread()
+                updateUserContentSettings()
+            }
         }
-    }
 
     private var managedUserHandle: UserHandle? = null
 
@@ -79,10 +80,10 @@ class LockscreenAndDreamTargetFilter @Inject constructor(
         userTracker.addCallback(userTrackerCallback, uiExecutor)
 
         contentResolver.registerContentObserver(
-                secureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
-                true,
-                settingsObserver,
-                UserHandle.USER_ALL
+            secureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
+            true,
+            settingsObserver,
+            UserHandle.USER_ALL
         )
 
         updateUserContentSettings()
@@ -110,7 +111,7 @@ class LockscreenAndDreamTargetFilter @Inject constructor(
                 // Only the primary user can have an associated managed profile, so only show
                 // content for the managed profile if the primary user is active
                 userTracker.userHandle.identifier == UserHandle.USER_SYSTEM &&
-                        (!t.isSensitive || showSensitiveContentForManagedUser)
+                    (!t.isSensitive || showSensitiveContentForManagedUser)
             }
             else -> {
                 false
@@ -118,12 +119,13 @@ class LockscreenAndDreamTargetFilter @Inject constructor(
         }
     }
 
-    private val userTrackerCallback = object : UserTracker.Callback {
-        override fun onUserChanged(newUser: Int, userContext: Context) {
-            execution.assertIsMainThread()
-            updateUserContentSettings()
+    private val userTrackerCallback =
+        object : UserTracker.Callback {
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                execution.assertIsMainThread()
+                updateUserContentSettings()
+            }
         }
-    }
 
     private fun getWorkProfileUser(): UserHandle? {
         for (userInfo in userTracker.userProfiles) {
@@ -138,13 +140,13 @@ class LockscreenAndDreamTargetFilter @Inject constructor(
         val setting = Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS
 
         showSensitiveContentForCurrentUser =
-                secureSettings.getIntForUser(setting, 0, userTracker.userId) == 1
+            secureSettings.getIntForUser(setting, 0, userTracker.userId) == 1
 
         managedUserHandle = getWorkProfileUser()
         val managedId = managedUserHandle?.identifier
         if (managedId != null) {
             showSensitiveContentForManagedUser =
-                    secureSettings.getIntForUser(setting, 0, managedId) == 1
+                secureSettings.getIntForUser(setting, 0, managedId) == 1
         }
 
         listeners.forEach { it.onCriteriaChanged() }
