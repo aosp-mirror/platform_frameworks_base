@@ -1357,7 +1357,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"ಯಾವುದೇ ಅನುಮತಿಗಳ ಅಗತ್ಯವಿಲ್ಲ"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ಇದು ನಿಮ್ಮ ಹಣವನ್ನು ವ್ಯಯಿಸಬಹುದು"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ಸರಿ"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"USB ಮೂಲಕ ಈ ಸಾಧನವು ಚಾರ್ಜ್‌ ಆಗುತ್ತಿದೆ"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"USB ಮೂಲಕ ಈ ಸಾಧನವನ್ನು ಚಾರ್ಜ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB ಮೂಲಕ ಸಂಪರ್ಕಗೊಂಡಿರುವ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ಫೈಲ್ ವರ್ಗಾವಣೆಯು ಆನ್‌ ಆಗಿದೆ"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB ಮೂಲಕ PTP ಆನ್‌ ಆಗಿದೆ"</string>
