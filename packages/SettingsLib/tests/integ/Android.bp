@@ -56,7 +56,7 @@ android_test {
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibSettingsSpinner",
         "SettingsLibUsageProgressBarPreference",
-        "settingslib_flags_lib",
+        "settingslib_media_flags_lib",
     ],
 
     dxflags: ["--multi-dex"],

@@ -48,6 +48,7 @@ android_library {
         "SettingsLibTwoTargetPreference",
         "SettingsLibUsageProgressBarPreference",
         "SettingsLibUtils",
+        "settingslib_media_flags_lib",
         "settingslib_flags_lib",
     ],
 
@@ -78,6 +79,19 @@ aconfig_declarations {
 }
 
 java_aconfig_library {
-    name: "settingslib_flags_lib",
+    name: "settingslib_media_flags_lib",
     aconfig_declarations: "settingslib_media_flags",
+}
+
+aconfig_declarations {
+    name: "settingslib_flags",
+    package: "com.android.settingslib.flags",
+    srcs: [
+        "aconfig/settingslib.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "settingslib_flags_lib",
+    aconfig_declarations: "settingslib_flags",
 }
