@@ -47,6 +47,7 @@ import com.android.systemui.keyguard.ui.viewmodel.SideFpsProgressBarViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.sample
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
@@ -59,49 +60,56 @@ class SideFpsOverlayViewBinder
 constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
-    private val biometricStatusInteractor: BiometricStatusInteractor,
-    private val displayStateInteractor: DisplayStateInteractor,
-    private val deviceEntrySideFpsOverlayInteractor: DeviceEntrySideFpsOverlayInteractor,
-    private val fpsUnlockTracker: FpsUnlockTracker,
-    private val layoutInflater: LayoutInflater,
-    private val sideFpsProgressBarViewModel: SideFpsProgressBarViewModel,
-    private val sfpsSensorInteractor: SideFpsSensorInteractor,
-    private val windowManager: WindowManager
+    private val biometricStatusInteractor: Lazy<BiometricStatusInteractor>,
+    private val displayStateInteractor: Lazy<DisplayStateInteractor>,
+    private val deviceEntrySideFpsOverlayInteractor: Lazy<DeviceEntrySideFpsOverlayInteractor>,
+    private val fpsUnlockTracker: Lazy<FpsUnlockTracker>,
+    private val layoutInflater: Lazy<LayoutInflater>,
+    private val sideFpsProgressBarViewModel: Lazy<SideFpsProgressBarViewModel>,
+    private val sfpsSensorInteractor: Lazy<SideFpsSensorInteractor>,
+    private val windowManager: Lazy<WindowManager>
 ) : CoreStartable {
 
     override fun start() {
         if (!SideFpsControllerRefactor.isEnabled) {
             return
         }
+
         applicationScope
             .launch {
-                combine(
-                        biometricStatusInteractor.sfpsAuthenticationReason,
-                        deviceEntrySideFpsOverlayInteractor.showIndicatorForDeviceEntry,
-                        sideFpsProgressBarViewModel.isVisible,
-                        ::Triple
-                    )
-                    .sample(displayStateInteractor.isInRearDisplayMode, ::Pair)
-                    .collect { (combinedFlows, isInRearDisplayMode: Boolean) ->
-                        val (
-                            systemServerAuthReason,
-                            showIndicatorForDeviceEntry,
-                            progressBarIsVisible) =
-                            combinedFlows
-                        if (!isInRearDisplayMode) {
-                            if (progressBarIsVisible) {
-                                hide()
-                            } else if (systemServerAuthReason != NotRunning) {
-                                show()
-                            } else if (showIndicatorForDeviceEntry) {
-                                show()
-                            } else {
-                                hide()
+                sfpsSensorInteractor.get().isAvailable.collect { isSfpsAvailable ->
+                    if (isSfpsAvailable) {
+                        combine(
+                                biometricStatusInteractor.get().sfpsAuthenticationReason,
+                                deviceEntrySideFpsOverlayInteractor
+                                    .get()
+                                    .showIndicatorForDeviceEntry,
+                                sideFpsProgressBarViewModel.get().isVisible,
+                                ::Triple
+                            )
+                            .sample(displayStateInteractor.get().isInRearDisplayMode, ::Pair)
+                            .collect { (combinedFlows, isInRearDisplayMode: Boolean) ->
+                                val (
+                                    systemServerAuthReason,
+                                    showIndicatorForDeviceEntry,
+                                    progressBarIsVisible) =
+                                    combinedFlows
+                                if (!isInRearDisplayMode) {
+                                    if (progressBarIsVisible) {
+                                        hide()
+                                    } else if (systemServerAuthReason != NotRunning) {
+                                        show()
+                                    } else if (showIndicatorForDeviceEntry) {
+                                        show()
+                                    } else {
+                                        hide()
+                                    }
+                                }
                             }
-                        }
                     }
+                }
             }
-            .invokeOnCompletion { fpsUnlockTracker.stopTracking() }
+            .invokeOnCompletion { fpsUnlockTracker.get().stopTracking() }
     }
 
     private var overlayView: View? = null
@@ -113,29 +121,29 @@ constructor(
             if (it.isAttachedToWindow) {
                 lottie = it.requireViewById<LottieAnimationView>(R.id.sidefps_animation)
                 lottie?.pauseAnimation()
-                windowManager.removeView(it)
+                windowManager.get().removeView(it)
             }
         }
 
-        overlayView = layoutInflater.inflate(R.layout.sidefps_view, null, false)
+        overlayView = layoutInflater.get().inflate(R.layout.sidefps_view, null, false)
         val overlayViewModel =
             SideFpsOverlayViewModel(
                 applicationContext,
-                biometricStatusInteractor,
-                deviceEntrySideFpsOverlayInteractor,
-                displayStateInteractor,
-                sfpsSensorInteractor,
-                sideFpsProgressBarViewModel
+                biometricStatusInteractor.get(),
+                deviceEntrySideFpsOverlayInteractor.get(),
+                displayStateInteractor.get(),
+                sfpsSensorInteractor.get(),
+                sideFpsProgressBarViewModel.get()
             )
-        bind(overlayView!!, overlayViewModel, fpsUnlockTracker, windowManager)
+        bind(overlayView!!, overlayViewModel, fpsUnlockTracker.get(), windowManager.get())
         overlayView!!.visibility = View.INVISIBLE
-        windowManager.addView(overlayView, overlayViewModel.defaultOverlayViewParams)
+        windowManager.get().addView(overlayView, overlayViewModel.defaultOverlayViewParams)
     }
 
     /** Hide the side fingerprint sensor indicator */
     private fun hide() {
         if (overlayView != null) {
-            windowManager.removeView(overlayView)
+            windowManager.get().removeView(overlayView)
             overlayView = null
         }
     }

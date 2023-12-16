@@ -220,6 +220,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
 
         deviceEntrySideFpsOverlayInteractor =
             DeviceEntrySideFpsOverlayInteractor(
+                testScope.backgroundScope,
                 mContext,
                 deviceEntryFingerprintAuthRepository,
                 primaryBouncerInteractor,
