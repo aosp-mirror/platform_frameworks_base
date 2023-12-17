@@ -292,6 +292,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -3137,7 +3138,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     private void enforceCanSetPackagesSuspendedAsUser(@NonNull Computer snapshot,
-            boolean quarantined, String callingPackage, int callingUid, int userId,
+            boolean quarantined, UserPackage suspender, int callingUid, int targetUserId,
             String callingMethod) {
         if (callingUid == Process.ROOT_UID
                 // Need to compare app-id to allow system dialogs access on secondary users
@@ -3145,9 +3146,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return;
         }
 
-        final String ownerPackage = mProtectedPackages.getDeviceOwnerOrProfileOwnerPackage(userId);
+        final String ownerPackage =
+                mProtectedPackages.getDeviceOwnerOrProfileOwnerPackage(targetUserId);
         if (ownerPackage != null) {
-            final int ownerUid = snapshot.getPackageUid(ownerPackage, 0, userId);
+            final int ownerUid = snapshot.getPackageUid(ownerPackage, 0, targetUserId);
             if (ownerUid == callingUid) {
                 return;
             }
@@ -3168,25 +3170,27 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     callingMethod);
         }
 
-        final int packageUid = snapshot.getPackageUid(callingPackage, 0, userId);
+        final int packageUid = snapshot.getPackageUid(suspender.packageName, 0, targetUserId);
         final boolean allowedPackageUid = packageUid == callingUid;
         // TODO(b/139383163): remove special casing for shell and enforce INTERACT_ACROSS_USERS_FULL
         final boolean allowedShell = callingUid == SHELL_UID
                 && UserHandle.isSameApp(packageUid, callingUid);
 
         if (!allowedShell && !allowedPackageUid) {
-            throw new SecurityException("Calling package " + callingPackage + " in user "
-                    + userId + " does not belong to calling uid " + callingUid);
+            throw new SecurityException("Suspending package " + suspender.packageName
+                    + " in user " + targetUserId + " does not belong to calling uid " + callingUid);
         }
     }
 
     void unsuspendForSuspendingPackage(@NonNull Computer computer, String suspendingPackage,
-            @UserIdInt int userId) {
+            @UserIdInt int suspendingUserId) {
         // TODO: This can be replaced by a special parameter to iterate all packages, rather than
         //  this weird pre-collect of all packages.
         final String[] allPackages = computer.getPackageStates().keySet().toArray(new String[0]);
+        final Predicate<UserPackage> suspenderPredicate =
+                UserPackage.of(suspendingUserId, suspendingPackage)::equals;
         mSuspendPackageHelper.removeSuspensionsBySuspendingPackage(computer,
-                allPackages, suspendingPackage::equals, userId);
+                allPackages, suspenderPredicate, suspendingUserId);
     }
 
     void removeAllDistractingPackageRestrictions(@NonNull Computer snapshot, int userId) {
@@ -5259,8 +5263,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 if (!snapshot.isPackageSuspendedForUser(packageName, userId)) {
                     return null;
                 }
-                return mSuspendPackageHelper.getSuspendingPackage(snapshot, packageName, userId,
-                        callingUid);
+                final UserPackage suspender = mSuspendPackageHelper.getSuspendingPackage(
+                        snapshot, packageName, userId, callingUid);
+                return suspender != null ? suspender.packageName : null;
             } catch (PackageManager.NameNotFoundException e) {
                 return null;
             }
@@ -6198,7 +6203,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
                 PersistableBundle appExtras, PersistableBundle launcherExtras,
-                SuspendDialogInfo dialogInfo, int flags, String callingPackage, int userId) {
+                SuspendDialogInfo dialogInfo, int flags, String suspendingPackage,
+                int suspendingUserId, int targetUserId) {
             final int callingUid = Binder.getCallingUid();
             boolean quarantined = false;
             if (Flags.quarantinedEnabled()) {
@@ -6207,14 +6213,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 } else if (FeatureFlagUtils.isEnabled(mContext,
                         SETTINGS_TREAT_PAUSE_AS_QUARANTINE)) {
                     final String wellbeingPkg = mContext.getString(R.string.config_systemWellbeing);
-                    quarantined = callingPackage.equals(wellbeingPkg);
+                    quarantined = suspendingPackage.equals(wellbeingPkg);
                 }
             }
             final Computer snapshot = snapshotComputer();
-            enforceCanSetPackagesSuspendedAsUser(snapshot, quarantined, callingPackage, callingUid,
-                    userId, "setPackagesSuspendedAsUser");
+            final UserPackage suspender = UserPackage.of(targetUserId, suspendingPackage);
+            enforceCanSetPackagesSuspendedAsUser(snapshot, quarantined, suspender, callingUid,
+                    targetUserId, "setPackagesSuspendedAsUser");
             return mSuspendPackageHelper.setPackagesSuspended(snapshot, packageNames, suspended,
-                    appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid,
+                    appExtras, launcherExtras, dialogInfo, suspender, targetUserId, callingUid,
                     quarantined);
         }
 
@@ -6653,7 +6660,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final Computer computer = snapshotComputer();
             final String[] allPackages = computer.getAllAvailablePackageNames();
             mSuspendPackageHelper.removeSuspensionsBySuspendingPackage(computer, allPackages,
-                    (suspendingPackage) -> !PLATFORM_PACKAGE_NAME.equals(suspendingPackage),
+                    (suspender) -> !PLATFORM_PACKAGE_NAME.equals(suspender.packageName),
                     userId);
         }
 
@@ -6667,8 +6674,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String[] setPackagesSuspendedByAdmin(
                 @UserIdInt int userId, @NonNull String[] packageNames, boolean suspended) {
-            return mSuspendPackageHelper.setPackagesSuspendedByAdmin(
-                    snapshotComputer(), userId, packageNames, suspended);
+            final int suspendingUserId = userId;
+            final UserPackage suspender = UserPackage.of(
+                    suspendingUserId, PackageManagerService.PLATFORM_PACKAGE_NAME);
+            return mSuspendPackageHelper.setPackagesSuspended(snapshotComputer(), packageNames,
+                    suspended, null /* appExtras */, null /* launcherExtras */,
+                    null /* dialogInfo */, suspender, userId, Process.SYSTEM_UID,
+                    false /* quarantined */);
         }
 
         @Override
