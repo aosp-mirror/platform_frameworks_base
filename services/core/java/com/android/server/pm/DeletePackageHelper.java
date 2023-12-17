@@ -282,8 +282,8 @@ final class DeletePackageHelper {
         // other processes clean up before deleting resources.
         synchronized (mPm.mInstallLock) {
             if (info.mArgs != null) {
-                mRemovePackageHelper.cleanUpResources(info.mArgs.mCodeFile,
-                        info.mArgs.mInstructionSets);
+                mRemovePackageHelper.cleanUpResources(info.mArgs.getPackageName(),
+                        info.mArgs.getCodeFile(), info.mArgs.getInstructionSets());
             }
 
             boolean reEnableStub = false;
@@ -571,7 +571,7 @@ final class DeletePackageHelper {
 
         // Delete application code and resources only for parent packages
         if (deleteCodeAndResources) {
-            outInfo.mArgs = new InstallArgs(
+            outInfo.mArgs = new CleanUpArgs(ps.getName(),
                     ps.getPathString(), getAppDexInstructionSets(
                             ps.getPrimaryCpuAbiLegacy(), ps.getSecondaryCpuAbiLegacy()));
             if (DEBUG_SD_INSTALL) Slog.i(TAG, "args=" + outInfo.mArgs);

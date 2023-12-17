@@ -2111,7 +2111,8 @@ final class InstallPackageHelper {
                         // We didn't need to disable the .apk as a current system package,
                         // which means we are replacing another update that is already
                         // installed.  We need to make sure to delete the older one's .apk.
-                        installRequest.getRemovedInfo().mArgs = new InstallArgs(
+                        installRequest.getRemovedInfo().mArgs = new CleanUpArgs(
+                                packageName,
                                 oldPackage.getPath(),
                                 getAppDexInstructionSets(
                                         deletedPkgSetting.getPrimaryCpuAbi(),
@@ -2820,7 +2821,7 @@ final class InstallPackageHelper {
             request.setReturnMessage("Package was removed before install could complete.");
 
             // Remove the update failed package's older resources safely now
-            mRemovePackageHelper.cleanUpResources(request.getOldCodeFile(),
+            mRemovePackageHelper.cleanUpResources(packageName, request.getOldCodeFile(),
                     request.getOldInstructionSet());
             mPm.notifyInstallObserver(request);
             return;
@@ -2872,7 +2873,7 @@ final class InstallPackageHelper {
                     getUnknownSourcesSettings());
 
             // Remove the replaced package's older resources safely now
-            InstallArgs args = request.getRemovedInfo() != null
+            CleanUpArgs args = request.getRemovedInfo() != null
                     ? request.getRemovedInfo().mArgs : null;
             if (args != null) {
                 if (!killApp) {
@@ -2883,7 +2884,8 @@ final class InstallPackageHelper {
                     // propagated to all application threads.
                     mPm.scheduleDeferredNoKillPostDelete(args);
                 } else {
-                    mRemovePackageHelper.cleanUpResources(args.mCodeFile, args.mInstructionSets);
+                    mRemovePackageHelper.cleanUpResources(packageName, args.getCodeFile(),
+                            args.getInstructionSets());
                 }
             } else {
                 // Force a gc to clear up things. Ask for a background one, it's fine to go on
@@ -4040,7 +4042,7 @@ final class InstallPackageHelper {
                             + "; " + pkgSetting.getPathString()
                             + " --> " + parsedPackage.getPath());
 
-            mRemovePackageHelper.cleanUpResources(
+            mRemovePackageHelper.cleanUpResources(pkgSetting.getPackageName(),
                     new File(pkgSetting.getPathString()),
                     getAppDexInstructionSets(pkgSetting.getPrimaryCpuAbiLegacy(),
                             pkgSetting.getSecondaryCpuAbiLegacy()));
@@ -4146,7 +4148,8 @@ final class InstallPackageHelper {
                                 + parsedPackage.getLongVersionCode()
                                 + "; " + pkgSetting.getPathString() + " --> "
                                 + parsedPackage.getPath());
-                mRemovePackageHelper.cleanUpResources(new File(pkgSetting.getPathString()),
+                mRemovePackageHelper.cleanUpResources(pkgSetting.getPackageName(),
+                        new File(pkgSetting.getPathString()),
                         getAppDexInstructionSets(
                                 pkgSetting.getPrimaryCpuAbiLegacy(), pkgSetting.getSecondaryCpuAbiLegacy()));
             } else {

@@ -101,9 +101,10 @@ final class PackageHandler extends Handler {
                 Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
             } break;
             case DEFERRED_NO_KILL_POST_DELETE: {
-                InstallArgs args = (InstallArgs) msg.obj;
+                CleanUpArgs args = (CleanUpArgs) msg.obj;
                 if (args != null) {
-                    mPm.cleanUpResources(args.mCodeFile, args.mInstructionSets);
+                    mPm.cleanUpResources(args.getPackageName(), args.getCodeFile(),
+                            args.getInstructionSets());
                 }
             } break;
             case DEFERRED_NO_KILL_INSTALL_OBSERVER:

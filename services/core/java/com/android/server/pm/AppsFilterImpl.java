@@ -1042,7 +1042,9 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                 existingSettings, forceQueryable, protectedBroadcasts);
         SparseSetArray<Integer> queriesViaComponent = computer.execute();
         synchronized (mQueriesViaComponentLock) {
-            mQueriesViaComponent.copyFrom(queriesViaComponent);
+            mQueriesViaComponent = new WatchedSparseSetArray<>(queriesViaComponent);
+            mQueriesViaComponentSnapshot = new SnapshotCache.Auto<>(
+                    mQueriesViaComponent, mQueriesViaComponent, "AppsFilter.mQueriesViaComponent");
         }
 
         mQueriesViaComponentRequireRecompute.set(false);

@@ -100,7 +100,7 @@ java_library_static {
     name: "services.core.unboosted",
     defaults: [
         "platform_service_defaults",
-        "android.hardware.power-java_static",
+        "android.hardware.power-java_shared",
     ],
     srcs: [
         ":android.hardware.biometrics.face-V4-java-source",
@@ -153,7 +153,7 @@ java_library_static {
     ],
 
     static_libs: [
-        "android.frameworks.location.altitude-V1-java", // AIDL
+        "android.frameworks.location.altitude-V2-java", // AIDL
         "android.frameworks.vibrator-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.authsecret-V1-java",

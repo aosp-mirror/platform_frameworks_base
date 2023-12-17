@@ -206,11 +206,13 @@ java_defaults {
 // framework_srcs. These have no or very limited dependency to the framework.
 java_library {
     name: "framework-internal-utils",
+    defaults: [
+        "android.hardware.power-java_static",
+    ],
     static_libs: [
         "apex_aidl_interface-java",
         "packagemanager_aidl-java",
         "framework-protos",
-        "libtombstone_proto_java",
         "updatable-driver-protos",
         "ota_metadata_proto_java",
         "android.hidl.base-V1.0-java",

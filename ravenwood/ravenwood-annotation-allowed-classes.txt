@@ -90,6 +90,7 @@ android.database.ContentObserver
 android.database.Cursor
 android.database.CursorIndexOutOfBoundsException
 android.database.CursorJoiner
+android.database.CursorWindow
 android.database.CursorWrapper
 android.database.DataSetObservable
 android.database.DataSetObserver
@@ -97,6 +98,9 @@ android.database.MatrixCursor
 android.database.MatrixCursor$RowBuilder
 android.database.MergeCursor
 android.database.Observable
+android.database.SQLException
+android.database.sqlite.SQLiteClosable
+android.database.sqlite.SQLiteException
 
 android.text.TextUtils
 android.text.TextUtils$SimpleStringSplitter
