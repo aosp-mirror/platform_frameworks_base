@@ -274,6 +274,10 @@
     <!-- Side padding on the side of notifications -->
     <dimen name="notification_side_paddings">16dp</dimen>
 
+    <!-- Starting translateY offset of the HUN appear and disappear animations. Indicates
+    the amount by the view is positioned above the screen before the animation starts. -->
+    <dimen name="heads_up_appear_y_above_screen">32dp</dimen>
+
     <!-- padding between the heads up and the statusbar -->
     <dimen name="heads_up_status_bar_padding">8dp</dimen>
 

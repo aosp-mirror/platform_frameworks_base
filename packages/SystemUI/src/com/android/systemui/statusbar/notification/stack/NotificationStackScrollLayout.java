@@ -115,6 +115,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -3328,8 +3329,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     logHunAnimationSkipped(row, "row has no viewState");
                     continue;
                 }
+                boolean shouldHunAppearFromTheBottom =
+                        mStackScrollAlgorithm.shouldHunAppearFromBottom(mAmbientState, viewState);
                 if (isHeadsUp && (mAddedHeadsUpChildren.contains(row) || pinnedAndClosed)) {
-                    if (pinnedAndClosed || shouldHunAppearFromBottom(viewState)) {
+                    if (pinnedAndClosed || shouldHunAppearFromTheBottom) {
                         // Our custom add animation
                         type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR;
                     } else {
@@ -3341,6 +3344,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
             AnimationEvent event = new AnimationEvent(row, type);
             event.headsUpFromBottom = onBottom;
+            if (NotificationsImprovedHunAnimation.isEnabled()) {
+                // TODO(b/283084712) remove this with the flag and update the HUN filters at
+                //  creation
+                event.filter.animateHeight = false;
+            }
             mAnimationEvents.add(event);
             if (SPEW) {
                 Log.v(TAG, "Generating HUN animation event: "
@@ -3353,11 +3361,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         mHeadsUpChangeAnimations.clear();
         mAddedHeadsUpChildren.clear();
-    }
-
-    private boolean shouldHunAppearFromBottom(ExpandableViewState viewState) {
-        return viewState.getYTranslation() + viewState.height
-                >= mAmbientState.getMaxHeadsUpTranslation();
     }
 
     private void generateGroupExpansionEvent() {
@@ -4932,7 +4935,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public void setHeadsUpBoundaries(int height, int bottomBarHeight) {
         mAmbientState.setMaxHeadsUpTranslation(height - bottomBarHeight);
+        mStackScrollAlgorithm.setHeadsUpAppearHeightBottom(height);
         mStateAnimator.setHeadsUpAppearHeightBottom(height);
+        mStateAnimator.setStackTopMargin(mAmbientState.getStackTopMargin());
         requestChildrenUpdate();
     }
 
