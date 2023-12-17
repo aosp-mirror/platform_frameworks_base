@@ -1071,7 +1071,7 @@
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"留守番電話の追加"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"留守番電話受信トレイにメッセージを追加することをアプリに許可します｡"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> にクリップボードから貼り付けました"</string>
-    <string name="more_item_label" msgid="7419249600215749115">"その他"</string>
+    <string name="more_item_label" msgid="7419249600215749115">"続きを見る"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"MENU+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
     <string name="menu_ctrl_shortcut_label" msgid="131911133027196485">"Ctrl+"</string>
