@@ -39,6 +39,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SuspendDialogInfo;
+import android.content.pm.UserPackage;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -308,7 +309,8 @@ public class SuspendedAppActivity extends AlertActivity
                         try {
                             final String[] errored = ipm.setPackagesSuspendedAsUser(
                                     new String[]{mSuspendedPackage}, false, null, null, null, 0,
-                                    mSuspendingPackage, mUserId);
+                                    mSuspendingPackage, mUserId /* suspendingUserId */,
+                                    mUserId /* targetUserId */);
                             if (ArrayUtils.contains(errored, mSuspendedPackage)) {
                                 Slog.e(TAG, "Could not unsuspend " + mSuspendedPackage);
                                 break;
@@ -350,17 +352,19 @@ public class SuspendedAppActivity extends AlertActivity
     }
 
     public static Intent createSuspendedAppInterceptIntent(String suspendedPackage,
-            String suspendingPackage, SuspendDialogInfo dialogInfo, Bundle options,
+            UserPackage suspendingPackage, SuspendDialogInfo dialogInfo, Bundle options,
             IntentSender onUnsuspend, int userId) {
-        return new Intent()
+        Intent intent = new Intent()
                 .setClassName("android", SuspendedAppActivity.class.getName())
                 .putExtra(EXTRA_SUSPENDED_PACKAGE, suspendedPackage)
                 .putExtra(EXTRA_DIALOG_INFO, dialogInfo)
-                .putExtra(EXTRA_SUSPENDING_PACKAGE, suspendingPackage)
+                .putExtra(EXTRA_SUSPENDING_PACKAGE,
+                        suspendingPackage != null ? suspendingPackage.packageName : null)
                 .putExtra(EXTRA_UNSUSPEND_INTENT, onUnsuspend)
                 .putExtra(EXTRA_ACTIVITY_OPTIONS, options)
                 .putExtra(Intent.EXTRA_USER_ID, userId)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        return intent;
     }
 }

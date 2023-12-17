@@ -51,6 +51,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.os.BaseBundle;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -431,7 +432,7 @@ public class PackageManagerSettingsTests {
         PackageUserStateInternal packageUserState1 = ps1.readUserState(0);
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
-        assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(UserPackage.of(0, "android")));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getAppExtras(), is(nullValue()));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getDialogInfo(),
                 is(nullValue()));
@@ -443,7 +444,7 @@ public class PackageManagerSettingsTests {
         packageUserState1 = ps1.readUserState(0);
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
-        assertThat(packageUserState1.getSuspendParams().keyAt(0), is("android"));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(UserPackage.of(0, "android")));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getAppExtras(), is(nullValue()));
         assertThat(packageUserState1.getSuspendParams().valueAt(0).getDialogInfo(),
                 is(nullValue()));
@@ -478,7 +479,8 @@ public class PackageManagerSettingsTests {
         watcher.verifyNoChangeReported("readUserState");
         assertThat(packageUserState1.isSuspended(), is(true));
         assertThat(packageUserState1.getSuspendParams().size(), is(1));
-        assertThat(packageUserState1.getSuspendParams().keyAt(0), is(PACKAGE_NAME_3));
+        assertThat(packageUserState1.getSuspendParams().keyAt(0),
+                is(UserPackage.of(0, PACKAGE_NAME_3)));
         final SuspendParams params = packageUserState1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("fetch user state");
         assertThat(params, is(notNullValue()));
@@ -529,19 +531,24 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND)
                 .build();
 
-        ps1.modifyUserState(0).putSuspendParams("suspendingPackage1",
+        UserPackage suspender1 = UserPackage.of(0, "suspendingPackage1");
+        UserPackage suspender2 = UserPackage.of(0, "suspendingPackage2");
+        UserPackage suspender3 = UserPackage.of(0, "suspendingPackage3");
+        UserPackage irrelevantSuspender = UserPackage.of(0, "irrelevant");
+
+        ps1.modifyUserState(0).putSuspendParams(suspender1,
                 new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
-        ps1.modifyUserState(0).putSuspendParams("suspendingPackage2",
+        ps1.modifyUserState(0).putSuspendParams(suspender2,
                 new SuspendParams(dialogInfo2, appExtras2, launcherExtras2));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
         watcher.verifyChangeReported("put package 1");
 
-        ps2.modifyUserState(0).putSuspendParams("suspendingPackage3",
+        ps2.modifyUserState(0).putSuspendParams(suspender3,
                 new SuspendParams(null, appExtras1, null));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
         watcher.verifyChangeReported("put package 2");
 
-        ps3.modifyUserState(0).removeSuspension("irrelevant");
+        ps3.modifyUserState(0).removeSuspension(irrelevantSuspender);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
         watcher.verifyChangeReported("put package 3");
 
@@ -566,7 +573,7 @@ public class PackageManagerSettingsTests {
         assertThat(readPus1.getSuspendParams().size(), is(2));
         watcher.verifyNoChangeReported("read package param");
 
-        assertThat(readPus1.getSuspendParams().keyAt(0), is("suspendingPackage1"));
+        assertThat(readPus1.getSuspendParams().keyAt(0), is(suspender1));
         final SuspendParams params11 = readPus1.getSuspendParams().valueAt(0);
         watcher.verifyNoChangeReported("read package param");
         assertThat(params11, is(notNullValue()));
@@ -576,7 +583,7 @@ public class PackageManagerSettingsTests {
                 is(true));
         watcher.verifyNoChangeReported("read package param");
 
-        assertThat(readPus1.getSuspendParams().keyAt(1), is("suspendingPackage2"));
+        assertThat(readPus1.getSuspendParams().keyAt(1), is(suspender2));
         final SuspendParams params12 = readPus1.getSuspendParams().valueAt(1);
         assertThat(params12, is(notNullValue()));
         assertThat(params12.getDialogInfo(), is(dialogInfo2));
@@ -589,7 +596,7 @@ public class PackageManagerSettingsTests {
                 .readUserState(0);
         assertThat(readPus2.isSuspended(), is(true));
         assertThat(readPus2.getSuspendParams().size(), is(1));
-        assertThat(readPus2.getSuspendParams().keyAt(0), is("suspendingPackage3"));
+        assertThat(readPus2.getSuspendParams().keyAt(0), is(suspender3));
         final SuspendParams params21 = readPus2.getSuspendParams().valueAt(0);
         assertThat(params21, is(notNullValue()));
         assertThat(params21.getDialogInfo(), is(nullValue()));
@@ -1142,7 +1149,8 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonText(0x11220003)
                 .setNeutralButtonAction(BUTTON_ACTION_MORE_DETAILS)
                 .build();
-        origPkgSetting01.modifyUserState(0).putSuspendParams("suspendingPackage1",
+        origPkgSetting01.modifyUserState(0).putSuspendParams(
+                UserPackage.of(0, "suspendingPackage1"),
                 new SuspendParams(dialogInfo1, appExtras1, launcherExtras1));
         origPkgSetting01.setPkg(mockAndroidPackage(origPkgSetting01));
         final PackageSetting testPkgSetting01 = new PackageSetting(
