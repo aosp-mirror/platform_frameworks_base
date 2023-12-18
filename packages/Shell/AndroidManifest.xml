@@ -685,6 +685,9 @@
     <!-- Permission required for CTS test - CtsAmbientContextDetectionServiceDeviceTest -->
     <uses-permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />
 
+    <!-- Permission required for CTS test - CtsWearableSensingServiceTestCases -->
+    <uses-permission android:name="android.permission.MANAGE_WEARABLE_SENSING_SERVICE" />
+
     <!-- Permission required for CTS test - CallAudioInterceptionTest -->
     <uses-permission android:name="android.permission.CALL_AUDIO_INTERCEPTION" />
 
