@@ -19,21 +19,21 @@ package com.android.systemui.qs.tiles.impl.custom.data.repository
 import android.os.UserHandle
 import android.service.quicksettings.Tile
 import com.android.systemui.qs.external.FakeCustomTileStatePersister
-import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.impl.custom.data.entity.CustomTileDefaults
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.Flow
 
 class FakeCustomTileRepository(
-    tileSpec: TileSpec.CustomTileSpec,
     customTileStatePersister: FakeCustomTileStatePersister,
+    private val packageManagerAdapterFacade: FakePackageManagerAdapterFacade,
     testBackgroundContext: CoroutineContext,
 ) : CustomTileRepository {
 
     private val realDelegate: CustomTileRepository =
         CustomTileRepositoryImpl(
-            tileSpec,
+            packageManagerAdapterFacade.tileSpec,
             customTileStatePersister,
+            packageManagerAdapterFacade.packageManagerAdapter,
             testBackgroundContext,
         )
 
@@ -43,6 +43,10 @@ class FakeCustomTileRepository(
     override fun getTiles(user: UserHandle): Flow<Tile> = realDelegate.getTiles(user)
 
     override fun getTile(user: UserHandle): Tile? = realDelegate.getTile(user)
+
+    override suspend fun isTileActive(): Boolean = realDelegate.isTileActive()
+
+    override suspend fun isTileToggleable(): Boolean = realDelegate.isTileToggleable()
 
     override suspend fun updateWithTile(
         user: UserHandle,
@@ -55,4 +59,8 @@ class FakeCustomTileRepository(
         defaults: CustomTileDefaults,
         isPersistable: Boolean,
     ) = realDelegate.updateWithDefaults(user, defaults, isPersistable)
+
+    fun setTileActive(isActive: Boolean) = packageManagerAdapterFacade.setIsActive(isActive)
+
+    fun setTileToggleable(isActive: Boolean) = packageManagerAdapterFacade.setIsToggleable(isActive)
 }
