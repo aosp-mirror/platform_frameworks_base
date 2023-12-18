@@ -204,7 +204,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_SCREEN_ON = "visualScreenOn";
     private static final String ALLOW_ATT_CONV = "convos";
     private static final String ALLOW_ATT_CONV_FROM = "convosFrom";
-    private static final String ALLOW_ATT_CHANNELS = "channels";
+    private static final String ALLOW_ATT_CHANNELS = "priorityChannels";
     private static final String USER_MODIFIED_FIELDS = "policyUserModifiedFields";
     private static final String DISALLOW_TAG = "disallow";
     private static final String DISALLOW_ATT_VISUAL_EFFECTS = "visualEffects";
@@ -856,9 +856,9 @@ public class ZenModeConfig implements Parcelable {
         final int events = safeInt(parser, ALLOW_ATT_EVENTS, ZenPolicy.STATE_UNSET);
         final int reminders = safeInt(parser, ALLOW_ATT_REMINDERS, ZenPolicy.STATE_UNSET);
         if (Flags.modesApi()) {
-            final int channels = safeInt(parser, ALLOW_ATT_CHANNELS, ZenPolicy.CHANNEL_TYPE_UNSET);
-            if (channels != ZenPolicy.CHANNEL_TYPE_UNSET) {
-                builder.allowChannels(channels);
+            final int channels = safeInt(parser, ALLOW_ATT_CHANNELS, ZenPolicy.STATE_UNSET);
+            if (channels != ZenPolicy.STATE_UNSET) {
+                builder.allowPriorityChannels(channels == ZenPolicy.STATE_ALLOW);
                 policySet = true;
             }
             builder.setUserModifiedFields(safeInt(parser, USER_MODIFIED_FIELDS, 0));
@@ -973,7 +973,7 @@ public class ZenModeConfig implements Parcelable {
                 out);
 
         if (Flags.modesApi()) {
-            writeZenPolicyState(ALLOW_ATT_CHANNELS, policy.getAllowedChannels(), out);
+            writeZenPolicyState(ALLOW_ATT_CHANNELS, policy.getPriorityChannels(), out);
             out.attributeInt(null, USER_MODIFIED_FIELDS, policy.getUserModifiedFields());
         }
     }
@@ -990,7 +990,7 @@ public class ZenModeConfig implements Parcelable {
                 out.attributeInt(null, attr, val);
             }
         } else if (Flags.modesApi() && Objects.equals(attr, ALLOW_ATT_CHANNELS)) {
-            if (val != ZenPolicy.CHANNEL_TYPE_UNSET) {
+            if (val != ZenPolicy.STATE_UNSET) {
                 out.attributeInt(null, attr, val);
             }
         } else {
@@ -1175,8 +1175,7 @@ public class ZenModeConfig implements Parcelable {
         }
 
         if (Flags.modesApi()) {
-            builder.allowChannels(allowPriorityChannels ? ZenPolicy.CHANNEL_TYPE_PRIORITY
-                    : ZenPolicy.CHANNEL_TYPE_NONE);
+            builder.allowPriorityChannels(allowPriorityChannels);
         }
         return builder.build();
     }
@@ -1306,7 +1305,7 @@ public class ZenModeConfig implements Parcelable {
         int state = defaultPolicy.state;
         if (Flags.modesApi()) {
             state = Policy.policyState(defaultPolicy.hasPriorityChannels(),
-                    getAllowPriorityChannelsWithDefault(zenPolicy.getAllowedChannels(),
+                    ZenPolicy.stateToBoolean(zenPolicy.getPriorityChannels(),
                             DEFAULT_ALLOW_PRIORITY_CHANNELS));
         }
 
@@ -1345,24 +1344,6 @@ public class ZenModeConfig implements Parcelable {
                 return senders;
             default:
                 return defaultPolicySender;
-        }
-    }
-
-    /**
-     * Gets whether priority channels are permitted by this channel type, with the specified
-     * default if the value is unset. This effectively converts the channel enum to a boolean,
-     * where "true" indicates priority channels are allowed to break through and "false" means
-     * they are not.
-     */
-    public static boolean getAllowPriorityChannelsWithDefault(
-            @ZenPolicy.ChannelType int channelType, boolean defaultAllowChannels) {
-        switch (channelType) {
-            case ZenPolicy.CHANNEL_TYPE_PRIORITY:
-                return true;
-            case ZenPolicy.CHANNEL_TYPE_NONE:
-                return false;
-            default:
-                return defaultAllowChannels;
         }
     }
 
