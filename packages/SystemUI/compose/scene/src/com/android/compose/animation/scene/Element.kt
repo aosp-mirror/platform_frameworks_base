@@ -531,11 +531,6 @@ private fun IntermediateMeasureScope.place(
             sceneValues.targetOffset = targetOffsetInScene
         }
 
-        // No need to place the element in this scene if we don't want to draw it anyways.
-        if (!shouldDrawElement(layoutImpl, scene, element)) {
-            return
-        }
-
         val currentOffset = lookaheadScopeCoordinates.localPositionOf(coords, Offset.Zero)
         val lastSharedValues = element.lastSharedValues
         val lastValues = sceneValues.lastValues
@@ -557,6 +552,13 @@ private fun IntermediateMeasureScope.place(
 
         lastSharedValues.offset = targetOffset
         lastValues.offset = targetOffset
+
+        // No need to place the element in this scene if we don't want to draw it anyways. Note that
+        // it's still important to compute the target offset and update lastValues, otherwise it
+        // will be out of date.
+        if (!shouldDrawElement(layoutImpl, scene, element)) {
+            return
+        }
 
         val offset = (targetOffset - currentOffset).round()
         if (isElementOpaque(layoutImpl, element, scene, sceneValues)) {
