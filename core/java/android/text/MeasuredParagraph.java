@@ -671,9 +671,18 @@ public class MeasuredParagraph {
         if (mLtrWithoutBidi) {
             // If the whole text is LTR direction, just apply whole region.
             if (builder == null) {
-                mWholeWidth += paint.getTextRunAdvances(
-                        mCopiedBuffer, start, end - start, start, end - start, false /* isRtl */,
-                        mWidths.getRawArray(), start);
+                // For the compatibility reasons, the letter spacing should not be dropped at the
+                // left and right edge.
+                int oldFlag = paint.getFlags();
+                paint.setFlags(paint.getFlags()
+                        | (Paint.TEXT_RUN_FLAG_LEFT_EDGE | Paint.TEXT_RUN_FLAG_RIGHT_EDGE));
+                try {
+                    mWholeWidth += paint.getTextRunAdvances(
+                            mCopiedBuffer, start, end - start, start, end - start,
+                            false /* isRtl */, mWidths.getRawArray(), start);
+                } finally {
+                    paint.setFlags(oldFlag);
+                }
             } else {
                 builder.appendStyleRun(paint, config, end - start, false /* isRtl */);
             }
@@ -690,9 +699,16 @@ public class MeasuredParagraph {
                     final boolean isRtl = (level & 0x1) != 0;
                     if (builder == null) {
                         final int levelLength = levelEnd - levelStart;
-                        mWholeWidth += paint.getTextRunAdvances(
-                                mCopiedBuffer, levelStart, levelLength, levelStart, levelLength,
-                                isRtl, mWidths.getRawArray(), levelStart);
+                        int oldFlag = paint.getFlags();
+                        paint.setFlags(paint.getFlags()
+                                | (Paint.TEXT_RUN_FLAG_LEFT_EDGE | Paint.TEXT_RUN_FLAG_RIGHT_EDGE));
+                        try {
+                            mWholeWidth += paint.getTextRunAdvances(
+                                    mCopiedBuffer, levelStart, levelLength, levelStart, levelLength,
+                                    isRtl, mWidths.getRawArray(), levelStart);
+                        } finally {
+                            paint.setFlags(oldFlag);
+                        }
                     } else {
                         builder.appendStyleRun(paint, config, levelEnd - levelStart, isRtl);
                     }
