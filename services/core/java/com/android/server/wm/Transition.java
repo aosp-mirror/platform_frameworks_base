@@ -2597,6 +2597,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 change.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor, 255));
             }
 
+            if (activityRecord != null) {
+                change.setActivityComponent(activityRecord.mActivityComponent);
+            }
+
             change.setRotation(info.mRotation, endRotation);
             if (info.mSnapshot != null) {
                 change.setSnapshot(info.mSnapshot, info.mSnapshotLuma);

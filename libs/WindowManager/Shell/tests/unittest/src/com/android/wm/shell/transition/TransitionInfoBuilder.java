@@ -21,6 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
@@ -50,18 +51,32 @@ public class TransitionInfoBuilder {
     }
 
     public TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
-            @TransitionInfo.ChangeFlags int flags, ActivityManager.RunningTaskInfo taskInfo) {
+            @TransitionInfo.ChangeFlags int flags, ActivityManager.RunningTaskInfo taskInfo,
+            ComponentName activityComponent) {
         final TransitionInfo.Change change = new TransitionInfo.Change(
                 taskInfo != null ? taskInfo.token : null, createMockSurface(true /* valid */));
         change.setMode(mode);
         change.setFlags(flags);
         change.setTaskInfo(taskInfo);
+        change.setActivityComponent(activityComponent);
         return addChange(change);
+    }
+
+    /** Add a change to the TransitionInfo */
+    public TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
+            @TransitionInfo.ChangeFlags int flags, ActivityManager.RunningTaskInfo taskInfo) {
+        return addChange(mode, flags, taskInfo, null /* activityComponent */);
     }
 
     public TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
             ActivityManager.RunningTaskInfo taskInfo) {
         return addChange(mode, TransitionInfo.FLAG_NONE, taskInfo);
+    }
+
+    /** Add a change to the TransitionInfo */
+    public TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
+            ComponentName activityComponent) {
+        return addChange(mode, TransitionInfo.FLAG_NONE, null /* taskinfo */, activityComponent);
     }
 
     public TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode) {

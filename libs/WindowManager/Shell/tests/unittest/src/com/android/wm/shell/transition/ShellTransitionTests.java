@@ -64,6 +64,7 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -417,6 +418,30 @@ public class ShellTransitionTests extends ShellTestCase {
         final TransitionInfo withoutFlag = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).build();
         assertTrue(filter.matches(withoutFlag));
+    }
+
+    @Test
+    public void testTransitionFilterActivityComponent() {
+        TransitionFilter filter = new TransitionFilter();
+        ComponentName cmpt = new ComponentName("testpak", "testcls");
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mTopActivity = cmpt;
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        final RunningTaskInfo taskInf = createTaskInfo(1);
+        final TransitionInfo openTask = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        assertFalse(filter.matches(openTask));
+
+        taskInf.topActivity = cmpt;
+        final TransitionInfo openTaskCmpt = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskInf).build();
+        assertTrue(filter.matches(openTaskCmpt));
+
+        final TransitionInfo openAct = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, cmpt).build();
+        assertTrue(filter.matches(openAct));
     }
 
     @Test
