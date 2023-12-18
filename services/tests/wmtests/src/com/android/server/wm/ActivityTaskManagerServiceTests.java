@@ -1087,4 +1087,16 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         assertTrue(homeActivity.getTask().isFocused());
         assertFalse(pinnedTask.isFocused());
     }
+
+    @Test
+    public void testContinueWindowLayout_notifyClientLifecycleManager() {
+        clearInvocations(mClientLifecycleManager);
+        mAtm.deferWindowLayout();
+
+        verify(mClientLifecycleManager, never()).onLayoutContinued();
+
+        mAtm.continueWindowLayout();
+
+        verify(mClientLifecycleManager).onLayoutContinued();
+    }
 }
