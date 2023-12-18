@@ -254,3 +254,10 @@ flag {
         "prefer using alpha to distinguish network activity."
     bug: "310715220"
 }
+
+flag {
+    name: "haptic_volume_slider"
+    namespace: "systemui"
+    description: "Adds haptic feedback to the volume slider."
+    bug: "316953430"
+}
