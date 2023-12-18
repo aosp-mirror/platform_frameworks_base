@@ -25,6 +25,7 @@ import android.app.Service;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
 import android.app.wearable.Flags;
+import android.app.wearable.WearableSensingDataRequest;
 import android.app.wearable.WearableSensingManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ import android.os.SharedMemory;
 import android.service.ambientcontext.AmbientContextDetectionResult;
 import android.service.ambientcontext.AmbientContextDetectionServiceStatus;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -90,6 +92,9 @@ public abstract class WearableSensingService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.wearable.WearableSensingService";
 
+    private final SparseArray<WearableSensingDataRequester> mDataRequestObserverIdToRequesterMap =
+            new SparseArray<>();
+
     @Nullable
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
@@ -124,6 +129,55 @@ public abstract class WearableSensingService extends Service {
                     Objects.requireNonNull(data);
                     Consumer<Integer> consumer = createWearableStatusConsumer(callback);
                     WearableSensingService.this.onDataProvided(data, sharedMemory, consumer);
+                }
+
+                /** {@inheritDoc} */
+                @Override
+                public void registerDataRequestObserver(
+                        int dataType,
+                        RemoteCallback dataRequestCallback,
+                        int dataRequestObserverId,
+                        String packageName,
+                        RemoteCallback statusCallback) {
+                    Objects.requireNonNull(dataRequestCallback);
+                    Objects.requireNonNull(statusCallback);
+                    WearableSensingDataRequester dataRequester;
+                    synchronized (mDataRequestObserverIdToRequesterMap) {
+                        dataRequester =
+                                mDataRequestObserverIdToRequesterMap.get(dataRequestObserverId);
+                        if (dataRequester == null) {
+                            dataRequester = createDataRequester(dataRequestCallback);
+                            mDataRequestObserverIdToRequesterMap.put(
+                                    dataRequestObserverId, dataRequester);
+                        }
+                    }
+                    Consumer<Integer> statusConsumer = createWearableStatusConsumer(statusCallback);
+                    WearableSensingService.this.onDataRequestObserverRegistered(
+                            dataType, packageName, dataRequester, statusConsumer);
+                }
+
+                @Override
+                public void unregisterDataRequestObserver(
+                        int dataType,
+                        int dataRequestObserverId,
+                        String packageName,
+                        RemoteCallback statusCallback) {
+                    WearableSensingDataRequester dataRequester;
+                    synchronized (mDataRequestObserverIdToRequesterMap) {
+                        dataRequester =
+                                mDataRequestObserverIdToRequesterMap.get(dataRequestObserverId);
+                        if (dataRequester == null) {
+                            Slog.w(
+                                    TAG,
+                                    "dataRequestObserverId not found, cannot unregister data"
+                                            + " request observer.");
+                            return;
+                        }
+                        mDataRequestObserverIdToRequesterMap.remove(dataRequestObserverId);
+                    }
+                    Consumer<Integer> statusConsumer = createWearableStatusConsumer(statusCallback);
+                    WearableSensingService.this.onDataRequestObserverUnregistered(
+                            dataType, packageName, dataRequester, statusConsumer);
                 }
 
                 /** {@inheritDoc} */
@@ -231,19 +285,19 @@ public abstract class WearableSensingService extends Service {
             @NonNull Consumer<Integer> statusConsumer);
 
     /**
-     * Called when configurations and read-only data in a {@link PersistableBundle}
-     * can be used by the WearableSensingService and sends the result to the {@link Consumer}
-     * right after the call. It is dependent on the application to define the type of data to
-     * provide. This is used by applications that will also provide an implementation of an isolated
-     * WearableSensingService. If the data was provided successfully
-     * {@link WearableSensingManager#STATUS_SUCCESS} will be provided.
+     * Called when configurations and read-only data in a {@link PersistableBundle} can be used by
+     * the WearableSensingService and sends the result to the {@link Consumer} right after the call.
+     * It is dependent on the application to define the type of data to provide. This is used by
+     * applications that will also provide an implementation of an isolated WearableSensingService.
+     * If the data was provided successfully {@link WearableSensingManager#STATUS_SUCCESS} will be
+     * provided.
      *
      * @param data Application configuration data to provide to the {@link WearableSensingService}.
-     *             PersistableBundle does not allow any remotable objects or other contents
-     *             that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob to
-     *                     provide to the {@link WearableSensingService}. Use this to provide the
-     *                     sensing models data or other such data to the trusted process.
+     *     PersistableBundle does not allow any remotable objects or other contents that can be used
+     *     to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to provide to the {@link
+     *     WearableSensingService}. Use this to provide the sensing models data or other such data
+     *     to the trusted process.
      * @param statusConsumer the consumer for the service status.
      */
     @BinderThread
@@ -251,6 +305,62 @@ public abstract class WearableSensingService extends Service {
             @NonNull PersistableBundle data,
             @Nullable SharedMemory sharedMemory,
             @NonNull Consumer<Integer> statusConsumer);
+
+    /**
+     * Called when a data request observer is registered.
+     *
+     * <p>The implementing class should override this method. After the data requester is received,
+     * it should send a {@link WearableSensingManager#STATUS_SUCCESS} status code to the {@code
+     * statusConsumer} unless it encounters an error condition described by a status code listed in
+     * {@link WearableSensingManager}, such as {@link
+     * WearableSensingManager#STATUS_WEARABLE_UNAVAILABLE}, in which case it should return the
+     * corresponding status code.
+     *
+     * @param dataType The data type the observer is registered for. Values are defined by the
+     *     application that implements this class.
+     * @param packageName The package name of the app that will receive the requests.
+     * @param dataRequester A handle to the observer registered. It can be used to request data of
+     *     the specified data type.
+     * @param statusConsumer the consumer for the status of the data request observer registration.
+     *     This is different from the status for each data request.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
+    @BinderThread
+    public void onDataRequestObserverRegistered(
+            int dataType,
+            @NonNull String packageName,
+            @NonNull WearableSensingDataRequester dataRequester,
+            @NonNull Consumer<Integer> statusConsumer) {
+        statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);
+    }
+
+    /**
+     * Called when a data request observer is unregistered.
+     *
+     * <p>The implementing class should override this method. It should send a {@link
+     * WearableSensingManager#STATUS_SUCCESS} status code to the {@code statusConsumer} unless it
+     * encounters an error condition described by a status code listed in {@link
+     * WearableSensingManager}, such as {@link WearableSensingManager#STATUS_WEARABLE_UNAVAILABLE},
+     * in which case it should return the corresponding status code.
+     *
+     * @param dataType The data type the observer is for.
+     * @param packageName The package name of the app that will receive the requests sent to the
+     *     dataRequester.
+     * @param dataRequester A handle to the observer to be unregistered. It is the exact same
+     *     instance provided in a previous {@link #onDataRequestConsumerRegistered(int, String,
+     *     WearableSensingDataRequester, Consumer)} invocation.
+     * @param statusConsumer the consumer for the status of the data request observer
+     *     unregistration. This is different from the status for each data request.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
+    @BinderThread
+    public void onDataRequestObserverUnregistered(
+            int dataType,
+            @NonNull String packageName,
+            @NonNull WearableSensingDataRequester dataRequester,
+            @NonNull Consumer<Integer> statusConsumer) {
+        statusConsumer.accept(WearableSensingManager.STATUS_UNSUPPORTED_OPERATION);
+    }
 
     /**
      * Called when a client app requests starting detection of the events in the request. The
@@ -307,6 +417,25 @@ public abstract class WearableSensingService extends Service {
             intArray[i++] = type;
         }
         return intArray;
+    }
+
+    private static WearableSensingDataRequester createDataRequester(
+            RemoteCallback dataRequestCallback) {
+        return (request, requestStatusConsumer) -> {
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(WearableSensingDataRequest.REQUEST_BUNDLE_KEY, request);
+            RemoteCallback requestStatusCallback =
+                    new RemoteCallback(
+                            requestStatusBundle -> {
+                                requestStatusConsumer.accept(
+                                        requestStatusBundle.getInt(
+                                                WearableSensingManager.STATUS_RESPONSE_BUNDLE_KEY));
+                            });
+            bundle.putParcelable(
+                    WearableSensingDataRequest.REQUEST_STATUS_CALLBACK_BUNDLE_KEY,
+                    requestStatusCallback);
+            dataRequestCallback.sendResult(bundle);
+        };
     }
 
     @NonNull
