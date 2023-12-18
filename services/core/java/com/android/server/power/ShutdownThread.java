@@ -319,6 +319,11 @@ public final class ShutdownThread extends Thread {
                 pd.setMax(100);
                 pd.setProgress(0);
                 pd.setIndeterminate(false);
+                boolean showPercent = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_showPercentageTextDuringRebootToUpdate);
+                if (!showPercent) {
+                    pd.setProgressPercentFormat(null);
+                }
                 pd.setProgressNumberFormat(null);
                 pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 pd.setMessage(context.getText(

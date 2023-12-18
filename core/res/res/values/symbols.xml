@@ -5311,4 +5311,7 @@
 
   <!-- Android MediaRouter framework configs. -->
   <java-symbol type="integer" name="config_mediaRouter_builtInSpeakerSuitability" />
+
+  <!-- Shutdown thread config flags -->
+  <java-symbol type="bool" name="config_showPercentageTextDuringRebootToUpdate" />
 </resources>
