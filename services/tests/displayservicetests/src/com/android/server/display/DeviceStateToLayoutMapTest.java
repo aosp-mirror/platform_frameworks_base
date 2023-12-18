@@ -25,6 +25,7 @@ import android.view.DisplayAddress;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
 
@@ -45,6 +46,7 @@ public class DeviceStateToLayoutMapTest {
     private DeviceStateToLayoutMap mDeviceStateToLayoutMap;
 
     @Mock DisplayIdProducer mDisplayIdProducerMock;
+    @Mock DisplayManagerFlags mMockFlags;
 
     @Before
     public void setUp() throws IOException {
@@ -52,7 +54,7 @@ public class DeviceStateToLayoutMapTest {
 
         Mockito.when(mDisplayIdProducerMock.getId(false)).thenReturn(1);
 
-        setupDeviceStateToLayoutMap();
+        setupDeviceStateToLayoutMap(getContent());
     }
 
     //////////////////
@@ -268,6 +270,41 @@ public class DeviceStateToLayoutMapTest {
                 IllegalArgumentException.class, () -> layout.postProcessLocked());
     }
 
+    @Test
+    public void testPortInLayout_disabledFlag() {
+        Mockito.when(mMockFlags.isPortInDisplayLayoutEnabled()).thenReturn(false);
+        assertThrows("Expected IllegalArgumentException when using <port>",
+                IllegalArgumentException.class,
+                () -> setupDeviceStateToLayoutMap(getPortContent()));
+    }
+
+    @Test
+    public void testPortInLayout_readLayout() throws Exception {
+        Mockito.when(mMockFlags.isPortInDisplayLayoutEnabled()).thenReturn(true);
+        setupDeviceStateToLayoutMap(getPortContent());
+
+        Layout configLayout = mDeviceStateToLayoutMap.get(0);
+
+        Layout testLayout = new Layout();
+        testLayout.createDisplayLocked(DisplayAddress.fromPortAndModel(123, null),
+                /* isDefault= */ true, /* isEnabled= */ true, /* displayGroupName= */ null,
+                mDisplayIdProducerMock,  Layout.Display.POSITION_UNKNOWN,
+                /* leadDisplayAddress= */ null, /* brightnessThrottlingMapId= */ null,
+                /* refreshRateZoneId= */ null,
+                /* refreshRateThermalThrottlingMapId= */ null,
+                /* powerThrottlingMapId= */ null);
+        testLayout.createDisplayLocked(DisplayAddress.fromPhysicalDisplayId(78910L),
+                /* isDefault= */ false, /* isEnabled= */ false, /* displayGroupName= */ null,
+                mDisplayIdProducerMock, Layout.Display.POSITION_UNKNOWN,
+                /* leadDisplayAddress= */ null, /* brightnessThrottlingMapId= */ null,
+                /* refreshRateZoneId= */ null,
+                /* refreshRateThermalThrottlingMapId= */ null,
+                /* powerThrottlingMapId= */ null);
+        testLayout.postProcessLocked();
+
+        assertEquals(testLayout, configLayout);
+    }
+
     ////////////////////
     // Helper Methods //
     ////////////////////
@@ -287,11 +324,26 @@ public class DeviceStateToLayoutMapTest {
                 /* powerThrottlingMapId= */ null);
     }
 
-    private void setupDeviceStateToLayoutMap() throws IOException {
+    private void setupDeviceStateToLayoutMap(String content) throws IOException {
         Path tempFile = Files.createTempFile("device_state_layout_map", ".tmp");
-        Files.write(tempFile, getContent().getBytes(StandardCharsets.UTF_8));
-        mDeviceStateToLayoutMap = new DeviceStateToLayoutMap(mDisplayIdProducerMock,
+        Files.write(tempFile, content.getBytes(StandardCharsets.UTF_8));
+        mDeviceStateToLayoutMap = new DeviceStateToLayoutMap(mDisplayIdProducerMock, mMockFlags,
                 tempFile.toFile());
+    }
+
+    private String getPortContent() {
+        return "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                +  "<layouts>\n"
+                +    "<layout>\n"
+                +      "<state>0</state> \n"
+                +      "<display enabled=\"true\" defaultDisplay=\"true\">\n"
+                +        "<port>123</port>\n"
+                +      "</display>\n"
+                +      "<display enabled=\"false\">\n"
+                +        "<address>78910</address>\n"
+                +      "</display>\n"
+                +    "</layout>\n"
+                +  "</layouts>\n";
     }
 
     private String getContent() {

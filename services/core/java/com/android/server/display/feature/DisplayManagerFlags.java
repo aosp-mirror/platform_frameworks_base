@@ -37,6 +37,9 @@ public class DisplayManagerFlags {
     // 'adb shell setprop persist.log.tag.DisplayManagerFlags DEBUG && adb reboot'
     private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
+    private final FlagState mPortInDisplayLayoutFlagState = new FlagState(
+            Flags.FLAG_ENABLE_PORT_IN_DISPLAY_LAYOUT,
+            Flags::enablePortInDisplayLayout);
 
     private final FlagState mConnectedDisplayManagementFlagState = new FlagState(
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_MANAGEMENT,
@@ -113,6 +116,13 @@ public class DisplayManagerFlags {
             Flags.FLAG_REFRESH_RATE_VOTING_TELEMETRY,
             Flags::refreshRateVotingTelemetry
     );
+
+    /**
+     * @return {@code true} if 'port' is allowed in display layout configuration file.
+     */
+    public boolean isPortInDisplayLayoutEnabled() {
+        return mPortInDisplayLayoutFlagState.isEnabled();
+    }
 
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
