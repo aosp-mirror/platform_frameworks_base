@@ -405,12 +405,15 @@ constructor(
         }
         widgetGroupIds.forEach { id ->
             squishedViewState.widgetStates.get(id)?.let { state ->
-                state.alpha =
-                    calculateAlpha(
-                        squishFraction,
-                        startPosition / nonsquishedHeight,
-                        endPosition / nonsquishedHeight
-                    )
+                // Don't modify alpha for elements that should be invisible (e.g. disabled seekbar)
+                if (state.alpha != 0f) {
+                    state.alpha =
+                        calculateAlpha(
+                            squishFraction,
+                            startPosition / nonsquishedHeight,
+                            endPosition / nonsquishedHeight
+                        )
+                }
             }
         }
         return groupTop // used for the widget group above this group
