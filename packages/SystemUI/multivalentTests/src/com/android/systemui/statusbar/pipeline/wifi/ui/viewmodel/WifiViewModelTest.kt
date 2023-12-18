@@ -16,7 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
-import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.WIFI_OTHER_DEVICE_CONNECTION
@@ -59,8 +60,6 @@ import org.mockito.MockitoAnnotations
 class WifiViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: WifiViewModel
-
-    private val setFlagsRule = SetFlagsRule()
 
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
@@ -187,11 +186,9 @@ class WifiViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
     fun activity_nullSsid_outputsFalse_staticFlagOff() =
         testScope.runTest {
-            // GIVEN flag is disabled
-            setFlagsRule.disableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
-
             whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
 
@@ -214,11 +211,9 @@ class WifiViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
     fun activity_nullSsid_outputsFalse_staticFlagOn() =
         testScope.runTest {
-            // GIVEN flag is enabled
-            setFlagsRule.enableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
-
             whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
 
@@ -371,11 +366,9 @@ class WifiViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
     fun activityContainer_inAndOutFalse_outputsTrue_staticFlagOff() =
         testScope.runTest {
-            // GIVEN the flag is off
-            setFlagsRule.disableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
-
             whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
@@ -389,11 +382,9 @@ class WifiViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
     fun activityContainer_inAndOutFalse_outputsTrue_staticFlagOn() =
         testScope.runTest {
-            // GIVEN the flag is on
-            setFlagsRule.enableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
-
             whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
