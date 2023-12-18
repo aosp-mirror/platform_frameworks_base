@@ -72,7 +72,7 @@ class InsetsStateController {
     };
     private final InsetsControlTarget mEmptyImeControlTarget = new InsetsControlTarget() {
         @Override
-        public void notifyInsetsControlChanged() {
+        public void notifyInsetsControlChanged(int displayId) {
             InsetsSourceControl[] controls = getControlsForDispatch(this);
             if (controls == null) {
                 return;
@@ -80,7 +80,7 @@ class InsetsStateController {
             for (InsetsSourceControl control : controls) {
                 if (control.getType() == WindowInsets.Type.ime()) {
                     mDisplayContent.mWmService.mH.post(() ->
-                            InputMethodManagerInternal.get().removeImeSurface());
+                            InputMethodManagerInternal.get().removeImeSurface(displayId));
                 }
             }
         }
@@ -370,9 +370,10 @@ class InsetsStateController {
                 provider.onSurfaceTransactionApplied();
             }
             final ArraySet<InsetsControlTarget> newControlTargets = new ArraySet<>();
+            int displayId = mDisplayContent.getDisplayId();
             for (int i = mPendingControlChanged.size() - 1; i >= 0; i--) {
                 final InsetsControlTarget controlTarget = mPendingControlChanged.valueAt(i);
-                controlTarget.notifyInsetsControlChanged();
+                controlTarget.notifyInsetsControlChanged(displayId);
                 if (mControlTargetProvidersMap.containsKey(controlTarget)) {
                     // We only collect targets who get controls, not lose controls.
                     newControlTargets.add(controlTarget);

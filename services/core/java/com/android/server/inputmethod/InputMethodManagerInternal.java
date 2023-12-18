@@ -171,9 +171,11 @@ public abstract class InputMethodManagerInternal {
     public abstract void onImeParentChanged();
 
     /**
-     * Destroys the IME surface.
+     * Destroys the IME surface for the given display.
+     *
+     * @param displayId the display hosting the IME window
      */
-    public abstract void removeImeSurface();
+    public abstract void removeImeSurface(int displayId);
 
     /**
      * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
@@ -302,7 +304,7 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void removeImeSurface() {
+                public void removeImeSurface(int displayId) {
                 }
 
                 @Override
