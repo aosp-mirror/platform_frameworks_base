@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Flags;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -143,9 +144,16 @@ public class EnableZenModeDialog {
                                     Slog.d(TAG, "Invalid manual condition: " + tag.condition);
                                 }
                                 // always triggers priority-only dnd with chosen condition
-                                mNotificationManager.setZenMode(
-                                        Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
-                                        getRealConditionId(tag.condition), TAG);
+                                if (Flags.modesApi()) {
+                                    mNotificationManager.setZenMode(
+                                            Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                                            getRealConditionId(tag.condition), TAG,
+                                            /* fromUser= */ true);
+                                } else {
+                                    mNotificationManager.setZenMode(
+                                            Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                                            getRealConditionId(tag.condition), TAG);
+                                }
                             }
                         });
 

@@ -117,7 +117,6 @@ public class NotificationShellCmd extends ShellCommand {
     private final NotificationManagerService mDirectService;
     private final INotificationManager mBinderService;
     private final PackageManager mPm;
-    private NotificationChannel mChannel;
 
     public NotificationShellCmd(NotificationManagerService service) {
         mDirectService = service;
@@ -183,7 +182,13 @@ public class NotificationShellCmd extends ShellCommand {
                             interruptionFilter = INTERRUPTION_FILTER_ALL;
                     }
                     final int filter = interruptionFilter;
-                    mBinderService.setInterruptionFilter(callingPackage, filter);
+                    if (android.app.Flags.modesApi()) {
+                        mBinderService.setInterruptionFilter(callingPackage, filter,
+                                /* fromUser= */ true);
+                    } else {
+                        mBinderService.setInterruptionFilter(callingPackage, filter,
+                                /* fromUser= */ false);
+                    }
                 }
                 break;
                 case "allow_dnd": {
