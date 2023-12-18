@@ -14,7 +14,6 @@
 
 package com.android.systemui.qs.tileimpl;
 
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -25,14 +24,13 @@ import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.external.CustomTile;
-import com.android.systemui.util.leak.GarbageMonitor;
-
-import dagger.Lazy;
 
 import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import dagger.Lazy;
 
 /**
  * A factory that creates Quick Settings tiles based on a tileSpec
@@ -79,9 +77,7 @@ public class QSFactoryImpl implements QSFactory {
     @Nullable
     protected QSTileImpl createTileInternal(String tileSpec) {
         // Stock tiles.
-        if (mTileMap.containsKey(tileSpec)
-                // We should not return a Garbage Monitory Tile if the build is not Debuggable
-                && (!tileSpec.equals(GarbageMonitor.MemoryTile.TILE_SPEC) || Build.IS_DEBUGGABLE)) {
+        if (mTileMap.containsKey(tileSpec)) {
             return mTileMap.get(tileSpec).get();
         }
 
