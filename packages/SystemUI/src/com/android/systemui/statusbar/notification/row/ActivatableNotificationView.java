@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
+import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.util.DumpUtilsKt;
@@ -569,7 +570,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public float getTopCornerRadius() {
-        if (mImprovedHunAnimation.isEnabled()) {
+        if (NotificationsImprovedHunAnimation.isEnabled()) {
             return super.getTopCornerRadius();
         }
 
@@ -579,7 +580,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public float getBottomCornerRadius() {
-        if (mImprovedHunAnimation.isEnabled()) {
+        if (NotificationsImprovedHunAnimation.isEnabled()) {
             return super.getBottomCornerRadius();
         }
 

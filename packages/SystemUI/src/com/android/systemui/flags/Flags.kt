@@ -17,11 +17,11 @@ package com.android.systemui.flags
 
 import android.provider.DeviceConfig
 import com.android.internal.annotations.Keep
-import com.android.systemui.res.R
 import com.android.systemui.flags.FlagsFactory.releasedFlag
 import com.android.systemui.flags.FlagsFactory.resourceBooleanFlag
 import com.android.systemui.flags.FlagsFactory.sysPropBooleanFlag
 import com.android.systemui.flags.FlagsFactory.unreleasedFlag
+import com.android.systemui.res.R
 
 /**
  * List of [Flag] objects for use in SystemUI.
@@ -599,9 +599,6 @@ object Flags {
     // TODO(b/285059790) : Tracking Bug
     @JvmField
     val LOCKSCREEN_WALLPAPER_DREAM_ENABLED = unreleasedFlag("enable_lockscreen_wallpaper_dream")
-
-    // TODO(b/283084712): Tracking Bug
-    @JvmField val IMPROVED_HUN_ANIMATIONS = unreleasedFlag("improved_hun_animations")
 
     // TODO(b/283447257): Tracking bug
     @JvmField

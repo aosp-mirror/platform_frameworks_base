@@ -28,8 +28,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 /** Tests for {@link NotificationShelf}. */
 @SmallTest
@@ -53,7 +53,6 @@ open class NotificationShelfTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         mDependency.injectTestDependency(FeatureFlags::class.java, flags)
         flags.set(Flags.SENSITIVE_REVEAL_ANIM, useSensitiveReveal)
-        flags.setDefault(Flags.IMPROVED_HUN_ANIMATIONS)
         val root = FrameLayout(context)
         shelf =
             LayoutInflater.from(root.context)
