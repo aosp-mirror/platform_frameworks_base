@@ -10757,11 +10757,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
-        session.internalNotifyViewTreeEvent(/* started= */ true);
+        session.notifyViewTreeEvent(/* started= */ true);
         try {
             dispatchProvideContentCaptureStructure();
         } finally {
-            session.internalNotifyViewTreeEvent(/* started= */ false);
+            session.notifyViewTreeEvent(/* started= */ false);
         }
     }
 

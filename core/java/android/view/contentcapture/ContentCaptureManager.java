@@ -502,7 +502,7 @@ public final class ContentCaptureManager {
     private Handler mHandler;
 
     @GuardedBy("mLock")
-    private MainContentCaptureSession mMainSession;
+    private ContentCaptureSession mMainSession;
 
     @Nullable // set on-demand by addDumpable()
     private Dumper mDumpable;
@@ -587,7 +587,7 @@ public final class ContentCaptureManager {
      */
     @NonNull
     @UiThread
-    public MainContentCaptureSession getMainContentCaptureSession() {
+    public ContentCaptureSession getMainContentCaptureSession() {
         synchronized (mLock) {
             if (mMainSession == null) {
                 mMainSession = new MainContentCaptureSession(
@@ -726,7 +726,7 @@ public final class ContentCaptureManager {
     public boolean isContentCaptureEnabled() {
         if (mOptions.lite) return false;
 
-        final MainContentCaptureSession mainSession;
+        final ContentCaptureSession mainSession;
         synchronized (mLock) {
             mainSession = mMainSession;
         }
@@ -777,7 +777,7 @@ public final class ContentCaptureManager {
             Log.d(TAG, "setContentCaptureEnabled(): setting to " + enabled + " for " + mContext);
         }
 
-        MainContentCaptureSession mainSession;
+        ContentCaptureSession mainSession;
         synchronized (mLock) {
             if (enabled) {
                 mFlags &= ~ContentCaptureContext.FLAG_DISABLED_BY_APP;
@@ -803,7 +803,7 @@ public final class ContentCaptureManager {
         final boolean flagSecureEnabled =
                 (params.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
 
-        MainContentCaptureSession mainSession;
+        ContentCaptureSession mainSession;
         boolean alreadyDisabledByApp;
         synchronized (mLock) {
             alreadyDisabledByApp = (mFlags & ContentCaptureContext.FLAG_DISABLED_BY_APP) != 0;
