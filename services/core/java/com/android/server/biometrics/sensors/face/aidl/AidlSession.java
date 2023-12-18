@@ -21,7 +21,7 @@ import android.content.Context;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 
-import com.android.server.biometrics.sensors.face.hidl.AidlToHidlAdapter;
+import com.android.server.biometrics.sensors.face.hidl.HidlToAidlSessionAdapter;
 
 import java.util.function.Supplier;
 
@@ -47,7 +47,7 @@ public class AidlSession {
 
     public AidlSession(Context context, Supplier<IBiometricsFace> session, int userId,
             AidlResponseHandler aidlResponseHandler) {
-        mSession = new AidlToHidlAdapter(context, session, userId, aidlResponseHandler);
+        mSession = new HidlToAidlSessionAdapter(context, session, userId, aidlResponseHandler);
         mHalInterfaceVersion = 0;
         mUserId = userId;
         mAidlResponseHandler = aidlResponseHandler;
@@ -64,7 +64,7 @@ public class AidlSession {
     }
 
     /** The HAL callback, which should only be used in tests {@See BiometricTestSessionImpl}. */
-    AidlResponseHandler getHalSessionCallback() {
+    public AidlResponseHandler getHalSessionCallback() {
         return mAidlResponseHandler;
     }
 

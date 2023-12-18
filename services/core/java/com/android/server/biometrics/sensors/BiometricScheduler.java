@@ -202,7 +202,7 @@ public class BiometricScheduler {
     };
 
     @VisibleForTesting
-    BiometricScheduler(@NonNull String tag,
+    public BiometricScheduler(@NonNull String tag,
             @NonNull Handler handler,
             @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,

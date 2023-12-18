@@ -16,6 +16,9 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.os.UserHandle.USER_NULL;
+import static android.os.UserHandle.USER_SYSTEM;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -34,17 +37,20 @@ import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.SensorLocation;
 import android.hardware.biometrics.fingerprint.SensorProps;
+import android.hardware.fingerprint.HidlFingerprintSensorConfig;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.AuthenticationStateListeners;
-import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
@@ -52,6 +58,7 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -63,6 +70,10 @@ import java.util.ArrayList;
 public class FingerprintProviderTest {
 
     private static final String TAG = "FingerprintProviderTest";
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock
     private Context mContext;
@@ -115,7 +126,8 @@ public class FingerprintProviderTest {
         mFingerprintProvider = new FingerprintProvider(mContext,
                 mBiometricStateCallback, mAuthenticationStateListeners, mSensorProps, TAG,
                 mLockoutResetDispatcher, mGestureAvailabilityDispatcher, mBiometricContext,
-                mDaemon);
+                mDaemon, false /* resetLockoutRequiresHardwareAuthToken */,
+                true /* testHalEnabled */);
     }
 
     @Test
@@ -123,15 +135,40 @@ public class FingerprintProviderTest {
         waitForIdle();
 
         for (SensorProps prop : mSensorProps) {
-            final BiometricScheduler scheduler =
-                    mFingerprintProvider.mFingerprintSensors.get(prop.commonProps.sensorId)
-                            .getScheduler();
-            BaseClientMonitor currentClient = scheduler.getCurrentClient();
-
-            assertThat(currentClient).isInstanceOf(FingerprintInternalCleanupClient.class);
-            assertThat(currentClient.getSensorId()).isEqualTo(prop.commonProps.sensorId);
-            assertThat(currentClient.getTargetUserId()).isEqualTo(UserHandle.USER_SYSTEM);
+            final Sensor sensor =
+                    mFingerprintProvider.mFingerprintSensors.get(prop.commonProps.sensorId);
+            assertThat(sensor.getLazySession().get().getUserId()).isEqualTo(USER_SYSTEM);
         }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testAddingHidlSensors() {
+        when(mResources.getIntArray(anyInt())).thenReturn(new int[]{});
+        when(mResources.getBoolean(anyInt())).thenReturn(false);
+
+        final int fingerprintId = 0;
+        final int fingerprintStrength = 15;
+        final String config = String.format("%d:2:%d", fingerprintId, fingerprintStrength);
+        final HidlFingerprintSensorConfig fingerprintSensorConfig =
+                new HidlFingerprintSensorConfig();
+        fingerprintSensorConfig.parse(config, mContext);
+        HidlFingerprintSensorConfig[] hidlFingerprintSensorConfigs =
+                new HidlFingerprintSensorConfig[]{fingerprintSensorConfig};
+        mFingerprintProvider = new FingerprintProvider(mContext,
+                mBiometricStateCallback, mAuthenticationStateListeners,
+                hidlFingerprintSensorConfigs, TAG, mLockoutResetDispatcher,
+                mGestureAvailabilityDispatcher, mBiometricContext, mDaemon,
+                false /* resetLockoutRequiresHardwareAuthToken */,
+                true /* testHalEnabled */);
+
+        assertThat(mFingerprintProvider.mFingerprintSensors.get(fingerprintId)
+                .getLazySession().get().getUserId()).isEqualTo(USER_NULL);
+
+        waitForIdle();
+
+        assertThat(mFingerprintProvider.mFingerprintSensors.get(fingerprintId)
+                .getLazySession().get().getUserId()).isEqualTo(USER_SYSTEM);
     }
 
     @SuppressWarnings("rawtypes")
