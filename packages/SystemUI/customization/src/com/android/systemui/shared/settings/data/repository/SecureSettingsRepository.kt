@@ -37,15 +37,17 @@ interface SecureSettingsRepository {
     ): Flow<Int>
 
     /** Updates the value of the setting with the given name. */
-    suspend fun set(
+    suspend fun setInt(
         name: String,
         value: Int,
     )
 
-    suspend fun get(
+    suspend fun getInt(
         name: String,
         defaultValue: Int = 0,
     ): Int
+
+    suspend fun getString(name: String): String?
 }
 
 class SecureSettingsRepositoryImpl(
@@ -80,7 +82,7 @@ class SecureSettingsRepositoryImpl(
             .flowOn(backgroundDispatcher)
     }
 
-    override suspend fun set(name: String, value: Int) {
+    override suspend fun setInt(name: String, value: Int) {
         withContext(backgroundDispatcher) {
             Settings.Secure.putInt(
                 contentResolver,
@@ -90,12 +92,21 @@ class SecureSettingsRepositoryImpl(
         }
     }
 
-    override suspend fun get(name: String, defaultValue: Int): Int {
+    override suspend fun getInt(name: String, defaultValue: Int): Int {
         return withContext(backgroundDispatcher) {
             Settings.Secure.getInt(
                 contentResolver,
                 name,
                 defaultValue,
+            )
+        }
+    }
+
+    override suspend fun getString(name: String): String? {
+        return withContext(backgroundDispatcher) {
+            Settings.Secure.getString(
+                contentResolver,
+                name,
             )
         }
     }

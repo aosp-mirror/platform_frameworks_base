@@ -58,13 +58,13 @@ class NotificationSettingsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val showNotifs by collectLastValue(underTest.isShowNotificationsOnLockScreenEnabled)
 
-            secureSettingsRepository.set(
+            secureSettingsRepository.setInt(
                 name = Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                 value = 1,
             )
             assertThat(showNotifs).isEqualTo(true)
 
-            secureSettingsRepository.set(
+            secureSettingsRepository.setInt(
                 name = Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                 value = 0,
             )
