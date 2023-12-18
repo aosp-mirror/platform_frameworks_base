@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.ui.viewmodel
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
-import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
-import com.android.systemui.keyguard.ui.viewmodel.deviceEntryIconViewModel
+package com.android.systemui.keyguard.ui.viewmodel
+
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.statusbar.phone.systemUIDialogManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
-val Kosmos.deviceEntryUdfpsTouchOverlayViewModel by Fixture {
-    DeviceEntryUdfpsTouchOverlayViewModel(
-        deviceEntryIconViewModel = deviceEntryIconViewModel,
-        alternateBouncerInteractor = alternateBouncerInteractor,
-        systemUIDialogManager = systemUIDialogManager,
+val Kosmos.alternateBouncerToAodTransitionViewModel by Fixture {
+    AlternateBouncerToAodTransitionViewModel(
+        interactor = keyguardTransitionInteractor,
+        deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,
+        animationFlow = keyguardTransitionAnimationFlow,
     )
 }

@@ -141,5 +141,6 @@ constructor(
     companion object {
         val TRANSITION_DURATION_MS = 300.milliseconds
         val TO_GONE_DURATION = 500.milliseconds
+        val TO_AOD_DURATION = TRANSITION_DURATION_MS
     }
 }
