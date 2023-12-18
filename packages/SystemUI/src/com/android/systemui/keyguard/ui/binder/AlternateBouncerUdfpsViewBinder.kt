@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 object AlternateBouncerUdfpsViewBinder {
@@ -71,10 +72,12 @@ object AlternateBouncerUdfpsViewBinder {
         bgView.visibility = View.VISIBLE
         bgView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.bgViewModel.collect { bgViewModel ->
-                    bgView.alpha = bgViewModel.alpha
-                    bgView.imageTintList = ColorStateList.valueOf(bgViewModel.tint)
+                launch {
+                    viewModel.bgColor.collect { color ->
+                        bgView.imageTintList = ColorStateList.valueOf(color)
+                    }
                 }
+                launch { viewModel.bgAlpha.collect { alpha -> bgView.alpha = alpha } }
             }
         }
     }
