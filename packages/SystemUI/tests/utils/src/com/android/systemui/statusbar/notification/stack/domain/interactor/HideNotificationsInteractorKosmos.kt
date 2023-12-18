@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
-import com.android.systemui.common.domain.interactor.configurationInteractor
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.power.domain.interactor.powerInteractor

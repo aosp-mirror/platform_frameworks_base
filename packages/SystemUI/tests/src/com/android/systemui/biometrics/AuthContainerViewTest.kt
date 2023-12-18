@@ -151,6 +151,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             )
         udfpsOverlayInteractor =
                 UdfpsOverlayInteractor(
+                        context,
                         authController,
                         selectedUserInteractor,
                         testScope.backgroundScope,
