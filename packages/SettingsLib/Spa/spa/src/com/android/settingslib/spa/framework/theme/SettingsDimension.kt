@@ -37,7 +37,6 @@ object SettingsDimension {
     val itemPaddingAround = 8.dp
     val itemDividerHeight = 32.dp
 
-    val iconSmall = 16.dp
     val iconLarge = 48.dp
 
     /** The size when app icon is displayed in list. */
