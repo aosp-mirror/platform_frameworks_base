@@ -499,11 +499,16 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     public void testAddWindowWithSubWindowTypeByWindowContext() {
         spyOn(mWm.mWindowContextListenerController);
 
-        final WindowToken windowToken = createTestWindowToken(TYPE_INPUT_METHOD, mDefaultDisplay);
-        final Session session = getTestSession();
+        final WindowState parentWin = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final IBinder parentToken = parentWin.mToken.token;
+        parentWin.mAttrs.token = parentToken;
+        mWm.mWindowMap.put(parentToken, parentWin);
+        final Session session = parentWin.mSession;
+        session.onWindowAdded(parentWin);
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 TYPE_APPLICATION_ATTACHED_DIALOG);
-        params.token = windowToken.token;
+        params.token = parentToken;
+        params.setTitle("attached-dialog");
         final IBinder windowContextToken = new Binder();
         params.setWindowContextToken(windowContextToken);
         doReturn(true).when(mWm.mWindowContextListenerController)
@@ -517,6 +522,12 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), any(), anyInt(), any(), anyBoolean());
+
+        assertTrue(parentWin.hasChild());
+        assertTrue(parentWin.isAttached());
+        session.binderDied();
+        assertFalse(parentWin.hasChild());
+        assertFalse(parentWin.isAttached());
     }
 
     @Test
