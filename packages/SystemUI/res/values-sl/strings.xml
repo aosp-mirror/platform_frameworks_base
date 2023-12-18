@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Omogoči USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Več o tem"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Posnetek zaslona"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Podaljšanje časa odklenjenosti je onemogočeno"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Razširjeno odklepanje je onemogočeno"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"je poslal(-a) sliko"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Shranjevanje posnetka zaslona ..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Shranjevanje posnetka zaslona v delovni profil …"</string>
@@ -270,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inverzija barv"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Popravljanje barv"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Velikost pisave"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Upravljanje uporabnikov"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Upravljaj uporabnike"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Končano"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Zapri"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Povezava je vzpostavljena"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meni za vklop/izklop"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. stran od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaklenjen zaslon"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tel. izklopljen zaradi vročine"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon zdaj deluje normalno.\nDotaknite se za več informacij"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon je bil prevroč, zato se je izklopil, da se ohladi. Zdaj normalno deluje.\n\nTelefon lahko postane prevroč ob:\n	• uporabi aplikacij, ki intenzivno porabljajo sredstva (npr. za igranje iger, videoposnetke ali navigacijo)\n	• prenosu ali nalaganju velikih datotek\n	• uporabi telefona pri visokih temp."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Oglejte si navodila za ukrepanje"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Telefon se segreva"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Nekatere funkcije bodo med ohlajanjem telefona omejene.\nDotaknite se za več informacij"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon se bo samodejno poskusil ohladiti. Še naprej ga lahko uporabljate, vendar bo morda deloval počasneje.\n\nKo se telefon ohladi, bo zopet deloval kot običajno."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Oglejte si navodila za ukrepanje"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Odklopite napravo"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Naprava se segreva pri vratih za polnjenje. Če je priključena na polnilnik ali dodatek USB, ga odklopite in bodite tem previdni, saj je tudi kabel lahko topel."</string>
@@ -1096,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Predogled slike"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"urejanje"</string>
     <string name="add" msgid="81036585205287996">"Dodaj"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Upravljanje uporabnikov"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Upravljaj uporabnike"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"To obvestilo ne podpira vlečenja v razdeljen zaslon."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi ni na voljo."</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prednostni način"</string>

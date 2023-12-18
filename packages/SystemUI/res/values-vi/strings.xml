@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Bật USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Tìm hiểu thêm"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Chụp ảnh màn hình"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Đã tắt tính năng Luôn mở khoá"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Đã tắt tính năng Kéo dài trạng thái mở khoá"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"đã gửi hình ảnh"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Đang lưu ảnh chụp màn hình..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Đang lưu ảnh chụp màn hình vào hồ sơ công việc…"</string>
@@ -270,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Đảo màu"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Chỉnh màu"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Cỡ chữ"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Quản lý người dùng"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Quản lý ng.dùng"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Xong"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Đóng"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Đã kết nối"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Trình đơn nguồn"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Trang <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Màn hình khóa"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Điện thoại đã tắt do nhiệt"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Điện thoại của bạn đang chạy bình thường.\nHãy nhấn để biết thêm thông tin"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Do quá nóng nên điện thoại đã tắt để hạ nhiệt. Hiện điện thoại của bạn đang chạy bình thường.\n\nĐiện thoại có thể bị quá nóng nếu bạn:\n	• Dùng các ứng dụng tốn nhiều tài nguyên (như ứng dụng trò chơi, video hoặc điều hướng)\n	• Tải xuống hoặc tải lên tệp có dung lượng lớn\n	• Dùng điện thoại ở nhiệt độ cao"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Xem các bước chăm sóc"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Điện thoại đang nóng lên"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Một số tính năng bị hạn chế trong khi điện thoại nguội dần.\nHãy nhấn để biết thêm thông tin"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Điện thoại của bạn sẽ tự động nguội dần. Bạn vẫn có thể sử dụng điện thoại, nhưng điện thoại có thể chạy chậm hơn. \n\nSau khi đã nguội, điện thoại sẽ chạy bình thường."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Xem các bước chăm sóc"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Rút thiết bị ra"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Phần gần cổng sạc của thiết bị đang nóng lên. Nếu thiết bị kết nối với bộ sạc hoặc phụ kiện USB, hãy rút ra một cách thận trọng vì cáp có thể cũng đang nóng."</string>
@@ -801,7 +795,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi đang tắt"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth tắt"</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth đang tắt"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Không làm phiền tắt"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Chế độ Không làm phiền đang bật"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Không làm phiền đã được một quy tắc tự động (<xliff:g id="ID_1">%s</xliff:g>) bật."</string>
@@ -1096,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Bản xem trước hình ảnh"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"sửa"</string>
     <string name="add" msgid="81036585205287996">"Thêm"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Quản lý người dùng"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Quản lý ng.dùng"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Thông báo này không hỗ trợ thao tác kéo để chia đôi màn hình"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Không có Wi‑Fi"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Chế độ ưu tiên"</string>

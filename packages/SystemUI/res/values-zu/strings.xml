@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Imenyu yamandla"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Ikhasi <xliff:g id="ID_1">%1$d</xliff:g> kwangu-<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Khiya isikrini"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Ifoni ivaliwe ngenxa yokushisa"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ifoni yakho manje isebenza ngokuvamile.\nThepha ukuze uthole ulwazi olungeziwe"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ifoni yakho ibishisa kakhulu, ngakho-ke yacisha ukuze iphole. Ifoni yakho manje isebenza ngokuvamile.\n\nIfoni yakho ingashisa kakhulu uma:\n	• Usebenzisa izinhlelo zokusebenza ezinkulu (njegegeyimu, ividiyo, noma izinhlelo zokusebenza zokuzula)\n	• Landa noma layisha amafayela amakhulu\n	• Sebenzisa ifoni yakho kumathempelesha aphezulu"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Bona izinyathelo zokunakekelwa"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Ifoni iyafudumala"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Ezinye izici zikhawulelwe ngenkathi ifoni iphola.\nThepha mayelana nolwazi olwengeziwe"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ifoni yakho izozama ngokuzenzakalela ukuphola. Ungasasebenzisa ifoni yakho, kodwa ingasebenza ngokungasheshi.\n\nUma ifoni yakho isipholile, izosebenza ngokuvamile."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Bona izinyathelo zokunakekelwa"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Khipha idivayisi yakho"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Idivayisi yakho iqala ukufudumala eduze kwembobo yokushaja. Uma ixhunywe kushaja noma insiza ye-USB, yikhiphe, futhi uqaphele njengoba ikhebuli ingase ifudumale."</string>

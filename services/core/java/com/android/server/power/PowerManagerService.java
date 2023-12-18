@@ -92,6 +92,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
+import android.provider.DeviceConfigInterface;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamManagerInternal;
@@ -128,6 +129,7 @@ import com.android.server.UiThread;
 import com.android.server.UserspaceRebootLogger;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.policy.WindowManagerPolicy;
@@ -323,6 +325,9 @@ public final class PowerManagerService extends SystemService
     private final Injector mInjector;
     private final PermissionCheckerWrapper mPermissionCheckerWrapper;
     private final PowerPropertiesWrapper mPowerPropertiesWrapper;
+    private final DeviceConfigParameterProvider mDeviceConfigProvider;
+
+    private boolean mDisableScreenWakeLocksWhileCached;
 
     private LightsManager mLightsManager;
     private BatteryManagerInternal mBatteryManagerInternal;
@@ -1065,6 +1070,10 @@ public final class PowerManagerService extends SystemService
                 }
             };
         }
+
+        DeviceConfigParameterProvider createDeviceConfigParameterProvider() {
+            return new DeviceConfigParameterProvider(DeviceConfigInterface.REAL);
+        }
     }
 
     /** Interface for checking an app op permission */
@@ -1161,6 +1170,7 @@ public final class PowerManagerService extends SystemService
                 mInjector.createInattentiveSleepWarningController();
         mPermissionCheckerWrapper = mInjector.createPermissionCheckerWrapper();
         mPowerPropertiesWrapper = mInjector.createPowerPropertiesWrapper();
+        mDeviceConfigProvider = mInjector.createDeviceConfigParameterProvider();
 
         mPowerGroupWakefulnessChangeListener = new PowerGroupWakefulnessChangeListener();
 
@@ -1346,6 +1356,14 @@ public final class PowerManagerService extends SystemService
 
             mLightsManager = getLocalService(LightsManager.class);
             mAttentionLight = mLightsManager.getLight(LightsManager.LIGHT_ID_ATTENTION);
+            updateDeviceConfigLocked();
+            mDeviceConfigProvider.addOnPropertiesChangedListener(BackgroundThread.getExecutor(),
+                    properties -> {
+                        synchronized (mLock) {
+                            updateDeviceConfigLocked();
+                            updateWakeLockDisabledStatesLocked();
+                        }
+                    });
 
             // Initialize display power management.
             mDisplayManagerInternal.initPowerManagement(
@@ -1543,6 +1561,12 @@ public final class PowerManagerService extends SystemService
     void handleSettingsChangedLocked() {
         updateSettingsLocked();
         updatePowerStateLocked();
+    }
+
+    @GuardedBy("mLock")
+    private void updateDeviceConfigLocked() {
+        mDisableScreenWakeLocksWhileCached = mDeviceConfigProvider
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
     }
 
     @RequiresPermission(value = android.Manifest.permission.TURN_SCREEN_ON, conditional = true)
@@ -2760,13 +2784,13 @@ public final class PowerManagerService extends SystemService
     /** Get wake lock summary flags that correspond to the given wake lock. */
     @SuppressWarnings("deprecation")
     private int getWakeLockSummaryFlags(WakeLock wakeLock) {
+        if (wakeLock.mDisabled) {
+            // We only respect this if the wake lock is not disabled.
+            return 0;
+        }
         switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
             case PowerManager.PARTIAL_WAKE_LOCK:
-                if (!wakeLock.mDisabled) {
-                    // We only respect this if the wake lock is not disabled.
-                    return WAKE_LOCK_CPU;
-                }
-                break;
+                return WAKE_LOCK_CPU;
             case PowerManager.FULL_WAKE_LOCK:
                 return WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_BUTTON_BRIGHT;
             case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
@@ -4151,7 +4175,7 @@ public final class PowerManagerService extends SystemService
         for (int i = 0; i < numWakeLocks; i++) {
             final WakeLock wakeLock = mWakeLocks.get(i);
             if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
-                    == PowerManager.PARTIAL_WAKE_LOCK) {
+                    == PowerManager.PARTIAL_WAKE_LOCK || isScreenLock(wakeLock)) {
                 if (setWakeLockDisabledStateLocked(wakeLock)) {
                     changed = true;
                     if (wakeLock.mDisabled) {
@@ -4203,6 +4227,22 @@ public final class PowerManagerService extends SystemService
                         disabled = true;
                     }
                 }
+            }
+            return wakeLock.setDisabled(disabled);
+        } else if (mDisableScreenWakeLocksWhileCached && isScreenLock(wakeLock)) {
+            boolean disabled = false;
+            final int appid = UserHandle.getAppId(wakeLock.mOwnerUid);
+            final UidState state = wakeLock.mUidState;
+            // Cached inactive processes are never allowed to hold wake locks.
+            if (mConstants.NO_CACHED_WAKE_LOCKS
+                    && appid >= Process.FIRST_APPLICATION_UID
+                    && !state.mActive
+                    && state.mProcState != ActivityManager.PROCESS_STATE_NONEXISTENT
+                    && state.mProcState >= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
+                if (DEBUG_SPEW) {
+                    Slog.d(TAG, "disabling full wakelock " + wakeLock);
+                }
+                disabled = true;
             }
             return wakeLock.setDisabled(disabled);
         }

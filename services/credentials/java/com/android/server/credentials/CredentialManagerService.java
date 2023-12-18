@@ -91,8 +91,6 @@ public final class CredentialManagerService
         CredentialManagerService, CredentialManagerServiceImpl> {
 
     private static final String TAG = "CredManSysService";
-    private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API =
-            "enable_credential_description_api";
     private static final String PERMISSION_DENIED_ERROR = "permission_denied";
     private static final String PERMISSION_DENIED_WRITE_SECURE_SETTINGS_ERROR =
             "Caller is missing WRITE_SECURE_SETTINGS permission";
@@ -311,14 +309,7 @@ public final class CredentialManagerService
     }
 
     public static boolean isCredentialDescriptionApiEnabled() {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            return DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API,
-                    false);
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        return true;
     }
 
     @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked

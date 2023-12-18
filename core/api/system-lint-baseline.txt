@@ -143,11 +143,15 @@ SamShouldBeLast: android.media.AudioFocusRequest.Builder#setOnAudioFocusChangeLi
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioFocusRequest.Builder.setOnAudioFocusChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int):
     SAM-compatible parameters (such as parameter 1, "l", in android.media.AudioManager.requestAudioFocus) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioRecord#addOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioRecord.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioRecord#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioRecord.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioRouting.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioTrack.OnRoutingChangedListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaCodec#setOnFrameRenderedListener(android.media.MediaCodec.OnFrameRenderedListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.MediaCodec.setOnFrameRenderedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions

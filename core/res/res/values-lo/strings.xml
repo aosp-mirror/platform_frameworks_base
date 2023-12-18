@@ -2324,7 +2324,7 @@
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ໄມໂຄຣໂຟນພ້ອມໃຫ້ນຳໃຊ້"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ໄມໂຄຣໂຟນຖືກບລັອກໄວ້"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ໜ້າຈໍຄູ່"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ເປີດໜ້າຈໍຄູ່ຢູ່"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ເປີດ Dual Screen ຢູ່"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ກຳລັງໃຊ້ຈໍສະແດງຜົນທັງສອງເພື່ອສະແດງເນື້ອຫາ"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ອຸປະກອນຮ້ອນເກີນໄປ"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ໜ້າຈໍຄູ່ບໍ່ພ້ອມໃຫ້ນຳໃຊ້ເນື່ອງຈາກໂທລະສັບຂອງທ່ານຮ້ອນເກີນໄປ"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ຕັ້ງໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… ແຕະເພື່ອປ່ຽນແປງ."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ຕັ້ງຄ່າແປ້ນພິມແທ້ແລ້ວ"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ແຕະເພື່ອເບິ່ງແປ້ນພິມ"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ສ່ວນຕົວ"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"ໂຄລນ"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"ວຽກ"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"ວຽກ 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"ວຽກ 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"ທົດສອບ"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"ສ່ວນກາງ"</string>
 </resources>

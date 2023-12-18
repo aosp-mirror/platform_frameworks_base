@@ -1212,7 +1212,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         });
     }
 
-    public void postNotification() {
+    public void postNotification(boolean byForegroundService) {
         if (isForeground && foregroundNoti != null && app != null) {
             final int appUid = appInfo.uid;
             final int appPid = app.getPid();
@@ -1320,7 +1320,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                         }
                         nm.enqueueNotification(localPackageName, localPackageName,
                                 appUid, appPid, null, localForegroundId, localForegroundNoti,
-                                userId);
+                                userId, byForegroundService /* byForegroundService */);
 
                         foregroundNoti = localForegroundNoti; // save it for amending next time
 

@@ -280,7 +280,7 @@ public class BackgroundActivityStartController {
         // visible window.
         if (Process.isSdkSandboxUid(realCallingUid)) {
             int realCallingSdkSandboxUidToAppUid =
-                    Process.getAppUidForSdkSandboxUid(UserHandle.getAppId(realCallingUid));
+                    Process.getAppUidForSdkSandboxUid(realCallingUid);
 
             if (mService.hasActiveVisibleWindow(realCallingSdkSandboxUidToAppUid)) {
                 return logStartAllowedAndReturnCode(BAL_ALLOW_SDK_SANDBOX,
