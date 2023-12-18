@@ -94,9 +94,7 @@ import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.res.R;
-import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.TouchLogger;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
@@ -145,8 +143,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private static final String TAG = "StackScroller";
     private static final boolean SPEW = Log.isLoggable(TAG, Log.VERBOSE);
 
-    // Delay in milli-seconds before shade closes for clear all.
-    private static final int DELAY_BEFORE_SHADE_CLOSE = 200;
     private boolean mShadeNeedsToClose = false;
 
     @VisibleForTesting
@@ -481,7 +477,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final Rect mTmpRect = new Rect();
     private ClearAllListener mClearAllListener;
     private ClearAllAnimationListener mClearAllAnimationListener;
-    private ShadeController mShadeController;
+    private Runnable mClearAllFinishedWhilePanelExpandedRunnable;
     private Consumer<Boolean> mOnStackYChanged;
 
     private Interpolator mHideXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
@@ -4315,19 +4311,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (mShadeNeedsToClose) {
                 mShadeNeedsToClose = false;
                 if (mIsExpanded) {
-                    collapseShadeDelayed();
+                    mClearAllFinishedWhilePanelExpandedRunnable.run();
                 }
             }
         }
-    }
-
-    private void collapseShadeDelayed() {
-        postDelayed(
-                () -> {
-                    mShadeController.animateCollapseShade(
-                            CommandQueue.FLAG_EXCLUDE_NONE);
-                },
-                DELAY_BEFORE_SHADE_CLOSE /* delayMillis */);
     }
 
     private void clearHeadsUpDisappearRunning() {
@@ -5680,8 +5667,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mFooterClearAllListener = listener;
     }
 
-    void setShadeController(ShadeController shadeController) {
-        mShadeController = shadeController;
+    void setClearAllFinishedWhilePanelExpandedRunnable(Runnable runnable) {
+        mClearAllFinishedWhilePanelExpandedRunnable = runnable;
     }
 
     /**

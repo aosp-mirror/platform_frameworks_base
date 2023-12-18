@@ -81,6 +81,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
@@ -152,6 +153,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private static final String TAG = "StackScrollerController";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
     private static final String HIGH_PRIORITY = "high_priority";
+    /** Delay in milli-seconds before shade closes for clear all. */
+    private static final int DELAY_BEFORE_SHADE_CLOSE = 200;
 
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
@@ -770,7 +773,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 mView.setIsRemoteInputActive(active);
             }
         });
-        mView.setShadeController(mShadeController);
+        mView.setClearAllFinishedWhilePanelExpandedRunnable(()-> {
+            final Runnable doCollapseRunnable = () ->
+                    mShadeController.animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE);
+            mView.postDelayed(doCollapseRunnable, /* delayMillis = */ DELAY_BEFORE_SHADE_CLOSE);
+        });
         mDumpManager.registerDumpable(mView);
 
         mKeyguardBypassController.registerOnBypassStateChangedListener(
