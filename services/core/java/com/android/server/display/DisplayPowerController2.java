@@ -126,6 +126,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // To enable these logs, run:
     // 'adb shell setprop persist.log.tag.DisplayPowerController2 DEBUG && adb reboot'
     private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
+    private static final String SCREEN_ON_BLOCKED_BY_DISPLAYOFFLOAD_TRACE_NAME =
+            "Screen on blocked by displayoffload";
 
     // If true, uses the color fade on animation.
     // We might want to turn this off if we cannot get a guarantee that the screen
@@ -155,6 +157,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final int MSG_SET_DWBC_COLOR_OVERRIDE = 15;
     private static final int MSG_SET_DWBC_LOGGING_ENABLED = 16;
     private static final int MSG_SET_BRIGHTNESS_FROM_OFFLOAD = 17;
+    private static final int MSG_OFFLOADING_SCREEN_ON_UNBLOCKED = 18;
 
 
 
@@ -339,6 +342,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // we are waiting for a callback to release it and unblock the screen.
     private ScreenOnUnblocker mPendingScreenOnUnblocker;
     private ScreenOffUnblocker mPendingScreenOffUnblocker;
+    private Runnable mPendingScreenOnUnblockerByDisplayOffload;
 
     // True if we were in the process of turning off the screen.
     // This allows us to recover more gracefully from situations where we abort
@@ -348,9 +352,14 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // The elapsed real time when the screen on was blocked.
     private long mScreenOnBlockStartRealTime;
     private long mScreenOffBlockStartRealTime;
+    private long mScreenOnBlockByDisplayOffloadStartRealTime;
 
     // Screen state we reported to policy. Must be one of REPORTED_TO_POLICY_* fields.
     private int mReportedScreenStateToPolicy = REPORTED_TO_POLICY_UNREPORTED;
+
+    // Used to deduplicate the displayoffload blocking screen on logic. One block per turning on.
+    // This value is reset when screen on is reported or the blocking is cancelled.
+    private boolean mScreenTurningOnWasBlockedByDisplayOffload;
 
     // If the last recorded screen state was dozing or not.
     private boolean mDozing;
@@ -472,7 +481,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private boolean mBootCompleted;
     private final DisplayManagerFlags mFlags;
 
-    private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
+    private DisplayOffloadSession mDisplayOffloadSession;
 
     /**
      * Creates the display power controller.
@@ -772,6 +781,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     @Override
     public void setDisplayOffloadSession(DisplayOffloadSession session) {
+        if (session == mDisplayOffloadSession) {
+            return;
+        }
+        unblockScreenOnByDisplayOffload();
         mDisplayOffloadSession = session;
     }
 
@@ -1735,6 +1748,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // reporting the display is ready because we only need to ensure the screen is in the
         // right power state even as it continues to converge on the desired brightness.
         final boolean ready = mPendingScreenOnUnblocker == null
+                && mPendingScreenOnUnblockerByDisplayOffload == null
                 && (!mColorFadeEnabled || (!mColorFadeOnAnimator.isStarted()
                         && !mColorFadeOffAnimator.isStarted()))
                 && mPowerState.waitUntilClean(mCleanListener);
@@ -1983,15 +1997,69 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
     }
 
+    private void blockScreenOnByDisplayOffload(DisplayOffloadSession displayOffloadSession) {
+        if (mPendingScreenOnUnblockerByDisplayOffload != null || displayOffloadSession == null) {
+            return;
+        }
+        mScreenTurningOnWasBlockedByDisplayOffload = true;
+
+        Trace.asyncTraceBegin(
+                Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_BY_DISPLAYOFFLOAD_TRACE_NAME, 0);
+        mScreenOnBlockByDisplayOffloadStartRealTime = SystemClock.elapsedRealtime();
+
+        mPendingScreenOnUnblockerByDisplayOffload =
+                () -> onDisplayOffloadUnblockScreenOn(displayOffloadSession);
+        if (!displayOffloadSession.blockScreenOn(mPendingScreenOnUnblockerByDisplayOffload)) {
+            mPendingScreenOnUnblockerByDisplayOffload = null;
+            long delay =
+                    SystemClock.elapsedRealtime() - mScreenOnBlockByDisplayOffloadStartRealTime;
+            Slog.w(mTag, "Tried blocking screen on for offloading but failed. So, end trace after "
+                    + delay + " ms.");
+            Trace.asyncTraceEnd(
+                    Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_BY_DISPLAYOFFLOAD_TRACE_NAME, 0);
+            return;
+        }
+        Slog.i(mTag, "Blocking screen on for offloading.");
+    }
+
+    private void onDisplayOffloadUnblockScreenOn(DisplayOffloadSession displayOffloadSession) {
+        Message msg = mHandler.obtainMessage(MSG_OFFLOADING_SCREEN_ON_UNBLOCKED,
+                displayOffloadSession);
+        mHandler.sendMessage(msg);
+    }
+
+    private void unblockScreenOnByDisplayOffload() {
+        if (mPendingScreenOnUnblockerByDisplayOffload == null) {
+            return;
+        }
+        mPendingScreenOnUnblockerByDisplayOffload = null;
+        long delay = SystemClock.elapsedRealtime() - mScreenOnBlockByDisplayOffloadStartRealTime;
+        Slog.i(mTag, "Unblocked screen on for offloading after " + delay + " ms");
+        Trace.asyncTraceEnd(
+                Trace.TRACE_TAG_POWER, SCREEN_ON_BLOCKED_BY_DISPLAYOFFLOAD_TRACE_NAME, 0);
+    }
+
     private boolean setScreenState(int state) {
         return setScreenState(state, false /*reportOnly*/);
     }
 
     private boolean setScreenState(int state, boolean reportOnly) {
         final boolean isOff = (state == Display.STATE_OFF);
+        final boolean isOn = (state == Display.STATE_ON);
+        final boolean changed = mPowerState.getScreenState() != state;
 
-        if (mPowerState.getScreenState() != state
-                || mReportedScreenStateToPolicy == REPORTED_TO_POLICY_UNREPORTED) {
+        // If the screen is turning on, give displayoffload a chance to do something before the
+        // screen actually turns on.
+        // TODO(b/316941732): add tests for this displayoffload screen-on blocker.
+        if (isOn && changed && !mScreenTurningOnWasBlockedByDisplayOffload) {
+            blockScreenOnByDisplayOffload(mDisplayOffloadSession);
+        } else if (!isOn && mScreenTurningOnWasBlockedByDisplayOffload) {
+            // No longer turning screen on, so unblock previous screen on blocking immediately.
+            unblockScreenOnByDisplayOffload();
+            mScreenTurningOnWasBlockedByDisplayOffload = false;
+        }
+
+        if (changed || mReportedScreenStateToPolicy == REPORTED_TO_POLICY_UNREPORTED) {
             // If we are trying to turn screen off, give policy a chance to do something before we
             // actually turn the screen off.
             if (isOff && !mDisplayPowerProximityStateController.isScreenOffBecauseOfProximity()) {
@@ -2007,8 +2075,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 }
             }
 
-            if (!reportOnly && mPowerState.getScreenState() != state
-                    && readyToUpdateDisplayState()) {
+            if (!reportOnly && changed && readyToUpdateDisplayState()
+                    && mPendingScreenOffUnblocker == null
+                    && mPendingScreenOnUnblockerByDisplayOffload == null) {
                 Trace.traceCounter(Trace.TRACE_TAG_POWER, "ScreenState", state);
 
                 String propertyKey = "debug.tracing.screen_state";
@@ -2060,12 +2129,16 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
 
         // Return true if the screen isn't blocked.
-        return mPendingScreenOnUnblocker == null;
+        return mPendingScreenOnUnblocker == null
+                && mPendingScreenOnUnblockerByDisplayOffload == null;
     }
 
     private void setReportedScreenState(int state) {
         Trace.traceCounter(Trace.TRACE_TAG_POWER, "ReportedScreenStateToPolicy", state);
         mReportedScreenStateToPolicy = state;
+        if (state == REPORTED_TO_POLICY_SCREEN_ON) {
+            mScreenTurningOnWasBlockedByDisplayOffload = false;
+        }
     }
 
     private void loadAmbientLightSensor() {
@@ -2810,6 +2883,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 case MSG_SCREEN_OFF_UNBLOCKED:
                     if (mPendingScreenOffUnblocker == msg.obj) {
                         unblockScreenOff();
+                        updatePowerState();
+                    }
+                    break;
+                case MSG_OFFLOADING_SCREEN_ON_UNBLOCKED:
+                    if (mDisplayOffloadSession == msg.obj) {
+                        unblockScreenOnByDisplayOffload();
                         updatePowerState();
                     }
                     break;
