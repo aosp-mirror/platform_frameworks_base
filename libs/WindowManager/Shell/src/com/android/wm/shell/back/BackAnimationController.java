@@ -70,9 +70,11 @@ import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
+import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -123,6 +125,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private final ShellController mShellController;
+    private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mShellExecutor;
     private final Handler mBgHandler;
 
@@ -179,7 +182,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull @ShellBackgroundThread Handler backgroundHandler,
             Context context,
             @NonNull BackAnimationBackground backAnimationBackground,
-            ShellBackAnimationRegistry shellBackAnimationRegistry) {
+            ShellBackAnimationRegistry shellBackAnimationRegistry,
+            ShellCommandHandler shellCommandHandler) {
         this(
                 shellInit,
                 shellController,
@@ -189,7 +193,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 context,
                 context.getContentResolver(),
                 backAnimationBackground,
-                shellBackAnimationRegistry);
+                shellBackAnimationRegistry,
+                shellCommandHandler);
     }
 
     @VisibleForTesting
@@ -202,7 +207,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             Context context,
             ContentResolver contentResolver,
             @NonNull BackAnimationBackground backAnimationBackground,
-            ShellBackAnimationRegistry shellBackAnimationRegistry) {
+            ShellBackAnimationRegistry shellBackAnimationRegistry,
+            ShellCommandHandler shellCommandHandler) {
         mShellController = shellController;
         mShellExecutor = shellExecutor;
         mActivityTaskManager = activityTaskManager;
@@ -218,6 +224,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 .build();
         mShellBackAnimationRegistry = shellBackAnimationRegistry;
         mLatencyTracker = LatencyTracker.getInstance(mContext);
+        mShellCommandHandler = shellCommandHandler;
     }
 
     private void onInit() {
@@ -226,6 +233,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         createAdapter();
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
                 this::createExternalInterface, this);
+        mShellCommandHandler.addDumpCallback(this::dump, this);
     }
 
     private void setupAnimationDeveloperSettingsObserver(
@@ -945,4 +953,20 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 };
         mBackAnimationAdapter = new BackAnimationAdapter(runner);
     }
+
+    /**
+     * Description of current BackAnimationController state.
+     */
+    private void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "BackAnimationController state:");
+        pw.println(prefix + "  mEnableAnimations=" + mEnableAnimations.get());
+        pw.println(prefix + "  mBackGestureStarted=" + mBackGestureStarted);
+        pw.println(prefix + "  mPostCommitAnimationInProgress=" + mPostCommitAnimationInProgress);
+        pw.println(prefix + "  mShouldStartOnNextMoveEvent=" + mShouldStartOnNextMoveEvent);
+        pw.println(prefix + "  mCurrentTracker state:");
+        mCurrentTracker.dump(pw, prefix + "    ");
+        pw.println(prefix + "  mQueuedTracker state:");
+        mQueuedTracker.dump(pw, prefix + "    ");
+    }
+
 }
