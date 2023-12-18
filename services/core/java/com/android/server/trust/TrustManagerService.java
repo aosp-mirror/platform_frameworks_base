@@ -1442,6 +1442,13 @@ public class TrustManagerService extends SystemService {
         if (biometricManager == null) {
             return new long[0];
         }
+        if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()
+                && mLockPatternUtils.isProfileWithUnifiedChallenge(userId)) {
+            // Profiles with unified challenge have their own set of biometrics, but the device
+            // unlock happens via the parent user.  In this case Keystore needs to be given the list
+            // of biometric SIDs from the parent user, not the profile.
+            userId = resolveProfileParent(userId);
+        }
         return biometricManager.getAuthenticatorIds(userId);
     }
 
