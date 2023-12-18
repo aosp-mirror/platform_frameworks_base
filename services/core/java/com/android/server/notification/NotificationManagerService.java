@@ -7001,12 +7001,14 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
 
-        final boolean hasBitmap = n.extras.containsKey(Notification.EXTRA_PICTURE);
+        final boolean hasBitmap = n.extras.containsKey(Notification.EXTRA_PICTURE)
+                && n.extras.getParcelable(Notification.EXTRA_PICTURE) != null;
         if (hasBitmap) {
             return true;
         }
 
-        final boolean hasIcon = n.extras.containsKey(Notification.EXTRA_PICTURE_ICON);
+        final boolean hasIcon = n.extras.containsKey(Notification.EXTRA_PICTURE_ICON)
+                && n.extras.getParcelable(Notification.EXTRA_PICTURE_ICON) != null;
         if (hasIcon) {
             return true;
         }
@@ -7022,9 +7024,10 @@ public class NotificationManagerService extends SystemService {
         if (!isBigPictureWithBitmapOrIcon(r.getNotification())) {
             return;
         }
-        // Remove Notification object's reference to picture bitmap or URI
-        r.getNotification().extras.remove(Notification.EXTRA_PICTURE);
-        r.getNotification().extras.remove(Notification.EXTRA_PICTURE_ICON);
+        // Remove Notification object's reference to picture bitmap or URI. Leave the extras set to
+        // null to avoid crashing apps that came to expect them to be present but null.
+        r.getNotification().extras.putParcelable(Notification.EXTRA_PICTURE, null);
+        r.getNotification().extras.putParcelable(Notification.EXTRA_PICTURE_ICON, null);
 
         // Make Notification silent
         r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
