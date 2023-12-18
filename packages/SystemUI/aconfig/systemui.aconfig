@@ -268,3 +268,11 @@ flag {
     description: "Adds haptic feedback to the volume slider."
     bug: "316953430"
 }
+
+flag {
+    name: "screenshare_notification_hiding"
+    namespace: "systemui"
+    description: "Enable hiding of notifications during screenshare"
+    bug: "312784809"
+}
+
