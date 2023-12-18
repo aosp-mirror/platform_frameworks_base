@@ -8885,18 +8885,18 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "epdg_static_address_roaming_string";
 
         /**
-         * Controls if the multiple SA proposals allowed for IKE session to include
-         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
-         * IKE SA proposals as per RFC 7296.
+         * Enables the use of multiple IKE SA proposals, encompassing both carrier-preferred
+         * ciphers and all supported ciphers from 3GPP TS 33.210 and RFC 8221,
+         * as defined in RFC 7296.
          */
         @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
         public static final String KEY_SUPPORTS_IKE_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
                 KEY_PREFIX + "supports_ike_session_multiple_sa_proposals_bool";
 
         /**
-         * Controls if the multiple SA proposals allowed for Child session to include
-         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
-         * Child SA proposals as per RFC 7296.
+         * Enables the use of multiple Child SA proposals, encompassing both carrier-preferred
+         * ciphers and all supported ciphers from 3GPP TS 33.210 and RFC 8221,
+         * as defined in RFC 7296.
          */
         @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
         public static final String KEY_SUPPORTS_CHILD_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
