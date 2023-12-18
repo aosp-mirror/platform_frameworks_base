@@ -507,7 +507,8 @@ public class ForegroundServiceTypeLoggerModule {
                 r.appInfo.uid,
                 r.shortInstanceName,
                 fgsState, // FGS State
-                r.isFgsAllowedWIU(), // allowWhileInUsePermissionInFgs
+                // TODO: Also log "forStart"
+                r.isFgsAllowedWiu_forCapabilities(), // allowWhileInUsePermissionInFgs
                 r.getFgsAllowStart(), // fgsStartReasonCode
                 r.appInfo.targetSdkVersion,
                 r.mRecentCallingUid,
@@ -535,12 +536,12 @@ public class ForegroundServiceTypeLoggerModule {
                 ActivityManager.PROCESS_CAPABILITY_NONE,
                 apiDurationBeforeFgsStart,
                 apiDurationAfterFgsEnd,
-                r.mAllowWhileInUsePermissionInFgsReasonNoBinding,
-                r.mAllowWIUInBindService,
-                r.mAllowWIUByBindings,
-                r.mAllowStartForegroundNoBinding,
-                r.mAllowStartInBindService,
-                r.mAllowStartByBindings,
+                r.mAllowWiu_noBinding,
+                r.mAllowWiu_inBindService,
+                r.mAllowWiu_byBindings,
+                r.mAllowStart_noBinding,
+                r.mAllowStart_inBindService,
+                r.mAllowStart_byBindings,
                 FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA,
                 false
         );
