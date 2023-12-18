@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -92,15 +93,15 @@ class MovableElementTest {
             }
 
             at(32) {
-                // In the middle of the transition, there are 2 copies of the counter: the previous
-                // one from scene A (equal to 3) and the new one from scene B (equal to 0).
+                // In the middle of the transition, 2 copies of the counter are composed but only
+                // the one in scene B is placed/drawn.
                 rule
                     .onNode(
                         hasText("count: 3") and
                             hasParent(isElement(TestElements.Foo, scene = TestScenes.SceneA))
                     )
-                    .assertIsDisplayed()
-                    .assertSizeIsEqualTo(75.dp, 75.dp)
+                    .assertExists()
+                    .assertIsNotDisplayed()
 
                 rule
                     .onNode(

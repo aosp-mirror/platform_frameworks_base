@@ -116,7 +116,13 @@ class ElementTest {
             toSceneContent = {
                 Box(Modifier.size(layoutSize)) {
                     // Shared element.
-                    Element(TestElements.Foo, elementSize, elementOffset)
+                    Element(
+                        TestElements.Foo,
+                        elementSize,
+                        elementOffset,
+                        onLayout = { fooLayouts++ },
+                        onPlacement = { fooPlacements++ },
+                    )
                 }
             },
             transition = {
@@ -127,21 +133,25 @@ class ElementTest {
                 scaleSize(TestElements.Bar, width = 1f, height = 1f)
             },
         ) {
-            var numberOfLayoutsAfterOneAnimationFrame = 0
-            var numberOfPlacementsAfterOneAnimationFrame = 0
+            var fooLayoutsAfterOneAnimationFrame = 0
+            var fooPlacementsAfterOneAnimationFrame = 0
+            var barLayoutsAfterOneAnimationFrame = 0
+            var barPlacementsAfterOneAnimationFrame = 0
 
             fun assertNumberOfLayoutsAndPlacements() {
-                assertThat(fooLayouts).isEqualTo(numberOfLayoutsAfterOneAnimationFrame)
-                assertThat(fooPlacements).isEqualTo(numberOfPlacementsAfterOneAnimationFrame)
-                assertThat(barLayouts).isEqualTo(numberOfLayoutsAfterOneAnimationFrame)
-                assertThat(barPlacements).isEqualTo(numberOfPlacementsAfterOneAnimationFrame)
+                assertThat(fooLayouts).isEqualTo(fooLayoutsAfterOneAnimationFrame)
+                assertThat(fooPlacements).isEqualTo(fooPlacementsAfterOneAnimationFrame)
+                assertThat(barLayouts).isEqualTo(barLayoutsAfterOneAnimationFrame)
+                assertThat(barPlacements).isEqualTo(barPlacementsAfterOneAnimationFrame)
             }
 
             at(16) {
                 // Capture the number of layouts and placements that happened after 1 animation
                 // frame.
-                numberOfLayoutsAfterOneAnimationFrame = fooLayouts
-                numberOfPlacementsAfterOneAnimationFrame = fooPlacements
+                fooLayoutsAfterOneAnimationFrame = fooLayouts
+                fooPlacementsAfterOneAnimationFrame = fooPlacements
+                barLayoutsAfterOneAnimationFrame = barLayouts
+                barPlacementsAfterOneAnimationFrame = barPlacements
             }
             repeat(nFrames - 2) { i ->
                 // Ensure that all animation frames (except the final one) don't relayout or replace
@@ -187,7 +197,13 @@ class ElementTest {
             toSceneContent = {
                 Box(Modifier.size(layoutSize)) {
                     // Shared element.
-                    Element(TestElements.Foo, elementSize, offset = 20.dp)
+                    Element(
+                        TestElements.Foo,
+                        elementSize,
+                        offset = 20.dp,
+                        onLayout = { fooLayouts++ },
+                        onPlacement = { fooPlacements++ },
+                    )
                 }
             },
             transition = {
@@ -198,25 +214,30 @@ class ElementTest {
                 scaleSize(TestElements.Bar, width = 1f, height = 1f)
             },
         ) {
-            var numberOfLayoutsAfterOneAnimationFrame = 0
-            var lastNumberOfPlacements = 0
+            var fooLayoutsAfterOneAnimationFrame = 0
+            var barLayoutsAfterOneAnimationFrame = 0
+            var lastFooPlacements = 0
+            var lastBarPlacements = 0
 
             fun assertNumberOfLayoutsAndPlacements() {
                 // The number of layouts have not changed.
-                assertThat(fooLayouts).isEqualTo(numberOfLayoutsAfterOneAnimationFrame)
-                assertThat(barLayouts).isEqualTo(numberOfLayoutsAfterOneAnimationFrame)
+                assertThat(fooLayouts).isEqualTo(fooLayoutsAfterOneAnimationFrame)
+                assertThat(barLayouts).isEqualTo(barLayoutsAfterOneAnimationFrame)
 
                 // The number of placements have increased.
-                assertThat(fooPlacements).isGreaterThan(lastNumberOfPlacements)
-                assertThat(barPlacements).isGreaterThan(lastNumberOfPlacements)
-                lastNumberOfPlacements = fooPlacements
+                assertThat(fooPlacements).isGreaterThan(lastFooPlacements)
+                assertThat(barPlacements).isGreaterThan(lastBarPlacements)
+                lastFooPlacements = fooPlacements
+                lastBarPlacements = barPlacements
             }
 
             at(16) {
                 // Capture the number of layouts and placements that happened after 1 animation
                 // frame.
-                numberOfLayoutsAfterOneAnimationFrame = fooLayouts
-                lastNumberOfPlacements = fooPlacements
+                fooLayoutsAfterOneAnimationFrame = fooLayouts
+                barLayoutsAfterOneAnimationFrame = barLayouts
+                lastFooPlacements = fooPlacements
+                lastBarPlacements = barPlacements
             }
             repeat(nFrames - 2) { i ->
                 // Ensure that all animation frames (except the final one) only replaced the
