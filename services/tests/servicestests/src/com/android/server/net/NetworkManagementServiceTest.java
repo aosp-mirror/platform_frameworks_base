@@ -52,9 +52,9 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.test.FakePermissionEnforcer;
 import android.platform.test.annotations.Presubmit;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IBatteryStats;
