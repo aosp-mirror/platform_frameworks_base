@@ -20,3 +20,10 @@ flag {
     description: "Flag for GnssMeasurementRequest WorkSource API"
     bug: "295235160"
 }
+
+flag {
+    name: "release_supl_connection_on_timeout"
+    namespace: "location"
+    description: "Flag for releasing SUPL connection on timeout"
+    bug: "315024652"
+}
