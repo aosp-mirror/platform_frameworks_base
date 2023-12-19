@@ -1631,7 +1631,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Cast skærm til enhed"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Søger efter enheder…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Indstillinger"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Afbryd forbindelsen"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Afbryd forbindelse"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Søger..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Opretter forbindelse..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Tilgængelig"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Tastaturlayoutet er angivet som <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Tryk for at ændre dette."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fysiske tastaturer er konfigureret"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Tryk for at se tastaturer"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privat"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Arbejde"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Arbejde 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Arbejde 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Fælles"</string>
 </resources>

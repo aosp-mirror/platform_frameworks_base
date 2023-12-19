@@ -1120,10 +1120,8 @@ static std::string getAppDataDirName(std::string_view parent_path, std::string_v
       }
     }
     // Fallback done
-
-    fail_fn(CREATE_ERROR("Unable to find %s:%lld in %s", package_name.data(),
-        ce_data_inode, parent_path.data()));
-    return nullptr;
+    ALOGW("Unable to find %s:%lld in %s", package_name.data(), ce_data_inode, parent_path.data());
+    return "";
   }
 }
 
@@ -1144,11 +1142,19 @@ static void isolateAppDataPerPackage(int userId, std::string_view package_name,
                         true /*call_fail_fn*/);
 
   std::string ce_data_path = getAppDataDirName(mirrorCePath, package_name, ce_data_inode, fail_fn);
+  if (ce_data_path.empty()) {
+    ALOGE("Ignoring missing CE app data dir for %s\n", package_name.data());
+    return;
+  }
   if (!createAndMountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn,
                              false /*call_fail_fn*/)) {
     // CE might unlocks and the name is decrypted
     // get the name and mount again
     ce_data_path=getAppDataDirName(mirrorCePath, package_name, ce_data_inode, fail_fn);
+    if (ce_data_path.empty()) {
+      ALOGE("Ignoring missing CE app data dir for %s\n", package_name.data());
+      return;
+    }
     mountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn);
   }
 }

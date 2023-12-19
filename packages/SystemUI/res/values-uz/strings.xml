@@ -20,8 +20,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Tizim interfeysi"</string>
-    <string name="battery_low_title" msgid="5319680173344341779">"Quvvat tejash funksiyasi yoqilsinmi?"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"<xliff:g id="PERCENTAGE">%s</xliff:g> batareya quvvati qoldi. Quvvat tejash funksiyasi Tungi mavzuni yoqadi va fondagi faollikni cheklaydi. Buning natijasida bildirishnomalar kechikishi mumkin."</string>
+    <string name="battery_low_title" msgid="5319680173344341779">"Quvvat tejash yoqilsinmi?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Batareya quvvati <xliff:g id="PERCENTAGE">%s</xliff:g> qoldi. Quvvat tejash funksiyasi Tungi mavzuni yoqadi va fondagi faollikni cheklaydi. Buning natijasida bildirishnomalar kechikishi mumkin."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"Quvvat tejash funksiyasi Tungi mavzuni yoqadi va fondagi faollikni cheklaydi. Buning natijasida bildirishnomalar kechikishi mumkin."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB orqali quvvatlash imkonsiz"</string>

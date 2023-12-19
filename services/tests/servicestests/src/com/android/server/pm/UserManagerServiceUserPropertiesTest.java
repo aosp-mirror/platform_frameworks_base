@@ -60,6 +60,8 @@ public class UserManagerServiceUserPropertiesTest {
                 .setShowInLauncher(21)
                 .setStartWithParent(false)
                 .setShowInSettings(45)
+                .setShowInSharingSurfaces(78)
+                .setShowInQuietMode(12)
                 .setInheritDevicePolicy(67)
                 .setUseParentsContacts(false)
                 .setCrossProfileIntentFilterAccessControl(10)
@@ -67,10 +69,13 @@ public class UserManagerServiceUserPropertiesTest {
                 .setMediaSharedWithParent(false)
                 .setCredentialShareableWithParent(true)
                 .setDeleteAppWithParent(false)
+                .setCrossProfileContentSharingStrategy(0)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
         actualProps.setShowInSettings(32);
+        actualProps.setShowInSharingSurfaces(46);
+        actualProps.setShowInQuietMode(27);
         actualProps.setInheritDevicePolicy(51);
         actualProps.setUseParentsContacts(true);
         actualProps.setCrossProfileIntentFilterAccessControl(20);
@@ -78,6 +83,7 @@ public class UserManagerServiceUserPropertiesTest {
         actualProps.setMediaSharedWithParent(true);
         actualProps.setCredentialShareableWithParent(false);
         actualProps.setDeleteAppWithParent(true);
+        actualProps.setCrossProfileContentSharingStrategy(1);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -184,6 +190,8 @@ public class UserManagerServiceUserPropertiesTest {
                 copy::isMediaSharedWithParent, true);
         assertEqualGetterOrThrows(orig::isCredentialShareableWithParent,
                 copy::isCredentialShareableWithParent, true);
+        assertEqualGetterOrThrows(orig::getCrossProfileContentSharingStrategy,
+                copy::getCrossProfileContentSharingStrategy, true);
     }
 
     /**
@@ -223,6 +231,10 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.getShowInLauncher()).isEqualTo(actual.getShowInLauncher());
         assertThat(expected.getStartWithParent()).isEqualTo(actual.getStartWithParent());
         assertThat(expected.getShowInSettings()).isEqualTo(actual.getShowInSettings());
+        assertThat(expected.getShowInSharingSurfaces()).isEqualTo(
+                actual.getShowInSharingSurfaces());
+        assertThat(expected.getShowInQuietMode())
+                .isEqualTo(actual.getShowInQuietMode());
         assertThat(expected.getInheritDevicePolicy()).isEqualTo(actual.getInheritDevicePolicy());
         assertThat(expected.getUseParentsContacts()).isEqualTo(actual.getUseParentsContacts());
         assertThat(expected.getCrossProfileIntentFilterAccessControl())
@@ -234,5 +246,7 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.isCredentialShareableWithParent())
                 .isEqualTo(actual.isCredentialShareableWithParent());
         assertThat(expected.getDeleteAppWithParent()).isEqualTo(actual.getDeleteAppWithParent());
+        assertThat(expected.getCrossProfileContentSharingStrategy())
+                .isEqualTo(actual.getCrossProfileContentSharingStrategy());
     }
 }

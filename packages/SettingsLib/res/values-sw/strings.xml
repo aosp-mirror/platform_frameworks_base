@@ -94,7 +94,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Imeunganishwa (hamna simu), kiasi cha chaji ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Imeunganishwa (hamna kifaa cha sauti), kiasi cha chaji ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Imeunganishwa (hamna simu au kifaa cha sauti), kiasi cha chaji ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Inatumika, chaji ya betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Inatumika, betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Inatumika, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ya betri, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ya betri"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Chaji ya betri ni <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ya betri, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ya betri"</string>
@@ -509,7 +509,7 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Mbinu zinazotumika"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Tumia lugha za mfumo"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Imeshindwa kufungua mipangilio ya <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"Huenda mbinu hii ya kuingiza ikakusanya maandishi yote unayoandika, pamoja na data ya kibinafsi kama vile manenosiri na nambari za kadi za mkopo. Inatoka kwa programu <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Je, ungependa kutumia mbinu hii ya kingiza?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"Huenda mbinu hii ya kuingiza ikakusanya maandishi yote unayoandika, pamoja na data ya kibinafsi kama vile manenosiri na namba za kadi za mkopo. Inatoka kwa programu <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Je, ungependa kutumia mbinu hii ya kingiza?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Kumbuka: Baada ya kuwasha tena programu hii, hutaweza kuitumia hadi utakapofungua simu yako"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Hali ya usajili wa IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Imesajiliwa"</string>

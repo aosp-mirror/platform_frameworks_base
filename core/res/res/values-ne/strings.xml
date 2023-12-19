@@ -1682,8 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाउनुहोस्"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ठुलो आवाजमा सुनिरहन चाहनुहुन्छ?\n\nहेडफोनको भोल्युम सिफारिस गरिएको समयभन्दा लामो समयदेखि उच्च छ। यसले तपाईंको श्रवण शक्तिमा क्षति पुर्‍याउन सक्छ"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ठुलो आवाज पत्ता लाग्यो\n\nहेडफोनको भोल्युम सिफारिस गरिएको स्तरभन्दा उच्च छ। यसले तपाईंको श्रवण शक्ति क्षय गर्न सक्छ"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ठुलो साउन्डमा सुनिरहन चाहनुहुन्छ?\n\nहेडफोनको भोल्युम धेरै बेरदेखि उच्च छ। यसले तपाईंको श्रवण शक्तिमा क्षति पुर्‍याउन सक्छ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"साउन्ड ठूलो भयो\n\nहेडफोनको भोल्युम सिफारिस गरिएको स्तरभन्दा उच्च छ। यसले तपाईंको श्रवण शक्ति क्षय गर्न सक्छ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"पहुँच सम्बन्धी सर्टकट प्रयोग गर्ने हो?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"यो सर्टकट सक्रिय हुँदा, ३ सेकेन्डसम्म दुवै भोल्युम बटन थिच्नुले पहुँचसम्बन्धी कुनै सुविधा सुरु गर्ने छ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"एक्सेसिबिलिटीसम्बन्धी सुविधा  प्रयोग गर्न सर्टकट अन गर्ने हो?"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"किबोर्ड लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> भाषामा सेट गरिएको छ… बदल्न ट्याप गर्नुहोस्।"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"भौतिक किबोर्डहरू कन्फिगर गरिएका छन्"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"किबोर्डहरू हेर्न ट्याप गर्नुहोस्"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"निजी"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"क्लोन"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"कार्य प्रोफाइल"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"कार्य प्रोफाइल २"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"कार्य प्रोफाइल ३"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"परीक्षण"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"सामुदायिक"</string>
 </resources>

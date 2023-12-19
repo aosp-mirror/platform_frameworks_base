@@ -1682,8 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Kendu"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bolumena gomendatutako mailatik gora igo nahi duzu?\n\nMusika bolumen handian eta denbora luzez entzuteak entzumena kalte diezazuke."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Bolumen altuan entzuten jarraitu nahi duzu?\n\nEntzungailuen bolumena gomendatutako denboran baino gehiagoan eduki da ozen, eta baliteke horrek entzumena kaltetzea"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Soinu ozen bat hauteman da\n\nEntzungailuen bolumena gomendatutakoa baino ozenago eduki da, eta baliteke horrek entzumena kaltetzea"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Bolumen altuan entzuten jarraitu nahi duzu?\n\nEntzungailuen bolumena gomendatutako denbora baino luzaroago egon da ozen, eta baliteke horrek entzumena kaltetzea"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Soinua ozenegia dela hauteman da\n\nEntzungailuen bolumena gomendatutakoa baino ozenago eduki da, eta baliteke horrek entzumena kaltetzea"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erabilerraztasun-lasterbidea erabili nahi duzu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Lasterbidea aktibatuta dagoenean, bi bolumen-botoiak hiru segundoz sakatuta abiaraziko da erabilerraztasun-eginbidea."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Erabilerraztasun-eginbideetarako lasterbidea aktibatu nahi duzu?"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Ezarri da <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> eta <xliff:g id="LAYOUT_3">%3$s</xliff:g> gisa teklatuaren diseinua… Diseinu hori aldatzeko, sakatu hau."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Konfiguratu dira teklatu fisikoak"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Sakatu hau teklatuak ikusteko"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Pribatua"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Klona"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Lanekoa"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Lanekoa 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Lanekoa 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Probakoa"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Partekatua"</string>
 </resources>

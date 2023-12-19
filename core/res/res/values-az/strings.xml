@@ -1683,7 +1683,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Yığışdır"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Səsin həcmi tövsiyə olunan səviyyədən artıq olsun?\n\nYüksək səsi uzun zaman dinləmək eşitmə qabiliyyətinizə zərər vura bilər."</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Yüksək səsdə davam edilsin?\n\nQulaqlığın səsi tövsiyə ediləndən uzun müddət yüksək olub. Eşitmə zədələnə bilər"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Yüksək səs aşkarlandı\n\nQulaqlığın səsi tövsiyə ediləndən yüksək olub. Eşitmə zədələnə bilər"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Yüksək səs aşkarlandı\n\nQulaqlığın səsi tövsiyə ediləndən yüksək olub. Eşitməniz zədələnə bilər"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Əlçatımlılıq Qısayolu istifadə edilsin?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Qısayol aktiv olduqda, hər iki səs düyməsinə 3 saniyə basıb saxlamaqla əlçatımlılıq funksiyası başladılacaq."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Əlçatımlılıq funksiyaları üçün qısayol aktiv edilsin?"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Klaviatura düzəni <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> kimi ayarlanıb… Dəyişmək üçün toxunun."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fiziki klaviaturalar konfiqurasiya edilib"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klaviaturalara baxmaq üçün toxunun"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Şəxsi"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"İş"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"İş 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"İş 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Kommunal"</string>
 </resources>
