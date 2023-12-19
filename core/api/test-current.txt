@@ -507,6 +507,7 @@ package android.app {
     method public int getActivityType();
     method @Nullable public android.graphics.Rect getAppBounds();
     method @NonNull public android.graphics.Rect getBounds();
+    method public int getDisplayRotation();
     method @NonNull public android.graphics.Rect getMaxBounds();
     method public int getRotation();
     method public int getWindowingMode();
