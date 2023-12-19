@@ -334,6 +334,9 @@ public abstract class Window {
     private boolean mOverlayWithDecorCaptionEnabled = true;
     private boolean mCloseOnSwipeEnabled = false;
 
+    private static boolean sToolkitSetFrameRateReadOnlyFlagValue =
+                android.view.flags.Flags.toolkitSetFrameRateReadOnly();
+
     // The current window attributes.
     @UnsupportedAppUsage
     private final WindowManager.LayoutParams mWindowAttributes =
@@ -1370,6 +1373,39 @@ public abstract class Window {
     @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
     public float getDesiredHdrHeadroom() {
         return getAttributes().getDesiredHdrHeadroom();
+    }
+
+    /**
+     * Sets whether the frame rate touch boost is enabled for this Window.
+     * When enabled, the frame rate will be boosted when a user touches the Window.
+     *
+     * @param enabled whether the frame rate touch boost is enabled.
+     * @see #getFrameRateBoostOnTouchEnabled()
+     * @see WindowManager.LayoutParams#setFrameRateBoostOnTouchEnabled(boolean)
+     */
+    @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void setFrameRateBoostOnTouchEnabled(boolean enabled) {
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            final WindowManager.LayoutParams attrs = getAttributes();
+            attrs.setFrameRateBoostOnTouchEnabled(enabled);
+            dispatchWindowAttributesChanged(attrs);
+        }
+    }
+
+    /**
+     * Get whether frame rate touch boost is enabled
+     * {@link #setFrameRateBoostOnTouchEnabled(boolean)}
+     *
+     * @return whether the frame rate touch boost is enabled.
+     * @see #setFrameRateBoostOnTouchEnabled(boolean)
+     * @see WindowManager.LayoutParams#getFrameRateBoostOnTouchEnabled()
+     */
+    @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public boolean getFrameRateBoostOnTouchEnabled() {
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            return getAttributes().getFrameRateBoostOnTouchEnabled();
+        }
+        return true;
     }
 
     /**
