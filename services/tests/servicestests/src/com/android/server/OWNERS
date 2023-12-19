@@ -4,5 +4,6 @@ per-file *BinaryTransparency* = file:/core/java/android/transparency/OWNERS
 per-file *Bluetooth* = file:platform/packages/modules/Bluetooth:master:/framework/java/android/bluetooth/OWNERS
 per-file *Gnss* = file:/services/core/java/com/android/server/location/OWNERS
 per-file *Network* = file:/services/core/java/com/android/server/net/OWNERS
-per-file BatteryServiceTest.java = file:platform/hardware/interfaces:/health/aidl/OWNERS
+# per-file BatteryServiceTest.java = file:platform/hardware/interfaces:/health/aidl/OWNERS
 per-file GestureLauncherServiceTest.java = file:platform/packages/apps/EmergencyInfo:/OWNERS
+per-file SecurityStateTest.java = file:/SECURITY_STATE_OWNERS
