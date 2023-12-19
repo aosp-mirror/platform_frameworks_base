@@ -33056,7 +33056,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private float getSizePercentage() {
-        if (mResources == null || getVisibility() != VISIBLE) {
+        float alpha = mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
+        int visibility = mViewFlags & VISIBILITY_MASK;
+
+        if (mResources == null || alpha == 0 || visibility != VISIBLE) {
             return 0;
         }
 
@@ -33081,25 +33084,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void votePreferredFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
-        ViewRootImpl viewRootImpl = getViewRootImpl();
-        float sizePercentage = getSizePercentage();
-        int frameRateCateogry = calculateFrameRateCategory(sizePercentage);
-        if (sToolkitSetFrameRateReadOnlyFlagValue && viewRootImpl != null
-                && sizePercentage > 0) {
-            if (mPreferredFrameRate < 0) {
-                if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            ViewRootImpl viewRootImpl = getViewRootImpl();
+            float sizePercentage = getSizePercentage();
+            int frameRateCateogry = calculateFrameRateCategory(sizePercentage);
+            if (viewRootImpl != null && sizePercentage > 0) {
+                if (mPreferredFrameRate < 0) {
+                    if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
+                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
+                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
+                    }
+                } else {
+                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
                 }
-            } else {
-                viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
+                viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
             }
-            viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
         }
     }
 
