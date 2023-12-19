@@ -17,18 +17,16 @@
 package android.sax;
 
 import android.graphics.Bitmap;
-import android.sax.Element;
-import android.sax.ElementListener;
-import android.sax.EndTextElementListener;
-import android.sax.RootElement;
-import android.sax.StartElementListener;
-import android.sax.TextElementListener;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.Xml;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.SmallTest;
+
+import com.android.frameworks.saxtests.R;
 import com.android.internal.util.XmlUtils;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -39,8 +37,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
-
-import com.android.frameworks.saxtests.R;
 
 public class SafeSaxTest extends AndroidTestCase {
 
