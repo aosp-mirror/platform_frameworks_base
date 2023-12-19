@@ -90,7 +90,6 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -123,8 +122,6 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Provider;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -215,8 +212,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock
     private UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
-    @Mock
-    private Provider<UdfpsKeyguardViewModels> mUdfpsKeyguardViewModels;
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
 
@@ -339,7 +334,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mInputManager,
                 mock(KeyguardFaceAuthInteractor.class),
                 mUdfpsKeyguardAccessibilityDelegate,
-                mUdfpsKeyguardViewModels,
                 mSelectedUserInteractor,
                 mFpsUnlockTracker,
                 mKeyguardTransitionInteractor,

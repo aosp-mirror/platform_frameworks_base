@@ -33,7 +33,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
@@ -81,8 +80,7 @@ open class UdfpsKeyguardViewControllerLegacy(
         primaryBouncerInteractor,
         systemUIDialogManager,
         dumpManager,
-    ),
-    UdfpsKeyguardViewControllerAdapter {
+    ) {
     private val uniqueIdentifier = this.toString()
     private var showingUdfpsBouncer = false
     private var udfpsRequested = false

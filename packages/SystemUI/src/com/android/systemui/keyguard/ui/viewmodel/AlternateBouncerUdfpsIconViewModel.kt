@@ -43,6 +43,7 @@ constructor(
     val context: Context,
     configurationInteractor: ConfigurationInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    deviceEntryBackgroundViewModel: DeviceEntryBackgroundViewModel,
     fingerprintPropertyRepository: FingerprintPropertyRepository,
 ) {
     private val isSupported: Flow<Boolean> = deviceEntryUdfpsInteractor.isUdfpsSupported
@@ -90,26 +91,8 @@ constructor(
             )
         }
 
-    private val bgColor: Flow<Int> =
-        configurationInteractor.onAnyConfigurationChange
-            .map {
-                Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.colorSurface)
-            }
-            .onStart {
-                emit(
-                    Utils.getColorAttrDefaultColor(
-                        context,
-                        com.android.internal.R.attr.colorSurface
-                    )
-                )
-            }
-    val bgViewModel: Flow<DeviceEntryBackgroundViewModel.BackgroundViewModel> =
-        bgColor.map { color ->
-            DeviceEntryBackgroundViewModel.BackgroundViewModel(
-                alpha = 1f,
-                tint = color,
-            )
-        }
+    val bgColor: Flow<Int> = deviceEntryBackgroundViewModel.color
+    val bgAlpha: Flow<Float> = flowOf(1f)
 
     data class IconLocation(
         val left: Int,

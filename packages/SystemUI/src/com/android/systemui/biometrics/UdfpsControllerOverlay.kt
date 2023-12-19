@@ -55,7 +55,6 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -438,7 +437,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             if (DeviceEntryUdfpsRefactor.isEnabled) {
                 !keyguardStateController.isShowing
             } else {
-                animation !is UdfpsKeyguardViewControllerAdapter
+                animation !is UdfpsKeyguardViewControllerLegacy
             }
 
         if (keyguardNotShowing) {
