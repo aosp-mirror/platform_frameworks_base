@@ -28,8 +28,6 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
-import static com.android.server.job.JobSchedulerService.EXEMPTED_INDEX;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_APPLIED_CONSTRAINTS;
@@ -214,7 +212,6 @@ public class FlexibilityControllerTest {
         JobStatus js = JobStatus.createFromJobInfo(
                 jobInfo, 1000, SOURCE_PACKAGE, SOURCE_USER_ID, "FCTest", testTag);
         js.enqueueTime = FROZEN_TIME;
-        js.setStandbyBucket(ACTIVE_INDEX);
         if (js.hasFlexibilityConstraint()) {
             js.setNumAppliedFlexibleConstraints(Integer.bitCount(
                     mFlexibilityController.getRelevantAppliedConstraintsLocked(js)));
@@ -850,75 +847,14 @@ public class FlexibilityControllerTest {
     }
 
     @Test
-    public void testAllowlistedAppBypass() {
-        JobStatus jsHigh = createJobStatus("testAllowlistedAppBypass",
-                createJob(0).setPriority(JobInfo.PRIORITY_HIGH));
-        JobStatus jsDefault = createJobStatus("testAllowlistedAppBypass",
-                createJob(0).setPriority(JobInfo.PRIORITY_DEFAULT));
-        JobStatus jsLow = createJobStatus("testAllowlistedAppBypass",
-                createJob(0).setPriority(JobInfo.PRIORITY_LOW));
-        JobStatus jsMin = createJobStatus("testAllowlistedAppBypass",
-                createJob(0).setPriority(JobInfo.PRIORITY_MIN));
-        jsHigh.setStandbyBucket(EXEMPTED_INDEX);
-        jsDefault.setStandbyBucket(EXEMPTED_INDEX);
-        jsLow.setStandbyBucket(EXEMPTED_INDEX);
-        jsMin.setStandbyBucket(EXEMPTED_INDEX);
-
-        synchronized (mFlexibilityController.mLock) {
-            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHigh));
-            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefault));
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLow));
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMin));
-        }
-    }
-
-    @Test
-    public void testForegroundAppBypass() {
-        JobStatus jsHigh = createJobStatus("testAllowlistedAppBypass",
-                createJob(0).setPriority(JobInfo.PRIORITY_HIGH));
-        JobStatus jsDefault = createJobStatus("testAllowlistedAppBypass",
-                createJob(0).setPriority(JobInfo.PRIORITY_DEFAULT));
-        JobStatus jsLow = createJobStatus("testAllowlistedAppBypass",
-                createJob(0).setPriority(JobInfo.PRIORITY_LOW));
-        JobStatus jsMin = createJobStatus("testAllowlistedAppBypass",
-                createJob(0).setPriority(JobInfo.PRIORITY_MIN));
-
-        when(mJobSchedulerService.getUidBias(mSourceUid)).thenReturn(JobInfo.BIAS_DEFAULT);
-        synchronized (mFlexibilityController.mLock) {
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHigh));
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefault));
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLow));
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMin));
-        }
-
-        when(mJobSchedulerService.getUidBias(mSourceUid))
-                .thenReturn(JobInfo.BIAS_BOUND_FOREGROUND_SERVICE);
-        synchronized (mFlexibilityController.mLock) {
-            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHigh));
-            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefault));
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLow));
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMin));
-        }
-
-        when(mJobSchedulerService.getUidBias(mSourceUid))
-                .thenReturn(JobInfo.BIAS_FOREGROUND_SERVICE);
-        synchronized (mFlexibilityController.mLock) {
-            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHigh));
-            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefault));
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLow));
-            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMin));
-        }
-    }
-
-    @Test
     public void testTopAppBypass() {
-        JobInfo.Builder jb = createJob(0).setPriority(JobInfo.PRIORITY_MIN);
+        JobInfo.Builder jb = createJob(0);
         JobStatus js = createJobStatus("testTopAppBypass", jb);
         mJobStore.add(js);
 
         // Needed because if before and after Uid bias is the same, nothing happens.
         when(mJobSchedulerService.getUidBias(mSourceUid))
-                .thenReturn(JobInfo.BIAS_DEFAULT);
+                .thenReturn(JobInfo.BIAS_FOREGROUND_SERVICE);
 
         synchronized (mFlexibilityController.mLock) {
             mFlexibilityController.maybeStartTrackingJobLocked(js, null);
@@ -929,7 +865,7 @@ public class FlexibilityControllerTest {
             assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(js));
             assertTrue(js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE));
 
-            setUidBias(mSourceUid, JobInfo.BIAS_SYNC_INITIALIZATION);
+            setUidBias(mSourceUid, JobInfo.BIAS_FOREGROUND_SERVICE);
 
             assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(js));
             assertFalse(js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE));
