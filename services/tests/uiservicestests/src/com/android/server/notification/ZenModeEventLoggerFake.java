@@ -99,7 +99,7 @@ public class ZenModeEventLoggerFake extends ZenModeEventLogger {
     public boolean getFromSystemOrSystemUi(int i) throws IllegalArgumentException {
         // While this isn't a logged output value, it's still helpful to check in tests.
         checkInRange(i);
-        return mChanges.get(i).mFromSystemOrSystemUi;
+        return mChanges.get(i).isFromSystemOrSystemUi();
     }
 
     public boolean getIsUserAction(int i) throws IllegalArgumentException {

@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.os.Process;
 import android.service.notification.DNDPolicyProto;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
 import android.service.notification.ZenModeDiff;
 import android.service.notification.ZenPolicy;
 import android.util.ArrayMap;
@@ -58,7 +59,7 @@ class ZenModeEventLogger {
     // mode change.
     ZenModeEventLogger.ZenStateChanges mChangeState = new ZenModeEventLogger.ZenStateChanges();
 
-    private PackageManager mPm;
+    private final PackageManager mPm;
 
     ZenModeEventLogger(PackageManager pm) {
         mPm = pm;
@@ -97,11 +98,11 @@ class ZenModeEventLogger {
      * @param newInfo     ZenModeInfo after this change takes effect
      * @param callingUid  the calling UID associated with the change; may be used to attribute the
      *                    change to a particular package or determine if this is a user action
-     * @param fromSystemOrSystemUi whether the calling UID is either system UID or system UI
+     * @param origin      The origin of the Zen change.
      */
     public final void maybeLogZenChange(ZenModeInfo prevInfo, ZenModeInfo newInfo, int callingUid,
-            boolean fromSystemOrSystemUi) {
-        mChangeState.init(prevInfo, newInfo, callingUid, fromSystemOrSystemUi);
+            @ConfigChangeOrigin int origin) {
+        mChangeState.init(prevInfo, newInfo, callingUid, origin);
         if (mChangeState.shouldLogChanges()) {
             maybeReassignCallingUid();
             logChanges();
@@ -124,7 +125,7 @@ class ZenModeEventLogger {
         // We don't consider the manual rule in the old config because if a manual rule is turning
         // off with a call from system, that could easily be a user action to explicitly turn it off
         if (mChangeState.getChangedRuleType() == RULE_TYPE_MANUAL) {
-            if (!mChangeState.mFromSystemOrSystemUi
+            if (!mChangeState.isFromSystemOrSystemUi()
                     || mChangeState.getNewManualRuleEnabler() == null) {
                 return;
             }
@@ -136,7 +137,7 @@ class ZenModeEventLogger {
         //   - we've determined it's not a user action
         //   - our current best guess is that the calling uid is system/sysui
         if (mChangeState.getChangedRuleType() == RULE_TYPE_AUTOMATIC) {
-            if (mChangeState.getIsUserAction() || !mChangeState.mFromSystemOrSystemUi) {
+            if (mChangeState.getIsUserAction() || !mChangeState.isFromSystemOrSystemUi()) {
                 return;
             }
 
@@ -221,10 +222,10 @@ class ZenModeEventLogger {
         ZenModeConfig mPrevConfig, mNewConfig;
         NotificationManager.Policy mPrevPolicy, mNewPolicy;
         int mCallingUid = Process.INVALID_UID;
-        boolean mFromSystemOrSystemUi = false;
+        @ConfigChangeOrigin int mOrigin = ZenModeConfig.UPDATE_ORIGIN_UNKNOWN;
 
         private void init(ZenModeInfo prevInfo, ZenModeInfo newInfo, int callingUid,
-                boolean fromSystemOrSystemUi) {
+                @ConfigChangeOrigin int origin) {
             // previous & new may be the same -- that would indicate that zen mode hasn't changed.
             mPrevZenMode = prevInfo.mZenMode;
             mNewZenMode = newInfo.mZenMode;
@@ -233,7 +234,7 @@ class ZenModeEventLogger {
             mPrevPolicy = prevInfo.mPolicy;
             mNewPolicy = newInfo.mPolicy;
             mCallingUid = callingUid;
-            mFromSystemOrSystemUi = fromSystemOrSystemUi;
+            mOrigin = origin;
         }
 
         /**
@@ -389,12 +390,16 @@ class ZenModeEventLogger {
 
         /**
          * Return our best guess as to whether the changes observed are due to a user action.
-         * Note that this won't be 100% accurate as we can't necessarily distinguish between a
-         * system uid call indicating "user interacted with Settings" vs "a system app changed
-         * something automatically".
+         * Note that this (before {@code MODES_API}) won't be 100% accurate as we can't necessarily
+         * distinguish between a system uid call indicating "user interacted with Settings" vs "a
+         * system app changed something automatically".
          */
         boolean getIsUserAction() {
-            // Approach:
+            if (Flags.modesApi()) {
+                return mOrigin == ZenModeConfig.UPDATE_ORIGIN_USER;
+            }
+
+            // Approach for pre-MODES_API:
             //   - if manual rule turned on or off, the calling UID is system, and the new manual
             //     rule does not have an enabler set, guess that this is likely to be a user action.
             //     This may represent a system app turning on DND automatically, but we guess "user"
@@ -419,13 +424,13 @@ class ZenModeEventLogger {
             switch (getChangedRuleType()) {
                 case RULE_TYPE_MANUAL:
                     // TODO(b/278888961): Distinguish the automatically-turned-off state
-                    return mFromSystemOrSystemUi && (getNewManualRuleEnabler() == null);
+                    return isFromSystemOrSystemUi() && (getNewManualRuleEnabler() == null);
                 case RULE_TYPE_AUTOMATIC:
                     for (ZenModeDiff.RuleDiff d : getChangedAutomaticRules().values()) {
                         if (d.wasAdded() || d.wasRemoved()) {
                             // If the change comes from system, a rule being added/removed indicates
                             // a likely user action. From an app, it's harder to know for sure.
-                            return mFromSystemOrSystemUi;
+                            return isFromSystemOrSystemUi();
                         }
                         ZenModeDiff.FieldDiff enabled = d.getDiffForField(
                                 ZenModeDiff.RuleDiff.FIELD_ENABLED);
@@ -453,6 +458,13 @@ class ZenModeEventLogger {
 
             // don't know, or none of the other things triggered; assume not a user action
             return false;
+        }
+
+        boolean isFromSystemOrSystemUi() {
+            return mOrigin == ZenModeConfig.UPDATE_ORIGIN_INIT
+                    || mOrigin == ZenModeConfig.UPDATE_ORIGIN_INIT_USER
+                    || mOrigin == ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                    || mOrigin == ZenModeConfig.UPDATE_ORIGIN_RESTORE_BACKUP;
         }
 
         /**
@@ -612,7 +624,7 @@ class ZenModeEventLogger {
             copy.mPrevPolicy = mPrevPolicy.copy();
             copy.mNewPolicy = mNewPolicy.copy();
             copy.mCallingUid = mCallingUid;
-            copy.mFromSystemOrSystemUi = mFromSystemOrSystemUi;
+            copy.mOrigin = mOrigin;
             return copy;
         }
     }
