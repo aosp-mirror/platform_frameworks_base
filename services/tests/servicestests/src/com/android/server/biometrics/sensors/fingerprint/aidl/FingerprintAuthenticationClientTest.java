@@ -161,6 +161,7 @@ public class FingerprintAuthenticationClientTest {
 
     @Before
     public void setup() {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         mContext.addMockSystemService(BiometricManager.class, mBiometricManager);
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
         when(mBiometricLogger.getAmbientLightProbe(anyBoolean())).thenAnswer(i ->
