@@ -196,7 +196,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     private void updateKeyguardStatusBarHeight() {
-        MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        ViewGroup.LayoutParams lp = (ViewGroup.LayoutParams) getLayoutParams();
         lp.height = getStatusBarHeaderHeightKeyguard(mContext);
         setLayoutParams(lp);
     }
