@@ -1221,8 +1221,6 @@ UserHandleName: android.content.ContentCaptureOptions:
     Classes holding a set of parameters should be called `FooParams`, was `ContentCaptureOptions`
 
 
-VisiblySynchronized: PsiThisExpression:
-    Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.content.res.AssetManager.getApkPaths()
 VisiblySynchronized: android.content.res.AssetManager#getApkPaths():
     Internal locks must not be exposed (synchronizing on this or class is still externally observable): method android.content.res.AssetManager.getApkPaths()
 VisiblySynchronized: android.content.res.AssetManager#getLastResourceResolution():
