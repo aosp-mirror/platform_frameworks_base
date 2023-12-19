@@ -961,28 +961,6 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.event.CALL_REMOTELY_UNHELD";
 
     /**
-     * Connection event used to inform an {@link InCallService} which initiated a call handover via
-     * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has
-     * successfully completed.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_COMPLETE =
-            "android.telecom.event.HANDOVER_COMPLETE";
-
-    /**
-     * Connection event used to inform an {@link InCallService} which initiated a call handover via
-     * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has failed
-     * to complete.
-     * @hide
-     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
-     * APIs instead.
-     */
-    public static final String EVENT_HANDOVER_FAILED =
-            "android.telecom.event.HANDOVER_FAILED";
-
-    /**
      * String Connection extra key used to store SIP invite fields for an incoming call for IMS call
      */
     public static final String EXTRA_SIP_INVITE = "android.telecom.extra.SIP_INVITE";
