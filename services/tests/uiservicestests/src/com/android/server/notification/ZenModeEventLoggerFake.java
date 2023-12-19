@@ -118,10 +118,13 @@ public class ZenModeEventLoggerFake extends ZenModeEventLogger {
     public DNDPolicyProto getPolicyProto(int i) throws IllegalArgumentException {
         checkInRange(i);
         byte[] policyBytes = mChanges.get(i).getDNDPolicyProto();
+        if (policyBytes == null) {
+            return null;
+        }
         try {
             return DNDPolicyProto.parseFrom(policyBytes);
         } catch (InvalidProtocolBufferException e) {
-            return null; // couldn't turn it into proto
+            throw new RuntimeException("Couldn't parse DNDPolicyProto!", e);
         }
     }
 
