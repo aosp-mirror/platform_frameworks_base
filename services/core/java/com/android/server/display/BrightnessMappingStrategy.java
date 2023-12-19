@@ -35,7 +35,6 @@ import android.util.Slog;
 import android.util.Spline;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.display.BrightnessUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.Plog;
@@ -97,28 +96,17 @@ public abstract class BrightnessMappingStrategy {
         float[] brightnessLevels = null;
         float[] luxLevels = null;
         switch (mode) {
-            case AUTO_BRIGHTNESS_MODE_DEFAULT:
+            case AUTO_BRIGHTNESS_MODE_DEFAULT -> {
                 brightnessLevelsNits = displayDeviceConfig.getAutoBrightnessBrighteningLevelsNits();
                 luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux();
-
                 brightnessLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevels();
-                if (brightnessLevels == null || brightnessLevels.length == 0) {
-                    // Load the old configuration in the range [0, 255]. The values need to be
-                    // normalized to the range [0, 1].
-                    int[] brightnessLevelsInt = resources.getIntArray(
-                            com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
-                    brightnessLevels = new float[brightnessLevelsInt.length];
-                    for (int i = 0; i < brightnessLevels.length; i++) {
-                        brightnessLevels[i] = normalizeAbsoluteBrightness(brightnessLevelsInt[i]);
-                    }
-                }
-                break;
-            case AUTO_BRIGHTNESS_MODE_IDLE:
+            }
+            case AUTO_BRIGHTNESS_MODE_IDLE -> {
                 brightnessLevelsNits = getFloatArray(resources.obtainTypedArray(
                         com.android.internal.R.array.config_autoBrightnessDisplayValuesNitsIdle));
                 luxLevels = getLuxLevels(resources.getIntArray(
                         com.android.internal.R.array.config_autoBrightnessLevelsIdle));
-                break;
+            }
         }
 
         // Display independent, mode independent values
@@ -424,11 +412,6 @@ public abstract class BrightnessMappingStrategy {
                     + "(" + minAmbientLux + ", " + maxAmbientLux + ")");
             return true;
         }
-    }
-
-    // Normalize entire brightness range to 0 - 1.
-    protected static float normalizeAbsoluteBrightness(int brightness) {
-        return BrightnessSynchronizer.brightnessIntToFloat(brightness);
     }
 
     private Pair<float[], float[]> insertControlPoint(
