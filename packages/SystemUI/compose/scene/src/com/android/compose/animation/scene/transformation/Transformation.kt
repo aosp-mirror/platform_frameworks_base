@@ -20,7 +20,6 @@ import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.Scene
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.SharedElementScenePicker
 import com.android.compose.animation.scene.TransitionState
 
 /** A transformation applied to one or more elements during a transition. */
@@ -48,7 +47,6 @@ sealed interface Transformation {
 internal class SharedElementTransformation(
     override val matcher: ElementMatcher,
     internal val enabled: Boolean,
-    internal val scenePicker: SharedElementScenePicker,
 ) : Transformation
 
 /** A transformation that changes the value of an element property, like its size or offset. */

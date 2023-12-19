@@ -310,7 +310,6 @@ private fun shouldDrawElement(
         transition,
         scene.key,
         element.key,
-        sharedTransformation,
     )
 }
 
@@ -319,9 +318,8 @@ internal fun shouldDrawOrComposeSharedElement(
     transition: TransitionState.Transition,
     scene: SceneKey,
     element: ElementKey,
-    sharedTransformation: SharedElementTransformation?
 ): Boolean {
-    val scenePicker = sharedTransformation?.scenePicker ?: DefaultSharedElementScenePicker
+    val scenePicker = element.scenePicker ?: DefaultSharedElementScenePicker
     val fromScene = transition.fromScene
     val toScene = transition.toScene
 

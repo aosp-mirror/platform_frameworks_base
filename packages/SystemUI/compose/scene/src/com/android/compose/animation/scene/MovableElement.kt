@@ -179,7 +179,6 @@ private fun shouldComposeMovableElement(
         transition,
         scene,
         element.key,
-        sharedElementTransformation(layoutImpl.state, transition, element.key),
     )
 }
 

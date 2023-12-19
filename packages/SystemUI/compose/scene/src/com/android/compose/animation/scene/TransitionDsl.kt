@@ -119,14 +119,8 @@ interface TransitionBuilder : PropertyTransformationBuilder {
      *
      * @param enabled whether the matched element(s) should actually be shared in this transition.
      *   Defaults to true.
-     * @param scenePicker the [SharedElementScenePicker] to use when deciding in which scene we
-     *   should draw or compose this shared element.
      */
-    fun sharedElement(
-        matcher: ElementMatcher,
-        enabled: Boolean = true,
-        scenePicker: SharedElementScenePicker = DefaultSharedElementScenePicker,
-    )
+    fun sharedElement(matcher: ElementMatcher, enabled: Boolean = true)
 
     /**
      * Adds the transformations in [builder] but in reversed order. This allows you to partially
