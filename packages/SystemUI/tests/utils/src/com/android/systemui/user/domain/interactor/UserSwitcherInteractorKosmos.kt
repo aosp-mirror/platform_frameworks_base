@@ -47,6 +47,7 @@ val Kosmos.userSwitcherInteractor by
             broadcastDispatcher = broadcastDispatcher,
             keyguardUpdateMonitor = keyguardUpdateMonitor,
             backgroundDispatcher = testDispatcher,
+            mainDispatcher = testDispatcher,
             activityManager = activityManager,
             refreshUsersScheduler = refreshUsersScheduler,
             guestUserInteractor = guestUserInteractor,
