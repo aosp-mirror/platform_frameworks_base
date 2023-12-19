@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.common.data
+package com.android.systemui.log.dagger
 
 import com.android.systemui.common.data.repository.PackageChangeRepository
-import com.android.systemui.common.data.repository.PackageChangeRepositoryImpl
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
-import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
-import dagger.Binds
-import dagger.Module
+import com.android.systemui.log.LogBuffer
+import javax.inject.Qualifier
 
-@Module
-abstract class CommonDataLayerModule {
-    @Binds
-    abstract fun bindConfigurationRepository(
-        impl: ConfigurationRepositoryImpl
-    ): ConfigurationRepository
-
-    @Binds
-    abstract fun bindPackageChangeRepository(
-        impl: PackageChangeRepositoryImpl
-    ): PackageChangeRepository
-}
+/** A [LogBuffer] for [PackageChangeRepository]. */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class PackageChangeRepoLog
