@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package android.companion.virtual.camera;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.companion.virtual.flags.Flags;
 import android.view.Surface;
@@ -50,8 +49,7 @@ public interface VirtualCameraCallback {
             @NonNull VirtualCameraStreamConfig streamConfig);
 
     /**
-     * The client application is requesting a camera frame for the given streamId with the provided
-     * metadata.
+     * The client application is requesting a camera frame for the given streamId and frameId.
      *
      * <p>The virtual camera needs to write the frame data in the {@link Surface} corresponding to
      * this stream that was provided during the {@link #onStreamConfigured(int, Surface,
@@ -62,12 +60,8 @@ public interface VirtualCameraCallback {
      *     VirtualCameraStreamConfig)}
      * @param frameId The frameId that is being requested. Each request will have a different
      *     frameId, that will be increasing for each call with a particular streamId.
-     * @param metadata The metadata requested for the frame. The virtual camera should do its best
-     *     to honor the requested metadata but the consumer won't be informed about the metadata set
-     *     for a particular frame. If null, the requested frame can be anything the producer sends.
      */
-    void onProcessCaptureRequest(
-            int streamId, long frameId, @Nullable VirtualCameraMetadata metadata);
+    default void onProcessCaptureRequest(int streamId, long frameId) {}
 
     /**
      * The stream previously configured when {@link #onStreamConfigured(int, Surface,
