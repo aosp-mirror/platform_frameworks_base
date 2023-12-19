@@ -3050,8 +3050,8 @@ class UserController implements Handler.Callback {
 
     /**
      * Returns whether the given user requires credential entry at this time. This is used to
-     * intercept activity launches for locked work apps due to work challenge being triggered
-     * or when the profile user is yet to be unlocked.
+     * intercept activity launches for apps corresponding to locked profiles due to separate
+     * challenge being triggered or when the profile user is yet to be unlocked.
      */
     protected boolean shouldConfirmCredentials(@UserIdInt int userId) {
         if (getStartedUserState(userId) == null) {
