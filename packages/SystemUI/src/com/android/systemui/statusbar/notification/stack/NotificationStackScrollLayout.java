@@ -992,8 +992,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE
-                    && child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                    && child instanceof ExpandableNotificationRow row) {
                 if ((row.isPinned() || row.isHeadsUpAnimatingAway()) && row.getTranslation() < 0
                         && row.getProvider().shouldShowGutsOnSnapOpen()) {
                     top = Math.min(top, row.getTranslationY());
@@ -1128,10 +1127,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             for (int i = 0; i < n; i++) {
                 View view = getChildAt(i);
                 if (view.getVisibility() == View.GONE
-                        || !(view instanceof ExpandableNotificationRow)) {
+                        || !(view instanceof ExpandableNotificationRow row)) {
                     continue;
                 }
-                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
                 currentIndex++;
                 boolean beforeSpeedBump;
                 if (mHighPriorityBeforeSpeedBump) {
@@ -1768,16 +1766,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     public static boolean isPinnedHeadsUp(View v) {
-        if (v instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+        if (v instanceof ExpandableNotificationRow row) {
             return row.isHeadsUp() && row.isPinned();
         }
         return false;
     }
 
     private boolean isHeadsUp(View v) {
-        if (v instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+        if (v instanceof ExpandableNotificationRow row) {
             return row.isHeadsUp();
         }
         return false;
@@ -1819,8 +1815,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
             if ((bottom - top >= mMinInteractionHeight || !requireMinHeight)
                     && touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
-                if (slidingChild instanceof ExpandableNotificationRow) {
-                    ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
+                if (slidingChild instanceof ExpandableNotificationRow row) {
                     NotificationEntry entry = row.getEntry();
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
                             && mTopHeadsUpEntry.getRow() != row
@@ -2363,8 +2358,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             float rowTranslation = child.getTranslationY();
             if (rowTranslation >= translationY) {
                 return child;
-            } else if (!ignoreChildren && child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            } else if (!ignoreChildren && child instanceof ExpandableNotificationRow row) {
                 if (row.isSummaryWithChildren() && row.areChildrenExpanded()) {
                     List<ExpandableNotificationRow> notificationChildren =
                             row.getAttachedChildren();
@@ -2885,8 +2879,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void focusNextViewIfFocused(View view) {
-        if (view instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+        if (view instanceof ExpandableNotificationRow row) {
             if (row.shouldRefocusOnDismiss()) {
                 View nextView = row.getChildAfterViewWhenDismissed();
                 if (nextView == null) {
@@ -3034,8 +3027,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private int getIntrinsicHeight(View view) {
-        if (view instanceof ExpandableView) {
-            ExpandableView expandableView = (ExpandableView) view;
+        if (view instanceof ExpandableView expandableView) {
             return expandableView.getIntrinsicHeight();
         }
         return view.getHeight();
@@ -3125,8 +3117,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
         updateChronometerForChild(child);
-        if (child instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+        if (child instanceof ExpandableNotificationRow row) {
             row.setDismissUsingRowTranslationX(mDismissUsingRowTranslationX);
 
         }
@@ -3195,8 +3186,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void updateAnimationState(boolean running, View child) {
-        if (child instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+        if (child instanceof ExpandableNotificationRow row) {
             row.setAnimationRunning(running);
         }
     }
@@ -3391,8 +3381,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             // we need to know the view after this one
             float removedTranslation = child.getTranslationY();
             boolean ignoreChildren = true;
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (child instanceof ExpandableNotificationRow row) {
                 if (row.isRemoved() && row.wasChildInGroupWhenRemoved()) {
                     removedTranslation = row.getTranslationWhenRemoved();
                     ignoreChildren = false;
@@ -3434,8 +3423,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void generatePositionChangeEvents() {
         for (ExpandableView child : mChildrenChangingPositions) {
             Integer duration = null;
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (child instanceof ExpandableNotificationRow row) {
                 if (row.getEntry().isMarkedForUserTriggeredMovement()) {
                     duration = StackStateAnimator.ANIMATION_DURATION_PRIORITY_CHANGE;
                     row.getEntry().markForUserTriggeredMovement(false);
@@ -4119,8 +4107,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void clearUserLockedViews() {
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView child = getChildAtIndex(i);
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (child instanceof ExpandableNotificationRow row) {
                 row.setUserLocked(false);
             }
         }
@@ -4134,8 +4121,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         );
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView child = getChildAtIndex(i);
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (child instanceof ExpandableNotificationRow row) {
                 clearTemporaryViewsInGroup(
                         /* viewGroup = */ row.getChildrenContainer(),
                         /* reason = */ "clearTemporaryViewsInGroup(row.getChildrenContainer())"
@@ -4220,8 +4206,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     void updateChronometerForChild(View child) {
-        if (child instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+        if (child instanceof ExpandableNotificationRow row) {
             row.setChronometerRunning(mIsExpanded);
         }
     }
@@ -4260,8 +4245,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private void updateScrollPositionOnExpandInBottom(ExpandableView view) {
-        if (view instanceof ExpandableNotificationRow && !onKeyguard()) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+        if (view instanceof ExpandableNotificationRow row && !onKeyguard()) {
             // TODO: once we're recycling this will need to check the adapter position of the child
             if (row.isUserLocked() && row != getFirstChildNotGone()) {
                 if (row.isSummaryWithChildren()) {
@@ -4320,8 +4304,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void clearHeadsUpDisappearRunning() {
         for (int i = 0; i < getChildCount(); i++) {
             View view = getChildAt(i);
-            if (view instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (view instanceof ExpandableNotificationRow row) {
                 row.setHeadsUpAnimatingAway(false);
                 if (row.isSummaryWithChildren()) {
                     for (ExpandableNotificationRow child : row.getAttachedChildren()) {
@@ -5203,8 +5186,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     }
                     View swipedView = mSwipeHelper.getSwipedView();
                     pw.println("Swiped view: " + swipedView);
-                    if (swipedView instanceof ExpandableView) {
-                        ExpandableView expandableView = (ExpandableView) swipedView;
+                    if (swipedView instanceof ExpandableView expandableView) {
                         expandableView.dump(pw, args);
                     }
                 });
@@ -5287,8 +5269,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (view instanceof SectionHeaderView && silentSectionWillBeGone) {
             return true;
         }
-        if (view instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+        if (view instanceof ExpandableNotificationRow row) {
             if (isVisible(row) && includeChildInClearAll(row, selection)) {
                 return true;
             }
@@ -5314,9 +5295,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (shouldHideParent(view, selection)) {
                 viewsToHide.add(view);
             }
-            if (view instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
-
+            if (view instanceof ExpandableNotificationRow parent) {
                 if (isChildrenVisible(parent)) {
                     for (ExpandableNotificationRow child : parent.getAttachedChildren()) {
                         if (isVisible(child) && includeChildInClearAll(child, selection)) {
@@ -5336,10 +5315,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         for (int i = 0; i < childCount; i++) {
             final View view = getChildAt(i);
-            if (!(view instanceof ExpandableNotificationRow)) {
+            if (!(view instanceof ExpandableNotificationRow parent)) {
                 continue;
             }
-            ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
             if (includeChildInClearAll(parent, selection)) {
                 viewsToRemove.add(parent);
             }
@@ -5978,8 +5956,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             mSwipeHelper.forceResetSwipeState(child);
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow childRow = (ExpandableNotificationRow) child;
+            if (child instanceof ExpandableNotificationRow childRow) {
                 List<ExpandableNotificationRow> grandchildren = childRow.getAttachedChildren();
                 if (grandchildren != null) {
                     for (ExpandableNotificationRow grandchild : grandchildren) {
@@ -6265,8 +6242,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     static boolean canChildBeDismissed(View v) {
-        if (v instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+        if (v instanceof ExpandableNotificationRow row) {
             if (row.areGutsExposed() || !row.getEntry().hasFinishedInitialization()) {
                 return false;
             }
@@ -6276,8 +6252,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     static boolean canChildBeCleared(View v) {
-        if (v instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+        if (v instanceof ExpandableNotificationRow row) {
             if (row.areGutsExposed() || !row.getEntry().hasFinishedInitialization()) {
                 return false;
             }
@@ -6372,8 +6347,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         /* Only ever called as a consequence of an expansion gesture in the shade. */
         @Override
         public void setUserExpandedChild(View v, boolean userExpanded) {
-            if (v instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+            if (v instanceof ExpandableNotificationRow row) {
                 if (userExpanded && onKeyguard()) {
                     // Due to a race when locking the screen while touching, a notification may be
                     // expanded even after we went back to keyguard. An example of this happens if

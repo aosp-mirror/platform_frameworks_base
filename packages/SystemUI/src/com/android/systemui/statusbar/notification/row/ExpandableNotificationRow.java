@@ -505,15 +505,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private void setImageViewAnimationRunning(ImageView imageView, boolean running) {
         if (imageView != null) {
             Drawable drawable = imageView.getDrawable();
-            if (drawable instanceof AnimationDrawable) {
-                AnimationDrawable animationDrawable = (AnimationDrawable) drawable;
+            if (drawable instanceof AnimationDrawable animationDrawable) {
                 if (running) {
                     animationDrawable.start();
                 } else {
                     animationDrawable.stop();
                 }
-            } else if (drawable instanceof AnimatedVectorDrawable) {
-                AnimatedVectorDrawable animationDrawable = (AnimatedVectorDrawable) drawable;
+            } else if (drawable instanceof AnimatedVectorDrawable animationDrawable) {
                 if (running) {
                     animationDrawable.start();
                 } else {
@@ -3414,8 +3412,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected boolean childNeedsClipping(View child) {
-        if (child instanceof NotificationContentView) {
-            NotificationContentView contentView = (NotificationContentView) child;
+        if (child instanceof NotificationContentView contentView) {
             if (isClippingNeeded()) {
                 return true;
             } else if (hasRoundedCorner()
@@ -3497,8 +3494,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
         @Override
         public void applyToView(View view) {
-            if (view instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (view instanceof ExpandableNotificationRow row) {
                 if (row.isExpandAnimationRunning()) {
                     return;
                 }
@@ -3518,8 +3514,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         @Override
         protected void onYTranslationAnimationFinished(View view) {
             super.onYTranslationAnimationFinished(view);
-            if (view instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (view instanceof ExpandableNotificationRow row) {
                 if (row.isHeadsUpAnimatingAway()) {
                     row.setHeadsUpAnimatingAway(false);
                 }
@@ -3528,8 +3523,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
         @Override
         public void animateTo(View child, AnimationProperties properties) {
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            if (child instanceof ExpandableNotificationRow row) {
                 if (row.isExpandAnimationRunning()) {
                     return;
                 }

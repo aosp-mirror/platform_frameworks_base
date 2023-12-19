@@ -405,8 +405,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             if (!mAllowLongPress) {
                 return;
             }
-            if (view instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (view instanceof ExpandableNotificationRow row) {
                 mMetricsLogger.write(row.getEntry().getSbn().getLogMaker()
                         .setCategory(MetricsEvent.ACTION_TOUCH_GEAR)
                         .setType(MetricsEvent.TYPE_ACTION)
@@ -426,8 +425,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
         @Override
         public void onMenuShown(View row) {
-            if (row instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) row;
+            if (row instanceof ExpandableNotificationRow notificationRow) {
                 mMetricsLogger.write(notificationRow.getEntry().getSbn().getLogMaker()
                         .setCategory(MetricsEvent.ACTION_REVEAL_GEAR)
                         .setType(MetricsEvent.TYPE_ACTION));
@@ -492,10 +490,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                  */
                 @Override
                 public void onChildDismissed(View view) {
-                    if (!(view instanceof ActivatableNotificationView)) {
+                    if (!(view instanceof ActivatableNotificationView row)) {
                         return;
                     }
-                    ActivatableNotificationView row = (ActivatableNotificationView) view;
                     if (!row.isDismissed()) {
                         handleChildViewDismissed(view);
                     }
@@ -519,8 +516,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     if (mView.getClearAllInProgress()) {
                         return;
                     }
-                    if (view instanceof ExpandableNotificationRow) {
-                        ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+                    if (view instanceof ExpandableNotificationRow row) {
                         if (row.isHeadsUp()) {
                             mHeadsUpManager.addSwipedOutNotification(
                                     row.getEntry().getSbn().getKey());
@@ -551,8 +547,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                             ev.getY(),
                             true /* requireMinHeight */,
                             false /* ignoreDecors */);
-                    if (child instanceof ExpandableNotificationRow) {
-                        ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                    if (child instanceof ExpandableNotificationRow row) {
                         ExpandableNotificationRow parent = row.getNotificationParent();
                         if (parent != null && parent.areChildrenExpanded()
                                 && (parent.areGutsExposed()
@@ -582,8 +577,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 @Override
                 public void onChildSnappedBack(View animView, float targetLeft) {
                     mView.onSwipeEnd();
-                    if (animView instanceof ExpandableNotificationRow) {
-                        ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
+                    if (animView instanceof ExpandableNotificationRow row) {
                         if (row.isPinned() && !canChildBeDismissed(row)
                                 && row.getEntry().getSbn().getNotification().fullScreenIntent
                                 == null) {
@@ -1980,8 +1974,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
             // Check if we need to clear any snooze leavebehinds
             if (guts != null && !NotificationSwipeHelper.isTouchInView(ev, guts)
-                    && guts.getGutsContent() instanceof NotificationSnooze) {
-                NotificationSnooze ns = (NotificationSnooze) guts.getGutsContent();
+                    && guts.getGutsContent() instanceof NotificationSnooze ns) {
                 if ((ns.isExpanded() && isCancelOrUp)
                         || (!horizontalSwipeWantsIt && scrollerWantsIt)) {
                     // If the leavebehind is expanded we clear it on the next up event, otherwise we

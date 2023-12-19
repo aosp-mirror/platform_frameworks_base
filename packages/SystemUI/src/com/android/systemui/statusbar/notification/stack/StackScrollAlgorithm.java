@@ -229,8 +229,7 @@ public class StackScrollAlgorithm {
 
     public static void logView(View view, String s) {
         String viewString = "";
-        if (view instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = ((ExpandableNotificationRow) view);
+        if (view instanceof ExpandableNotificationRow row) {
             if (row.getEntry() == null) {
                 viewString = "ExpandableNotificationRow has null NotificationEntry";
             } else {
@@ -264,8 +263,7 @@ public class StackScrollAlgorithm {
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = algorithmState.visibleChildren.get(i);
-            if (v instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+            if (v instanceof ExpandableNotificationRow row) {
                 row.updateChildrenStates();
             }
         }
@@ -376,8 +374,7 @@ public class StackScrollAlgorithm {
                     continue;
                 }
                 notGoneIndex = updateNotGoneIndex(state, notGoneIndex, v);
-                if (v instanceof ExpandableNotificationRow) {
-                    ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+                if (v instanceof ExpandableNotificationRow row) {
 
                     // handle the notGoneIndex for the children as well
                     List<ExpandableNotificationRow> children = row.getAttachedChildren();
@@ -508,10 +505,9 @@ public class StackScrollAlgorithm {
     private boolean hasNonClearableNotifs(StackScrollAlgorithmState algorithmState) {
         for (int i = 0; i < algorithmState.visibleChildren.size(); i++) {
             View child = algorithmState.visibleChildren.get(i);
-            if (!(child instanceof ExpandableNotificationRow)) {
+            if (!(child instanceof ExpandableNotificationRow row)) {
                 continue;
             }
-            final ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             if (!row.canViewBeCleared()) {
                 return true;
             }
@@ -715,10 +711,9 @@ public class StackScrollAlgorithm {
         ExpandableNotificationRow pulsingRow = null;
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
-            if (!(child instanceof ExpandableNotificationRow)) {
+            if (!(child instanceof ExpandableNotificationRow row)) {
                 continue;
             }
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             if (!row.showingPulsing() || (i == 0 && ambientState.isPulseExpanding())) {
                 continue;
             }
@@ -760,10 +755,9 @@ public class StackScrollAlgorithm {
         ExpandableNotificationRow topHeadsUpEntry = null;
         for (int i = 0; i < childCount; i++) {
             View child = algorithmState.visibleChildren.get(i);
-            if (!(child instanceof ExpandableNotificationRow)) {
+            if (!(child instanceof ExpandableNotificationRow row)) {
                 continue;
             }
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             if (!(row.isHeadsUp() || row.isHeadsUpAnimatingAway())) {
                 continue;
             }
@@ -897,8 +891,7 @@ public class StackScrollAlgorithm {
     }
 
     protected int getMaxAllowedChildHeight(View child) {
-        if (child instanceof ExpandableView) {
-            ExpandableView expandableView = (ExpandableView) child;
+        if (child instanceof ExpandableView expandableView) {
             return expandableView.getIntrinsicHeight();
         }
         return child == null ? mCollapsedSize : child.getHeight();
