@@ -43,13 +43,13 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaRecorder;
 import android.os.SystemClock;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
 
 import com.android.ex.camera2.blocking.BlockingSessionCallback;
 import com.android.mediaframeworktest.Camera2SurfaceViewTestCase;

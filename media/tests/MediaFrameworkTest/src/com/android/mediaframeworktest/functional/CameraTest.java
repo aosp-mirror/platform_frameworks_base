@@ -16,9 +16,6 @@
 
 package com.android.mediaframeworktest.functional;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.MediaNames;
-
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -27,9 +24,13 @@ import android.hardware.Camera.ShutterCallback;
 import android.os.ConditionVariable;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.SurfaceHolder;
+
+import androidx.test.filters.LargeTest;
+
+import com.android.mediaframeworktest.MediaFrameworkTest;
+import com.android.mediaframeworktest.MediaNames;
 
 import java.io.*;
 

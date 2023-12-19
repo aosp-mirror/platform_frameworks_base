@@ -18,8 +18,9 @@ package com.android.mediaframeworktest.unit;
 
 import android.media.MediaRecorder;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
+
+import androidx.test.filters.MediumTest;
+
 import java.io.IOException;
 
 /**

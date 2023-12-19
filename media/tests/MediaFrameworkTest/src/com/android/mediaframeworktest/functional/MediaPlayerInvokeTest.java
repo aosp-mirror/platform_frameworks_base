@@ -16,17 +16,14 @@
 
 package com.android.mediaframeworktest.functional;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.MediaNames;
-
-import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
-
 import android.media.MediaPlayer;
 import android.os.Parcel;
+import android.test.ActivityInstrumentationTestCase2;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
+
+import com.android.mediaframeworktest.MediaFrameworkTest;
 
 import java.util.Calendar;
 import java.util.Random;
