@@ -41,8 +41,9 @@ import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.inputmethod.InputMethodInfo;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.BaseTest;
 
