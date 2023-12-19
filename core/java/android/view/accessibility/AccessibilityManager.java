@@ -2406,7 +2406,6 @@ public final class AccessibilityManager {
         }
     }
 
-
     /**
      * Attaches a {@link android.view.SurfaceControl} containing an accessibility overlay to the
      * specified display.
@@ -2426,6 +2425,31 @@ public final class AccessibilityManager {
         try {
             service.attachAccessibilityOverlayToDisplay(
                     displayId, surfaceControl);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies that the current a11y tiles in QuickSettings Panel has been changed
+     *
+     * @param userId            The userId of the user attempts to change the qs panel.
+     * @param tileComponentNames A list of Accessibility feature's TileServices' component names
+     *                           and the a11y platform tiles' component names
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.STATUS_BAR_SERVICE)
+    public void notifyQuickSettingsTilesChanged(
+            @UserIdInt int userId, List<ComponentName> tileComponentNames) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.notifyQuickSettingsTilesChanged(userId, tileComponentNames);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

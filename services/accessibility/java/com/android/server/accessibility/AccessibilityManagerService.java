@@ -23,9 +23,9 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILIT
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_FINGERPRINT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_INPUT_FILTER;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_PACKAGE_BROADCAST_RECEIVER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_USER_BROADCAST_RECEIVER;
-import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
@@ -1742,6 +1742,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         synchronized (mLock) {
             notifyAccessibilityButtonVisibilityChangedLocked(shown);
         }
+    }
+
+    @Override
+    @RequiresPermission(Manifest.permission.STATUS_BAR_SERVICE)
+    public void notifyQuickSettingsTilesChanged(
+            @UserIdInt int userId, List<ComponentName> tileComponentNames) {
+        mSecurityPolicy.enforceCallingPermission(
+                Manifest.permission.STATUS_BAR_SERVICE,
+                /* function= */ "notifyQuickSettingsTilesChanged");
+
+        Slog.d(LOG_TAG, TextUtils.formatSimple(
+                "notifyQuickSettingsTilesChanged userId: %d, tileComponentNames: %s",
+                        userId, tileComponentNames));
+        // TODO (b/314843909): in the follow up cl
+        // update in-memory copy of QS_TILES in AccessibilityManager
+        // update Settings.Secure.ACCESSIBILITY_QS_TARGETS and its in-memory copy
+        // show full device control warning if needed (b/314850435)
     }
 
     /**

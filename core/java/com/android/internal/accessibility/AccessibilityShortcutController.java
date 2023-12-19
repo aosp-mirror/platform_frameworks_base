@@ -109,6 +109,8 @@ public class AccessibilityShortcutController {
             new ComponentName("com.android.server.accessibility", "OneHandedModeTile");
     public static final ComponentName REDUCE_BRIGHT_COLORS_TILE_SERVICE_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "ReduceBrightColorsTile");
+    public static final ComponentName FONT_SIZE_TILE_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "FontSizeTile");
 
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)

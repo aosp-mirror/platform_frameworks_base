@@ -16,16 +16,31 @@
 
 package com.android.systemui.accessibility.data.repository
 
+import android.content.Context
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
 class FakeAccessibilityQsShortcutsRepository : AccessibilityQsShortcutsRepository {
+    private val mutableNotifyA11yManagerTilesChangedRequests =
+        mutableListOf<NotifyA11yManagerTilesChangedRequest>()
+    val notifyA11yManagerTilesChangedRequests: List<NotifyA11yManagerTilesChangedRequest> =
+        mutableNotifyA11yManagerTilesChangedRequests
 
     private val targetsPerUser = mutableMapOf<Int, MutableSharedFlow<Set<String>>>()
 
     override fun a11yQsShortcutTargets(userId: Int): SharedFlow<Set<String>> {
         return getFlow(userId).asSharedFlow()
+    }
+
+    override suspend fun notifyAccessibilityManagerTilesChanged(
+        userContext: Context,
+        tiles: List<TileSpec>
+    ) {
+        mutableNotifyA11yManagerTilesChangedRequests.add(
+            NotifyA11yManagerTilesChangedRequest(userContext, tiles)
+        )
     }
 
     /**
@@ -38,4 +53,9 @@ class FakeAccessibilityQsShortcutsRepository : AccessibilityQsShortcutsRepositor
 
     private fun getFlow(userId: Int): MutableSharedFlow<Set<String>> =
         targetsPerUser.getOrPut(userId) { MutableSharedFlow(replay = 1) }
+
+    data class NotifyA11yManagerTilesChangedRequest(
+        val userContext: Context,
+        val tiles: List<TileSpec>
+    )
 }
