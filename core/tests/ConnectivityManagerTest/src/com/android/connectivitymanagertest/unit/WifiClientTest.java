@@ -17,18 +17,18 @@
 package com.android.connectivitymanagertest.unit;
 
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.Context;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
+import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.Status;
-import android.net.wifi.SupplicantState;
-
-import android.test.suitebuilder.annotation.LargeTest;
+import android.net.wifi.WifiManager;
 import android.test.AndroidTestCase;
+
+import androidx.test.filters.LargeTest;
 
 import java.util.List;
 
