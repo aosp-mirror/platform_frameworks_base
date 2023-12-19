@@ -19,7 +19,8 @@ package com.android.framework.permission.tests;
 import android.app.PackageInstallObserver;
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 /**
  * Verify PackageManager api's that require specific permissions.
