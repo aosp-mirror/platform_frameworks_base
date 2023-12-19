@@ -44,9 +44,7 @@ public final class URLUtil {
     static final String PROXY_BASE = "file:///cookieless_proxy/";
     static final String CONTENT_BASE = "content:";
 
-    /**
-     * Cleans up (if possible) user-entered web addresses
-     */
+    /** Cleans up (if possible) user-entered web addresses */
     public static String guessUrl(String inUrl) {
 
         String retVal = inUrl;
@@ -86,8 +84,12 @@ public final class URLUtil {
         return webAddress.toString();
     }
 
-    public static String composeSearchUrl(String inQuery, String template,
-                                          String queryPlaceHolder) {
+    /**
+     * Inserts the {@code inQuery} in the {@code template} after URL-encoding it. The encoded query
+     * will replace the {@code queryPlaceHolder}.
+     */
+    public static String composeSearchUrl(
+            String inQuery, String template, String queryPlaceHolder) {
         int placeHolderIndex = template.indexOf(queryPlaceHolder);
         if (placeHolderIndex < 0) {
             return null;
@@ -104,8 +106,7 @@ public final class URLUtil {
             return null;
         }
 
-        buffer.append(template.substring(
-                placeHolderIndex + queryPlaceHolder.length()));
+        buffer.append(template.substring(placeHolderIndex + queryPlaceHolder.length()));
 
         return buffer.toString();
     }
@@ -123,8 +124,7 @@ public final class URLUtil {
             byte b = url[i];
             if (b == '%') {
                 if (url.length - i > 2) {
-                    b = (byte) (parseHex(url[i + 1]) * 16
-                            + parseHex(url[i + 2]));
+                    b = (byte) (parseHex(url[i + 1]) * 16 + parseHex(url[i + 2]));
                     i += 2;
                 } else {
                     throw new IllegalArgumentException("Invalid format");
@@ -189,8 +189,8 @@ public final class URLUtil {
     }
 
     /**
-     * @return {@code true} if the url is a proxy url to allow cookieless network
-     * requests from a file url.
+     * @return {@code true} if the url is a proxy url to allow cookieless network requests from a
+     *     file url.
      * @deprecated Cookieless proxy is no longer supported.
      */
     @Deprecated
@@ -202,9 +202,10 @@ public final class URLUtil {
      * @return {@code true} if the url is a local file.
      */
     public static boolean isFileUrl(String url) {
-        return (null != url) && (url.startsWith(FILE_BASE) &&
-                                 !url.startsWith(ASSET_BASE) &&
-                                 !url.startsWith(PROXY_BASE));
+        return (null != url)
+                && (url.startsWith(FILE_BASE)
+                        && !url.startsWith(ASSET_BASE)
+                        && !url.startsWith(PROXY_BASE));
     }
 
     /**
@@ -232,18 +233,18 @@ public final class URLUtil {
      * @return {@code true} if the url is an http: url.
      */
     public static boolean isHttpUrl(String url) {
-        return (null != url) &&
-               (url.length() > 6) &&
-               url.substring(0, 7).equalsIgnoreCase("http://");
+        return (null != url)
+                && (url.length() > 6)
+                && url.substring(0, 7).equalsIgnoreCase("http://");
     }
 
     /**
      * @return {@code true} if the url is an https: url.
      */
     public static boolean isHttpsUrl(String url) {
-        return (null != url) &&
-               (url.length() > 7) &&
-               url.substring(0, 8).equalsIgnoreCase("https://");
+        return (null != url)
+                && (url.length() > 7)
+                && url.substring(0, 8).equalsIgnoreCase("https://");
     }
 
     /**
@@ -271,19 +272,17 @@ public final class URLUtil {
             return false;
         }
 
-        return (isAssetUrl(url) ||
-                isResourceUrl(url) ||
-                isFileUrl(url) ||
-                isAboutUrl(url) ||
-                isHttpUrl(url) ||
-                isHttpsUrl(url) ||
-                isJavaScriptUrl(url) ||
-                isContentUrl(url));
+        return (isAssetUrl(url)
+                || isResourceUrl(url)
+                || isFileUrl(url)
+                || isAboutUrl(url)
+                || isHttpUrl(url)
+                || isHttpsUrl(url)
+                || isJavaScriptUrl(url)
+                || isContentUrl(url));
     }
 
-    /**
-     * Strips the url of the anchor.
-     */
+    /** Strips the url of the anchor. */
     public static String stripAnchor(String url) {
         int anchorIndex = url.indexOf('#');
         if (anchorIndex != -1) {
@@ -293,19 +292,16 @@ public final class URLUtil {
     }
 
     /**
-     * Guesses canonical filename that a download would have, using
-     * the URL and contentDisposition. File extension, if not defined,
-     * is added based on the mimetype
+     * Guesses canonical filename that a download would have, using the URL and contentDisposition.
+     * File extension, if not defined, is added based on the mimetype
+     *
      * @param url Url to the content
      * @param contentDisposition Content-Disposition HTTP header or {@code null}
      * @param mimeType Mime-type of the content or {@code null}
-     *
      * @return suggested filename
      */
     public static final String guessFileName(
-            String url,
-            @Nullable String contentDisposition,
-            @Nullable String mimeType) {
+            String url, @Nullable String contentDisposition, @Nullable String mimeType) {
         String filename = null;
         String extension = null;
 
@@ -369,8 +365,9 @@ public final class URLUtil {
                 // Compare the last segment of the extension against the mime type.
                 // If there's a mismatch, discard the entire extension.
                 int lastDotIndex = filename.lastIndexOf('.');
-                String typeFromExt = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                        filename.substring(lastDotIndex + 1));
+                String typeFromExt =
+                        MimeTypeMap.getSingleton()
+                                .getMimeTypeFromExtension(filename.substring(lastDotIndex + 1));
                 if (typeFromExt != null && !typeFromExt.equalsIgnoreCase(mimeType)) {
                     extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
                     if (extension != null) {
@@ -389,17 +386,17 @@ public final class URLUtil {
 
     /** Regex used to parse content-disposition headers */
     private static final Pattern CONTENT_DISPOSITION_PATTERN =
-            Pattern.compile("attachment;\\s*filename\\s*=\\s*(\"?)([^\"]*)\\1\\s*$",
-            Pattern.CASE_INSENSITIVE);
+            Pattern.compile(
+                    "attachment;\\s*filename\\s*=\\s*(\"?)([^\"]*)\\1\\s*$",
+                    Pattern.CASE_INSENSITIVE);
 
     /**
-     * Parse the Content-Disposition HTTP Header. The format of the header
-     * is defined here: http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
-     * This header provides a filename for content that is going to be
-     * downloaded to the file system. We only support the attachment type.
-     * Note that RFC 2616 specifies the filename value must be double-quoted.
-     * Unfortunately some servers do not quote the value so to maintain
-     * consistent behaviour with other browsers, we allow unquoted values too.
+     * Parse the Content-Disposition HTTP Header. The format of the header is defined here:
+     * http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html This header provides a filename for
+     * content that is going to be downloaded to the file system. We only support the attachment
+     * type. Note that RFC 2616 specifies the filename value must be double-quoted. Unfortunately
+     * some servers do not quote the value so to maintain consistent behaviour with other browsers,
+     * we allow unquoted values too.
      */
     @UnsupportedAppUsage
     static String parseContentDisposition(String contentDisposition) {
@@ -409,7 +406,7 @@ public final class URLUtil {
                 return m.group(2);
             }
         } catch (IllegalStateException ex) {
-             // This function is defined as returning null when it can't parse the header
+            // This function is defined as returning null when it can't parse the header
         }
         return null;
     }
