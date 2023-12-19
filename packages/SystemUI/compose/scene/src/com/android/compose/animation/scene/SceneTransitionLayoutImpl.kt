@@ -46,7 +46,12 @@ internal class SceneTransitionLayoutImpl(
     builder: SceneTransitionLayoutScope.() -> Unit,
     coroutineScope: CoroutineScope,
 ) {
-    internal val scenes = mutableMapOf<SceneKey, Scene>()
+    /**
+     * The map of [Scene]s.
+     *
+     * TODO(b/317014852): Make this a normal MutableMap instead.
+     */
+    internal val scenes = SnapshotStateMap<SceneKey, Scene>()
 
     /**
      * The map of [Element]s.

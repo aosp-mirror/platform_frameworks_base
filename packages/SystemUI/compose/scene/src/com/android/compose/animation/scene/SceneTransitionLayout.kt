@@ -280,6 +280,10 @@ internal fun SceneTransitionLayoutForTesting(
             .also { onLayoutImpl?.invoke(it) }
     }
 
+    // TODO(b/317014852): Move this into the SideEffect {} again once STLImpl.scenes is not a
+    // SnapshotStateMap anymore.
+    layoutImpl.updateScenes(scenes)
+
     val targetSceneChannel = remember { Channel<SceneKey>(Channel.CONFLATED) }
     SideEffect {
         if (state != layoutImpl.state) {
@@ -293,7 +297,6 @@ internal fun SceneTransitionLayoutForTesting(
         (state as SceneTransitionLayoutStateImpl).transitions = transitions
         layoutImpl.density = density
         layoutImpl.edgeDetector = edgeDetector
-        layoutImpl.updateScenes(scenes)
 
         state.transitions = transitions
 
