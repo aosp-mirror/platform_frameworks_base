@@ -23,8 +23,6 @@ import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AF
 import static com.android.settingslib.Utils.getColorAttrDefaultColor;
 
 import android.Manifest;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -52,6 +50,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 
