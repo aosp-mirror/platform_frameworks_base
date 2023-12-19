@@ -483,9 +483,6 @@ object Flags {
     // TODO(b/264916608): Tracking Bug
     @JvmField val SCREENSHOT_METADATA = unreleasedFlag("screenshot_metadata")
 
-    // TODO(b/266955521): Tracking bug
-    @JvmField val SCREENSHOT_DETECTION = releasedFlag("screenshot_detection")
-
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag("screenshot_app_clips")
 

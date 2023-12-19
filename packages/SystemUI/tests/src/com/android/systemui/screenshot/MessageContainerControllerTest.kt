@@ -10,8 +10,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Guideline
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
@@ -39,7 +37,6 @@ class MessageContainerControllerTest : SysuiTestCase() {
     lateinit var detectionNoticeView: ViewGroup
     lateinit var container: FrameLayout
 
-    var featureFlags = FakeFeatureFlags()
     lateinit var screenshotView: ViewGroup
 
     val userHandle = UserHandle.of(5)
@@ -55,7 +52,6 @@ class MessageContainerControllerTest : SysuiTestCase() {
             MessageContainerController(
                 workProfileMessageController,
                 screenshotDetectionController,
-                featureFlags
             )
         screenshotView = ConstraintLayout(mContext)
         workProfileData = WorkProfileMessageController.WorkProfileFirstRunData(appName, icon)
@@ -105,8 +101,6 @@ class MessageContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun testOnScreenshotTakenScreenshotData_nothingToShow() {
-        featureFlags.set(Flags.SCREENSHOT_DETECTION, true)
-
         messageContainer.onScreenshotTaken(screenshotData)
 
         verify(workProfileMessageController, never()).populateView(any(), any(), any())
