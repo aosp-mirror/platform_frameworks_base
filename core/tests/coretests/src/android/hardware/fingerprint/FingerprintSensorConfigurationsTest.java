@@ -27,7 +27,8 @@ import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,7 +38,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.function.Function;
-
 
 @Presubmit
 @SmallTest
