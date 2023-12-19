@@ -28,117 +28,113 @@ import androidx.compose.ui.unit.lerp
 import com.android.compose.ui.util.lerp
 
 /**
- * Animate a shared Int value.
+ * Animate a scene Int value.
  *
- * @see SceneScope.animateSharedValueAsState
+ * @see SceneScope.animateSceneValueAsState
  */
 @Composable
-fun SceneScope.animateSharedIntAsState(
+fun SceneScope.animateSceneIntAsState(
     value: Int,
     key: ValueKey,
-    element: ElementKey?,
     canOverflow: Boolean = true,
 ): State<Int> {
-    return animateSharedValueAsState(value, key, element, ::lerp, canOverflow)
+    return animateSceneValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Int value.
+ * Animate a shared element Int value.
  *
- * @see MovableElementScope.animateSharedValueAsState
+ * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun MovableElementScope.animateSharedIntAsState(
+fun ElementScope<*>.animateElementIntAsState(
     value: Int,
-    debugName: String,
+    key: ValueKey,
     canOverflow: Boolean = true,
 ): State<Int> {
-    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow)
+    return animateElementValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Float value.
+ * Animate a scene Float value.
  *
- * @see SceneScope.animateSharedValueAsState
+ * @see SceneScope.animateSceneValueAsState
  */
 @Composable
-fun SceneScope.animateSharedFloatAsState(
+fun SceneScope.animateSceneFloatAsState(
     value: Float,
     key: ValueKey,
-    element: ElementKey?,
     canOverflow: Boolean = true,
 ): State<Float> {
-    return animateSharedValueAsState(value, key, element, ::lerp, canOverflow)
+    return animateSceneValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Float value.
+ * Animate a shared element Float value.
  *
- * @see MovableElementScope.animateSharedValueAsState
+ * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun MovableElementScope.animateSharedFloatAsState(
+fun ElementScope<*>.animateElementFloatAsState(
     value: Float,
-    debugName: String,
+    key: ValueKey,
     canOverflow: Boolean = true,
 ): State<Float> {
-    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow)
+    return animateElementValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Dp value.
+ * Animate a scene Dp value.
  *
- * @see SceneScope.animateSharedValueAsState
+ * @see SceneScope.animateSceneValueAsState
  */
 @Composable
-fun SceneScope.animateSharedDpAsState(
+fun SceneScope.animateSceneDpAsState(
     value: Dp,
     key: ValueKey,
-    element: ElementKey?,
     canOverflow: Boolean = true,
 ): State<Dp> {
-    return animateSharedValueAsState(value, key, element, ::lerp, canOverflow)
+    return animateSceneValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Dp value.
+ * Animate a shared element Dp value.
  *
- * @see MovableElementScope.animateSharedValueAsState
+ * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun MovableElementScope.animateSharedDpAsState(
+fun ElementScope<*>.animateElementDpAsState(
     value: Dp,
-    debugName: String,
+    key: ValueKey,
     canOverflow: Boolean = true,
 ): State<Dp> {
-    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow)
+    return animateElementValueAsState(value, key, ::lerp, canOverflow)
 }
 
 /**
- * Animate a shared Color value.
+ * Animate a scene Color value.
  *
- * @see SceneScope.animateSharedValueAsState
+ * @see SceneScope.animateSceneValueAsState
  */
 @Composable
-fun SceneScope.animateSharedColorAsState(
+fun SceneScope.animateSceneColorAsState(
     value: Color,
     key: ValueKey,
-    element: ElementKey?,
 ): State<Color> {
-    return animateSharedValueAsState(value, key, element, ::lerp, canOverflow = false)
+    return animateSceneValueAsState(value, key, ::lerp, canOverflow = false)
 }
 
 /**
- * Animate a shared Color value.
+ * Animate a shared element Color value.
  *
- * @see MovableElementScope.animateSharedValueAsState
+ * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun MovableElementScope.animateSharedColorAsState(
+fun ElementScope<*>.animateElementColorAsState(
     value: Color,
-    debugName: String,
+    key: ValueKey,
 ): State<Color> {
-    return animateSharedValueAsState(value, debugName, ::lerp, canOverflow = false)
+    return animateElementValueAsState(value, key, ::lerp, canOverflow = false)
 }
 
 @Composable

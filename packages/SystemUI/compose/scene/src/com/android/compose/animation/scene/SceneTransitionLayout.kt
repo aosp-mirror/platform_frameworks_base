@@ -98,9 +98,9 @@ interface SceneTransitionLayoutScope {
  */
 @DslMarker annotation class ElementDsl
 
-@ElementDsl
 @Stable
-interface SceneScope {
+@ElementDsl
+interface BaseSceneScope {
     /** The state of the [SceneTransitionLayout] in which this scene is contained. */
     val layoutState: SceneTransitionLayoutState
 
@@ -111,19 +111,72 @@ interface SceneScope {
      * that the element can be transformed and animated when the scene transitions in or out.
      *
      * Additionally, this [key] will be used to detect elements that are shared between scenes to
-     * automatically interpolate their size, offset and [shared values][animateSharedValueAsState].
+     * automatically interpolate their size and offset. If you need to animate shared element values
+     * (i.e. values associated to this element that change depending on which scene it is composed
+     * in), use [Element] instead.
      *
      * Note that shared elements tagged using this function will be duplicated in each scene they
      * are part of, so any **internal** state (e.g. state created using `remember {
      * mutableStateOf(...) }`) will be lost. If you need to preserve internal state, you should use
      * [MovableElement] instead.
      *
+     * @see Element
      * @see MovableElement
-     *
-     * TODO(b/291566282): Migrate this to the new Modifier Node API and remove the @Composable
-     *   constraint.
      */
     fun Modifier.element(key: ElementKey): Modifier
+
+    /**
+     * Create an element identified by [key].
+     *
+     * Similar to [element], this creates an element that will be automatically shared when present
+     * in multiple scenes and that can be transformed during transitions, the same way that
+     * [element] does.
+     *
+     * The only difference with [element] is that the provided [ElementScope] allows you to
+     * [animate element values][ElementScope.animateElementValueAsState] or specify its
+     * [movable content][Element.movableContent] that will be "moved" and composed only once during
+     * transitions (as opposed to [element] that duplicates shared elements) so that any internal
+     * state is preserved during and after the transition.
+     *
+     * @see element
+     * @see MovableElement
+     */
+    @Composable
+    fun Element(
+        key: ElementKey,
+        modifier: Modifier,
+
+        // TODO(b/317026105): As discussed in http://shortn/_gJVdltF8Si, remove the @Composable
+        // scope here to make sure that callers specify the content in ElementScope.content {} or
+        // ElementScope.movableContent {}.
+        content: @Composable ElementScope<ElementContentScope>.() -> Unit,
+    )
+
+    /**
+     * Create a *movable* element identified by [key].
+     *
+     * Similar to [Element], this creates an element that will be automatically shared when present
+     * in multiple scenes and that can be transformed during transitions, and you can also use the
+     * provided [ElementScope] to [animate element values][ElementScope.animateElementValueAsState].
+     *
+     * The important difference with [element] and [Element] is that this element
+     * [content][ElementScope.content] will be "moved" and composed only once during transitions, as
+     * opposed to [element] and [Element] that duplicates shared elements, so that any internal
+     * state is preserved during and after the transition.
+     *
+     * @see element
+     * @see Element
+     */
+    @Composable
+    fun MovableElement(
+        key: ElementKey,
+        modifier: Modifier,
+
+        // TODO(b/317026105): As discussed in http://shortn/_gJVdltF8Si, remove the @Composable
+        // scope here to make sure that callers specify the content in ElementScope.content {} or
+        // ElementScope.movableContent {}.
+        content: @Composable ElementScope<MovableElementContentScope>.() -> Unit,
+    )
 
     /**
      * Adds a [NestedScrollConnection] to intercept scroll events not handled by the scrollable
@@ -150,51 +203,6 @@ interface SceneScope {
     ): Modifier
 
     /**
-     * Create a *movable* element identified by [key].
-     *
-     * This creates an element that will be automatically shared when present in multiple scenes and
-     * that can be transformed during transitions, the same way that [element] does. The major
-     * difference with [element] is that elements created with [MovableElement] will be "moved" and
-     * composed only once during transitions (as opposed to [element] that duplicates shared
-     * elements) so that any internal state is preserved during and after the transition.
-     *
-     * @see element
-     */
-    @Composable
-    fun MovableElement(
-        key: ElementKey,
-        modifier: Modifier,
-        content: @Composable MovableElementScope.() -> Unit,
-    )
-
-    /**
-     * Animate some value of a shared element.
-     *
-     * @param value the value of this shared value in the current scene.
-     * @param key the key of this shared value.
-     * @param element the element associated with this value. If `null`, this value will be
-     *   associated at the scene level, which means that [key] should be used maximum once in the
-     *   same scene.
-     * @param lerp the *linear* interpolation function that should be used to interpolate between
-     *   two different values. Note that it has to be linear because the [fraction] passed to this
-     *   interpolator is already interpolated.
-     * @param canOverflow whether this value can overflow past the values it is interpolated
-     *   between, for instance because the transition is animated using a bouncy spring.
-     * @see animateSharedIntAsState
-     * @see animateSharedFloatAsState
-     * @see animateSharedDpAsState
-     * @see animateSharedColorAsState
-     */
-    @Composable
-    fun <T> animateSharedValueAsState(
-        value: T,
-        key: ValueKey,
-        element: ElementKey?,
-        lerp: (start: T, stop: T, fraction: Float) -> T,
-        canOverflow: Boolean,
-    ): State<T>
-
-    /**
      * Punch a hole in this [element] using the bounds of [bounds] in [scene] and the given [shape].
      *
      * Punching a hole in an element will "remove" any pixel drawn by that element in the hole area.
@@ -213,18 +221,78 @@ interface SceneScope {
     fun Modifier.noResizeDuringTransitions(): Modifier
 }
 
-// TODO(b/291053742): Add animateSharedValueAsState(targetValue) without any ValueKey and ElementKey
-// arguments to allow sharing values inside a movable element.
+@Stable
 @ElementDsl
-interface MovableElementScope {
+interface SceneScope : BaseSceneScope {
+    /**
+     * Animate some value at the scene level.
+     *
+     * @param value the value of this shared value in the current scene.
+     * @param key the key of this shared value.
+     * @param lerp the *linear* interpolation function that should be used to interpolate between
+     *   two different values. Note that it has to be linear because the [fraction] passed to this
+     *   interpolator is already interpolated.
+     * @param canOverflow whether this value can overflow past the values it is interpolated
+     *   between, for instance because the transition is animated using a bouncy spring.
+     * @see animateSceneIntAsState
+     * @see animateSceneFloatAsState
+     * @see animateSceneDpAsState
+     * @see animateSceneColorAsState
+     */
     @Composable
-    fun <T> animateSharedValueAsState(
+    fun <T> animateSceneValueAsState(
         value: T,
-        debugName: String,
+        key: ValueKey,
         lerp: (start: T, stop: T, fraction: Float) -> T,
         canOverflow: Boolean,
     ): State<T>
 }
+
+@Stable
+@ElementDsl
+interface ElementScope<ContentScope> {
+    /**
+     * Animate some value associated to this element.
+     *
+     * @param value the value of this shared value in the current scene.
+     * @param key the key of this shared value.
+     * @param lerp the *linear* interpolation function that should be used to interpolate between
+     *   two different values. Note that it has to be linear because the [fraction] passed to this
+     *   interpolator is already interpolated.
+     * @param canOverflow whether this value can overflow past the values it is interpolated
+     *   between, for instance because the transition is animated using a bouncy spring.
+     * @see animateElementIntAsState
+     * @see animateElementFloatAsState
+     * @see animateElementDpAsState
+     * @see animateElementColorAsState
+     */
+    @Composable
+    fun <T> animateElementValueAsState(
+        value: T,
+        key: ValueKey,
+        lerp: (start: T, stop: T, fraction: Float) -> T,
+        canOverflow: Boolean,
+    ): State<T>
+
+    /**
+     * The content of this element.
+     *
+     * Important: This must be called exactly once, after all calls to [animateElementValueAsState].
+     */
+    @Composable fun content(content: @Composable ContentScope.() -> Unit)
+}
+
+/** The scope for "normal" (not movable) elements. */
+@Stable @ElementDsl interface ElementContentScope : MovableElementContentScope, SceneScope
+
+/**
+ * The scope for the content of movable elements.
+ *
+ * Note that it extends [BaseSceneScope] and not [SceneScope] because movable elements should not
+ * call [SceneScope.animateSceneValueAsState], given that their content is not composed in all
+ * scenes.
+ */
+@Stable @ElementDsl interface MovableElementContentScope : BaseSceneScope
 
 /** An action performed by the user. */
 sealed interface UserAction

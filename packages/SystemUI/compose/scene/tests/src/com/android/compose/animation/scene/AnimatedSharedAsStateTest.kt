@@ -18,7 +18,6 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -62,17 +61,18 @@ class AnimatedSharedAsStateTest {
         onCurrentValueChanged: (Values) -> Unit,
     ) {
         val key = TestElements.Foo
-        Box(Modifier.element(key)) {
-            val int by animateSharedIntAsState(targetValues.int, TestValues.Value1, key)
-            val float by animateSharedFloatAsState(targetValues.float, TestValues.Value2, key)
-            val dp by animateSharedDpAsState(targetValues.dp, TestValues.Value3, key)
-            val color by
-                animateSharedColorAsState(targetValues.color, TestValues.Value4, element = null)
+        Element(key, Modifier) {
+            val int by animateElementIntAsState(targetValues.int, key = TestValues.Value1)
+            val float by animateElementFloatAsState(targetValues.float, key = TestValues.Value2)
+            val dp by animateElementDpAsState(targetValues.dp, key = TestValues.Value3)
+            val color by animateElementColorAsState(targetValues.color, key = TestValues.Value4)
 
-            // Make sure we read the values during composition, so that we recompose and call
-            // onCurrentValueChanged() with the latest values.
-            val currentValues = Values(int, float, dp, color)
-            SideEffect { onCurrentValueChanged(currentValues) }
+            content {
+                // Make sure we read the values during composition, so that we recompose and call
+                // onCurrentValueChanged() with the latest values.
+                val currentValues = Values(int, float, dp, color)
+                SideEffect { onCurrentValueChanged(currentValues) }
+            }
         }
     }
 
@@ -83,30 +83,36 @@ class AnimatedSharedAsStateTest {
     ) {
         val key = TestElements.Foo
         MovableElement(key = key, Modifier) {
-            val int by
-                animateSharedIntAsState(targetValues.int, debugName = TestValues.Value1.debugName)
-            val float by
-                animateSharedFloatAsState(
-                    targetValues.float,
-                    debugName = TestValues.Value2.debugName
-                )
-            val dp by
-                animateSharedDpAsState(targetValues.dp, debugName = TestValues.Value3.debugName)
-            val color by
-                animateSharedColorAsState(
-                    targetValues.color,
-                    debugName = TestValues.Value4.debugName
-                )
+            val int by animateElementIntAsState(targetValues.int, key = TestValues.Value1)
+            val float by animateElementFloatAsState(targetValues.float, key = TestValues.Value2)
+            val dp by animateElementDpAsState(targetValues.dp, key = TestValues.Value3)
+            val color by animateElementColorAsState(targetValues.color, key = TestValues.Value4)
 
-            // Make sure we read the values during composition, so that we recompose and call
-            // onCurrentValueChanged() with the latest values.
-            val currentValues = Values(int, float, dp, color)
-            SideEffect { onCurrentValueChanged(currentValues) }
+            content {
+                // Make sure we read the values during composition, so that we recompose and call
+                // onCurrentValueChanged() with the latest values.
+                val currentValues = Values(int, float, dp, color)
+                SideEffect { onCurrentValueChanged(currentValues) }
+            }
         }
     }
 
+    @Composable
+    private fun SceneScope.SceneValues(
+        targetValues: Values,
+        onCurrentValueChanged: (Values) -> Unit,
+    ) {
+        val int by animateSceneIntAsState(targetValues.int, key = TestValues.Value1)
+        val float by animateSceneFloatAsState(targetValues.float, key = TestValues.Value2)
+        val dp by animateSceneDpAsState(targetValues.dp, key = TestValues.Value3)
+        val color by animateSceneColorAsState(targetValues.color, key = TestValues.Value4)
+
+        val currentValues = Values(int, float, dp, color)
+        SideEffect { onCurrentValueChanged(currentValues) }
+    }
+
     @Test
-    fun animateSharedValues() {
+    fun animateElementValues() {
         val fromValues = Values(int = 0, float = 0f, dp = 0.dp, color = Color.Red)
         val toValues = Values(int = 100, float = 100f, dp = 100.dp, color = Color.Blue)
 
@@ -212,6 +218,65 @@ class AnimatedSharedAsStateTest {
 
             after {
                 assertThat(lastValueInFrom).isEqualTo(fromValues)
+                assertThat(lastValueInTo).isEqualTo(toValues)
+            }
+        }
+    }
+
+    @Test
+    fun animateSceneValues() {
+        val fromValues = Values(int = 0, float = 0f, dp = 0.dp, color = Color.Red)
+        val toValues = Values(int = 100, float = 100f, dp = 100.dp, color = Color.Blue)
+
+        var lastValueInFrom = fromValues
+        var lastValueInTo = toValues
+
+        rule.testTransition(
+            fromSceneContent = {
+                SceneValues(
+                    targetValues = fromValues,
+                    onCurrentValueChanged = { lastValueInFrom = it }
+                )
+            },
+            toSceneContent = {
+                SceneValues(targetValues = toValues, onCurrentValueChanged = { lastValueInTo = it })
+            },
+            transition = {
+                // The transition lasts 64ms = 4 frames.
+                spec = tween(durationMillis = 16 * 4, easing = LinearEasing)
+            },
+            fromScene = TestScenes.SceneA,
+            toScene = TestScenes.SceneB,
+        ) {
+            before {
+                assertThat(lastValueInFrom).isEqualTo(fromValues)
+
+                // to was not composed yet, so lastValueInTo was not set yet.
+                assertThat(lastValueInTo).isEqualTo(toValues)
+            }
+
+            at(16) {
+                // Given that we use scene values here, animateSceneXAsState is composed in both
+                // scenes and values should be interpolated with the transition fraction.
+                val expectedValues = lerp(fromValues, toValues, fraction = 0.25f)
+                assertThat(lastValueInFrom).isEqualTo(expectedValues)
+                assertThat(lastValueInTo).isEqualTo(expectedValues)
+            }
+
+            at(32) {
+                val expectedValues = lerp(fromValues, toValues, fraction = 0.5f)
+                assertThat(lastValueInFrom).isEqualTo(expectedValues)
+                assertThat(lastValueInTo).isEqualTo(expectedValues)
+            }
+
+            at(48) {
+                val expectedValues = lerp(fromValues, toValues, fraction = 0.75f)
+                assertThat(lastValueInFrom).isEqualTo(expectedValues)
+                assertThat(lastValueInTo).isEqualTo(expectedValues)
+            }
+
+            after {
+                assertThat(lastValueInFrom).isEqualTo(toValues)
                 assertThat(lastValueInTo).isEqualTo(toValues)
             }
         }

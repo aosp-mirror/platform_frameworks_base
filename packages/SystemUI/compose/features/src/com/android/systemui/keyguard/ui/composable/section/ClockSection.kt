@@ -49,17 +49,19 @@ constructor(
             key = ClockElementKey,
             modifier = modifier,
         ) {
-            Box(
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .background(Color.Magenta)
-                        .onTopPlacementChanged(onTopChanged)
-            ) {
-                Text(
-                    text = "TODO(b/316211368): Small clock",
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+            content {
+                Box(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .background(Color.Magenta)
+                            .onTopPlacementChanged(onTopChanged)
+                ) {
+                    Text(
+                        text = "TODO(b/316211368): Small clock",
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                }
             }
         }
     }
@@ -74,14 +76,16 @@ constructor(
             key = ClockElementKey,
             modifier = modifier,
         ) {
-            Box(
-                modifier = Modifier.fillMaxWidth().background(Color.Blue),
-            ) {
-                Text(
-                    text = "TODO(b/316211368): Large clock",
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+            content {
+                Box(
+                    modifier = Modifier.fillMaxWidth().background(Color.Blue),
+                ) {
+                    Text(
+                        text = "TODO(b/316211368): Large clock",
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                }
             }
         }
     }

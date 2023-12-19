@@ -58,7 +58,7 @@ class MovableElementTest {
 
     @Composable
     private fun SceneScope.MovableCounter(key: ElementKey, modifier: Modifier) {
-        MovableElement(key, modifier) { Counter() }
+        MovableElement(key, modifier) { content { Counter() } }
     }
 
     @Test

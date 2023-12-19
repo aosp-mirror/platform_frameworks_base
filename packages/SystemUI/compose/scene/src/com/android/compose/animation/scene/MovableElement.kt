@@ -39,22 +39,90 @@ import androidx.compose.ui.unit.IntSize
 private const val TAG = "MovableElement"
 
 @Composable
+internal fun Element(
+    layoutImpl: SceneTransitionLayoutImpl,
+    scene: Scene,
+    key: ElementKey,
+    modifier: Modifier,
+    content: @Composable ElementScope<ElementContentScope>.() -> Unit,
+) {
+    ElementBase(
+        layoutImpl,
+        scene,
+        key,
+        modifier,
+        content,
+        scene.scope,
+        isMovable = false,
+    )
+}
+
+@Composable
 internal fun MovableElement(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     key: ElementKey,
     modifier: Modifier,
-    content: @Composable MovableElementScope.() -> Unit,
+    content: @Composable ElementScope<MovableElementContentScope>.() -> Unit,
+) {
+    ElementBase(
+        layoutImpl,
+        scene,
+        key,
+        modifier,
+        content,
+        scene.scope,
+        isMovable = true,
+    )
+}
+
+@Composable
+private inline fun <ContentScope> ElementBase(
+    layoutImpl: SceneTransitionLayoutImpl,
+    scene: Scene,
+    key: ElementKey,
+    modifier: Modifier,
+    content: @Composable ElementScope<ContentScope>.() -> Unit,
+    contentScope: ContentScope,
+    isMovable: Boolean,
 ) {
     Box(modifier.element(layoutImpl, scene, key)) {
         // Get the Element from the map. It will always be the same and we don't want to recompose
         // every time an element is added/removed from SceneTransitionLayoutImpl.elements, so we
         // disable read observation during the look-up in that map.
         val element = Snapshot.withoutReadObservation { layoutImpl.elements.getValue(key) }
-        val movableElementScope =
-            remember(layoutImpl, element, scene) {
-                MovableElementScopeImpl(layoutImpl, element, scene)
+        val elementScope =
+            remember(layoutImpl, element, scene, contentScope, isMovable) {
+                ElementScopeImpl(layoutImpl, element, scene, contentScope, isMovable)
             }
+
+        elementScope.content()
+    }
+}
+
+private class ElementScopeImpl<ContentScope>(
+    private val layoutImpl: SceneTransitionLayoutImpl,
+    private val element: Element,
+    private val scene: Scene,
+    private val contentScope: ContentScope,
+    private val isMovable: Boolean,
+) : ElementScope<ContentScope> {
+    @Composable
+    override fun <T> animateElementValueAsState(
+        value: T,
+        key: ValueKey,
+        lerp: (start: T, stop: T, fraction: Float) -> T,
+        canOverflow: Boolean
+    ): State<T> {
+        return animateSharedValueAsState(layoutImpl, scene, element, key, value, lerp, canOverflow)
+    }
+
+    @Composable
+    override fun content(content: @Composable ContentScope.() -> Unit) {
+        if (!isMovable) {
+            contentScope.content()
+            return
+        }
 
         // The [Picture] to which we save the last drawing commands of this element. This is
         // necessary because the content of this element might not be composed in this scene, in
@@ -90,7 +158,7 @@ internal fun MovableElement(
                     }
                 }
             ) {
-                element.movableContent { movableElementScope.content() }
+                element.movableContent { contentScope.content() }
             }
         } else {
             // If we are not composed, we draw the previous drawing commands at the same size as the
@@ -180,21 +248,4 @@ private fun shouldComposeMovableElement(
         scene,
         element.key,
     )
-}
-
-private class MovableElementScopeImpl(
-    private val layoutImpl: SceneTransitionLayoutImpl,
-    private val element: Element,
-    private val scene: Scene,
-) : MovableElementScope {
-    @Composable
-    override fun <T> animateSharedValueAsState(
-        value: T,
-        debugName: String,
-        lerp: (start: T, stop: T, fraction: Float) -> T,
-        canOverflow: Boolean,
-    ): State<T> {
-        val key = remember { ValueKey(debugName) }
-        return animateSharedValueAsState(layoutImpl, scene, element, key, value, lerp, canOverflow)
-    }
 }
