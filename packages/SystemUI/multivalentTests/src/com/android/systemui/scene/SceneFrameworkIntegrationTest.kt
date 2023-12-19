@@ -265,8 +265,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 falsingCollector = utils.falsingCollector(),
                 powerInteractor = powerInteractor,
                 bouncerInteractor = bouncerInteractor,
-                simBouncerInteractor = utils.simBouncerInteractor,
-                authenticationInteractor = utils.authenticationInteractor()
+                simBouncerInteractor = dagger.Lazy { utils.simBouncerInteractor },
+                authenticationInteractor = dagger.Lazy { utils.authenticationInteractor() }
             )
         startable.start()
 
