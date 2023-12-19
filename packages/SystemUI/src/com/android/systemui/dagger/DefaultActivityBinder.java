@@ -20,7 +20,6 @@ import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
 import com.android.systemui.communal.widgets.EditWidgetsActivity;
-import com.android.systemui.communal.widgets.WidgetPickerActivity;
 import com.android.systemui.contrast.ContrastDialogActivity;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.people.PeopleSpaceActivity;
@@ -157,12 +156,6 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(EditWidgetsActivity.class)
     public abstract Activity bindEditWidgetsActivity(EditWidgetsActivity activity);
-
-    /** Inject into WidgetPickerActivity. */
-    @Binds
-    @IntoMap
-    @ClassKey(WidgetPickerActivity.class)
-    public abstract Activity bindWidgetPickerActivity(WidgetPickerActivity activity);
 
     /** Inject into SwitchToManagedProfileForCallActivity. */
     @Binds
