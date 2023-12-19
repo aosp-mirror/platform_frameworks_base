@@ -129,6 +129,7 @@ class TouchTracker {
                 /* progress = */ 0,
                 /* velocityX = */ 0,
                 /* velocityY = */ 0,
+                /* triggerBack = */ mTriggerBack,
                 /* swipeEdge = */ mSwipeEdge,
                 /* departingAnimationTarget = */ target);
     }
@@ -204,6 +205,7 @@ class TouchTracker {
                 /* progress = */ progress,
                 /* velocityX = */ mLatestVelocityX,
                 /* velocityY = */ mLatestVelocityY,
+                /* triggerBack = */ mTriggerBack,
                 /* swipeEdge = */ mSwipeEdge,
                 /* departingAnimationTarget = */ null);
     }
