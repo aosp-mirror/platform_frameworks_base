@@ -20,6 +20,7 @@ import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.server.app.Flags.gameDefaultFrameRate;
+import static android.server.app.Flags.disableGameModeWhenAppTop;
 
 import static com.android.internal.R.styleable.GameModeConfig_allowGameAngleDriver;
 import static com.android.internal.R.styleable.GameModeConfig_allowGameDownscaling;
@@ -181,7 +182,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
     @Nullable
     final MyUidObserver mUidObserver;
     @GuardedBy("mUidObserverLock")
-    private final Set<Integer> mForegroundGameUids = new HashSet<>();
+    private final Set<Integer> mGameForegroundUids = new HashSet<>();
+    @GuardedBy("mUidObserverLock")
+    private final Set<Integer> mNonGameForegroundUids = new HashSet<>();
     private final GameManagerServiceSystemPropertiesWrapper mSysProps;
     private float mGameDefaultFrameRateValue;
 
@@ -238,12 +241,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 FileUtils.S_IRUSR | FileUtils.S_IWUSR
                         | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
                 -1, -1);
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_GAME_SERVICE)) {
+        if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_GAME_SERVICE)) {
             mGameServiceController = new GameServiceController(
                     context, BackgroundThread.getExecutor(),
-                    new GameServiceProviderSelectorImpl(
-                            context.getResources(),
-                            context.getPackageManager()),
+                    new GameServiceProviderSelectorImpl(context.getResources(), mPackageManager),
                     new GameServiceProviderInstanceFactoryImpl(context));
         } else {
             mGameServiceController = null;
@@ -2245,7 +2246,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         // Update all foreground games' frame rate.
         synchronized (mUidObserverLock) {
-            for (int uid : mForegroundGameUids) {
+            for (int uid : mGameForegroundUids) {
                 setGameDefaultFrameRateOverride(uid, getGameDefaultFrameRate(isEnabled));
             }
         }
@@ -2261,31 +2262,44 @@ public final class GameManagerService extends IGameManagerService.Stub {
         @Override
         public void onUidGone(int uid, boolean disabled) {
             synchronized (mUidObserverLock) {
-                disableGameMode(uid);
+                handleUidMovedOffTop(uid);
             }
         }
 
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
+            switch (procState) {
+                case ActivityManager.PROCESS_STATE_TOP:
+                    handleUidMovedToTop(uid);
+                    return;
+                default:
+                    handleUidMovedOffTop(uid);
+            }
+        }
+
+        private void handleUidMovedToTop(int uid) {
+            final String[] packages = mPackageManager.getPackagesForUid(uid);
+            if (packages == null || packages.length == 0) {
+                return;
+            }
+
+            final int userId = mContext.getUserId();
+            final boolean isNotGame = Arrays.stream(packages).noneMatch(
+                    p -> isPackageGame(p, userId));
             synchronized (mUidObserverLock) {
-
-                if (procState != ActivityManager.PROCESS_STATE_TOP) {
-                    disableGameMode(uid);
+                if (isNotGame) {
+                    if (disableGameModeWhenAppTop()) {
+                        if (!mGameForegroundUids.isEmpty() && mNonGameForegroundUids.isEmpty()) {
+                            Slog.v(TAG, "Game power mode OFF (first non-game in foreground)");
+                            mPowerManagerInternal.setPowerMode(Mode.GAME, false);
+                        }
+                        mNonGameForegroundUids.add(uid);
+                    }
                     return;
                 }
-
-                final String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
-                if (packages == null || packages.length == 0) {
-                    return;
-                }
-
-                final int userId = mContext.getUserId();
-                if (!Arrays.stream(packages).anyMatch(p -> isPackageGame(p, userId))) {
-                    return;
-                }
-
-                if (mForegroundGameUids.isEmpty()) {
-                    Slog.v(TAG, "Game power mode ON (process state was changed to foreground)");
+                if (mGameForegroundUids.isEmpty() && (!disableGameModeWhenAppTop()
+                        || mNonGameForegroundUids.isEmpty())) {
+                    Slog.v(TAG, "Game power mode ON (first game in foreground)");
                     mPowerManagerInternal.setPowerMode(Mode.GAME, true);
                 }
                 final boolean isGameDefaultFrameRateDisabled =
@@ -2293,22 +2307,26 @@ public final class GameManagerService extends IGameManagerService.Stub {
                                 PROPERTY_DEBUG_GFX_GAME_DEFAULT_FRAME_RATE_DISABLED, false);
                 setGameDefaultFrameRateOverride(uid,
                         getGameDefaultFrameRate(!isGameDefaultFrameRateDisabled));
-                mForegroundGameUids.add(uid);
+                mGameForegroundUids.add(uid);
             }
         }
 
-        private void disableGameMode(int uid) {
+        private void handleUidMovedOffTop(int uid) {
             synchronized (mUidObserverLock) {
-                if (!mForegroundGameUids.contains(uid)) {
-                    return;
+                if (mGameForegroundUids.contains(uid)) {
+                    mGameForegroundUids.remove(uid);
+                    if (mGameForegroundUids.isEmpty() && (!disableGameModeWhenAppTop()
+                            || mNonGameForegroundUids.isEmpty())) {
+                        Slog.v(TAG, "Game power mode OFF (no games in foreground)");
+                        mPowerManagerInternal.setPowerMode(Mode.GAME, false);
+                    }
+                } else if (disableGameModeWhenAppTop() && mNonGameForegroundUids.contains(uid)) {
+                    mNonGameForegroundUids.remove(uid);
+                    if (mNonGameForegroundUids.isEmpty() && !mGameForegroundUids.isEmpty()) {
+                        Slog.v(TAG, "Game power mode ON (only games in foreground)");
+                        mPowerManagerInternal.setPowerMode(Mode.GAME, true);
+                    }
                 }
-                mForegroundGameUids.remove(uid);
-                if (!mForegroundGameUids.isEmpty()) {
-                    return;
-                }
-                Slog.v(TAG,
-                        "Game power mode OFF (process remomved or state changed to background)");
-                mPowerManagerInternal.setPowerMode(Mode.GAME, false);
             }
         }
     }
