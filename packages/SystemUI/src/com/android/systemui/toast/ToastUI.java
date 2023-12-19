@@ -42,6 +42,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.util.Objects;
 
@@ -51,7 +52,10 @@ import javax.inject.Inject;
  * Controls display of text toasts.
  */
 @SysUISingleton
-public class ToastUI implements CoreStartable, CommandQueue.Callbacks {
+public class ToastUI implements
+        CoreStartable,
+        ConfigurationController.ConfigurationListener,
+        CommandQueue.Callbacks {
     // values from NotificationManagerService#LONG_DELAY and NotificationManagerService#SHORT_DELAY
     private static final int TOAST_LONG_TIME = 3500; // 3.5 seconds
     private static final int TOAST_SHORT_TIME = 2000; // 2 seconds
@@ -187,7 +191,7 @@ public class ToastUI implements CoreStartable, CommandQueue.Callbacks {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         if (newConfig.orientation != mOrientation) {
             mOrientation = newConfig.orientation;
             if (mToast != null) {

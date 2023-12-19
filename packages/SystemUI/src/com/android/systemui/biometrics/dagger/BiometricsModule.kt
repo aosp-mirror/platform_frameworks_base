@@ -19,6 +19,7 @@ package com.android.systemui.biometrics.dagger
 import android.content.res.Resources
 import com.android.internal.R
 import com.android.systemui.CoreStartable
+import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.EllipseOverlapDetectorParams
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.data.repository.BiometricStatusRepository
@@ -38,18 +39,30 @@ import com.android.systemui.biometrics.udfps.EllipseOverlapDetector
 import com.android.systemui.biometrics.udfps.OverlapDetector
 import com.android.systemui.biometrics.ui.binder.SideFpsOverlayViewBinder
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import dagger.multibindings.IntoSet
 import java.util.concurrent.Executor
 import javax.inject.Qualifier
 
 /** Dagger module for all things biometric. */
 @Module
 interface BiometricsModule {
+    /** Starts AuthController.  */
+    @Binds
+    @IntoMap
+    @ClassKey(AuthController::class)
+    fun bindAuthControllerStartable(service: AuthController): CoreStartable
+
+    /** Listen to config changes for AuthController. */
+    @Binds
+    @IntoSet
+    fun bindAuthControllerConfigChanges(service: AuthController): ConfigurationListener
 
     @Binds
     @IntoMap
