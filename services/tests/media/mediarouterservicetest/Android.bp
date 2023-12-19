@@ -1,0 +1,39 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "MediaRouterServiceTests",
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.rules",
+        "androidx.test.runner",
+        "compatibility-device-util-axt",
+        "junit",
+        "platform-test-annotations",
+        "services.core",
+        "truth",
+    ],
+
+    platform_apis: true,
+
+    test_suites: [
+        // "device-tests",
+        "general-tests",
+    ],
+
+    certificate: "platform",
+    dxflags: ["--multi-dex"],
+    optimize: {
+        enabled: false,
+    },
+}
