@@ -653,7 +653,7 @@ public class BackgroundActivityStartController {
                                 + " if the PI creator upgrades target_sdk to 35+"
                                 + " AND the PI sender upgrades target_sdk to 34+! "
                                 + state.dump(resultForCaller, resultForRealCaller));
-                showBalRiskToast("BAL would be blocked", state);
+                showBalRiskToast();
                 // return the realCaller result for backwards compatibility
                 return statsLog(resultForRealCaller, state);
             }
@@ -679,7 +679,7 @@ public class BackgroundActivityStartController {
                                 + " if the PI creator upgrades target_sdk to 35+! "
                                 + " (missing opt in by PI creator)! "
                                 + state.dump(resultForCaller, resultForRealCaller));
-                showBalRiskToast("BAL would be blocked", state);
+                showBalRiskToast();
                 return statsLog(resultForCaller, state);
             }
             Slog.wtf(TAG,
@@ -696,7 +696,7 @@ public class BackgroundActivityStartController {
                                 + " if the PI sender upgrades target_sdk to 34+! "
                                 + " (missing opt in by PI sender)! "
                                 + state.dump(resultForCaller, resultForRealCaller));
-                showBalRiskToast("BAL would be blocked", state);
+                showBalRiskToast();
                 return statsLog(resultForRealCaller, state);
             }
             Slog.wtf(TAG, "Without Android 14 BAL hardening this activity start would be allowed"
@@ -712,7 +712,7 @@ public class BackgroundActivityStartController {
             BalVerdict resultForRealCaller) {
         Slog.w(TAG, "Background activity launch blocked! "
                 + state.dump(resultForCaller, resultForRealCaller));
-        showBalBlockedToast("BAL blocked", state);
+        showBalBlockedToast();
         return statsLog(BalVerdict.BLOCK, state);
     }
 
@@ -1104,19 +1104,15 @@ public class BackgroundActivityStartController {
         return true;
     }
 
-    private void showBalBlockedToast(String toastText, BalState state) {
+    private void showBalBlockedToast() {
         if (balShowToastsBlocked()) {
-            showToast(toastText
-                    + " caller:" + state.mCallingPackage
-                    + " realCaller:" + state.mRealCallingPackage);
+            showToast("BAL blocked. go/debug-bal");
         }
     }
 
-    private void showBalRiskToast(String toastText, BalState state) {
+    private void showBalRiskToast() {
         if (balShowToasts()) {
-            showToast(toastText
-                    + " caller:" + state.mCallingPackage
-                    + " realCaller:" + state.mRealCallingPackage);
+            showToast("BAL allowed in compat mode. go/debug-bal");
         }
     }
 
