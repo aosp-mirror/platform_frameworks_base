@@ -318,10 +318,6 @@ stubs_defaults {
         "framework-protos",
     ],
     flags: [
-        "--api-lint-ignore-prefix android.icu.",
-        "--api-lint-ignore-prefix java.",
-        "--api-lint-ignore-prefix junit.",
-        "--api-lint-ignore-prefix org.",
         "--error NoSettingsProvider",
         "--error UnhiddenSystemApi",
         "--error UnflaggedApi",
