@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.notification.data.model.activeNotification
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.FakeNotificationsKeyguardViewStateRepository
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor
 import com.android.systemui.statusbar.notification.shared.byIsAmbient
 import com.android.systemui.statusbar.notification.shared.byIsLastMessageFromReply
 import com.android.systemui.statusbar.notification.shared.byIsPulsing
@@ -264,6 +265,7 @@ class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
     interface TestComponent : SysUITestComponent<StatusBarNotificationIconsInteractor> {
 
         val activeNotificationListRepository: ActiveNotificationListRepository
+        val headsUpIconsInteractor: HeadsUpNotificationIconInteractor
         val keyguardViewStateRepository: FakeNotificationsKeyguardViewStateRepository
         val notificationListenerSettingsRepository: NotificationListenerSettingsRepository
 
@@ -335,6 +337,14 @@ class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
             assertThat(filteredSet)
                 .comparingElementsUsing(byIsLastMessageFromReply)
                 .doesNotContain(true)
+        }
+
+    @Test
+    fun filteredEntrySet_includesIsolatedIcon() =
+        testComponent.runTest {
+            val filteredSet by collectLastValue(underTest.statusBarNotifs)
+            headsUpIconsInteractor.setIsolatedIconNotificationKey("notif5")
+            assertThat(filteredSet).comparingElementsUsing(byKey).contains("notif5")
         }
 }
 

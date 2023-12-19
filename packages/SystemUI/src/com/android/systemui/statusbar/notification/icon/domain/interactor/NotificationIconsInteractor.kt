@@ -21,6 +21,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.statusbar.data.repository.NotificationListenerSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -37,10 +38,12 @@ class NotificationIconsInteractor
 constructor(
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
     private val bubbles: Optional<Bubbles>,
+    private val headsUpNotificationIconInteractor: HeadsUpNotificationIconInteractor,
     private val keyguardViewStateRepository: NotificationsKeyguardViewStateRepository,
 ) {
     /** Returns a subset of all active notifications based on the supplied filtration parameters. */
     fun filteredNotifSet(
+        forceShowHeadsUp: Boolean = false,
         showAmbient: Boolean = true,
         showLowPriority: Boolean = true,
         showDismissed: Boolean = true,
@@ -49,18 +52,21 @@ constructor(
     ): Flow<Set<ActiveNotificationModel>> {
         return combine(
             activeNotificationsInteractor.topLevelRepresentativeNotifications,
+            headsUpNotificationIconInteractor.isolatedNotification,
             keyguardViewStateRepository.areNotificationsFullyHidden,
-        ) { notifications, notifsFullyHidden ->
+        ) { notifications, isolatedNotifKey, notifsFullyHidden ->
             notifications
                 .asSequence()
                 .filter { model: ActiveNotificationModel ->
                     shouldShowNotificationIcon(
                         model = model,
+                        forceShowHeadsUp = forceShowHeadsUp,
                         showAmbient = showAmbient,
                         showLowPriority = showLowPriority,
                         showDismissed = showDismissed,
                         showRepliedMessages = showRepliedMessages,
                         showPulsing = showPulsing,
+                        isolatedNotifKey = isolatedNotifKey,
                         notifsFullyHidden = notifsFullyHidden,
                     )
                 }
@@ -70,14 +76,17 @@ constructor(
 
     private fun shouldShowNotificationIcon(
         model: ActiveNotificationModel,
+        forceShowHeadsUp: Boolean,
         showAmbient: Boolean,
         showLowPriority: Boolean,
         showDismissed: Boolean,
         showRepliedMessages: Boolean,
         showPulsing: Boolean,
+        isolatedNotifKey: String?,
         notifsFullyHidden: Boolean,
     ): Boolean {
         return when {
+            forceShowHeadsUp && model.key == isolatedNotifKey -> true
             !showAmbient && model.isAmbient -> false
             !showLowPriority && model.isSilent -> false
             !showDismissed && model.isRowDismissed -> false
@@ -118,6 +127,7 @@ constructor(
     val statusBarNotifs: Flow<Set<ActiveNotificationModel>> =
         settingsRepository.showSilentStatusIcons.flatMapLatest { showSilentIcons ->
             iconsInteractor.filteredNotifSet(
+                forceShowHeadsUp = true,
                 showAmbient = false,
                 showLowPriority = showSilentIcons,
                 showDismissed = false,
