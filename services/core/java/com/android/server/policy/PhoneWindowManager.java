@@ -6865,13 +6865,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static class ButtonOverridePermissionChecker {
         boolean canAppOverrideSystemKey(Context context, int uid) {
             return PermissionChecker.checkPermissionForDataDelivery(
-                            context,
-                            OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW,
-                            PID_UNKNOWN,
-                            uid,
-                            null,
-                            null,
-                            null)
+                    context,
+                    OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW,
+                    PID_UNKNOWN,
+                    uid,
+                    null,
+                    null,
+                    null)
                     == PERMISSION_GRANTED;
         }
     }
