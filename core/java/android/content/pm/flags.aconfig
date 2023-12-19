@@ -115,3 +115,11 @@ flag {
     description: "Feature flag to fix duplicated PackageManager flag values"
     bug: "314815969"
 }
+
+flag {
+    name: "provide_info_of_apk_in_apex"
+    namespace: "package_manager_service"
+    description: "Feature flag to provide the information of APK-in-APEX"
+    bug: "306329516"
+    is_fixed_read_only: true
+}
