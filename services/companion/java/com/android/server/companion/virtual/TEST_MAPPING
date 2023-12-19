@@ -54,9 +54,7 @@
           "exclude-annotation": "android.support.test.filters.FlakyTest"
         }
       ]
-    }
-  ],
-  "postsubmit": [
+    },
     {
       "name": "CtsVirtualDevicesCameraTestCases",
       "options": [
