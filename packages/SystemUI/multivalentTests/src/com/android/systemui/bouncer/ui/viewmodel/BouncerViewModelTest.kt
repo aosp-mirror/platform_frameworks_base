@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -135,19 +136,47 @@ class BouncerViewModelTest : SysuiTestCase() {
     fun message() =
         testScope.runTest {
             val message by collectLastValue(underTest.message)
-            val lockout by collectLastValue(bouncerInteractor.lockout)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(message?.isUpdateAnimated).isTrue()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                // Wrong PIN.
-                bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
+                bouncerInteractor.authenticate(WRONG_PIN)
             }
             assertThat(message?.isUpdateAnimated).isFalse()
 
-            lockout?.remainingSeconds?.let { remainingSeconds ->
-                advanceTimeBy(remainingSeconds.seconds.inWholeMilliseconds)
+            val lockoutEndMs = authenticationInteractor.lockoutEndTimestamp ?: 0
+            advanceTimeBy(lockoutEndMs - testScope.currentTime)
+            assertThat(message?.isUpdateAnimated).isTrue()
+        }
+
+    @Test
+    fun lockoutMessage() =
+        testScope.runTest {
+            val authMethodViewModel by collectLastValue(underTest.authMethodViewModel)
+            val message by collectLastValue(underTest.message)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            assertThat(utils.authenticationRepository.lockoutEndTimestamp).isNull()
+            assertThat(authMethodViewModel?.lockoutMessageId).isNotNull()
+
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) { times ->
+                bouncerInteractor.authenticate(WRONG_PIN)
+                if (times < FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
+                    assertThat(message?.text).isEqualTo(bouncerInteractor.message.value)
+                    assertThat(message?.isUpdateAnimated).isTrue()
+                }
             }
+            val lockoutSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS
+            assertTryAgainMessage(message?.text, lockoutSeconds)
+            assertThat(message?.isUpdateAnimated).isFalse()
+
+            repeat(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS) { time ->
+                advanceTimeBy(1.seconds)
+                val remainingSeconds = lockoutSeconds - time - 1
+                if (remainingSeconds > 0) {
+                    assertTryAgainMessage(message?.text, remainingSeconds)
+                }
+            }
+            assertThat(message?.text).isEmpty()
             assertThat(message?.isUpdateAnimated).isTrue()
         }
 
@@ -160,32 +189,30 @@ class BouncerViewModelTest : SysuiTestCase() {
                         authViewModel?.isInputEnabled ?: emptyFlow()
                     }
                 )
-            val lockout by collectLastValue(bouncerInteractor.lockout)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(isInputEnabled).isTrue()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                // Wrong PIN.
-                bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
+                bouncerInteractor.authenticate(WRONG_PIN)
             }
             assertThat(isInputEnabled).isFalse()
 
-            lockout?.remainingSeconds?.let { remainingSeconds ->
-                advanceTimeBy(remainingSeconds.seconds.inWholeMilliseconds)
-            }
+            val lockoutEndMs = authenticationInteractor.lockoutEndTimestamp ?: 0
+            advanceTimeBy(lockoutEndMs - testScope.currentTime)
             assertThat(isInputEnabled).isTrue()
         }
 
     @Test
     fun dialogMessage() =
         testScope.runTest {
+            val authMethodViewModel by collectLastValue(underTest.authMethodViewModel)
             val dialogMessage by collectLastValue(underTest.dialogMessage)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            assertThat(authMethodViewModel?.lockoutMessageId).isNotNull()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                // Wrong PIN.
                 assertThat(dialogMessage).isNull()
-                bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
+                bouncerInteractor.authenticate(WRONG_PIN)
             }
             assertThat(dialogMessage).isNotEmpty()
 
@@ -240,5 +267,16 @@ class BouncerViewModelTest : SysuiTestCase() {
             AuthenticationMethodModel.Pattern,
             AuthenticationMethodModel.Sim,
         )
+    }
+
+    private fun assertTryAgainMessage(
+        message: String?,
+        time: Int,
+    ) {
+        assertThat(message).isEqualTo("Try again in $time seconds.")
+    }
+
+    companion object {
+        private val WRONG_PIN = FakeAuthenticationRepository.DEFAULT_PIN.map { it + 1 }
     }
 }
