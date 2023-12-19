@@ -563,7 +563,7 @@ public class ExpandedAnimationController
                         ? p.x - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR
                         : p.x + mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
                 animationForChild(child)
-                        .translationX(fromX, p.y)
+                        .translationX(fromX, p.x)
                         .start();
             } else {
                 float fromY = p.y - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR;
@@ -633,5 +633,10 @@ public class ExpandedAnimationController
                     .translationY(p.y)
                     .start();
         }
+    }
+
+    /** Returns true if we're in the middle of a collapse or expand animation. */
+    boolean isAnimating() {
+        return mAnimatingCollapse || mAnimatingExpand;
     }
 }
