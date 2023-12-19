@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,12 +67,15 @@ public class StackScrollAlgorithm {
     private boolean mClipNotificationScrollToTop;
     @VisibleForTesting
     float mHeadsUpInset;
+    @VisibleForTesting
+    float mHeadsUpAppearStartAboveScreen;
     private int mPinnedZTranslationExtra;
     private float mNotificationScrimPadding;
     private int mMarginBottom;
     private float mQuickQsOffsetHeight;
     private float mSmallCornerRadius;
     private float mLargeCornerRadius;
+    private int mHeadsUpAppearHeightBottom;
 
     public StackScrollAlgorithm(
             Context context,
@@ -94,6 +98,8 @@ public class StackScrollAlgorithm {
         int statusBarHeight = SystemBarUtils.getStatusBarHeight(context);
         mHeadsUpInset = statusBarHeight + res.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
+        mHeadsUpAppearStartAboveScreen = res.getDimensionPixelSize(
+                R.dimen.heads_up_appear_y_above_screen);
         mPinnedZTranslationExtra = res.getDimensionPixelSize(
                 R.dimen.heads_up_pinned_elevation);
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
@@ -219,6 +225,25 @@ public class StackScrollAlgorithm {
      */
     public float getNotificationSquishinessFraction(AmbientState ambientState) {
         return getExpansionFractionWithoutShelf(mTempAlgorithmState, ambientState);
+    }
+
+    public void setHeadsUpAppearHeightBottom(int headsUpAppearHeightBottom) {
+        mHeadsUpAppearHeightBottom = headsUpAppearHeightBottom;
+    }
+
+    /**
+     * If the QuickSettings is showing full screen, we want to animate the HeadsUp Notifications
+     * from the bottom of the screen.
+     *
+     * @param ambientState Current ambient state.
+     * @param viewState The state of the HUN that is being queried to appear from the bottom.
+     *
+     * @return true if the HeadsUp Notifications should appear from the bottom
+     */
+    public boolean shouldHunAppearFromBottom(AmbientState ambientState,
+            ExpandableViewState viewState) {
+        return viewState.getYTranslation() + viewState.height
+                >= ambientState.getMaxHeadsUpTranslation();
     }
 
     public static void log(String s) {
@@ -793,10 +818,16 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isPinned()) {
-                // Make sure row yTranslation is at maximum the HUN yTranslation,
-                // which accounts for AmbientState.stackTopMargin in split-shade.
-                childState.setYTranslation(
-                        Math.max(childState.getYTranslation(), headsUpTranslation));
+                if (NotificationsImprovedHunAnimation.isEnabled()) {
+                    // Make sure row yTranslation is at the HUN yTranslation,
+                    // which accounts for AmbientState.stackTopMargin in split-shade.
+                    childState.setYTranslation(headsUpTranslation);
+                } else {
+                    // Make sure row yTranslation is at maximum the HUN yTranslation,
+                    // which accounts for AmbientState.stackTopMargin in split-shade.
+                    childState.setYTranslation(
+                            Math.max(childState.getYTranslation(), headsUpTranslation));
+                }
                 childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
                 childState.hidden = false;
                 ExpandableViewState topState =
@@ -819,10 +850,22 @@ public class StackScrollAlgorithm {
                 }
             }
             if (row.isHeadsUpAnimatingAway()) {
-                // Make sure row yTranslation is at maximum the HUN yTranslation,
-                // which accounts for AmbientState.stackTopMargin in split-shade.
-                childState.setYTranslation(
-                        Math.max(childState.getYTranslation(), headsUpTranslation));
+                if (NotificationsImprovedHunAnimation.isEnabled()) {
+                    if (shouldHunAppearFromBottom(ambientState, childState)) {
+                        // move to the bottom of the screen
+                        childState.setYTranslation(
+                                mHeadsUpAppearHeightBottom + mHeadsUpAppearStartAboveScreen);
+                    } else {
+                        // move to the top of the screen
+                        childState.setYTranslation(-ambientState.getStackTopMargin()
+                                - mHeadsUpAppearStartAboveScreen);
+                    }
+                } else {
+                    // Make sure row yTranslation is at maximum the HUN yTranslation,
+                    // which accounts for AmbientState.stackTopMargin in split-shade.
+                    childState.setYTranslation(
+                            Math.max(childState.getYTranslation(), headsUpTranslation));
+                }
                 // keep it visible for the animation
                 childState.hidden = false;
             }

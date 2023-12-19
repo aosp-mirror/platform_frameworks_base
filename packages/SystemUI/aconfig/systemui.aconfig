@@ -45,6 +45,13 @@ flag {
 }
 
 flag {
+    name: "notifications_improved_hun_animation"
+    namespace: "systemui"
+    description: "Adds a translateY animation, and other improvements to match the motion specs of the HUN Intro + Outro animations."
+    bug: "243302608"
+}
+
+flag {
     name: "notification_lifetime_extension_refactor"
     namespace: "systemui"
     description: "Enables moving notification lifetime extension management from SystemUI to "

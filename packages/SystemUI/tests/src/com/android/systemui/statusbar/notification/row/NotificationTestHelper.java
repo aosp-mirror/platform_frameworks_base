@@ -57,7 +57,6 @@ import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -568,9 +567,6 @@ public class NotificationTestHelper {
             NotificationEntry entry,
             @InflationFlag int extraInflationFlags)
             throws Exception {
-        // NOTE: This flag is read when the ExpandableNotificationRow is inflated, so it needs to be
-        //  set, but we do not want to override an existing value that is needed by a specific test.
-        mFeatureFlags.setDefault(Flags.IMPROVED_HUN_ANIMATIONS);
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 mContext.LAYOUT_INFLATER_SERVICE);
