@@ -38,6 +38,7 @@ import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.metrics.LogMaker;
+import android.platform.test.annotations.DisableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -84,6 +85,7 @@ import com.android.systemui.statusbar.notification.collection.render.SectionHead
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -218,6 +220,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void testUpdateEmptyShadeView_notificationsVisible_zenHiding() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
         initController(/* viewIsAttached= */ true);
@@ -238,6 +241,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void testUpdateEmptyShadeView_notificationsHidden_zenNotHiding() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
@@ -258,6 +262,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void testUpdateEmptyShadeView_splitShadeMode_alwaysShowEmptyView() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
@@ -285,6 +290,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void testUpdateEmptyShadeView_bouncerShowing_flagOff_hideEmptyView() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
@@ -306,6 +312,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void testUpdateEmptyShadeView_bouncerShowing_flagOn_hideEmptyView() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
@@ -327,6 +334,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void testUpdateEmptyShadeView_bouncerNotShowing_flagOff_showEmptyView() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
@@ -348,6 +356,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void testUpdateEmptyShadeView_bouncerNotShowing_flagOn_showEmptyView() {
         when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         initController(/* viewIsAttached= */ true);
@@ -504,6 +513,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void testSetNotifStats_updatesHasFilteredOutSeenNotifications() {
         initController(/* viewIsAttached= */ true);
         mSeenNotificationsInteractor.setHasFilteredOutSeenNotifications(true);
@@ -545,6 +555,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void updateImportantForAccessibility_noChild_onKeyGuard_notImportantForA11y() {
         // GIVEN: Controller is attached, active notifications is empty,
         // and mNotificationStackScrollLayout.onKeyguard() is true
@@ -561,6 +572,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void updateImportantForAccessibility_hasChild_onKeyGuard_importantForA11y() {
         // GIVEN: Controller is attached, active notifications is not empty,
         // and mNotificationStackScrollLayout.onKeyguard() is true
@@ -584,6 +596,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void updateImportantForAccessibility_hasChild_notOnKeyGuard_importantForA11y() {
         // GIVEN: Controller is attached, active notifications is not empty,
         // and mNotificationStackScrollLayout.onKeyguard() is false
@@ -607,6 +620,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void updateImportantForAccessibility_noChild_notOnKeyGuard_importantForA11y() {
         // GIVEN: Controller is attached, active notifications is empty,
         // and mNotificationStackScrollLayout.onKeyguard() is false
@@ -623,6 +637,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void updateEmptyShadeView_onKeyguardTransitionToAod_hidesView() {
         initController(/* viewIsAttached= */ true);
         mController.onKeyguardTransitionChanged(
@@ -633,6 +648,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FooterViewRefactor.FLAG_NAME)
     public void updateEmptyShadeView_onKeyguardOccludedTransitionToAod_hidesView() {
         initController(/* viewIsAttached= */ true);
         mController.onKeyguardTransitionChanged(
