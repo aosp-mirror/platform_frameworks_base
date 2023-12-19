@@ -29,7 +29,6 @@ import android.view.ViewGroup.OnHierarchyChangeListener
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.internal.jank.InteractionJankMonitor
@@ -67,6 +66,7 @@ import com.android.systemui.util.ui.value
 import javax.inject.Provider
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -205,7 +205,6 @@ object KeyguardRootViewBinder {
                                     childViews[aodNotificationIconContainerId]
                                         ?.setAodNotifIconContainerIsVisible(
                                             isVisible,
-                                            featureFlags,
                                             iconsAppearTranslationPx.value,
                                             screenOffAnimationController,
                                         )
@@ -359,37 +358,29 @@ object KeyguardRootViewBinder {
         }
     }
 
-    @JvmStatic
-    fun bindAodIconVisibility(
+    suspend fun bindAodNotifIconVisibility(
         view: View,
         isVisible: Flow<AnimatedValue<Boolean>>,
         configuration: ConfigurationState,
-        featureFlags: FeatureFlagsClassic,
         screenOffAnimationController: ScreenOffAnimationController,
-    ): DisposableHandle? {
+    ) {
         KeyguardShadeMigrationNssl.assertInLegacyMode()
-        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return null
-        return view.repeatWhenAttached {
-            lifecycleScope.launch {
-                val iconAppearTranslationPx =
-                    configuration
-                        .getDimensionPixelSize(R.dimen.shelf_appear_translation)
-                        .stateIn(this)
-                isVisible.collect { isVisible ->
-                    view.setAodNotifIconContainerIsVisible(
-                        isVisible,
-                        featureFlags,
-                        iconAppearTranslationPx.value,
-                        screenOffAnimationController,
-                    )
-                }
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return
+        coroutineScope {
+            val iconAppearTranslationPx =
+                configuration.getDimensionPixelSize(R.dimen.shelf_appear_translation).stateIn(this)
+            isVisible.collect { isVisible ->
+                view.setAodNotifIconContainerIsVisible(
+                    isVisible = isVisible,
+                    iconsAppearTranslationPx = iconAppearTranslationPx.value,
+                    screenOffAnimationController = screenOffAnimationController,
+                )
             }
         }
     }
 
     private fun View.setAodNotifIconContainerIsVisible(
         isVisible: AnimatedValue<Boolean>,
-        featureFlags: FeatureFlagsClassic,
         iconsAppearTranslationPx: Int,
         screenOffAnimationController: ScreenOffAnimationController,
     ) {

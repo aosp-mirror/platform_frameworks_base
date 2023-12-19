@@ -35,7 +35,6 @@ import com.android.systemui.statusbar.notification.icon.IconPack
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder.IconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconColors
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData.LimitType
@@ -45,7 +44,6 @@ import com.android.systemui.util.kotlin.mapValuesNotNullTo
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
-import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -56,42 +54,6 @@ import kotlinx.coroutines.launch
 
 /** Binds a view-model to a [NotificationIconContainer]. */
 object NotificationIconContainerViewBinder {
-    @JvmStatic
-    fun bindWhileAttached(
-        view: NotificationIconContainer,
-        viewModel: NotificationIconContainerShelfViewModel,
-        configuration: ConfigurationState,
-        systemBarUtilsState: SystemBarUtilsState,
-        failureTracker: StatusBarIconViewBindingFailureTracker,
-        viewStore: IconViewStore,
-    ): DisposableHandle {
-        return view.repeatWhenAttached {
-            lifecycleScope.launch {
-                viewModel.icons.bindIcons(
-                    view,
-                    configuration,
-                    systemBarUtilsState,
-                    notifyBindingFailures = { failureTracker.shelfFailures = it },
-                    viewStore,
-                )
-            }
-        }
-    }
-
-    @JvmStatic
-    fun bindWhileAttached(
-        view: NotificationIconContainer,
-        viewModel: NotificationIconContainerStatusBarViewModel,
-        configuration: ConfigurationState,
-        systemBarUtilsState: SystemBarUtilsState,
-        failureTracker: StatusBarIconViewBindingFailureTracker,
-        viewStore: IconViewStore,
-    ): DisposableHandle =
-        view.repeatWhenAttached {
-            lifecycleScope.launch {
-                bind(view, viewModel, configuration, systemBarUtilsState, failureTracker, viewStore)
-            }
-        }
 
     suspend fun bind(
         view: NotificationIconContainer,
@@ -215,7 +177,7 @@ object NotificationIconContainerViewBinder {
      * given `iconKey`. The parent [Job] of this coroutine will be cancelled automatically when the
      * view is to be unbound.
      */
-    private suspend fun Flow<NotificationIconsViewData>.bindIcons(
+    suspend fun Flow<NotificationIconsViewData>.bindIcons(
         view: NotificationIconContainer,
         configuration: ConfigurationState,
         systemBarUtilsState: SystemBarUtilsState,
@@ -377,24 +339,14 @@ object NotificationIconContainerViewBinder {
     }
 
     @ColorInt private const val DEFAULT_AOD_ICON_COLOR = Color.WHITE
-    private const val TAG =  "NotifIconContainerViewBinder"
+    private const val TAG = "NotifIconContainerViewBinder"
 }
 
-/** [IconViewStore] for the [com.android.systemui.statusbar.NotificationShelf] */
-class ShelfNotificationIconViewStore @Inject constructor(notifCollection: NotifCollection) :
-    IconViewStore by (notifCollection.iconViewStoreBy { it.shelfIcon })
-
-/** [IconViewStore] for the always-on display. */
-class AlwaysOnDisplayNotificationIconViewStore
-@Inject
-constructor(notifCollection: NotifCollection) :
-    IconViewStore by (notifCollection.iconViewStoreBy { it.aodIcon })
-
-/** [IconViewStore] for the status bar. */
-class StatusBarNotificationIconViewStore @Inject constructor(notifCollection: NotifCollection) :
-    IconViewStore by (notifCollection.iconViewStoreBy { it.statusBarIcon })
-
-private fun NotifCollection.iconViewStoreBy(block: (IconPack) -> StatusBarIconView?) =
+/**
+ * Convenience builder for [IconViewStore] that uses [block] to extract the relevant
+ * [StatusBarIconView] from an [IconPack] stored inside of the [NotifCollection].
+ */
+fun NotifCollection.iconViewStoreBy(block: (IconPack) -> StatusBarIconView?) =
     IconViewStore { key ->
         getEntry(key)?.icons?.let(block)
     }
