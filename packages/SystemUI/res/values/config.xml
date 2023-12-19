@@ -538,15 +538,15 @@
        -->
     <string translatable="false" name="config_frontBuiltInDisplayCutoutProtection"></string>
 
-    <!--  ID for the camera of outer display that needs extra protection -->
+    <!-- ID for the camera of outer display that needs extra protection -->
     <string translatable="false" name="config_protectedCameraId"></string>
-    <!--  Physical ID for the camera of outer display that needs extra protection -->
+    <!-- Physical ID for the camera of outer display that needs extra protection -->
     <string translatable="false" name="config_protectedPhysicalCameraId"></string>
 
     <!-- Similar to config_frontBuiltInDisplayCutoutProtection but for inner display. -->
     <string translatable="false" name="config_innerBuiltInDisplayCutoutProtection"></string>
 
-    <!-- ID for the camera of inner display that needs extra protection -->
+    <!-- ID for the camera of inner display that needs extra protection. -->
     <string translatable="false" name="config_protectedInnerCameraId"></string>
     <!-- Physical ID for the camera of inner display that needs extra protection -->
     <string translatable="false" name="config_protectedInnerPhysicalCameraId"></string>
@@ -650,8 +650,15 @@
     <!-- Whether to use window background blur for the volume dialog. -->
     <bool name="config_volumeDialogUseBackgroundBlur">false</bool>
 
-    <!-- The properties of the face auth camera in pixels -->
+    <!-- The properties of the face auth front camera for outer display in pixels -->
     <integer-array name="config_face_auth_props">
+        <!-- sensorLocationX -->
+        <!-- sensorLocationY -->
+        <!--sensorRadius -->
+    </integer-array>
+
+    <!-- The properties of the face auth front camera for inner display in pixels -->
+    <integer-array name="config_inner_face_auth_props">
         <!-- sensorLocationX -->
         <!-- sensorLocationY -->
         <!--sensorRadius -->

@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.data.repository
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.display.DisplayManager
 import android.os.Handler
+import android.util.Size
 import android.view.Display
 import android.view.DisplayInfo
 import android.view.Surface
@@ -146,6 +147,40 @@ class DisplayStateRepositoryTest : SysuiTestCase() {
             }
             displayListenerCaptor.value.onDisplayChanged(Surface.ROTATION_180)
             assertThat(currentRotation).isEqualTo(DisplayRotation.ROTATION_180)
+        }
+
+    @Test
+    fun updatesCurrentSize_whenDisplayStateChanges() =
+        testScope.runTest {
+            val currentSize by collectLastValue(underTest.currentDisplaySize)
+            runCurrent()
+
+            verify(displayManager)
+                .registerDisplayListener(
+                    displayListenerCaptor.capture(),
+                    same(handler),
+                    eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED)
+                )
+
+            whenever(display.getDisplayInfo(any())).then {
+                val info = it.getArgument<DisplayInfo>(0)
+                info.rotation = Surface.ROTATION_0
+                info.logicalWidth = 100
+                info.logicalHeight = 200
+                return@then true
+            }
+            displayListenerCaptor.value.onDisplayChanged(Surface.ROTATION_0)
+            assertThat(currentSize).isEqualTo(Size(100, 200))
+
+            whenever(display.getDisplayInfo(any())).then {
+                val info = it.getArgument<DisplayInfo>(0)
+                info.rotation = Surface.ROTATION_90
+                info.logicalWidth = 100
+                info.logicalHeight = 200
+                return@then true
+            }
+            displayListenerCaptor.value.onDisplayChanged(Surface.ROTATION_180)
+            assertThat(currentSize).isEqualTo(Size(200, 100))
         }
 }
 

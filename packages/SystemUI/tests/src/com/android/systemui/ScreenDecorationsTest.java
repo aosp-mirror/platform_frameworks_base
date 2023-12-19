@@ -54,6 +54,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -80,6 +81,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository;
 import com.android.systemui.decor.CornerDecorProvider;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
 import com.android.systemui.decor.CutoutDecorProviderImpl;
@@ -101,6 +103,7 @@ import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.FakeThreadFactory;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -108,8 +111,6 @@ import com.android.systemui.util.time.FakeSystemClock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -169,8 +170,11 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private PrivacyDotViewController.ShowingListener mPrivacyDotShowingListener;
     @Mock
     private CutoutDecorProviderFactory mCutoutFactory;
-    @Captor
-    private ArgumentCaptor<AuthController.Callback> mAuthControllerCallback;
+    @Mock
+    private JavaAdapter mJavaAdapter;
+
+    private FakeFacePropertyRepository mFakeFacePropertyRepository =
+            new FakeFacePropertyRepository();
     private List<DecorProvider> mMockCutoutList;
 
     @Before
@@ -227,20 +231,23 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         doAnswer(it -> !(mMockCutoutList.isEmpty())).when(mCutoutFactory).getHasProviders();
         doReturn(mMockCutoutList).when(mCutoutFactory).getProviders();
 
+        mFakeFacePropertyRepository.setSensorLocation(new Point(10, 10));
+
         mFaceScanningDecorProvider = spy(new FaceScanningOverlayProviderImpl(
                 BOUNDS_POSITION_TOP,
                 mAuthController,
                 mStatusBarStateController,
                 mKeyguardUpdateMonitor,
                 mExecutor,
-                new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer"))));
+                new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
+                mFakeFacePropertyRepository));
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mSecureSettings,
                 mCommandRegistry, mUserTracker, mDisplayTracker, mDotViewController,
                 mThreadFactory,
                 mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
-                mAuthController) {
+                mFakeFacePropertyRepository, mJavaAdapter) {
             @Override
             public void start() {
                 super.start();
@@ -1235,9 +1242,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mSecureSettings, mCommandRegistry, mUserTracker, mDisplayTracker,
                 mDotViewController,
                 mThreadFactory, mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
-                new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")), mAuthController);
+                new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
+                mFakeFacePropertyRepository, mJavaAdapter);
         screenDecorations.start();
-        verify(mAuthController).addCallback(mAuthControllerCallback.capture());
         when(mContext.getDisplay()).thenReturn(mDisplay);
         when(mDisplay.getDisplayInfo(any())).thenAnswer(new Answer<Boolean>() {
             @Override
@@ -1252,9 +1259,9 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         });
         mExecutor.runAllReady();
         clearInvocations(mFaceScanningDecorProvider);
-
-        AuthController.Callback callback = mAuthControllerCallback.getValue();
-        callback.onFaceSensorLocationChanged();
+        final Point location = new Point();
+        mFakeFacePropertyRepository.setSensorLocation(location);
+        screenDecorations.onFaceSensorLocationChanged(location);
         mExecutor.runAllReady();
 
         verify(mFaceScanningDecorProvider).onReloadResAndMeasure(any(),

@@ -17,25 +17,39 @@
 
 package com.android.systemui.biometrics.data.repository
 
+import android.content.Context
+import android.graphics.Point
+import android.hardware.camera2.CameraManager
 import android.hardware.face.FaceManager
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback
 import android.util.Log
+import android.util.RotationUtils
+import android.util.Size
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.biometrics.shared.model.toLockoutMode
+import com.android.systemui.biometrics.shared.model.toRotation
 import com.android.systemui.biometrics.shared.model.toSensorStrength
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
+import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
@@ -47,10 +61,23 @@ interface FacePropertyRepository {
 
     /** Get the current lockout mode for the user. This makes a binder based service call. */
     suspend fun getLockoutMode(userId: Int): LockoutMode
+
+    /** The current face sensor location in current device rotation */
+    val sensorLocation: StateFlow<Point?>
 }
 
 /** Describes a biometric sensor */
 data class FaceSensorInfo(val id: Int, val strength: SensorStrength)
+
+/** Data class for camera info */
+private data class CameraInfo(
+    /** The logical id of the camera */
+    val cameraId: String,
+    /** The physical id of the camera */
+    val cameraPhysicalId: String?,
+    /** The center point of the camera in natural orientation */
+    val cameraLocation: Point?,
+)
 
 private const val TAG = "FaceSensorPropertyRepositoryImpl"
 
@@ -58,9 +85,14 @@ private const val TAG = "FaceSensorPropertyRepositoryImpl"
 class FacePropertyRepositoryImpl
 @Inject
 constructor(
+    @Application val applicationContext: Context,
+    @Main mainExecutor: Executor,
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val faceManager: FaceManager?,
+    private val cameraManager: CameraManager,
+    displayStateRepository: DisplayStateRepository,
+    configurationRepository: ConfigurationRepository,
 ) : FacePropertyRepository {
 
     override val sensorInfo: StateFlow<FaceSensorInfo?> =
@@ -89,10 +121,179 @@ constructor(
             .onEach { Log.d(TAG, "sensorProps changed: $it") }
             .stateIn(applicationScope, SharingStarted.Eagerly, null)
 
+    private val cameraInfoList: List<CameraInfo> = loadCameraInfoList()
+    private var currentPhysicalCameraId: String? = null
+
+    private val defaultSensorLocation: StateFlow<Point?> =
+        ConflatedCallbackFlow.conflatedCallbackFlow {
+                val callback =
+                    object : CameraManager.AvailabilityCallback() {
+
+                        // This callback will only be called when there is more than one front
+                        // camera on the device (e.g. foldable device with cameras on both outer &
+                        // inner display).
+                        override fun onPhysicalCameraAvailable(
+                            cameraId: String,
+                            physicalCameraId: String
+                        ) {
+                            currentPhysicalCameraId = physicalCameraId
+                            val cameraInfo =
+                                cameraInfoList.firstOrNull {
+                                    physicalCameraId == it.cameraPhysicalId
+                                }
+                            trySendWithFailureLogging(
+                                cameraInfo?.cameraLocation,
+                                TAG,
+                                "Update face sensor location to $cameraInfo."
+                            )
+                        }
+
+                        // This callback will only be called when there is more than one front
+                        // camera on the device (e.g. foldable device with cameras on both outer &
+                        // inner display).
+                        //
+                        // By default, all cameras are available which means there will be no
+                        // onPhysicalCameraAvailable() invoked and depending on the device state
+                        // (Fold or unfold), only the onPhysicalCameraUnavailable() for another
+                        // camera will be invoke. So we need to use this method to decide the
+                        // initial physical ID for foldable devices.
+                        override fun onPhysicalCameraUnavailable(
+                            cameraId: String,
+                            physicalCameraId: String
+                        ) {
+                            if (currentPhysicalCameraId == null) {
+                                val cameraInfo =
+                                    cameraInfoList.firstOrNull {
+                                        physicalCameraId != it.cameraPhysicalId
+                                    }
+                                currentPhysicalCameraId = cameraInfo?.cameraPhysicalId
+                                trySendWithFailureLogging(
+                                    cameraInfo?.cameraLocation,
+                                    TAG,
+                                    "Update face sensor location to $cameraInfo."
+                                )
+                            }
+                        }
+                    }
+                cameraManager.registerAvailabilityCallback(mainExecutor, callback)
+                awaitClose { cameraManager.unregisterAvailabilityCallback(callback) }
+            }
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue =
+                    if (cameraInfoList.isNotEmpty()) cameraInfoList[0].cameraLocation else null
+            )
+
+    override val sensorLocation: StateFlow<Point?> =
+        sensorInfo
+            .flatMapLatest { info ->
+                if (info == null) {
+                    flowOf(null)
+                } else {
+                    combine(
+                        defaultSensorLocation,
+                        displayStateRepository.currentRotation,
+                        displayStateRepository.currentDisplaySize,
+                        configurationRepository.scaleForResolution
+                    ) { defaultLocation, displayRotation, displaySize, scaleForResolution ->
+                        computeCurrentFaceLocation(
+                            defaultLocation,
+                            displayRotation,
+                            displaySize,
+                            scaleForResolution
+                        )
+                    }
+                }
+            }
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null
+            )
+
+    private fun computeCurrentFaceLocation(
+        defaultLocation: Point?,
+        rotation: DisplayRotation,
+        displaySize: Size,
+        scaleForResolution: Float,
+    ): Point? {
+        if (defaultLocation == null) {
+            return null
+        }
+
+        return rotateToCurrentOrientation(
+            Point(
+                (defaultLocation.x * scaleForResolution).toInt(),
+                (defaultLocation.y * scaleForResolution).toInt()
+            ),
+            rotation,
+            displaySize
+        )
+    }
+
+    private fun rotateToCurrentOrientation(
+        inOutPoint: Point,
+        rotation: DisplayRotation,
+        displaySize: Size
+    ): Point {
+        RotationUtils.rotatePoint(
+            inOutPoint,
+            rotation.toRotation(),
+            displaySize.width,
+            displaySize.height
+        )
+        return inOutPoint
+    }
     override suspend fun getLockoutMode(userId: Int): LockoutMode {
         if (sensorInfo.value == null || faceManager == null) {
             return LockoutMode.NONE
         }
         return faceManager.getLockoutModeForUser(sensorInfo.value!!.id, userId).toLockoutMode()
+    }
+
+    private fun loadCameraInfoList(): List<CameraInfo> {
+        val list = mutableListOf<CameraInfo>()
+
+        val outer =
+            loadCameraInfo(
+                R.string.config_protectedCameraId,
+                R.string.config_protectedPhysicalCameraId,
+                R.array.config_face_auth_props
+            )
+        if (outer != null) {
+            list.add(outer)
+        }
+
+        val inner =
+            loadCameraInfo(
+                R.string.config_protectedInnerCameraId,
+                R.string.config_protectedInnerPhysicalCameraId,
+                R.array.config_inner_face_auth_props
+            )
+        if (inner != null) {
+            list.add(inner)
+        }
+        return list
+    }
+
+    private fun loadCameraInfo(
+        cameraIdRes: Int,
+        cameraPhysicalIdRes: Int,
+        cameraLocationRes: Int
+    ): CameraInfo? {
+        val cameraId = applicationContext.getString(cameraIdRes)
+        if (cameraId.isNullOrEmpty()) {
+            return null
+        }
+        val physicalCameraId = applicationContext.getString(cameraPhysicalIdRes)
+        val cameraLocation: IntArray = applicationContext.resources.getIntArray(cameraLocationRes)
+        val location: Point?
+        if (cameraLocation.size < 2) {
+            location = null
+        } else {
+            location = Point(cameraLocation[0], cameraLocation[1])
+        }
+        return CameraInfo(cameraId, physicalCameraId, location)
     }
 }

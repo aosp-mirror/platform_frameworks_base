@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.decor.FaceScanningProviderFactory
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.log.logcatLogBuffer
@@ -52,6 +53,8 @@ class FaceScanningProviderFactoryTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
 
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+
+    private val facePropertyRepository = FakeFacePropertyRepository()
 
     private val displayId = 2
 
@@ -86,9 +89,10 @@ class FaceScanningProviderFactoryTest : SysuiTestCase() {
                 keyguardUpdateMonitor,
                 mock(Executor::class.java),
                 ScreenDecorationsLogger(logcatLogBuffer("FaceScanningProviderFactoryTest")),
+                facePropertyRepository,
             )
 
-        whenever(authController.faceSensorLocation).thenReturn(Point(10, 10))
+        facePropertyRepository.setSensorLocation(Point(10, 10))
     }
 
     @Test
