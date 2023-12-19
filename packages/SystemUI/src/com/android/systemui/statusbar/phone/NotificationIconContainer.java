@@ -284,11 +284,22 @@ public class NotificationIconContainer extends ViewGroup {
 
     @Override
     public String toString() {
-        return "NotificationIconContainer("
-                + "dozing=" + mDozing + " onLockScreen=" + mOnLockScreen
-                + " overrideIconColor=" + mOverrideIconColor
-                + " speedBumpIndex=" + mSpeedBumpIndex
-                + " themedTextColorPrimary=#" + Integer.toHexString(mThemedTextColorPrimary) + ')';
+        if (NotificationIconContainerRefactor.isEnabled()) {
+            return super.toString()
+                    + " {"
+                    + " overrideIconColor=" + mOverrideIconColor
+                    + ", maxIcons=" + mMaxIcons
+                    + ", isStaticLayout=" + mIsStaticLayout
+                    + ", themedTextColorPrimary=#" + Integer.toHexString(mThemedTextColorPrimary)
+                    + " }";
+        } else {
+            return "NotificationIconContainer("
+                    + "dozing=" + mDozing + " onLockScreen=" + mOnLockScreen
+                    + " overrideIconColor=" + mOverrideIconColor
+                    + " speedBumpIndex=" + mSpeedBumpIndex
+                    + " themedTextColorPrimary=#" + Integer.toHexString(mThemedTextColorPrimary)
+                    + ')';
+        }
     }
 
     @VisibleForTesting

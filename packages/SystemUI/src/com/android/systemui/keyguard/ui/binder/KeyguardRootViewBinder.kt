@@ -393,7 +393,6 @@ object KeyguardRootViewBinder {
         iconsAppearTranslationPx: Int,
         screenOffAnimationController: ScreenOffAnimationController,
     ) {
-        val statusViewMigrated = KeyguardShadeMigrationNssl.isEnabled
         animate().cancel()
         val animatorListener =
             object : AnimatorListenerAdapter() {
@@ -404,13 +403,13 @@ object KeyguardRootViewBinder {
         when {
             !isVisible.isAnimating -> {
                 alpha = 1f
-                if (!statusViewMigrated) {
+                if (!KeyguardShadeMigrationNssl.isEnabled) {
                     translationY = 0f
                 }
                 visibility = if (isVisible.value) View.VISIBLE else View.INVISIBLE
             }
             newAodTransition() -> {
-                animateInIconTranslation(statusViewMigrated)
+                animateInIconTranslation()
                 if (isVisible.value) {
                     CrossFadeHelper.fadeIn(this, animatorListener)
                 } else {
@@ -419,7 +418,7 @@ object KeyguardRootViewBinder {
             }
             !isVisible.value -> {
                 // Let's make sure the icon are translated to 0, since we cancelled it above
-                animateInIconTranslation(statusViewMigrated)
+                animateInIconTranslation()
                 CrossFadeHelper.fadeOut(this, animatorListener)
             }
             visibility != View.VISIBLE -> {
@@ -429,13 +428,12 @@ object KeyguardRootViewBinder {
                 appearIcons(
                     animate = screenOffAnimationController.shouldAnimateAodIcons(),
                     iconsAppearTranslationPx,
-                    statusViewMigrated,
                     animatorListener,
                 )
             }
             else -> {
                 // Let's make sure the icons are translated to 0, since we cancelled it above
-                animateInIconTranslation(statusViewMigrated)
+                animateInIconTranslation()
                 // We were fading out, let's fade in instead
                 CrossFadeHelper.fadeIn(this, animatorListener)
             }
@@ -445,11 +443,10 @@ object KeyguardRootViewBinder {
     private fun View.appearIcons(
         animate: Boolean,
         iconAppearTranslation: Int,
-        statusViewMigrated: Boolean,
         animatorListener: Animator.AnimatorListener,
     ) {
         if (animate) {
-            if (!statusViewMigrated) {
+            if (!KeyguardShadeMigrationNssl.isEnabled) {
                 translationY = -iconAppearTranslation.toFloat()
             }
             alpha = 0f
@@ -457,19 +454,19 @@ object KeyguardRootViewBinder {
                 .alpha(1f)
                 .setInterpolator(Interpolators.LINEAR)
                 .setDuration(AOD_ICONS_APPEAR_DURATION)
-                .apply { if (statusViewMigrated) animateInIconTranslation() }
+                .apply { if (KeyguardShadeMigrationNssl.isEnabled) animateInIconTranslation() }
                 .setListener(animatorListener)
                 .start()
         } else {
             alpha = 1.0f
-            if (!statusViewMigrated) {
+            if (!KeyguardShadeMigrationNssl.isEnabled) {
                 translationY = 0f
             }
         }
     }
 
-    private fun View.animateInIconTranslation(statusViewMigrated: Boolean) {
-        if (!statusViewMigrated) {
+    private fun View.animateInIconTranslation() {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             animate().animateInIconTranslation().setDuration(AOD_ICONS_APPEAR_DURATION).start()
         }
     }
