@@ -65,7 +65,7 @@ java_genrule {
 // depend on it.
 java_genrule {
     name: "framework-minus-apex.ravenwood",
-    defaults: ["hoststubgen-for-prototype-only-genrule"],
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
     cmd: "cp $(in) $(out)",
     srcs: [
         ":framework-minus-apex.ravenwood-base{ravenwood.jar}",
