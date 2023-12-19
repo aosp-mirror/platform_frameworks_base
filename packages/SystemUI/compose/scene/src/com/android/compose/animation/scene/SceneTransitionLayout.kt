@@ -65,11 +65,11 @@ fun SceneTransitionLayout(
     SceneTransitionLayoutForTesting(
         currentScene,
         onChangeScene,
+        modifier,
         transitions,
         state,
         edgeDetector,
         transitionInterceptionThreshold,
-        modifier,
         onLayoutImpl = null,
         scenes,
     )
@@ -205,6 +205,12 @@ interface SceneScope {
      * the result.
      */
     fun Modifier.punchHole(element: ElementKey, bounds: ElementKey, shape: Shape): Modifier
+
+    /**
+     * Don't resize during transitions. This can for instance be used to make sure that scrollable
+     * lists keep a constant size during transitions even if its elements are growing/shrinking.
+     */
+    fun Modifier.noResizeDuringTransitions(): Modifier
 }
 
 // TODO(b/291053742): Add animateSharedValueAsState(targetValue) without any ValueKey and ElementKey
@@ -257,12 +263,12 @@ enum class SwipeDirection(val orientation: Orientation) {
 internal fun SceneTransitionLayoutForTesting(
     currentScene: SceneKey,
     onChangeScene: (SceneKey) -> Unit,
-    transitions: SceneTransitions,
-    state: SceneTransitionLayoutState,
-    edgeDetector: EdgeDetector,
-    transitionInterceptionThreshold: Float,
-    modifier: Modifier,
-    onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)?,
+    modifier: Modifier = Modifier,
+    transitions: SceneTransitions = transitions {},
+    state: SceneTransitionLayoutState = remember { SceneTransitionLayoutState(currentScene) },
+    edgeDetector: EdgeDetector = DefaultEdgeDetector,
+    transitionInterceptionThreshold: Float = 0f,
+    onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
