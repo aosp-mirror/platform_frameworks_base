@@ -199,7 +199,23 @@ open class UdfpsKeyguardViewControllerLegacy(
                 listenForAodToOccludedTransitions(this)
                 listenForAlternateBouncerToAodTransitions(this)
                 listenForDreamingToAodTransitions(this)
+                listenForPrimaryBouncerToAodTransitions(this)
             }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForPrimaryBouncerToAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor
+                .transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.AOD)
+                .collect { transitionStep ->
+                    view.onDozeAmountChanged(
+                        transitionStep.value,
+                        transitionStep.value,
+                        ANIMATE_APPEAR_ON_SCREEN_OFF,
+                    )
+                }
         }
     }
 
