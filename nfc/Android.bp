@@ -67,6 +67,9 @@ java_sdk_library {
         "//packages/apps/Nfc:__subpackages__",
     ],
     jarjar_rules: ":nfc-jarjar-rules",
+    lint: {
+        strict_updatability_linting: true,
+    },
 }
 
 filegroup {
