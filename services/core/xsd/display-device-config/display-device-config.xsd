@@ -631,7 +631,7 @@
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
-        <xs:element name="mode" type="xs:string" minOccurs="0"/>
+        <xs:element name="mode" type="AutoBrightnessModeName" minOccurs="0"/>
         <xs:element name="setting" type="xs:string" minOccurs="0"/>
     </xs:complexType>
 
@@ -765,4 +765,14 @@
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+
+    <!-- Predefined type names as defined by
+    AutomaticBrightnessController.AutomaticBrightnessMode -->
+    <xs:simpleType  name="AutoBrightnessModeName">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="default"/>
+            <xs:enumeration value="idle"/>
+            <xs:enumeration value="doze"/>
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>

@@ -695,9 +695,11 @@ public class BrightnessMappingStrategyTest {
             mDdc = mock(DisplayDeviceConfig.class);
             when(mDdc.getNits()).thenReturn(DISPLAY_RANGE_NITS);
             when(mDdc.getBrightness()).thenReturn(DISPLAY_LEVELS_RANGE_BACKLIGHT_FLOAT);
-            when(mDdc.getAutoBrightnessBrighteningLevelsLux()).thenReturn(LUX_LEVELS);
+            when(mDdc.getAutoBrightnessBrighteningLevelsLux(AUTO_BRIGHTNESS_MODE_DEFAULT))
+                    .thenReturn(LUX_LEVELS);
             when(mDdc.getAutoBrightnessBrighteningLevelsNits()).thenReturn(EMPTY_FLOAT_ARRAY);
-            when(mDdc.getAutoBrightnessBrighteningLevels()).thenReturn(EMPTY_FLOAT_ARRAY);
+            when(mDdc.getAutoBrightnessBrighteningLevels(AUTO_BRIGHTNESS_MODE_DEFAULT))
+                    .thenReturn(EMPTY_FLOAT_ARRAY);
         }
 
         DdcBuilder setNitsRange(float[] nitsArray) {
@@ -711,7 +713,8 @@ public class BrightnessMappingStrategyTest {
         }
 
         DdcBuilder setAutoBrightnessLevelsLux(float[] luxLevels) {
-            when(mDdc.getAutoBrightnessBrighteningLevelsLux()).thenReturn(luxLevels);
+            when(mDdc.getAutoBrightnessBrighteningLevelsLux(AUTO_BRIGHTNESS_MODE_DEFAULT))
+                    .thenReturn(luxLevels);
             return this;
         }
 
@@ -721,7 +724,8 @@ public class BrightnessMappingStrategyTest {
         }
 
         DdcBuilder setAutoBrightnessLevels(float[] brightnessLevels) {
-            when(mDdc.getAutoBrightnessBrighteningLevels()).thenReturn(brightnessLevels);
+            when(mDdc.getAutoBrightnessBrighteningLevels(AUTO_BRIGHTNESS_MODE_DEFAULT))
+                    .thenReturn(brightnessLevels);
             return this;
         }
 

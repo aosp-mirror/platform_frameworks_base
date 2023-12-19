@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
 
 import android.animation.Animator;
@@ -1006,6 +1007,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             }
         }
 
+        BrightnessMappingStrategy dozeModeBrightnessMapper =
+                BrightnessMappingStrategy.create(resources, mDisplayDeviceConfig,
+                        AUTO_BRIGHTNESS_MODE_DOZE, mDisplayWhiteBalanceController);
+        if (mFlags.areAutoBrightnessModesEnabled() && dozeModeBrightnessMapper != null) {
+            brightnessMappers.put(AUTO_BRIGHTNESS_MODE_DOZE, dozeModeBrightnessMapper);
+        }
+
         float userLux = BrightnessMappingStrategy.INVALID_LUX;
         float userNits = BrightnessMappingStrategy.INVALID_NITS;
         if (mAutomaticBrightnessController != null) {
@@ -1348,6 +1356,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // actual state instead of the desired one.
         animateScreenStateChange(state, mDisplayStateController.shouldPerformScreenOffTransition());
         state = mPowerState.getScreenState();
+
+        // Switch to doze auto-brightness mode if needed
+        if (mFlags.areAutoBrightnessModesEnabled() && mAutomaticBrightnessController != null
+                && !mAutomaticBrightnessController.isInIdleMode()) {
+            setAutomaticScreenBrightnessMode(Display.isDozeState(state)
+                    ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT);
+        }
 
         final boolean userSetBrightnessChanged = mDisplayBrightnessController
                 .updateUserSetScreenBrightness();

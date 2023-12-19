@@ -19,6 +19,7 @@ package com.android.server.display;
 import static android.text.TextUtils.formatSimple;
 
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
 
 import android.annotation.Nullable;
@@ -98,14 +99,18 @@ public abstract class BrightnessMappingStrategy {
         switch (mode) {
             case AUTO_BRIGHTNESS_MODE_DEFAULT -> {
                 brightnessLevelsNits = displayDeviceConfig.getAutoBrightnessBrighteningLevelsNits();
-                luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux();
-                brightnessLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevels();
+                luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(mode);
+                brightnessLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevels(mode);
             }
             case AUTO_BRIGHTNESS_MODE_IDLE -> {
                 brightnessLevelsNits = getFloatArray(resources.obtainTypedArray(
                         com.android.internal.R.array.config_autoBrightnessDisplayValuesNitsIdle));
                 luxLevels = getLuxLevels(resources.getIntArray(
                         com.android.internal.R.array.config_autoBrightnessLevelsIdle));
+            }
+            case AUTO_BRIGHTNESS_MODE_DOZE -> {
+                luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(mode);
+                brightnessLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevels(mode);
             }
         }
 

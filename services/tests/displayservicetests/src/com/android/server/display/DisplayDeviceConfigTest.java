@@ -18,6 +18,7 @@ package com.android.server.display;
 
 
 import static com.android.internal.display.BrightnessSynchronizer.brightnessIntToFloat;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.config.SensorData.SupportedMode;
 import static com.android.server.display.utils.DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat;
 import static com.android.server.display.utils.DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat;
@@ -605,13 +606,13 @@ public final class DisplayDeviceConfigTest {
 
     private void verifyConfigValuesFromConfigResource() {
         assertNull(mDisplayDeviceConfig.getName());
-        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), new
-                float[]{2.0f, 200.0f, 600.0f}, ZERO_DELTA);
-        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), new
-                float[]{0.0f, 110.0f, 500.0f}, ZERO_DELTA);
-        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(), new
-                float[]{brightnessIntToFloat(50), brightnessIntToFloat(100),
-                brightnessIntToFloat(150)}, SMALL_DELTA);
+        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(),
+                new float[]{2.0f, 200.0f, 600.0f}, ZERO_DELTA);
+        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
+                AUTO_BRIGHTNESS_MODE_DEFAULT), new float[]{0.0f, 110.0f, 500.0f}, ZERO_DELTA);
+        assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(
+                AUTO_BRIGHTNESS_MODE_DEFAULT), new float[]{brightnessIntToFloat(50),
+                brightnessIntToFloat(100), brightnessIntToFloat(150)}, SMALL_DELTA);
 
         // Test thresholds
         assertEquals(0, mDisplayDeviceConfig.getAmbientLuxBrighteningMinThreshold(), ZERO_DELTA);
@@ -737,9 +738,11 @@ public final class DisplayDeviceConfigTest {
                 getValidProxSensor(), /* includeIdleMode= */ false));
 
         assertArrayEquals(new float[]{0.0f, 80},
-                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), ZERO_DELTA);
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
+                        AUTO_BRIGHTNESS_MODE_DEFAULT), ZERO_DELTA);
         assertArrayEquals(new float[]{0.2f, 0.3f},
-                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(), SMALL_DELTA);
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(
+                        AUTO_BRIGHTNESS_MODE_DEFAULT), SMALL_DELTA);
 
         assertArrayEquals(new float[]{0.0f, 90},
                 mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux("default", "dim"),
@@ -772,9 +775,11 @@ public final class DisplayDeviceConfigTest {
 
         assertArrayEquals(new float[]{brightnessIntToFloat(50), brightnessIntToFloat(100),
                         brightnessIntToFloat(150)},
-                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(), SMALL_DELTA);
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(
+                        AUTO_BRIGHTNESS_MODE_DEFAULT), SMALL_DELTA);
         assertArrayEquals(new float[]{0, 110, 500},
-                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), ZERO_DELTA);
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
+                        AUTO_BRIGHTNESS_MODE_DEFAULT), ZERO_DELTA);
         assertArrayEquals(new float[]{2, 200, 600},
                 mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), SMALL_DELTA);
     }
