@@ -797,18 +797,7 @@ constructor(
                             }
                         }
                         if (dismissShade) {
-                            if (
-                                shadeControllerLazy.get().isExpandedVisible &&
-                                    !statusBarKeyguardViewManagerLazy.get().isBouncerShowing
-                            ) {
-                                shadeControllerLazy.get().animateCollapseShadeForcedDelayed()
-                            } else {
-                                // Do it after DismissAction has been processed to conserve the
-                                // needed ordering.
-                                postOnUiThread {
-                                    shadeControllerLazy.get().runPostCollapseRunnables()
-                                }
-                            }
+                            shadeControllerLazy.get().collapseShadeForActivityStart()
                         }
                         return deferred
                     }

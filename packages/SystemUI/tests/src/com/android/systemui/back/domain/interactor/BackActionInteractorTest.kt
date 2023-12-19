@@ -32,12 +32,16 @@ import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.QuickSettingsController
 import com.android.systemui.shade.ShadeController
@@ -59,7 +63,6 @@ import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Rule
@@ -76,7 +79,8 @@ import org.mockito.junit.MockitoJUnit
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class BackActionInteractorTest : SysuiTestCase() {
-    private val testScope = TestScope()
+    private val kosmos = Kosmos()
+    private val testScope = kosmos.testScope
     private val executor = FakeExecutor(FakeSystemClock())
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
@@ -105,6 +109,8 @@ class BackActionInteractorTest : SysuiTestCase() {
             headsUpManager,
             powerInteractor,
             activeNotificationsInteractor,
+            kosmos.sceneContainerFlags,
+            kosmos::sceneInteractor,
         )
     }
 

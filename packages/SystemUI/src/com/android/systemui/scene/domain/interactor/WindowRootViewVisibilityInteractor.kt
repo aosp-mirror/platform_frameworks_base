@@ -23,16 +23,22 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.model.ObservableTransitionState
+import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.init.NotificationsController
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -47,6 +53,8 @@ constructor(
     private val headsUpManager: HeadsUpManager,
     private val powerInteractor: PowerInteractor,
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
+    sceneContainerFlags: SceneContainerFlags,
+    sceneInteractorProvider: Provider<SceneInteractor>,
 ) : CoreStartable {
 
     private var notificationPresenter: NotificationPresenter? = null
@@ -58,11 +66,28 @@ constructor(
     /**
      * True if lockscreen (including AOD) or the shade is visible and false otherwise. Notably,
      * false if the bouncer is visible.
-     *
-     * TODO(b/297080059): Use [SceneInteractor] as the source of truth if the scene flag is on.
      */
     val isLockscreenOrShadeVisible: StateFlow<Boolean> =
-        windowRootViewVisibilityRepository.isLockscreenOrShadeVisible
+        if (!sceneContainerFlags.isEnabled()) {
+            windowRootViewVisibilityRepository.isLockscreenOrShadeVisible
+        } else {
+            sceneInteractorProvider
+                .get()
+                .transitionState
+                .map { state ->
+                    when (state) {
+                        is ObservableTransitionState.Idle ->
+                            state.scene == SceneKey.Shade || state.scene == SceneKey.Lockscreen
+                        is ObservableTransitionState.Transition ->
+                            state.toScene == SceneKey.Shade ||
+                                state.toScene == SceneKey.Lockscreen ||
+                                state.fromScene == SceneKey.Shade ||
+                                state.fromScene == SceneKey.Lockscreen
+                    }
+                }
+                .distinctUntilChanged()
+                .stateIn(scope, SharingStarted.Eagerly, false)
+        }
 
     /**
      * True if lockscreen (including AOD) or the shade is visible **and** the user is currently
