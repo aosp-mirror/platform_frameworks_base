@@ -30,6 +30,7 @@ import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PREFERRED;
+import static com.android.server.pm.PackageManagerService.DEFAULT_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageManagerService.RANDOM_CODEPATH_PREFIX;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
@@ -69,6 +70,7 @@ import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
+import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
@@ -129,10 +131,12 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
@@ -853,7 +857,7 @@ public class PackageManagerServiceUtils {
             FileUtils.copy(fileIn, outputStream);
             // Flush anything in buffer before chmod, because any writes after chmod will fail.
             outputStream.flush();
-            Os.fchmod(outputStream.getFD(), 0644);
+            Os.fchmod(outputStream.getFD(), DEFAULT_FILE_ACCESS_MODE);
             atomicFile.finishWrite(outputStream);
             return PackageManager.INSTALL_SUCCEEDED;
         } catch (IOException e) {
@@ -1081,8 +1085,8 @@ public class PackageManagerServiceUtils {
 
         final File targetFile = new File(targetDir, targetName);
         final FileDescriptor targetFd = Os.open(targetFile.getAbsolutePath(),
-                O_RDWR | O_CREAT, 0644);
-        Os.chmod(targetFile.getAbsolutePath(), 0644);
+                O_RDWR | O_CREAT, DEFAULT_FILE_ACCESS_MODE);
+        Os.chmod(targetFile.getAbsolutePath(), DEFAULT_FILE_ACCESS_MODE);
         FileInputStream source = null;
         try {
             source = new FileInputStream(sourcePath);
@@ -1551,5 +1555,73 @@ public class PackageManagerServiceUtils {
      */
     public static boolean isInstalledByAdb(String initiatingPackageName) {
         return initiatingPackageName == null || SHELL_PACKAGE_NAME.equals(initiatingPackageName);
+    }
+
+    public static void linkSplitsToOldDirs(@NonNull Installer installer,
+                                           @NonNull String packageName,
+                                           @NonNull File newPath,
+                                           @Nullable Set<File> oldPaths) {
+        if (oldPaths == null || oldPaths.isEmpty()) {
+            return;
+        }
+        if (IncrementalManager.isIncrementalPath(newPath.getPath())) {
+            //TODO(b/291212866): handle incremental installs
+            return;
+        }
+        final File[] filesInNewPath = newPath.listFiles();
+        if (filesInNewPath == null || filesInNewPath.length == 0) {
+            return;
+        }
+        final List<String> splitApkNames = new ArrayList<String>();
+        for (int i = 0; i < filesInNewPath.length; i++) {
+            if (!filesInNewPath[i].isDirectory() && filesInNewPath[i].toString().endsWith(".apk")) {
+                splitApkNames.add(filesInNewPath[i].getName());
+            }
+        }
+        final int numSplits = splitApkNames.size();
+        if (numSplits == 0) {
+            return;
+        }
+        for (File oldPath : oldPaths) {
+            if (!oldPath.exists()) {
+                continue;
+            }
+            for (int i = 0; i < numSplits; i++) {
+                final String splitApkName = splitApkNames.get(i);
+                final File linkedSplit = new File(oldPath, splitApkName);
+                if (linkedSplit.exists()) {
+                    if (DEBUG) {
+                        Slog.d(PackageManagerService.TAG, "Skipping existing linked split <"
+                                + linkedSplit + ">");
+                    }
+                    continue;
+                }
+                final File sourceSplit = new File(newPath, splitApkName);
+                try {
+                    installer.linkFile(packageName, splitApkName,
+                            newPath.getAbsolutePath(), oldPath.getAbsolutePath());
+                    if (DEBUG) {
+                        Slog.d(PackageManagerService.TAG, "Linked <"
+                                + sourceSplit + "> to <" + linkedSplit + ">");
+                    }
+                } catch (Installer.InstallerException e) {
+                    Slog.w(PackageManagerService.TAG, "Failed to link split <"
+                            + sourceSplit + " > to <" + linkedSplit + ">", e);
+                    continue;
+                }
+                try {
+                    Os.chmod(linkedSplit.getAbsolutePath(), DEFAULT_FILE_ACCESS_MODE);
+                } catch (ErrnoException e) {
+                    Slog.w(PackageManagerService.TAG, "Failed to set mode for linked split <"
+                            + linkedSplit + ">", e);
+                    continue;
+                }
+                if (!SELinux.restorecon(linkedSplit)) {
+                    Slog.w(PackageManagerService.TAG, "Failed to restorecon for linked split <"
+                            + linkedSplit + ">");
+                }
+            }
+        }
+        //TODO(b/291212866): support native libs
     }
 }

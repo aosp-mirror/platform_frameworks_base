@@ -593,6 +593,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     static final String APP_METADATA_FILE_NAME = "app.metadata";
 
+    static final int DEFAULT_FILE_ACCESS_MODE = 0644;
+
     final Handler mHandler;
     final Handler mBackgroundHandler;
 
