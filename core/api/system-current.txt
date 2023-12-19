@@ -6472,6 +6472,7 @@ package android.media {
     method public void clearAudioServerStateCallback();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean clearPreferredDevicesForCapturePreset(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
+    method @FlaggedApi("android.media.audiopolicy.enable_fade_manager_configuration") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public int dispatchAudioFocusChangeWithFade(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy, @NonNull java.util.List<android.media.AudioFocusInfo>, @Nullable android.media.FadeManagerConfiguration);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int[] getActiveAssistantServicesUids();
     method @IntRange(from=0) public long getAdditionalOutputDeviceDelay(@NonNull android.media.AudioDeviceInfo);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int[] getAssistantServicesUids();
@@ -6669,6 +6670,69 @@ package android.media {
     method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getContentId();
     method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getSyncId();
     field public static final int CONTENT_ID_NONE = 0; // 0x0
+  }
+
+  @FlaggedApi("android.media.audiopolicy.enable_fade_manager_configuration") public final class FadeManagerConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.media.AudioAttributes> getAudioAttributesWithVolumeShaperConfigs();
+    method public long getFadeInDelayForOffenders();
+    method public long getFadeInDurationForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method public long getFadeInDurationForUsage(int);
+    method @Nullable public android.media.VolumeShaper.Configuration getFadeInVolumeShaperConfigForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @Nullable public android.media.VolumeShaper.Configuration getFadeInVolumeShaperConfigForUsage(int);
+    method public long getFadeOutDurationForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method public long getFadeOutDurationForUsage(int);
+    method @Nullable public android.media.VolumeShaper.Configuration getFadeOutVolumeShaperConfigForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @Nullable public android.media.VolumeShaper.Configuration getFadeOutVolumeShaperConfigForUsage(int);
+    method public int getFadeState();
+    method @NonNull public java.util.List<java.lang.Integer> getFadeableUsages();
+    method @NonNull public java.util.List<android.media.AudioAttributes> getUnfadeableAudioAttributes();
+    method @NonNull public java.util.List<java.lang.Integer> getUnfadeableContentTypes();
+    method @NonNull public java.util.List<java.lang.Integer> getUnfadeablePlayerTypes();
+    method @NonNull public java.util.List<java.lang.Integer> getUnfadeableUids();
+    method public boolean isAudioAttributesUnfadeable(@NonNull android.media.AudioAttributes);
+    method public boolean isContentTypeUnfadeable(int);
+    method public boolean isFadeEnabled();
+    method public boolean isPlayerTypeUnfadeable(int);
+    method public boolean isUidUnfadeable(int);
+    method public boolean isUsageFadeable(int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.FadeManagerConfiguration> CREATOR;
+    field public static final long DURATION_NOT_SET = 0L; // 0x0L
+    field public static final int FADE_STATE_DISABLED = 0; // 0x0
+    field public static final int FADE_STATE_ENABLED_AUTO = 2; // 0x2
+    field public static final int FADE_STATE_ENABLED_DEFAULT = 1; // 0x1
+    field public static final String TAG = "FadeManagerConfiguration";
+    field public static final int VOLUME_SHAPER_SYSTEM_FADE_ID = 2; // 0x2
+  }
+
+  public static final class FadeManagerConfiguration.Builder {
+    ctor public FadeManagerConfiguration.Builder();
+    ctor public FadeManagerConfiguration.Builder(long, long);
+    ctor public FadeManagerConfiguration.Builder(@NonNull android.media.FadeManagerConfiguration);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder addFadeableUsage(int);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder addUnfadeableAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder addUnfadeableContentType(int);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder addUnfadeableUid(int);
+    method @NonNull public android.media.FadeManagerConfiguration build();
+    method @NonNull public android.media.FadeManagerConfiguration.Builder clearFadeableUsage(int);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder clearUnfadeableAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder clearUnfadeableContentType(int);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder clearUnfadeableUid(int);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeInDelayForOffenders(long);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeInDurationForAudioAttributes(@NonNull android.media.AudioAttributes, long);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeInDurationForUsage(int, long);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeInVolumeShaperConfigForAudioAttributes(@NonNull android.media.AudioAttributes, @Nullable android.media.VolumeShaper.Configuration);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeInVolumeShaperConfigForUsage(int, @Nullable android.media.VolumeShaper.Configuration);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeOutDurationForAudioAttributes(@NonNull android.media.AudioAttributes, long);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeOutDurationForUsage(int, long);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeOutVolumeShaperConfigForAudioAttributes(@NonNull android.media.AudioAttributes, @Nullable android.media.VolumeShaper.Configuration);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeOutVolumeShaperConfigForUsage(int, @Nullable android.media.VolumeShaper.Configuration);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeState(int);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setFadeableUsages(@NonNull java.util.List<java.lang.Integer>);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setUnfadeableAudioAttributes(@NonNull java.util.List<android.media.AudioAttributes>);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setUnfadeableContentTypes(@NonNull java.util.List<java.lang.Integer>);
+    method @NonNull public android.media.FadeManagerConfiguration.Builder setUnfadeableUids(@NonNull java.util.List<java.lang.Integer>);
   }
 
   public class HwAudioSource {
@@ -6889,15 +6953,18 @@ package android.media.audiopolicy {
 
   public class AudioPolicy {
     method public int attachMixes(@NonNull java.util.List<android.media.audiopolicy.AudioMix>);
+    method @FlaggedApi("android.media.audiopolicy.enable_fade_manager_configuration") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public int clearFadeManagerConfigurationForFocusLoss();
     method public android.media.AudioRecord createAudioRecordSink(android.media.audiopolicy.AudioMix) throws java.lang.IllegalArgumentException;
     method public android.media.AudioTrack createAudioTrackSource(android.media.audiopolicy.AudioMix) throws java.lang.IllegalArgumentException;
     method public int detachMixes(@NonNull java.util.List<android.media.audiopolicy.AudioMix>);
+    method @FlaggedApi("android.media.audiopolicy.enable_fade_manager_configuration") @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public android.media.FadeManagerConfiguration getFadeManagerConfigurationForFocusLoss();
     method public int getFocusDuckingBehavior();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public java.util.List<android.media.AudioFocusInfo> getFocusStack();
     method public int getStatus();
     method public boolean removeUidDeviceAffinity(int);
     method public boolean removeUserIdDeviceAffinity(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean sendFocusLoss(@NonNull android.media.AudioFocusInfo) throws java.lang.IllegalStateException;
+    method @FlaggedApi("android.media.audiopolicy.enable_fade_manager_configuration") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public int setFadeManagerConfigurationForFocusLoss(@NonNull android.media.FadeManagerConfiguration);
     method public int setFocusDuckingBehavior(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setRegistration(String);
     method public boolean setUidDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
