@@ -34,19 +34,15 @@ import com.android.wm.shell.animation.Interpolators
  */
 class StackEducationView(
     context: Context,
-    positioner: BubblePositioner,
-    controller: BubbleController
+    private val positioner: BubblePositioner,
+    private val controller: BubbleController
 ) : LinearLayout(context) {
 
-    private val TAG =
-        if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "BubbleStackEducationView"
-        else BubbleDebugConfig.TAG_BUBBLES
-
-    private val ANIMATE_DURATION: Long = 200
-    private val ANIMATE_DURATION_SHORT: Long = 40
-
-    private val positioner: BubblePositioner = positioner
-    private val controller: BubbleController = controller
+    companion object {
+        const val PREF_STACK_EDUCATION: String = "HasSeenBubblesOnboarding"
+        private const val ANIMATE_DURATION: Long = 200
+        private const val ANIMATE_DURATION_SHORT: Long = 40
+    }
 
     private val view by lazy { requireViewById<View>(R.id.stack_education_layout) }
     private val titleTextView by lazy { requireViewById<TextView>(R.id.stack_education_title) }
@@ -175,7 +171,7 @@ class StackEducationView(
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1f)
         }
-        setShouldShow(false)
+        updateStackEducationSeen()
         return true
     }
 
@@ -196,13 +192,11 @@ class StackEducationView(
             .withEndAction { visibility = GONE }
     }
 
-    private fun setShouldShow(shouldShow: Boolean) {
+    private fun updateStackEducationSeen() {
         context
             .getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             .edit()
-            .putBoolean(PREF_STACK_EDUCATION, !shouldShow)
+            .putBoolean(PREF_STACK_EDUCATION, true)
             .apply()
     }
 }
-
-const val PREF_STACK_EDUCATION: String = "HasSeenBubblesOnboarding"

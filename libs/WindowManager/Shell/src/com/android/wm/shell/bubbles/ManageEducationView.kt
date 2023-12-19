@@ -33,15 +33,16 @@ import com.android.wm.shell.animation.Interpolators
  * User education view to highlight the manage button that allows a user to configure the settings
  * for the bubble. Shown only the first time a user expands a bubble.
  */
-class ManageEducationView(context: Context, positioner: BubblePositioner) : LinearLayout(context) {
+class ManageEducationView(
+    context: Context,
+    private val positioner: BubblePositioner
+) : LinearLayout(context) {
 
-    private val TAG =
-        if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "ManageEducationView"
-        else BubbleDebugConfig.TAG_BUBBLES
+    companion object {
+        const val PREF_MANAGED_EDUCATION: String = "HasSeenBubblesManageOnboarding"
+        private const val ANIMATE_DURATION: Long = 200
+    }
 
-    private val ANIMATE_DURATION: Long = 200
-
-    private val positioner: BubblePositioner = positioner
     private val manageView by lazy { requireViewById<ViewGroup>(R.id.manage_education_view) }
     private val manageButton by lazy { requireViewById<Button>(R.id.manage_button) }
     private val gotItButton by lazy { requireViewById<Button>(R.id.got_it) }
@@ -128,7 +129,7 @@ class ManageEducationView(context: Context, positioner: BubblePositioner) : Line
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1f)
         }
-        setShouldShow(false)
+        updateManageEducationSeen()
     }
 
     /**
@@ -218,13 +219,11 @@ class ManageEducationView(context: Context, positioner: BubblePositioner) : Line
             }
     }
 
-    private fun setShouldShow(shouldShow: Boolean) {
+    private fun updateManageEducationSeen() {
         context
             .getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
             .edit()
-            .putBoolean(PREF_MANAGED_EDUCATION, !shouldShow)
+            .putBoolean(PREF_MANAGED_EDUCATION, true)
             .apply()
     }
 }
-
-const val PREF_MANAGED_EDUCATION: String = "HasSeenBubblesManageOnboarding"
