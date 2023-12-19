@@ -12302,7 +12302,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 /* isImageBitmap= */ true,
                 /* isExpired= */ true);
         addRecordAndRemoveBitmaps(record);
-        assertThat(record.getNotification().extras.containsKey(EXTRA_PICTURE)).isFalse();
+        assertThat(record.getNotification().extras.containsKey(EXTRA_PICTURE)).isTrue();
+        final Parcelable picture = record.getNotification().extras.getParcelable(EXTRA_PICTURE);
+        assertThat(picture).isNull();
     }
 
     @Test
@@ -12336,7 +12338,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 /* isImageBitmap= */ false,
                 /* isExpired= */ true);
         addRecordAndRemoveBitmaps(record);
-        assertThat(record.getNotification().extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
+        assertThat(record.getNotification().extras.containsKey(EXTRA_PICTURE_ICON)).isTrue();
+        final Parcelable pictureIcon =
+                record.getNotification().extras.getParcelable(EXTRA_PICTURE_ICON);
+        assertThat(pictureIcon).isNull();
     }
 
     @Test
