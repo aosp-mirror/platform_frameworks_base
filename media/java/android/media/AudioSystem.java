@@ -2499,14 +2499,12 @@ public class AudioSystem
      * </ul>
      */
     public static int getPlatformType(Context context) {
-        if (((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
-                .isVoiceCapable()) {
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            return PLATFORM_AUTOMOTIVE;
+        } else if ((context.getSystemService(TelephonyManager.class)).isVoiceCapable()) {
             return PLATFORM_VOICE;
         } else if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
             return PLATFORM_TELEVISION;
-        } else if (context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_AUTOMOTIVE)) {
-            return PLATFORM_AUTOMOTIVE;
         } else {
             return PLATFORM_DEFAULT;
         }
