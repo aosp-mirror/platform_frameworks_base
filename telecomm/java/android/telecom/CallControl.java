@@ -19,6 +19,7 @@ package android.telecom;
 import static android.telecom.CallException.TRANSACTION_EXCEPTION_KEY;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -32,6 +33,7 @@ import android.text.TextUtils;
 
 import com.android.internal.telecom.ClientTransactionalServiceRepository;
 import com.android.internal.telecom.ICallControl;
+import com.android.server.telecom.flags.Flags;
 
 import java.util.List;
 import java.util.Objects;
@@ -283,6 +285,43 @@ public final class CallControl {
             try {
                 mServerInterface.requestCallEndpointChange(callEndpoint,
                         new CallControlResultReceiver("endpointChange", executor, callback));
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            throw new IllegalStateException(INTERFACE_ERROR_MSG);
+        }
+    }
+
+    /**
+     * Request a new mute state.  Note: {@link CallEventCallback#onMuteStateChanged(boolean)}
+     * will be called every time the mute state is changed and can be used to track the current
+     * mute state.
+     *
+     * @param isMuted  The new mute state.  Passing in a {@link Boolean#TRUE} for the isMuted
+     *                 parameter will mute the call.  {@link Boolean#FALSE} will unmute the call.
+     * @param executor The {@link Executor} on which the {@link OutcomeReceiver} callback
+     *                 will be called on.
+     * @param callback The {@link OutcomeReceiver} that will be completed on the Telecom side
+     *                 that details success or failure of the requested operation.
+     *
+     *                 {@link OutcomeReceiver#onResult} will be called if Telecom has
+     *                 successfully changed the mute state.
+     *
+     *                 {@link OutcomeReceiver#onError} will be called if Telecom has failed to
+     *                 switch to the mute state.  A {@link CallException} will be
+     *                 passed that details why the operation failed.
+     */
+    @FlaggedApi(Flags.FLAG_SET_MUTE_STATE)
+    public void setMuteState(boolean isMuted, @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, CallException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        if (mServerInterface != null) {
+            try {
+                mServerInterface.setMuteState(isMuted,
+                        new CallControlResultReceiver("setMuteState", executor, callback));
+
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
