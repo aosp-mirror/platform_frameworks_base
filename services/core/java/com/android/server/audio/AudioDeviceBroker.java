@@ -56,6 +56,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1640,7 +1641,7 @@ public class AudioDeviceBroker {
         return mBtHelper.getLeAudioDeviceGroupId(device);
     }
 
-    /*package*/ List<String> getLeAudioGroupAddresses(int groupId) {
+    /*package*/ List<Pair<String, String>> getLeAudioGroupAddresses(int groupId) {
         return mBtHelper.getLeAudioGroupAddresses(groupId);
     }
 
@@ -2651,9 +2652,9 @@ public class AudioDeviceBroker {
         }
     }
 
-    List<String> getDeviceAddresses(AudioDeviceAttributes device) {
+    List<String> getDeviceIdentityAddresses(AudioDeviceAttributes device) {
         synchronized (mDeviceStateLock) {
-            return mDeviceInventory.getDeviceAddresses(device);
+            return mDeviceInventory.getDeviceIdentityAddresses(device);
         }
     }
 

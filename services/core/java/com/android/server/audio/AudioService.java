@@ -13775,8 +13775,8 @@ public class AudioService extends IAudioService.Stub
         return activeAssistantUids;
     }
 
-    List<String> getDeviceAddresses(AudioDeviceAttributes device) {
-        return mDeviceBroker.getDeviceAddresses(device);
+    List<String> getDeviceIdentityAddresses(AudioDeviceAttributes device) {
+        return mDeviceBroker.getDeviceIdentityAddresses(device);
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
