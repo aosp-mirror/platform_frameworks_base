@@ -45,11 +45,11 @@ import android.os.Bundle;
 import android.os.UserManager;
 import android.provider.ContactsContract;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableString;
 import android.util.ArraySet;
 import android.util.LruCache;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;

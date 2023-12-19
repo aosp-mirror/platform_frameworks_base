@@ -43,9 +43,9 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.ParceledListSlice;
 import android.permission.IPermissionManager;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Pair;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;

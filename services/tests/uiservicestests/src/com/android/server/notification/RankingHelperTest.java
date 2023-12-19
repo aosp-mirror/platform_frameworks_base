@@ -43,10 +43,10 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
