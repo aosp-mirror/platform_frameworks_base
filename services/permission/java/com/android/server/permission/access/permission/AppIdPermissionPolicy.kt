@@ -1262,7 +1262,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         val apexModuleName = packageState.apexModuleName
         val packageName = packageState.packageName
         return when {
-            packageState.isVendor ->
+            packageState.isVendor || packageState.isOdm ->
                 permissionAllowlist.getVendorPrivilegedAppAllowlistState(
                     packageName,
                     permissionName
@@ -1471,12 +1471,15 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     // In any case, don't grant a privileged permission to privileged vendor apps,
                     // if the permission's protectionLevel does not have the extra vendorPrivileged
                     // flag.
-                    if (packageState.isVendor && !permission.isVendorPrivileged) {
+                    if (
+                        (packageState.isVendor || packageState.isOdm) &&
+                            !permission.isVendorPrivileged
+                    ) {
                         Slog.w(
                             LOG_TAG,
                             "Permission $permissionName cannot be granted to privileged" +
-                                " vendor app $packageName because it isn't a vendorPrivileged" +
-                                " permission"
+                                " vendor (or odm) app $packageName because it isn't a" +
+                                " vendorPrivileged permission"
                         )
                         return false
                     }
