@@ -52,7 +52,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NOT_MAGNIFIABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
@@ -1247,12 +1246,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @see ActivityRecord#hasSizeCompatBounds()
      */
     boolean hasCompatScale() {
-        if ((mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0) {
-            return true;
-        }
         if (mAttrs.type == TYPE_APPLICATION_STARTING) {
             // Exclude starting window because it is not displayed by the application.
             return false;
+        }
+        if (mWmService.mAtmService.mCompatModePackages.useLegacyScreenCompatMode(
+                mSession.mProcess.mInfo.packageName)) {
+            return true;
         }
         return mActivityRecord != null && mActivityRecord.hasSizeCompatBounds()
                 || mOverrideScale != 1f;
