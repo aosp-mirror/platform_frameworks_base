@@ -775,7 +775,7 @@ public final class DisplayPowerController2Test {
         final float hdrBrightness = 0.3f;
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
-        when(mHolder.automaticBrightnessController.isInIdleMode()).thenReturn(true);
+        when(mHolder.automaticBrightnessController.getMode()).thenReturn(AUTO_BRIGHTNESS_MODE_IDLE);
         when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
                 any(BrightnessEvent.class))).thenReturn(sdrBrightness);
         when(mHolder.hdrClamper.getMaxBrightness()).thenReturn(1.0f);
@@ -1234,7 +1234,7 @@ public final class DisplayPowerController2Test {
         float brightness = 0.6f;
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
-        when(mHolder.automaticBrightnessController.isInIdleMode()).thenReturn(true);
+        when(mHolder.automaticBrightnessController.getMode()).thenReturn(AUTO_BRIGHTNESS_MODE_IDLE);
         when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
                 any(BrightnessEvent.class))).thenReturn(brightness);
 
@@ -1597,7 +1597,7 @@ public final class DisplayPowerController2Test {
     public void testDoesNotSwitchFromIdleToDozeAutoBrightnessMode() {
         when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(true);
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
-        when(mHolder.automaticBrightnessController.isInIdleMode()).thenReturn(true);
+        when(mHolder.automaticBrightnessController.getMode()).thenReturn(AUTO_BRIGHTNESS_MODE_IDLE);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);

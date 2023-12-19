@@ -751,6 +751,13 @@ public abstract class DisplayManagerInternal {
          */
         boolean blockScreenOn(Runnable unblocker);
 
+        /** Get the current brightness levels used to determine automatic brightness based on lux
+         * levels. */
+        float[] getCurrentAutoBrightnessLevels();
+
+        /** Get the current lux levels used to determine automatic brightness. */
+        float[] getCurrentAutoBrightnessLuxLevels();
+
         /** Returns whether displayoffload supports the given display state. */
         static boolean isSupportedOffloadState(int displayState) {
             return Display.isSuspendedState(displayState);
