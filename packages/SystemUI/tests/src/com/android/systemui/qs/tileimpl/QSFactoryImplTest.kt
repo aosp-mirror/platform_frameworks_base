@@ -50,7 +50,6 @@ import com.android.systemui.qs.tiles.RotationLockTile
 import com.android.systemui.qs.tiles.ScreenRecordTile
 import com.android.systemui.qs.tiles.UiModeNightTile
 import com.android.systemui.qs.tiles.WorkModeTile
-import com.android.systemui.util.leak.GarbageMonitor
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -117,7 +116,6 @@ class QSFactoryImplTest : SysuiTestCase() {
     @Mock private lateinit var dataSaverTile: DataSaverTile
     @Mock private lateinit var nightDisplayTile: NightDisplayTile
     @Mock private lateinit var nfcTile: NfcTile
-    @Mock private lateinit var memoryTile: GarbageMonitor.MemoryTile
     @Mock private lateinit var darkModeTile: UiModeNightTile
     @Mock private lateinit var screenRecordTile: ScreenRecordTile
     @Mock private lateinit var reduceBrightColorsTile: ReduceBrightColorsTile
