@@ -16,14 +16,18 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
+import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.keyguard.ui.viewmodel.deviceEntryIconViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.statusbar.phone.systemUIDialogManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@ExperimentalCoroutinesApi
 val Kosmos.deviceEntryUdfpsTouchOverlayViewModel by Fixture {
     DeviceEntryUdfpsTouchOverlayViewModel(
         deviceEntryIconViewModel = deviceEntryIconViewModel,
+        alternateBouncerInteractor = alternateBouncerInteractor,
         systemUIDialogManager = systemUIDialogManager,
     )
 }

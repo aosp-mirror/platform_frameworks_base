@@ -25,20 +25,25 @@ import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 import com.android.server.biometrics.sensors.fingerprint.aidl.AidlResponseHandler;
+import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintGetAuthenticatorIdClient;
+import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintInvalidationClient;
 
 import java.util.function.Supplier;
 
 /**
- * Adapter to convert AIDL-specific interface {@link ISession} methods to HIDL implementation.
+ * Adapter to convert HIDL methods into AIDL interface {@link ISession}.
  */
-public class AidlToHidlAdapter implements ISession {
-    private final String TAG = "AidlToHidlAdapter";
+public class HidlToAidlSessionAdapter implements ISession {
+
+    private final String TAG = "HidlToAidlSessionAdapter";
+
     @VisibleForTesting
     static final int ENROLL_TIMEOUT_SEC = 60;
     @NonNull
@@ -46,20 +51,11 @@ public class AidlToHidlAdapter implements ISession {
     private final int mUserId;
     private HidlToAidlCallbackConverter mHidlToAidlCallbackConverter;
 
-    public AidlToHidlAdapter(Supplier<IBiometricsFingerprint> session, int userId,
+    public HidlToAidlSessionAdapter(Supplier<IBiometricsFingerprint> session, int userId,
             AidlResponseHandler aidlResponseHandler) {
         mSession = session;
         mUserId = userId;
         setCallback(aidlResponseHandler);
-    }
-
-    private void setCallback(AidlResponseHandler aidlResponseHandler) {
-        mHidlToAidlCallbackConverter = new HidlToAidlCallbackConverter(aidlResponseHandler);
-        try {
-            mSession.get().setNotify(mHidlToAidlCallbackConverter);
-        } catch (RemoteException e) {
-            Slog.d(TAG, "Failed to set callback");
-        }
     }
 
     @Override
@@ -125,12 +121,16 @@ public class AidlToHidlAdapter implements ISession {
 
     @Override
     public void getAuthenticatorId() throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "getAuthenticatorId unsupported in HIDL");
+        mHidlToAidlCallbackConverter.unsupportedClientScheduled(
+                FingerprintGetAuthenticatorIdClient.class);
     }
 
     @Override
     public void invalidateAuthenticatorId() throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "invalidateAuthenticatorId unsupported in HIDL");
+        mHidlToAidlCallbackConverter.unsupportedClientScheduled(
+                FingerprintInvalidationClient.class);
     }
 
     @Override
@@ -140,70 +140,90 @@ public class AidlToHidlAdapter implements ISession {
 
     @Override
     public void close() throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "close unsupported in HIDL");
     }
 
     @Override
     public void onUiReady() throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "onUiReady unsupported in HIDL");
     }
 
     @Override
     public ICancellationSignal authenticateWithContext(long operationId, OperationContext context)
             throws RemoteException {
-        //Unsupported in HIDL
-        return null;
+        Log.e(TAG, "authenticateWithContext unsupported in HIDL");
+        return authenticate(operationId);
     }
 
     @Override
     public ICancellationSignal enrollWithContext(HardwareAuthToken hat, OperationContext context)
             throws RemoteException {
-        //Unsupported in HIDL
-        return null;
+        Log.e(TAG, "enrollWithContext unsupported in HIDL");
+        return enroll(hat);
     }
 
     @Override
     public ICancellationSignal detectInteractionWithContext(OperationContext context)
             throws RemoteException {
-        //Unsupported in HIDL
-        return null;
+        Log.e(TAG, "enrollWithContext unsupported in HIDL");
+        return detectInteraction();
     }
 
     @Override
     public void onPointerDownWithContext(PointerContext context) throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "onPointerDownWithContext unsupported in HIDL");
+        onPointerDown(context.pointerId, (int) context.x, (int) context.y, context.minor,
+                context.major);
     }
 
     @Override
     public void onPointerUpWithContext(PointerContext context) throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "onPointerUpWithContext unsupported in HIDL");
+        onPointerUp(context.pointerId);
     }
 
     @Override
     public void onContextChanged(OperationContext context) throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "onContextChanged unsupported in HIDL");
     }
 
     @Override
     public void onPointerCancelWithContext(PointerContext context) throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "onPointerCancelWithContext unsupported in HIDL");
     }
 
     @Override
     public void setIgnoreDisplayTouches(boolean shouldIgnore) throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "setIgnoreDisplayTouches unsupported in HIDL");
     }
 
     @Override
     public int getInterfaceVersion() throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "getInterfaceVersion unsupported in HIDL");
         return 0;
     }
 
     @Override
     public String getInterfaceHash() throws RemoteException {
-        //Unsupported in HIDL
+        Log.e(TAG, "getInterfaceHash unsupported in HIDL");
         return null;
+    }
+
+    private void setCallback(AidlResponseHandler aidlResponseHandler) {
+        mHidlToAidlCallbackConverter = new HidlToAidlCallbackConverter(aidlResponseHandler);
+        try {
+            if (mSession.get() != null) {
+                long halId = mSession.get().setNotify(mHidlToAidlCallbackConverter);
+                Slog.d(TAG, "Fingerprint HAL ready, HAL ID: " + halId);
+                if (halId == 0) {
+                    Slog.d(TAG, "Unable to set HIDL callback.");
+                }
+            } else {
+                Slog.e(TAG, "Unable to set HIDL callback. HIDL daemon is null.");
+            }
+        } catch (RemoteException e) {
+            Slog.d(TAG, "Failed to set callback");
+        }
     }
 
     private class Cancellation extends ICancellationSignal.Stub {

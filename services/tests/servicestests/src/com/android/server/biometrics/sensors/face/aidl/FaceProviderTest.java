@@ -16,6 +16,9 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.os.UserHandle.USER_NULL;
+import static android.os.UserHandle.USER_SYSTEM;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -32,15 +35,19 @@ import android.hardware.biometrics.common.CommonProps;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.SensorProps;
+import android.hardware.face.HidlFaceSensorConfig;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
@@ -49,6 +56,7 @@ import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -58,6 +66,10 @@ import java.util.ArrayList;
 @Presubmit
 @SmallTest
 public class FaceProviderTest {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final String TAG = "FaceProviderTest";
 
@@ -109,7 +121,7 @@ public class FaceProviderTest {
 
         mFaceProvider = new FaceProvider(mContext, mBiometricStateCallback,
                 mSensorProps, TAG, mLockoutResetDispatcher, mBiometricContext,
-                mDaemon);
+                mDaemon, false /* resetLockoutRequiresChallenge */, false /* testHalEnabled */);
     }
 
     @Test
@@ -124,8 +136,36 @@ public class FaceProviderTest {
 
             assertThat(currentClient).isInstanceOf(FaceInternalCleanupClient.class);
             assertThat(currentClient.getSensorId()).isEqualTo(prop.commonProps.sensorId);
-            assertThat(currentClient.getTargetUserId()).isEqualTo(UserHandle.USER_SYSTEM);
+            assertThat(currentClient.getTargetUserId()).isEqualTo(USER_SYSTEM);
         }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testAddingHidlSensors() {
+        when(mResources.getIntArray(anyInt())).thenReturn(new int[]{});
+        when(mResources.getBoolean(anyInt())).thenReturn(false);
+
+        final int faceId = 0;
+        final int faceStrength = 15;
+        final String config = String.format("%d:8:%d", faceId, faceStrength);
+        final HidlFaceSensorConfig faceSensorConfig = new HidlFaceSensorConfig();
+        faceSensorConfig.parse(config, mContext);
+        final HidlFaceSensorConfig[] hidlFaceSensorConfig =
+                new HidlFaceSensorConfig[]{faceSensorConfig};
+        mFaceProvider = new FaceProvider(mContext,
+                mBiometricStateCallback, hidlFaceSensorConfig, TAG,
+                mLockoutResetDispatcher, mBiometricContext, mDaemon,
+                true /* resetLockoutRequiresChallenge */,
+                true /* testHalEnabled */);
+
+        assertThat(mFaceProvider.mFaceSensors.get(faceId)
+                .getLazySession().get().getUserId()).isEqualTo(USER_NULL);
+
+        waitForIdle();
+
+        assertThat(mFaceProvider.mFaceSensors.get(faceId)
+                .getLazySession().get().getUserId()).isEqualTo(USER_SYSTEM);
     }
 
     @SuppressWarnings("rawtypes")

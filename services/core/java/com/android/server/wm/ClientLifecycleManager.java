@@ -105,7 +105,7 @@ class ClientLifecycleManager {
             final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
             clientTransaction.addTransactionItem(transactionItem);
 
-            onClientTransactionItemScheduledLocked(clientTransaction);
+            onClientTransactionItemScheduled(clientTransaction);
         } else {
             // TODO(b/260873529): cleanup after launch.
             final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
@@ -134,7 +134,7 @@ class ClientLifecycleManager {
             clientTransaction.addTransactionItem(transactionItem);
             clientTransaction.addTransactionItem(lifecycleItem);
 
-            onClientTransactionItemScheduledLocked(clientTransaction);
+            onClientTransactionItemScheduled(clientTransaction);
         } else {
             // TODO(b/260873529): cleanup after launch.
             final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
@@ -146,6 +146,9 @@ class ClientLifecycleManager {
 
     /** Executes all the pending transactions. */
     void dispatchPendingTransactions() {
+        if (!Flags.bundleClientTransactionFlag()) {
+            return;
+        }
         final int size = mPendingTransactions.size();
         for (int i = 0; i < size; i++) {
             final ClientTransaction transaction = mPendingTransactions.valueAt(i);
@@ -158,6 +161,20 @@ class ClientLifecycleManager {
         mPendingTransactions.clear();
     }
 
+    /**
+     * Called to when {@link WindowSurfacePlacer#continueLayout}.
+     * Dispatches all pending transactions unless there is an ongoing/scheduled layout, in which
+     * case the pending transactions will be dispatched in
+     * {@link RootWindowContainer#performSurfacePlacementNoTrace}.
+     */
+    void onLayoutContinued() {
+        if (shouldDispatchPendingTransactionsImmediately()) {
+            // Dispatch the pending transactions immediately if there is no ongoing/scheduled layout
+            dispatchPendingTransactions();
+        }
+    }
+
+    /** Must only be called with WM lock. */
     @NonNull
     private ClientTransaction getOrCreatePendingTransaction(@NonNull IApplicationThread client) {
         final IBinder clientBinder = client.asBinder();
@@ -173,20 +190,28 @@ class ClientLifecycleManager {
     }
 
     /** Must only be called with WM lock. */
-    private void onClientTransactionItemScheduledLocked(
+    private void onClientTransactionItemScheduled(
             @NonNull ClientTransaction clientTransaction) throws RemoteException {
-        // TODO(b/260873529): make sure WindowSurfacePlacer#requestTraversal is called before
-        // ClientTransaction scheduled when needed.
-
-        if (mWms != null && (mWms.mWindowPlacerLocked.isInLayout()
-                || mWms.mWindowPlacerLocked.isTraversalScheduled())) {
-            // The pending transactions will be dispatched when
-            // RootWindowContainer#performSurfacePlacementNoTrace.
-            return;
+        if (shouldDispatchPendingTransactionsImmediately()) {
+            // Dispatch the pending transaction immediately.
+            mPendingTransactions.remove(clientTransaction.getClient().asBinder());
+            scheduleTransaction(clientTransaction);
         }
+    }
 
-        // Dispatch the pending transaction immediately.
-        mPendingTransactions.remove(clientTransaction.getClient().asBinder());
-        scheduleTransaction(clientTransaction);
+    /** Must only be called with WM lock. */
+    private boolean shouldDispatchPendingTransactionsImmediately() {
+        if (mWms == null) {
+            return true;
+        }
+        // Do not dispatch when
+        // 1. Layout deferred.
+        // 2. Layout requested.
+        // 3. Layout in process.
+        // The pending transactions will be dispatched during layout in
+        // RootWindowContainer#performSurfacePlacementNoTrace.
+        return !mWms.mWindowPlacerLocked.isLayoutDeferred()
+                && !mWms.mWindowPlacerLocked.isTraversalScheduled()
+                && !mWms.mWindowPlacerLocked.isInLayout();
     }
 }

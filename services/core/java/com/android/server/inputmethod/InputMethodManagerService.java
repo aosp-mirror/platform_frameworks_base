@@ -5671,7 +5671,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void onImeParentChanged() {
+        public void onImeParentChanged(int displayId) {
             synchronized (ImfLock.class) {
                 // Hide the IME method menu only when the IME surface parent is changed by the
                 // input target changed, in case seeing the dialog dismiss flickering during
@@ -5683,7 +5683,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void removeImeSurface() {
+        public void removeImeSurface(int displayId) {
             mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();
         }
 

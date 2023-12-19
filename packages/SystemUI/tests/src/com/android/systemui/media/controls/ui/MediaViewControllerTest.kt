@@ -22,11 +22,11 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
 import com.android.systemui.media.controls.util.MediaFlags
+import com.android.systemui.res.R
 import com.android.systemui.util.animation.MeasurementInput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionViewState
@@ -37,6 +37,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.floatThat
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -183,16 +184,46 @@ class MediaViewControllerTest : SysuiTestCase() {
         // detail widgets occupy [90, 100]
         whenever(detailWidgetState.y).thenReturn(90F)
         whenever(detailWidgetState.height).thenReturn(10)
+        whenever(detailWidgetState.alpha).thenReturn(1F)
         // control widgets occupy [150, 170]
         whenever(controlWidgetState.y).thenReturn(150F)
         whenever(controlWidgetState.height).thenReturn(20)
-        // in current beizer, when the progress reach 0.38, the result will be 0.5
+        whenever(controlWidgetState.alpha).thenReturn(1F)
+        // in current bezier, when the progress reach 0.38, the result will be 0.5
         mediaViewController.squishViewState(mockViewState, 181.4F / 200F)
         verify(controlWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
         verify(detailWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
         mediaViewController.squishViewState(mockViewState, 200F / 200F)
         verify(controlWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
         verify(detailWidgetState, times(2)).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
+    }
+
+    @Test
+    fun testSquishViewState_applySquishFraction_toTransitionViewState_alpha_invisibleElements() {
+        whenever(mockViewState.copy()).thenReturn(mockCopiedState)
+        whenever(mockCopiedState.widgetStates)
+            .thenReturn(
+                mutableMapOf(
+                    R.id.media_progress_bar to controlWidgetState,
+                    R.id.header_artist to detailWidgetState
+                )
+            )
+        whenever(mockCopiedState.measureHeight).thenReturn(200)
+        // detail widgets occupy [90, 100]
+        whenever(detailWidgetState.y).thenReturn(90F)
+        whenever(detailWidgetState.height).thenReturn(10)
+        whenever(detailWidgetState.alpha).thenReturn(0F)
+        // control widgets occupy [150, 170]
+        whenever(controlWidgetState.y).thenReturn(150F)
+        whenever(controlWidgetState.height).thenReturn(20)
+        whenever(controlWidgetState.alpha).thenReturn(0F)
+        // Verify that alpha remains 0 throughout squishing
+        mediaViewController.squishViewState(mockViewState, 181.4F / 200F)
+        verify(controlWidgetState, never()).alpha = floatThat { it > 0 }
+        verify(detailWidgetState, never()).alpha = floatThat { it > 0 }
+        mediaViewController.squishViewState(mockViewState, 200F / 200F)
+        verify(controlWidgetState, never()).alpha = floatThat { it > 0 }
+        verify(detailWidgetState, never()).alpha = floatThat { it > 0 }
     }
 
     @Test
@@ -210,12 +241,15 @@ class MediaViewControllerTest : SysuiTestCase() {
         // media container widgets occupy [20, 300]
         whenever(mediaContainerWidgetState.y).thenReturn(20F)
         whenever(mediaContainerWidgetState.height).thenReturn(280)
+        whenever(mediaContainerWidgetState.alpha).thenReturn(1F)
         // media title widgets occupy [320, 330]
         whenever(mediaTitleWidgetState.y).thenReturn(320F)
         whenever(mediaTitleWidgetState.height).thenReturn(10)
+        whenever(mediaTitleWidgetState.alpha).thenReturn(1F)
         // media subtitle widgets occupy [340, 350]
         whenever(mediaSubTitleWidgetState.y).thenReturn(340F)
         whenever(mediaSubTitleWidgetState.height).thenReturn(10)
+        whenever(mediaSubTitleWidgetState.alpha).thenReturn(1F)
 
         // in current beizer, when the progress reach 0.38, the result will be 0.5
         mediaViewController.squishViewState(mockViewState, 307.6F / 360F)

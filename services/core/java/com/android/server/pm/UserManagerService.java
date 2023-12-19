@@ -7237,7 +7237,8 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public boolean isUserInitialized(@UserIdInt int userId) {
-            return (getUserInfo(userId).flags & UserInfo.FLAG_INITIALIZED) != 0;
+            final UserInfo userInfo = getUserInfo(userId);
+            return userInfo != null && (userInfo.flags & UserInfo.FLAG_INITIALIZED) != 0;
         }
 
         @Override

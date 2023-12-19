@@ -29,8 +29,10 @@ interface InsetsControlTarget {
 
     /**
      * Notifies the control target that the insets control has changed.
+     *
+     * @param displayId the display hosting the window of this target
      */
-    default void notifyInsetsControlChanged() {
+    default void notifyInsetsControlChanged(int displayId) {
     };
 
     /**

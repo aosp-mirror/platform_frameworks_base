@@ -54,8 +54,13 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler;
+import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder;
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.log.BouncerLogger;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -64,6 +69,7 @@ import com.android.systemui.statusbar.NotificationInsetsController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.gesture.TapGestureDetector;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
@@ -76,13 +82,18 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.SystemClock;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Controller for {@link NotificationShadeWindowView}.
@@ -149,6 +160,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             };
     private final SystemClock mClock;
 
+    @ExperimentalCoroutinesApi
     @Inject
     public NotificationShadeWindowViewController(
             LockscreenShadeTransitionController transitionController,
@@ -190,7 +202,13 @@ public class NotificationShadeWindowViewController implements Dumpable {
             QuickSettingsController quickSettingsController,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            SelectedUserInteractor selectedUserInteractor) {
+            SelectedUserInteractor selectedUserInteractor,
+            Lazy<JavaAdapter> javaAdapter,
+            Lazy<AlternateBouncerViewModel> alternateBouncerViewModel,
+            Lazy<FalsingManager> falsingManager,
+            Lazy<SwipeUpAnywhereGestureHandler> swipeUpAnywhereGestureHandler,
+            Lazy<TapGestureDetector> tapGestureDetector,
+            Lazy<AlternateBouncerUdfpsIconViewModel> alternateBouncerUdfpsIconViewModel) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -234,6 +252,25 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 bouncerLogger,
                 featureFlagsClassic,
                 selectedUserInteractor);
+
+        if (DeviceEntryUdfpsRefactor.isEnabled()) {
+            AlternateBouncerViewBinder.bind(
+                    mView.findViewById(R.id.alternate_bouncer),
+                    alternateBouncerViewModel.get(),
+                    falsingManager.get(),
+                    swipeUpAnywhereGestureHandler.get(),
+                    tapGestureDetector.get(),
+                    alternateBouncerUdfpsIconViewModel.get()
+            );
+            javaAdapter.get().alwaysCollectFlow(
+                    alternateBouncerViewModel.get().getForcePluginOpen(),
+                    forcePluginOpen ->
+                            mNotificationShadeWindowController.setForcePluginOpen(
+                                    forcePluginOpen,
+                                    alternateBouncerViewModel.get()
+                            )
+            );
+        }
 
         collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
                 mLockscreenToDreamingTransition);

@@ -2395,7 +2395,19 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            return queryEventsHelper(UserHandle.getCallingUserId(), query.getBeginTimeMillis(),
+            final int callingUserId = UserHandle.getCallingUserId();
+            int userId = query.getUserId();
+            if (userId == UserHandle.USER_NULL) {
+                // Convert userId to actual user Id if not specified in the query object.
+                userId = callingUserId;
+            }
+            if (userId != callingUserId) {
+                getContext().enforceCallingPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        "No permission to query usage stats for user " + userId);
+            }
+
+            return queryEventsHelper(userId, query.getBeginTimeMillis(),
                     query.getEndTimeMillis(), callingPackage, query.getEventTypeFilter());
         }
 

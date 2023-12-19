@@ -82,7 +82,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
-import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -116,7 +115,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     private AmbientState mAmbientState;
     private TestableResources mTestableResources;
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
-    @Mock private NotificationsController mNotificationsController;
     @Mock private SysuiStatusBarStateController mBarState;
     @Mock private GroupMembershipManager mGroupMembershipManger;
     @Mock private GroupExpansionManager mGroupExpansionManager;
@@ -193,7 +191,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper,
                 mNotificationStackSizeCalculator);
         mStackScroller = spy(mStackScrollerInternal);
-        mStackScroller.setNotificationsController(mNotificationsController);
+        mStackScroller.setResetUserExpandedStatesRunnable(()->{});
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mStackScrollLayoutController.isHistoryEnabled()).thenReturn(true);
         when(mStackScrollLayoutController.getNotificationRoundnessManager())

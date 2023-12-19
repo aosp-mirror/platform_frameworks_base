@@ -108,6 +108,7 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
     private fun createUdpfsOverlayInteractor() {
         underTest =
             UdfpsOverlayInteractor(
+                context,
                 authController,
                 selectedUserInteractor,
                 testScope.backgroundScope

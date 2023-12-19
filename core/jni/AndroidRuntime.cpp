@@ -653,6 +653,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
             sizeof("-Xps-save-resolved-classes-delay-ms:")-1 + PROPERTY_VALUE_MAX];
     char profileMinSavePeriodOptsBuf[sizeof("-Xps-min-save-period-ms:")-1 + PROPERTY_VALUE_MAX];
     char profileMinFirstSaveOptsBuf[sizeof("-Xps-min-first-save-ms:") - 1 + PROPERTY_VALUE_MAX];
+    char profileInlineCacheThresholdOptsBuf[
+            sizeof("-Xps-inline-cache-threshold:") - 1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeVdex[
             sizeof("-XMadviseWillNeedVdexFileSize:")-1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeOdex[
@@ -897,6 +899,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
 
     parseRuntimeOption("dalvik.vm.ps-min-first-save-ms", profileMinFirstSaveOptsBuf,
             "-Xps-min-first-save-ms:");
+
+    parseRuntimeOption("dalvik.vm.ps-inline-cache-threshold", profileInlineCacheThresholdOptsBuf,
+            "-Xps-inline-cache-threshold:");
 
     property_get("ro.config.low_ram", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {

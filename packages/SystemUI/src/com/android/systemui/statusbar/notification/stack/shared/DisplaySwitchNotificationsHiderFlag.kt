@@ -17,12 +17,17 @@
 package com.android.systemui.statusbar.notification.stack.shared
 
 import com.android.systemui.Flags
+import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading or using the DisplaySwitchNotificationsHider flag state. */
 @Suppress("NOTHING_TO_INLINE")
 object DisplaySwitchNotificationsHiderFlag {
     const val FLAG_NAME = Flags.FLAG_NOTIFICATIONS_HIDE_ON_DISPLAY_SWITCH
+
+    /** A token used for dependency declaration */
+    val token: FlagToken
+        get() = FlagToken(FLAG_NAME, isEnabled)
 
     /** Is the hiding enabled? */
     @JvmStatic

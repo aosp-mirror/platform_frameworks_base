@@ -41,7 +41,7 @@ import org.mockito.junit.MockitoRule;
 
 @Presubmit
 @SmallTest
-public class AidlToHidlAdapterTest {
+public class HidlToAidlSessionAdapterTest {
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
@@ -54,11 +54,11 @@ public class AidlToHidlAdapterTest {
 
     private final long mChallenge = 100L;
     private final int mUserId = 0;
-    private AidlToHidlAdapter mAidlToHidlAdapter;
+    private HidlToAidlSessionAdapter mHidlToAidlSessionAdapter;
 
     @Before
     public void setUp() {
-        mAidlToHidlAdapter = new AidlToHidlAdapter(() -> mSession, mUserId,
+        mHidlToAidlSessionAdapter = new HidlToAidlSessionAdapter(() -> mSession, mUserId,
                 mAidlResponseHandler);
         mHardwareAuthToken.timestamp = new Timestamp();
         mHardwareAuthToken.mac = new byte[10];
@@ -67,7 +67,7 @@ public class AidlToHidlAdapterTest {
     @Test
     public void testGenerateChallenge() throws RemoteException {
         when(mSession.preEnroll()).thenReturn(mChallenge);
-        mAidlToHidlAdapter.generateChallenge();
+        mHidlToAidlSessionAdapter.generateChallenge();
 
         verify(mSession).preEnroll();
         verify(mAidlResponseHandler).onChallengeGenerated(mChallenge);
@@ -75,7 +75,7 @@ public class AidlToHidlAdapterTest {
 
     @Test
     public void testRevokeChallenge() throws RemoteException {
-        mAidlToHidlAdapter.revokeChallenge(mChallenge);
+        mHidlToAidlSessionAdapter.revokeChallenge(mChallenge);
 
         verify(mSession).postEnroll();
         verify(mAidlResponseHandler).onChallengeRevoked(0L);
@@ -84,9 +84,9 @@ public class AidlToHidlAdapterTest {
     @Test
     public void testEnroll() throws RemoteException {
         final ICancellationSignal cancellationSignal =
-                mAidlToHidlAdapter.enroll(mHardwareAuthToken);
+                mHidlToAidlSessionAdapter.enroll(mHardwareAuthToken);
 
-        verify(mSession).enroll(any(), anyInt(), eq(AidlToHidlAdapter.ENROLL_TIMEOUT_SEC));
+        verify(mSession).enroll(any(), anyInt(), eq(HidlToAidlSessionAdapter.ENROLL_TIMEOUT_SEC));
 
         cancellationSignal.cancel();
 
@@ -96,7 +96,8 @@ public class AidlToHidlAdapterTest {
     @Test
     public void testAuthenticate() throws RemoteException {
         final int operationId = 2;
-        final ICancellationSignal cancellationSignal = mAidlToHidlAdapter.authenticate(operationId);
+        final ICancellationSignal cancellationSignal = mHidlToAidlSessionAdapter.authenticate(
+                operationId);
 
         verify(mSession).authenticate(operationId, mUserId);
 
@@ -107,7 +108,8 @@ public class AidlToHidlAdapterTest {
 
     @Test
     public void testDetectInteraction() throws RemoteException {
-        final ICancellationSignal cancellationSignal = mAidlToHidlAdapter.detectInteraction();
+        final ICancellationSignal cancellationSignal = mHidlToAidlSessionAdapter
+                .detectInteraction();
 
         verify(mSession).authenticate(0 /* operationId */, mUserId);
 
@@ -118,7 +120,7 @@ public class AidlToHidlAdapterTest {
 
     @Test
     public void testEnumerateEnrollments() throws RemoteException {
-        mAidlToHidlAdapter.enumerateEnrollments();
+        mHidlToAidlSessionAdapter.enumerateEnrollments();
 
         verify(mSession).enumerate();
     }
@@ -126,7 +128,7 @@ public class AidlToHidlAdapterTest {
     @Test
     public void testRemoveEnrollment() throws RemoteException {
         final int[] enrollmentIds = new int[]{1};
-        mAidlToHidlAdapter.removeEnrollments(enrollmentIds);
+        mHidlToAidlSessionAdapter.removeEnrollments(enrollmentIds);
 
         verify(mSession).remove(mUserId, enrollmentIds[0]);
     }
@@ -134,14 +136,14 @@ public class AidlToHidlAdapterTest {
     @Test
     public void testRemoveMultipleEnrollments() throws RemoteException {
         final int[] enrollmentIds = new int[]{1, 2};
-        mAidlToHidlAdapter.removeEnrollments(enrollmentIds);
+        mHidlToAidlSessionAdapter.removeEnrollments(enrollmentIds);
 
         verify(mSession).remove(mUserId, 0);
     }
 
     @Test
     public void testResetLockout() throws RemoteException {
-        mAidlToHidlAdapter.resetLockout(mHardwareAuthToken);
+        mHidlToAidlSessionAdapter.resetLockout(mHardwareAuthToken);
 
         verify(mAidlResponseHandler).onLockoutCleared();
     }

@@ -13,15 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.hardware.face;
 
-package com.android.systemui.common.domain
-
-import com.android.systemui.common.domain.interactor.ConfigurationInteractor
-import com.android.systemui.common.domain.interactor.ConfigurationInteractorImpl
-import dagger.Binds
-import dagger.Module
-
-@Module
-abstract class CommonDomainLayerModule {
-    @Binds abstract fun bindInteractor(impl: ConfigurationInteractorImpl): ConfigurationInteractor
-}
+parcelable FaceSensorConfigurations;

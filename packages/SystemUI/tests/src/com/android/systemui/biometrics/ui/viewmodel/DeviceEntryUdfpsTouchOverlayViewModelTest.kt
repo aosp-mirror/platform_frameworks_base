@@ -18,6 +18,7 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -64,7 +65,8 @@ class DeviceEntryUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
     init {
         kosmos.deviceEntryIconViewModelTransitionsMock.add(testDeviceEntryIconTransition)
     }
-    val systemUIDialogManager = kosmos.systemUIDialogManager
+    private val systemUIDialogManager = kosmos.systemUIDialogManager
+    private val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
     private val underTest = kosmos.deviceEntryUdfpsTouchOverlayViewModel
 
     @Captor
@@ -114,6 +116,18 @@ class DeviceEntryUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
             verify(systemUIDialogManager).registerListener(sysuiDialogListenerCaptor.capture())
             sysuiDialogListenerCaptor.value.shouldHideAffordances(false)
 
+            assertThat(shouldHandleTouches).isTrue()
+        }
+
+    @Test
+    fun deviceEntryViewAlphaZero_alternateBouncerVisible_shouldHandleTouchesTrue() =
+        testScope.runTest {
+            val shouldHandleTouches by collectLastValue(underTest.shouldHandleTouches)
+
+            testDeviceEntryIconTransitionAlpha.value = 0f
+            runCurrent()
+
+            bouncerRepository.setAlternateVisible(true)
             assertThat(shouldHandleTouches).isTrue()
         }
 }
