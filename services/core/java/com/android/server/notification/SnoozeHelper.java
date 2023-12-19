@@ -350,11 +350,6 @@ public final class SnoozeHelper {
                 mPersistedSnoozedNotificationsWithContext.remove(trimmedKey);
                 mPersistedSnoozedNotifications.remove(trimmedKey);
 
-                final String trimmedKey = getTrimmedString(groupSummaryKey);
-                removeRecordLocked(pkg, trimmedKey, userId, mPersistedSnoozedNotifications);
-                removeRecordLocked(pkg, trimmedKey, userId,
-                      mPersistedSnoozedNotificationsWithContext);
-
                 if (record != null && !record.isCanceled) {
                     Runnable runnable = () -> {
                         MetricsLogger.action(record.getLogMaker()
