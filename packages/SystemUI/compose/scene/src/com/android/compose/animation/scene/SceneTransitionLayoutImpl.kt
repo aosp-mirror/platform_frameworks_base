@@ -20,14 +20,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.unit.Density
@@ -98,16 +95,6 @@ internal class SceneTransitionLayoutImpl(
             _sharedValues
                 ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>()
                     .also { _sharedValues = it }
-
-    /**
-     * The scenes that are "ready", i.e. they were composed and fully laid-out at least once.
-     *
-     * Note that this map is *read* during composition, so it is a [SnapshotStateMap] to make sure
-     * that we recompose when modifications are made to this map.
-     *
-     * TODO(b/316901148): Remove this map.
-     */
-    private val readyScenes = SnapshotStateMap<SceneKey, Boolean>()
 
     private val horizontalGestureHandler: SceneGestureHandler
     private val verticalGestureHandler: SceneGestureHandler
@@ -249,42 +236,12 @@ internal class SceneTransitionLayoutImpl(
                 Box {
                     scenesToCompose.fastForEach { scene ->
                         val key = scene.key
-                        key(key) {
-                            // Mark this scene as ready once it has been composed, laid out and
-                            // drawn the first time. We have to do this in a LaunchedEffect here
-                            // because DisposableEffect runs between composition and layout.
-                            LaunchedEffect(key) { readyScenes[key] = true }
-                            DisposableEffect(key) { onDispose { readyScenes.remove(key) } }
-
-                            scene.Content(
-                                Modifier.drawWithContent {
-                                    if (state.currentTransition == null) {
-                                        drawContent()
-                                    } else {
-                                        // Don't draw scenes that are not ready yet.
-                                        if (readyScenes.containsKey(key)) {
-                                            drawContent()
-                                        }
-                                    }
-                                }
-                            )
-                        }
+                        key(key) { scene.Content() }
                     }
                 }
             }
         }
     }
-
-    /**
-     * Return whether [transition] is ready, i.e. the elements of both scenes of the transition were
-     * laid out at least once.
-     */
-    internal fun isTransitionReady(transition: TransitionState.Transition): Boolean {
-        return readyScenes.containsKey(transition.fromScene) &&
-            readyScenes.containsKey(transition.toScene)
-    }
-
-    internal fun isSceneReady(scene: SceneKey): Boolean = readyScenes.containsKey(scene)
 
     internal fun setScenesTargetSizeForTest(size: IntSize) {
         scenes.values.forEach { it.targetSize = size }
