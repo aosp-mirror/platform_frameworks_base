@@ -22,8 +22,9 @@ import android.os.Bundle;
 import android.surfacecomposition.SurfaceCompositionMeasuringActivity.AllocationScore;
 import android.surfacecomposition.SurfaceCompositionMeasuringActivity.CompositorScore;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
+
+import androidx.test.filters.SmallTest;
 
 public class SurfaceCompositionTest extends
         ActivityInstrumentationTestCase2<SurfaceCompositionMeasuringActivity> {
