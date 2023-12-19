@@ -18,14 +18,16 @@ package com.android.systemui.deviceentry.data.ui.viewmodel
 
 import com.android.systemui.accessibility.domain.interactor.accessibilityInteractor
 import com.android.systemui.biometrics.domain.interactor.udfpsOverlayInteractor
-import com.android.systemui.deviceentry.ui.viewmodel.UdfpsAccessibilityOverlayViewModel
+import com.android.systemui.deviceentry.ui.viewmodel.DeviceEntryUdfpsAccessibilityOverlayViewModel
 import com.android.systemui.keyguard.ui.viewmodel.deviceEntryForegroundIconViewModel
 import com.android.systemui.keyguard.ui.viewmodel.deviceEntryIconViewModel
 import com.android.systemui.kosmos.Kosmos
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.udfpsAccessibilityOverlayViewModel by
+@ExperimentalCoroutinesApi
+val Kosmos.deviceEntryUdfpsAccessibilityOverlayViewModel by
     Kosmos.Fixture {
-        UdfpsAccessibilityOverlayViewModel(
+        DeviceEntryUdfpsAccessibilityOverlayViewModel(
             udfpsOverlayInteractor = udfpsOverlayInteractor,
             accessibilityInteractor = accessibilityInteractor,
             deviceEntryIconViewModel = deviceEntryIconViewModel,

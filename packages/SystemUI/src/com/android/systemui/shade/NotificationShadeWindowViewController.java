@@ -54,13 +54,10 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler;
 import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder;
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel;
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.log.BouncerLogger;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -69,7 +66,6 @@ import com.android.systemui.statusbar.NotificationInsetsController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
-import com.android.systemui.statusbar.gesture.TapGestureDetector;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
@@ -204,11 +200,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             AlternateBouncerInteractor alternateBouncerInteractor,
             SelectedUserInteractor selectedUserInteractor,
             Lazy<JavaAdapter> javaAdapter,
-            Lazy<AlternateBouncerViewModel> alternateBouncerViewModel,
-            Lazy<FalsingManager> falsingManager,
-            Lazy<SwipeUpAnywhereGestureHandler> swipeUpAnywhereGestureHandler,
-            Lazy<TapGestureDetector> tapGestureDetector,
-            Lazy<AlternateBouncerUdfpsIconViewModel> alternateBouncerUdfpsIconViewModel) {
+            Lazy<AlternateBouncerDependencies> alternateBouncerDependencies) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -255,18 +247,16 @@ public class NotificationShadeWindowViewController implements Dumpable {
         if (DeviceEntryUdfpsRefactor.isEnabled()) {
             AlternateBouncerViewBinder.bind(
                     mView.findViewById(R.id.alternate_bouncer),
-                    alternateBouncerViewModel.get(),
-                    falsingManager.get(),
-                    swipeUpAnywhereGestureHandler.get(),
-                    tapGestureDetector.get(),
-                    alternateBouncerUdfpsIconViewModel.get()
+                    alternateBouncerDependencies.get()
             );
             javaAdapter.get().alwaysCollectFlow(
-                    alternateBouncerViewModel.get().getForcePluginOpen(),
-                    forcePluginOpen ->
+                    alternateBouncerDependencies.get().getViewModel()
+                            .getForcePluginOpen(),
+                        forcePluginOpen ->
                             mNotificationShadeWindowController.setForcePluginOpen(
                                     forcePluginOpen,
-                                    alternateBouncerViewModel.get()
+                                    alternateBouncerDependencies.get()
+                                            .getViewModel()
                             )
             );
         }

@@ -23,47 +23,32 @@ import com.android.systemui.accessibility.domain.interactor.AccessibilityInterac
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
-import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
-import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
-import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 
 /** Models the UI state for the UDFPS accessibility overlay */
 @ExperimentalCoroutinesApi
-class UdfpsAccessibilityOverlayViewModel
-@Inject
-constructor(
+abstract class UdfpsAccessibilityOverlayViewModel(
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
     accessibilityInteractor: AccessibilityInteractor,
-    deviceEntryIconViewModel: DeviceEntryIconViewModel,
-    deviceEntryFgIconViewModel: DeviceEntryForegroundViewModel,
 ) {
     private val udfpsUtils = UdfpsUtils()
     private val udfpsOverlayParams: StateFlow<UdfpsOverlayParams> =
         udfpsOverlayInteractor.udfpsOverlayParams
 
-    /** Overlay is only visible if touch exploration is enabled and UDFPS can be used. */
     val visible: Flow<Boolean> =
         accessibilityInteractor.isTouchExplorationEnabled.flatMapLatest { touchExplorationEnabled ->
             if (touchExplorationEnabled) {
-                combine(
-                    deviceEntryFgIconViewModel.viewModel,
-                    deviceEntryIconViewModel.deviceEntryViewAlpha,
-                ) { iconViewModel, alpha ->
-                    iconViewModel.type == DeviceEntryIconView.IconType.FINGERPRINT &&
-                        !iconViewModel.useAodVariant &&
-                        alpha == 1f
-                }
+                isVisibleWhenTouchExplorationEnabled()
             } else {
                 flowOf(false)
             }
         }
+
+    abstract fun isVisibleWhenTouchExplorationEnabled(): Flow<Boolean>
 
     /** Give directional feedback to help the user authenticate with UDFPS. */
     fun onHoverEvent(v: View, event: MotionEvent): Boolean {
