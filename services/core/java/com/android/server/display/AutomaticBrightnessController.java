@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.config.DisplayBrightnessMappingConfig.autoBrightnessModeToString;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -72,12 +74,14 @@ public class AutomaticBrightnessController {
     @IntDef(prefix = { "AUTO_BRIGHTNESS_MODE_" }, value = {
             AUTO_BRIGHTNESS_MODE_DEFAULT,
             AUTO_BRIGHTNESS_MODE_IDLE,
+            AUTO_BRIGHTNESS_MODE_DOZE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutomaticBrightnessMode{}
 
     public static final int AUTO_BRIGHTNESS_MODE_DEFAULT = 0;
     public static final int AUTO_BRIGHTNESS_MODE_IDLE = 1;
+    public static final int AUTO_BRIGHTNESS_MODE_DOZE = 2;
 
     // How long the current sensor reading is assumed to be valid beyond the current time.
     // This provides a bit of prediction, as well as ensures that the weight for the last sample is
@@ -616,12 +620,13 @@ public class AutomaticBrightnessController {
         pw.println("  mPendingForegroundAppPackageName=" + mPendingForegroundAppPackageName);
         pw.println("  mForegroundAppCategory=" + mForegroundAppCategory);
         pw.println("  mPendingForegroundAppCategory=" + mPendingForegroundAppCategory);
-        pw.println("  Current mode=" + mCurrentBrightnessMapper.getMode());
+        pw.println("  Current mode="
+                + autoBrightnessModeToString(mCurrentBrightnessMapper.getMode()));
 
         pw.println();
         for (int i = 0; i < mBrightnessMappingStrategyMap.size(); i++) {
-            pw.println("  Mapper for mode " + modeToString(mBrightnessMappingStrategyMap.keyAt(i))
-                    + "=");
+            pw.println("  Mapper for mode "
+                    + autoBrightnessModeToString(mBrightnessMappingStrategyMap.keyAt(i)) + "=");
             mBrightnessMappingStrategyMap.valueAt(i).dump(pw,
                     mBrightnessRangeController.getNormalBrightnessMax());
         }
@@ -1222,14 +1227,6 @@ public class AutomaticBrightnessController {
         if (applyAdjustment) {
             setScreenBrightnessByUser(getAutomaticScreenBrightness());
         }
-    }
-
-    private String modeToString(@AutomaticBrightnessMode int mode) {
-        return switch (mode) {
-            case AUTO_BRIGHTNESS_MODE_DEFAULT -> "default";
-            case AUTO_BRIGHTNESS_MODE_IDLE -> "idle";
-            default -> Integer.toString(mode);
-        };
     }
 
     private class ShortTermModel {
