@@ -23,10 +23,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
 import android.companion.virtual.camera.VirtualCameraCallback;
 import android.companion.virtual.camera.VirtualCameraConfig;
-import android.companion.virtual.camera.VirtualCameraStreamConfig;
 import android.companion.virtualcamera.IVirtualCameraService;
 import android.companion.virtualcamera.VirtualCameraConfiguration;
 import android.graphics.ImageFormat;
@@ -36,7 +34,6 @@ import android.os.Looper;
 import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.Surface;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,14 +53,21 @@ public class VirtualCameraControllerTest {
     private static final String CAMERA_NAME_1 = "Virtual camera 1";
     private static final int CAMERA_WIDTH_1 = 100;
     private static final int CAMERA_HEIGHT_1 = 200;
+    private static final int CAMERA_MAX_FPS_1 = 30;
+    private static final int CAMERA_SENSOR_ORIENTATION_1 = VirtualCameraConfig.SENSOR_ORIENTATION_0;
 
     private static final String CAMERA_NAME_2 = "Virtual camera 2";
     private static final int CAMERA_WIDTH_2 = 400;
     private static final int CAMERA_HEIGHT_2 = 600;
+    private static final int CAMERA_MAX_FPS_2 = 60;
+    private static final int CAMERA_SENSOR_ORIENTATION_2 =
+            VirtualCameraConfig.SENSOR_ORIENTATION_90;
     private static final int CAMERA_FORMAT = ImageFormat.YUV_420_888;
 
     @Mock
     private IVirtualCameraService mVirtualCameraServiceMock;
+    @Mock
+    private VirtualCameraCallback mVirtualCameraCallbackMock;
 
     private VirtualCameraController mVirtualCameraController;
     private final HandlerExecutor mCallbackHandler =
@@ -84,7 +88,8 @@ public class VirtualCameraControllerTest {
     @Test
     public void registerCamera_registersCamera() throws Exception {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_NAME_1));
+                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_MAX_FPS_1, CAMERA_NAME_1,
+                CAMERA_SENSOR_ORIENTATION_1));
 
         ArgumentCaptor<VirtualCameraConfiguration> configurationCaptor =
                 ArgumentCaptor.forClass(VirtualCameraConfiguration.class);
@@ -92,13 +97,14 @@ public class VirtualCameraControllerTest {
         VirtualCameraConfiguration virtualCameraConfiguration = configurationCaptor.getValue();
         assertThat(virtualCameraConfiguration.supportedStreamConfigs.length).isEqualTo(1);
         assertVirtualCameraConfiguration(virtualCameraConfiguration, CAMERA_WIDTH_1,
-                CAMERA_HEIGHT_1, CAMERA_FORMAT);
+                CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_MAX_FPS_1, CAMERA_SENSOR_ORIENTATION_1);
     }
 
     @Test
     public void unregisterCamera_unregistersCamera() throws Exception {
         VirtualCameraConfig config = createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_NAME_1);
+                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_MAX_FPS_1, CAMERA_NAME_1,
+                CAMERA_SENSOR_ORIENTATION_1);
         mVirtualCameraController.registerCamera(config);
 
         mVirtualCameraController.unregisterCamera(config);
@@ -109,9 +115,11 @@ public class VirtualCameraControllerTest {
     @Test
     public void close_unregistersAllCameras() throws Exception {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_NAME_1));
+                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_MAX_FPS_1, CAMERA_NAME_1,
+                CAMERA_SENSOR_ORIENTATION_1));
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT, CAMERA_NAME_2));
+                CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT, CAMERA_MAX_FPS_2, CAMERA_NAME_2,
+                CAMERA_SENSOR_ORIENTATION_2));
 
         mVirtualCameraController.close();
 
@@ -123,38 +131,29 @@ public class VirtualCameraControllerTest {
                 configurationCaptor.getAllValues();
         assertThat(virtualCameraConfigurations).hasSize(2);
         assertVirtualCameraConfiguration(virtualCameraConfigurations.get(0), CAMERA_WIDTH_1,
-                CAMERA_HEIGHT_1, CAMERA_FORMAT);
+                CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_MAX_FPS_1, CAMERA_SENSOR_ORIENTATION_1);
         assertVirtualCameraConfiguration(virtualCameraConfigurations.get(1), CAMERA_WIDTH_2,
-                CAMERA_HEIGHT_2, CAMERA_FORMAT);
+                CAMERA_HEIGHT_2, CAMERA_FORMAT, CAMERA_MAX_FPS_2, CAMERA_SENSOR_ORIENTATION_2);
     }
 
     private VirtualCameraConfig createVirtualCameraConfig(
-            int width, int height, int format, String displayName) {
+            int width, int height, int format, int maximumFramesPerSecond,
+            String name, int sensorOrientation) {
         return new VirtualCameraConfig.Builder()
-                .addStreamConfig(width, height, format)
-                .setName(displayName)
-                .setVirtualCameraCallback(mCallbackHandler, createNoOpCallback())
+                .addStreamConfig(width, height, format, maximumFramesPerSecond)
+                .setName(name)
+                .setVirtualCameraCallback(mCallbackHandler, mVirtualCameraCallbackMock)
+                .setSensorOrientation(sensorOrientation)
                 .build();
     }
 
     private static void assertVirtualCameraConfiguration(
-            VirtualCameraConfiguration configuration, int width, int height, int format) {
+            VirtualCameraConfiguration configuration, int width, int height, int format,
+            int maxFps, int sensorOrientation) {
         assertThat(configuration.supportedStreamConfigs[0].width).isEqualTo(width);
         assertThat(configuration.supportedStreamConfigs[0].height).isEqualTo(height);
         assertThat(configuration.supportedStreamConfigs[0].pixelFormat).isEqualTo(format);
-    }
-
-    private static VirtualCameraCallback createNoOpCallback() {
-        return new VirtualCameraCallback() {
-
-            @Override
-            public void onStreamConfigured(
-                    int streamId,
-                    @NonNull Surface surface,
-                    @NonNull VirtualCameraStreamConfig streamConfig) {}
-
-            @Override
-            public void onStreamClosed(int streamId) {}
-        };
+        assertThat(configuration.supportedStreamConfigs[0].maxFps).isEqualTo(maxFps);
+        assertThat(configuration.sensorOrientation).isEqualTo(sensorOrientation);
     }
 }

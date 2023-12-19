@@ -3356,30 +3356,36 @@ package android.companion.virtual.camera {
   @FlaggedApi("android.companion.virtual.flags.virtual_camera") public interface VirtualCameraCallback {
     method public default void onProcessCaptureRequest(int, long);
     method public void onStreamClosed(int);
-    method public void onStreamConfigured(int, @NonNull android.view.Surface, @NonNull android.companion.virtual.camera.VirtualCameraStreamConfig);
+    method public void onStreamConfigured(int, @NonNull android.view.Surface, @IntRange(from=1) int, @IntRange(from=1) int, int);
   }
 
   @FlaggedApi("android.companion.virtual.flags.virtual_camera") public final class VirtualCameraConfig implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public String getName();
+    method public int getSensorOrientation();
     method @NonNull public java.util.Set<android.companion.virtual.camera.VirtualCameraStreamConfig> getStreamConfigs();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.camera.VirtualCameraConfig> CREATOR;
+    field public static final int SENSOR_ORIENTATION_0 = 0; // 0x0
+    field public static final int SENSOR_ORIENTATION_180 = 180; // 0xb4
+    field public static final int SENSOR_ORIENTATION_270 = 270; // 0x10e
+    field public static final int SENSOR_ORIENTATION_90 = 90; // 0x5a
   }
 
   @FlaggedApi("android.companion.virtual.flags.virtual_camera") public static final class VirtualCameraConfig.Builder {
     ctor public VirtualCameraConfig.Builder();
-    method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder addStreamConfig(int, int, int);
+    method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder addStreamConfig(@IntRange(from=1) int, @IntRange(from=1) int, int, @IntRange(from=1) int);
     method @NonNull public android.companion.virtual.camera.VirtualCameraConfig build();
     method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder setName(@NonNull String);
+    method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder setSensorOrientation(int);
     method @NonNull public android.companion.virtual.camera.VirtualCameraConfig.Builder setVirtualCameraCallback(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.camera.VirtualCameraCallback);
   }
 
   @FlaggedApi("android.companion.virtual.flags.virtual_camera") public final class VirtualCameraStreamConfig implements android.os.Parcelable {
-    ctor public VirtualCameraStreamConfig(@IntRange(from=1) int, @IntRange(from=1) int, int);
     method public int describeContents();
     method public int getFormat();
     method @IntRange(from=1) public int getHeight();
+    method @IntRange(from=1) public int getMaximumFramesPerSecond();
     method @IntRange(from=1) public int getWidth();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.camera.VirtualCameraStreamConfig> CREATOR;
