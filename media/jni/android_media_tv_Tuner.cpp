@@ -3696,7 +3696,7 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
                     "([Landroid/media/tv/tuner/filter/FilterEvent;)V");
 
     jclass sharedFilterClazz = env->FindClass("android/media/tv/tuner/filter/SharedFilter");
-    gFields.sharedFilterContext = env->GetFieldID(filterClazz, "mNativeContext", "J");
+    gFields.sharedFilterContext = env->GetFieldID(sharedFilterClazz, "mNativeContext", "J");
     gFields.sharedFilterInitID = env->GetMethodID(sharedFilterClazz, "<init>", "()V");
     gFields.onSharedFilterStatusID = env->GetMethodID(sharedFilterClazz, "onFilterStatus", "(I)V");
     gFields.onSharedFilterEventID =
