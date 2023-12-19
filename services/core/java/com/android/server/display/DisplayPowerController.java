@@ -735,7 +735,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mCdsi = null;
         }
 
-        setUpAutoBrightness(resources, handler);
+        setUpAutoBrightness(context, handler);
 
         mColorFadeEnabled = !ActivityManager.isLowRamDeviceStatic()
                 && !resources.getBoolean(
@@ -1075,7 +1075,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         loadBrightnessRampRates();
         loadProximitySensor();
         loadNitsRange(mContext.getResources());
-        setUpAutoBrightness(mContext.getResources(), mHandler);
+        setUpAutoBrightness(mContext, mHandler);
         reloadReduceBrightColours();
         setAnimatorRampSpeeds(/* isIdleMode= */ false);
         mBrightnessRangeController.loadFromConfig(hbmMetadata, token, info, mDisplayDeviceConfig);
@@ -1145,7 +1145,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         handleBrightnessModeChange();
     }
 
-    private void setUpAutoBrightness(Resources resources, Handler handler) {
+    private void setUpAutoBrightness(Context context, Handler handler) {
         mUseSoftwareAutoBrightnessConfig = mDisplayDeviceConfig.isAutoBrightnessAvailable();
 
         if (!mUseSoftwareAutoBrightnessConfig) {
@@ -1155,21 +1155,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         SparseArray<BrightnessMappingStrategy> brightnessMappers = new SparseArray<>();
 
         BrightnessMappingStrategy defaultModeBrightnessMapper =
-                mInjector.getDefaultModeBrightnessMapper(resources, mDisplayDeviceConfig,
+                mInjector.getDefaultModeBrightnessMapper(context, mDisplayDeviceConfig,
                         mDisplayWhiteBalanceController);
         brightnessMappers.append(AUTO_BRIGHTNESS_MODE_DEFAULT,
                 defaultModeBrightnessMapper);
 
-        final boolean isIdleScreenBrightnessEnabled = resources.getBoolean(
+        final boolean isIdleScreenBrightnessEnabled = context.getResources().getBoolean(
                 R.bool.config_enableIdleScreenBrightnessMode);
         if (isIdleScreenBrightnessEnabled) {
             BrightnessMappingStrategy idleModeBrightnessMapper =
-                    BrightnessMappingStrategy.create(resources, mDisplayDeviceConfig,
-                            AUTO_BRIGHTNESS_MODE_IDLE,
-                            mDisplayWhiteBalanceController);
+                    BrightnessMappingStrategy.create(context, mDisplayDeviceConfig,
+                            AUTO_BRIGHTNESS_MODE_IDLE, mDisplayWhiteBalanceController);
             if (idleModeBrightnessMapper != null) {
-                brightnessMappers.append(AUTO_BRIGHTNESS_MODE_IDLE,
-                        idleModeBrightnessMapper);
+                brightnessMappers.append(AUTO_BRIGHTNESS_MODE_IDLE, idleModeBrightnessMapper);
             }
         }
 
@@ -1181,7 +1179,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         if (defaultModeBrightnessMapper != null) {
-            final float dozeScaleFactor = resources.getFraction(
+            final float dozeScaleFactor = context.getResources().getFraction(
                     com.android.internal.R.fraction.config_screenAutoBrightnessDozeScaleFactor,
                     1, 1);
 
@@ -1265,14 +1263,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     .getAutoBrightnessBrighteningLightDebounceIdle();
             long darkeningLightDebounceIdle = mDisplayDeviceConfig
                     .getAutoBrightnessDarkeningLightDebounceIdle();
-            boolean autoBrightnessResetAmbientLuxAfterWarmUp = resources.getBoolean(
+            boolean autoBrightnessResetAmbientLuxAfterWarmUp = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_autoBrightnessResetAmbientLuxAfterWarmUp);
 
-            int lightSensorWarmUpTimeConfig = resources.getInteger(
+            int lightSensorWarmUpTimeConfig = context.getResources().getInteger(
                     com.android.internal.R.integer.config_lightSensorWarmupTime);
-            int lightSensorRate = resources.getInteger(
+            int lightSensorRate = context.getResources().getInteger(
                     com.android.internal.R.integer.config_autoBrightnessLightSensorRate);
-            int initialLightSensorRate = resources.getInteger(
+            int initialLightSensorRate = context.getResources().getInteger(
                     com.android.internal.R.integer.config_autoBrightnessInitialLightSensorRate);
             if (initialLightSensorRate == -1) {
                 initialLightSensorRate = lightSensorRate;
@@ -3645,12 +3643,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     userNits);
         }
 
-        BrightnessMappingStrategy getDefaultModeBrightnessMapper(Resources resources,
+        BrightnessMappingStrategy getDefaultModeBrightnessMapper(Context context,
                 DisplayDeviceConfig displayDeviceConfig,
                 DisplayWhiteBalanceController displayWhiteBalanceController) {
-            return BrightnessMappingStrategy.create(resources,
-                    displayDeviceConfig, AUTO_BRIGHTNESS_MODE_DEFAULT,
-                    displayWhiteBalanceController);
+            return BrightnessMappingStrategy.create(context, displayDeviceConfig,
+                    AUTO_BRIGHTNESS_MODE_DEFAULT, displayWhiteBalanceController);
         }
 
         HysteresisLevels getHysteresisLevels(float[] brighteningThresholdsPercentages,

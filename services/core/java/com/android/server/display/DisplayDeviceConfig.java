@@ -1592,24 +1592,13 @@ public class DisplayDeviceConfig {
 
     /**
      * @param mode The auto-brightness mode
-     * @return The default auto-brightness brightening ambient lux levels for the specified mode
-     * and the normal brightness preset
-     */
-    public float[] getAutoBrightnessBrighteningLevelsLux(
-            @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
-        if (mDisplayBrightnessMapping == null) {
-            return null;
-        }
-        return mDisplayBrightnessMapping.getLuxArray(mode);
-    }
-
-    /**
-     * @param mode The auto-brightness mode
      * @param preset The brightness preset. Presets are used on devices that allow users to choose
      *               from a set of predefined options in display auto-brightness settings.
-     * @return Auto brightness brightening ambient lux levels for the specified mode and preset
+     * @return The default auto-brightness brightening ambient lux levels for the specified mode
+     * and preset
      */
-    public float[] getAutoBrightnessBrighteningLevelsLux(String mode, String preset) {
+    public float[] getAutoBrightnessBrighteningLevelsLux(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode, int preset) {
         if (mDisplayBrightnessMapping == null) {
             return null;
         }
@@ -1628,24 +1617,12 @@ public class DisplayDeviceConfig {
 
     /**
      * @param mode The auto-brightness mode
-     * @return The default auto-brightness brightening levels for the specified mode and the normal
-     * brightness preset
-     */
-    public float[] getAutoBrightnessBrighteningLevels(
-            @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
-        if (mDisplayBrightnessMapping == null) {
-            return null;
-        }
-        return mDisplayBrightnessMapping.getBrightnessArray(mode);
-    }
-
-    /**
-     * @param mode The auto-brightness mode
      * @param preset The brightness preset. Presets are used on devices that allow users to choose
      *               from a set of predefined options in display auto-brightness settings.
-     * @return Auto brightness brightening backlight levels for the specified mode and preset
+     * @return The default auto-brightness brightening levels for the specified mode and preset
      */
-    public float[] getAutoBrightnessBrighteningLevels(String mode, String preset) {
+    public float[] getAutoBrightnessBrighteningLevels(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode, int preset) {
         if (mDisplayBrightnessMapping == null) {
             return null;
         }

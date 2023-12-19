@@ -19,6 +19,7 @@ package com.android.server.display;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
+import static com.android.server.display.config.DisplayBrightnessMappingConfig.autoBrightnessPresetToString;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -624,7 +625,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             mCdsi = null;
         }
 
-        setUpAutoBrightness(resources, handler);
+        setUpAutoBrightness(context, handler);
 
         mColorFadeEnabled = mInjector.isColorFadeEnabled()
                 && !resources.getBoolean(
@@ -905,7 +906,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // updated here.
         loadBrightnessRampRates();
         loadNitsRange(mContext.getResources());
-        setUpAutoBrightness(mContext.getResources(), mHandler);
+        setUpAutoBrightness(mContext, mHandler);
         reloadReduceBrightColours();
         setAnimatorRampSpeeds(/* isIdleMode= */ false);
 
@@ -976,10 +977,15 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_MODE),
                 false /*notifyForDescendants*/, mSettingsObserver, UserHandle.USER_ALL);
+        if (mFlags.areAutoBrightnessModesEnabled()) {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_FOR_ALS),
+                    /* notifyForDescendants= */ false, mSettingsObserver, UserHandle.USER_CURRENT);
+        }
         handleBrightnessModeChange();
     }
 
-    private void setUpAutoBrightness(Resources resources, Handler handler) {
+    private void setUpAutoBrightness(Context context, Handler handler) {
         mUseSoftwareAutoBrightnessConfig = mDisplayDeviceConfig.isAutoBrightnessAvailable();
 
         if (!mUseSoftwareAutoBrightnessConfig) {
@@ -989,16 +995,16 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         SparseArray<BrightnessMappingStrategy> brightnessMappers = new SparseArray<>();
 
         BrightnessMappingStrategy defaultModeBrightnessMapper =
-                mInjector.getDefaultModeBrightnessMapper(resources, mDisplayDeviceConfig,
+                mInjector.getDefaultModeBrightnessMapper(context, mDisplayDeviceConfig,
                         mDisplayWhiteBalanceController);
         brightnessMappers.append(AUTO_BRIGHTNESS_MODE_DEFAULT,
                 defaultModeBrightnessMapper);
 
-        final boolean isIdleScreenBrightnessEnabled = resources.getBoolean(
+        final boolean isIdleScreenBrightnessEnabled = context.getResources().getBoolean(
                 R.bool.config_enableIdleScreenBrightnessMode);
         if (isIdleScreenBrightnessEnabled) {
             BrightnessMappingStrategy idleModeBrightnessMapper =
-                    BrightnessMappingStrategy.create(resources, mDisplayDeviceConfig,
+                    BrightnessMappingStrategy.create(context, mDisplayDeviceConfig,
                             AUTO_BRIGHTNESS_MODE_IDLE,
                             mDisplayWhiteBalanceController);
             if (idleModeBrightnessMapper != null) {
@@ -1008,7 +1014,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
 
         BrightnessMappingStrategy dozeModeBrightnessMapper =
-                BrightnessMappingStrategy.create(resources, mDisplayDeviceConfig,
+                BrightnessMappingStrategy.create(context, mDisplayDeviceConfig,
                         AUTO_BRIGHTNESS_MODE_DOZE, mDisplayWhiteBalanceController);
         if (mFlags.areAutoBrightnessModesEnabled() && dozeModeBrightnessMapper != null) {
             brightnessMappers.put(AUTO_BRIGHTNESS_MODE_DOZE, dozeModeBrightnessMapper);
@@ -1022,7 +1028,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
 
         if (defaultModeBrightnessMapper != null) {
-            final float dozeScaleFactor = resources.getFraction(
+            final float dozeScaleFactor = context.getResources().getFraction(
                     R.fraction.config_screenAutoBrightnessDozeScaleFactor,
                     1, 1);
 
@@ -1106,14 +1112,14 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     .getAutoBrightnessBrighteningLightDebounceIdle();
             long darkeningLightDebounceIdle = mDisplayDeviceConfig
                     .getAutoBrightnessDarkeningLightDebounceIdle();
-            boolean autoBrightnessResetAmbientLuxAfterWarmUp = resources.getBoolean(
+            boolean autoBrightnessResetAmbientLuxAfterWarmUp = context.getResources().getBoolean(
                     R.bool.config_autoBrightnessResetAmbientLuxAfterWarmUp);
 
-            int lightSensorWarmUpTimeConfig = resources.getInteger(
+            int lightSensorWarmUpTimeConfig = context.getResources().getInteger(
                     R.integer.config_lightSensorWarmupTime);
-            int lightSensorRate = resources.getInteger(
+            int lightSensorRate = context.getResources().getInteger(
                     R.integer.config_autoBrightnessLightSensorRate);
-            int initialLightSensorRate = resources.getInteger(
+            int initialLightSensorRate = context.getResources().getInteger(
                     R.integer.config_autoBrightnessInitialLightSensorRate);
             if (initialLightSensorRate == -1) {
                 initialLightSensorRate = lightSensorRate;
@@ -2999,6 +3005,16 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         public void onChange(boolean selfChange, Uri uri) {
             if (uri.equals(Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_MODE))) {
                 handleBrightnessModeChange();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.SCREEN_BRIGHTNESS_FOR_ALS))) {
+                int preset = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
+                        Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL,
+                        UserHandle.USER_CURRENT);
+                Slog.i(mTag, "Setting up auto-brightness for preset "
+                        + autoBrightnessPresetToString(preset));
+                setUpAutoBrightness(mContext, mHandler);
+                sendUpdatePowerState();
             } else {
                 handleSettingsChange(false /* userSwitch */);
             }
@@ -3117,12 +3133,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     userNits);
         }
 
-        BrightnessMappingStrategy getDefaultModeBrightnessMapper(Resources resources,
+        BrightnessMappingStrategy getDefaultModeBrightnessMapper(Context context,
                 DisplayDeviceConfig displayDeviceConfig,
                 DisplayWhiteBalanceController displayWhiteBalanceController) {
-            return BrightnessMappingStrategy.create(resources,
-                    displayDeviceConfig, AUTO_BRIGHTNESS_MODE_DEFAULT,
-                    displayWhiteBalanceController);
+            return BrightnessMappingStrategy.create(context, displayDeviceConfig,
+                    AUTO_BRIGHTNESS_MODE_DEFAULT, displayWhiteBalanceController);
         }
 
         HysteresisLevels getHysteresisLevels(float[] brighteningThresholdsPercentages,

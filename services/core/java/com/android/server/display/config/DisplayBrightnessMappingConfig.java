@@ -22,6 +22,7 @@ import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIG
 
 import android.content.Context;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Spline;
 
 import com.android.internal.display.BrightnessSynchronizer;
@@ -38,9 +39,9 @@ import java.util.Map;
  */
 public class DisplayBrightnessMappingConfig {
 
-    private static final String DEFAULT_BRIGHTNESS_PRESET_NAME = "normal";
     private static final String DEFAULT_BRIGHTNESS_MAPPING_KEY =
-            AutoBrightnessModeName._default.getRawName() + "_" + DEFAULT_BRIGHTNESS_PRESET_NAME;
+            AutoBrightnessModeName._default.getRawName() + "_"
+                    + AutoBrightnessSettingName.normal.getRawName();
 
     /**
      * Array of desired screen brightness in nits corresponding to the lux values
@@ -152,22 +153,15 @@ public class DisplayBrightnessMappingConfig {
 
     /**
      * @param mode The auto-brightness mode
-     * @return The default auto-brightness brightening ambient lux levels for the specified mode
-     * and the normal brightness preset
-     */
-    public float[] getLuxArray(@AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
-        return mBrightnessLevelsLuxMap.get(
-                autoBrightnessModeToString(mode) + "_" + DEFAULT_BRIGHTNESS_PRESET_NAME);
-    }
-
-    /**
-     * @param mode The auto-brightness mode
      * @param preset The brightness preset. Presets are used on devices that allow users to choose
      *               from a set of predefined options in display auto-brightness settings.
-     * @return Auto brightness brightening ambient lux levels for the specified mode and preset
+     * @return The default auto-brightness brightening ambient lux levels for the specified mode
+     * and preset
      */
-    public float[] getLuxArray(String mode, String preset) {
-        return mBrightnessLevelsLuxMap.get(mode + "_" + preset);
+    public float[] getLuxArray(@AutomaticBrightnessController.AutomaticBrightnessMode int mode,
+            int preset) {
+        return mBrightnessLevelsLuxMap.get(
+                autoBrightnessModeToString(mode) + "_" + autoBrightnessPresetToString(preset));
     }
 
     /**
@@ -179,23 +173,14 @@ public class DisplayBrightnessMappingConfig {
 
     /**
      * @param mode The auto-brightness mode
-     * @return The default auto-brightness brightening levels for the specified mode and the normal
-     * brightness preset
-     */
-    public float[] getBrightnessArray(
-            @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
-        return mBrightnessLevelsMap.get(
-                autoBrightnessModeToString(mode) + "_" + DEFAULT_BRIGHTNESS_PRESET_NAME);
-    }
-
-    /**
-     * @param mode The auto-brightness mode
      * @param preset The brightness preset. Presets are used on devices that allow users to choose
      *               from a set of predefined options in display auto-brightness settings.
-     * @return Auto brightness brightening ambient lux levels for the specified mode and preset
+     * @return The default auto-brightness brightening levels for the specified mode and preset
      */
-    public float[] getBrightnessArray(String mode, String preset) {
-        return mBrightnessLevelsMap.get(mode + "_" + preset);
+    public float[] getBrightnessArray(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode, int preset) {
+        return mBrightnessLevelsMap.get(
+                autoBrightnessModeToString(mode) + "_" + autoBrightnessPresetToString(preset));
     }
 
     @Override
@@ -245,6 +230,24 @@ public class DisplayBrightnessMappingConfig {
             }
             default -> throw new IllegalArgumentException("Unknown auto-brightness mode: " + mode);
         }
+    }
+
+    /**
+     * @param preset The brightness preset. Presets are used on devices that allow users to choose
+     *               from a set of predefined options in display auto-brightness settings.
+     * @return The string representing the preset
+     */
+    public static String autoBrightnessPresetToString(int preset) {
+        return switch (preset) {
+            case Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_DIM ->
+                    AutoBrightnessSettingName.dim.getRawName();
+            case Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL ->
+                    AutoBrightnessSettingName.normal.getRawName();
+            case Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_BRIGHT ->
+                    AutoBrightnessSettingName.bright.getRawName();
+            default -> throw new IllegalArgumentException(
+                    "Unknown auto-brightness preset value: " + preset);
+        };
     }
 
     private float[] brightnessArrayIntToFloat(int[] brightnessInt,
