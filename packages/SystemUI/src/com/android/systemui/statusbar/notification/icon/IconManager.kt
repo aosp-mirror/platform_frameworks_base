@@ -26,15 +26,15 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import com.android.app.tracing.traceSection
 import com.android.internal.statusbar.StatusBarIcon
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.app.tracing.traceSection
 import javax.inject.Inject
 
 /**
@@ -112,15 +112,6 @@ class IconManager @Inject constructor(
         aodIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
         aodIcon.setIncreasedSize(true)
 
-        // Construct the centered icon view.
-        val centeredIcon = if (entry.sbn.notification.isMediaNotification) {
-            iconBuilder.createIconView(entry).apply {
-                scaleType = ImageView.ScaleType.CENTER_INSIDE
-            }
-        } else {
-            null
-        }
-
         // Set the icon views' icons
         val (normalIconDescriptor, sensitiveIconDescriptor) = getIconDescriptors(entry)
 
@@ -128,10 +119,7 @@ class IconManager @Inject constructor(
             setIcon(entry, normalIconDescriptor, sbIcon)
             setIcon(entry, sensitiveIconDescriptor, shelfIcon)
             setIcon(entry, sensitiveIconDescriptor, aodIcon)
-            if (centeredIcon != null) {
-                setIcon(entry, normalIconDescriptor, centeredIcon)
-            }
-            entry.icons = IconPack.buildPack(sbIcon, shelfIcon, aodIcon, centeredIcon, entry.icons)
+            entry.icons = IconPack.buildPack(sbIcon, shelfIcon, aodIcon, entry.icons)
         } catch (e: InflationException) {
             entry.icons = IconPack.buildEmptyPack(entry.icons)
             throw e
@@ -153,24 +141,22 @@ class IconManager @Inject constructor(
         entry.icons.peopleAvatarDescriptor = null
 
         val (normalIconDescriptor, sensitiveIconDescriptor) = getIconDescriptors(entry)
+        val notificationContentDescription = entry.sbn.notification?.let {
+            iconBuilder.getIconContentDescription(it)
+        }
 
         entry.icons.statusBarIcon?.let {
-            it.notification = entry.sbn
+            it.setNotification(entry.sbn, notificationContentDescription)
             setIcon(entry, normalIconDescriptor, it)
         }
 
         entry.icons.shelfIcon?.let {
-            it.notification = entry.sbn
+            it.setNotification(entry.sbn, notificationContentDescription)
             setIcon(entry, normalIconDescriptor, it)
         }
 
         entry.icons.aodIcon?.let {
-            it.notification = entry.sbn
-            setIcon(entry, sensitiveIconDescriptor, it)
-        }
-
-        entry.icons.centeredIcon?.let {
-            it.notification = entry.sbn
+            it.setNotification(entry.sbn, notificationContentDescription)
             setIcon(entry, sensitiveIconDescriptor, it)
         }
     }

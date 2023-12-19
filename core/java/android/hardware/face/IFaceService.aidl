@@ -26,6 +26,7 @@ import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
 import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.FaceSensorConfigurations;
 import android.view.Surface;
 
 /**
@@ -166,6 +167,10 @@ interface IFaceService {
     // hidlSensors must be non-null and empty. See AuthService.java
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void registerAuthenticators(in List<FaceSensorPropertiesInternal> hidlSensors);
+
+    //Register all available face sensors.
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    void registerAuthenticatorsLegacy(in FaceSensorConfigurations faceSensorConfigurations);
 
     // Adds a callback which gets called when the service registers all of the face
     // authenticators. The callback is automatically removed after it's invoked.

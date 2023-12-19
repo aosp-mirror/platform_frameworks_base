@@ -128,6 +128,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             )
         udfpsOverlayInteractor =
             UdfpsOverlayInteractor(
+                context,
                 authController,
                 selectedUserInteractor,
                 testScope.backgroundScope

@@ -15,6 +15,8 @@
  */
 package com.android.systemui.keyguard.ui.transitions
 
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DozingToLockscreenTransitionViewModel
@@ -37,6 +39,18 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 @Module
 abstract class DeviceEntryIconTransitionModule {
+    @Binds
+    @IntoSet
+    abstract fun alternateBouncerToAod(
+        impl: AlternateBouncerToAodTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun alternateBouncerToGone(
+        impl: AlternateBouncerToGoneTransitionViewModel
+    ): DeviceEntryIconTransition
+
     @Binds
     @IntoSet
     abstract fun aodToLockscreen(

@@ -294,7 +294,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     static void suppressInsetsAnimation(InsetsControlTarget target) {
         spyOn(target);
-        Mockito.doNothing().when(target).notifyInsetsControlChanged();
+        Mockito.doNothing().when(target).notifyInsetsControlChanged(anyInt());
     }
 
     @After

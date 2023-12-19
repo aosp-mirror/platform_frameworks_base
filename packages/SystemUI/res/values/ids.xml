@@ -259,4 +259,7 @@
     <item type="id" name="device_entry_icon_view" />
     <item type="id" name="device_entry_icon_fg" />
     <item type="id" name="device_entry_icon_bg" />
+
+    <!--Id for the device-entry UDFPS icon that lives in the alternate bouncer. -->
+    <item type="id" name="alternate_bouncer_udfps_icon_view" />
 </resources>

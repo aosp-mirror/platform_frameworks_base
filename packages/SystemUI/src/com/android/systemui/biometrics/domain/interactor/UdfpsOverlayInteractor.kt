@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics.domain.interactor
 
+import android.content.Context
 import android.view.MotionEvent
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
@@ -23,12 +24,15 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business logic for interacting with the UDFPS overlay. */
@@ -36,10 +40,12 @@ import kotlinx.coroutines.flow.stateIn
 class UdfpsOverlayInteractor
 @Inject
 constructor(
+    @Application context: Context,
     private val authController: AuthController,
     private val selectedUserInteractor: SelectedUserInteractor,
     @Application scope: CoroutineScope
 ) {
+    private val iconSize: Int = context.resources.getDimensionPixelSize(R.dimen.udfps_icon_size)
 
     /** Whether a touch is within the under-display fingerprint sensor area */
     fun isTouchWithinUdfpsArea(ev: MotionEvent): Boolean {
@@ -69,6 +75,14 @@ constructor(
                 awaitClose { authController.removeCallback(callback) }
             }
             .stateIn(scope, started = SharingStarted.Eagerly, initialValue = UdfpsOverlayParams())
+
+    // Padding between the fingerprint icon and its bounding box in pixels.
+    val iconPadding: Flow<Int> =
+        udfpsOverlayParams.map { params ->
+            val sensorWidth = params.nativeSensorBounds.right - params.nativeSensorBounds.left
+            val nativePadding = (sensorWidth - iconSize) / 2
+            (nativePadding * params.scaleFactor).toInt()
+        }
 
     companion object {
         private const val TAG = "UdfpsOverlayInteractor"

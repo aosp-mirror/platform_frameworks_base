@@ -169,20 +169,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private final static int DEFAULT_BACKGROUND_FADE_DURATION_MS = 300;
 
     /**
-     * Makes navigation bar color transparent by default if the target SDK is
-     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    private static final long NAV_BAR_COLOR_DEFAULT_TRANSPARENT = 232195501L;
-
-    /**
      * Make app go edge-to-edge by default if the target SDK is
      * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    private static final long EDGE_TO_EDGE_BY_DEFAULT = 309578419;
+    private static final long ENFORCE_EDGE_TO_EDGE = 309578419;
 
     private static final int CUSTOM_TITLE_COMPATIBLE_FEATURES = DEFAULT_FEATURES |
             (1 << FEATURE_CUSTOM_TITLE) |
@@ -193,9 +185,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private static final Transition USE_DEFAULT_TRANSITION = new TransitionSet();
 
     /**
-     * Since which target SDK version this window should be edge-to-edge by default.
+     * Since which target SDK version this window is enforced to go edge-to-edge.
      */
-    private static final int DEFAULT_EDGE_TO_EDGE_SDK_VERSION =
+    private static final int ENFORCE_EDGE_TO_EDGE_SDK_VERSION =
             SystemProperties.getInt("persist.wm.debug.default_e2e_since_sdk", Integer.MAX_VALUE);
 
     /**
@@ -376,7 +368,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     boolean mDecorFitsSystemWindows = true;
 
     @VisibleForTesting
-    public final boolean mDefaultEdgeToEdge;
+    public final boolean mEdgeToEdgeEnforced;
 
     private final ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher;
 
@@ -396,11 +388,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(context);
         mAllowFloatingWindowsFillScreen = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowFloatingWindowsFillScreen);
-        mDefaultEdgeToEdge =
-                context.getApplicationInfo().targetSdkVersion >= DEFAULT_EDGE_TO_EDGE_SDK_VERSION
-                        || (CompatChanges.isChangeEnabled(EDGE_TO_EDGE_BY_DEFAULT)
-                                && Flags.edgeToEdgeByDefault());
-        if (mDefaultEdgeToEdge) {
+        mEdgeToEdgeEnforced =
+                context.getApplicationInfo().targetSdkVersion >= ENFORCE_EDGE_TO_EDGE_SDK_VERSION
+                        || (CompatChanges.isChangeEnabled(ENFORCE_EDGE_TO_EDGE)
+                                && Flags.enforceEdgeToEdge());
+        if (mEdgeToEdgeEnforced) {
             mDecorFitsSystemWindows = false;
         }
     }
@@ -2472,7 +2464,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR, flagsToUpdate);
             params.setFitInsetsSides(0);
             params.setFitInsetsTypes(0);
-            if (mDefaultEdgeToEdge) {
+            if (mEdgeToEdgeEnforced) {
                 params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
             }
         }
@@ -2562,7 +2554,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             final int statusBarColor = a.getColor(R.styleable.Window_statusBarColor,
                     statusBarDefaultColor);
 
-            mStatusBarColor = statusBarColor == statusBarDefaultColor && !mDefaultEdgeToEdge
+            mStatusBarColor = statusBarColor == statusBarDefaultColor && !mEdgeToEdgeEnforced
                     ? statusBarCompatibleColor
                     : statusBarColor;
         }
@@ -2574,9 +2566,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             mNavigationBarColor =
                     navBarColor == navBarDefaultColor
-                            && !mDefaultEdgeToEdge
-                            && !(CompatChanges.isChangeEnabled(NAV_BAR_COLOR_DEFAULT_TRANSPARENT)
-                                    && Flags.navBarTransparentByDefault())
+                            && !mEdgeToEdgeEnforced
                             && !context.getResources().getBoolean(
                                     R.bool.config_navBarDefaultTransparent)
                     ? navBarCompatibleColor

@@ -19,9 +19,11 @@ package android.app.usage;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.usage.UsageEvents.Event;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
@@ -40,11 +42,13 @@ public final class UsageEventsQuery implements Parcelable {
     private final @CurrentTimeMillisLong long mBeginTimeMillis;
     private final @CurrentTimeMillisLong long mEndTimeMillis;
     private final @Event.EventType int[] mEventTypes;
+    private final @UserIdInt int mUserId;
 
     private UsageEventsQuery(@NonNull Builder builder) {
         mBeginTimeMillis = builder.mBeginTimeMillis;
         mEndTimeMillis = builder.mEndTimeMillis;
         mEventTypes = ArrayUtils.convertToIntArray(builder.mEventTypes);
+        mUserId = builder.mUserId;
     }
 
     private UsageEventsQuery(Parcel in) {
@@ -53,6 +57,7 @@ public final class UsageEventsQuery implements Parcelable {
         int eventTypesLength = in.readInt();
         mEventTypes = new int[eventTypesLength];
         in.readIntArray(mEventTypes);
+        mUserId = in.readInt();
     }
 
     /**
@@ -87,6 +92,11 @@ public final class UsageEventsQuery implements Parcelable {
         return eventTypeSet;
     }
 
+    /** @hide */
+    public @UserIdInt int getUserId() {
+        return mUserId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -98,6 +108,7 @@ public final class UsageEventsQuery implements Parcelable {
         dest.writeLong(mEndTimeMillis);
         dest.writeInt(mEventTypes.length);
         dest.writeIntArray(mEventTypes);
+        dest.writeInt(mUserId);
     }
 
     @NonNull
@@ -126,6 +137,7 @@ public final class UsageEventsQuery implements Parcelable {
         private final @CurrentTimeMillisLong long mBeginTimeMillis;
         private final @CurrentTimeMillisLong long mEndTimeMillis;
         private final ArraySet<Integer> mEventTypes = new ArraySet<>();
+        private @UserIdInt int mUserId = UserHandle.USER_NULL;
 
         /**
          * Constructor that specifies the period for which to return events.
@@ -167,6 +179,16 @@ public final class UsageEventsQuery implements Parcelable {
                 }
                 mEventTypes.add(eventType);
             }
+            return this;
+        }
+
+        /**
+         * Specifices the user id for the query.
+         * @param userId for whom the query should be performed.
+         * @hide
+         */
+        public @NonNull Builder setUserId(@UserIdInt int userId) {
+            mUserId = userId;
             return this;
         }
     }

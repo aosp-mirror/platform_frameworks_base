@@ -96,7 +96,7 @@ public class SensorTest {
     private final TestLooper mLooper = new TestLooper();
     private final LockoutCache mLockoutCache = new LockoutCache();
 
-    private UserAwareBiometricScheduler mScheduler;
+    private BiometricScheduler mScheduler;
     private AidlResponseHandler mHalCallback;
 
     @Before
@@ -164,7 +164,8 @@ public class SensorTest {
         final Sensor sensor = new Sensor("SensorTest", mFingerprintProvider, mContext,
                 null /* handler */, internalProp, mLockoutResetDispatcher,
                 mGestureAvailabilityDispatcher, mBiometricContext, mCurrentSession);
-        mScheduler = (UserAwareBiometricScheduler) sensor.getScheduler();
+        sensor.init(mGestureAvailabilityDispatcher, mLockoutResetDispatcher);
+        mScheduler = sensor.getScheduler();
         sensor.mCurrentSession = new AidlSession(0, mock(ISession.class),
                 USER_ID, mHalCallback);
 

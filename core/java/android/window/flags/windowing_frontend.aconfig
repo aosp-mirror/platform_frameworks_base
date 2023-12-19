@@ -15,6 +15,14 @@ flag {
 }
 
 flag {
+  name: "enforce_edge_to_edge"
+  namespace: "windowing_frontend"
+  description: "Make app go edge-to-edge when targeting SDK level 35 or greater"
+  bug: "309578419"
+  is_fixed_read_only: true
+}
+
+flag {
     name: "defer_display_updates"
     namespace: "windowing_frontend"
     description: "Feature flag for deferring DisplayManager updates to WindowManager if Shell transition is running"

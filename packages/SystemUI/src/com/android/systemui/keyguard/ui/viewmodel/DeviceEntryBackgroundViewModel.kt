@@ -42,6 +42,7 @@ constructor(
     occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
     occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
 ) {
     private val color: Flow<Int> =
         configurationRepository.onAnyConfigurationChange
@@ -65,6 +66,7 @@ constructor(
                 occludedToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
                 occludedToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                 dreamingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                alternateBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
             )
             .merge()
 

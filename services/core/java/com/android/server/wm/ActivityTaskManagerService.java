@@ -4777,6 +4777,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (DEBUG_ALL && !mWindowManager.mWindowPlacerLocked.isLayoutDeferred()) {
             Slog.i(TAG, "continueWindowLayout reason=" + mLayoutReasons);
         }
+
+        // ClientTransactions is queued during #deferWindowLayout() for performance.
+        // Notify to continue.
+        mLifecycleManager.onLayoutContinued();
     }
 
     /**

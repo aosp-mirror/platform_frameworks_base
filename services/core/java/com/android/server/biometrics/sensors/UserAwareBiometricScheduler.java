@@ -135,7 +135,7 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
         final int currentUserId = mCurrentUserRetriever.getCurrentUserId();
         final int nextUserId = mPendingOperations.getFirst().getTargetUserId();
 
-        if (nextUserId == currentUserId) {
+        if (nextUserId == currentUserId || mPendingOperations.getFirst().isStartUserOperation()) {
             super.startNextOperationIfIdle();
         } else if (currentUserId == UserHandle.USER_NULL) {
             final BaseClientMonitor startClient =

@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.common.domain.interactor
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
-import com.android.systemui.common.ui.data.repository.configurationRepository
+package com.android.systemui.keyguard.ui.viewmodel
+
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.configurationInteractor by Fixture {
-    ConfigurationInteractorImpl(repository = configurationRepository)
+val Kosmos.alternateBouncerToAodTransitionViewModel by Fixture {
+    AlternateBouncerToAodTransitionViewModel(
+        interactor = keyguardTransitionInteractor,
+        deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,
+        animationFlow = keyguardTransitionAnimationFlow,
+    )
 }

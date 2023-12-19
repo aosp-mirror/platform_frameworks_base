@@ -17,47 +17,49 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.view.View
-import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
+import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scrim.ScrimView
-import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.gesture.TapGestureDetector
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
-/** Binds the alternate bouncer view to its view-model. */
+/**
+ * Binds the alternate bouncer view to its view-model.
+ *
+ * For devices that support UDFPS, this includes a UDFPS view.
+ */
 @ExperimentalCoroutinesApi
 object AlternateBouncerViewBinder {
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
     @JvmStatic
     fun bind(
-        view: ViewGroup,
+        view: ConstraintLayout,
         viewModel: AlternateBouncerViewModel,
-        scope: CoroutineScope,
-        notificationShadeWindowController: NotificationShadeWindowController,
         falsingManager: FalsingManager,
         swipeUpAnywhereGestureHandler: SwipeUpAnywhereGestureHandler,
         tapGestureDetector: TapGestureDetector,
+        alternateBouncerUdfpsIconViewModel: AlternateBouncerUdfpsIconViewModel,
     ) {
-        if (DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()) return
-        scope.launch {
-            // forcePluginOpen is necessary to show over occluded apps.
-            // This cannot be tied to the view's lifecycle because setting this allows the view
-            // to be started in the first place.
-            viewModel.forcePluginOpen.collect {
-                notificationShadeWindowController.setForcePluginOpen(it, this)
-            }
+        if (DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()) {
+            return
         }
+        optionallyAddUdfpsView(
+            view = view,
+            alternateBouncerUdfpsIconViewModel = alternateBouncerUdfpsIconViewModel,
+        )
 
         val scrim = view.requireViewById(R.id.alternate_bouncer_scrim) as ScrimView
         view.repeatWhenAttached { alternateBouncerViewContainer ->
@@ -96,6 +98,52 @@ object AlternateBouncerViewBinder {
                 }
 
                 launch { viewModel.scrimColor.collect { scrim.tint = it } }
+            }
+        }
+    }
+
+    private fun optionallyAddUdfpsView(
+        view: ConstraintLayout,
+        alternateBouncerUdfpsIconViewModel: AlternateBouncerUdfpsIconViewModel,
+    ) {
+        view.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                launch {
+                    alternateBouncerUdfpsIconViewModel.iconLocation.collect { iconLocation ->
+                        val viewId = R.id.alternate_bouncer_udfps_icon_view
+                        var udfpsView = view.getViewById(viewId)
+                        if (udfpsView == null) {
+                            udfpsView =
+                                DeviceEntryIconView(view.context, null).apply { id = viewId }
+                            view.addView(udfpsView)
+                            AlternateBouncerUdfpsViewBinder.bind(
+                                udfpsView,
+                                alternateBouncerUdfpsIconViewModel,
+                            )
+                        }
+
+                        val constraintSet = ConstraintSet().apply { clone(view) }
+                        constraintSet.apply {
+                            constrainWidth(viewId, iconLocation.width)
+                            constrainHeight(viewId, iconLocation.height)
+                            connect(
+                                viewId,
+                                ConstraintSet.TOP,
+                                ConstraintSet.PARENT_ID,
+                                ConstraintSet.TOP,
+                                iconLocation.top,
+                            )
+                            connect(
+                                viewId,
+                                ConstraintSet.START,
+                                ConstraintSet.PARENT_ID,
+                                ConstraintSet.START,
+                                iconLocation.left
+                            )
+                        }
+                        constraintSet.applyTo(view)
+                    }
+                }
             }
         }
     }

@@ -235,18 +235,16 @@ internal class ElementNode(
     }
 
     override fun ContentDrawScope.draw() {
-        if (shouldDrawElement(layoutImpl, scene, element)) {
-            val drawScale = getDrawScale(layoutImpl, element, scene, sceneValues)
-            if (drawScale == Scale.Default) {
-                drawContent()
-            } else {
-                scale(
-                    drawScale.scaleX,
-                    drawScale.scaleY,
-                    if (drawScale.pivot.isUnspecified) center else drawScale.pivot,
-                ) {
-                    this@draw.drawContent()
-                }
+        val drawScale = getDrawScale(layoutImpl, element, scene, sceneValues)
+        if (drawScale == Scale.Default) {
+            drawContent()
+        } else {
+            scale(
+                drawScale.scaleX,
+                drawScale.scaleY,
+                if (drawScale.pivot.isUnspecified) center else drawScale.pivot,
+            ) {
+                this@draw.drawContent()
             }
         }
     }
@@ -516,11 +514,16 @@ private fun IntermediateMeasureScope.place(
     with(placementScope) {
         // Update the offset (relative to the SceneTransitionLayout) this element has in this scene
         // when idle.
-        val coords = coordinates!!
+        val coords = coordinates ?: error("Element ${element.key} does not have any coordinates")
         val targetOffsetInScene = lookaheadScopeCoordinates.localLookaheadPositionOf(coords)
         if (targetOffsetInScene != sceneValues.targetOffset) {
             // TODO(b/290930950): Better handle when this changes to avoid instant offset jumps.
             sceneValues.targetOffset = targetOffsetInScene
+        }
+
+        // No need to place the element in this scene if we don't want to draw it anyways.
+        if (!shouldDrawElement(layoutImpl, scene, element)) {
+            return
         }
 
         val currentOffset = lookaheadScopeCoordinates.localPositionOf(coords, Offset.Zero)

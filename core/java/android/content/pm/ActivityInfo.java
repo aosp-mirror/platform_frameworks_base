@@ -1393,6 +1393,18 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
 
     /**
+     * Enables {@link #SCREEN_ORIENTATION_USER} which overrides any orientation requested
+     * by the activity. Fixed orientation apps can be overridden to fullscreen on large
+     * screen devices with ignoreOrientationRequest enabled with this override.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_ANY_ORIENTATION_TO_USER = 310816437L;
+
+    /**
      * Compares activity window layout min width/height with require space for multi window to
      * determine if it can be put into multi window mode.
      */

@@ -157,7 +157,7 @@ public class SensorTest {
                 sensorProps.halControlsPreview, false /* resetLockoutRequiresChallenge */);
         final Sensor sensor = new Sensor("SensorTest", mFaceProvider, mContext,
                 null /* handler */, internalProp, mLockoutResetDispatcher, mBiometricContext);
-
+        sensor.init(mLockoutResetDispatcher, mFaceProvider);
         mScheduler.reset();
 
         assertNull(mScheduler.getCurrentClient());
@@ -185,6 +185,7 @@ public class SensorTest {
                 sensorProps.halControlsPreview, false /* resetLockoutRequiresChallenge */);
         final Sensor sensor = new Sensor("SensorTest", mFaceProvider, mContext, null,
                 internalProp, mLockoutResetDispatcher, mBiometricContext, mCurrentSession);
+        sensor.init(mLockoutResetDispatcher, mFaceProvider);
         mScheduler = (UserAwareBiometricScheduler) sensor.getScheduler();
         sensor.mCurrentSession = new AidlSession(0, mock(ISession.class),
                 USER_ID, mHalCallback);

@@ -21,21 +21,28 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
+import android.hardware.biometrics.SensorLocationInternal;
+import android.hardware.biometrics.common.ComponentInfo;
+import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
 import com.android.server.biometrics.UserStateProto;
@@ -48,15 +55,20 @@ import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
+import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
 import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Maintains the state of a single sensor within an instance of the
@@ -73,15 +85,17 @@ public class Sensor {
     @NonNull private final IBinder mToken;
     @NonNull private final Handler mHandler;
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
-    @NonNull private final UserAwareBiometricScheduler mScheduler;
-    @NonNull private final LockoutCache mLockoutCache;
+    @NonNull private BiometricScheduler mScheduler;
+    @NonNull private LockoutTracker mLockoutTracker;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
+    @NonNull private final BiometricContext mBiometricContext;
 
     @Nullable AidlSession mCurrentSession;
-    @NonNull private final Supplier<AidlSession> mLazySession;
+    @NonNull private Supplier<AidlSession> mLazySession;
 
-    Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
-            @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
+    public Sensor(@NonNull String tag, @NonNull FingerprintProvider provider,
+            @NonNull Context context, @NonNull Handler handler,
+            @NonNull FingerprintSensorPropertiesInternal sensorProperties,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull BiometricContext biometricContext, AidlSession session) {
@@ -91,8 +105,38 @@ public class Sensor {
         mToken = new Binder();
         mHandler = handler;
         mSensorProperties = sensorProperties;
-        mLockoutCache = new LockoutCache();
-        mScheduler = new UserAwareBiometricScheduler(tag,
+        mBiometricContext = biometricContext;
+        mAuthenticatorIds = new HashMap<>();
+        mCurrentSession = session;
+    }
+
+    Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull BiometricContext biometricContext) {
+        this(tag, provider, context, handler, sensorProperties, lockoutResetDispatcher,
+                gestureAvailabilityDispatcher, biometricContext, null);
+    }
+
+    Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
+            @NonNull Handler handler, @NonNull SensorProps sensorProp,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull BiometricContext biometricContext,
+            @NonNull List<SensorLocationInternal> workaroundLocation,
+            boolean resetLockoutRequiresHardwareAuthToken) {
+        this(tag, provider, context, handler, getFingerprintSensorPropertiesInternal(sensorProp,
+                        workaroundLocation, resetLockoutRequiresHardwareAuthToken),
+                lockoutResetDispatcher, gestureAvailabilityDispatcher, biometricContext, null);
+    }
+
+    /**
+     * Initialize biometric scheduler, lockout tracker and session for the sensor.
+     */
+    public void init(GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            LockoutResetDispatcher lockoutResetDispatcher) {
+        mScheduler = new UserAwareBiometricScheduler(mTag,
                 BiometricScheduler.sensorTypeFromFingerprintProperties(mSensorProperties),
                 gestureAvailabilityDispatcher,
                 () -> mCurrentSession != null ? mCurrentSession.getUserId() : UserHandle.USER_NULL,
@@ -102,7 +146,7 @@ public class Sensor {
                     public StopUserClient<?> getStopUserClient(int userId) {
                         return new FingerprintStopUserClient(mContext, mLazySession, mToken,
                                 userId, mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), biometricContext,
+                                BiometricLogger.ofUnknown(mContext), mBiometricContext,
                                 () -> mCurrentSession = null);
                     }
 
@@ -111,13 +155,38 @@ public class Sensor {
                     public StartUserClient<?, ?> getStartUserClient(int newUserId) {
                         final int sensorId = mSensorProperties.sensorId;
 
-                        final AidlResponseHandler resultController = new AidlResponseHandler(
-                                mContext, mScheduler, sensorId, newUserId,
-                                mLockoutCache, lockoutResetDispatcher,
-                                biometricContext.getAuthSessionCoordinator(), () -> {
-                            Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
-                            mCurrentSession = null;
-                        });
+                        final AidlResponseHandler resultController;
+
+                        if (Flags.deHidl()) {
+                            resultController = new AidlResponseHandler(
+                                    mContext, mScheduler, sensorId, newUserId,
+                                    mLockoutTracker, lockoutResetDispatcher,
+                                    mBiometricContext.getAuthSessionCoordinator(), () -> {},
+                                    new AidlResponseHandler.AidlResponseHandlerCallback() {
+                                        @Override
+                                        public void onEnrollSuccess() {
+                                            mProvider.scheduleLoadAuthenticatorIdsForUser(sensorId,
+                                                    newUserId);
+                                            mProvider.scheduleInvalidationRequest(sensorId,
+                                                    newUserId);
+                                        }
+
+                                        @Override
+                                        public void onHardwareUnavailable() {
+                                            Slog.e(mTag,
+                                                    "Fingerprint sensor hardware unavailable.");
+                                            mCurrentSession = null;
+                                        }
+                                    });
+                        } else {
+                            resultController = new AidlResponseHandler(
+                                    mContext, mScheduler, sensorId, newUserId,
+                                    mLockoutTracker, lockoutResetDispatcher,
+                                    mBiometricContext.getAuthSessionCoordinator(), () -> {
+                                Slog.e(mTag, "Got ERROR_HW_UNAVAILABLE");
+                                mCurrentSession = null;
+                            });
+                        }
 
                         final StartUserClient.UserStartedCallback<ISession> userStartedCallback =
                                 (userIdStarted, newSession, halInterfaceVersion) -> {
@@ -133,40 +202,58 @@ public class Sensor {
                                                         + "sensor: "
                                                         + sensorId
                                                         + ", user: " + userIdStarted);
-                                        provider.scheduleInvalidationRequest(sensorId,
+                                        mProvider.scheduleInvalidationRequest(sensorId,
                                                 userIdStarted);
                                     }
                                 };
 
-                        return new FingerprintStartUserClient(mContext, provider::getHalInstance,
+                        return new FingerprintStartUserClient(mContext, mProvider::getHalInstance,
                                 mToken, newUserId, mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), biometricContext,
+                                BiometricLogger.ofUnknown(mContext), mBiometricContext,
                                 resultController, userStartedCallback);
                     }
                 });
-        mAuthenticatorIds = new HashMap<>();
+        mLockoutTracker = new LockoutCache();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
-        mCurrentSession = session;
     }
 
-    Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
-            @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
-            @NonNull BiometricContext biometricContext) {
-        this(tag, provider, context, handler, sensorProperties, lockoutResetDispatcher,
-                gestureAvailabilityDispatcher, biometricContext, null);
+    protected static FingerprintSensorPropertiesInternal getFingerprintSensorPropertiesInternal(
+            SensorProps prop, List<SensorLocationInternal> workaroundLocations,
+            boolean resetLockoutRequiresHardwareAuthToken) {
+        final List<ComponentInfoInternal> componentInfo = new ArrayList<>();
+        if (prop.commonProps.componentInfo != null) {
+            for (ComponentInfo info : prop.commonProps.componentInfo) {
+                componentInfo.add(new ComponentInfoInternal(info.componentId,
+                        info.hardwareVersion, info.firmwareVersion, info.serialNumber,
+                        info.softwareVersion));
+            }
+        }
+        return new FingerprintSensorPropertiesInternal(prop.commonProps.sensorId,
+                prop.commonProps.sensorStrength,
+                prop.commonProps.maxEnrollmentsPerUser,
+                componentInfo,
+                prop.sensorType,
+                prop.halControlsIllumination,
+                resetLockoutRequiresHardwareAuthToken,
+                !workaroundLocations.isEmpty() ? workaroundLocations :
+                        Arrays.stream(prop.sensorLocations).map(location ->
+                                        new SensorLocationInternal(
+                                                location.display,
+                                                location.sensorLocationX,
+                                                location.sensorLocationY,
+                                                location.sensorRadius))
+                                .collect(Collectors.toList()));
     }
 
-    @NonNull Supplier<AidlSession> getLazySession() {
+    @NonNull public Supplier<AidlSession> getLazySession() {
         return mLazySession;
     }
 
-    @NonNull FingerprintSensorPropertiesInternal getSensorProperties() {
+    @NonNull public FingerprintSensorPropertiesInternal getSensorProperties() {
         return mSensorProperties;
     }
 
-    @Nullable AidlSession getSessionForUser(int userId) {
+    @Nullable protected AidlSession getSessionForUser(int userId) {
         if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
@@ -180,15 +267,18 @@ public class Sensor {
                 biometricStateCallback, mProvider, this);
     }
 
-    @NonNull BiometricScheduler getScheduler() {
+    @NonNull public BiometricScheduler getScheduler() {
         return mScheduler;
     }
 
-    @NonNull LockoutCache getLockoutCache() {
-        return mLockoutCache;
+    @NonNull protected LockoutTracker getLockoutTracker(boolean forAuth) {
+        if (forAuth) {
+            return null;
+        }
+        return mLockoutTracker;
     }
 
-    @NonNull Map<Integer, Long> getAuthenticatorIds() {
+    @NonNull public Map<Integer, Long> getAuthenticatorIds() {
         return mAuthenticatorIds;
     }
 
@@ -261,5 +351,50 @@ public class Sensor {
         mScheduler.recordCrashState();
         mScheduler.reset();
         mCurrentSession = null;
+    }
+
+    @NonNull protected Handler getHandler() {
+        return mHandler;
+    }
+
+    @NonNull protected Context getContext() {
+        return mContext;
+    }
+
+    /**
+     * Returns true if the sensor hardware is detected.
+     */
+    protected boolean isHardwareDetected(String halInstance) {
+        if (mTestHalEnabled) {
+            return true;
+        }
+        return (ServiceManager.checkService(IFingerprint.DESCRIPTOR + "/" + halInstance)
+                != null);
+    }
+
+    @NonNull protected BiometricContext getBiometricContext() {
+        return mBiometricContext;
+    }
+
+    /**
+     * Returns lockout mode of this sensor.
+     */
+    @LockoutTracker.LockoutMode
+    public int getLockoutModeForUser(int userId) {
+        return mBiometricContext.getAuthSessionCoordinator().getLockoutStateFor(userId,
+                Utils.getCurrentStrength(mSensorProperties.sensorId));
+    }
+
+    public void setScheduler(BiometricScheduler scheduler) {
+        mScheduler = scheduler;
+    }
+
+    public void setLazySession(
+            Supplier<AidlSession> lazySession) {
+        mLazySession = lazySession;
+    }
+
+    public FingerprintProvider getProvider() {
+        return mProvider;
     }
 }

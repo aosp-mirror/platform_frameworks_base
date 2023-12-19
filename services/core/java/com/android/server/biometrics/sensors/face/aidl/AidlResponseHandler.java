@@ -27,6 +27,7 @@ import android.hardware.face.Face;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.util.Slog;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
@@ -59,6 +60,20 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
         void onHardwareUnavailable();
     }
 
+    /**
+     * Interface to send results to the AidlResponseHandler's owner.
+     */
+    public interface AidlResponseHandlerCallback {
+        /**
+         * Invoked when enrollment is successful.
+         */
+        void onEnrollSuccess();
+        /**
+         * Invoked when the HAL sends ERROR_HW_UNAVAILABLE.
+         */
+        void onHardwareUnavailable();
+    }
+
     private static final String TAG = "AidlResponseHandler";
 
     @NonNull
@@ -68,7 +83,7 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
     private final int mSensorId;
     private final int mUserId;
     @NonNull
-    private final LockoutTracker mLockoutCache;
+    private final LockoutTracker mLockoutTracker;
     @NonNull
     private final LockoutResetDispatcher mLockoutResetDispatcher;
 
@@ -76,6 +91,8 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
     private final AuthSessionCoordinator mAuthSessionCoordinator;
     @NonNull
     private final HardwareUnavailableCallback mHardwareUnavailableCallback;
+    @NonNull
+    private final AidlResponseHandlerCallback mAidlResponseHandlerCallback;
 
     public AidlResponseHandler(@NonNull Context context,
             @NonNull BiometricScheduler scheduler, int sensorId, int userId,
@@ -83,14 +100,33 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull AuthSessionCoordinator authSessionCoordinator,
             @NonNull HardwareUnavailableCallback hardwareUnavailableCallback) {
+        this(context, scheduler, sensorId, userId, lockoutTracker, lockoutResetDispatcher,
+                authSessionCoordinator, hardwareUnavailableCallback,
+                new AidlResponseHandlerCallback() {
+                    @Override
+                    public void onEnrollSuccess() {}
+
+                    @Override
+                    public void onHardwareUnavailable() {}
+                });
+    }
+
+    public AidlResponseHandler(@NonNull Context context,
+            @NonNull BiometricScheduler scheduler, int sensorId, int userId,
+            @NonNull LockoutTracker lockoutTracker,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull AuthSessionCoordinator authSessionCoordinator,
+            @NonNull HardwareUnavailableCallback hardwareUnavailableCallback,
+            @NonNull AidlResponseHandlerCallback aidlResponseHandlerCallback) {
         mContext = context;
         mScheduler = scheduler;
         mSensorId = sensorId;
         mUserId = userId;
-        mLockoutCache = lockoutTracker;
+        mLockoutTracker = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mAuthSessionCoordinator = authSessionCoordinator;
         mHardwareUnavailableCallback = hardwareUnavailableCallback;
+        mAidlResponseHandlerCallback = aidlResponseHandlerCallback;
     }
 
     @Override
@@ -106,13 +142,13 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
     @Override
     public void onChallengeGenerated(long challenge) {
         handleResponse(FaceGenerateChallengeClient.class, (c) -> c.onChallengeGenerated(mSensorId,
-                mUserId, challenge), null);
+                mUserId, challenge));
     }
 
     @Override
     public void onChallengeRevoked(long challenge) {
         handleResponse(FaceRevokeChallengeClient.class, (c) -> c.onChallengeRevoked(mSensorId,
-                mUserId, challenge), null);
+                mUserId, challenge));
     }
 
     @Override
@@ -123,7 +159,7 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
                 return;
             }
             c.onAuthenticationFrame(AidlConversionUtils.toFrameworkAuthenticationFrame(frame));
-        }, null);
+        });
     }
 
     @Override
@@ -134,7 +170,7 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
                 return;
             }
             c.onEnrollmentFrame(AidlConversionUtils.toFrameworkEnrollmentFrame(frame));
-        }, null);
+        });
     }
 
     @Override
@@ -149,9 +185,13 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
         handleResponse(ErrorConsumer.class, (c) -> {
             c.onError(error, vendorCode);
             if (error == Error.HW_UNAVAILABLE) {
-                mHardwareUnavailableCallback.onHardwareUnavailable();
+                if (Flags.deHidl()) {
+                    mAidlResponseHandlerCallback.onHardwareUnavailable();
+                } else {
+                    mHardwareUnavailableCallback.onHardwareUnavailable();
+                }
             }
-        }, null);
+        });
     }
 
     @Override
@@ -167,7 +207,12 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
                 .getUniqueName(mContext, currentUserId);
         final Face face = new Face(name, enrollmentId, mSensorId);
 
-        handleResponse(FaceEnrollClient.class, (c) -> c.onEnrollResult(face, remaining), null);
+        handleResponse(FaceEnrollClient.class, (c) -> {
+            c.onEnrollResult(face, remaining);
+            if (remaining == 0) {
+                mAidlResponseHandlerCallback.onEnrollSuccess();
+            }
+        });
     }
 
     @Override
@@ -179,37 +224,37 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
             byteList.add(b);
         }
         handleResponse(AuthenticationConsumer.class, (c) -> c.onAuthenticated(face,
-                true /* authenticated */, byteList), null);
+                true /* authenticated */, byteList));
     }
 
     @Override
     public void onAuthenticationFailed() {
         final Face face = new Face("" /* name */, 0 /* faceId */, mSensorId);
         handleResponse(AuthenticationConsumer.class, (c) -> c.onAuthenticated(face,
-                false /* authenticated */, null /* hat */), null);
+                false /* authenticated */, null /* hat */));
     }
 
     @Override
     public void onLockoutTimed(long durationMillis) {
-        handleResponse(LockoutConsumer.class, (c) -> c.onLockoutTimed(durationMillis), null);
+        handleResponse(LockoutConsumer.class, (c) -> c.onLockoutTimed(durationMillis));
     }
 
     @Override
     public void onLockoutPermanent() {
-        handleResponse(LockoutConsumer.class, LockoutConsumer::onLockoutPermanent, null);
+        handleResponse(LockoutConsumer.class, LockoutConsumer::onLockoutPermanent);
     }
 
     @Override
     public void onLockoutCleared() {
         handleResponse(FaceResetLockoutClient.class, FaceResetLockoutClient::onLockoutCleared,
                 (c) -> FaceResetLockoutClient.resetLocalLockoutStateToNone(mSensorId, mUserId,
-                mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
-                Utils.getCurrentStrength(mSensorId), -1 /* requestId */));
+                        mLockoutTracker, mLockoutResetDispatcher, mAuthSessionCoordinator,
+                        Utils.getCurrentStrength(mSensorId), -1 /* requestId */));
     }
 
     @Override
     public void onInteractionDetected() {
-        handleResponse(FaceDetectClient.class, FaceDetectClient::onInteractionDetected, null);
+        handleResponse(FaceDetectClient.class, FaceDetectClient::onInteractionDetected);
     }
 
     @Override
@@ -219,23 +264,23 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
                 final Face face = new Face("" /* name */, enrollmentIds[i], mSensorId);
                 final int finalI = i;
                 handleResponse(EnumerateConsumer.class, (c) -> c.onEnumerationResult(face,
-                        enrollmentIds.length - finalI - 1), null);
+                        enrollmentIds.length - finalI - 1 /* remaining */));
             }
         } else {
             handleResponse(EnumerateConsumer.class, (c) -> c.onEnumerationResult(
-                    null /* identifier */, 0 /* remaining */), null);
+                    null /* identifier */, 0 /* remaining */));
         }
     }
 
     @Override
     public void onFeaturesRetrieved(byte[] features) {
         handleResponse(FaceGetFeatureClient.class, (c) -> c.onFeatureGet(true /* success */,
-                features), null);
+                features));
     }
 
     @Override
     public void onFeatureSet(byte feature) {
-        handleResponse(FaceSetFeatureClient.class, (c) -> c.onFeatureSet(true /* success */), null);
+        handleResponse(FaceSetFeatureClient.class, (c) -> c.onFeatureSet(true /* success */));
     }
 
     @Override
@@ -245,33 +290,32 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
                 final Face face = new Face("" /* name */, enrollmentIds[i], mSensorId);
                 final int finalI = i;
                 handleResponse(RemovalConsumer.class,
-                        (c) -> c.onRemoved(face, enrollmentIds.length - finalI - 1),
-                        null);
+                        (c) -> c.onRemoved(face,
+                                enrollmentIds.length - finalI - 1 /* remaining */));
             }
         } else {
             handleResponse(RemovalConsumer.class, (c) -> c.onRemoved(null /* identifier */,
-                    0 /* remaining */), null);
+                    0 /* remaining */));
         }
     }
 
     @Override
     public void onAuthenticatorIdRetrieved(long authenticatorId) {
         handleResponse(FaceGetAuthenticatorIdClient.class, (c) -> c.onAuthenticatorIdRetrieved(
-                authenticatorId), null);
+                authenticatorId));
     }
 
     @Override
     public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
         handleResponse(FaceInvalidationClient.class, (c) -> c.onAuthenticatorIdInvalidated(
-                newAuthenticatorId), null);
+                newAuthenticatorId));
     }
 
     /**
      * Handles acquired messages sent by the HAL (specifically for HIDL HAL).
      */
     public void onAcquired(int acquiredInfo, int vendorCode) {
-        handleResponse(AcquisitionClient.class, (c) -> c.onAcquired(acquiredInfo, vendorCode),
-                null);
+        handleResponse(AcquisitionClient.class, (c) -> c.onAcquired(acquiredInfo, vendorCode));
     }
 
     /**
@@ -288,12 +332,26 @@ public class AidlResponseHandler extends ISessionCallback.Stub {
                 lockoutMode = LockoutTracker.LOCKOUT_TIMED;
             }
 
-            mLockoutCache.setLockoutModeForUser(mUserId, lockoutMode);
+            mLockoutTracker.setLockoutModeForUser(mUserId, lockoutMode);
 
             if (duration == 0) {
                 mLockoutResetDispatcher.notifyLockoutResetCallbacks(mSensorId);
             }
         });
+    }
+
+    /**
+     * Handle clients which are not supported in HIDL HAL. For face, FaceInvalidationClient
+     * is the only AIDL client which is not supported in HIDL.
+     */
+    public void onUnsupportedClientScheduled() {
+        Slog.e(TAG, "FaceInvalidationClient is not supported in the HAL.");
+        handleResponse(FaceInvalidationClient.class, BaseClientMonitor::cancel);
+    }
+
+    private <T> void handleResponse(@NonNull Class<T> className,
+            @NonNull Consumer<T> action) {
+        handleResponse(className, action, null /* alternateAction */);
     }
 
     private <T> void handleResponse(@NonNull Class<T> className,

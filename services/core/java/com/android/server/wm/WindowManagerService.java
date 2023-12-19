@@ -1445,6 +1445,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!mDisplayReady) {
                 throw new IllegalStateException("Display has not been initialialized");
             }
+            if (session.isClientDead()) {
+                ProtoLog.w(WM_ERROR, "Attempted to add window with a client %s "
+                        + "that is dead. Aborting.", session);
+                return WindowManagerGlobal.ADD_APP_EXITING;
+            }
 
             final DisplayContent displayContent = getDisplayContentOrCreate(displayId, attrs.token);
 
@@ -1629,19 +1634,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
                     appOp[0], attrs, viewVisibility, session.mUid, userId,
                     session.mCanAddInternalSystemWindow);
-            if (win.mDeathRecipient == null) {
-                // Client has apparently died, so there is no reason to
-                // continue.
-                ProtoLog.w(WM_ERROR, "Adding window client %s"
-                        + " that is dead, aborting.", client.asBinder());
-                return WindowManagerGlobal.ADD_APP_EXITING;
-            }
-
-            if (win.getDisplayContent() == null) {
-                ProtoLog.w(WM_ERROR, "Adding window to Display that has been removed.");
-                return WindowManagerGlobal.ADD_INVALID_DISPLAY;
-            }
-
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
             displayPolicy.adjustWindowParamsLw(win, win.mAttrs);
             attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), callingUid, callingPid);
@@ -1725,7 +1717,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.mTapExcludedWindows.add(win);
             }
 
-            win.attach();
+            win.mSession.onWindowAdded(win);
             mWindowMap.put(client.asBinder(), win);
             win.initAppOpsState();
 

@@ -55,8 +55,12 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepo
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.log.BouncerLogger
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.DragDownHelper
@@ -65,6 +69,7 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.statusbar.notification.stack.AmbientState
@@ -79,12 +84,14 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -99,6 +106,7 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@ExperimentalCoroutinesApi
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
@@ -259,6 +267,12 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 mSelectedUserInteractor,
+                { Mockito.mock(JavaAdapter::class.java) },
+                { Mockito.mock(AlternateBouncerViewModel::class.java) },
+                { Mockito.mock(FalsingManager::class.java) },
+                { Mockito.mock(SwipeUpAnywhereGestureHandler::class.java) },
+                { Mockito.mock(TapGestureDetector::class.java) },
+                { Mockito.mock(AlternateBouncerUdfpsIconViewModel::class.java) },
             )
 
         controller.setupExpandedStatusBar()

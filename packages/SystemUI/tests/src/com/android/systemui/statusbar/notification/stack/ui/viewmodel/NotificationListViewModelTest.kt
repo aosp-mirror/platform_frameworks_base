@@ -28,7 +28,6 @@ import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.TestMocksModule
 import com.android.systemui.collectLastValue
-import com.android.systemui.common.domain.CommonDomainLayerModule
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -69,7 +68,6 @@ class NotificationListViewModelTest : SysuiTestCase() {
             [
                 SysUITestModule::class,
                 ActivatableNotificationViewModelModule::class,
-                CommonDomainLayerModule::class,
                 FooterViewModelModule::class,
                 HeadlessSystemUserModeModule::class,
                 UnfoldTransitionModule.Bindings::class,

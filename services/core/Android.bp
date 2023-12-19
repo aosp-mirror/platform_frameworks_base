@@ -103,7 +103,6 @@ java_library_static {
         "android.hardware.power-java_shared",
     ],
     srcs: [
-        ":android.hardware.biometrics.face-V4-java-source",
         ":android.hardware.tv.hdmi.connection-V1-java-source",
         ":android.hardware.tv.hdmi.earc-V1-java-source",
         ":statslog-art-java-gen",

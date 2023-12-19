@@ -36,3 +36,10 @@ flag {
   bug: "316139088"
   is_fixed_read_only: true
 }
+
+flag {
+  name: "user_min_aspect_ratio_app_default"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the API PackageManager.USER_MIN_ASPECT_RATIO_APP_DEFAULT is available"
+  bug: "310816437"
+}
