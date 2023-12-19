@@ -36,10 +36,11 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.StaticInOrder;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;

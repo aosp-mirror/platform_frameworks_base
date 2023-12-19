@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.notification;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -30,13 +30,14 @@ import static org.mockito.Mockito.verify;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
 import android.util.FloatProperty;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.SysuiTestCase;

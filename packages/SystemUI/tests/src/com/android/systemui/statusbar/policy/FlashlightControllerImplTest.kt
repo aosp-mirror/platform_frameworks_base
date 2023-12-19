@@ -20,7 +20,7 @@ import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.impl.CameraMetadataNative
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender

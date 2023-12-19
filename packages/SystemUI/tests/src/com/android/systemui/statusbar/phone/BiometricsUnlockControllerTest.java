@@ -37,11 +37,12 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.UserHandle;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
 import android.view.ViewRootImpl;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.LatencyTracker;

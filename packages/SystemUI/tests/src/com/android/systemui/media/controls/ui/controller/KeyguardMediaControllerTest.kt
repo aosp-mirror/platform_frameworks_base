@@ -16,12 +16,13 @@
 
 package com.android.systemui.media.controls.ui.controller
 
-import android.test.suitebuilder.annotation.SmallTest
+import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.FrameLayout
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.ui.view.MediaHost

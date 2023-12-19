@@ -17,9 +17,9 @@
 package com.android.systemui.statusbar.phone
 
 import android.content.pm.PackageManager
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags

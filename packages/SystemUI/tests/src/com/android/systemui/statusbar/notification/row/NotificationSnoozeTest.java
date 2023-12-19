@@ -16,28 +16,29 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+
+import static org.mockito.Mockito.mock;
+
 import android.provider.Settings;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableResources;
 import android.testing.UiThreadTest;
 import android.util.KeyValueListParser;
 
-import com.android.systemui.res.R;
+import androidx.test.filters.SmallTest;
+
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.mock;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

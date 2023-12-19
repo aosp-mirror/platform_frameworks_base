@@ -19,9 +19,10 @@ package com.android.systemui.statusbar.connectivity;
 import static junit.framework.Assert.assertEquals;
 
 import android.net.NetworkCapabilities;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
