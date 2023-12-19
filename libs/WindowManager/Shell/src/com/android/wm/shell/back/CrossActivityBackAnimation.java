@@ -211,6 +211,7 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
 
     private void finishAnimation() {
         if (mEnteringTarget != null) {
+            mTransaction.setCornerRadius(mEnteringTarget.leash, 0);
             mEnteringTarget.leash.release();
             mEnteringTarget = null;
         }
