@@ -88,3 +88,6 @@ per-file PerformanceHintManager.java = file:/ADPF_OWNERS
 per-file IThermal* = file:/THERMAL_OWNERS
 per-file CoolingDevice.java = file:/THERMAL_OWNERS
 per-file Temperature.java = file:/THERMAL_OWNERS
+
+# SecurityStateManager
+per-file *SecurityStateManager* = file:/SECURITY_STATE_OWNERS
