@@ -115,6 +115,7 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 
 import static com.android.input.flags.Flags.enablePointerChoreographer;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
+import static com.android.window.flags.Flags.setScPropertiesInClient;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -3521,6 +3522,16 @@ public final class ViewRootImpl implements ViewParent,
                             == WindowManager.LayoutParams.TYPE_STATUS_BAR) {
                         mTransaction.setDefaultFrameRateCompatibility(mSurfaceControl,
                             Surface.FRAME_RATE_COMPATIBILITY_NO_VOTE).apply();
+                    }
+
+                    if (setScPropertiesInClient()) {
+                        if (surfaceControlChanged || windowAttributesChanged) {
+                            boolean colorSpaceAgnostic = (lp.privateFlags
+                                    & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC)
+                                    != 0;
+                            mTransaction.setColorSpaceAgnostic(mSurfaceControl, colorSpaceAgnostic)
+                                    .apply();
+                        }
                     }
                 }
 

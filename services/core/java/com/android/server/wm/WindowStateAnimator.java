@@ -45,6 +45,7 @@ import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
 import static com.android.window.flags.Flags.secureWindowState;
+import static com.android.window.flags.Flags.setScPropertiesInClient;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -311,8 +312,10 @@ class WindowStateAnimator {
 
             mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), format,
                     flags, this, attrs.type);
-            mSurfaceController.setColorSpaceAgnostic(w.getPendingTransaction(),
-                    (attrs.privateFlags & LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
+            if (!setScPropertiesInClient()) {
+                mSurfaceController.setColorSpaceAgnostic(w.getPendingTransaction(),
+                        (attrs.privateFlags & LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
+            }
 
             w.setHasSurface(true);
             // The surface instance is changed. Make sure the input info can be applied to the
