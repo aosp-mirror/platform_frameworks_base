@@ -12,25 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.keyguard.ui.viewmodel
+package com.android.systemui.deviceentry.domain.interactor
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.deviceentry.domain.interactor.OccludingAppDeviceEntryInteractor
-import com.android.systemui.deviceentry.shared.model.BiometricMessage
-import javax.inject.Inject
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.kosmos.Kosmos
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 
-/** Shows authentication messages over occcluding apps over the lockscreen. */
 @ExperimentalCoroutinesApi
-@SysUISingleton
-class OccludingAppDeviceEntryMessageViewModel
-@Inject
-constructor(
-    interactor: OccludingAppDeviceEntryInteractor,
-) {
-    val message: Flow<BiometricMessage?> = interactor.message
-}
+val Kosmos.deviceEntryBiometricSettingsInteractor by
+    Kosmos.Fixture {
+        DeviceEntryBiometricSettingsInteractor(
+            repository = biometricSettingsRepository,
+        )
+    }

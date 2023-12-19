@@ -20,23 +20,37 @@ import android.content.res.Resources
 import com.android.keyguard.logging.BiometricMessageDeferralLogger
 import com.android.keyguard.logging.FaceMessageDeferralLogger
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.res.R
 import java.io.PrintWriter
 import java.util.Objects
 import javax.inject.Inject
+
+@SysUISingleton
+class FaceHelpMessageDeferralFactory
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    private val logBuffer: FaceMessageDeferralLogger,
+    private val dumpManager: DumpManager
+) {
+    fun create(): FaceHelpMessageDeferral {
+        return FaceHelpMessageDeferral(
+            resources = resources,
+            logBuffer = logBuffer,
+            dumpManager = dumpManager,
+        )
+    }
+}
 
 /**
  * Provides whether a face acquired help message should be shown immediately when its received or
  * should be shown when face auth times out. See [updateMessage] and [getDeferredMessage].
  */
-@SysUISingleton
-class FaceHelpMessageDeferral
-@Inject
-constructor(
-    @Main resources: Resources,
+class FaceHelpMessageDeferral(
+    resources: Resources,
     logBuffer: FaceMessageDeferralLogger,
     dumpManager: DumpManager
 ) :
