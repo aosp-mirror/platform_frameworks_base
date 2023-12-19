@@ -18,6 +18,9 @@ package com.android.providers.settings;
 
 import static android.os.Process.FIRST_APPLICATION_UID;
 
+import android.aconfig.Aconfig.flag_state;
+import android.aconfig.Aconfig.parsed_flag;
+import android.aconfig.Aconfig.parsed_flags;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -146,6 +149,17 @@ final class SettingsState {
      * {@code namespace/flagName}, and the special staged flags are deleted.
      */
     private static final String CONFIG_STAGED_PREFIX = "staged/";
+
+    private static final List<String> sAconfigTextProtoFilesOnDevice = List.of(
+            "/system/etc/aconfig_flags.pb",
+            "/system_ext/etc/aconfig_flags.pb",
+            "/product/etc/aconfig_flags.pb",
+            "/vendor/etc/aconfig_flags.pb");
+
+    /**
+     * This tag is applied to all aconfig default value-loaded flags.
+     */
+    private static final String BOOT_LOADED_DEFAULT_TAG = "BOOT_LOADED_DEFAULT";
 
     // This was used in version 120 and before.
     private static final String NULL_VALUE_OLD_STYLE = "null";
@@ -315,6 +329,59 @@ final class SettingsState {
 
         synchronized (mLock) {
             readStateSyncLocked();
+
+            if (Flags.loadAconfigDefaults()) {
+                // Only load aconfig defaults if this is the first boot, the XML
+                // file doesn't exist yet, or this device is on its first boot after
+                // an OTA.
+                boolean shouldLoadAconfigValues = isConfigSettingsKey(mKey)
+                        && (!file.exists()
+                                || mContext.getPackageManager().isDeviceUpgrading());
+                if (shouldLoadAconfigValues) {
+                    loadAconfigDefaultValuesLocked();
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void loadAconfigDefaultValuesLocked() {
+        for (String fileName : sAconfigTextProtoFilesOnDevice) {
+            try (FileInputStream inputStream = new FileInputStream(fileName)) {
+                byte[] contents = inputStream.readAllBytes();
+                loadAconfigDefaultValues(contents);
+            } catch (IOException e) {
+                Slog.e(LOG_TAG, "failed to read protobuf", e);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    public void loadAconfigDefaultValues(byte[] fileContents) {
+        try {
+            parsed_flags parsedFlags = parsed_flags.parseFrom(fileContents);
+
+            if (parsedFlags == null) {
+                Slog.e(LOG_TAG, "failed to parse aconfig protobuf");
+                return;
+            }
+
+            for (parsed_flag flag : parsedFlags.getParsedFlagList()) {
+                String flagName = flag.getNamespace() + "/"
+                        + flag.getPackage() + "." + flag.getName();
+                String value = flag.getState() == flag_state.ENABLED ? "true" : "false";
+
+                Setting existingSetting = getSettingLocked(flagName);
+                boolean isDefaultLoaded = existingSetting.getTag() != null
+                        && existingSetting.getTag().equals(BOOT_LOADED_DEFAULT_TAG);
+                if (existingSetting.getValue() == null || isDefaultLoaded) {
+                    insertSettingLocked(flagName, value, BOOT_LOADED_DEFAULT_TAG,
+                            false, flag.getPackage());
+                }
+            }
+        } catch (IOException e) {
+            Slog.e(LOG_TAG, "failed to parse protobuf", e);
         }
     }
 
