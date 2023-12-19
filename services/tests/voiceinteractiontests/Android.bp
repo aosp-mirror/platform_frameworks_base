@@ -45,6 +45,7 @@ android_test {
         "servicestests-utils-mockito-extended",
         "truth",
         "frameworks-base-testutils",
+        "androidx.test.rules",
     ],
 
     libs: [
