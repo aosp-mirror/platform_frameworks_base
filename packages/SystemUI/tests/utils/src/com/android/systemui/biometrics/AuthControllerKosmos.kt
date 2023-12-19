@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.accessibility.data.repository
+package com.android.systemui.biometrics
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.fakeAccessibilityRepository by Fixture { FakeAccessibilityRepository() }
-val Kosmos.accessibilityRepository by Fixture { fakeAccessibilityRepository }
+var Kosmos.authController by Fixture { mock<AuthController>() }

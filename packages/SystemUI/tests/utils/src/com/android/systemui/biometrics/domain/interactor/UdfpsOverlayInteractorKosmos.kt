@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.accessibility.data.repository
+package com.android.systemui.biometrics.domain.interactor
 
+import android.content.applicationContext
+import com.android.systemui.biometrics.authController
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
 
-val Kosmos.fakeAccessibilityRepository by Fixture { FakeAccessibilityRepository() }
-val Kosmos.accessibilityRepository by Fixture { fakeAccessibilityRepository }
+val Kosmos.udfpsOverlayInteractor by Fixture {
+    UdfpsOverlayInteractor(
+        context = applicationContext,
+        authController = authController,
+        selectedUserInteractor = selectedUserInteractor,
+        scope = applicationCoroutineScope,
+    )
+}

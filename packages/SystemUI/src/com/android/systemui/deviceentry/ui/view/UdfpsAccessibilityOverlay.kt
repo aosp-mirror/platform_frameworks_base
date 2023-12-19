@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.accessibility.data.repository
+package com.android.systemui.deviceentry.ui.view
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
+import android.content.Context
+import android.view.View
 
-val Kosmos.fakeAccessibilityRepository by Fixture { FakeAccessibilityRepository() }
-val Kosmos.accessibilityRepository by Fixture { fakeAccessibilityRepository }
+/** Overlay to handle under-fingerprint sensor accessibility events. */
+class UdfpsAccessibilityOverlay(context: Context?) : View(context)

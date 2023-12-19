@@ -22,17 +22,13 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
-import com.android.systemui.keyguard.ui.viewmodel.deviceEntryIconViewModelTransitionsMock
+import com.android.systemui.keyguard.ui.viewmodel.fakeDeviceEntryIconViewModelTransition
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.systemUIDialogManager
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -48,25 +44,14 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(JUnit4::class)
 class DeviceEntryUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
-    val kosmos =
+    private val kosmos =
         testKosmos().apply {
             fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, true) }
         }
-    val testScope = kosmos.testScope
-
-    private val testDeviceEntryIconTransitionAlpha = MutableStateFlow(0f)
-    private val testDeviceEntryIconTransition: DeviceEntryIconTransition
-        get() =
-            object : DeviceEntryIconTransition {
-                override val deviceEntryParentViewAlpha: Flow<Float> =
-                    testDeviceEntryIconTransitionAlpha.asStateFlow()
-            }
-
-    init {
-        kosmos.deviceEntryIconViewModelTransitionsMock.add(testDeviceEntryIconTransition)
-    }
     private val systemUIDialogManager = kosmos.systemUIDialogManager
     private val bouncerRepository = kosmos.fakeKeyguardBouncerRepository
+    private val testScope = kosmos.testScope
+    private val deviceEntryIconViewModelTransition = kosmos.fakeDeviceEntryIconViewModelTransition
     private val underTest = kosmos.deviceEntryUdfpsTouchOverlayViewModel
 
     @Captor
@@ -82,7 +67,7 @@ class DeviceEntryUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val shouldHandleTouches by collectLastValue(underTest.shouldHandleTouches)
 
-            testDeviceEntryIconTransitionAlpha.value = 1f
+            deviceEntryIconViewModelTransition.setDeviceEntryParentViewAlpha(1f)
             runCurrent()
 
             verify(systemUIDialogManager).registerListener(sysuiDialogListenerCaptor.capture())
@@ -96,7 +81,7 @@ class DeviceEntryUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val shouldHandleTouches by collectLastValue(underTest.shouldHandleTouches)
 
-            testDeviceEntryIconTransitionAlpha.value = .3f
+            deviceEntryIconViewModelTransition.setDeviceEntryParentViewAlpha(.3f)
             runCurrent()
 
             verify(systemUIDialogManager).registerListener(sysuiDialogListenerCaptor.capture())
@@ -110,7 +95,7 @@ class DeviceEntryUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val shouldHandleTouches by collectLastValue(underTest.shouldHandleTouches)
 
-            testDeviceEntryIconTransitionAlpha.value = 1f
+            deviceEntryIconViewModelTransition.setDeviceEntryParentViewAlpha(1f)
             runCurrent()
 
             verify(systemUIDialogManager).registerListener(sysuiDialogListenerCaptor.capture())
@@ -124,7 +109,7 @@ class DeviceEntryUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val shouldHandleTouches by collectLastValue(underTest.shouldHandleTouches)
 
-            testDeviceEntryIconTransitionAlpha.value = 0f
+            deviceEntryIconViewModelTransition.setDeviceEntryParentViewAlpha(0f)
             runCurrent()
 
             bouncerRepository.setAlternateVisible(true)

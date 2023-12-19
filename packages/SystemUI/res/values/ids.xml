@@ -262,4 +262,8 @@
 
     <!--Id for the device-entry UDFPS icon that lives in the alternate bouncer. -->
     <item type="id" name="alternate_bouncer_udfps_icon_view" />
+
+    <!-- Id for the udfps accessibility overlay -->
+    <item type="id" name="udfps_accessibility_overlay" />
+    <item type="id" name="udfps_accessibility_overlay_top_guideline" />
 </resources>
