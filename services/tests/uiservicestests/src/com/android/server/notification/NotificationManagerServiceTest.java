@@ -13616,7 +13616,31 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
-    public void setNotificationPolicy_watchCompanionApp_setsGlobalPolicy() throws RemoteException {
+    public void setNotificationPolicy_watchCompanionApp_setsGlobalPolicy()
+            throws RemoteException {
+        setNotificationPolicy_dependingOnCompanionAppDevice_maySetGlobalPolicy(
+                AssociationRequest.DEVICE_PROFILE_WATCH, true);
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setNotificationPolicy_autoCompanionApp_setsGlobalPolicy()
+            throws RemoteException {
+        setNotificationPolicy_dependingOnCompanionAppDevice_maySetGlobalPolicy(
+                AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, true);
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setNotificationPolicy_otherCompanionApp_doesNotSetGlobalPolicy()
+            throws RemoteException {
+        setNotificationPolicy_dependingOnCompanionAppDevice_maySetGlobalPolicy(
+                AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING, false);
+    }
+
+    private void setNotificationPolicy_dependingOnCompanionAppDevice_maySetGlobalPolicy(
+            @AssociationRequest.DeviceProfile String deviceProfile, boolean canSetGlobalPolicy)
+            throws RemoteException {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
         mService.setCallerIsNormalPackage();
         ZenModeHelper zenModeHelper = mock(ZenModeHelper.class);
@@ -13626,14 +13650,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mCompanionMgr.getAssociations(anyString(), anyInt()))
                 .thenReturn(ImmutableList.of(
                         new AssociationInfo.Builder(1, mUserId, "package")
-                                .setDisplayName("My watch")
-                                .setDeviceProfile(AssociationRequest.DEVICE_PROFILE_WATCH)
+                                .setDisplayName("My connected device")
+                                .setDeviceProfile(deviceProfile)
                                 .build()));
 
         NotificationManager.Policy policy = new NotificationManager.Policy(0, 0, 0);
         mBinderService.setNotificationPolicy("package", policy, false);
 
-        verify(zenModeHelper).setNotificationPolicy(eq(policy), anyInt(), anyInt());
+        if (canSetGlobalPolicy) {
+            verify(zenModeHelper).setNotificationPolicy(eq(policy), anyInt(), anyInt());
+        } else {
+            verify(zenModeHelper).applyGlobalPolicyAsImplicitZenRule(anyString(), anyInt(),
+                    eq(policy), anyInt());
+        }
     }
 
     @Test
@@ -13703,7 +13732,29 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
-    public void setInterruptionFilter_watchCompanionApp_setsGlobalPolicy() throws RemoteException {
+    public void setInterruptionFilter_watchCompanionApp_setsGlobalZen() throws RemoteException {
+        setInterruptionFilter_dependingOnCompanionAppDevice_maySetGlobalZen(
+                AssociationRequest.DEVICE_PROFILE_WATCH, true);
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setInterruptionFilter_autoCompanionApp_setsGlobalZen() throws RemoteException {
+        setInterruptionFilter_dependingOnCompanionAppDevice_maySetGlobalZen(
+                AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION, true);
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setInterruptionFilter_otherCompanionApp_doesNotSetGlobalZen()
+            throws RemoteException {
+        setInterruptionFilter_dependingOnCompanionAppDevice_maySetGlobalZen(
+                AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING, false);
+    }
+
+    private void setInterruptionFilter_dependingOnCompanionAppDevice_maySetGlobalZen(
+            @AssociationRequest.DeviceProfile String deviceProfile, boolean canSetGlobalPolicy)
+            throws RemoteException {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
         ZenModeHelper zenModeHelper = mock(ZenModeHelper.class);
         mService.mZenModeHelper = zenModeHelper;
@@ -13713,14 +13764,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mCompanionMgr.getAssociations(anyString(), anyInt()))
                 .thenReturn(ImmutableList.of(
                         new AssociationInfo.Builder(1, mUserId, "package")
-                                .setDisplayName("My watch")
-                                .setDeviceProfile(AssociationRequest.DEVICE_PROFILE_WATCH)
+                                .setDisplayName("My connected device")
+                                .setDeviceProfile(deviceProfile)
                                 .build()));
 
         mBinderService.setInterruptionFilter("package", INTERRUPTION_FILTER_PRIORITY, false);
 
-        verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
-                eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyString(), eq("package"), anyInt());
+        if (canSetGlobalPolicy) {
+            verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
+                    eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyString(), eq("package"), anyInt());
+        } else {
+            verify(zenModeHelper).applyGlobalZenModeAsImplicitZenRule(anyString(), anyInt(),
+                    eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS));
+        }
     }
 
     @Test
