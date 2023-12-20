@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -36,9 +37,11 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
@@ -46,6 +49,7 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
+import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -109,6 +113,11 @@ private fun SceneScope.QuickSettingsScene(
             val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
             val collapsedHeaderHeight =
                 with(LocalDensity.current) { ShadeHeader.Dimensions.CollapsedHeight.roundToPx() }
+            val lifecycleOwner = LocalLifecycleOwner.current
+            val footerActionsViewModel = remember(lifecycleOwner, viewModel) {
+                viewModel.getFooterActionsViewModel(lifecycleOwner)
+            }
+
             Spacer(
                 modifier =
                     Modifier.element(Shade.Elements.ScrimBackground)
@@ -153,9 +162,22 @@ private fun SceneScope.QuickSettingsScene(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 QuickSettings(
-                    modifier = Modifier.fillMaxHeight(),
+                    modifier = Modifier.fillMaxHeight().weight(1f),
                     viewModel.qsSceneAdapter,
                 )
+                AnimatedVisibility(
+                    visible = !isCustomizing,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth()
+                ) {
+                    QuickSettingsTheme {
+                        // TODO(b/321716470) This should use a lifecycle tied to the scene.
+                        FooterActions(
+                            viewModel = footerActionsViewModel,
+                            qsVisibilityLifecycleOwner = lifecycleOwner,
+                            modifier = Modifier.element(QuickSettings.Elements.FooterActions)
+                        )
+                    }
+                }
             }
         }
         HeadsUpNotificationSpace(

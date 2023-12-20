@@ -23,6 +23,8 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.qs.FooterActionsController
+import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Direction
@@ -39,12 +41,16 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsVi
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -56,6 +62,12 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
     private val qsFlexiglassAdapter = FakeQSSceneAdapter { mock() }
+    private val footerActionsViewModel = mock<FooterActionsViewModel>()
+    private val footerActionsViewModelFactory =
+        mock<FooterActionsViewModel.Factory> {
+            whenever(create(any())).thenReturn(footerActionsViewModel)
+        }
+    private val footerActionsController = mock<FooterActionsController>()
 
     private var mobileIconsViewModel: MobileIconsViewModel =
         MobileIconsViewModel(
@@ -94,6 +106,8 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
+                footerActionsViewModelFactory,
+                footerActionsController,
             )
     }
 
@@ -125,4 +139,12 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                     )
                 )
         }
+
+    @Test
+    fun gettingViewModelInitializesControllerOnlyOnce() {
+        underTest.getFooterActionsViewModel(mock())
+        underTest.getFooterActionsViewModel(mock())
+
+        verify(footerActionsController, times(1)).init()
+    }
 }
