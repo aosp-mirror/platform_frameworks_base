@@ -57,6 +57,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
@@ -107,6 +108,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     private val selectedUserInteractor: SelectedUserInteractor,
     private val deviceEntryUdfpsTouchOverlayViewModel: Lazy<DeviceEntryUdfpsTouchOverlayViewModel>,
     private val defaultUdfpsTouchOverlayViewModel: Lazy<DefaultUdfpsTouchOverlayViewModel>,
+    private val shadeInteractor: ShadeInteractor,
 ) {
     private var overlayViewLegacy: UdfpsView? = null
         private set
@@ -277,7 +279,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                         updateAccessibilityViewLocation(sensorBounds)
                     },
                     statusBarStateController,
-                    primaryBouncerInteractor,
+                    shadeInteractor,
                     dialogManager,
                     dumpManager
                 )
@@ -303,6 +305,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                     udfpsKeyguardAccessibilityDelegate,
                     selectedUserInteractor,
                     transitionInteractor,
+                    shadeInteractor,
                 )
             }
             REASON_AUTH_BP -> {
@@ -310,7 +313,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                 UdfpsBpViewController(
                     view.addUdfpsView(R.layout.udfps_bp_view),
                     statusBarStateController,
-                    primaryBouncerInteractor,
+                    shadeInteractor,
                     dialogManager,
                     dumpManager
                 )
@@ -320,7 +323,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                 UdfpsFpmEmptyViewController(
                     view.addUdfpsView(R.layout.udfps_fpm_empty_view),
                     statusBarStateController,
-                    primaryBouncerInteractor,
+                    shadeInteractor,
                     dialogManager,
                     dumpManager
                 )

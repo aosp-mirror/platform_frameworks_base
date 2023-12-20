@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
@@ -68,16 +69,17 @@ open class UdfpsKeyguardViewControllerLegacy(
     systemUIDialogManager: SystemUIDialogManager,
     private val udfpsController: UdfpsController,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
-    primaryBouncerInteractor: PrimaryBouncerInteractor,
+    private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
     private val selectedUserInteractor: SelectedUserInteractor,
     private val transitionInteractor: KeyguardTransitionInteractor,
+    shadeInteractor: ShadeInteractor,
 ) :
     UdfpsAnimationViewController<UdfpsKeyguardViewLegacy>(
         view,
         statusBarStateController,
-        primaryBouncerInteractor,
+        shadeInteractor,
         systemUIDialogManager,
         dumpManager,
     ) {
@@ -319,7 +321,7 @@ open class UdfpsKeyguardViewControllerLegacy(
     }
 
     @VisibleForTesting
-    override suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
+    suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
         return scope.launch {
             primaryBouncerInteractor.bouncerExpansion.collect { bouncerExpansion: Float ->
                 inputBouncerExpansion = bouncerExpansion

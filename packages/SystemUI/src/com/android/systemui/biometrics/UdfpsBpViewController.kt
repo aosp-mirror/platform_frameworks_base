@@ -15,9 +15,9 @@
  */
 package com.android.systemui.biometrics
 
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 
 /**
@@ -26,13 +26,13 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 class UdfpsBpViewController(
     view: UdfpsBpView,
     statusBarStateController: StatusBarStateController,
-    primaryBouncerInteractor: PrimaryBouncerInteractor,
+    shadeInteractor: ShadeInteractor,
     systemUIDialogManager: SystemUIDialogManager,
     dumpManager: DumpManager
 ) : UdfpsAnimationViewController<UdfpsBpView>(
     view,
     statusBarStateController,
-    primaryBouncerInteractor,
+    shadeInteractor,
     systemUIDialogManager,
     dumpManager
 ) {
