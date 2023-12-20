@@ -373,6 +373,7 @@ public final class FadeOutManager {
             mFadedPlayers.clear();
         }
 
+        @GuardedBy("mLock")
         void fadeInPlayer(@NonNull AudioPlaybackConfiguration apc,
                 @Nullable VolumeShaper.Configuration config) {
             int piid = Integer.valueOf(apc.getPlayerInterfaceId());
@@ -385,10 +386,16 @@ public final class FadeOutManager {
                 return;
             }
 
+            VolumeShaper.Operation operation = VolumeShaper.Operation.REVERSE;
+            if (config != null) {
+                // replace and join the volumeshapers with (possibly) in progress fade out operation
+                // for a smoother fade in
+                operation = new VolumeShaper.Operation.Builder()
+                        .replace(mFadedPlayers.get(piid).getId(), /* join= */ true).build();
+            }
             mFadedPlayers.remove(piid);
             if (apc.getPlayerProxy() != null) {
-                applyVolumeShaperInternal(apc, piid, config,
-                        config != null ? PLAY_CREATE_IF_NEEDED : VolumeShaper.Operation.REVERSE);
+                applyVolumeShaperInternal(apc, piid, config, operation);
             } else {
                 if (DEBUG) {
                     Slog.v(TAG, "Error fading in player piid:" + piid
@@ -397,6 +404,7 @@ public final class FadeOutManager {
             }
         }
 
+        @GuardedBy("mLock")
         void clear() {
             if (mFadedPlayers.size() > 0) {
                 if (DEBUG) {
