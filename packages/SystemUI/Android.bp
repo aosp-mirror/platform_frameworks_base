@@ -157,7 +157,7 @@ android_library {
         "SystemUI-res",
         "WifiTrackerLib",
         "WindowManager-Shell",
-        "SystemUIAnimationLib",
+        "PlatformAnimationLib",
         "SystemUICommon",
         "SystemUICustomizationLib",
         "SystemUILogLib",
@@ -274,7 +274,7 @@ android_library {
     static_libs: [
         "SystemUI-res",
         "WifiTrackerLib",
-        "SystemUIAnimationLib",
+        "PlatformAnimationLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SystemUICustomizationLib",

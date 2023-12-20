@@ -30,8 +30,8 @@ android_library {
         "src/**/*.aidl",
     ],
     static_libs: [
+        "PlatformAnimationLib",
         "PluginCoreLib",
-        "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUIUnfoldLib",
         "androidx.dynamicanimation_dynamicanimation",

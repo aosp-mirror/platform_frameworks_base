@@ -51,8 +51,8 @@ android_library {
     ],
     static_libs: [
         "BiometricsSharedLib",
+        "PlatformAnimationLib",
         "PluginCoreLib",
-        "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUIUnfoldLib",
         "SystemUISharedLib-Keyguard",
