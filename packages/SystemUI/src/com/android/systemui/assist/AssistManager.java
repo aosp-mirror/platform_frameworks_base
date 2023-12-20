@@ -5,6 +5,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
@@ -144,6 +145,7 @@ public class AssistManager {
     private final UserTracker mUserTracker;
     private final DisplayTracker mDisplayTracker;
     private final SecureSettings mSecureSettings;
+    private final ActivityManager mActivityManager;
 
     private final DeviceProvisionedController mDeviceProvisionedController;
 
@@ -183,7 +185,8 @@ public class AssistManager {
             @Main Handler uiHandler,
             UserTracker userTracker,
             DisplayTracker displayTracker,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            ActivityManager activityManager) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
@@ -195,6 +198,7 @@ public class AssistManager {
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mSecureSettings = secureSettings;
+        mActivityManager = activityManager;
 
         registerVoiceInteractionSessionListener();
         registerVisualQueryRecognitionStatusListener();
@@ -266,6 +270,9 @@ public class AssistManager {
     }
 
     public void startAssist(Bundle args) {
+        if (mActivityManager.getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_LOCKED) {
+            return;
+        }
         if (shouldOverrideAssist(args)) {
             try {
                 if (mOverviewProxyService.getProxy() == null) {
