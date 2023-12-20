@@ -16,34 +16,74 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import android.view.View
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
+import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
+import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 
-class NotificationSection @Inject constructor() {
+class NotificationSection
+@Inject
+constructor(
+    private val rootViewModel: KeyguardRootViewModel,
+    private val sharedNotificationContainer: SharedNotificationContainer,
+    private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
+    private val controller: NotificationStackScrollLayoutController,
+    private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
+    @Main private val dispatcher: CoroutineDispatcher,
+    private val sceneContainerFlags: SceneContainerFlags,
+) {
     @Composable
     fun SceneScope.Notifications(modifier: Modifier = Modifier) {
         MovableElement(
             key = NotificationsElementKey,
             modifier = modifier,
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize().background(Color.Yellow),
-            ) {
-                Text(
-                    text = "TODO(b/316211368): Notifications",
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+            val (bounds, onBoundsChanged) = remember { mutableStateOf<Pair<Float, Float>?>(null) }
+            LaunchedEffect(bounds) {
+                bounds?.let {
+                    rootViewModel.onNotificationContainerBoundsChanged(bounds.first, bounds.second)
+                }
             }
+
+            AndroidView(
+                factory = { context ->
+                    View(context, null).apply {
+                        id = R.id.nssl_placeholder
+                        SharedNotificationContainerBinder.bind(
+                            view = sharedNotificationContainer,
+                            viewModel = sharedNotificationContainerViewModel,
+                            sceneContainerFlags = sceneContainerFlags,
+                            controller = controller,
+                            notificationStackSizeCalculator = notificationStackSizeCalculator,
+                            mainImmediateDispatcher = dispatcher,
+                        )
+                    }
+                },
+                modifier =
+                    modifier.onPlaced {
+                        val positionInRoot = it.positionInWindow()
+                        val size = it.size
+                        onBoundsChanged(positionInRoot.y to positionInRoot.y + size.height)
+                    },
+            )
         }
     }
 }
