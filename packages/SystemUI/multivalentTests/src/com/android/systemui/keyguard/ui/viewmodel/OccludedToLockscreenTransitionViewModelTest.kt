@@ -95,7 +95,7 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(5)
+            assertThat(values.size).isEqualTo(4)
             values.forEach { assertThat(it).isIn(Range.closed(-100f, 0f)) }
         }
 

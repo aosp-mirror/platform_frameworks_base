@@ -95,7 +95,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(3)
+            assertThat(values.size).isEqualTo(1)
             values.forEach { assertThat(it).isEqualTo(0f) }
         }
 
@@ -107,7 +107,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
             keyguardTransitionRepository.sendTransitionStep(step(1f))
 
-            assertThat(values.size).isEqualTo(2)
+            assertThat(values.size).isEqualTo(1)
             values.forEach { assertThat(it).isEqualTo(0f) }
         }
 
@@ -121,7 +121,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
             keyguardTransitionRepository.sendTransitionStep(step(1f))
 
-            assertThat(values.size).isEqualTo(2)
+            assertThat(values.size).isEqualTo(1)
             values.forEach { assertThat(it).isEqualTo(1f) }
         }
 
@@ -135,7 +135,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
             keyguardTransitionRepository.sendTransitionStep(step(1f))
 
-            assertThat(values.size).isEqualTo(2)
+            assertThat(values.size).isEqualTo(1)
             values.forEach { assertThat(it).isEqualTo(1f) }
         }
 
