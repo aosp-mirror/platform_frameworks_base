@@ -319,6 +319,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages Sticky modifier state
     private final StickyModifierStateController mStickyModifierStateController;
 
+    // Manages Keyboard microphone mute led
+    private final KeyboardLedController mKeyboardLedController;
+
     // Manages Keyboard modifier keys remapping
     private final KeyRemapper mKeyRemapper;
 
@@ -468,6 +471,8 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), injector.getUEventManager())
                 : new KeyboardBacklightControllerInterface() {};
         mStickyModifierStateController = new StickyModifierStateController();
+        mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
+                mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
         mPointerIconCache = new PointerIconCache(mContext, mNative);
 
@@ -582,6 +587,7 @@ public class InputManagerService extends IInputManager.Stub
         mKeyboardLayoutManager.systemRunning();
         mBatteryController.systemRunning();
         mKeyboardBacklightController.systemRunning();
+        mKeyboardLedController.systemRunning();
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
     }
@@ -2164,6 +2170,7 @@ public class InputManagerService extends IInputManager.Stub
         dumpDisplayInputPropertiesValues(ipw);
         mBatteryController.dump(ipw);
         mKeyboardBacklightController.dump(ipw);
+        mKeyboardLedController.dump(ipw);
     }
 
     private void dumpAssociations(IndentingPrintWriter pw) {
