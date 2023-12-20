@@ -626,17 +626,19 @@ constructor(
             faceAuthLogger.skippingDetection(_isAuthRunning.value, detectCancellationSignal != null)
             return
         }
-        detectCancellationSignal?.cancel()
-        detectCancellationSignal = CancellationSignal()
         withContext(mainDispatcher) {
             // We always want to invoke face detect in the main thread.
             faceAuthLogger.faceDetectionStarted()
-            faceManager?.detectFace(
-                checkNotNull(detectCancellationSignal),
-                detectionCallback,
-                SysUiFaceAuthenticateOptions(currentUserId, uiEvent, uiEvent.extraInfo)
-                    .toFaceAuthenticateOptions()
-            )
+            detectCancellationSignal?.cancel()
+            detectCancellationSignal = CancellationSignal()
+            detectCancellationSignal?.let {
+                faceManager?.detectFace(
+                    it,
+                    detectionCallback,
+                    SysUiFaceAuthenticateOptions(currentUserId, uiEvent, uiEvent.extraInfo)
+                        .toFaceAuthenticateOptions()
+                )
+            }
         }
     }
 
