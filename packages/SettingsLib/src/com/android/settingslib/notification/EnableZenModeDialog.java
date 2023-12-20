@@ -16,7 +16,6 @@
 
 package com.android.settingslib.notification;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -42,6 +41,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.PhoneWindow;
