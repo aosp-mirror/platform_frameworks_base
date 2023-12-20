@@ -165,8 +165,15 @@ public class DisplayBrightnessMappingConfig {
      */
     public float[] getLuxArray(@AutomaticBrightnessController.AutomaticBrightnessMode int mode,
             int preset) {
-        return mBrightnessLevelsLuxMap.get(
+        float[] luxArray = mBrightnessLevelsLuxMap.get(
                 autoBrightnessModeToString(mode) + "_" + autoBrightnessPresetToString(preset));
+        if (luxArray != null) {
+            return luxArray;
+        }
+
+        // No array for this preset, fall back to the normal preset
+        return mBrightnessLevelsLuxMap.get(autoBrightnessModeToString(mode) + "_"
+                + AutoBrightnessSettingName.normal.getRawName());
     }
 
     /**
@@ -184,8 +191,15 @@ public class DisplayBrightnessMappingConfig {
      */
     public float[] getBrightnessArray(
             @AutomaticBrightnessController.AutomaticBrightnessMode int mode, int preset) {
-        return mBrightnessLevelsMap.get(
+        float[] brightnessArray = mBrightnessLevelsMap.get(
                 autoBrightnessModeToString(mode) + "_" + autoBrightnessPresetToString(preset));
+        if (brightnessArray != null) {
+            return brightnessArray;
+        }
+
+        // No array for this preset, fall back to the normal preset
+        return mBrightnessLevelsMap.get(autoBrightnessModeToString(mode) + "_"
+                + AutoBrightnessSettingName.normal.getRawName());
     }
 
     @Override
