@@ -403,8 +403,7 @@ public class AutomaticBrightnessController {
                     | (!mAmbientLuxValid ? BrightnessEvent.FLAG_INVALID_LUX : 0)
                     | (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE
                         ? BrightnessEvent.FLAG_DOZE_SCALE : 0)
-                    | (getMode() == AUTO_BRIGHTNESS_MODE_IDLE
-                        ? BrightnessEvent.FLAG_IDLE_CURVE : 0));
+                    | (isInIdleMode() ? BrightnessEvent.FLAG_IDLE_CURVE : 0));
         }
 
         if (!mAmbientLuxValid) {
@@ -515,8 +514,7 @@ public class AutomaticBrightnessController {
         if (mLoggingEnabled) {
             Slog.d(TAG, "Display policy transitioning from " + oldPolicy + " to " + policy);
         }
-        if (!isInteractivePolicy(policy) && isInteractivePolicy(oldPolicy)
-                && getMode() != AUTO_BRIGHTNESS_MODE_IDLE) {
+        if (!isInteractivePolicy(policy) && isInteractivePolicy(oldPolicy) && !isInIdleMode()) {
             mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_CURRENT_SHORT_TERM_MODEL,
                     mCurrentBrightnessMapper.getShortTermModelTimeout());
         } else if (isInteractivePolicy(policy) && !isInteractivePolicy(oldPolicy)) {
@@ -557,7 +555,7 @@ public class AutomaticBrightnessController {
             boolean shouldResetShortTermModel) {
         if (mBrightnessMappingStrategyMap.get(AUTO_BRIGHTNESS_MODE_DEFAULT)
                 .setBrightnessConfiguration(configuration)) {
-            if (getMode() != AUTO_BRIGHTNESS_MODE_IDLE && shouldResetShortTermModel) {
+            if (!isInIdleMode() && shouldResetShortTermModel) {
                 resetShortTermModel();
             }
             return true;
@@ -565,9 +563,8 @@ public class AutomaticBrightnessController {
         return false;
     }
 
-    @AutomaticBrightnessController.AutomaticBrightnessMode
-    public int getMode() {
-        return mCurrentBrightnessMapper.getMode();
+    public boolean isInIdleMode() {
+        return mCurrentBrightnessMapper.getMode() == AUTO_BRIGHTNESS_MODE_IDLE;
     }
 
     public void dump(PrintWriter pw) {
@@ -623,7 +620,8 @@ public class AutomaticBrightnessController {
         pw.println("  mPendingForegroundAppPackageName=" + mPendingForegroundAppPackageName);
         pw.println("  mForegroundAppCategory=" + mForegroundAppCategory);
         pw.println("  mPendingForegroundAppCategory=" + mPendingForegroundAppCategory);
-        pw.println("  Current mode=" + autoBrightnessModeToString(getMode()));
+        pw.println("  Current mode="
+                + autoBrightnessModeToString(mCurrentBrightnessMapper.getMode()));
 
         pw.println();
         for (int i = 0; i < mBrightnessMappingStrategyMap.size(); i++) {
@@ -745,7 +743,7 @@ public class AutomaticBrightnessController {
             lux = 0;
         }
         mAmbientLux = lux;
-        if (getMode() == AUTO_BRIGHTNESS_MODE_IDLE) {
+        if (isInIdleMode()) {
             mAmbientBrighteningThreshold =
                     mAmbientBrightnessThresholdsIdle.getBrighteningThreshold(lux);
             mAmbientDarkeningThreshold =
@@ -837,7 +835,7 @@ public class AutomaticBrightnessController {
             }
             earliestValidTime = mAmbientLightRingBuffer.getTime(i);
         }
-        return earliestValidTime + (getMode() == AUTO_BRIGHTNESS_MODE_IDLE
+        return earliestValidTime + (isInIdleMode()
                 ? mBrighteningLightDebounceConfigIdle : mBrighteningLightDebounceConfig);
     }
 
@@ -850,7 +848,7 @@ public class AutomaticBrightnessController {
             }
             earliestValidTime = mAmbientLightRingBuffer.getTime(i);
         }
-        return earliestValidTime + (getMode() == AUTO_BRIGHTNESS_MODE_IDLE
+        return earliestValidTime + (isInIdleMode()
                 ? mDarkeningLightDebounceConfigIdle : mDarkeningLightDebounceConfig);
     }
 
@@ -975,7 +973,7 @@ public class AutomaticBrightnessController {
                 mPreThresholdBrightness = mScreenAutoBrightness;
             }
             mScreenAutoBrightness = newScreenAutoBrightness;
-            if (getMode() == AUTO_BRIGHTNESS_MODE_IDLE) {
+            if (isInIdleMode()) {
                 mScreenBrighteningThreshold = clampScreenBrightness(
                         mScreenBrightnessThresholdsIdle.getBrighteningThreshold(
                                 newScreenAutoBrightness));

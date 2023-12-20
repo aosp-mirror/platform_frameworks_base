@@ -65,16 +65,6 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
         return true;
     }
 
-    @Override
-    public float[] getCurrentAutoBrightnessLevels() {
-        return mDisplayPowerController.getCurrentAutoBrightnessLevels();
-    }
-
-    @Override
-    public float[] getCurrentAutoBrightnessLuxLevels() {
-        return mDisplayPowerController.getCurrentAutoBrightnessLuxLevels();
-    }
-
     /**
      * Start the offload session. The method returns if the session is already active.
      * @return Whether the session was started successfully

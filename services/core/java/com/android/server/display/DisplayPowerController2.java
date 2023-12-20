@@ -951,7 +951,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 DisplayPowerState.SCREEN_BRIGHTNESS_FLOAT,
                 DisplayPowerState.SCREEN_SDR_BRIGHTNESS_FLOAT);
         setAnimatorRampSpeeds(mAutomaticBrightnessController != null
-                && mAutomaticBrightnessController.getMode() == AUTO_BRIGHTNESS_MODE_IDLE);
+                && mAutomaticBrightnessController.isInIdleMode());
         mScreenBrightnessRampAnimator.setListener(mRampAnimatorListener);
 
         noteScreenState(mPowerState.getScreenState());
@@ -1365,7 +1365,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         // Switch to doze auto-brightness mode if needed
         if (mFlags.areAutoBrightnessModesEnabled() && mAutomaticBrightnessController != null
-                && mAutomaticBrightnessController.getMode() != AUTO_BRIGHTNESS_MODE_IDLE) {
+                && !mAutomaticBrightnessController.isInIdleMode()) {
             setAutomaticScreenBrightnessMode(Display.isDozeState(state)
                     ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT);
         }
@@ -1654,8 +1654,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     boolean isIncreasing = animateValue > currentBrightness;
                     final float rampSpeed;
                     final boolean idle = mAutomaticBrightnessController != null
-                            && mAutomaticBrightnessController.getMode()
-                            == AUTO_BRIGHTNESS_MODE_IDLE;
+                            && mAutomaticBrightnessController.isInIdleMode();
                     if (isIncreasing && slowChange) {
                         rampSpeed = idle ? mBrightnessRampRateSlowIncreaseIdle
                                 : mBrightnessRampRateSlowIncrease;
@@ -1884,18 +1883,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         Message msg = mHandler.obtainMessage(MSG_SET_BRIGHTNESS_FROM_OFFLOAD,
                 Float.floatToIntBits(brightness), 0 /*unused*/);
         mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
-    }
-
-    @Override
-    public float[] getCurrentAutoBrightnessLevels() {
-        return mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(
-                mAutomaticBrightnessController.getMode());
-    }
-
-    @Override
-    public float[] getCurrentAutoBrightnessLuxLevels() {
-        return mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
-                mAutomaticBrightnessController.getMode());
     }
 
     @Override
@@ -2473,7 +2460,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // or the nits is invalid.
         if (brightnessIsTemporary
                 || mAutomaticBrightnessController == null
-                || mAutomaticBrightnessController.getMode() == AUTO_BRIGHTNESS_MODE_IDLE
+                || mAutomaticBrightnessController.isInIdleMode()
                 || !autobrightnessEnabled
                 || mBrightnessTracker == null
                 || !shouldUseAutoBrightness
