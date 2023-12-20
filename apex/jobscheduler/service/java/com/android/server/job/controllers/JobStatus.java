@@ -106,11 +106,8 @@ public final class JobStatus {
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final int CONSTRAINT_CHARGING = JobInfo.CONSTRAINT_FLAG_CHARGING; // 1 < 0
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;  // 1 << 2
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final int CONSTRAINT_BATTERY_NOT_LOW =
             JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW; // 1 << 1
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -125,7 +122,7 @@ public final class JobStatus {
     static final int CONSTRAINT_WITHIN_QUOTA = 1 << 24;      // Implicit constraint
     static final int CONSTRAINT_PREFETCH = 1 << 23;
     static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1 << 22; // Implicit constraint
-    static final int CONSTRAINT_FLEXIBLE = 1 << 21; // Implicit constraint
+    public static final int CONSTRAINT_FLEXIBLE = 1 << 21; // Implicit constraint
 
     private static final int IMPLICIT_CONSTRAINTS = 0
             | CONSTRAINT_BACKGROUND_NOT_RESTRICTED
@@ -1534,7 +1531,7 @@ public final class JobStatus {
 
     /**
      * Returns the number of required flexible job constraints that have been dropped with time.
-     * The lower this number is the easier it is for the flexibility constraint to be satisfied.
+     * The higher this number is the easier it is for the flexibility constraint to be satisfied.
      */
     public int getNumDroppedFlexibleConstraints() {
         return mNumDroppedFlexibleConstraints;
@@ -1600,7 +1597,8 @@ public final class JobStatus {
         mTransportAffinitiesSatisfied = isSatisfied;
     }
 
-    boolean canApplyTransportAffinities() {
+    /** Whether transport affinities can be applied to the job in flex scheduling. */
+    public boolean canApplyTransportAffinities() {
         return mCanApplyTransportAffinities;
     }
 
