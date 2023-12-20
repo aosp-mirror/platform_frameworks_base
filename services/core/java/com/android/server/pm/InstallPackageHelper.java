@@ -2860,14 +2860,17 @@ final class InstallPackageHelper {
                 mPm.notifyPackageChanged(packageName, request.getAppId());
             }
 
-            for (int userId : firstUserIds) {
-                // Apply restricted settings on potentially dangerous packages. Needs to happen
-                // after appOpsManager is notified of the new package
-                if (request.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE
-                        || request.getPackageSource()
-                        == PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE) {
-                    enableRestrictedSettings(packageName, request.getAppId(), userId);
-                }
+            // Apply restricted settings on potentially dangerous packages. Needs to happen
+            // after appOpsManager is notified of the new package
+            if (request.getPackageSource() == PackageInstaller.PACKAGE_SOURCE_LOCAL_FILE
+                    || request.getPackageSource()
+                    == PackageInstaller.PACKAGE_SOURCE_DOWNLOADED_FILE) {
+                final int appId = request.getAppId();
+                mPm.mHandler.post(() -> {
+                    for (int userId : firstUserIds) {
+                        enableRestrictedSettings(packageName, appId, userId);
+                    }
+                });
             }
 
             // Log current value of "unknown sources" setting
