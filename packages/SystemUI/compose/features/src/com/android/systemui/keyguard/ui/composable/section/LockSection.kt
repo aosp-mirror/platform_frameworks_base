@@ -19,25 +19,33 @@ package com.android.systemui.keyguard.ui.composable.section
 import android.content.Context
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.keyguard.LockIconView
+import com.android.keyguard.LockIconViewController
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
+import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.VibratorHelper
+import dagger.Lazy
 import javax.inject.Inject
 
 class LockSection
@@ -46,48 +54,70 @@ constructor(
     private val windowManager: WindowManager,
     private val authController: AuthController,
     private val featureFlags: FeatureFlagsClassic,
+    private val lockIconViewController: Lazy<LockIconViewController>,
+    private val deviceEntryIconViewModel: Lazy<DeviceEntryIconViewModel>,
+    private val deviceEntryForegroundViewModel: Lazy<DeviceEntryForegroundViewModel>,
+    private val deviceEntryBackgroundViewModel: Lazy<DeviceEntryBackgroundViewModel>,
+    private val falsingManager: Lazy<FalsingManager>,
+    private val vibratorHelper: Lazy<VibratorHelper>,
 ) {
     @Composable
     fun SceneScope.LockIcon(modifier: Modifier = Modifier) {
-        MovableElement(
-            key = LockIconElementKey,
-            modifier = modifier,
-        ) {
-            val context = LocalContext.current
-            Box(
-                modifier =
-                    Modifier.background(Color.Red).layout { measurable, _ ->
-                        val lockIconBounds = lockIconBounds(context)
-                        val placeable =
-                            measurable.measure(
-                                Constraints.fixed(
-                                    width = lockIconBounds.width,
-                                    height = lockIconBounds.height,
-                                )
-                            )
-                        layout(
-                            width = placeable.width,
-                            height = placeable.height,
-                            alignmentLines =
-                                mapOf(
-                                    BlueprintAlignmentLines.LockIcon.Left to lockIconBounds.left,
-                                    BlueprintAlignmentLines.LockIcon.Top to lockIconBounds.top,
-                                    BlueprintAlignmentLines.LockIcon.Right to lockIconBounds.right,
-                                    BlueprintAlignmentLines.LockIcon.Bottom to
-                                        lockIconBounds.bottom,
-                                ),
-                        ) {
-                            placeable.place(0, 0)
-                        }
-                    },
-            ) {
-                Text(
-                    text = "TODO(b/316211368): Lock",
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.Center),
-                )
-            }
+        if (!keyguardBottomAreaRefactor() && !DeviceEntryUdfpsRefactor.isEnabled) {
+            return
         }
+
+        val context = LocalContext.current
+
+        AndroidView(
+            factory = { context ->
+                val view =
+                    if (DeviceEntryUdfpsRefactor.isEnabled) {
+                        DeviceEntryIconView(context, null).apply {
+                            id = R.id.device_entry_icon_view
+                            DeviceEntryIconViewBinder.bind(
+                                this,
+                                deviceEntryIconViewModel.get(),
+                                deviceEntryForegroundViewModel.get(),
+                                deviceEntryBackgroundViewModel.get(),
+                                falsingManager.get(),
+                                vibratorHelper.get(),
+                            )
+                        }
+                    } else {
+                        // keyguardBottomAreaRefactor()
+                        LockIconView(context, null).apply {
+                            id = R.id.lock_icon_view
+                            lockIconViewController.get().setLockIconView(this)
+                        }
+                    }
+                view
+            },
+            modifier =
+                modifier.element(LockIconElementKey).layout { measurable, _ ->
+                    val lockIconBounds = lockIconBounds(context)
+                    val placeable =
+                        measurable.measure(
+                            Constraints.fixed(
+                                width = lockIconBounds.width,
+                                height = lockIconBounds.height,
+                            )
+                        )
+                    layout(
+                        width = placeable.width,
+                        height = placeable.height,
+                        alignmentLines =
+                            mapOf(
+                                BlueprintAlignmentLines.LockIcon.Left to lockIconBounds.left,
+                                BlueprintAlignmentLines.LockIcon.Top to lockIconBounds.top,
+                                BlueprintAlignmentLines.LockIcon.Right to lockIconBounds.right,
+                                BlueprintAlignmentLines.LockIcon.Bottom to lockIconBounds.bottom,
+                            ),
+                    ) {
+                        placeable.place(0, 0)
+                    }
+                },
+        )
     }
 
     /**
