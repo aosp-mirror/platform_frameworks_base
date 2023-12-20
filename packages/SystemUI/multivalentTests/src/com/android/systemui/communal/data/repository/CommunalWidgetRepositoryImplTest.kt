@@ -208,11 +208,11 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val repository = initCommunalWidgetRepository()
             runCurrent()
 
-            val ids = listOf(104, 103, 101)
-            repository.updateWidgetOrder(ids)
+            val widgetIdToPriorityMap = mapOf(104 to 1, 103 to 2, 101 to 3)
+            repository.updateWidgetOrder(widgetIdToPriorityMap)
             runCurrent()
 
-            verify(communalWidgetDao).updateWidgetOrder(ids)
+            verify(communalWidgetDao).updateWidgetOrder(widgetIdToPriorityMap)
         }
 
     @Test

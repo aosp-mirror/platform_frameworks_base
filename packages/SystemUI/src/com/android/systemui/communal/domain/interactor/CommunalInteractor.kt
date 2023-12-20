@@ -102,8 +102,13 @@ constructor(
     /** Delete a widget by id. */
     fun deleteWidget(id: Int) = widgetRepository.deleteWidget(id)
 
-    /** Reorder widgets. The order in the list will be their display order in the hub. */
-    fun updateWidgetOrder(ids: List<Int>) = widgetRepository.updateWidgetOrder(ids)
+    /**
+     * Reorder the widgets.
+     *
+     * @param widgetIdToPriorityMap mapping of the widget ids to their new priorities.
+     */
+    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) =
+        widgetRepository.updateWidgetOrder(widgetIdToPriorityMap)
 
     /** A list of widget content to be displayed in the communal hub. */
     val widgetContent: Flow<List<CommunalContentModel.Widget>> =
