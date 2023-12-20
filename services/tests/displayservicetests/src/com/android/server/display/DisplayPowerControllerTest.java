@@ -1164,7 +1164,7 @@ public final class DisplayPowerControllerTest {
         float brightness = 0.6f;
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
         when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
-        when(mHolder.automaticBrightnessController.getMode()).thenReturn(AUTO_BRIGHTNESS_MODE_IDLE);
+        when(mHolder.automaticBrightnessController.isInIdleMode()).thenReturn(true);
         when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
                 any(BrightnessEvent.class))).thenReturn(brightness);
 

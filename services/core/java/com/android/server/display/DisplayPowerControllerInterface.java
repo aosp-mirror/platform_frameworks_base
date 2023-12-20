@@ -237,14 +237,4 @@ public interface DisplayPowerControllerInterface {
      * Indicate that boot has been completed and the screen is ready to update.
      */
     void onBootCompleted();
-
-    /**
-     * Get the current brightness levels used to determine automatic brightness based on lux levels.
-     */
-    float[] getCurrentAutoBrightnessLevels();
-
-    /**
-     * Get the current lux levels used to determine automatic brightness.
-     */
-    float[] getCurrentAutoBrightnessLuxLevels();
 }
