@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.composable.section
 import android.view.View
 import android.widget.ImageView
 import androidx.annotation.IdRes
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -58,38 +57,17 @@ constructor(
     private val indicationAreaViewModel: KeyguardIndicationAreaViewModel,
     private val keyguardRootViewModel: KeyguardRootViewModel,
 ) {
-    @Composable
-    fun SceneScope.BottomArea(
-        modifier: Modifier = Modifier,
-    ) {
-        Row(
-            modifier =
-                modifier
-                    .padding(
-                        horizontal =
-                            dimensionResource(R.dimen.keyguard_affordance_horizontal_offset)
-                    )
-                    .padding(
-                        bottom = dimensionResource(R.dimen.keyguard_affordance_vertical_offset)
-                    ),
-        ) {
-            Shortcut(
-                isStart = true,
-            )
-
-            IndicationArea(
-                modifier = Modifier.weight(1f),
-            )
-
-            Shortcut(
-                isStart = false,
-            )
-        }
-    }
-
+    /**
+     * Renders a single lockscreen shortcut.
+     *
+     * @param isStart Whether the shortcut goes on the left (in left-to-right locales).
+     * @param applyPadding Whether to apply padding around the shortcut, this is needed if the
+     *   shortcut is placed along the edges of the display.
+     */
     @Composable
     fun SceneScope.Shortcut(
         isStart: Boolean,
+        applyPadding: Boolean,
         modifier: Modifier = Modifier,
     ) {
         MovableElement(
@@ -103,6 +81,12 @@ constructor(
                 falsingManager = falsingManager,
                 vibratorHelper = vibratorHelper,
                 indicationController = indicationController,
+                modifier =
+                    if (applyPadding) {
+                        Modifier.shortcutPadding()
+                    } else {
+                        Modifier
+                    }
             )
         }
     }
@@ -113,7 +97,7 @@ constructor(
     ) {
         MovableElement(
             key = IndicationAreaElementKey,
-            modifier = modifier,
+            modifier = modifier.shortcutPadding(),
         ) {
             IndicationArea(
                 indicationAreaViewModel = indicationAreaViewModel,
@@ -217,6 +201,14 @@ constructor(
             onRelease = { disposable?.dispose() },
             modifier = modifier.fillMaxWidth(),
         )
+    }
+
+    @Composable
+    private fun Modifier.shortcutPadding(): Modifier {
+        return this.padding(
+                horizontal = dimensionResource(R.dimen.keyguard_affordance_horizontal_offset)
+            )
+            .padding(bottom = dimensionResource(R.dimen.keyguard_affordance_vertical_offset))
     }
 }
 
