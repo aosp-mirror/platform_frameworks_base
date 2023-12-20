@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.appwidget.flags.Flags.drawDataParcel;
+
 import static com.android.internal.R.id.pending_intent_tag;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -63,6 +65,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -412,6 +415,24 @@ public class RemoteViewsTest {
         View view = parent.apply(mContext, mContainer);
         assertNull(view.findViewById(R.id.text));
         assertNotNull(view.findViewById(R.id.light_background_text));
+    }
+
+    @Test
+    public void remoteCanvasCanAccessDrawInstructions() {
+        if (!drawDataParcel()) {
+            return;
+        }
+        final byte[] first = new byte[] {'f', 'i', 'r', 's', 't'};
+        final byte[] second = new byte[] {'s', 'e', 'c', 'o', 'n', 'd'};
+        final RemoteViews.DrawInstructions drawInstructions =
+                new RemoteViews.DrawInstructions.Builder(
+                        Collections.singletonList(first)).build();
+        drawInstructions.appendInstructions(second);
+
+        RemoteViews rv = new RemoteViews(drawInstructions);
+        View view = rv.apply(mContext, mContainer);
+        assertTrue(view instanceof RemoteCanvas);
+        assertEquals(drawInstructions, view.getTag());
     }
 
     private RemoteViews createViewChained(int depth, String... texts) {

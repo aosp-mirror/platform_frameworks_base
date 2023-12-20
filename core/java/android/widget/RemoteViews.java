@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import static android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL;
+import static android.appwidget.flags.Flags.drawDataParcel;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 
@@ -243,6 +245,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int ATTRIBUTE_REFLECTION_ACTION_TAG = 32;
     private static final int SET_REMOTE_ADAPTER_TAG = 33;
     private static final int SET_ON_STYLUS_HANDWRITING_RESPONSE_TAG = 34;
+    private static final int SET_DRAW_INSTRUCTION_TAG = 35;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -441,6 +444,13 @@ public class RemoteViews implements Parcelable, Filter {
      */
     @Nullable
     private LayoutInflater.Factory2 mLayoutInflaterFactory2;
+
+    /**
+     * Indicates whether this {@link RemoteViews} was instantiated with a {@link DrawInstructions}
+     * object. {@link DrawInstructions} serves as an alternative protocol for the host process
+     * to render.
+     */
+    private boolean mHasDrawInstructions;
 
     private static final InteractionHandler DEFAULT_INTERACTION_HANDLER =
             (view, pendingIntent, response) ->
@@ -3851,6 +3861,45 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private static class SetDrawInstructionAction extends Action {
+
+        @Nullable
+        private final DrawInstructions mInstructions;
+
+        SetDrawInstructionAction(@NonNull final DrawInstructions instructions) {
+            mInstructions = instructions;
+        }
+
+        SetDrawInstructionAction(@NonNull final Parcel in) {
+            if (drawDataParcel()) {
+                mInstructions = DrawInstructions.readFromParcel(in);
+            } else {
+                mInstructions = null;
+            }
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            if (drawDataParcel()) {
+                DrawInstructions.writeToParcel(mInstructions, dest, flags);
+            }
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, ActionApplyParams params)
+                throws ActionException {
+            if (drawDataParcel() && mInstructions != null
+                    && root instanceof RemoteCanvas remoteCanvas) {
+                remoteCanvas.setDrawInstructions(mInstructions);
+            }
+        }
+
+        @Override
+        public int getActionTag() {
+            return SET_DRAW_INSTRUCTION_TAG;
+        }
+    }
+
     /**
      * Create a new RemoteViews object that will display the views contained
      * in the specified layout file.
@@ -4080,6 +4129,7 @@ public class RemoteViews implements Parcelable, Filter {
         mClassCookies = src.mClassCookies;
         mIdealSize = src.mIdealSize;
         mProviderInstanceId = src.mProviderInstanceId;
+        mHasDrawInstructions = src.mHasDrawInstructions;
 
         if (src.hasLandscapeAndPortraitLayouts()) {
             mLandscape = createInitializedFrom(src.mLandscape, hierarchyRoot);
@@ -4114,10 +4164,24 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Reads a RemoteViews object from a parcel.
      *
-     * @param parcel
+     * @param parcel the parcel object
      */
     public RemoteViews(Parcel parcel) {
         this(parcel, /* rootData= */ null, /* info= */ null, /* depth= */ 0);
+    }
+
+    /**
+     * Instantiates a RemoteViews object using {@link DrawInstructions}, which serves as an
+     * alternative to XML layout. {@link DrawInstructions} objects contains the instructions which
+     * can be interpreted and rendered accordingly in the host process.
+     *
+     * @param drawInstructions The {@link DrawInstructions} object
+     */
+    @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
+    public RemoteViews(@NonNull final DrawInstructions drawInstructions) {
+        Objects.requireNonNull(drawInstructions);
+        mHasDrawInstructions = true;
+        addAction(new SetDrawInstructionAction(drawInstructions));
     }
 
     private RemoteViews(@NonNull Parcel parcel, @Nullable HierarchyRootData rootData,
@@ -4178,6 +4242,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
         mApplyFlags = parcel.readInt();
         mProviderInstanceId = parcel.readLong();
+        mHasDrawInstructions = parcel.readBoolean();
 
         // Ensure that all descendants have their caches set up recursively.
         if (mIsRoot) {
@@ -4254,6 +4319,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new AttributeReflectionAction(parcel);
             case SET_ON_STYLUS_HANDWRITING_RESPONSE_TAG:
                 return new SetOnStylusHandwritingResponse(parcel);
+            case SET_DRAW_INSTRUCTION_TAG:
+                return new SetDrawInstructionAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -5791,6 +5858,10 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private boolean hasDrawInstructions() {
+        return mHasDrawInstructions;
+    }
+
     private RemoteViews getRemoteViewsToApply(Context context) {
         if (hasLandscapeAndPortraitLayouts()) {
             int orientation = context.getResources().getConfiguration().orientation;
@@ -5972,6 +6043,10 @@ public class RemoteViews implements Parcelable, Filter {
         // If mApplyThemeResId is not given, Theme.DeviceDefault will be used.
         if (applyThemeResId != 0) {
             inflationContext = new ContextThemeWrapper(inflationContext, applyThemeResId);
+        }
+        // If the RemoteViews contains draw instructions, just use it instead.
+        if (rv.hasDrawInstructions()) {
+            return new RemoteCanvas(inflationContext);
         }
         LayoutInflater inflater = LayoutInflater.from(context);
 
@@ -6236,7 +6311,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /** @hide */
     public boolean canRecycleView(@Nullable View v) {
-        if (v == null) {
+        if (v == null || hasDrawInstructions()) {
             return false;
         }
         Integer previousLayoutId = (Integer) v.getTag(R.id.widget_frame);
@@ -6624,6 +6699,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
         dest.writeInt(mApplyFlags);
         dest.writeLong(mProviderInstanceId);
+        dest.writeBoolean(mHasDrawInstructions);
 
         dest.restoreAllowSquashing(prevSquashingAllowed);
     }
@@ -7408,6 +7484,98 @@ public class RemoteViews implements Parcelable, Filter {
         private void visitUris(@NonNull Consumer<Uri> visitor) {
             for (RemoteViews view : mViews) {
                 view.visitUris(visitor);
+            }
+        }
+    }
+
+    /**
+     * A data parcel that carries the instructions to draw the RemoteViews, as an alternative to
+     * XML layout.
+     */
+    @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
+    public static final class DrawInstructions {
+
+        @NonNull
+        private final List<byte[]> mInstructions;
+
+        private DrawInstructions() {
+            throw new UnsupportedOperationException(
+                    "DrawInstructions cannot be instantiate without instructions");
+        }
+
+        private DrawInstructions(@NonNull List<byte[]> instructions) {
+            // Create and retain an immutable copy of given instructions.
+            mInstructions = new ArrayList<>(instructions.size());
+            for (byte[] instruction : instructions) {
+                final int len = instruction.length;
+                final byte[] target = new byte[len];
+                System.arraycopy(instruction, 0, target, 0, len);
+                mInstructions.add(target);
+            }
+        }
+
+        @Nullable
+        private static DrawInstructions readFromParcel(@NonNull final Parcel in) {
+            int size = in.readInt();
+            if (size == -1) {
+                return null;
+            }
+            byte[] instruction;
+            final List<byte[]> instructions = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                instruction = new byte[in.readInt()];
+                in.readByteArray(instruction);
+                instructions.add(instruction);
+            }
+            return new DrawInstructions(instructions);
+        }
+        private static void writeToParcel(@Nullable final DrawInstructions drawInstructions,
+                @NonNull final Parcel dest, final int flags) {
+            if (drawInstructions == null) {
+                dest.writeInt(-1);
+                return;
+            }
+            final List<byte[]> instructions = drawInstructions.mInstructions;
+            dest.writeInt(instructions.size());
+            for (byte[] instruction : instructions) {
+                dest.writeInt(instruction.length);
+                dest.writeByteArray(instruction);
+            }
+        }
+
+        /**
+         * Append additional instructions to this {@link DrawInstructions} object.
+         */
+        @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
+        public void appendInstructions(@NonNull final byte[] instructions) {
+            mInstructions.add(instructions);
+        }
+
+        /**
+         * Builder class for {@link DrawInstructions} objects.
+         */
+        @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
+        public static final class Builder {
+
+            private final List<byte[]> mInstructions;
+
+            /**
+             * Constructor.
+             *
+             * @param instructions Information to draw the RemoteViews.
+             */
+            @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
+            public Builder(@NonNull final List<byte[]> instructions) {
+                mInstructions = new ArrayList<>(instructions);
+            }
+
+            /**
+             * Creates a {@link DrawInstructions} instance.
+             */
+            @NonNull
+            @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
+            public DrawInstructions build() {
+                return new DrawInstructions(mInstructions);
             }
         }
     }
