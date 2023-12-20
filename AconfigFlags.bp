@@ -14,6 +14,7 @@
 
 aconfig_srcjars = [
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
+    ":android.content.res.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
     ":android.net.vcn.flags-aconfig-java{.generated_srcjars}",
     ":android.nfc.flags-aconfig-java{.generated_srcjars}",
@@ -187,6 +188,19 @@ java_aconfig_library {
     name: "android.content.pm.flags-aconfig-java-host",
     aconfig_declarations: "android.content.pm.flags-aconfig",
     host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Resources
+aconfig_declarations {
+    name: "android.content.res.flags-aconfig",
+    package: "android.content.res",
+    srcs: ["core/java/android/content/res/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.content.res.flags-aconfig-java",
+    aconfig_declarations: "android.content.res.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

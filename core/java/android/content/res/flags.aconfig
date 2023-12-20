@@ -1,0 +1,19 @@
+package: "android.content.res"
+
+flag {
+    name: "default_locale"
+    namespace: "resource_manager"
+    description: "Feature flag for default locale in LocaleConfig"
+    bug: "117306409"
+    # fixed_read_only or device wont boot because of permission issues accessing flags during boot
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "manifest_flagging"
+    namespace: "resource_manager"
+    description: "Feature flag for flagging manifest entries"
+    bug: "297373084"
+    # This flag is read in PackageParser at boot time, and in aapt2 which is a build tool.
+    is_fixed_read_only: true
+}
