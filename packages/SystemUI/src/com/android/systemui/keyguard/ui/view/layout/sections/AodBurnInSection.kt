@@ -23,7 +23,6 @@ import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.Flags.migrateClocksToBlueprint
-import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
@@ -38,7 +37,6 @@ constructor(
     private val context: Context,
     private val clockViewModel: KeyguardClockViewModel,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
-    private val featureFlags: FeatureFlagsClassic,
 ) : KeyguardSection() {
     lateinit var burnInLayer: Layer
 
@@ -59,6 +57,8 @@ constructor(
                 }
             }
         if (migrateClocksToBlueprint()) {
+            // weather and date parts won't be added here, cause their visibility doesn't align
+            // with others in burnInLayer
             addSmartspaceViews(constraintLayout)
         }
         constraintLayout.addView(burnInLayer)
@@ -89,14 +89,6 @@ constructor(
                 val smartspaceView =
                     constraintLayout.requireViewById<View>(smartspaceViewModel.smartspaceViewId)
                 addView(smartspaceView)
-                if (smartspaceViewModel.isDateWeatherDecoupled) {
-                    val dateView =
-                        constraintLayout.requireViewById<View>(smartspaceViewModel.dateId)
-                    val weatherView =
-                        constraintLayout.requireViewById<View>(smartspaceViewModel.weatherId)
-                    addView(weatherView)
-                    addView(dateView)
-                }
             }
         }
     }

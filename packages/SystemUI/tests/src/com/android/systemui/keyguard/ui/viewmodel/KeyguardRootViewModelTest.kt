@@ -24,7 +24,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.collectLastValue
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.coroutines.collectLastValue

@@ -69,14 +69,13 @@ class SmartspaceSectionTest : SysuiTestCase() {
                 keyguardUnlockAnimationController,
             )
         constraintLayout = ConstraintLayout(mContext)
-        whenever(lockscreenSmartspaceController.buildAndConnectView(constraintLayout))
-            .thenReturn(smartspaceView)
-        whenever(lockscreenSmartspaceController.buildAndConnectWeatherView(constraintLayout))
-            .thenReturn(weatherView)
-        whenever(lockscreenSmartspaceController.buildAndConnectDateView(constraintLayout))
-            .thenReturn(dateView)
+        whenever(keyguardSmartspaceViewModel.smartspaceView).thenReturn(smartspaceView)
+        whenever(keyguardSmartspaceViewModel.weatherView).thenReturn(weatherView)
+        whenever(keyguardSmartspaceViewModel.dateView).thenReturn(dateView)
         whenever(keyguardClockViewModel.hasCustomWeatherDataDisplay)
             .thenReturn(hasCustomWeatherDataDisplay)
+        whenever(keyguardSmartspaceViewModel.smartspaceController)
+            .thenReturn(lockscreenSmartspaceController)
         constraintSet = ConstraintSet()
     }
 
