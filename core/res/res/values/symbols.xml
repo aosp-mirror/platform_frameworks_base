@@ -5306,4 +5306,7 @@
   <java-symbol type="bool" name="config_viewBasedRotaryEncoderHapticsEnabled" />
 
   <java-symbol type="bool" name="config_quickSettingsShowMediaPlayer" />
+
+  <!-- Android MediaRouter framework configs. -->
+  <java-symbol type="integer" name="config_mediaRouter_builtInSpeakerSuitability" />
 </resources>

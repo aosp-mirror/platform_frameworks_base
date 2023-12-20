@@ -24,6 +24,7 @@ import android.media.MediaRoute2ProviderInfo;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
+import android.os.UserHandle;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -54,8 +55,15 @@ abstract class MediaRoute2Provider {
         mCallback = callback;
     }
 
-    public abstract void requestCreateSession(long requestId, String packageName, String routeId,
-            @Nullable Bundle sessionHints);
+    public abstract void requestCreateSession(
+            long requestId,
+            String packageName,
+            String routeId,
+            @Nullable Bundle sessionHints,
+            @RoutingSessionInfo.TransferReason int transferReason,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName);
+
     public abstract void releaseSession(long requestId, String sessionId);
 
     public abstract void updateDiscoveryPreference(
@@ -63,7 +71,14 @@ abstract class MediaRoute2Provider {
 
     public abstract void selectRoute(long requestId, String sessionId, String routeId);
     public abstract void deselectRoute(long requestId, String sessionId, String routeId);
-    public abstract void transferToRoute(long requestId, String sessionId, String routeId);
+
+    public abstract void transferToRoute(
+            long requestId,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName,
+            String sessionId,
+            String routeId,
+            @RoutingSessionInfo.TransferReason int transferReason);
 
     public abstract void setRouteVolume(long requestId, String routeId, int volume);
     public abstract void setSessionVolume(long requestId, String sessionId, int volume);

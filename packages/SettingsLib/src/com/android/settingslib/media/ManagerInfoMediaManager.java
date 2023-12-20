@@ -81,14 +81,17 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     @Override
     protected void transferToRoute(@NonNull MediaRoute2Info route) {
-        mRouterManager.transfer(mPackageName, route);
+        // TODO: b/279555229 - provide real user handle of a caller.
+        mRouterManager.transfer(mPackageName, route, android.os.Process.myUserHandle());
     }
 
     @Override
     protected boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device) {
         final RoutingSessionInfo info = mRouterManager.getSystemRoutingSession(null);
         if (info != null) {
-            mRouterManager.transfer(info, device.mRouteInfo);
+            // TODO: b/279555229 - provide real user handle and package name of a caller.
+            mRouterManager.transfer(
+                    info, device.mRouteInfo, android.os.Process.myUserHandle(), mPackageName);
             return true;
         }
         return false;
