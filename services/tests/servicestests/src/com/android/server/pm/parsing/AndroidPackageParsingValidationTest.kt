@@ -36,7 +36,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 @Postsubmit
 class AndroidPackageParsingValidationTest {
     companion object {
-        private val parser2 = PackageParser2.forParsingFileWithDefaults()
+        private val parser2 = PackageParserUtils.forParsingFileWithDefaults()
         private val apks = ((PackageManagerService.SYSTEM_PARTITIONS)
                 .flatMap {
                     listOfNotNull(it.privAppFolder, it.appFolder, it.overlayFolder)

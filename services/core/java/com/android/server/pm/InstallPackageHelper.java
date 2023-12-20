@@ -146,6 +146,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -154,6 +155,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.F2fsUtils;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.pm.parsing.PackageParserException;
 import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
@@ -178,7 +180,6 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.parsing.PackageCacher;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.Permission;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -1167,8 +1168,9 @@ final class InstallPackageHelper {
                         parseFlags);
                 archivedPackage = request.getPackageLite().getArchivedPackage();
             }
-        } catch (PackageManagerException | PackageParserException e) {
-            throw new PrepareFailure("Failed parse during installPackageLI", e);
+        } catch (PackageParserException e) {
+            throw new PrepareFailure(e.error,
+                    ExceptionUtils.getCompleteMessage("Failed parse during installPackageLI", e));
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -3680,6 +3682,8 @@ final class InstallPackageHelper {
         final ParsedPackage parsedPackage;
         try (PackageParser2 pp = mPm.mInjector.getScanningPackageParser()) {
             parsedPackage = pp.parsePackage(scanFile, parseFlags, false);
+        } catch (PackageParserException e) {
+            throw new PackageManagerException(e.error, e.getMessage(), e);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }

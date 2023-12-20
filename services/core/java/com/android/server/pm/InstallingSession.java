@@ -51,8 +51,8 @@ import android.util.Slog;
 import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.util.Preconditions;
-import com.android.server.pm.parsing.PackageParser2;
 
 import libcore.io.IoUtils;
 
