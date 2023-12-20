@@ -1,0 +1,8 @@
+package: "com.android.server.flags"
+
+flag {
+    name: "disable_system_compaction"
+    namespace: "system_performance"
+    description: "This flag controls if all processes compaction should happen during idle maintenance."
+    bug: "314328789"
+}
