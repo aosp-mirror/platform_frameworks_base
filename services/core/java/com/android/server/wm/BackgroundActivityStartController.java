@@ -36,6 +36,7 @@ import static com.android.window.flags.Flags.balShowToastsBlocked;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
+import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -152,36 +153,25 @@ public class BackgroundActivityStartController {
     static final int BAL_ALLOW_SDK_SANDBOX = 10;
 
     static String balCodeToString(@BalCode int balCode) {
-        switch (balCode) {
-            case BAL_ALLOW_ALLOWLISTED_COMPONENT:
-                return "BAL_ALLOW_ALLOWLISTED_COMPONENT";
-            case BAL_ALLOW_ALLOWLISTED_UID:
-                return "BAL_ALLOW_ALLOWLISTED_UID";
-            case BAL_ALLOW_DEFAULT:
-                return "BAL_ALLOW_DEFAULT";
-            case BAL_ALLOW_FOREGROUND:
-                return "BAL_ALLOW_FOREGROUND";
-            case BAL_ALLOW_GRACE_PERIOD:
-                return "BAL_ALLOW_GRACE_PERIOD";
-            case BAL_ALLOW_PENDING_INTENT:
-                return "BAL_ALLOW_PENDING_INTENT";
-            case BAL_ALLOW_PERMISSION:
-                return "BAL_ALLOW_PERMISSION";
-            case BAL_ALLOW_SAW_PERMISSION:
-                return "BAL_ALLOW_SAW_PERMISSION";
-            case BAL_ALLOW_SDK_SANDBOX:
-                return "BAL_ALLOW_SDK_SANDBOX";
-            case BAL_ALLOW_VISIBLE_WINDOW:
-                return "BAL_ALLOW_VISIBLE_WINDOW";
-            case BAL_BLOCK:
-                return "BAL_BLOCK";
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + balCode);
-        }
+        return switch (balCode) {
+            case BAL_ALLOW_ALLOWLISTED_COMPONENT -> "BAL_ALLOW_ALLOWLISTED_COMPONENT";
+            case BAL_ALLOW_ALLOWLISTED_UID -> "BAL_ALLOW_ALLOWLISTED_UID";
+            case BAL_ALLOW_DEFAULT -> "BAL_ALLOW_DEFAULT";
+            case BAL_ALLOW_FOREGROUND -> "BAL_ALLOW_FOREGROUND";
+            case BAL_ALLOW_GRACE_PERIOD -> "BAL_ALLOW_GRACE_PERIOD";
+            case BAL_ALLOW_PENDING_INTENT -> "BAL_ALLOW_PENDING_INTENT";
+            case BAL_ALLOW_PERMISSION -> "BAL_ALLOW_PERMISSION";
+            case BAL_ALLOW_SAW_PERMISSION -> "BAL_ALLOW_SAW_PERMISSION";
+            case BAL_ALLOW_SDK_SANDBOX -> "BAL_ALLOW_SDK_SANDBOX";
+            case BAL_ALLOW_VISIBLE_WINDOW -> "BAL_ALLOW_VISIBLE_WINDOW";
+            case BAL_BLOCK -> "BAL_BLOCK";
+            default -> throw new IllegalArgumentException("Unexpected value: " + balCode);
+        };
     }
 
     @GuardedBy("mService.mGlobalLock")
-    private HashMap<Integer, FinishedActivityEntry> mTaskIdToFinishedActivity = new HashMap<>();
+    private final HashMap<Integer, FinishedActivityEntry> mTaskIdToFinishedActivity =
+            new HashMap<>();
     @GuardedBy("mService.mGlobalLock")
     private FinishedActivityEntry mTopFinishedActivity = null;
 
@@ -467,9 +457,8 @@ public class BackgroundActivityStartController {
             return !blocks();
         }
 
-        BalVerdict setOnlyCreatorAllows(boolean onlyCreatorAllows) {
+        void setOnlyCreatorAllows(boolean onlyCreatorAllows) {
             mOnlyCreatorAllows = onlyCreatorAllows;
-            return this;
         }
 
         boolean onlyCreatorAllows() {
@@ -479,10 +468,6 @@ public class BackgroundActivityStartController {
         private BalVerdict setBasedOnRealCaller() {
             mBasedOnRealCaller = true;
             return this;
-        }
-
-        private boolean isBasedOnRealCaller() {
-            return mBasedOnRealCaller;
         }
 
         public String toString() {
@@ -583,15 +568,14 @@ public class BackgroundActivityStartController {
         BalVerdict resultForCaller = checkBackgroundActivityStartAllowedByCaller(state);
 
         if (!state.hasRealCaller()) {
-            BalVerdict resultForRealCaller = null; // nothing to compute
             if (resultForCaller.allows()) {
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "Background activity start allowed. "
-                            + state.dump(resultForCaller, resultForRealCaller));
+                            + state.dump(resultForCaller, resultForCaller));
                 }
                 return statsLog(resultForCaller, state);
             }
-            return abortLaunch(state, resultForCaller, resultForRealCaller);
+            return abortLaunch(state, resultForCaller, resultForCaller);
         }
 
         // The realCaller result is only calculated for PendingIntents (indicated by a valid
@@ -910,7 +894,7 @@ public class BackgroundActivityStartController {
 
     /**
      * Check if the app allows BAL.
-     *
+     * <p>
      * See {@link BackgroundLaunchProcessController#areBackgroundActivityStartsAllowed(int, int,
      * String, int, boolean, boolean, boolean, long, long, long)} for details on the
      * exceptions.
@@ -1281,7 +1265,7 @@ public class BackgroundActivityStartController {
      * 2. Or top of an adjacent task fragment to (1)
      * <p>
      * The 'sourceRecord' can be considered top even if it is 'finishing'
-     *
+     * <p>
      * Returns a class where the elements are:
      * <pre>
      * shouldBlockActivityStart: {@code true} if we should actually block the transition (takes into
@@ -1344,7 +1328,7 @@ public class BackgroundActivityStartController {
     /**
      * Determines if a source is allowed to add or remove activities from the task,
      * if the current ActivityRecord is above it in the stack
-     *
+     * <p>
      * A transition is blocked ({@code false} returned) if all of the following are met:
      * <pre>
      * 1. The source activity and the current activity record belong to different apps
@@ -1489,8 +1473,8 @@ public class BackgroundActivityStartController {
 
         if (code == BAL_ALLOW_PENDING_INTENT
                 && (callingUid == Process.SYSTEM_UID || realCallingUid == Process.SYSTEM_UID)) {
-            String activityName =
-                    intent != null ? intent.getComponent().flattenToShortString() : "";
+            String activityName = intent != null
+                    ? requireNonNull(intent.getComponent()).flattenToShortString() : "";
             FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
                     activityName,
                     BAL_ALLOW_PENDING_INTENT,
