@@ -17,6 +17,7 @@ import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.StackScrollAlgorithmState
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
@@ -72,6 +73,7 @@ open class NotificationShelfTest : SysuiTestCase() {
 
     @Test
     fun testShadeWidth_BasedOnFractionToShade() {
+        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(true)
 
@@ -87,6 +89,7 @@ open class NotificationShelfTest : SysuiTestCase() {
 
     @Test
     fun testShelfIsLong_WhenNotOnLockscreen() {
+        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         setFractionToShade(0f)
         setOnLockscreen(false)
 

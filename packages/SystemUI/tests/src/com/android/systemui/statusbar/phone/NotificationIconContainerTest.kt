@@ -23,6 +23,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -73,6 +74,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
 
     @Test
     fun calculateWidthFor_fiveIcons_widthForFourIcons() {
+        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         iconContainer.setActualPaddingStart(10f)
         iconContainer.setActualPaddingEnd(10f)
         iconContainer.setIconSize(10)
@@ -151,7 +153,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
         iconContainer.addView(iconFive)
         assertEquals(5, iconContainer.childCount)
 
-        val width = iconContainer.calculateWidthFor(/* numIcons= */ 5f)
+        val width = iconContainer.calculateWidthFor(/* numIcons= */ 4f)
         iconContainer.setActualLayoutWidth(width.toInt())
 
         iconContainer.calculateIconXTranslations()
@@ -212,6 +214,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
 
     @Test
     fun shouldForceOverflow_appearingAboveSpeedBump_true() {
+        mSetFlagsRule.disableFlags(NotificationIconContainerRefactor.FLAG_NAME)
         val forceOverflow =
             iconContainer.shouldForceOverflow(
                 /* i= */ 1,
@@ -228,7 +231,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
             iconContainer.shouldForceOverflow(
                 /* i= */ 10,
                 /* speedBumpIndex= */ 11,
-                /* iconAppearAmount= */ 0f,
+                /* iconAppearAmount= */ 0.1f,
                 /* maxVisibleIcons= */ 5
             )
         assertTrue(forceOverflow)
