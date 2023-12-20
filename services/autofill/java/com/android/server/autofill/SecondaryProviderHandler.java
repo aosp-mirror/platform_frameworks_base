@@ -25,9 +25,6 @@ import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.util.Slog;
 
-import java.util.Objects;
-
-
 /**
  * Requests autofill response from a Remote Autofill Service. This autofill service can be
  * either a Credential Autofill Service or the user-opted autofill service.
@@ -51,7 +48,6 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
 
     private final RemoteFillService mRemoteFillService;
     private final SecondaryProviderCallback mCallback;
-    private FillRequest mLastFillRequest;
     private int mLastFlag;
 
     SecondaryProviderHandler(
@@ -97,17 +93,11 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
     }
 
     /**
-     * Requests a new fill response. If the fill request is same as the last requested fill request,
-     * then the request is duped.
+     * Requests a new fill response.
      */
     public void onFillRequest(FillRequest pendingFillRequest, int flag) {
-        if (Objects.equals(pendingFillRequest, mLastFillRequest)) {
-            Slog.v(TAG, "Deduping fill request to secondary provider.");
-            return;
-        }
         Slog.v(TAG, "Requesting fill response to secondary provider.");
         mLastFlag = flag;
-        mLastFillRequest = pendingFillRequest;
         mRemoteFillService.onFillRequest(pendingFillRequest);
     }
 
