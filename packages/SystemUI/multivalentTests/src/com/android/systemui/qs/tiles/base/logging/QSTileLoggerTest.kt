@@ -21,9 +21,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dump.LogcatEchoTrackerAlways
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.log.LogcatEchoTrackerAlways
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.viewmodel.QSTileState

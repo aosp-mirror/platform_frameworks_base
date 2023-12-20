@@ -48,7 +48,7 @@ import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.compose.ComposeFacade.isComposeAvailable
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.dump.logcatLogBuffer
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES

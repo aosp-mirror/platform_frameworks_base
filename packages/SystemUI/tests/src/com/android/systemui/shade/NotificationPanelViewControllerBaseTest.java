@@ -19,11 +19,9 @@ package com.android.systemui.shade;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
-import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
-
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -38,6 +36,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 
 import android.annotation.IdRes;
 import android.content.ContentResolver;
