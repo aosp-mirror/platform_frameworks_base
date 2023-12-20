@@ -30,13 +30,15 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.LogcatOnlyMessageBuffer
 import com.android.systemui.plugins.clocks.ClockAnimations
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockEvents
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.plugins.clocks.ClockFaceEvents
+import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockTickRate
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -94,9 +96,9 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var largeClockEvents: ClockFaceEvents
     @Mock private lateinit var parentView: View
     private lateinit var repository: FakeKeyguardRepository
-    @Mock private lateinit var smallLogBuffer: LogBuffer
-    @Mock private lateinit var largeLogBuffer: LogBuffer
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    private val messageBuffer = LogcatOnlyMessageBuffer(LogLevel.DEBUG)
+    private val clockBuffers = ClockMessageBuffers(messageBuffer, messageBuffer, messageBuffer)
     private lateinit var underTest: ClockEventController
     @Mock private lateinit var zenModeController: ZenModeController
 
@@ -140,8 +142,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 context,
                 mainExecutor,
                 bgExecutor,
-                smallLogBuffer,
-                largeLogBuffer,
+                clockBuffers,
                 withDeps.featureFlags,
                 zenModeController
             )
