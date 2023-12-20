@@ -519,7 +519,7 @@ public class ForegroundServiceTypeLoggerModule {
                 r.mFgsNotificationShown,
                 0, // durationMs
                 r.mStartForegroundCount,
-                ActivityManagerUtils.hashComponentNameForAtom(r.shortInstanceName),
+                0, // Short instance name -- no longer logging it.
                 r.mFgsHasNotificationPermission,
                 r.foregroundServiceType,
                 0,
