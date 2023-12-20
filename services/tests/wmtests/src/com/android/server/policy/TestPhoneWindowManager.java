@@ -73,6 +73,7 @@ import android.media.AudioManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
@@ -176,8 +177,9 @@ class TestPhoneWindowManager {
     private Handler mHandler;
 
     private boolean mIsTalkBackEnabled;
+    private boolean mIsTalkBackShortcutGestureEnabled;
 
-    class TestTalkbackShortcutController extends TalkbackShortcutController {
+    private class TestTalkbackShortcutController extends TalkbackShortcutController {
         TestTalkbackShortcutController(Context context) {
             super(context);
         }
@@ -190,13 +192,18 @@ class TestPhoneWindowManager {
 
         @Override
         boolean isTalkBackShortcutGestureEnabled() {
-            return true;
+            return mIsTalkBackShortcutGestureEnabled;
         }
     }
 
     private class TestInjector extends PhoneWindowManager.Injector {
         TestInjector(Context context, WindowManagerPolicy.WindowManagerFuncs funcs) {
-            super(context, funcs, mTestLooper.getLooper());
+            super(context, funcs);
+        }
+
+        @Override
+        Looper getLooper() {
+            return mTestLooper.getLooper();
         }
 
         AccessibilityShortcutController getAccessibilityShortcutController(
@@ -408,6 +415,10 @@ class TestPhoneWindowManager {
 
     void overrideShouldEarlyShortPressOnStemPrimary(boolean shouldEarlyShortPress) {
         mPhoneWindowManager.mShouldEarlyShortPressOnStemPrimary = shouldEarlyShortPress;
+    }
+
+    void overrideTalkbackShortcutGestureEnabled(boolean enabled) {
+        mIsTalkBackShortcutGestureEnabled = enabled;
     }
 
      // Override assist perform function.
@@ -714,7 +725,7 @@ class TestPhoneWindowManager {
     }
 
     void assertOpenAllAppView() {
-        mTestLooper.dispatchAll();
+        moveTimeForward(TEST_SINGLE_KEY_DELAY_MILLIS);
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext, timeout(TEST_SINGLE_KEY_DELAY_MILLIS))
                 .startActivityAsUser(intentCaptor.capture(), isNull(), any(UserHandle.class));
@@ -728,7 +739,7 @@ class TestPhoneWindowManager {
     }
 
     void assertActivityTargetLaunched(ComponentName targetActivity) {
-        mTestLooper.dispatchAll();
+        moveTimeForward(TEST_SINGLE_KEY_DELAY_MILLIS);
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext, timeout(TEST_SINGLE_KEY_DELAY_MILLIS))
                 .startActivityAsUser(intentCaptor.capture(), isNull(), any(UserHandle.class));
@@ -743,10 +754,15 @@ class TestPhoneWindowManager {
                         expectedModifierState, deviceBus), description(errorMsg));
     }
 
-    void assertSwitchToRecent(int persistentId) throws RemoteException {
+    void assertSwitchToTask(int persistentId) throws RemoteException {
         mTestLooper.dispatchAll();
         verify(mActivityManagerService,
                 timeout(TEST_SINGLE_KEY_DELAY_MILLIS)).startActivityFromRecents(eq(persistentId),
                 isNull());
+    }
+
+    void assertTalkBack(boolean expectEnabled) {
+        mTestLooper.dispatchAll();
+        Assert.assertEquals(expectEnabled, mIsTalkBackEnabled);
     }
 }
