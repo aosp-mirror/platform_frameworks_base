@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public final class VirtualCameraConversionUtil {
 
             @Override
             public void onProcessCaptureRequest(int streamId, int frameId) throws RemoteException {
-                camera.onProcessCaptureRequest(streamId, frameId, /*metadata=*/ null);
+                camera.onProcessCaptureRequest(streamId, frameId);
             }
 
             @Override

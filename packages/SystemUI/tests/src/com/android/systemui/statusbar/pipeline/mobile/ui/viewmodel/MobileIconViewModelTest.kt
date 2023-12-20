@@ -16,7 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
-import android.platform.test.flag.junit.SetFlagsRule
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
@@ -72,8 +73,6 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class MobileIconViewModelTest : SysuiTestCase() {
     private var connectivityRepository = FakeConnectivityRepository()
-
-    private val setFlagsRule = SetFlagsRule()
 
     private lateinit var underTest: MobileIconViewModel
     private lateinit var interactor: MobileIconInteractorImpl
@@ -561,11 +560,9 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
     fun dataActivity_configOn_testIndicators_staticFlagOff() =
         testScope.runTest {
-            // GIVEN STATUS_BAR_STATIC_NETWORK_INDICATORS flag is off
-            setFlagsRule.disableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
-
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()
@@ -618,11 +615,9 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
     fun dataActivity_configOn_testIndicators_staticFlagOn() =
         testScope.runTest {
-            // GIVEN STATUS_BAR_STATIC_NETWORK_INDICATORS flag is on
-            setFlagsRule.enableFlags(FLAG_STATUS_BAR_STATIC_INOUT_INDICATORS)
-
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(true)
             createAndSetViewModel()

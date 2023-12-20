@@ -43,7 +43,6 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.AnimatorTestRule;
-import com.android.systemui.common.ui.ConfigurationState;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.log.LogBuffer;
@@ -57,9 +56,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker;
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarNotificationIconViewStore;
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
@@ -70,7 +67,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.ui.SystemBarUtilsState;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.util.CarrierConfigTracker;
@@ -702,7 +698,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mKeyguardStateController,
                 mShadeViewController,
                 mStatusBarStateController,
-                mock(StatusBarIconViewBindingFailureTracker.class),
+                mock(NotificationIconContainerStatusBarViewBinder.class),
                 mCommandQueue,
                 mCarrierConfigTracker,
                 new CollapsedStatusBarFragmentLogger(
@@ -715,10 +711,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mDumpManager,
                 mStatusBarWindowStateController,
                 mKeyguardUpdateMonitor,
-                mock(NotificationIconContainerStatusBarViewModel.class),
-                mock(ConfigurationState.class),
-                mock(SystemBarUtilsState.class),
-                mock(StatusBarNotificationIconViewStore.class),
                 mock(DemoModeController.class));
     }
 

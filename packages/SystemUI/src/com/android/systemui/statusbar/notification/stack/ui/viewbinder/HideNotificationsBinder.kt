@@ -16,29 +16,22 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import androidx.core.view.doOnDetach
-import androidx.lifecycle.lifecycleScope
-import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
-import kotlinx.coroutines.launch
 
 /**
  * Binds a [NotificationStackScrollLayoutController] to its [view model][NotificationListViewModel].
  */
 object HideNotificationsBinder {
-    fun bindHideList(
+    suspend fun bindHideList(
         viewController: NotificationStackScrollLayoutController,
         viewModel: NotificationListViewModel
     ) {
-        viewController.view.repeatWhenAttached {
-            lifecycleScope.launch {
-                viewModel.hideListViewModel.shouldHideListForPerformance.collect { shouldHide ->
-                    viewController.bindHideState(shouldHide)
-                }
-            }
-        }
-
         viewController.view.doOnDetach { viewController.bindHideState(shouldHide = false) }
+
+        viewModel.hideListViewModel.shouldHideListForPerformance.collect { shouldHide ->
+            viewController.bindHideState(shouldHide)
+        }
     }
 
     private fun NotificationStackScrollLayoutController.bindHideState(shouldHide: Boolean) {

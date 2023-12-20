@@ -7733,11 +7733,12 @@ public class Notification implements Parcelable
             } else if (mPictureIcon.getType() == Icon.TYPE_BITMAP) {
                 // If the icon contains a bitmap, use the old extra so that listeners which look
                 // for that extra can still find the picture. Don't include the new extra in
-                // that case, to avoid duplicating data.
+                // that case, to avoid duplicating data. Leave the unused extra set to null to avoid
+                // crashing apps that came to expect it to be present but null.
                 extras.putParcelable(EXTRA_PICTURE, mPictureIcon.getBitmap());
-                extras.remove(EXTRA_PICTURE_ICON);
+                extras.putParcelable(EXTRA_PICTURE_ICON, null);
             } else {
-                extras.remove(EXTRA_PICTURE);
+                extras.putParcelable(EXTRA_PICTURE, null);
                 extras.putParcelable(EXTRA_PICTURE_ICON, mPictureIcon);
             }
         }

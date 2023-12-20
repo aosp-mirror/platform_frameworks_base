@@ -94,7 +94,9 @@ public class VisualQueryDetector {
      */
     public void updateState(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory) {
-        mInitializationDelegate.updateState(options, sharedMemory);
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.updateState(options, sharedMemory);
+        }
     }
 
 
@@ -116,18 +118,21 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
-        // check if the detector is active with the initialization delegate
-        mInitializationDelegate.startRecognition();
+        synchronized (mInitializationDelegate.getLock()) {
+            // check if the detector is active with the initialization delegate
+            mInitializationDelegate.startRecognition();
 
-        try {
-            mManagerService.startPerceiving(new BinderCallback(mExecutor, mCallback));
-        } catch (SecurityException e) {
-            Slog.e(TAG, "startRecognition failed: " + e);
-            return false;
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            try {
+                mManagerService.startPerceiving(new BinderCallback(
+                        mExecutor, mCallback, mInitializationDelegate.getLock()));
+            } catch (SecurityException e) {
+                Slog.e(TAG, "startRecognition failed: " + e);
+                return false;
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            return true;
         }
-        return true;
     }
 
     /**
@@ -140,15 +145,17 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
-        // check if the detector is active with the initialization delegate
-        mInitializationDelegate.startRecognition();
+        synchronized (mInitializationDelegate.getLock()) {
+            // check if the detector is active with the initialization delegate
+            mInitializationDelegate.stopRecognition();
 
-        try {
-            mManagerService.stopPerceiving();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            try {
+                mManagerService.stopPerceiving();
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+            return true;
         }
-        return true;
     }
 
     /**
@@ -160,12 +167,16 @@ public class VisualQueryDetector {
         if (DEBUG) {
             Slog.i(TAG, "#destroy");
         }
-        mInitializationDelegate.destroy();
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.destroy();
+        }
     }
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
-        // TODO: implement this
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.dump(prefix, pw);
+        }
     }
 
     /** @hide */
@@ -175,7 +186,9 @@ public class VisualQueryDetector {
 
     /** @hide */
     void registerOnDestroyListener(Consumer<AbstractDetector> onDestroyListener) {
-        mInitializationDelegate.registerOnDestroyListener(onDestroyListener);
+        synchronized (mInitializationDelegate.getLock()) {
+            mInitializationDelegate.registerOnDestroyListener(onDestroyListener);
+        }
     }
 
     /**
@@ -282,6 +295,15 @@ public class VisualQueryDetector {
         public boolean isUsingSandboxedDetectionService() {
             return true;
         }
+
+        @Override
+        public void dump(String prefix, PrintWriter pw) {
+            // No-op
+        }
+
+        private Object getLock() {
+            return mLock;
+        }
     }
 
     private static class BinderCallback
@@ -289,31 +311,43 @@ public class VisualQueryDetector {
         private final Executor mExecutor;
         private final VisualQueryDetector.Callback mCallback;
 
-        BinderCallback(Executor executor, VisualQueryDetector.Callback callback) {
+        private final Object mLock;
+
+        BinderCallback(Executor executor, VisualQueryDetector.Callback callback, Object lock) {
             this.mExecutor = executor;
             this.mCallback = callback;
+            this.mLock = lock;
         }
 
         /** Called when the detected result is valid. */
         @Override
         public void onQueryDetected(@NonNull String partialQuery) {
             Slog.v(TAG, "BinderCallback#onQueryDetected");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onQueryDetected(partialQuery)));
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mCallback.onQueryDetected(partialQuery);
+                }
+            });
         }
 
         @Override
         public void onQueryFinished() {
             Slog.v(TAG, "BinderCallback#onQueryFinished");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onQueryFinished()));
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mCallback.onQueryFinished();
+                }
+            });
         }
 
         @Override
         public void onQueryRejected() {
             Slog.v(TAG, "BinderCallback#onQueryRejected");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onQueryRejected()));
+            Binder.withCleanCallingIdentity(() -> {
+                synchronized (mLock) {
+                    mCallback.onQueryRejected();
+                }
+            });
         }
 
         /** Called when the detection fails due to an error. */

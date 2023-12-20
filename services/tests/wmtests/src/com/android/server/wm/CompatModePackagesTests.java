@@ -20,10 +20,13 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import android.app.GameManagerInternal;
+import android.content.pm.ApplicationInfo;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -90,6 +93,14 @@ public class CompatModePackagesTests extends SystemServiceTestsBase {
     public void testGetCompatScale_noGameManager() {
         assertEquals(mAtm.mCompatModePackages.getCompatScale(TEST_PACKAGE, TEST_USER_ID), 1f,
                 0.01f);
-    }
 
+        final ApplicationInfo info = new ApplicationInfo();
+        // Any non-zero value without FLAG_SUPPORTS_*_SCREENS.
+        info.flags = ApplicationInfo.FLAG_HAS_CODE;
+        info.packageName = info.sourceDir = "legacy.app";
+        mAtm.mCompatModePackages.compatibilityInfoForPackageLocked(info);
+        assertTrue(mAtm.mCompatModePackages.useLegacyScreenCompatMode(info.packageName));
+        mAtm.mCompatModePackages.handlePackageUninstalledLocked(info.packageName);
+        assertFalse(mAtm.mCompatModePackages.useLegacyScreenCompatMode(info.packageName));
+    }
 }

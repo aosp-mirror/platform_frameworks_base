@@ -67,3 +67,11 @@ flag {
     bug: "309545085"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "activity_snapshot_by_default"
+    namespace: "systemui"
+    description: "Enable record activity snapshot by default"
+    bug: "259497289"
+    is_fixed_read_only: true
+}

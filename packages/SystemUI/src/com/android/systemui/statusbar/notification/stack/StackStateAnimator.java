@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK;
 
@@ -26,6 +27,7 @@ import android.util.Property;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.AnimatableClockView;
@@ -33,6 +35,7 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,6 +71,8 @@ public class StackStateAnimator {
 
     private final int mGoToFullShadeAppearingTranslation;
     private final int mPulsingAppearingTranslation;
+    @VisibleForTesting
+    float mHeadsUpAppearStartAboveScreen;
     private final ExpandableViewState mTmpState = new ExpandableViewState();
     private final AnimationProperties mAnimationProperties;
     public NotificationStackScrollLayout mHostLayout;
@@ -85,21 +90,23 @@ public class StackStateAnimator {
     private ValueAnimator mTopOverScrollAnimator;
     private ValueAnimator mBottomOverScrollAnimator;
     private int mHeadsUpAppearHeightBottom;
+    private int mStackTopMargin;
     private boolean mShadeExpanded;
     private ArrayList<ExpandableView> mTransientViewsToRemove = new ArrayList<>();
     private NotificationShelf mShelf;
-    private float mStatusBarIconLocation;
-    private int[] mTmpLocation = new int[2];
     private StackStateLogger mLogger;
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
+        // TODO(b/317061579) reload on configuration changes
         mGoToFullShadeAppearingTranslation =
                 hostLayout.getContext().getResources().getDimensionPixelSize(
                         R.dimen.go_to_full_shade_appearing_translation);
         mPulsingAppearingTranslation =
                 hostLayout.getContext().getResources().getDimensionPixelSize(
                         R.dimen.pulsing_notification_appear_translation);
+        mHeadsUpAppearStartAboveScreen = hostLayout.getContext().getResources()
+                .getDimensionPixelSize(R.dimen.heads_up_appear_y_above_screen);
         mAnimationProperties = new AnimationProperties() {
             @Override
             public AnimationFilter getAnimationFilter() {
@@ -455,8 +462,37 @@ public class StackStateAnimator {
                     .AnimationEvent.ANIMATION_TYPE_GROUP_EXPANSION_CHANGED) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) event.mChangingView;
                 row.prepareExpansionChanged();
-            } else if (event.animationType == NotificationStackScrollLayout
-                    .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
+            } else if (NotificationsImprovedHunAnimation.isEnabled()
+                    && (event.animationType == ANIMATION_TYPE_HEADS_UP_APPEAR)) {
+                mHeadsUpAppearChildren.add(changingView);
+
+                mTmpState.copyFrom(changingView.getViewState());
+                if (event.headsUpFromBottom) {
+                    // start from the bottom of the screen
+                    mTmpState.setYTranslation(
+                            mHeadsUpAppearHeightBottom + mHeadsUpAppearStartAboveScreen);
+                } else {
+                    // start from the top of the screen
+                    mTmpState.setYTranslation(
+                            -mStackTopMargin - mHeadsUpAppearStartAboveScreen);
+                }
+                // set the height and the initial position
+                mTmpState.applyToView(changingView);
+                mAnimationProperties.setCustomInterpolator(View.TRANSLATION_Y,
+                        Interpolators.FAST_OUT_SLOW_IN);
+
+                Runnable onAnimationEnd = null;
+                if (loggable) {
+                    // This only captures HEADS_UP_APPEAR animations, but HUNs can appear with
+                    // normal ADD animations, which would not be logged here.
+                    String finalKey = key;
+                    mLogger.logHUNViewAppearing(key);
+                    onAnimationEnd = () -> mLogger.appearAnimationEnded(finalKey);
+                }
+                changingView.performAddAnimation(0, ANIMATION_DURATION_HEADS_UP_APPEAR,
+                        /* isHeadsUpAppear= */ true, onAnimationEnd);
+            } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_APPEAR) {
+                NotificationsImprovedHunAnimation.assertInLegacyMode();
                 // This item is added, initialize its properties.
                 ExpandableViewState viewState = changingView.getViewState();
                 mTmpState.copyFrom(viewState);
@@ -536,6 +572,10 @@ public class StackStateAnimator {
                             changingView.setInRemovalAnimation(true);
                         };
                     }
+                    if (NotificationsImprovedHunAnimation.isEnabled()) {
+                        mAnimationProperties.setCustomInterpolator(View.TRANSLATION_Y,
+                                Interpolators.FAST_OUT_SLOW_IN_REVERSE);
+                    }
                     long removeAnimationDelay = changingView.performRemoveAnimation(
                             ANIMATION_DURATION_HEADS_UP_DISAPPEAR,
                             0, 0.0f, true /* isHeadsUpAppear */,
@@ -599,6 +639,10 @@ public class StackStateAnimator {
 
     public void setHeadsUpAppearHeightBottom(int headsUpAppearHeightBottom) {
         mHeadsUpAppearHeightBottom = headsUpAppearHeightBottom;
+    }
+
+    public void setStackTopMargin(int stackTopMargin) {
+        mStackTopMargin = stackTopMargin;
     }
 
     public void setShadeExpanded(boolean shadeExpanded) {

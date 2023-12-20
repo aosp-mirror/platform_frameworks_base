@@ -23,6 +23,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.util.SparseIntArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -402,7 +404,9 @@ public final class AudioDeviceInfo {
 
     private final AudioDevicePort mPort;
 
-    AudioDeviceInfo(AudioDevicePort port) {
+    /** @hide */
+    @VisibleForTesting
+    public AudioDeviceInfo(AudioDevicePort port) {
        mPort = port;
     }
 

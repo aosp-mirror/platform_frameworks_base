@@ -715,6 +715,14 @@ public abstract class DisplayManagerInternal {
         boolean startOffload();
 
         void stopOffload();
+
+        /**
+         * Called when {@link DisplayOffloadSession} tries to block screen turning on.
+         *
+         * @param unblocker a {@link Runnable} executed upon all work required before screen turning
+         *                  on is done.
+         */
+        void onBlockingScreenOn(Runnable unblocker);
     }
 
     /** A session token that associates a internal display with a {@link DisplayOffloader}. */
@@ -733,6 +741,15 @@ public abstract class DisplayManagerInternal {
          *                   the brightness from offload. Other values will be ignored.
          */
         void updateBrightness(float brightness);
+
+        /**
+         * Called while display is turning to state ON to leave a small period for displayoffload
+         * session to finish some work.
+         *
+         * @param unblocker a {@link Runnable} used by displayoffload session to notify
+         *                  {@link DisplayManager} that it can continue turning screen on.
+         */
+        boolean blockScreenOn(Runnable unblocker);
 
         /** Returns whether displayoffload supports the given display state. */
         static boolean isSupportedOffloadState(int displayState) {

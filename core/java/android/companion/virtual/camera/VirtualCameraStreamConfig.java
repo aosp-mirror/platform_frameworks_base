@@ -24,6 +24,8 @@ import android.graphics.ImageFormat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * The configuration of a single virtual camera stream.
  *
@@ -96,6 +98,19 @@ public final class VirtualCameraStreamConfig implements Parcelable {
     @IntRange(from = 1)
     public int getHeight() {
         return mHeight;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VirtualCameraStreamConfig that = (VirtualCameraStreamConfig) o;
+        return mWidth == that.mWidth && mHeight == that.mHeight && mFormat == that.mFormat;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mWidth, mHeight, mFormat);
     }
 
     /** Returns the {@link ImageFormat} of this stream. */

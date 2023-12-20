@@ -206,6 +206,9 @@ public class LocalDisplayAdapterTest {
         when(mMockedResources.getIntArray(
             com.android.internal.R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate))
             .thenReturn(new int[]{});
+        when(mMockedResources.getIntArray(
+                com.android.internal.R.array.config_autoBrightnessLcdBacklightValues))
+                .thenReturn(new int[]{});
         doReturn(true).when(mFlags).isDisplayOffloadEnabled();
         initDisplayOffloadSession();
     }
@@ -1235,6 +1238,9 @@ public class LocalDisplayAdapterTest {
 
             @Override
             public void stopOffload() {}
+
+            @Override
+            public void onBlockingScreenOn(Runnable unblocker) {}
         });
 
         mDisplayOffloadSession = new DisplayOffloadSessionImpl(mDisplayOffloader,

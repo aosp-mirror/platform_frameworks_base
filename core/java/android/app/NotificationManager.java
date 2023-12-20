@@ -1184,13 +1184,19 @@ public class NotificationManager {
      */
     @UnsupportedAppUsage
     public void setZenMode(int mode, Uri conditionId, String reason) {
+        setZenMode(mode, conditionId, reason, /* fromUser= */ false);
+    }
+
+    /** @hide */
+    public void setZenMode(int mode, Uri conditionId, String reason, boolean fromUser) {
         INotificationManager service = getService();
         try {
-            service.setZenMode(mode, conditionId, reason);
+            service.setZenMode(mode, conditionId, reason, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
+
 
     /**
      * @hide
@@ -1325,9 +1331,19 @@ public class NotificationManager {
      * @return The id of the newly created rule; null if the rule could not be created.
      */
     public String addAutomaticZenRule(AutomaticZenRule automaticZenRule) {
+        return addAutomaticZenRule(automaticZenRule, /* fromUser= */ false);
+    }
+
+    /** @hide */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @NonNull
+    public String addAutomaticZenRule(@NonNull AutomaticZenRule automaticZenRule,
+            boolean fromUser) {
         INotificationManager service = getService();
         try {
-            return service.addAutomaticZenRule(automaticZenRule, mContext.getPackageName());
+            return service.addAutomaticZenRule(automaticZenRule,
+                    mContext.getPackageName(), fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1347,9 +1363,17 @@ public class NotificationManager {
      * @return Whether the rule was successfully updated.
      */
     public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule) {
+        return updateAutomaticZenRule(id, automaticZenRule, /* fromUser= */ false);
+    }
+
+    /** @hide */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public boolean updateAutomaticZenRule(@NonNull String id,
+            @NonNull AutomaticZenRule automaticZenRule, boolean fromUser) {
         INotificationManager service = getService();
         try {
-            return service.updateAutomaticZenRule(id, automaticZenRule);
+            return service.updateAutomaticZenRule(id, automaticZenRule, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1367,9 +1391,20 @@ public class NotificationManager {
      * @param condition The new state of this rule
      */
     public void setAutomaticZenRuleState(@NonNull String id, @NonNull Condition condition) {
+        if (Flags.modesApi()) {
+            setAutomaticZenRuleState(id, condition,
+                    /* fromUser= */ condition.source == Condition.SOURCE_USER_ACTION);
+        } else {
+            setAutomaticZenRuleState(id, condition, /* fromUser= */ false);
+        }
+    }
+
+    /** @hide */
+    public void setAutomaticZenRuleState(@NonNull String id, @NonNull Condition condition,
+            boolean fromUser) {
         INotificationManager service = getService();
         try {
-            service.setAutomaticZenRuleState(id, condition);
+            service.setAutomaticZenRuleState(id, condition, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1388,9 +1423,16 @@ public class NotificationManager {
      * @return Whether the rule was successfully deleted.
      */
     public boolean removeAutomaticZenRule(String id) {
+        return removeAutomaticZenRule(id, /* fromUser= */ false);
+    }
+
+    /** @hide */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public boolean removeAutomaticZenRule(@NonNull String id, boolean fromUser) {
         INotificationManager service = getService();
         try {
-            return service.removeAutomaticZenRule(id);
+            return service.removeAutomaticZenRule(id, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1402,9 +1444,14 @@ public class NotificationManager {
      * @hide
      */
     public boolean removeAutomaticZenRules(String packageName) {
+        return removeAutomaticZenRules(packageName, /* fromUser= */ false);
+    }
+
+    /** @hide */
+    public boolean removeAutomaticZenRules(String packageName, boolean fromUser) {
         INotificationManager service = getService();
         try {
-            return service.removeAutomaticZenRules(packageName);
+            return service.removeAutomaticZenRules(packageName, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1685,10 +1732,15 @@ public class NotificationManager {
      */
     // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public void setNotificationPolicy(@NonNull Policy policy) {
+        setNotificationPolicy(policy, /* fromUser= */ false);
+    }
+
+    /** @hide */
+    public void setNotificationPolicy(@NonNull Policy policy, boolean fromUser) {
         checkRequired("policy", policy);
         INotificationManager service = getService();
         try {
-            service.setNotificationPolicy(mContext.getOpPackageName(), policy);
+            service.setNotificationPolicy(mContext.getOpPackageName(), policy, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2685,9 +2737,16 @@ public class NotificationManager {
      */
     // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public final void setInterruptionFilter(@InterruptionFilter int interruptionFilter) {
+        setInterruptionFilter(interruptionFilter, /* fromUser= */ false);
+    }
+
+    /** @hide */
+    public final void setInterruptionFilter(@InterruptionFilter int interruptionFilter,
+            boolean fromUser) {
         final INotificationManager service = getService();
         try {
-            service.setInterruptionFilter(mContext.getOpPackageName(), interruptionFilter);
+            service.setInterruptionFilter(mContext.getOpPackageName(), interruptionFilter,
+                    fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

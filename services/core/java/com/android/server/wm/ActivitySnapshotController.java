@@ -33,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
+import com.android.window.flags.Flags;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -121,7 +122,8 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
 
     // TODO remove when enabled
     static boolean isSnapshotEnabled() {
-        return SystemProperties.getInt("persist.wm.debug.activity_screenshot", 0) != 0;
+        return SystemProperties.getInt("persist.wm.debug.activity_screenshot", 0) != 0
+                || Flags.activitySnapshotByDefault();
     }
 
     static PersistInfoProvider createPersistInfoProvider(

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalFoundationApi::class)
 
 package com.android.systemui.keyguard.ui.composable
 
@@ -50,13 +50,16 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+
+/** Set this to `true` to use the LockscreenContent replacement of KeyguardRootView. */
+private val UseLockscreenContent = false
 
 /** The lock screen scene shows when the device is locked. */
 @SysUISingleton
@@ -66,6 +69,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val viewModel: LockscreenSceneViewModel,
     @KeyguardRootView private val viewProvider: () -> @JvmSuppressWildcards View,
+    private val lockscreenContent: Lazy<LockscreenContent>,
 ) : ComposableScene {
     override val key = SceneKey.Lockscreen
 
@@ -91,6 +95,7 @@ constructor(
         LockscreenScene(
             viewProvider = viewProvider,
             viewModel = viewModel,
+            lockscreenContent = lockscreenContent,
             modifier = modifier,
         )
     }
@@ -113,6 +118,7 @@ constructor(
 private fun SceneScope.LockscreenScene(
     viewProvider: () -> View,
     viewModel: LockscreenSceneViewModel,
+    lockscreenContent: Lazy<LockscreenContent>,
     modifier: Modifier = Modifier,
 ) {
     fun findSettingsMenu(): View {
@@ -133,16 +139,24 @@ private fun SceneScope.LockscreenScene(
             modifier = Modifier.fillMaxSize(),
         )
 
-        AndroidView(
-            factory = { _ ->
-                val keyguardRootView = viewProvider()
-                // Remove the KeyguardRootView from any parent it might already have in legacy code
-                // just in case (a view can't have two parents).
-                (keyguardRootView.parent as? ViewGroup)?.removeView(keyguardRootView)
-                keyguardRootView
-            },
-            modifier = Modifier.fillMaxSize(),
-        )
+        if (UseLockscreenContent) {
+            lockscreenContent
+                .get()
+                .Content(
+                    modifier = Modifier.fillMaxSize(),
+                )
+        } else {
+            AndroidView(
+                factory = { _ ->
+                    val keyguardRootView = viewProvider()
+                    // Remove the KeyguardRootView from any parent it might already have in legacy
+                    // code just in case (a view can't have two parents).
+                    (keyguardRootView.parent as? ViewGroup)?.removeView(keyguardRootView)
+                    keyguardRootView
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
 
         val notificationStackPosition by viewModel.keyguardRoot.notificationBounds.collectAsState()
 

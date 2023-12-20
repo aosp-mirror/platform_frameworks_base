@@ -616,4 +616,28 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 .onDozeAmountChanged(eq(.3f), eq(.3f), eq(ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN))
             job.cancel()
         }
+
+    @Test
+    fun bouncerToAod_dozeAmountChanged() =
+        testScope.runTest {
+            // GIVEN view is attached
+            mController.onViewAttached()
+            Mockito.reset(mView)
+
+            val job = mController.listenForPrimaryBouncerToAodTransitions(this)
+            // WHEN alternate bouncer to aod transition in progress
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.AOD,
+                    value = .3f,
+                    transitionState = TransitionState.RUNNING
+                )
+            )
+            runCurrent()
+
+            // THEN doze amount is updated to
+            verify(mView).onDozeAmountChanged(eq(.3f), eq(.3f), eq(ANIMATE_APPEAR_ON_SCREEN_OFF))
+            job.cancel()
+        }
 }

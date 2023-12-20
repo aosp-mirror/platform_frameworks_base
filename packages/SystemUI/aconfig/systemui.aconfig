@@ -45,6 +45,13 @@ flag {
 }
 
 flag {
+    name: "notifications_improved_hun_animation"
+    namespace: "systemui"
+    description: "Adds a translateY animation, and other improvements to match the motion specs of the HUN Intro + Outro animations."
+    bug: "243302608"
+}
+
+flag {
     name: "notification_lifetime_extension_refactor"
     namespace: "systemui"
     description: "Enables moving notification lifetime extension management from SystemUI to "
@@ -241,10 +248,16 @@ flag {
 }
 
 flag {
+   name: "switch_user_on_bg"
+   namespace: "systemui"
+   description: "Does user switching on a background thread"
+   bug: "284095720"
+}
+
+flag {
     name: "status_bar_static_inout_indicators"
     namespace: "systemui"
     description: "(Upstream request) Always show the network activity inout indicators and "
         "prefer using alpha to distinguish network activity."
     bug: "310715220"
 }
-

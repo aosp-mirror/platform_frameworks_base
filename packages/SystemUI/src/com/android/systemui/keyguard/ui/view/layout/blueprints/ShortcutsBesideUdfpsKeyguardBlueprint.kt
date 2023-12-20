@@ -29,14 +29,17 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotification
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultUdfpsAccessibilityOverlaySection
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Vertically aligns the shortcuts with the udfps. */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class ShortcutsBesideUdfpsKeyguardBlueprint
 @Inject
@@ -53,6 +56,7 @@ constructor(
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
     aodNotificationIconsSection: AodNotificationIconsSection,
     aodBurnInSection: AodBurnInSection,
+    udfpsAccessibilityOverlaySection: DefaultUdfpsAccessibilityOverlaySection,
 ) : KeyguardBlueprint {
     override val id: String = SHORTCUTS_BESIDE_UDFPS
 
@@ -68,7 +72,8 @@ constructor(
             splitShadeGuidelines,
             aodNotificationIconsSection,
             aodBurnInSection,
-            defaultDeviceEntrySection, // Add LAST: Intentionally has z-order above other views.
+            defaultDeviceEntrySection,
+            udfpsAccessibilityOverlaySection, // Add LAST: Intentionally has z-order above others
         )
 
     companion object {

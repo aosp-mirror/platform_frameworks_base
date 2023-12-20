@@ -525,6 +525,12 @@ public class CarrierConfigManager {
     public static final String KEY_PREFER_2G_BOOL = "prefer_2g_bool";
 
     /**
+     * Used in the Preferred Network Types menu to determine if the 3G option is displayed.
+     */
+    @FlaggedApi(Flags.FLAG_HIDE_PREFER_3G_ITEM)
+    public static final String KEY_PREFER_3G_VISIBILITY_BOOL = "prefer_3g_visibility_bool";
+
+    /**
      * Used in Cellular Network Settings for preferred network type to show 4G only mode.
      * @hide
      */
@@ -10144,6 +10150,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
         sDefaults.putBoolean(KEY_PREFER_2G_BOOL, false);
+        sDefaults.putBoolean(KEY_PREFER_3G_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_4G_ONLY_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_APN_SETTING_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CDMA_CHOICES_BOOL, false);

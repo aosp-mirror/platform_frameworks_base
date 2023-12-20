@@ -1639,8 +1639,7 @@ public class SpatializerHelper {
             return  -1;
         }
         final AudioDeviceAttributes currentDevice = sRoutingDevices.get(0);
-        List<String> deviceAddresses = mAudioService.getDeviceAddresses(currentDevice);
-
+        List<String> deviceAddresses = mAudioService.getDeviceIdentityAddresses(currentDevice);
         // We limit only to Sensor.TYPE_HEAD_TRACKER here to avoid confusion
         // with gaming sensors. (Note that Sensor.TYPE_ROTATION_VECTOR
         // and Sensor.TYPE_GAME_ROTATION_VECTOR are supported internally by

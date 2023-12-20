@@ -37,6 +37,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.UserIcons
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags.switchUserOnBg
 import com.android.systemui.SystemUISecondaryUserService
 import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -44,6 +45,7 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -100,6 +102,7 @@ constructor(
     broadcastDispatcher: BroadcastDispatcher,
     keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     private val activityManager: ActivityManager,
     private val refreshUsersScheduler: RefreshUsersScheduler,
     private val guestUserInteractor: GuestUserInteractor,
@@ -339,7 +342,11 @@ constructor(
             }
             .launchIn(applicationScope)
         restartSecondaryService(repository.getSelectedUserInfo().id)
-        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        applicationScope.launch {
+            withContext(mainDispatcher) {
+                keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+            }
+        }
     }
 
     fun addCallback(callback: UserCallback) {
@@ -593,10 +600,18 @@ constructor(
     private fun switchUser(userId: Int) {
         // TODO(b/246631653): track jank and latency like in the old impl.
         refreshUsersScheduler.pause()
-        try {
-            activityManager.switchUser(userId)
-        } catch (e: RemoteException) {
-            Log.e(TAG, "Couldn't switch user.", e)
+        val runnable = Runnable {
+            try {
+                activityManager.switchUser(userId)
+            } catch (e: RemoteException) {
+                Log.e(TAG, "Couldn't switch user.", e)
+            }
+        }
+
+        if (switchUserOnBg()) {
+            applicationScope.launch { withContext(backgroundDispatcher) { runnable.run() } }
+        } else {
+            runnable.run()
         }
     }
 

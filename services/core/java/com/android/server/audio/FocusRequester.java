@@ -33,6 +33,7 @@ import com.android.server.audio.MediaFocusControl.AudioFocusDeathHandler;
 import com.android.server.pm.UserManagerInternal;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * @hide
@@ -532,6 +533,33 @@ public class FocusRequester {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+    @GuardedBy("MediaFocusControl.mAudioFocusLock")
+    int dispatchFocusChangeWithFadeLocked(int focusChange, List<FocusRequester> otherActiveFrs) {
+        if (focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+                || focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE
+                || focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
+                || focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+            mFocusLossFadeLimbo = false;
+            mFocusController.restoreVShapedPlayers(this);
+        } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS
+                && mFocusController.shouldEnforceFade()) {
+            for (int index = 0; index < otherActiveFrs.size(); index++) {
+                // candidate for fade-out before a receiving a loss
+                if (mFocusController.fadeOutPlayers(otherActiveFrs.get(index), /* loser= */ this)) {
+                    // active players are being faded out, delay the dispatch of focus loss
+                    // mark this instance as being faded so it's not released yet as the focus loss
+                    // will be dispatched later, it is now in limbo mode
+                    mFocusLossFadeLimbo = true;
+                    mFocusController.postDelayedLossAfterFade(this,
+                            mFocusController.getFadeOutDurationOnFocusLossMillis(
+                                    this.getAudioAttributes()));
+                    return AudioManager.AUDIOFOCUS_REQUEST_DELAYED;
+                }
+            }
+        }
+        return dispatchFocusChange(focusChange);
     }
 
     void dispatchFocusResultFromExtPolicy(int requestResult) {

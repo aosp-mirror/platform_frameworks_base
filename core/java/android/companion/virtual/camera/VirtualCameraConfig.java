@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,9 +224,8 @@ public final class VirtualCameraConfig implements Parcelable {
         }
 
         @Override
-        public void onProcessCaptureRequest(
-                int streamId, long frameId, VirtualCameraMetadata metadata) {
-            mExecutor.execute(() -> mCallback.onProcessCaptureRequest(streamId, frameId, metadata));
+        public void onProcessCaptureRequest(int streamId, long frameId) {
+            mExecutor.execute(() -> mCallback.onProcessCaptureRequest(streamId, frameId));
         }
 
         @Override

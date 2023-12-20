@@ -70,7 +70,6 @@ import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_FGS_PERMI
 import static android.os.PowerExemptionManager.REASON_OPT_OUT_REQUESTED;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
 import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
-import static android.os.PowerExemptionManager.REASON_OTHER;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_INSTALLER;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
@@ -127,7 +126,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.Manifest;
-import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1085,7 +1083,7 @@ public final class ActiveServices {
             // Use that as a shortcut if possible to avoid having to recheck all the conditions.
             final boolean whileInUseAllowsUiJobScheduling =
                     ActivityManagerService.doesReasonCodeAllowSchedulingUserInitiatedJobs(
-                            r.getFgsAllowWIU());
+                            r.getFgsAllowWiu_forStart());
             r.updateAllowUiJobScheduling(whileInUseAllowsUiJobScheduling
                     || mAm.canScheduleUserInitiatedJobs(callingUid, callingPid, callingPackage));
         } else {
@@ -2320,7 +2318,7 @@ public final class ActiveServices {
 
                     // If the foreground service is not started from TOP process, do not allow it to
                     // have while-in-use location/camera/microphone access.
-                    if (!r.isFgsAllowedWIU()) {
+                    if (!r.isFgsAllowedWiu_forCapabilities()) {
                         Slog.w(TAG,
                                 "Foreground service started from background can not have "
                                         + "location/camera/microphone access: service "
@@ -2436,7 +2434,7 @@ public final class ActiveServices {
                         // mAllowWhileInUsePermissionInFgs.
                         r.mAllowStartForegroundAtEntering = r.getFgsAllowStart();
                         r.mAllowWhileInUsePermissionInFgsAtEntering =
-                                r.isFgsAllowedWIU();
+                                r.isFgsAllowedWiu_forCapabilities();
                         r.mStartForegroundCount++;
                         r.mFgsEnterTime = SystemClock.uptimeMillis();
                         if (!stopProcStatsOp) {
@@ -2632,7 +2630,7 @@ public final class ActiveServices {
                 policy.getForegroundServiceTypePolicyInfo(type, defaultToType);
         final @ForegroundServicePolicyCheckCode int code = policy.checkForegroundServiceTypePolicy(
                 mAm.mContext, r.packageName, r.app.uid, r.app.getPid(),
-                r.isFgsAllowedWIU(), policyInfo);
+                r.isFgsAllowedWiu_forStart(), policyInfo);
         RuntimeException exception = null;
         switch (code) {
             case FGS_TYPE_POLICY_CHECK_DEPRECATED: {
@@ -7580,78 +7578,76 @@ public final class ActiveServices {
      * @param callingUid caller app's uid.
      * @param intent intent to start/bind service.
      * @param r the service to start.
-     * @param isBindService True if it's called from bindService().
+     * @param inBindService True if it's called from bindService().
      * @param forBoundFgs set to true if it's called from Service.startForeground() for a
      *                    service that's not started but bound.
-     * @return true if allow, false otherwise.
      */
     private void setFgsRestrictionLocked(String callingPackage,
             int callingPid, int callingUid, Intent intent, ServiceRecord r, int userId,
-            BackgroundStartPrivileges backgroundStartPrivileges, boolean isBindService,
+            BackgroundStartPrivileges backgroundStartPrivileges, boolean inBindService,
             boolean forBoundFgs) {
 
-        @ReasonCode int allowWIU;
+        @ReasonCode int allowWiu;
         @ReasonCode int allowStart;
 
         // If called from bindService(), do not update the actual fields, but instead
         // keep it in a separate set of fields.
-        if (isBindService) {
-            allowWIU = r.mAllowWIUInBindService;
-            allowStart = r.mAllowStartInBindService;
+        if (inBindService) {
+            allowWiu = r.mAllowWiu_inBindService;
+            allowStart = r.mAllowStart_inBindService;
         } else {
-            allowWIU = r.mAllowWhileInUsePermissionInFgsReasonNoBinding;
-            allowStart = r.mAllowStartForegroundNoBinding;
+            allowWiu = r.mAllowWiu_noBinding;
+            allowStart = r.mAllowStart_noBinding;
         }
 
-        // Check DeviceConfig flag.
-        if (!mAm.mConstants.mFlagBackgroundFgsStartRestrictionEnabled) {
-            if (allowWIU == REASON_DENIED) {
-                // BGFGS start restrictions are disabled. We're allowing while-in-use permissions.
-                // Note REASON_OTHER since there's no other suitable reason.
-                allowWIU = REASON_OTHER;
-            }
-        }
-
-        if ((allowWIU == REASON_DENIED)
-                || (allowStart == REASON_DENIED)) {
+        if ((allowWiu == REASON_DENIED) || (allowStart == REASON_DENIED)) {
             @ReasonCode final int allowWhileInUse = shouldAllowFgsWhileInUsePermissionLocked(
                     callingPackage, callingPid, callingUid, r.app, backgroundStartPrivileges);
             // We store them to compare the old and new while-in-use logics to each other.
             // (They're not used for any other purposes.)
-            if (allowWIU == REASON_DENIED) {
-                allowWIU = allowWhileInUse;
+            if (allowWiu == REASON_DENIED) {
+                allowWiu = allowWhileInUse;
             }
             if (allowStart == REASON_DENIED) {
                 allowStart = shouldAllowFgsStartForegroundWithBindingCheckLocked(
                         allowWhileInUse, callingPackage, callingPid, callingUid, intent, r,
-                        backgroundStartPrivileges, isBindService);
+                        backgroundStartPrivileges, inBindService);
             }
         }
 
-        if (isBindService) {
-            r.mAllowWIUInBindService = allowWIU;
-            r.mAllowStartInBindService = allowStart;
+        if (inBindService) {
+            r.mAllowWiu_inBindService = allowWiu;
+            r.mAllowStart_inBindService = allowStart;
         } else {
             if (!forBoundFgs) {
-                // This is for "normal" situation.
-                r.mAllowWhileInUsePermissionInFgsReasonNoBinding = allowWIU;
-                r.mAllowStartForegroundNoBinding = allowStart;
+                // This is for "normal" situation -- either:
+                // - in Context.start[Foreground]Service()
+                // - or, in Service.startForeground() on a started service.
+                r.mAllowWiu_noBinding = allowWiu;
+                r.mAllowStart_noBinding = allowStart;
             } else {
-                // This logic is only for logging, so we only update the "by-binding" fields.
-                if (r.mAllowWIUByBindings == REASON_DENIED) {
-                    r.mAllowWIUByBindings = allowWIU;
+                // Service.startForeground() is called on a service that's not started, but bound.
+                // In this case, we set them to "byBindings", not "noBinding", because
+                // we don't want to use them when we calculate the "legacy" code.
+                //
+                // We don't want to set them to "no binding" codes, because on U-QPR1 and below,
+                // we didn't call setFgsRestrictionLocked() in the code path which sets
+                // forBoundFgs to true, and we wanted to preserve the original behavior in other
+                // places to compare the legacy and new logic.
+                if (r.mAllowWiu_byBindings == REASON_DENIED) {
+                    r.mAllowWiu_byBindings = allowWiu;
                 }
-                if (r.mAllowStartByBindings == REASON_DENIED) {
-                    r.mAllowStartByBindings = allowStart;
+                if (r.mAllowStart_byBindings == REASON_DENIED) {
+                    r.mAllowStart_byBindings = allowStart;
                 }
             }
             // Also do a binding client check, unless called from bindService().
-            if (r.mAllowWIUByBindings == REASON_DENIED) {
-                r.mAllowWIUByBindings =
+            if (r.mAllowWiu_byBindings == REASON_DENIED) {
+                r.mAllowWiu_byBindings =
                         shouldAllowFgsWhileInUsePermissionByBindingsLocked(callingUid);
             }
-            if (r.mAllowStartByBindings == REASON_DENIED) {
-                r.mAllowStartByBindings = r.mAllowWIUByBindings;
+            if (r.mAllowStart_byBindings == REASON_DENIED) {
+                r.mAllowStart_byBindings = r.mAllowWiu_byBindings;
             }
         }
     }
@@ -7660,13 +7656,13 @@ public final class ActiveServices {
      * Reset various while-in-use and BFSL related information.
      */
     void resetFgsRestrictionLocked(ServiceRecord r) {
-        r.clearFgsAllowWIU();
+        r.clearFgsAllowWiu();
         r.clearFgsAllowStart();
 
         r.mInfoAllowStartForeground = null;
         r.mInfoTempFgsAllowListReason = null;
         r.mLoggedInfoAllowStartForeground = false;
-        r.updateAllowUiJobScheduling(r.isFgsAllowedWIU());
+        r.updateAllowUiJobScheduling(r.isFgsAllowedWiu_forStart());
     }
 
     boolean canStartForegroundServiceLocked(int callingPid, int callingUid, String callingPackage) {
@@ -8284,7 +8280,8 @@ public final class ActiveServices {
             allowWhileInUsePermissionInFgs = r.mAllowWhileInUsePermissionInFgsAtEntering;
             fgsStartReasonCode = r.mAllowStartForegroundAtEntering;
         } else {
-            allowWhileInUsePermissionInFgs = r.isFgsAllowedWIU();
+            // TODO: Also log "forStart"
+            allowWhileInUsePermissionInFgs = r.isFgsAllowedWiu_forCapabilities();
             fgsStartReasonCode = r.getFgsAllowStart();
         }
         final int callerTargetSdkVersion = r.mRecentCallerApplicationInfo != null
@@ -8323,12 +8320,12 @@ public final class ActiveServices {
                 mAm.getUidProcessCapabilityLocked(r.mRecentCallingUid),
                 0,
                 0,
-                r.mAllowWhileInUsePermissionInFgsReasonNoBinding,
-                r.mAllowWIUInBindService,
-                r.mAllowWIUByBindings,
-                r.mAllowStartForegroundNoBinding,
-                r.mAllowStartInBindService,
-                r.mAllowStartByBindings,
+                r.mAllowWiu_noBinding,
+                r.mAllowWiu_inBindService,
+                r.mAllowWiu_byBindings,
+                r.mAllowStart_noBinding,
+                r.mAllowStart_inBindService,
+                r.mAllowStart_byBindings,
                 fgsStartApi,
                 fgsRestrictionRecalculated);
 

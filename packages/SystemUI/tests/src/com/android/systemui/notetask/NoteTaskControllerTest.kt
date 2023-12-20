@@ -75,7 +75,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
@@ -463,7 +462,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     // region setNoteTaskShortcutEnabled
     @Test
-    @Ignore("b/316332684")
     fun setNoteTaskShortcutEnabled_setTrue() {
         createNoteTaskController().setNoteTaskShortcutEnabled(value = true, userTracker.userHandle)
 
@@ -480,7 +478,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/316332684")
     fun setNoteTaskShortcutEnabled_setFalse() {
         createNoteTaskController().setNoteTaskShortcutEnabled(value = false, userTracker.userHandle)
 
@@ -497,7 +494,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/316332684")
     fun setNoteTaskShortcutEnabled_workProfileUser_setTrue() {
         whenever(context.createContextAsUser(eq(workUserInfo.userHandle), any()))
             .thenReturn(workProfileContext)
@@ -519,7 +515,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/316332684")
     fun setNoteTaskShortcutEnabled_workProfileUser_setFalse() {
         whenever(context.createContextAsUser(eq(workUserInfo.userHandle), any()))
             .thenReturn(workProfileContext)
@@ -738,7 +733,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     // region internalUpdateNoteTaskAsUser
     @Test
-    @Ignore("b/316332684")
     fun updateNoteTaskAsUserInternal_withNotesRole_withShortcuts_shouldUpdateShortcuts() {
         createNoteTaskController(isEnabled = true)
             .launchUpdateNoteTaskAsUser(userTracker.userHandle)
@@ -772,7 +766,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/316332684")
     fun updateNoteTaskAsUserInternal_noNotesRole_shouldDisableShortcuts() {
         whenever(roleManager.getRoleHoldersAsUser(ROLE_NOTES, userTracker.userHandle))
             .thenReturn(emptyList())
@@ -796,7 +789,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @Ignore("b/316332684")
     fun updateNoteTaskAsUserInternal_flagDisabled_shouldDisableShortcuts() {
         createNoteTaskController(isEnabled = false)
             .launchUpdateNoteTaskAsUser(userTracker.userHandle)

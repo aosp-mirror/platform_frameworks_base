@@ -63,6 +63,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellSharedConstants;
@@ -110,6 +111,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
     @Mock
     private InputManager mInputManager;
+    @Mock
+    private ShellCommandHandler mShellCommandHandler;
 
     private BackAnimationController mController;
     private TestableContentResolver mContentResolver;
@@ -145,7 +148,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mContext,
                         mContentResolver,
                         mAnimationBackground,
-                        mShellBackAnimationRegistry);
+                        mShellBackAnimationRegistry,
+                        mShellCommandHandler);
         mShellInit.init();
         mShellExecutor.flushAll();
     }
@@ -298,7 +302,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mContext,
                         mContentResolver,
                         mAnimationBackground,
-                        mShellBackAnimationRegistry);
+                        mShellBackAnimationRegistry,
+                        mShellCommandHandler);
         shellInit.init();
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 

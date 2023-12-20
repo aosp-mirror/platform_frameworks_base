@@ -131,10 +131,10 @@ object DeviceEntryIconViewBinder {
 
         bgView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
+                launch { bgViewModel.alpha.collect { alpha -> bgView.alpha = alpha } }
                 launch {
-                    bgViewModel.viewModel.collect { bgViewModel ->
-                        bgView.alpha = bgViewModel.alpha
-                        bgView.imageTintList = ColorStateList.valueOf(bgViewModel.tint)
+                    bgViewModel.color.collect { color ->
+                        bgView.imageTintList = ColorStateList.valueOf(color)
                     }
                 }
             }

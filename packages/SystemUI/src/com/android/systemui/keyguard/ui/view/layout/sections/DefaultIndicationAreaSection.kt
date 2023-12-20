@@ -54,7 +54,7 @@ constructor(
         if (keyguardBottomAreaRefactor()) {
             indicationAreaHandle =
                 KeyguardIndicationAreaBinder.bind(
-                    constraintLayout,
+                    constraintLayout.requireViewById(R.id.keyguard_indication_area),
                     keyguardIndicationAreaViewModel,
                     keyguardRootViewModel,
                     indicationController,

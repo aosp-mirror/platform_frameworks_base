@@ -369,11 +369,14 @@ package android.app {
   }
 
   public class NotificationManager {
+    method @FlaggedApi("android.app.modes_api") @NonNull public String addAutomaticZenRule(@NonNull android.app.AutomaticZenRule, boolean);
     method public void cleanUpCallersAfter(long);
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
+    method @FlaggedApi("android.app.modes_api") public boolean removeAutomaticZenRule(@NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING) public void setToastRateLimitingEnabled(boolean);
+    method @FlaggedApi("android.app.modes_api") public boolean updateAutomaticZenRule(@NonNull String, @NonNull android.app.AutomaticZenRule, boolean);
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
   }
 

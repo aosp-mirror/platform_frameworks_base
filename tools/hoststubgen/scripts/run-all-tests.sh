@@ -22,7 +22,6 @@ ATEST_ARGS="--host"
 
 # These tests are known to pass.
 READY_TEST_MODULES=(
-  HostStubGenTest-framework-all-test-host-test
   hoststubgen-test-tiny-test
   CtsUtilTestCasesRavenwood
   CtsOsTestCasesRavenwood # This one uses native sustitution, so let's run it too.
@@ -30,7 +29,6 @@ READY_TEST_MODULES=(
 
 MUST_BUILD_MODULES=(
     "${NOT_READY_TEST_MODULES[*]}"
-    HostStubGenTest-framework-test
 )
 
 # First, build all the test / etc modules. This shouldn't fail.
@@ -44,11 +42,8 @@ run atest $ATEST_ARGS hoststubgentest hoststubgen-invoke-test
 # files, and they may fail when something changes in the build system.
 run ./hoststubgen/test-tiny-framework/diff-and-update-golden.sh
 
-run ./hoststubgen/test-framework/run-test-without-atest.sh
-
 run ./hoststubgen/test-tiny-framework/run-test-manually.sh
 run atest $ATEST_ARGS tiny-framework-dump-test
-run ./scripts/build-framework-hostside-jars-and-extract.sh
 
 # This script is already broken on goog/master
 # run ./scripts/build-framework-hostside-jars-without-genrules.sh

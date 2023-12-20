@@ -62,8 +62,8 @@ constructor(
     override val isPulseExpanding: Flow<Boolean> = conflatedCallbackFlow {
         val listener =
             object : NotificationWakeUpCoordinator.WakeUpListener {
-                override fun onPulseExpansionChanged(expandingChanged: Boolean) {
-                    trySend(expandingChanged)
+                override fun onPulseExpandingChanged(isPulseExpanding: Boolean) {
+                    trySend(isPulseExpanding)
                 }
             }
         trySend(wakeUpCoordinator.isPulseExpanding())

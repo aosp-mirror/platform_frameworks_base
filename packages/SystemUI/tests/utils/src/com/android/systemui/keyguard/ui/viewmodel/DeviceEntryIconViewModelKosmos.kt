@@ -28,8 +28,10 @@ import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
 
+val Kosmos.fakeDeviceEntryIconViewModelTransition by Fixture { FakeDeviceEntryIconTransition() }
+
 val Kosmos.deviceEntryIconViewModelTransitionsMock by Fixture {
-    mutableSetOf<DeviceEntryIconTransition>()
+    setOf<DeviceEntryIconTransition>(fakeDeviceEntryIconViewModelTransition)
 }
 
 val Kosmos.deviceEntryIconViewModel by Fixture {
