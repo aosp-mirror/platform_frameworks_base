@@ -632,7 +632,7 @@
             <xs:annotation name="final"/>
         </xs:element>
         <xs:element name="mode" type="AutoBrightnessModeName" minOccurs="0"/>
-        <xs:element name="setting" type="xs:string" minOccurs="0"/>
+        <xs:element name="setting" type="AutoBrightnessSettingName" minOccurs="0"/>
     </xs:complexType>
 
     <!-- Represents a point in the display brightness mapping, representing the lux level from the
@@ -773,6 +773,15 @@
             <xs:enumeration value="default"/>
             <xs:enumeration value="idle"/>
             <xs:enumeration value="doze"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Predefined auto-brighntess settings -->
+    <xs:simpleType  name="AutoBrightnessSettingName">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="dim"/>
+            <xs:enumeration value="normal"/>
+            <xs:enumeration value="bright"/>
         </xs:restriction>
     </xs:simpleType>
 </xs:schema>

@@ -23,6 +23,13 @@ package com.android.server.display.config {
     enum_constant public static final com.android.server.display.config.AutoBrightnessModeName idle;
   }
 
+  public enum AutoBrightnessSettingName {
+    method public String getRawName();
+    enum_constant public static final com.android.server.display.config.AutoBrightnessSettingName bright;
+    enum_constant public static final com.android.server.display.config.AutoBrightnessSettingName dim;
+    enum_constant public static final com.android.server.display.config.AutoBrightnessSettingName normal;
+  }
+
   public class BlockingZoneConfig {
     ctor public BlockingZoneConfig();
     method public final com.android.server.display.config.BlockingZoneThreshold getBlockingZoneThreshold();
@@ -227,10 +234,10 @@ package com.android.server.display.config {
     ctor public LuxToBrightnessMapping();
     method @NonNull public final com.android.server.display.config.NonNegativeFloatToFloatMap getMap();
     method public com.android.server.display.config.AutoBrightnessModeName getMode();
-    method public String getSetting();
+    method public com.android.server.display.config.AutoBrightnessSettingName getSetting();
     method public final void setMap(@NonNull com.android.server.display.config.NonNegativeFloatToFloatMap);
     method public void setMode(com.android.server.display.config.AutoBrightnessModeName);
-    method public void setSetting(String);
+    method public void setSetting(com.android.server.display.config.AutoBrightnessSettingName);
   }
 
   public class NitsMap {

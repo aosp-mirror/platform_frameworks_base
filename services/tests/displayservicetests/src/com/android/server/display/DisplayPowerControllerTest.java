@@ -1669,7 +1669,7 @@ public final class DisplayPowerControllerTest {
         }
 
         @Override
-        BrightnessMappingStrategy getDefaultModeBrightnessMapper(Resources resources,
+        BrightnessMappingStrategy getDefaultModeBrightnessMapper(Context context,
                 DisplayDeviceConfig displayDeviceConfig,
                 DisplayWhiteBalanceController displayWhiteBalanceController) {
             return mBrightnessMappingStrategy;
