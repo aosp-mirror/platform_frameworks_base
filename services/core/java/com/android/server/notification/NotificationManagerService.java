@@ -5617,7 +5617,8 @@ public class NotificationManagerService extends SystemService {
             return !isCompatChangeEnabled
                     || isCallerSystemOrSystemUi()
                     || hasCompanionDevice(callingPkg, UserHandle.getUserId(callingUid),
-                            AssociationRequest.DEVICE_PROFILE_WATCH);
+                            Set.of(AssociationRequest.DEVICE_PROFILE_WATCH,
+                                    AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION));
         }
 
         private void enforcePolicyAccess(String pkg, String method) {
@@ -10800,7 +10801,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     private boolean hasCompanionDevice(String pkg, @UserIdInt int userId,
-            @Nullable @AssociationRequest.DeviceProfile String withDeviceProfile) {
+            @Nullable Set</* @AssociationRequest.DeviceProfile */ String> withDeviceProfiles) {
         if (mCompanionManager == null) {
             mCompanionManager = getCompanionManager();
         }
@@ -10812,7 +10813,7 @@ public class NotificationManagerService extends SystemService {
         try {
             List<AssociationInfo> associations = mCompanionManager.getAssociations(pkg, userId);
             for (AssociationInfo association : associations) {
-                if (withDeviceProfile == null || withDeviceProfile.equals(
+                if (withDeviceProfiles == null || withDeviceProfiles.contains(
                         association.getDeviceProfile())) {
                     return true;
                 }
