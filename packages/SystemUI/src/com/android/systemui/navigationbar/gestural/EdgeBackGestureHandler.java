@@ -758,7 +758,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private void updateMLModelState() {
-        boolean newState = mIsGestureHandlingEnabled && DeviceConfig.getBoolean(
+        boolean newState = mIsGestureHandlingEnabled && mContext.getResources().getBoolean(
+                R.bool.config_useBackGestureML) && DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.USE_BACK_GESTURE_ML_MODEL, false);
 
