@@ -235,6 +235,7 @@ import com.android.internal.policy.PhoneFallbackEventHandler;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.SurfaceCallbackHelper;
+import com.android.modules.expresslog.Counter;
 import com.android.window.flags.Flags;
 
 import java.io.IOException;
@@ -9704,11 +9705,27 @@ public final class ViewRootImpl implements ViewParent,
             } else {
                 q.mReceiver.finishInputEvent(q.mEvent, handled);
             }
+            if (q.mEvent instanceof KeyEvent) {
+                logHandledSystemKey((KeyEvent) q.mEvent, handled);
+            }
         } else {
             q.mEvent.recycleIfNeededAfterDispatch();
         }
 
         recycleQueuedInputEvent(q);
+    }
+
+    private void logHandledSystemKey(KeyEvent event, boolean handled) {
+        final int keyCode = event.getKeyCode();
+        if (keyCode != KeyEvent.KEYCODE_STEM_PRIMARY) {
+            return;
+        }
+        if (event.isDown() && event.getRepeatCount() == 0 && handled) {
+            // Initial DOWN event is handled. Log the stem primary key press.
+            Counter.logIncrementWithUid(
+                    "input.value_app_handled_stem_primary_key_gestures_count",
+                    Process.myUid());
+        }
     }
 
     static boolean isTerminalInputEvent(InputEvent event) {
