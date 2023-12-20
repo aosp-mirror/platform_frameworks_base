@@ -40,6 +40,7 @@ import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
@@ -54,8 +55,10 @@ import dagger.assisted.AssistedInject;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 /**
  * Manages the lifecycle of a TileService.
@@ -101,8 +104,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final ActivityManager mActivityManager;
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
-    @Nullable
-    private volatile QSTileServiceWrapper mWrapper;
+    @NonNull
+    private volatile Optional<QSTileServiceWrapper> mOptionalWrapper = Optional.empty();
     private boolean mListening;
     private IBinder mClickBinder;
 
@@ -222,6 +225,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                 // Only try a new binding if we are not currently bound.
                 mIsBound.compareAndSet(false, bindServices());
                 if (!mIsBound.get()) {
+                    Log.d(TAG, "Failed to bind to service");
                     mContext.unbindService(this);
                 }
             } catch (SecurityException e) {
@@ -281,7 +285,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             service.linkToDeath(this, 0);
         } catch (RemoteException e) {
         }
-        mWrapper = wrapper;
+        mOptionalWrapper = Optional.of(wrapper);
         handlePendingMessages();
     }
 
@@ -368,6 +372,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
      * are supposed to be bound, we will try to bind after some amount of time.
      */
     private void handleDeath() {
+        if (!mIsBound.get()) {
+            // If we are already not bound, don't do anything else.
+            return;
+        }
         mExecutor.execute(() -> {
             if (!mIsBound.get()) {
                 // If we are already not bound, don't do anything else.
@@ -522,7 +530,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     @Override
     public void onTileAdded() {
         if (mDebug) Log.d(TAG, "onTileAdded " + getComponent());
-        if (mWrapper == null || !mWrapper.onTileAdded()) {
+        if (isNullOrFailedAction(mOptionalWrapper, QSTileServiceWrapper::onTileAdded)) {
             queueMessage(MSG_ON_ADDED);
             handleDeath();
         }
@@ -531,7 +539,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     @Override
     public void onTileRemoved() {
         if (mDebug) Log.d(TAG, "onTileRemoved " + getComponent());
-        if (mWrapper == null || !mWrapper.onTileRemoved()) {
+        if (isNullOrFailedAction(mOptionalWrapper, QSTileServiceWrapper::onTileRemoved)) {
             queueMessage(MSG_ON_REMOVED);
             handleDeath();
         }
@@ -541,7 +549,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     public void onStartListening() {
         if (mDebug) Log.d(TAG, "onStartListening " + getComponent());
         mListening = true;
-        if (mWrapper != null && !mWrapper.onStartListening()) {
+        if (isNotNullAndFailedAction(mOptionalWrapper, QSTileServiceWrapper::onStartListening)) {
             handleDeath();
         }
     }
@@ -550,7 +558,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     public void onStopListening() {
         if (mDebug) Log.d(TAG, "onStopListening " + getComponent());
         mListening = false;
-        if (mWrapper != null && !mWrapper.onStopListening()) {
+        if (isNotNullAndFailedAction(mOptionalWrapper, QSTileServiceWrapper::onStopListening)) {
             handleDeath();
         }
     }
@@ -558,7 +566,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     @Override
     public void onClick(IBinder iBinder) {
         if (mDebug) Log.d(TAG, "onClick " + iBinder + " " + getComponent() + " " + mUser);
-        if (mWrapper == null || !mWrapper.onClick(iBinder)) {
+        if (isNullOrFailedAction(mOptionalWrapper, (wrapper) -> wrapper.onClick(iBinder))) {
             mClickBinder = iBinder;
             queueMessage(MSG_ON_CLICK);
             handleDeath();
@@ -568,7 +576,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     @Override
     public void onUnlockComplete() {
         if (mDebug) Log.d(TAG, "onUnlockComplete " + getComponent());
-        if (mWrapper == null || !mWrapper.onUnlockComplete()) {
+        if (isNullOrFailedAction(mOptionalWrapper, QSTileServiceWrapper::onUnlockComplete)) {
             queueMessage(MSG_ON_UNLOCK_COMPLETE);
             handleDeath();
         }
@@ -577,7 +585,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     @Nullable
     @Override
     public IBinder asBinder() {
-        return mWrapper != null ? mWrapper.asBinder() : null;
+        return mOptionalWrapper.map(QSTileServiceWrapper::asBinder).orElse(null);
     }
 
     @Override
@@ -591,18 +599,42 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     }
 
     private void freeWrapper() {
-        if (mWrapper != null) {
+        if (mOptionalWrapper.isPresent()) {
             try {
-                mWrapper.asBinder().unlinkToDeath(this, 0);
+                mOptionalWrapper.ifPresent(
+                        (wrapper) -> wrapper.asBinder().unlinkToDeath(this, 0)
+                );
             } catch (NoSuchElementException e) {
                 Log.w(TAG, "Trying to unlink not linked recipient for component"
                         + mIntent.getComponent().flattenToShortString());
             }
-            mWrapper = null;
+            mOptionalWrapper = Optional.empty();
         }
     }
 
     public interface TileChangeListener {
         void onTileChanged(ComponentName tile);
+    }
+
+    /**
+     * Returns true if the Optional is empty OR performing the action on the content of the Optional
+     * (when not empty) fails.
+     */
+    private static boolean isNullOrFailedAction(
+            Optional<QSTileServiceWrapper> optionalWrapper,
+            Predicate<QSTileServiceWrapper> action
+    ) {
+        return !optionalWrapper.map(action::test).orElse(false);
+    }
+
+    /**
+     * Returns true if the Optional is not empty AND performing the action on the content of
+     * the Optional fails.
+     */
+    private static boolean isNotNullAndFailedAction(
+            Optional<QSTileServiceWrapper> optionalWrapper,
+            Predicate<QSTileServiceWrapper> action
+    ) {
+        return  !optionalWrapper.map(action::test).orElse(true);
     }
 }
