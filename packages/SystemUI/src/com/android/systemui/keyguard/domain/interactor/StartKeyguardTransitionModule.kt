@@ -67,4 +67,10 @@ abstract class StartKeyguardTransitionModule {
     abstract fun fromAlternateBouncer(
         impl: FromAlternateBouncerTransitionInteractor
     ): TransitionInteractor
+
+    @Binds
+    @IntoSet
+    abstract fun fromGlanceableHub(
+        impl: FromGlanceableHubTransitionInteractor
+    ): TransitionInteractor
 }
