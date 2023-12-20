@@ -574,8 +574,8 @@ public class AutomaticBrightnessController {
         pw.println("  mCurrentLightSensorRate=" + mCurrentLightSensorRate);
         pw.println("  mAmbientLux=" + mAmbientLux);
         pw.println("  mAmbientLuxValid=" + mAmbientLuxValid);
-        pw.println("  mPreThesholdLux=" + mPreThresholdLux);
-        pw.println("  mPreThesholdBrightness=" + mPreThresholdBrightness);
+        pw.println("  mPreThresholdLux=" + mPreThresholdLux);
+        pw.println("  mPreThresholdBrightness=" + mPreThresholdBrightness);
         pw.println("  mAmbientBrighteningThreshold=" + mAmbientBrighteningThreshold);
         pw.println("  mAmbientDarkeningThreshold=" + mAmbientDarkeningThreshold);
         pw.println("  mScreenBrighteningThreshold=" + mScreenBrighteningThreshold);

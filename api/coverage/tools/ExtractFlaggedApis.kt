@@ -43,7 +43,7 @@ fun main(args: Array<String>) {
                                 .setClassName(it.fullName())
                                 .setMethodName(method.name())
                         for (param in method.parameters()) {
-                            api.addParameterTypes(param.type().toTypeString())
+                            api.addParameters(param.type().toTypeString())
                         }
                         if (builder.containsFlagToApi(flagValue)) {
                             var updatedApis =
