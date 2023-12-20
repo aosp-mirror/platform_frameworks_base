@@ -35,8 +35,12 @@ import com.android.packageinstaller.v2.ui.InstallActionListener;
 public class ExternalSourcesBlockedFragment extends DialogFragment {
 
     private final String TAG = ExternalSourcesBlockedFragment.class.getSimpleName();
+    @NonNull
     private final InstallUserActionRequired mDialogData;
+    @NonNull
     private InstallActionListener mInstallActionListener;
+    @NonNull
+    private AlertDialog mDialog;
 
     public ExternalSourcesBlockedFragment(InstallUserActionRequired dialogData) {
         mDialogData = dialogData;
@@ -51,7 +55,7 @@ public class ExternalSourcesBlockedFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return new AlertDialog.Builder(requireContext())
+        mDialog = new AlertDialog.Builder(requireContext())
             .setTitle(mDialogData.getAppLabel())
             .setIcon(mDialogData.getAppIcon())
             .setMessage(R.string.untrusted_external_source_warning)
@@ -62,11 +66,32 @@ public class ExternalSourcesBlockedFragment extends DialogFragment {
                 (dialog, which) -> mInstallActionListener.onNegativeResponse(
                     mDialogData.getStageCode()))
             .create();
+        return mDialog;
     }
 
     @Override
     public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
         mInstallActionListener.onNegativeResponse(mDialogData.getStageCode());
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // This prevents tapjacking since an overlay activity started in front of Pia will
+        // cause Pia to be paused.
+        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
     }
 }
