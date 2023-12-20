@@ -559,6 +559,9 @@ final class InstallPackageHelper {
                 if (pkgSetting == null) {
                     return PackageManager.INSTALL_FAILED_INVALID_URI;
                 }
+                if (instantApp && (pkgSetting.isSystem() || pkgSetting.isUpdatedSystemApp())) {
+                    return PackageManager.INSTALL_FAILED_INVALID_URI;
+                }
                 if (!snapshot.canViewInstantApps(callingUid, UserHandle.getUserId(callingUid))) {
                     // only allow the existing package to be used if it's installed as a full
                     // application for at least one user
