@@ -16,7 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import android.graphics.Picture
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -73,15 +72,6 @@ internal class Element(val key: ElementKey) {
             _movableContent
                 ?: movableContentOf { content: @Composable () -> Unit -> content() }
                     .also { _movableContent = it }
-
-    /**
-     * The [Picture] to which we save the last drawing commands of this element, if it is movable.
-     * This is necessary because the content of this element might not be composed in the scene it
-     * should currently be drawn.
-     */
-    private var _picture: Picture? = null
-    val picture: Picture
-        get() = _picture ?: Picture().also { _picture = it }
 
     override fun toString(): String {
         return "Element(key=$key)"
@@ -325,9 +315,7 @@ internal fun shouldDrawOrComposeSharedElement(
 
     return scenePicker.sceneDuringTransition(
         element = element,
-        fromScene = fromScene,
-        toScene = toScene,
-        progress = transition::progress,
+        transition = transition,
         fromSceneZIndex = layoutImpl.scenes.getValue(fromScene).zIndex,
         toSceneZIndex = layoutImpl.scenes.getValue(toScene).zIndex,
     ) == scene

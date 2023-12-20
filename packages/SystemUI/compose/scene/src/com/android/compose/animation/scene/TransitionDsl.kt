@@ -133,25 +133,60 @@ interface TransitionBuilder : PropertyTransformationBuilder {
 interface SharedElementScenePicker {
     /**
      * Return the scene in which [element] should be drawn (when using `Modifier.element(key)`) or
-     * composed (when using `MovableElement(key)`) during the transition from [fromScene] to
-     * [toScene].
+     * composed (when using `MovableElement(key)`) during the given [transition].
      */
     fun sceneDuringTransition(
         element: ElementKey,
-        fromScene: SceneKey,
-        toScene: SceneKey,
-        progress: () -> Float,
+        transition: TransitionState.Transition,
         fromSceneZIndex: Float,
         toSceneZIndex: Float,
     ): SceneKey
+
+    /**
+     * Return [transition.fromScene] if it is in [scenes] and [transition.toScene] is not, or return
+     * [transition.toScene] if it is in [scenes] and [transition.fromScene] is not, otherwise throw
+     * an exception (i.e. if neither or both of fromScene and toScene are in [scenes]).
+     *
+     * This function can be useful when computing the scene in which a movable element should be
+     * composed.
+     */
+    fun pickSingleSceneIn(
+        scenes: Set<SceneKey>,
+        transition: TransitionState.Transition,
+        element: ElementKey,
+    ): SceneKey {
+        val fromScene = transition.fromScene
+        val toScene = transition.toScene
+        val fromSceneInScenes = scenes.contains(fromScene)
+        val toSceneInScenes = scenes.contains(toScene)
+        if (fromSceneInScenes && toSceneInScenes) {
+            error(
+                "Element $element can be in both $fromScene and $toScene. You should add a " +
+                    "special case for this transition before calling pickSingleSceneIn()."
+            )
+        }
+
+        if (!fromSceneInScenes && !toSceneInScenes) {
+            error(
+                "Element $element can be neither in $fromScene and $toScene. This either means " +
+                    "that you should add one of them in the scenes set passed to " +
+                    "pickSingleSceneIn(), or there is an internal error and this element was " +
+                    "composed when it shouldn't be."
+            )
+        }
+
+        return if (fromSceneInScenes) {
+            fromScene
+        } else {
+            toScene
+        }
+    }
 }
 
 object DefaultSharedElementScenePicker : SharedElementScenePicker {
     override fun sceneDuringTransition(
         element: ElementKey,
-        fromScene: SceneKey,
-        toScene: SceneKey,
-        progress: () -> Float,
+        transition: TransitionState.Transition,
         fromSceneZIndex: Float,
         toSceneZIndex: Float
     ): SceneKey {
@@ -161,9 +196,9 @@ object DefaultSharedElementScenePicker : SharedElementScenePicker {
             (fromSceneZIndex > toSceneZIndex && !element.isBackground) ||
                 (fromSceneZIndex < toSceneZIndex && element.isBackground)
         ) {
-            fromScene
+            transition.fromScene
         } else {
-            toScene
+            transition.toScene
         }
     }
 }

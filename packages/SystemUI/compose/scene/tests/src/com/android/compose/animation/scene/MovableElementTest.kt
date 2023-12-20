@@ -149,20 +149,18 @@ class MovableElementTest {
                     object : SharedElementScenePicker {
                         override fun sceneDuringTransition(
                             element: ElementKey,
-                            fromScene: SceneKey,
-                            toScene: SceneKey,
-                            progress: () -> Float,
+                            transition: TransitionState.Transition,
                             fromSceneZIndex: Float,
                             toSceneZIndex: Float
                         ): SceneKey {
-                            assertThat(fromScene).isEqualTo(TestScenes.SceneA)
-                            assertThat(toScene).isEqualTo(TestScenes.SceneB)
+                            assertThat(transition.fromScene).isEqualTo(TestScenes.SceneA)
+                            assertThat(transition.toScene).isEqualTo(TestScenes.SceneB)
                             assertThat(fromSceneZIndex).isEqualTo(0)
                             assertThat(toSceneZIndex).isEqualTo(1)
 
                             // Compose Foo in Scene A if progress < 0.65f, otherwise compose it
                             // in Scene B.
-                            return if (progress() < 0.65f) {
+                            return if (transition.progress < 0.65f) {
                                 TestScenes.SceneA
                             } else {
                                 TestScenes.SceneB

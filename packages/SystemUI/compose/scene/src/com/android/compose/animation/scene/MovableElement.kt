@@ -16,9 +16,7 @@
 
 package com.android.compose.animation.scene
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -26,17 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.Canvas
-import androidx.compose.ui.graphics.drawscope.draw
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntSize
-
-private const val TAG = "MovableElement"
 
 @Composable
 internal fun Element(
@@ -124,60 +113,29 @@ private class ElementScopeImpl<ContentScope>(
             return
         }
 
-        // The [Picture] to which we save the last drawing commands of this element. This is
-        // necessary because the content of this element might not be composed in this scene, in
-        // which case we still need to draw it.
-        val picture = element.picture
-
         // Whether we should compose the movable element here. The scene picker logic to know in
         // which scene we should compose/draw a movable element might depend on the current
         // transition progress, so we put this in a derivedStateOf to prevent many recompositions
         // during the transition.
+        // TODO(b/317026105): Use derivedStateOf only if the scene picker reads the progress in its
+        // logic.
         val shouldComposeMovableElement by
             remember(layoutImpl, scene.key, element) {
                 derivedStateOf { shouldComposeMovableElement(layoutImpl, scene.key, element) }
             }
 
         if (shouldComposeMovableElement) {
-            Box(
-                Modifier.drawWithCache {
-                    val width = size.width.toInt()
-                    val height = size.height.toInt()
-
-                    onDrawWithContent {
-                        // Save the draw commands into [picture] for later to draw the last content
-                        // even when this movable content is not composed.
-                        val pictureCanvas = Canvas(picture.beginRecording(width, height))
-                        draw(this, this.layoutDirection, pictureCanvas, this.size) {
-                            this@onDrawWithContent.drawContent()
-                        }
-                        picture.endRecording()
-
-                        // Draw the content.
-                        drawIntoCanvas { canvas -> canvas.nativeCanvas.drawPicture(picture) }
-                    }
-                }
-            ) {
-                element.movableContent { contentScope.content() }
-            }
+            element.movableContent { contentScope.content() }
         } else {
-            // If we are not composed, we draw the previous drawing commands at the same size as the
-            // movable content when it was composed in this scene.
-            val sceneValues = element.sceneValues.getValue(scene.key)
-
-            Spacer(
-                Modifier.layout { measurable, _ ->
-                        val size =
-                            sceneValues.targetSize.takeIf { it != Element.SizeUnspecified }
-                                ?: IntSize.Zero
-                        val placeable =
-                            measurable.measure(Constraints.fixed(size.width, size.height))
-                        layout(size.width, size.height) { placeable.place(0, 0) }
-                    }
-                    .drawBehind {
-                        drawIntoCanvas { canvas -> canvas.nativeCanvas.drawPicture(picture) }
-                    }
-            )
+            // If we are not composed, we still need to lay out an empty space with the same *target
+            // size* as its movable content, i.e. the same *size when idle*. During transitions,
+            // this size will be used to interpolate the transition size, during the intermediate
+            // layout pass.
+            Layout { _, _ ->
+                // No need to measure or place anything.
+                val size = placeholderContentSize(layoutImpl, scene.key, element)
+                layout(size.width, size.height) {}
+            }
         }
     }
 }
@@ -198,54 +156,55 @@ private fun shouldComposeMovableElement(
     val fromReady = layoutImpl.isSceneReady(fromScene)
     val toReady = layoutImpl.isSceneReady(toScene)
 
-    val otherScene =
-        when (scene) {
-            fromScene -> toScene
-            toScene -> fromScene
-            else ->
-                error(
-                    "shouldComposeMovableElement(scene=$scene) called with fromScene=$fromScene " +
-                        "and toScene=$toScene"
-                )
-        }
-
-    val isShared = otherScene in element.sceneValues
-
-    if (isShared && !toReady && !fromReady) {
-        // This should usually not happen given that fromScene should be ready, but let's log a
-        // warning here in case it does so it helps debugging flicker issues caused by this part of
-        // the code.
-        Log.w(
-            TAG,
-            "MovableElement $element might have to be composed for the first time in both " +
-                "fromScene=$fromScene and toScene=$toScene. This will probably lead to a flicker " +
-                "where the size of the element will jump from IntSize.Zero to its actual size " +
-                "during the transition."
-        )
-    }
-
-    // Element is not shared in this transition.
-    if (!isShared) {
-        return true
-    }
-
-    // toScene is not ready (because we are composing it for the first time), so we compose it there
-    // first. This is the most common scenario when starting a transition that has a shared movable
-    // element.
-    if (!toReady) {
+    if (!fromReady && !toReady) {
+        // Neither of the scenes will be drawn, so where we compose it doesn't really matter. Note
+        // that we could have slightly more complicated logic here to optimize for this case, but
+        // it's not worth it given that readyScenes should disappear soon (b/316901148).
         return scene == toScene
     }
 
-    // This should usually not happen, but if we are also composing for the first time in fromScene
-    // then we should compose it there only.
-    if (!fromReady) {
-        return scene == fromScene
-    }
+    // If one of the scenes is not ready, compose it in the other one to make sure it is drawn.
+    if (!fromReady) return scene == toScene
+    if (!toReady) return scene == fromScene
 
+    // Always compose movable elements in the scene picked by their scene picker.
     return shouldDrawOrComposeSharedElement(
         layoutImpl,
         transition,
         scene,
         element.key,
     )
+}
+
+/**
+ * Return the size of the placeholder/space that is composed when the movable content is not
+ * composed in a scene.
+ */
+private fun placeholderContentSize(
+    layoutImpl: SceneTransitionLayoutImpl,
+    scene: SceneKey,
+    element: Element,
+): IntSize {
+    // If the content of the movable element was already composed in this scene before, use that
+    // target size.
+    val targetValueInScene = element.sceneValues.getValue(scene).targetSize
+    if (targetValueInScene != Element.SizeUnspecified) {
+        return targetValueInScene
+    }
+
+    // This code is only run during transitions (otherwise the content would be composed and the
+    // placeholder would not), so it's ok to cast the state into a Transition directly.
+    val transition = layoutImpl.state.transitionState as TransitionState.Transition
+
+    // If the content was already composed in the other scene, we use that target size assuming it
+    // doesn't change between scenes.
+    // TODO(b/317026105): Provide a way to give a hint size/content for cases where this is not
+    // true.
+    val otherScene = if (transition.fromScene == scene) transition.toScene else transition.fromScene
+    val targetValueInOtherScene = element.sceneValues[otherScene]?.targetSize
+    if (targetValueInOtherScene != null && targetValueInOtherScene != Element.SizeUnspecified) {
+        return targetValueInOtherScene
+    }
+
+    return IntSize.Zero
 }
