@@ -74,6 +74,9 @@ class BubbleBarExpandedViewDragController(
     }
 
     private inner class HandleDragListener : RelativeTouchListener() {
+
+        private var isMoving = false
+
         override fun onDown(v: View, ev: MotionEvent): Boolean {
             // While animating, don't allow new touch events
             return !expandedView.isAnimating
@@ -87,6 +90,10 @@ class BubbleBarExpandedViewDragController(
             dx: Float,
             dy: Float
         ) {
+            if (!isMoving) {
+                isMoving = true
+                animationHelper.animateStartDrag()
+            }
             expandedView.translationX = expandedViewInitialTranslationX + dx
             expandedView.translationY = expandedViewInitialTranslationY + dy
             dismissView.show()
@@ -114,6 +121,7 @@ class BubbleBarExpandedViewDragController(
                 animationHelper.animateToRestPosition()
                 dismissView.hide()
             }
+            isMoving = false
         }
     }
 
