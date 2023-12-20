@@ -19,10 +19,9 @@ package com.android.systemui.qs.tiles.impl.custom.domain.interactor
 import android.os.UserHandle
 import android.service.quicksettings.Tile
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.qs.external.TileServiceManager
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepository
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileRepository
-import com.android.systemui.qs.tiles.impl.custom.di.bound.CustomTileBoundScope
+import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -35,15 +34,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 /** Manages updates of the [Tile] assigned for the current custom tile. */
-@CustomTileBoundScope
+@QSTileScope
 class CustomTileInteractor
 @Inject
 constructor(
-    private val user: UserHandle,
     private val defaultsRepository: CustomTileDefaultsRepository,
     private val customTileRepository: CustomTileRepository,
-    private val tileServiceManager: TileServiceManager,
-    @CustomTileBoundScope private val boundScope: CoroutineScope,
+    @QSTileScope private val tileScope: CoroutineScope,
     @Background private val backgroundContext: CoroutineContext,
 ) {
 
@@ -51,8 +48,7 @@ constructor(
         MutableSharedFlow<Tile>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     /** [Tile] updates. [updateTile] to emit a new one. */
-    val tiles: Flow<Tile>
-        get() = customTileRepository.getTiles(user)
+    fun getTiles(user: UserHandle): Flow<Tile> = customTileRepository.getTiles(user)
 
     /**
      * Current [Tile]
@@ -61,10 +57,14 @@ constructor(
      *   the tile hasn't been updated for the current user. Can happen when this is accessed before
      *   [init] returns.
      */
-    val tile: Tile
-        get() =
-            customTileRepository.getTile(user)
-                ?: throw IllegalStateException("Attempt to get a tile for a wrong user")
+    fun getTile(user: UserHandle): Tile =
+        customTileRepository.getTile(user)
+            ?: throw IllegalStateException("Attempt to get a tile for a wrong user")
+
+    /**
+     * True if the tile is toggleable like a switch and false if it operates as a clickable button.
+     */
+    suspend fun isTileToggleable(): Boolean = customTileRepository.isTileToggleable()
 
     /**
      * Initializes the repository for the current user. Suspends until it's safe to call [tile]
@@ -73,36 +73,36 @@ constructor(
      * - receive tile update in [updateTile];
      * - restoration happened for a persisted tile.
      */
-    suspend fun init() {
-        launchUpdates()
-        customTileRepository.restoreForTheUserIfNeeded(user, tileServiceManager.isActiveTile)
+    suspend fun initForUser(user: UserHandle) {
+        launchUpdates(user)
+        customTileRepository.restoreForTheUserIfNeeded(user, customTileRepository.isTileActive())
         // Suspend to make sure it gets the tile from one of the sources: restoration, defaults, or
         // tile update.
         customTileRepository.getTiles(user).firstOrNull()
     }
 
-    private fun launchUpdates() {
+    private fun launchUpdates(user: UserHandle) {
         tileUpdates
             .onEach {
                 customTileRepository.updateWithTile(
                     user,
                     it,
-                    tileServiceManager.isActiveTile,
+                    customTileRepository.isTileActive(),
                 )
             }
             .flowOn(backgroundContext)
-            .launchIn(boundScope)
+            .launchIn(tileScope)
         defaultsRepository
             .defaults(user)
             .onEach {
                 customTileRepository.updateWithDefaults(
                     user,
                     it,
-                    tileServiceManager.isActiveTile,
+                    customTileRepository.isTileActive(),
                 )
             }
             .flowOn(backgroundContext)
-            .launchIn(boundScope)
+            .launchIn(tileScope)
     }
 
     /** Updates current [Tile]. Emits a new event in [tiles]. */

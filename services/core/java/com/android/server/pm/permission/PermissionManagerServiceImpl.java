@@ -3291,7 +3291,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final PermissionAllowlist permissionAllowlist =
                 SystemConfig.getInstance().getPermissionAllowlist();
         final String packageName = packageState.getPackageName();
-        if (packageState.isVendor()) {
+        if (packageState.isVendor() || packageState.isOdm()) {
             return permissionAllowlist.getVendorPrivilegedAppAllowlistState(packageName,
                     permissionName);
         } else if (packageState.isProduct()) {
@@ -3386,7 +3386,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             // the permission's protectionLevel does not have the extra 'vendorPrivileged'
             // flag.
             if (allowed && isPrivilegedPermission && !bp.isVendorPrivileged()
-                    && pkgSetting.isVendor()) {
+                    && (pkgSetting.isVendor() || pkgSetting.isOdm())) {
                 Slog.w(TAG, "Permission " + permissionName
                         + " cannot be granted to privileged vendor apk " + pkg.getPackageName()
                         + " because it isn't a 'vendorPrivileged' permission.");

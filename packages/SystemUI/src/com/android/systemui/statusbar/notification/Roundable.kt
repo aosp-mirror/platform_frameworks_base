@@ -3,10 +3,8 @@ package com.android.systemui.statusbar.notification
 import android.util.FloatProperty
 import android.view.View
 import androidx.annotation.FloatRange
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.RefactorFlag
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import kotlin.math.abs
@@ -42,13 +40,13 @@ interface Roundable {
     /** Current top corner in pixel, based on [topRoundness] and [maxRadius] */
     val topCornerRadius: Float
         get() =
-            if (roundableState.newHeadsUpAnim.isEnabled) roundableState.topCornerRadius
+            if (NotificationsImprovedHunAnimation.isEnabled) roundableState.topCornerRadius
             else topRoundness * maxRadius
 
     /** Current bottom corner in pixel, based on [bottomRoundness] and [maxRadius] */
     val bottomCornerRadius: Float
         get() =
-            if (roundableState.newHeadsUpAnim.isEnabled) roundableState.bottomCornerRadius
+            if (NotificationsImprovedHunAnimation.isEnabled) roundableState.bottomCornerRadius
             else bottomRoundness * maxRadius
 
     /** Get and update the current radii */
@@ -318,12 +316,9 @@ constructor(
     internal val targetView: View,
     private val roundable: Roundable,
     maxRadius: Float,
-    featureFlags: FeatureFlags? = null
 ) {
     internal var maxRadius = maxRadius
         private set
-
-    internal val newHeadsUpAnim = RefactorFlag.forView(Flags.IMPROVED_HUN_ANIMATIONS, featureFlags)
 
     /** Animatable for top roundness */
     private val topAnimatable = topAnimatable(roundable)

@@ -363,7 +363,8 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor shellExecutor,
             @ShellBackgroundThread Handler backgroundHandler,
             BackAnimationBackground backAnimationBackground,
-            Optional<ShellBackAnimationRegistry> shellBackAnimationRegistry) {
+            Optional<ShellBackAnimationRegistry> shellBackAnimationRegistry,
+            ShellCommandHandler shellCommandHandler) {
         if (BackAnimationController.IS_ENABLED) {
             return shellBackAnimationRegistry.map(
                     (animations) ->
@@ -374,7 +375,8 @@ public abstract class WMShellBaseModule {
                                     backgroundHandler,
                                     context,
                                     backAnimationBackground,
-                                    animations));
+                                    animations,
+                                    shellCommandHandler));
         }
         return Optional.empty();
     }

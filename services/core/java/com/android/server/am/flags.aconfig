@@ -28,3 +28,10 @@ flag {
     description: "Restrict network access for certain applications in BFGS process state"
     bug: "304347838"
 }
+# Whether to use the new while-in-use / BG-FGS-start logic
+flag {
+     namespace: "backstage_power"
+     name: "new_fgs_restriction_logic"
+     description: "Enable the new FGS restriction logic"
+     bug: "276963716"
+}

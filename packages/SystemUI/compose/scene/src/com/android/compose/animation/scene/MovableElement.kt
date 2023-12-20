@@ -16,7 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import android.graphics.Picture
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -60,7 +59,7 @@ internal fun MovableElement(
         // The [Picture] to which we save the last drawing commands of this element. This is
         // necessary because the content of this element might not be composed in this scene, in
         // which case we still need to draw it.
-        val picture = remember { Picture() }
+        val picture = element.picture
 
         // Whether we should compose the movable element here. The scene picker logic to know in
         // which scene we should compose/draw a movable element might depend on the current

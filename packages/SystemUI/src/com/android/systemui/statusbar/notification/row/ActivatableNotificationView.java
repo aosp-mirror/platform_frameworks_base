@@ -31,7 +31,6 @@ import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -44,6 +43,7 @@ import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
+import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.util.DumpUtilsKt;
@@ -67,7 +67,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * The content of the view should start showing at animation progress value of
      * #ALPHA_APPEAR_START_FRACTION.
      */
-    private static final float ALPHA_APPEAR_START_FRACTION = .4f;
+
+    private static final float ALPHA_APPEAR_START_FRACTION = .7f;
     /**
      * The content should show fully with progress at #ALPHA_APPEAR_END_FRACTION
      * The start of the animation is at #ALPHA_APPEAR_START_FRACTION
@@ -86,9 +87,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      */
     private boolean mActivated;
 
-    private final Interpolator mSlowOutFastInInterpolator;
     private Interpolator mCurrentAppearInterpolator;
-
     NotificationBackgroundView mBackgroundNormal;
     private float mAnimationTranslationY;
     private boolean mDrawingAppearAnimation;
@@ -116,7 +115,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mSlowOutFastInInterpolator = new PathInterpolator(0.8f, 0.0f, 0.6f, 1.0f);
         setClipChildren(false);
         setClipToPadding(false);
         updateColors();
@@ -400,12 +398,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mCurrentAppearInterpolator = Interpolators.FAST_OUT_SLOW_IN;
             targetValue = 1.0f;
         } else {
-            mCurrentAppearInterpolator = mSlowOutFastInInterpolator;
+            mCurrentAppearInterpolator = Interpolators.FAST_OUT_SLOW_IN_REVERSE;
             targetValue = 0.0f;
         }
         mAppearAnimator = ValueAnimator.ofFloat(mAppearAnimationFraction,
                 targetValue);
-        mAppearAnimator.setInterpolator(Interpolators.LINEAR);
+        if (NotificationsImprovedHunAnimation.isEnabled()) {
+            mAppearAnimator.setInterpolator(mCurrentAppearInterpolator);
+        } else {
+            mAppearAnimator.setInterpolator(Interpolators.LINEAR);
+        }
         mAppearAnimator.setDuration(
                 (long) (duration * Math.abs(mAppearAnimationFraction - targetValue)));
         mAppearAnimator.addUpdateListener(animation -> {
@@ -502,8 +504,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void updateAppearRect() {
-        float interpolatedFraction = mCurrentAppearInterpolator.getInterpolation(
-                mAppearAnimationFraction);
+        float interpolatedFraction =
+                NotificationsImprovedHunAnimation.isEnabled() ? mAppearAnimationFraction
+                        : mCurrentAppearInterpolator.getInterpolation(mAppearAnimationFraction);
         mAppearAnimationTranslation = (1.0f - interpolatedFraction) * mAnimationTranslationY;
         final int actualHeight = getActualHeight();
         float bottom = actualHeight * interpolatedFraction;
@@ -524,6 +527,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private float getInterpolatedAppearAnimationFraction() {
+
         if (mAppearAnimationFraction >= 0) {
             return mCurrentAppearInterpolator.getInterpolation(mAppearAnimationFraction);
         }
@@ -569,7 +573,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public float getTopCornerRadius() {
-        if (mImprovedHunAnimation.isEnabled()) {
+        if (NotificationsImprovedHunAnimation.isEnabled()) {
             return super.getTopCornerRadius();
         }
 
@@ -579,7 +583,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public float getBottomCornerRadius() {
-        if (mImprovedHunAnimation.isEnabled()) {
+        if (NotificationsImprovedHunAnimation.isEnabled()) {
             return super.getBottomCornerRadius();
         }
 

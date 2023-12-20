@@ -859,7 +859,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mGroupExpansionManager.registerGroupExpansionChangeListener(
                 (changedRow, expanded) -> mView.onGroupExpandChanged(changedRow, expanded));
 
-        mViewBinder.bind(mView, this);
+        mViewBinder.bindWhileAttached(mView, this);
 
         if (!FooterViewRefactor.isEnabled()) {
             collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),

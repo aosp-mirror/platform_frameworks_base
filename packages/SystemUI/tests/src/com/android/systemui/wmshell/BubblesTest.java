@@ -29,8 +29,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -49,6 +47,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 
 import android.app.ActivityManager;
 import android.app.IActivityManager;
@@ -186,7 +186,7 @@ import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.BubbleViewInfoTask;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.bubbles.StackEducationViewKt;
+import com.android.wm.shell.bubbles.StackEducationView;
 import com.android.wm.shell.bubbles.properties.BubbleProperties;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
@@ -1930,7 +1930,7 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void testShowStackEdu_isNotConversationBubble() {
         // Setup
-        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, false);
+        setPrefBoolean(StackEducationView.PREF_STACK_EDUCATION, false);
         BubbleEntry bubbleEntry = createBubbleEntry(false /* isConversation */);
         mBubbleController.updateBubble(bubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
@@ -1948,7 +1948,7 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void testShowStackEdu_isConversationBubble() {
         // Setup
-        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, false);
+        setPrefBoolean(StackEducationView.PREF_STACK_EDUCATION, false);
         BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
         mBubbleController.updateBubble(bubbleEntry);
         assertTrue(mBubbleController.hasBubbles());
@@ -1966,7 +1966,7 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void testShowStackEdu_isSeenConversationBubble() {
         // Setup
-        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, true);
+        setPrefBoolean(StackEducationView.PREF_STACK_EDUCATION, true);
         BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
         mBubbleController.updateBubble(bubbleEntry);
         assertTrue(mBubbleController.hasBubbles());

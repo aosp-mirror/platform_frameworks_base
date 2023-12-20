@@ -275,7 +275,7 @@ public final class CachedAppOptimizer {
     @VisibleForTesting static final String DEFAULT_COMPACT_PROC_STATE_THROTTLE =
             String.valueOf(ActivityManager.PROCESS_STATE_RECEIVER);
     @VisibleForTesting static final long DEFAULT_FREEZER_DEBOUNCE_TIMEOUT = 10_000L;
-    @VisibleForTesting static final boolean DEFAULT_FREEZER_EXEMPT_INST_PKG = true;
+    @VisibleForTesting static final boolean DEFAULT_FREEZER_EXEMPT_INST_PKG = false;
     @VisibleForTesting static final boolean DEFAULT_FREEZER_BINDER_ENABLED = true;
     @VisibleForTesting static final long DEFAULT_FREEZER_BINDER_DIVISOR = 4;
     @VisibleForTesting static final int DEFAULT_FREEZER_BINDER_OFFSET = 500;

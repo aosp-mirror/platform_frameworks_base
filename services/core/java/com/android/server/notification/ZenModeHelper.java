@@ -561,7 +561,7 @@ public class ZenModeHelper {
      * {@link Global#ZEN_MODE_IMPORTANT_INTERRUPTIONS}.
      */
     void applyGlobalPolicyAsImplicitZenRule(String callingPkg, int callingUid,
-            NotificationManager.Policy policy) {
+            NotificationManager.Policy policy, @ConfigChangeOrigin int origin) {
         if (!android.app.Flags.modesApi()) {
             Log.wtf(TAG, "applyGlobalPolicyAsImplicitZenRule called with flag off!");
             return;
@@ -579,7 +579,7 @@ public class ZenModeHelper {
             }
             // TODO: b/308673679 - Keep user customization of this rule!
             rule.zenPolicy = ZenAdapters.notificationPolicyToZenPolicy(policy);
-            setConfigLocked(newConfig, /* triggeringComponent= */ null, UPDATE_ORIGIN_APP,
+            setConfigLocked(newConfig, /* triggeringComponent= */ null, origin,
                     "applyGlobalPolicyAsImplicitZenRule", callingUid);
         }
     }
@@ -1371,12 +1371,8 @@ public class ZenModeHelper {
         if (logZenModeEvents) {
             ZenModeEventLogger.ZenModeInfo newInfo = new ZenModeEventLogger.ZenModeInfo(
                     mZenMode, mConfig, mConsolidatedPolicy);
-            boolean fromSystemOrSystemUi = origin == UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
-                    || origin == UPDATE_ORIGIN_INIT
-                    || origin == UPDATE_ORIGIN_INIT_USER
-                    || origin == UPDATE_ORIGIN_RESTORE_BACKUP;
             mZenModeEventLogger.maybeLogZenChange(prevInfo, newInfo, callingUid,
-                    fromSystemOrSystemUi);
+                    origin);
         }
     }
 

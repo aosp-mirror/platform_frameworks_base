@@ -86,8 +86,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter;
-import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -115,7 +113,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
@@ -152,7 +149,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final SystemUIDialogManager mDialogManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
-    @NonNull private final Provider<UdfpsKeyguardViewModels> mUdfpsKeyguardViewModels;
     @NonNull private final VibratorHelper mVibrator;
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final PowerManager mPowerManager;
@@ -623,7 +619,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         } else {
             onKeyguard = mOverlay != null
                     && mOverlay.getAnimationViewController()
-                        instanceof UdfpsKeyguardViewControllerAdapter;
+                        instanceof UdfpsKeyguardViewControllerLegacy;
         }
         return onKeyguard
                 && mKeyguardStateController.canDismissLockScreen()
@@ -666,7 +662,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull InputManager inputManager,
             @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
-            @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider,
             @NonNull SelectedUserInteractor selectedUserInteractor,
             @NonNull FpsUnlockTracker fpsUnlockTracker,
             @NonNull KeyguardTransitionInteractor keyguardTransitionInteractor,
@@ -737,7 +732,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     return Unit.INSTANCE;
                 });
         mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
-        mUdfpsKeyguardViewModels = udfpsKeyguardViewModelsProvider;
 
         final UdfpsOverlayController mUdfpsOverlayController = new UdfpsOverlayController();
         mFingerprintManager.setUdfpsOverlayController(mUdfpsOverlayController);

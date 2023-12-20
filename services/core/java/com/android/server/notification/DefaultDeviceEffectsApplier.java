@@ -109,7 +109,6 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
         if (origin == ZenModeConfig.UPDATE_ORIGIN_INIT
                 || origin == ZenModeConfig.UPDATE_ORIGIN_INIT_USER
                 || origin == ZenModeConfig.UPDATE_ORIGIN_USER
-                || origin == ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
                 || !mPowerManager.isInteractive()) {
             unregisterScreenOffReceiver();
             updateNightModeImmediately(useNightMode);

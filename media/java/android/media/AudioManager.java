@@ -22,6 +22,7 @@ import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
 import static android.media.audio.Flags.FLAG_FOCUS_FREEZE_TEST_API;
+import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -5114,6 +5115,71 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             return service.dispatchFocusChange(afi, focusChange, ap.cb());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies an application with a focus listener of gain or loss of audio focus
+     *
+     * <p>This is similar to {@link #dispatchAudioFocusChange(AudioFocusInfo, int, AudioPolicy)} but
+     * with additional functionality  of fade. The players of the application with  audio focus
+     * change, provided they meet the active {@link FadeManagerConfiguration} requirements, are
+     * faded before dispatching the callback to the application. For example, players of the
+     * application losing audio focus will be faded out, whereas players of the application gaining
+     * audio focus will be faded in, if needed.
+     *
+     * <p>The applicability of fade is decided against the supplied active {@link AudioFocusInfo}.
+     * This list cannot be {@code null}. The list can be empty if no other active
+     * {@link AudioFocusInfo} available at the time of the dispatch.
+     *
+     * <p>The {@link FadeManagerConfiguration} supplied here is prioritized over existing fade
+     * configurations. If none supplied, either the {@link FadeManagerConfiguration} set through
+     * {@link AudioPolicy} or the default will be used to determine the fade properties.
+     *
+     * <p>This method can only be used by owners of an {@link AudioPolicy} configured with
+     * {@link AudioPolicy.Builder#setIsAudioFocusPolicy(boolean)} set to true.
+     *
+     * @param afi the recipient of the focus change, that has previously requested audio focus, and
+     *     that was received by the {@code AudioPolicy} through
+     *     {@link AudioPolicy.AudioPolicyFocusListener#onAudioFocusRequest(AudioFocusInfo, int)}
+     * @param focusChange one of focus gain types ({@link #AUDIOFOCUS_GAIN},
+     *     {@link #AUDIOFOCUS_GAIN_TRANSIENT}, {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} or
+     *     {@link #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE})
+     *     or one of the focus loss types ({@link AudioManager#AUDIOFOCUS_LOSS},
+     *     {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT},
+     *     or {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}).
+     *     <br>For the focus gain, the change type should be the same as the app requested
+     * @param ap a valid registered {@link AudioPolicy} configured as a focus policy.
+     * @param otherActiveAfis active {@link AudioFocusInfo} that are granted audio focus at the time
+     *     of dispatch
+     * @param transientFadeMgrConfig {@link FadeManagerConfiguration} that will be used for fading
+     *     players resulting from this dispatch. This is a transient configuration that is only
+     *     valid for this focus change and shall be discarded after processing this request.
+     * @return {@link #AUDIOFOCUS_REQUEST_FAILED} if the focus client didn't have a listener or if
+     *     there was an error sending the request, or {@link #AUDIOFOCUS_REQUEST_GRANTED} if the
+     *     dispatch was successfully sent, or {@link #AUDIOFOCUS_REQUEST_DELAYED} if
+     *     the request was successful but the dispatch of focus change was delayed due to a fade
+     *     operation.
+     * @throws NullPointerException if the {@link AudioFocusInfo} or {@link AudioPolicy} or list of
+     *     other active {@link AudioFocusInfo} are {@code null}.
+     * @hide
+     */
+    @FlaggedApi(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int dispatchAudioFocusChangeWithFade(@NonNull AudioFocusInfo afi, int focusChange,
+            @NonNull AudioPolicy ap, @NonNull List<AudioFocusInfo> otherActiveAfis,
+            @Nullable FadeManagerConfiguration transientFadeMgrConfig) {
+        Objects.requireNonNull(afi, "AudioFocusInfo cannot be null");
+        Objects.requireNonNull(ap, "AudioPolicy cannot be null");
+        Objects.requireNonNull(otherActiveAfis, "Other active AudioFocusInfo list cannot be null");
+
+        IAudioService service = getService();
+        try {
+            return service.dispatchFocusChangeWithFade(afi, focusChange, ap.cb(), otherActiveAfis,
+                    transientFadeMgrConfig);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

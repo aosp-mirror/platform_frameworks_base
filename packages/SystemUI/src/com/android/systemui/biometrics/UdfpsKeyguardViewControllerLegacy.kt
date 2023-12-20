@@ -33,7 +33,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
@@ -81,8 +80,7 @@ open class UdfpsKeyguardViewControllerLegacy(
         primaryBouncerInteractor,
         systemUIDialogManager,
         dumpManager,
-    ),
-    UdfpsKeyguardViewControllerAdapter {
+    ) {
     private val uniqueIdentifier = this.toString()
     private var showingUdfpsBouncer = false
     private var udfpsRequested = false
@@ -199,7 +197,23 @@ open class UdfpsKeyguardViewControllerLegacy(
                 listenForAodToOccludedTransitions(this)
                 listenForAlternateBouncerToAodTransitions(this)
                 listenForDreamingToAodTransitions(this)
+                listenForPrimaryBouncerToAodTransitions(this)
             }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForPrimaryBouncerToAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor
+                .transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.AOD)
+                .collect { transitionStep ->
+                    view.onDozeAmountChanged(
+                        transitionStep.value,
+                        transitionStep.value,
+                        ANIMATE_APPEAR_ON_SCREEN_OFF,
+                    )
+                }
         }
     }
 

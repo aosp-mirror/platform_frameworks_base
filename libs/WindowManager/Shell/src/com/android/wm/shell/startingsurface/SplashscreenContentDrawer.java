@@ -277,11 +277,6 @@ public class SplashscreenContentDrawer {
         params.token = appToken;
         params.packageName = activityInfo.packageName;
         params.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-
-        if (!context.getResources().getCompatibilityInfo().supportsScreen()) {
-            params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-        }
-
         params.setTitle("Splash Screen " + title);
         return params;
     }

@@ -1291,7 +1291,7 @@ public class BubbleStackView extends FrameLayout
             // We only show user education for conversation bubbles right now
             return false;
         }
-        final boolean seen = getPrefBoolean(ManageEducationViewKt.PREF_MANAGED_EDUCATION);
+        final boolean seen = getPrefBoolean(ManageEducationView.PREF_MANAGED_EDUCATION);
         final boolean shouldShow = (!seen || BubbleDebugConfig.forceShowUserEducation(mContext))
                 && mExpandedBubble != null && mExpandedBubble.getExpandedView() != null;
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
@@ -1342,7 +1342,7 @@ public class BubbleStackView extends FrameLayout
             // We only show user education for conversation bubbles right now
             return false;
         }
-        final boolean seen = getPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION);
+        final boolean seen = getPrefBoolean(StackEducationView.PREF_STACK_EDUCATION);
         final boolean shouldShow = !seen || BubbleDebugConfig.forceShowUserEducation(mContext);
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
             Log.d(TAG, "Show stack edu: " + shouldShow);
@@ -2323,7 +2323,8 @@ public class BubbleStackView extends FrameLayout
         updateOverflowVisibility();
         updatePointerPosition(false /* forIme */);
         mExpandedAnimationController.expandFromStack(() -> {
-            if (mIsExpanded && mExpandedBubble.getExpandedView() != null) {
+            if (mIsExpanded && mExpandedBubble != null
+                    && mExpandedBubble.getExpandedView() != null) {
                 maybeShowManageEdu();
             }
             updateOverflowDotVisibility(true /* expanding */);
@@ -2384,7 +2385,7 @@ public class BubbleStackView extends FrameLayout
         }
         mExpandedViewContainer.setAnimationMatrix(mExpandedViewContainerMatrix);
 
-        if (mExpandedBubble.getExpandedView() != null) {
+        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
             mExpandedBubble.getExpandedView().setContentAlpha(0f);
             mExpandedBubble.getExpandedView().setBackgroundAlpha(0f);
 

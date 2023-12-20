@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.companion.virtual.camera.VirtualCameraCallback;
 import android.companion.virtual.camera.VirtualCameraConfig;
-import android.companion.virtual.camera.VirtualCameraMetadata;
 import android.companion.virtual.camera.VirtualCameraStreamConfig;
 import android.companion.virtualcamera.IVirtualCameraService;
 import android.companion.virtualcamera.VirtualCameraConfiguration;
@@ -154,10 +152,6 @@ public class VirtualCameraControllerTest {
                     int streamId,
                     @NonNull Surface surface,
                     @NonNull VirtualCameraStreamConfig streamConfig) {}
-
-            @Override
-            public void onProcessCaptureRequest(
-                    int streamId, long frameId, @Nullable VirtualCameraMetadata metadata) {}
 
             @Override
             public void onStreamClosed(int streamId) {}

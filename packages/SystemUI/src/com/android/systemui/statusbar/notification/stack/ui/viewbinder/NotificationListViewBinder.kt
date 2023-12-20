@@ -32,15 +32,14 @@ import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerShelfViewBinder
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinder
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.systemui.statusbar.ui.SystemBarUtilsState
+import com.android.systemui.util.kotlin.getOrNull
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.combine
@@ -55,25 +54,27 @@ constructor(
     private val configuration: ConfigurationState,
     private val falsingManager: FalsingManager,
     private val iconAreaController: NotificationIconAreaController,
-    private val iconViewBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val metricsLogger: MetricsLogger,
-    private val shelfIconViewStore: ShelfNotificationIconViewStore,
-    private val systemBarUtilsState: SystemBarUtilsState,
+    private val nicBinder: NotificationIconContainerShelfViewBinder,
 ) {
 
-    fun bind(
+    fun bindWhileAttached(
         view: NotificationStackScrollLayout,
         viewController: NotificationStackScrollLayoutController
     ) {
-        bindShelf(view)
-        bindHideList(viewController, viewModel)
+        val shelf =
+            LayoutInflater.from(view.context)
+                .inflate(R.layout.status_bar_notification_shelf, view, false) as NotificationShelf
+        view.setShelf(shelf)
 
-        if (FooterViewRefactor.isEnabled) {
-            bindFooter(view)
-            bindEmptyShade(view)
+        view.repeatWhenAttached {
+            lifecycleScope.launch {
+                launch { bindShelf(shelf) }
+                launch { bindHideList(viewController, viewModel) }
 
-            view.repeatWhenAttached {
-                lifecycleScope.launch {
+                if (FooterViewRefactor.isEnabled) {
+                    launch { bindFooter(view) }
+                    launch { bindEmptyShade(view) }
                     viewModel.isImportantForAccessibility.collect { isImportantForAccessibility ->
                         view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
                     }
@@ -82,73 +83,57 @@ constructor(
         }
     }
 
-    private fun bindShelf(parentView: NotificationStackScrollLayout) {
-        val shelf =
-            LayoutInflater.from(parentView.context)
-                .inflate(R.layout.status_bar_notification_shelf, parentView, false)
-                as NotificationShelf
+    private suspend fun bindShelf(shelf: NotificationShelf) {
         NotificationShelfViewBinder.bind(
             shelf,
             viewModel.shelf,
-            configuration,
-            systemBarUtilsState,
             falsingManager,
-            iconViewBindingFailureTracker,
+            nicBinder,
             iconAreaController,
-            shelfIconViewStore,
         )
-        parentView.setShelf(shelf)
     }
 
-    private fun bindFooter(parentView: NotificationStackScrollLayout) {
-        viewModel.footer.ifPresent { footerViewModel ->
+    private suspend fun bindFooter(parentView: NotificationStackScrollLayout) {
+        viewModel.footer.getOrNull()?.let { footerViewModel ->
             // The footer needs to be re-inflated every time the theme or the font size changes.
-            parentView.repeatWhenAttached {
-                configuration.reinflateAndBindLatest(
-                    R.layout.status_bar_notification_footer,
-                    parentView,
-                    attachToRoot = false,
-                    backgroundDispatcher,
-                ) { footerView: FooterView ->
-                    traceSection("bind FooterView") {
-                        val disposableHandle =
-                            FooterViewBinder.bind(
-                                footerView,
-                                footerViewModel,
-                                clearAllNotifications = {
-                                    metricsLogger.action(
-                                        MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES
-                                    )
-                                    parentView.clearAllNotifications()
-                                },
-                            )
-                        parentView.setFooterView(footerView)
-                        return@reinflateAndBindLatest disposableHandle
-                    }
+            configuration.reinflateAndBindLatest(
+                R.layout.status_bar_notification_footer,
+                parentView,
+                attachToRoot = false,
+                backgroundDispatcher,
+            ) { footerView: FooterView ->
+                traceSection("bind FooterView") {
+                    val disposableHandle =
+                        FooterViewBinder.bind(
+                            footerView,
+                            footerViewModel,
+                            clearAllNotifications = {
+                                metricsLogger.action(
+                                    MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES
+                                )
+                                parentView.clearAllNotifications()
+                            },
+                        )
+                    parentView.setFooterView(footerView)
+                    return@reinflateAndBindLatest disposableHandle
                 }
             }
         }
     }
 
-    private fun bindEmptyShade(
-        parentView: NotificationStackScrollLayout,
-    ) {
-        parentView.repeatWhenAttached {
-            lifecycleScope.launch {
-                combine(
-                        viewModel.shouldShowEmptyShadeView,
-                        viewModel.areNotificationsHiddenInShade,
-                        viewModel.hasFilteredOutSeenNotifications,
-                        ::Triple
-                    )
-                    .collect { (shouldShow, areNotifsHidden, hasFilteredNotifs) ->
-                        parentView.updateEmptyShadeView(
-                            shouldShow,
-                            areNotifsHidden,
-                            hasFilteredNotifs,
-                        )
-                    }
+    private suspend fun bindEmptyShade(parentView: NotificationStackScrollLayout) {
+        combine(
+                viewModel.shouldShowEmptyShadeView,
+                viewModel.areNotificationsHiddenInShade,
+                viewModel.hasFilteredOutSeenNotifications,
+                ::Triple
+            )
+            .collect { (shouldShow, areNotifsHidden, hasFilteredNotifs) ->
+                parentView.updateEmptyShadeView(
+                    shouldShow,
+                    areNotifsHidden,
+                    hasFilteredNotifs,
+                )
             }
-        }
     }
 }

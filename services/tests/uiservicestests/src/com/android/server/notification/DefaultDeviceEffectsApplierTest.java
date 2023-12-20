@@ -245,8 +245,8 @@ public class DefaultDeviceEffectsApplierTest {
     }
 
     @Test
-    @TestParameters({"{origin: ORIGIN_USER}", "{origin: ORIGIN_INIT}", "{origin: ORIGIN_INIT_USER}",
-            "{origin: ORIGIN_SYSTEM_OR_SYSTEMUI}"})
+    @TestParameters({"{origin: ORIGIN_USER}", "{origin: ORIGIN_INIT}",
+            "{origin: ORIGIN_INIT_USER}"})
     public void apply_nightModeWithScreenOn_appliedImmediatelyBasedOnOrigin(ChangeOrigin origin) {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
@@ -263,7 +263,7 @@ public class DefaultDeviceEffectsApplierTest {
 
     @Test
     @TestParameters({"{origin: ORIGIN_APP}", "{origin: ORIGIN_RESTORE_BACKUP}",
-            "{origin: ORIGIN_UNKNOWN}"})
+            "{origin: ORIGIN_SYSTEM_OR_SYSTEMUI}", "{origin: ORIGIN_UNKNOWN}"})
     public void apply_nightModeWithScreenOn_willBeAppliedLaterBasedOnOrigin(ChangeOrigin origin) {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 

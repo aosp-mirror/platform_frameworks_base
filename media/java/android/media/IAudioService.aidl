@@ -28,6 +28,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.BluetoothProfileConnectionInfo;
+import android.media.FadeManagerConfiguration;
 import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
@@ -398,6 +399,14 @@ interface IAudioService {
     int dispatchFocusChange(in AudioFocusInfo afi, in int focusChange,
             in IAudioPolicyCallback pcb);
 
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int dispatchFocusChangeWithFade(in AudioFocusInfo afi,
+            in int focusChange,
+            in IAudioPolicyCallback pcb,
+            in List<AudioFocusInfo> otherActiveAfis,
+            in FadeManagerConfiguration transientFadeMgrConfig);
+
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
     @EnforcePermission("BLUETOOTH_STACK")
@@ -754,4 +763,16 @@ interface IAudioService {
     oneway void removeLoudnessCodecInfo(int piid, in LoudnessCodecInfo codecInfo);
 
     PersistableBundle getLoudnessParams(int piid, in LoudnessCodecInfo codecInfo);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int setFadeManagerConfigurationForFocusLoss(in FadeManagerConfiguration fmcForFocusLoss);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int clearFadeManagerConfigurationForFocusLoss();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    FadeManagerConfiguration getFadeManagerConfigurationForFocusLoss();
 }

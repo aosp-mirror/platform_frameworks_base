@@ -53,6 +53,7 @@ public class BackProgressAnimatorTest {
                 /* progress = */ progress,
                 /* velocityX = */ 0,
                 /* velocityY = */ 0,
+                /* triggerBack = */ false,
                 /* swipeEdge = */ BackEvent.EDGE_LEFT,
                 /* departingAnimationTarget = */ null);
     }

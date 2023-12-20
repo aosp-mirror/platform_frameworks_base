@@ -566,23 +566,40 @@ public class AudioDeviceInventory {
         final int mDeviceType;
         final @NonNull String mDeviceName;
         final @NonNull String mDeviceAddress;
+        @NonNull String mDeviceIdentityAddress;
         int mDeviceCodecFormat;
-        @NonNull String mPeerDeviceAddress;
         final int mGroupId;
+        @NonNull String mPeerDeviceAddress;
+        @NonNull String mPeerIdentityDeviceAddress;
 
         /** Disabled operating modes for this device. Use a negative logic so that by default
          * an empty list means all modes are allowed.
          * See BluetoothAdapter.AUDIO_MODE_DUPLEX and BluetoothAdapter.AUDIO_MODE_OUTPUT_ONLY */
         @NonNull ArraySet<String> mDisabledModes = new ArraySet(0);
 
-        DeviceInfo(int deviceType, String deviceName, String deviceAddress,
-                   int deviceCodecFormat, String peerDeviceAddress, int groupId) {
+        DeviceInfo(int deviceType, String deviceName, String address,
+                   String identityAddress, int codecFormat,
+                   int groupId, String peerAddress, String peerIdentityAddress) {
             mDeviceType = deviceType;
-            mDeviceName = deviceName == null ? "" : deviceName;
-            mDeviceAddress = deviceAddress == null ? "" : deviceAddress;
-            mDeviceCodecFormat = deviceCodecFormat;
-            mPeerDeviceAddress = peerDeviceAddress == null ? "" : peerDeviceAddress;
+            mDeviceName = TextUtils.emptyIfNull(deviceName);
+            mDeviceAddress = TextUtils.emptyIfNull(address);
+            mDeviceIdentityAddress = TextUtils.emptyIfNull(identityAddress);
+            mDeviceCodecFormat = codecFormat;
             mGroupId = groupId;
+            mPeerDeviceAddress = TextUtils.emptyIfNull(peerAddress);
+            mPeerIdentityDeviceAddress = TextUtils.emptyIfNull(peerIdentityAddress);
+        }
+
+        /** Constructor for all devices except A2DP sink and LE Audio */
+        DeviceInfo(int deviceType, String deviceName, String address) {
+            this(deviceType, deviceName, address, null, AudioSystem.AUDIO_FORMAT_DEFAULT);
+        }
+
+        /** Constructor for A2DP sink devices */
+        DeviceInfo(int deviceType, String deviceName, String address,
+                   String identityAddress, int codecFormat) {
+            this(deviceType, deviceName, address, identityAddress, codecFormat,
+                    BluetoothLeAudio.GROUP_ID_INVALID, null, null);
         }
 
         void setModeDisabled(String mode) {
@@ -601,25 +618,20 @@ public class AudioDeviceInventory {
             return isModeEnabled(BluetoothAdapter.AUDIO_MODE_DUPLEX);
         }
 
-        DeviceInfo(int deviceType, String deviceName, String deviceAddress,
-                   int deviceCodecFormat) {
-            this(deviceType, deviceName, deviceAddress, deviceCodecFormat,
-                    null, BluetoothLeAudio.GROUP_ID_INVALID);
-        }
-
-        DeviceInfo(int deviceType, String deviceName, String deviceAddress) {
-            this(deviceType, deviceName, deviceAddress, AudioSystem.AUDIO_FORMAT_DEFAULT);
-        }
-
         @Override
         public String toString() {
             return "[DeviceInfo: type:0x" + Integer.toHexString(mDeviceType)
                     + " (" + AudioSystem.getDeviceName(mDeviceType)
                     + ") name:" + mDeviceName
                     + " addr:" + Utils.anonymizeBluetoothAddress(mDeviceType, mDeviceAddress)
+                    + " identity addr:"
+                    + Utils.anonymizeBluetoothAddress(mDeviceType, mDeviceIdentityAddress)
                     + " codec: " + Integer.toHexString(mDeviceCodecFormat)
-                    + " peer addr:" + mPeerDeviceAddress
                     + " group:" + mGroupId
+                    + " peer addr:"
+                    + Utils.anonymizeBluetoothAddress(mDeviceType, mPeerDeviceAddress)
+                    + " peer identity addr:"
+                    + Utils.anonymizeBluetoothAddress(mDeviceType, mPeerIdentityDeviceAddress)
                     + " disabled modes: " + mDisabledModes + "]";
         }
 
@@ -947,20 +959,44 @@ public class AudioDeviceInventory {
     }
 
 
+    /**
+     * Goes over all connected LE Audio devices in the provided group ID and
+     * update:
+     * - the peer address according to the addres of other device in the same
+     * group (can also clear the peer address is not anymore in the group)
+     * - The dentity address if not yet set.
+     * LE Audio buds in a pair are in the same group.
+     * @param groupId the LE Audio group to update
+     */
     /*package*/ void onUpdateLeAudioGroupAddresses(int groupId) {
         synchronized (mDevicesLock) {
+            // <address, identy address>
+            List<Pair<String, String>> addresses = new ArrayList<>();
             for (DeviceInfo di : mConnectedDevices.values()) {
                 if (di.mGroupId == groupId) {
-                    List<String> addresses = mDeviceBroker.getLeAudioGroupAddresses(groupId);
+                    if (addresses.isEmpty()) {
+                        addresses = mDeviceBroker.getLeAudioGroupAddresses(groupId);
+                    }
                     if (di.mPeerDeviceAddress.equals("")) {
-                        for (String addr : addresses) {
-                            if (!addr.equals(di.mDeviceAddress)) {
-                                di.mPeerDeviceAddress = addr;
+                        for (Pair<String, String> addr : addresses) {
+                            if (!addr.first.equals(di.mDeviceAddress)) {
+                                di.mPeerDeviceAddress = addr.first;
+                                di.mPeerIdentityDeviceAddress = addr.second;
                                 break;
                             }
                         }
-                    } else if (!addresses.contains(di.mPeerDeviceAddress)) {
+                    } else if (!addresses.contains(
+                            new Pair(di.mPeerDeviceAddress, di.mPeerIdentityDeviceAddress))) {
                         di.mPeerDeviceAddress = "";
+                        di.mPeerIdentityDeviceAddress = "";
+                    }
+                    if (di.mDeviceIdentityAddress.equals("")) {
+                        for (Pair<String, String> addr : addresses) {
+                            if (addr.first.equals(di.mDeviceAddress)) {
+                                di.mDeviceIdentityAddress = addr.second;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -1964,7 +2000,7 @@ public class AudioDeviceInventory {
         mDeviceBroker.clearA2dpSuspended(true /* internalOnly */);
 
         final DeviceInfo di = new DeviceInfo(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, name,
-                address, codec);
+                address, btInfo.mDevice.getIdentityAddress(), codec);
         final String diKey = di.getKey();
         mConnectedDevices.put(diKey, di);
         // on a connection always overwrite the device seen by AudioPolicy, see comment above when
@@ -2381,12 +2417,15 @@ public class AudioDeviceInventory {
             // Find LE Group ID and peer headset address if available
             final int groupId = mDeviceBroker.getLeAudioDeviceGroupId(btInfo.mDevice);
             String peerAddress = "";
+            String peerIdentityAddress = "";
             if (groupId != BluetoothLeAudio.GROUP_ID_INVALID) {
-                List<String> addresses = mDeviceBroker.getLeAudioGroupAddresses(groupId);
+                List<Pair<String, String>> addresses =
+                        mDeviceBroker.getLeAudioGroupAddresses(groupId);
                 if (addresses.size() > 1) {
-                    for (String addr : addresses) {
-                        if (!addr.equals(address)) {
-                            peerAddress = addr;
+                    for (Pair<String, String> addr : addresses) {
+                        if (!addr.first.equals(address)) {
+                            peerAddress = addr.first;
+                            peerIdentityAddress = addr.second;
                             break;
                         }
                     }
@@ -2420,8 +2459,9 @@ public class AudioDeviceInventory {
             // Reset LEA suspend state each time a new sink is connected
             mDeviceBroker.clearLeAudioSuspended(true /* internalOnly */);
             mConnectedDevices.put(DeviceInfo.makeDeviceListKey(device, address),
-                    new DeviceInfo(device, name, address, codec,
-                            peerAddress, groupId));
+                    new DeviceInfo(device, name, address,
+                            btInfo.mDevice.getIdentityAddress(), codec,
+                            groupId, peerAddress, peerIdentityAddress));
             mDeviceBroker.postAccessoryPlugMediaUnmute(device);
             setCurrentAudioRouteNameIfPossible(name, /*fromA2dp=*/false);
             addAudioDeviceInInventoryIfNeeded(device, address, peerAddress,
@@ -2806,18 +2846,19 @@ public class AudioDeviceInventory {
         mDevRoleCapturePresetDispatchers.finishBroadcast();
     }
 
-    List<String> getDeviceAddresses(AudioDeviceAttributes device) {
+    List<String> getDeviceIdentityAddresses(AudioDeviceAttributes device) {
         List<String> addresses = new ArrayList<String>();
         final String key = DeviceInfo.makeDeviceListKey(device.getInternalType(),
                 device.getAddress());
         synchronized (mDevicesLock) {
             DeviceInfo di = mConnectedDevices.get(key);
             if (di != null) {
-                if (!di.mDeviceAddress.isEmpty()) {
-                    addresses.add(di.mDeviceAddress);
+                if (!di.mDeviceIdentityAddress.isEmpty()) {
+                    addresses.add(di.mDeviceIdentityAddress);
                 }
-                if (!di.mPeerDeviceAddress.isEmpty()) {
-                    addresses.add(di.mPeerDeviceAddress);
+                if (!di.mPeerIdentityDeviceAddress.isEmpty()
+                        && !di.mPeerIdentityDeviceAddress.equals(di.mDeviceIdentityAddress)) {
+                    addresses.add(di.mPeerIdentityDeviceAddress);
                 }
             }
         }

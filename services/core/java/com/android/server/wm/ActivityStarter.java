@@ -579,30 +579,11 @@ class ActivityStarter {
                     computeResolveFilterUid(callingUid, realCallingUid, filterCallingUid),
                     realCallingPid);
             if (resolveInfo == null) {
-                final UserInfo userInfo = supervisor.getUserInfo(userId);
-                if (userInfo != null && userInfo.isManagedProfile()) {
-                    // Special case for managed profiles, if attempting to launch non-cryto aware
-                    // app in a locked managed profile from an unlocked parent allow it to resolve
-                    // as user will be sent via confirm credentials to unlock the profile.
-                    final UserManager userManager = UserManager.get(supervisor.mService.mContext);
-                    boolean profileLockedAndParentUnlockingOrUnlocked = false;
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        final UserInfo parent = userManager.getProfileParent(userId);
-                        profileLockedAndParentUnlockingOrUnlocked = (parent != null)
-                                && userManager.isUserUnlockingOrUnlocked(parent.id)
-                                && !userManager.isUserUnlockingOrUnlocked(userId);
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                    if (profileLockedAndParentUnlockingOrUnlocked) {
-                        resolveInfo = supervisor.resolveIntent(intent, resolvedType, userId,
-                                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                                computeResolveFilterUid(callingUid, realCallingUid,
-                                        filterCallingUid), realCallingPid);
-                    }
-                }
+                // Special case for profiles: If attempting to launch non-crypto aware app in a
+                // locked profile or launch an app in a profile that is stopped by quiet mode from
+                // an unlocked parent, allow it to resolve as user will be sent via confirm
+                // credentials to unlock the profile.
+                resolveInfo = resolveIntentForLockedOrStoppedProfiles(supervisor);
             }
 
             // Collect information about the target of the Intent.
@@ -615,6 +596,36 @@ class ActivityStarter {
                         intent, resolvedCallingUid, activityInfo.applicationInfo.packageName,
                         UserHandle.getUserId(activityInfo.applicationInfo.uid));
             }
+        }
+
+        /**
+         * Resolve intent for locked or stopped profiles if the parent profile is unlocking or
+         * unlocked.
+         */
+        ResolveInfo resolveIntentForLockedOrStoppedProfiles(
+                ActivityTaskSupervisor supervisor) {
+            final UserInfo userInfo = supervisor.getUserInfo(userId);
+            if (userInfo != null && userInfo.isProfile()) {
+                final UserManager userManager = UserManager.get(supervisor.mService.mContext);
+                boolean profileLockedAndParentUnlockingOrUnlocked = false;
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    final UserInfo parent = userManager.getProfileParent(userId);
+                    profileLockedAndParentUnlockingOrUnlocked = (parent != null)
+                            && userManager.isUserUnlockingOrUnlocked(parent.id)
+                            && !userManager.isUserUnlockingOrUnlocked(userId);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+                if (profileLockedAndParentUnlockingOrUnlocked) {
+                    return supervisor.resolveIntent(intent, resolvedType, userId,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                            computeResolveFilterUid(callingUid, realCallingUid,
+                                    filterCallingUid), realCallingPid);
+                }
+            }
+            return null;
         }
     }
 
@@ -2767,10 +2778,7 @@ class ActivityStarter {
             }
         }
 
-        // If the target task is not in the front, then we need to bring it to the front...
-        // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have
-        // the same behavior as if a new instance was being started, which means not bringing it
-        // to the front if the caller is not itself in the front.
+        // If the target task is not in the front, then we need to bring it to the front.
         final boolean differentTopTask;
         if (mTargetRootTask.getDisplayArea() == mPreferredTaskDisplayArea) {
             final Task focusRootTask = mTargetRootTask.mDisplayContent.getFocusedRootTask();
@@ -2787,49 +2795,47 @@ class ActivityStarter {
 
         if (differentTopTask && !avoidMoveToFront()) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            if (mSourceRecord == null || inTopNonFinishingTask(mSourceRecord)) {
-                // We really do want to push this one into the user's face, right now.
-                if (mLaunchTaskBehind && mSourceRecord != null) {
-                    intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
-                }
-
-                if (intentActivity.isDescendantOf(mTargetRootTask)) {
-                    // TODO(b/151572268): Figure out a better way to move tasks in above 2-levels
-                    //  tasks hierarchies.
-                    if (mTargetRootTask != intentTask
-                            && mTargetRootTask != intentTask.getParent().asTask()) {
-                        intentTask.getParent().positionChildAt(POSITION_TOP, intentTask,
-                                false /* includingParents */);
-                        intentTask = intentTask.getParent().asTaskFragment().getTask();
-                    }
-                    // If the activity is visible in multi-windowing mode, it may already be on
-                    // the top (visible to user but not the global top), then the result code
-                    // should be START_DELIVERED_TO_TOP instead of START_TASK_TO_FRONT.
-                    final boolean wasTopOfVisibleRootTask = intentActivity.isVisibleRequested()
-                            && intentActivity.inMultiWindowMode()
-                            && intentActivity == mTargetRootTask.topRunningActivity()
-                            && !intentActivity.mTransitionController.isTransientHide(
-                                    mTargetRootTask);
-                    // We only want to move to the front, if we aren't going to launch on a
-                    // different root task. If we launch on a different root task, we will put the
-                    // task on top there.
-                    // Defer resuming the top activity while moving task to top, since the
-                    // current task-top activity may not be the activity that should be resumed.
-                    mTargetRootTask.moveTaskToFront(intentTask, mNoAnimation, mOptions,
-                            mStartActivity.appTimeTracker, DEFER_RESUME,
-                            "bringingFoundTaskToFront");
-                    mMovedToFront = !wasTopOfVisibleRootTask;
-                } else if (intentActivity.getWindowingMode() != WINDOWING_MODE_PINNED) {
-                    // Leaves reparenting pinned task operations to task organizer to make sure it
-                    // dismisses pinned task properly.
-                    // TODO(b/199997762): Consider leaving all reparent operation of organized tasks
-                    //  to task organizer.
-                    intentTask.reparent(mTargetRootTask, ON_TOP, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
-                            ANIMATE, DEFER_RESUME, "reparentToTargetRootTask");
-                    mMovedToFront = true;
-                }
-                mOptions = null;
+            // We really do want to push this one into the user's face, right now.
+            if (mLaunchTaskBehind && mSourceRecord != null) {
+                intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
             }
+
+            if (intentActivity.isDescendantOf(mTargetRootTask)) {
+                // TODO(b/151572268): Figure out a better way to move tasks in above 2-levels
+                //  tasks hierarchies.
+                if (mTargetRootTask != intentTask
+                        && mTargetRootTask != intentTask.getParent().asTask()) {
+                    intentTask.getParent().positionChildAt(POSITION_TOP, intentTask,
+                            false /* includingParents */);
+                    intentTask = intentTask.getParent().asTaskFragment().getTask();
+                }
+                // If the activity is visible in multi-windowing mode, it may already be on
+                // the top (visible to user but not the global top), then the result code
+                // should be START_DELIVERED_TO_TOP instead of START_TASK_TO_FRONT.
+                final boolean wasTopOfVisibleRootTask = intentActivity.isVisibleRequested()
+                        && intentActivity.inMultiWindowMode()
+                        && intentActivity == mTargetRootTask.topRunningActivity()
+                        && !intentActivity.mTransitionController.isTransientHide(
+                                mTargetRootTask);
+                // We only want to move to the front, if we aren't going to launch on a
+                // different root task. If we launch on a different root task, we will put the
+                // task on top there.
+                // Defer resuming the top activity while moving task to top, since the
+                // current task-top activity may not be the activity that should be resumed.
+                mTargetRootTask.moveTaskToFront(intentTask, mNoAnimation, mOptions,
+                        mStartActivity.appTimeTracker, DEFER_RESUME,
+                        "bringingFoundTaskToFront");
+                mMovedToFront = !wasTopOfVisibleRootTask;
+            } else if (intentActivity.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                // Leaves reparenting pinned task operations to task organizer to make sure it
+                // dismisses pinned task properly.
+                // TODO(b/199997762): Consider leaving all reparent operation of organized tasks
+                //  to task organizer.
+                intentTask.reparent(mTargetRootTask, ON_TOP, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
+                        ANIMATE, DEFER_RESUME, "reparentToTargetRootTask");
+                mMovedToFront = true;
+            }
+            mOptions = null;
         }
         if (differentTopTask) {
             logPIOnlyCreatorAllowsBAL();
@@ -2848,20 +2854,6 @@ class ActivityStarter {
         mTargetRootTask = intentActivity.getRootTask();
         mSupervisor.handleNonResizableTaskIfNeeded(intentTask, WINDOWING_MODE_UNDEFINED,
                 mRootWindowContainer.getDefaultTaskDisplayArea(), mTargetRootTask);
-    }
-
-    private boolean inTopNonFinishingTask(ActivityRecord r) {
-        if (r == null || r.getTask() == null) {
-            return false;
-        }
-
-        final Task rTask = r.getTask();
-        final Task parent = rTask.getCreatedByOrganizerTask() != null
-                ? rTask.getCreatedByOrganizerTask() : r.getRootTask();
-        final ActivityRecord topNonFinishingActivity = parent != null
-                ? parent.getTopNonFinishingActivity() : null;
-
-        return topNonFinishingActivity != null && topNonFinishingActivity.getTask() == rTask;
     }
 
     private void resumeTargetRootTaskIfNeeded() {

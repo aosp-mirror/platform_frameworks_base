@@ -124,7 +124,7 @@ constructor(
 
         indicationAreaHandle =
             KeyguardIndicationAreaBinder.bind(
-                notificationShadeWindowView,
+                notificationShadeWindowView.requireViewById(R.id.keyguard_indication_area),
                 keyguardIndicationAreaViewModel,
                 keyguardRootViewModel,
                 indicationController,
