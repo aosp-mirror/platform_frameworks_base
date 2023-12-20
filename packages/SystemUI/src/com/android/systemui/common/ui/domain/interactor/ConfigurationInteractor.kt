@@ -72,6 +72,9 @@ class ConfigurationInteractor @Inject constructor(private val repository: Config
     val onAnyConfigurationChange: Flow<Unit> =
         repository.onAnyConfigurationChange.onStart { emit(Unit) }
 
+    /** Emits the new configuration on any configuration change */
+    val configurationValues: Flow<Configuration> = repository.configurationValues
+
     /** Emits the current resolution scaling factor */
     val scaleForResolution: Flow<Float> = repository.scaleForResolution
 }
