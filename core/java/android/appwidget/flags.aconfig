@@ -13,3 +13,10 @@ flag {
   description: "Enable adapter conversion to RemoteCollectionItemsAdapter"
   bug: "245950570"
 }
+
+flag {
+  name: "remove_app_widget_service_io_from_critical_path"
+  namespace: "app_widgets"
+  description: "Move state file IO to non-critical path"
+  bug: "312949280"
+}
