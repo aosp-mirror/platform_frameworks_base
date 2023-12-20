@@ -27,4 +27,7 @@ java_library_static {
     static_libs: [
         "ukey2_jni",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

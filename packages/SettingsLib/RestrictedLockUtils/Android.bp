@@ -29,4 +29,7 @@ android_library {
         "//apex_available:platform",
         "com.android.permission",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
