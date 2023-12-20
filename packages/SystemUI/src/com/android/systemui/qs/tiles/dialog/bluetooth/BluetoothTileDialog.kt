@@ -71,6 +71,10 @@ constructor(
     internal val bluetoothStateToggle
         get() = mutableBluetoothStateToggle.asStateFlow()
 
+    private val mutableBluetoothAutoOnToggle: MutableStateFlow<Boolean?> = MutableStateFlow(null)
+    internal val bluetoothAutoOnToggle
+        get() = mutableBluetoothAutoOnToggle.asStateFlow()
+
     private val mutableDeviceItemClick: MutableSharedFlow<DeviceItem> =
         MutableSharedFlow(extraBufferCapacity = 1)
     internal val deviceItemClick
@@ -89,6 +93,7 @@ constructor(
 
     private lateinit var toggleView: Switch
     private lateinit var subtitleTextView: TextView
+    private lateinit var autoOnToggle: Switch
     private lateinit var autoOnToggleView: View
     private lateinit var doneButton: View
     private lateinit var seeAllButton: View
@@ -109,6 +114,7 @@ constructor(
 
         toggleView = requireViewById(R.id.bluetooth_toggle)
         subtitleTextView = requireViewById(R.id.bluetooth_tile_dialog_subtitle) as TextView
+        autoOnToggle = requireViewById(R.id.bluetooth_auto_on_toggle)
         autoOnToggleView = requireViewById(R.id.bluetooth_auto_on_toggle_layout)
         doneButton = requireViewById(R.id.done_button)
         seeAllButton = requireViewById(R.id.see_all_button)
@@ -195,6 +201,16 @@ constructor(
         autoOnToggleView.visibility = uiProperties.autoOnToggleVisibility
     }
 
+    internal fun onBluetoothAutoOnUpdated(isEnabled: Boolean) {
+        if (::autoOnToggle.isInitialized) {
+            autoOnToggle.apply {
+                isChecked = isEnabled
+                setEnabled(true)
+                alpha = ENABLED_ALPHA
+            }
+        }
+    }
+
     private fun setupToggle() {
         toggleView.isChecked = bluetoothToggleInitialValue
         toggleView.setOnCheckedChangeListener { view, isChecked ->
@@ -208,6 +224,14 @@ constructor(
         }
 
         autoOnToggleView.visibility = initialUiProperties.autoOnToggleVisibility
+        autoOnToggle.setOnCheckedChangeListener { view, isChecked ->
+            mutableBluetoothAutoOnToggle.value = isChecked
+            view.apply {
+                isEnabled = false
+                alpha = DISABLED_ALPHA
+            }
+            uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_AUTO_ON_TOGGLE_CLICKED)
+        }
     }
 
     private fun setupRecyclerView() {

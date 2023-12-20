@@ -71,7 +71,11 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Mock private lateinit var logger: BluetoothTileDialogLogger
 
-    private val uiProperties = BluetoothTileDialogViewModel.UiProperties.build(ENABLED)
+    private val uiProperties =
+        BluetoothTileDialogViewModel.UiProperties.build(
+            isBluetoothEnabled = ENABLED,
+            isAutoOnToggleFeatureAvailable = ENABLED
+        )
 
     private val fakeSystemClock = FakeSystemClock()
 
@@ -305,7 +309,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
             bluetoothTileDialog =
                 BluetoothTileDialog(
                     ENABLED,
-                    BluetoothTileDialogViewModel.UiProperties.build(ENABLED),
+                    BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
                     MATCH_PARENT,
                     bluetoothTileDialogCallback,
                     dispatcher,
