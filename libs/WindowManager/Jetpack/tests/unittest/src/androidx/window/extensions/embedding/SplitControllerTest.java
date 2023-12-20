@@ -590,7 +590,7 @@ public class SplitControllerTest {
 
         assertFalse(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString());
+                anyString(), any());
     }
 
     @Test
@@ -753,7 +753,7 @@ public class SplitControllerTest {
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString());
+                anyString(), any());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 
@@ -796,7 +796,7 @@ public class SplitControllerTest {
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString());
+                anyString(), any());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 
