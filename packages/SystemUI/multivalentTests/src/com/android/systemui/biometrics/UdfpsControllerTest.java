@@ -76,6 +76,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.udfps.InteractionEvent;
 import com.android.systemui.biometrics.udfps.NormalizedTouchData;
@@ -214,6 +215,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock
+    private UdfpsOverlayInteractor mUdfpsOverlayInteractor;
+    @Mock
     private UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
@@ -342,8 +345,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mFpsUnlockTracker,
                 mKeyguardTransitionInteractor,
                 mDeviceEntryUdfpsTouchOverlayViewModel,
-                mDefaultUdfpsTouchOverlayViewModel
-
+                mDefaultUdfpsTouchOverlayViewModel,
+                mUdfpsOverlayInteractor
         );
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();

@@ -23,6 +23,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -49,7 +50,8 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     protected val statusBarStateController: StatusBarStateController,
     protected val shadeInteractor: ShadeInteractor,
     protected val dialogManager: SystemUIDialogManager,
-    private val dumpManager: DumpManager
+    private val dumpManager: DumpManager,
+    private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) : ViewController<T>(view), Dumpable {
 
     protected abstract val tag: String
@@ -130,11 +132,13 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     override fun onViewAttached() {
         dialogManager.registerListener(dialogListener)
         dumpManager.registerDumpable(dumpTag, this)
+        udfpsOverlayInteractor.setHandleTouches(shouldHandle = true)
     }
 
     override fun onViewDetached() {
         dialogManager.unregisterListener(dialogListener)
         dumpManager.unregisterDumpable(dumpTag)
+        udfpsOverlayInteractor.setHandleTouches(shouldHandle = true)
     }
 
     /**
@@ -165,6 +169,7 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     fun updatePauseAuth() {
         if (view.setPauseAuth(shouldPauseAuth())) {
             view.postInvalidate()
+            udfpsOverlayInteractor.setHandleTouches(shouldHandle = !shouldPauseAuth())
         }
     }
 

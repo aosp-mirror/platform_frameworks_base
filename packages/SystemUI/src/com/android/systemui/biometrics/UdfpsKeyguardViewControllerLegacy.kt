@@ -27,6 +27,7 @@ import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerPr
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
@@ -75,6 +76,7 @@ open class UdfpsKeyguardViewControllerLegacy(
     private val selectedUserInteractor: SelectedUserInteractor,
     private val transitionInteractor: KeyguardTransitionInteractor,
     shadeInteractor: ShadeInteractor,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) :
     UdfpsAnimationViewController<UdfpsKeyguardViewLegacy>(
         view,
@@ -82,6 +84,7 @@ open class UdfpsKeyguardViewControllerLegacy(
         shadeInteractor,
         systemUIDialogManager,
         dumpManager,
+        udfpsOverlayInteractor,
     ) {
     private val uniqueIdentifier = this.toString()
     private var showingUdfpsBouncer = false

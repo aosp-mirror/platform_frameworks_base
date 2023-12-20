@@ -5,6 +5,7 @@ import android.hardware.biometrics.IBiometricContextListener
 import android.hardware.biometrics.IBiometricContextListener.FoldState
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.AuthController
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
@@ -17,6 +18,7 @@ import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
 import com.android.systemui.unfold.updates.FoldStateProvider
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,7 +44,10 @@ class LogContextInteractorImplTest : SysuiTestCase() {
     private val testScope = TestScope()
 
     @Mock private lateinit var foldProvider: FoldStateProvider
+    @Mock private lateinit var authController: AuthController
+    @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
 
+    private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
 
     private lateinit var interactor: LogContextInteractorImpl
@@ -50,6 +55,13 @@ class LogContextInteractorImplTest : SysuiTestCase() {
     @Before
     fun setup() {
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
+        udfpsOverlayInteractor =
+            UdfpsOverlayInteractor(
+                context,
+                authController,
+                selectedUserInteractor,
+                testScope.backgroundScope,
+            )
         interactor =
             LogContextInteractorImpl(
                 testScope.backgroundScope,
@@ -59,6 +71,7 @@ class LogContextInteractorImplTest : SysuiTestCase() {
                         scope = testScope.backgroundScope,
                     )
                     .keyguardTransitionInteractor,
+                udfpsOverlayInteractor,
             )
     }
 
@@ -162,6 +175,18 @@ class LogContextInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun isHardwareIgnoringTouchesChanges() =
+        testScope.runTest {
+            val isHardwareIgnoringTouches by collectLastValue(interactor.isHardwareIgnoringTouches)
+
+            udfpsOverlayInteractor.setHandleTouches(true)
+            assertThat(isHardwareIgnoringTouches).isFalse()
+
+            udfpsOverlayInteractor.setHandleTouches(false)
+            assertThat(isHardwareIgnoringTouches).isTrue()
+        }
+
+    @Test
     fun foldStateChanges() =
         testScope.runTest {
             val foldState = collectLastValue(interactor.foldState)
@@ -195,6 +220,7 @@ class LogContextInteractorImplTest : SysuiTestCase() {
 
             var folded: Int? = null
             var displayState: Int? = null
+            var ignoreTouches: Boolean? = null
             val job =
                 interactor.addBiometricContextListener(
                     object : IBiometricContextListener.Stub() {
@@ -205,12 +231,17 @@ class LogContextInteractorImplTest : SysuiTestCase() {
                         override fun onDisplayStateChanged(newDisplayState: Int) {
                             displayState = newDisplayState
                         }
+
+                        override fun onHardwareIgnoreTouchesChanged(newIgnoreTouches: Boolean) {
+                            ignoreTouches = newIgnoreTouches
+                        }
                     }
                 )
             runCurrent()
 
             assertThat(folded).isEqualTo(FoldState.FULLY_CLOSED)
             assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_AOD)
+            assertThat(ignoreTouches).isFalse()
 
             foldListener.onFoldUpdate(FOLD_UPDATE_START_OPENING)
             foldListener.onFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN)
@@ -219,6 +250,11 @@ class LogContextInteractorImplTest : SysuiTestCase() {
 
             assertThat(folded).isEqualTo(FoldState.HALF_OPENED)
             assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
+
+            udfpsOverlayInteractor.setHandleTouches(false)
+            runCurrent()
+
+            assertThat(ignoreTouches).isTrue()
 
             job.cancel()
 

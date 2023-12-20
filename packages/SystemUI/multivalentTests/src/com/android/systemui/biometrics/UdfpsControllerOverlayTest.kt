@@ -38,6 +38,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayViewModel
 import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel
@@ -118,6 +119,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Captor private lateinit var layoutParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
+    @Mock private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
 
     private val onTouch = { _: View, _: MotionEvent, _: Boolean -> true }
     private var overlayParams: UdfpsOverlayParams = UdfpsOverlayParams()
@@ -174,7 +176,8 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 { deviceEntryUdfpsTouchOverlayViewModel },
                 { defaultUdfpsTouchOverlayViewModel },
-                shadeInteractor
+                shadeInteractor,
+                udfpsOverlayInteractor,
             )
         block()
     }

@@ -30,8 +30,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -55,6 +57,16 @@ constructor(
             udfpsOverlayParams.value.overlayBounds.contains(ev.rawX.toInt(), ev.rawY.toInt())
         return isUdfpsEnrolled && isWithinOverlayBounds
     }
+
+    /** Sets whether Udfps overlay should handle touches */
+    fun setHandleTouches(shouldHandle: Boolean = true) {
+        _shouldHandleTouches.value = shouldHandle
+    }
+
+    private var _shouldHandleTouches = MutableStateFlow(true)
+
+    /** Whether Udfps overlay should handle touches */
+    val shouldHandleTouches: StateFlow<Boolean> = _shouldHandleTouches.asStateFlow()
 
     /** Returns the current udfpsOverlayParams */
     val udfpsOverlayParams: StateFlow<UdfpsOverlayParams> =

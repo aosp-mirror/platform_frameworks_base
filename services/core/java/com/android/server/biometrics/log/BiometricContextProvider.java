@@ -86,8 +86,8 @@ public final class BiometricContextProvider implements BiometricContext {
     @Nullable private final Handler mHandler;
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private int mFoldState = IBiometricContextListener.FoldState.UNKNOWN;
-
     private int mDisplayState = AuthenticateOptions.DISPLAY_STATE_UNKNOWN;
+    private boolean mIsHardwareIgnoringTouches = false;
     @VisibleForTesting
     final BroadcastReceiver mDockStateReceiver = new BroadcastReceiver() {
         @Override
@@ -126,6 +126,14 @@ public final class BiometricContextProvider implements BiometricContext {
                 public void onDisplayStateChanged(int displayState) {
                     if (displayState != mDisplayState) {
                         mDisplayState = displayState;
+                        notifyChanged();
+                    }
+                }
+
+                @Override
+                public void onHardwareIgnoreTouchesChanged(boolean shouldIgnore) {
+                    if (mIsHardwareIgnoringTouches != shouldIgnore) {
+                        mIsHardwareIgnoringTouches = shouldIgnore;
                         notifyChanged();
                     }
                 }
@@ -215,6 +223,11 @@ public final class BiometricContextProvider implements BiometricContext {
     }
 
     @Override
+    public boolean isHardwareIgnoringTouches() {
+        return mIsHardwareIgnoringTouches;
+    }
+
+    @Override
     public void subscribe(@NonNull OperationContextExt context,
             @NonNull Consumer<OperationContext> consumer) {
         mSubscribers.put(context, consumer);
@@ -254,6 +267,7 @@ public final class BiometricContextProvider implements BiometricContext {
                 + "bp session: " + getBiometricPromptSessionInfo() + ", "
                 + "displayState: " + getDisplayState() + ", "
                 + "isAwake: " + isAwake() +  ", "
+                + "isHardwareIgnoring: " + isHardwareIgnoringTouches() +  ", "
                 + "isDisplayOn: " + isDisplayOn() +  ", "
                 + "dock: " + getDockedState() + ", "
                 + "rotation: " + getCurrentRotation() + ", "
