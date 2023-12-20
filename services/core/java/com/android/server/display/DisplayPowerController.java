@@ -1119,7 +1119,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 DisplayPowerState.SCREEN_BRIGHTNESS_FLOAT,
                 DisplayPowerState.SCREEN_SDR_BRIGHTNESS_FLOAT);
         setAnimatorRampSpeeds(mAutomaticBrightnessController != null
-                && mAutomaticBrightnessController.isInIdleMode());
+                && mAutomaticBrightnessController.getMode() == AUTO_BRIGHTNESS_MODE_IDLE);
         mScreenBrightnessRampAnimator.setListener(mRampAnimatorListener);
 
         noteScreenState(mPowerState.getScreenState());
@@ -1990,7 +1990,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     boolean isIncreasing = animateValue > currentBrightness;
                     final float rampSpeed;
                     final boolean idle = mAutomaticBrightnessController != null
-                            && mAutomaticBrightnessController.isInIdleMode();
+                            && mAutomaticBrightnessController.getMode()
+                            == AUTO_BRIGHTNESS_MODE_IDLE;
                     if (isIncreasing && slowChange) {
                         rampSpeed = idle ? mBrightnessRampRateSlowIncreaseIdle
                                 : mBrightnessRampRateSlowIncrease;
@@ -2211,6 +2212,18 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Override
     public void setBrightnessFromOffload(float brightness) {
         // The old DPC is no longer supported
+    }
+
+    @Override
+    public float[] getCurrentAutoBrightnessLevels() {
+        // The old DPC is no longer supported
+        return new float[0];
+    }
+
+    @Override
+    public float[] getCurrentAutoBrightnessLuxLevels() {
+        // The old DPC is no longer supported
+        return new float[0];
     }
 
     @Override
@@ -2898,7 +2911,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // or the nits is invalid.
         if (brightnessIsTemporary
                 || mAutomaticBrightnessController == null
-                || mAutomaticBrightnessController.isInIdleMode()
+                || mAutomaticBrightnessController.getMode() == AUTO_BRIGHTNESS_MODE_IDLE
                 || !autobrightnessEnabled
                 || mBrightnessTracker == null
                 || !mUseAutoBrightness
