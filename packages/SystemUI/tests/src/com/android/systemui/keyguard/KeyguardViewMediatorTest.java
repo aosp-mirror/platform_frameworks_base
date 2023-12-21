@@ -771,6 +771,11 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
 
+    @Test
+    public void testBouncerSwipeDown() {
+        mViewMediator.getViewMediatorCallback().onBouncerSwipeDown();
+        verify(mStatusBarKeyguardViewManager).reset(true);
+    }
     private void createAndStartViewMediator() {
         createAndStartViewMediator(false);
     }
