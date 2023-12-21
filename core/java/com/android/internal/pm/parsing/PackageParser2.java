@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.parsing;
+package com.android.internal.pm.parsing;
 
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseInput;
@@ -28,26 +27,20 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.TypedArray;
 import android.os.Build;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.permission.PermissionManager;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 
-import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.pm.pkg.parsing.ParsingUtils;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.SystemConfig;
-import com.android.server.pm.PackageManagerException;
-import com.android.server.pm.PackageManagerService;
 
 import java.io.File;
 import java.util.List;
-import java.util.Set;
 
 /**
  * The v2 of package parsing for use when parsing is initiated in the server and must
@@ -58,50 +51,6 @@ import java.util.Set;
  * collected automatically.
  */
 public class PackageParser2 implements AutoCloseable {
-
-    /**
-     * For parsing inside the system server but outside of {@link PackageManagerService}.
-     * Generally used for parsing information in an APK that hasn't been installed yet.
-     *
-     * This must be called inside the system process as it relies on {@link ServiceManager}.
-     */
-    @NonNull
-    public static PackageParser2 forParsingFileWithDefaults() {
-        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-        return new PackageParser2(null /* separateProcesses */, null /* displayMetrics */,
-                null /* cacheDir */, new Callback() {
-            @Override
-            public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
-                try {
-                    return platformCompat.isChangeEnabled(changeId, appInfo);
-                } catch (Exception e) {
-                    // This shouldn't happen, but assume enforcement if it does
-                    Slog.wtf(TAG, "IPlatformCompat query failed", e);
-                    return true;
-                }
-            }
-
-            @Override
-            public boolean hasFeature(String feature) {
-                // Assume the device doesn't support anything. This will affect permission parsing
-                // and will force <uses-permission/> declarations to include all requiredNotFeature
-                // permissions and exclude all requiredFeature permissions. This mirrors the old
-                // behavior.
-                return false;
-            }
-
-            @Override
-            public Set<String> getHiddenApiWhitelistedApps() {
-                return SystemConfig.getInstance().getHiddenApiWhitelistedApps();
-            }
-
-            @Override
-            public Set<String> getInstallConstraintsAllowlist() {
-                return SystemConfig.getInstance().getInstallConstraintsAllowlist();
-            }
-        });
-    }
 
     private static final String TAG = ParsingUtils.TAG;
 
@@ -118,12 +67,12 @@ public class PackageParser2 implements AutoCloseable {
     private final ThreadLocal<ParseTypeImpl> mSharedResult;
 
     @Nullable
-    protected PackageCacher mCacher;
+    protected IPackageCacher mCacher;
 
-    private final ParsingPackageUtils parsingUtils;
+    private final ParsingPackageUtils mParsingUtils;
 
     public PackageParser2(String[] separateProcesses, DisplayMetrics displayMetrics,
-            @Nullable File cacheDir, @NonNull Callback callback) {
+            @Nullable IPackageCacher cacher, @NonNull Callback callback) {
         if (displayMetrics == null) {
             displayMetrics = new DisplayMetrics();
             displayMetrics.setToDefaults();
@@ -134,9 +83,9 @@ public class PackageParser2 implements AutoCloseable {
         List<PermissionManager.SplitPermissionInfo> splitPermissions = permissionManager
                 .getSplitPermissions();
 
-        mCacher = cacheDir == null ? null : new PackageCacher(cacheDir);
+        mCacher = cacher;
 
-        parsingUtils = new ParsingPackageUtils(separateProcesses, displayMetrics, splitPermissions,
+        mParsingUtils = new ParsingPackageUtils(separateProcesses, displayMetrics, splitPermissions,
                 callback);
 
         ParseInput.Callback enforcementCallback = (changeId, packageName, targetSdkVersion) -> {
@@ -155,7 +104,7 @@ public class PackageParser2 implements AutoCloseable {
      */
     @AnyThread
     public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches)
-            throws PackageManagerException {
+            throws PackageParserException {
         var files = packageFile.listFiles();
         // Apk directory is directly nested under the current directory
         if (ArrayUtils.size(files) == 1 && files[0].isDirectory()) {
@@ -171,9 +120,9 @@ public class PackageParser2 implements AutoCloseable {
 
         long parseTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         ParseInput input = mSharedResult.get().reset();
-        ParseResult<ParsingPackage> result = parsingUtils.parsePackage(input, packageFile, flags);
+        ParseResult<ParsingPackage> result = mParsingUtils.parsePackage(input, packageFile, flags);
         if (result.isError()) {
-            throw new PackageManagerException(result.getErrorCode(), result.getErrorMessage(),
+            throw new PackageParserException(result.getErrorCode(), result.getErrorMessage(),
                     result.getException());
         }
 
@@ -201,12 +150,12 @@ public class PackageParser2 implements AutoCloseable {
      */
     @AnyThread
     public ParsedPackage parsePackageFromPackageLite(PackageLite packageLite, int flags)
-            throws PackageManagerException {
+            throws PackageParserException {
         ParseInput input = mSharedResult.get().reset();
-        ParseResult<ParsingPackage> result = parsingUtils.parsePackageFromPackageLite(input,
+        ParseResult<ParsingPackage> result = mParsingUtils.parsePackageFromPackageLite(input,
                 packageLite, flags);
         if (result.isError()) {
-            throw new PackageManagerException(result.getErrorCode(), result.getErrorMessage(),
+            throw new PackageParserException(result.getErrorCode(), result.getErrorMessage(),
                     result.getException());
         }
         return result.getResult().hideAsParsed();
@@ -226,7 +175,7 @@ public class PackageParser2 implements AutoCloseable {
         mSharedAppInfo.remove();
     }
 
-    public static abstract class Callback implements ParsingPackageUtils.Callback {
+    public abstract static class Callback implements ParsingPackageUtils.Callback {
 
         @Override
         public final ParsingPackage startParsingPackage(@NonNull String packageName,

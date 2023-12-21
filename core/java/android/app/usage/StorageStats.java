@@ -17,10 +17,15 @@
 package android.app.usage;
 
 import android.annotation.BytesLong;
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Storage statistics for a UID, package, or {@link UserHandle} on a single
@@ -29,10 +34,47 @@ import android.os.UserHandle;
  * @see StorageStatsManager
  */
 public final class StorageStats implements Parcelable {
-    /** {@hide} */ public long codeBytes;
-    /** {@hide} */ public long dataBytes;
-    /** {@hide} */ public long cacheBytes;
-    /** {@hide} */ public long externalCacheBytes;
+    /** @hide */ public long codeBytes;
+    /** @hide */ public long dataBytes;
+    /** @hide */ public long cacheBytes;
+    /** @hide */ public long apkBytes;
+    /** @hide */ public long libBytes;
+    /** @hide */ public long dmBytes;
+    /** @hide */ public long externalCacheBytes;
+
+    /** Represents all .apk files in application code path.
+     * Can be used as an input to {@link #getAppBytesByDataType(int)}
+     * to get the sum of sizes for files of this type.
+     */
+    @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
+    public static final int APP_DATA_TYPE_FILE_TYPE_APK = 0;
+
+    /** Represents all .dm files in application code path.
+     * Can be used as an input to {@link #getAppBytesByDataType(int)}
+     * to get the sum of sizes for files of this type.
+     */
+    @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
+    public static final int APP_DATA_TYPE_FILE_TYPE_DM = 1;
+
+    /** Represents lib/ in application code path.
+     * Can be used as an input to {@link #getAppBytesByDataType(int)}
+     * to get the size of lib/ directory.
+     */
+    @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
+    public static final int APP_DATA_TYPE_LIB = 2;
+
+    /**
+     * Keep in sync with the file types defined above.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
+    @IntDef(flag = false, value = {
+        APP_DATA_TYPE_FILE_TYPE_APK,
+        APP_DATA_TYPE_FILE_TYPE_DM,
+        APP_DATA_TYPE_LIB,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AppDataType {}
 
     /**
      * Return the size of app. This includes {@code APK} files, optimized
@@ -45,6 +87,27 @@ public final class StorageStats implements Parcelable {
      */
     public @BytesLong long getAppBytes() {
         return codeBytes;
+    }
+
+    /**
+     * Return the size of the specified data type. This includes files stored under
+     * application code path.
+     * <p>
+     * If there is more than one package inside a uid, the return represents the aggregated
+     * stats when query StorageStat for package or uid.
+     * The data  is not collected and the return defaults to 0 when query StorageStats for user.
+     *
+     * <p>
+     * Data is isolated for each user on a multiuser device.
+     */
+    @FlaggedApi(Flags.FLAG_GET_APP_BYTES_BY_DATA_TYPE_API)
+    public long getAppBytesByDataType(@AppDataType int dataType) {
+        switch (dataType) {
+          case APP_DATA_TYPE_FILE_TYPE_APK: return apkBytes;
+          case APP_DATA_TYPE_LIB: return libBytes;
+          case APP_DATA_TYPE_FILE_TYPE_DM: return dmBytes;
+          default: return 0;
+        }
     }
 
     /**
@@ -98,6 +161,9 @@ public final class StorageStats implements Parcelable {
         this.codeBytes = in.readLong();
         this.dataBytes = in.readLong();
         this.cacheBytes = in.readLong();
+        this.apkBytes = in.readLong();
+        this.libBytes = in.readLong();
+        this.dmBytes = in.readLong();
         this.externalCacheBytes = in.readLong();
     }
 
@@ -111,6 +177,9 @@ public final class StorageStats implements Parcelable {
         dest.writeLong(codeBytes);
         dest.writeLong(dataBytes);
         dest.writeLong(cacheBytes);
+        dest.writeLong(apkBytes);
+        dest.writeLong(libBytes);
+        dest.writeLong(dmBytes);
         dest.writeLong(externalCacheBytes);
     }
 

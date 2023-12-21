@@ -18,12 +18,12 @@ package com.android.settingslib.wifi;
 
 import static android.os.UserManager.DISALLOW_CONFIG_WIFI;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.UserManager;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.HashMap;

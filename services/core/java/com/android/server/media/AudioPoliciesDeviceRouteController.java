@@ -87,6 +87,8 @@ import java.util.Objects;
 
     @NonNull private final AudioDeviceCallback mAudioDeviceCallback = new AudioDeviceCallbackImpl();
 
+    @MediaRoute2Info.SuitabilityStatus private final int mBuiltInSpeakerSuitabilityStatus;
+
     @NonNull
     private final AudioManager.OnDevicesForAttributesChangedListener
             mOnDevicesForAttributesChangedListener = this::onDevicesForAttributesChangedListener;
@@ -113,6 +115,10 @@ import java.util.Objects;
         mHandler = new Handler(Objects.requireNonNull(looper));
         mStrategyForMedia = Objects.requireNonNull(strategyForMedia);
         mOnDeviceRouteChangedListener = Objects.requireNonNull(onDeviceRouteChangedListener);
+
+        mBuiltInSpeakerSuitabilityStatus =
+                DeviceRouteController.getBuiltInSpeakerSuitabilityStatus(mContext);
+
         mBluetoothRouteController =
                 new AudioPoliciesBluetoothRouteController(
                         mContext, btAdapter, this::rebuildAvailableRoutesAndNotify);
@@ -373,14 +379,19 @@ import java.util.Objects;
             // from getting an id using BluetoothRouteController#getRouteIdForBluetoothAddress.
             routeId = systemRouteInfo.mDefaultRouteId;
         }
-        return new MediaRoute2Info.Builder(routeId, humanReadableName)
+        MediaRoute2Info.Builder builder = new MediaRoute2Info.Builder(routeId, humanReadableName)
                 .setType(systemRouteInfo.mMediaRoute2InfoType)
                 .setAddress(address)
                 .setSystemRoute(true)
                 .addFeature(FEATURE_LIVE_AUDIO)
                 .addFeature(FEATURE_LOCAL_PLAYBACK)
-                .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED)
-                .build();
+                .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED);
+
+        if (systemRouteInfo.mMediaRoute2InfoType == MediaRoute2Info.TYPE_BUILTIN_SPEAKER) {
+            builder.setSuitabilityStatus(mBuiltInSpeakerSuitabilityStatus);
+        }
+
+        return builder.build();
     }
 
     /**

@@ -16,36 +16,25 @@
 
 package com.android.systemui.authentication.domain.interactor
 
-import com.android.app.tracing.TraceUtils.Companion.withContext
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
-import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
-import kotlin.math.ceil
-import kotlin.math.max
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 /**
  * Hosts application business logic related to user authentication.
@@ -59,10 +48,7 @@ class AuthenticationInteractor
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val repository: AuthenticationRepository,
-    private val userRepository: UserRepository,
-    private val clock: SystemClock,
 ) {
     /**
      * The currently-configured authentication method. This determines how the authentication
@@ -83,13 +69,6 @@ constructor(
      * proceed.
      */
     val authenticationMethod: Flow<AuthenticationMethodModel> = repository.authenticationMethod
-
-    /**
-     * The current authentication lockout (aka "throttling") state, set when the user has to wait
-     * before being able to try another authentication attempt. `null` indicates lockout isn't
-     * active.
-     */
-    val lockout: StateFlow<AuthenticationLockoutModel?> = repository.lockout
 
     /**
      * Whether the auto confirm feature is enabled for the currently-selected user.
@@ -130,26 +109,35 @@ constructor(
     /** Whether the pattern should be visible for the currently-selected user. */
     val isPatternVisible: StateFlow<Boolean> = repository.isPatternVisible
 
+    private val _onAuthenticationResult = MutableSharedFlow<Boolean>()
     /**
      * Emits the outcome (successful or unsuccessful) whenever a PIN/Pattern/Password security
      * challenge is attempted by the user in order to unlock the device.
      */
-    val authenticationChallengeResult: SharedFlow<Boolean> =
-        repository.authenticationChallengeResult
+    val onAuthenticationResult: SharedFlow<Boolean> = _onAuthenticationResult.asSharedFlow()
 
     /** Whether the "enhanced PIN privacy" setting is enabled for the current user. */
     val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> = repository.isPinEnhancedPrivacyEnabled
 
-    private var lockoutCountdownJob: Job? = null
+    /**
+     * The number of failed authentication attempts for the selected user since the last successful
+     * authentication.
+     */
+    val failedAuthenticationAttempts: StateFlow<Int> = repository.failedAuthenticationAttempts
 
-    init {
-        applicationScope.launch {
-            userRepository.selectedUserInfo
-                .map { it.id }
-                .distinctUntilChanged()
-                .collect { onSelectedUserChanged() }
-        }
-    }
+    /**
+     * Timestamp for when the current lockout (aka "throttling") will end, allowing the user to
+     * attempt authentication again. Returns `null` if no lockout is active.
+     *
+     * To be notified whenever a lockout is started, the caller should subscribe to
+     * [onAuthenticationResult].
+     *
+     * Note that the value is in milliseconds and matches [SystemClock.elapsedRealtime].
+     *
+     * Also note that the value may change when the selected user is changed.
+     */
+    val lockoutEndTimestamp: Long?
+        get() = repository.lockoutEndTimestamp
 
     /**
      * Returns the currently-configured authentication method. This determines how the
@@ -190,7 +178,7 @@ constructor(
         val skipCheck =
             when {
                 // Lockout is active, the UI layer should not have called this; skip the attempt.
-                lockout.value != null -> true
+                repository.lockoutEndTimestamp != null -> true
                 // The input is too short; skip the attempt.
                 input.isTooShort(authMethod) -> true
                 // Auto-confirm attempt when the feature is not enabled; skip the attempt.
@@ -211,27 +199,16 @@ constructor(
         credential.zeroize()
 
         if (authenticationResult.isSuccessful || !tryAutoConfirm) {
-            repository.reportAuthenticationAttempt(
-                isSuccessful = authenticationResult.isSuccessful,
-            )
+            repository.reportAuthenticationAttempt(authenticationResult.isSuccessful)
         }
 
         // Check if lockout should start and, if so, kick off the countdown:
         if (!authenticationResult.isSuccessful && authenticationResult.lockoutDurationMs > 0) {
-            repository.apply {
-                setLockoutDuration(durationMs = authenticationResult.lockoutDurationMs)
-                reportLockoutStarted(durationMs = authenticationResult.lockoutDurationMs)
-                hasLockoutOccurred.value = true
-            }
-            startLockoutCountdown()
+            repository.reportLockoutStarted(authenticationResult.lockoutDurationMs)
         }
 
-        if (authenticationResult.isSuccessful) {
-            // Since authentication succeeded, refresh lockout to make sure the state is completely
-            // reflecting the upstream source of truth.
-            refreshLockout()
-
-            repository.hasLockoutOccurred.value = false
+        if (authenticationResult.isSuccessful || !tryAutoConfirm) {
+            _onAuthenticationResult.emit(authenticationResult.isSuccessful)
         }
 
         return if (authenticationResult.isSuccessful) {
@@ -247,54 +224,6 @@ constructor(
             AuthenticationMethodModel.Password -> size < repository.minPasswordLength
             else -> false
         }
-    }
-
-    /** Starts refreshing the lockout state every second. */
-    private suspend fun startLockoutCountdown() {
-        cancelLockoutCountdown()
-        lockoutCountdownJob =
-            applicationScope.launch {
-                while (refreshLockout()) {
-                    delay(1.seconds.inWholeMilliseconds)
-                }
-            }
-    }
-
-    /** Cancels any lockout state countdown started in [startLockoutCountdown]. */
-    private fun cancelLockoutCountdown() {
-        lockoutCountdownJob?.cancel()
-        lockoutCountdownJob = null
-    }
-
-    /** Notifies that the currently-selected user has changed. */
-    private suspend fun onSelectedUserChanged() {
-        cancelLockoutCountdown()
-        if (refreshLockout()) {
-            startLockoutCountdown()
-        }
-    }
-
-    /**
-     * Refreshes the lockout state, hydrating the repository with the latest state.
-     *
-     * @return Whether lockout is active or not.
-     */
-    private suspend fun refreshLockout(): Boolean {
-        withContext("$TAG#refreshLockout", backgroundDispatcher) {
-            val failedAttemptCount = async { repository.getFailedAuthenticationAttemptCount() }
-            val deadline = async { repository.getLockoutEndTimestamp() }
-            val remainingMs = max(0, deadline.await() - clock.elapsedRealtime())
-            repository.lockout.value =
-                if (remainingMs > 0) {
-                    AuthenticationLockoutModel(
-                        failedAttemptCount = failedAttemptCount.await(),
-                        remainingSeconds = ceil(remainingMs / 1000f).toInt(),
-                    )
-                } else {
-                    null // Lockout ended.
-                }
-        }
-        return repository.lockout.value != null
     }
 
     private fun AuthenticationMethodModel.createCredential(

@@ -42,9 +42,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.res.R
-import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
-import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 
@@ -63,8 +61,7 @@ constructor(
     private val keyguardDismissUtil: KeyguardDismissUtil,
     private val keyguardStateController: KeyguardStateController,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val sysuiDialogFactory: SystemUIDialog.Factory,
-    private val userContextProvider: UserContextProvider,
+    private val delegateFactory: RecordIssueDialogDelegate.Factory,
 ) :
     QSTileImpl<QSTile.BooleanState>(
         host,
@@ -102,7 +99,8 @@ constructor(
 
     private fun showPrompt(view: View?) {
         val dialog: AlertDialog =
-            RecordIssueDialogDelegate(sysuiDialogFactory, userContextProvider) {
+            delegateFactory
+                .create {
                     isRecording = true
                     refreshState()
                 }

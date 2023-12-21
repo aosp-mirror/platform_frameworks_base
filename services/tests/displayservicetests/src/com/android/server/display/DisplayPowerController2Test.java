@@ -18,6 +18,8 @@ package com.android.server.display;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
 
 import static org.junit.Assert.assertNotNull;
@@ -1568,6 +1570,56 @@ public final class DisplayPowerController2Test {
                 eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
     }
 
+    @Test
+    public void testSwitchToDozeAutoBrightnessMode() {
+        when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(true);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        // One triggered by handleBrightnessModeChange, another triggered by requestPowerState
+        verify(mHolder.automaticBrightnessController, times(2))
+                .switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
+
+        // Back to default mode
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController).switchMode(AUTO_BRIGHTNESS_MODE_DEFAULT);
+    }
+
+    @Test
+    public void testDoesNotSwitchFromIdleToDozeAutoBrightnessMode() {
+        when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(true);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+        when(mHolder.automaticBrightnessController.isInIdleMode()).thenReturn(true);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController, never())
+                .switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
+    }
+
+    @Test
+    public void testDoesNotSwitchDozeAutoBrightnessModeIfFeatureFlagOff() {
+        when(mDisplayManagerFlagsMock.areAutoBrightnessModesEnabled()).thenReturn(false);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.automaticBrightnessController, never())
+                .switchMode(AUTO_BRIGHTNESS_MODE_DOZE);
+    }
+
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */
@@ -1853,7 +1905,7 @@ public final class DisplayPowerController2Test {
         }
 
         @Override
-        BrightnessMappingStrategy getDefaultModeBrightnessMapper(Resources resources,
+        BrightnessMappingStrategy getDefaultModeBrightnessMapper(Context context,
                 DisplayDeviceConfig displayDeviceConfig,
                 DisplayWhiteBalanceController displayWhiteBalanceController) {
             return mBrightnessMappingStrategy;

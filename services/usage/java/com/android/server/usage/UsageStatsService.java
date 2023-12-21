@@ -1121,13 +1121,8 @@ public class UsageStatsService extends SystemService implements
 
             switch (event.mEventType) {
                 case Event.ACTIVITY_RESUMED:
-                    FrameworkStatsLog.write(
-                            FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                            uid,
-                            event.mPackage,
-                            "",
-                            FrameworkStatsLog
-                                    .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
+                    logAppUsageEventReportedAtomLocked(Event.ACTIVITY_RESUMED, uid, event.mPackage);
+
                     // check if this activity has already been resumed
                     if (mVisibleActivities.get(event.mInstanceId) != null) break;
                     final String usageSourcePackage = getUsageSourcePackage(event);
@@ -1172,13 +1167,8 @@ public class UsageStatsService extends SystemService implements
                                 usageSourcePackage2);
                         mVisibleActivities.put(event.mInstanceId, pausedData);
                     } else {
-                        FrameworkStatsLog.write(
-                                FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                                uid,
-                                event.mPackage,
-                                "",
-                                FrameworkStatsLog
-                                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
+                        logAppUsageEventReportedAtomLocked(Event.ACTIVITY_PAUSED, uid,
+                                event.mPackage);
                     }
 
                     pausedData.lastEvent = Event.ACTIVITY_PAUSED;
@@ -1203,13 +1193,8 @@ public class UsageStatsService extends SystemService implements
                     }
 
                     if (prevData.lastEvent != Event.ACTIVITY_PAUSED) {
-                        FrameworkStatsLog.write(
-                                FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                                uid,
-                                event.mPackage,
-                                "",
-                                FrameworkStatsLog
-                                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND);
+                        logAppUsageEventReportedAtomLocked(Event.ACTIVITY_PAUSED, uid,
+                                event.mPackage);
                     }
 
                     ArraySet<String> tokens;
@@ -1244,10 +1229,18 @@ public class UsageStatsService extends SystemService implements
                     }
                     break;
                 case Event.USER_INTERACTION:
-                    // Fall through
+                    logAppUsageEventReportedAtomLocked(Event.USER_INTERACTION, uid, event.mPackage);
+                    // Fall through.
                 case Event.APP_COMPONENT_USED:
                     convertToSystemTimeLocked(event);
                     mLastTimeComponentUsedGlobal.put(event.mPackage, event.mTimeStamp);
+                    break;
+                case Event.SHORTCUT_INVOCATION:
+                case Event.CHOOSER_ACTION:
+                case Event.STANDBY_BUCKET_CHANGED:
+                case Event.FOREGROUND_SERVICE_START:
+                case Event.FOREGROUND_SERVICE_STOP:
+                    logAppUsageEventReportedAtomLocked(event.mEventType, uid, event.mPackage);
                     break;
             }
 
@@ -1259,6 +1252,45 @@ public class UsageStatsService extends SystemService implements
         }
 
         mIoHandler.obtainMessage(MSG_NOTIFY_USAGE_EVENT_LISTENER, userId, 0, event).sendToTarget();
+    }
+
+    @GuardedBy("mLock")
+    private void logAppUsageEventReportedAtomLocked(int eventType, int uid, String packageName) {
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED, uid, packageName,
+                "", getAppUsageEventOccurredAtomEventType(eventType));
+    }
+
+    /** Make sure align with the EventType defined in the AppUsageEventOccurred atom. */
+    private int getAppUsageEventOccurredAtomEventType(int eventType) {
+        switch (eventType) {
+            case Event.ACTIVITY_RESUMED:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND;
+            case Event.ACTIVITY_PAUSED:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_BACKGROUND;
+            case Event.USER_INTERACTION:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__USER_INTERACTION;
+            case Event.SHORTCUT_INVOCATION:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__SHORTCUT_INVOCATION;
+            case Event.CHOOSER_ACTION:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__CHOOSER_ACTION;
+            case Event.STANDBY_BUCKET_CHANGED:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__STANDBY_BUCKET_CHANGED;
+            case Event.FOREGROUND_SERVICE_START:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__FOREGROUND_SERVICE_START;
+            case Event.FOREGROUND_SERVICE_STOP:
+                return FrameworkStatsLog
+                        .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__FOREGROUND_SERVICE_STOP;
+            default:
+                Slog.w(TAG, "Unsupported usage event logging: " + eventType);
+                return -1;
+        }
     }
 
     private String getUsageSourcePackage(Event event) {

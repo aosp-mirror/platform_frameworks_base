@@ -34,6 +34,7 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHA
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
 
+import static androidx.window.extensions.embedding.ActivityEmbeddingOptionsProperties.KEY_OVERLAY_TAG;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.isStickyPlaceholderRule;
@@ -134,6 +135,15 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     @Nullable
     private Function<SplitAttributesCalculatorParams, SplitAttributes> mSplitAttributesCalculator;
+
+    /**
+     * A calculator function to compute {@link ActivityStack} attributes in a task, which is called
+     * when there's {@link #onTaskFragmentParentInfoChanged} or folding state changed.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private Function<ActivityStackAttributesCalculatorParams, ActivityStackAttributes>
+            mActivityStackAttributesCalculator;
 
     /**
      * Map from Task id to {@link TaskContainer} which contains all TaskFragment and split pair info
@@ -316,6 +326,22 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     public void clearSplitAttributesCalculator() {
         synchronized (mLock) {
             mSplitAttributesCalculator = null;
+        }
+    }
+
+    @Override
+    public void setActivityStackAttributesCalculator(
+            @NonNull Function<ActivityStackAttributesCalculatorParams, ActivityStackAttributes>
+                    calculator) {
+        synchronized (mLock) {
+            mActivityStackAttributesCalculator = calculator;
+        }
+    }
+
+    @Override
+    public void clearActivityStackAttributesCalculator() {
+        synchronized (mLock) {
+            mActivityStackAttributesCalculator = null;
         }
     }
 
@@ -1412,7 +1438,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             @NonNull WindowContainerTransaction wct, @NonNull Intent intent, int taskId,
             @Nullable Activity launchingActivity) {
         return createEmptyContainer(wct, intent, taskId, new Rect(), launchingActivity,
-                null /* overlayTag */);
+                null /* overlayTag */, null /* launchOptions */);
     }
 
     /**
@@ -1426,7 +1452,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     TaskFragmentContainer createEmptyContainer(
             @NonNull WindowContainerTransaction wct, @NonNull Intent intent, int taskId,
             @NonNull Rect bounds, @Nullable Activity launchingActivity,
-            @Nullable String overlayTag) {
+            @Nullable String overlayTag, @Nullable Bundle launchOptions) {
         // We need an activity in the organizer process in the same Task to use as the owner
         // activity, as well as to get the Task window info.
         final Activity activityInTask;
@@ -1443,7 +1469,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return null;
         }
         final TaskFragmentContainer container = newContainer(null /* pendingAppearedActivity */,
-                intent, activityInTask, taskId, null /* pairedPrimaryContainer*/, overlayTag);
+                intent, activityInTask, taskId, null /* pairedPrimaryContainer*/, overlayTag,
+                launchOptions);
         final IBinder taskFragmentToken = container.getTaskFragmentToken();
         // Note that taskContainer will not exist before calling #newContainer if the container
         // is the first embedded TF in the task.
@@ -1570,14 +1597,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     TaskFragmentContainer newContainer(@NonNull Activity pendingAppearedActivity,
             @NonNull Activity activityInTask, int taskId) {
         return newContainer(pendingAppearedActivity, null /* pendingAppearedIntent */,
-                activityInTask, taskId, null /* pairedPrimaryContainer */, null /* tag */);
+                activityInTask, taskId, null /* pairedPrimaryContainer */, null /* tag */,
+                null /* launchOptions */);
     }
 
     @GuardedBy("mLock")
     TaskFragmentContainer newContainer(@NonNull Intent pendingAppearedIntent,
             @NonNull Activity activityInTask, int taskId) {
         return newContainer(null /* pendingAppearedActivity */, pendingAppearedIntent,
-                activityInTask, taskId, null /* pairedPrimaryContainer */, null /* tag */);
+                activityInTask, taskId, null /* pairedPrimaryContainer */, null /* tag */,
+                null /* launchOptions */);
     }
 
     @GuardedBy("mLock")
@@ -1585,7 +1614,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                                        @NonNull Activity activityInTask, int taskId,
                                        @NonNull TaskFragmentContainer pairedPrimaryContainer) {
         return newContainer(null /* pendingAppearedActivity */, pendingAppearedIntent,
-                activityInTask, taskId, pairedPrimaryContainer, null /* tag */);
+                activityInTask, taskId, pairedPrimaryContainer, null /* tag */,
+                null /* launchOptions */);
     }
 
     /**
@@ -1602,11 +1632,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * @param overlayTag                The tag for the new created overlay container. It must be
      *                                  needed if {@code isOverlay} is {@code true}. Otherwise,
      *                                  it should be {@code null}.
+     * @param launchOptions             The launch options bundle to create a container. Must be
+     *                                  specified for overlay container.
      */
     @GuardedBy("mLock")
     TaskFragmentContainer newContainer(@Nullable Activity pendingAppearedActivity,
             @Nullable Intent pendingAppearedIntent, @NonNull Activity activityInTask, int taskId,
-            @Nullable TaskFragmentContainer pairedPrimaryContainer, @Nullable String overlayTag) {
+            @Nullable TaskFragmentContainer pairedPrimaryContainer, @Nullable String overlayTag,
+            @Nullable Bundle launchOptions) {
         if (activityInTask == null) {
             throw new IllegalArgumentException("activityInTask must not be null,");
         }
@@ -1615,7 +1648,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         final TaskContainer taskContainer = mTaskContainers.get(taskId);
         final TaskFragmentContainer container = new TaskFragmentContainer(pendingAppearedActivity,
-                pendingAppearedIntent, taskContainer, this, pairedPrimaryContainer, overlayTag);
+                pendingAppearedIntent, taskContainer, this, pairedPrimaryContainer, overlayTag,
+                launchOptions);
         return container;
     }
 
@@ -2345,28 +2379,28 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     @Nullable
     TaskFragmentContainer createOrUpdateOverlayTaskFragmentIfNeeded(
-            @NonNull WindowContainerTransaction wct,
-            @NonNull OverlayCreateParams overlayCreateParams, int launchTaskId,
+            @NonNull WindowContainerTransaction wct, @NonNull Bundle options,
             @NonNull Intent intent, @NonNull Activity launchActivity) {
-        final int taskId = overlayCreateParams.getTaskId();
-        if (taskId != launchTaskId) {
-            // The task ID doesn't match the launch activity's. Cannot determine the host task
-            // to launch the overlay.
-            throw new IllegalArgumentException("The task ID of "
-                    + "OverlayCreateParams#launchingActivity must match the task ID of "
-                    + "the activity to #startActivity with the activity options that takes "
-                    + "OverlayCreateParams.");
-        }
         final List<TaskFragmentContainer> overlayContainers =
                 getAllOverlayTaskFragmentContainers();
-        final String overlayTag = overlayCreateParams.getTag();
+        final String overlayTag = Objects.requireNonNull(options.getString(KEY_OVERLAY_TAG));
 
         // If the requested bounds of OverlayCreateParams are smaller than minimum dimensions
         // specified by Intent, expand the overlay container to fill the parent task instead.
-        final Rect bounds = overlayCreateParams.getBounds();
-        final Size minDimensions = getMinDimensions(intent);
-        final boolean shouldExpandContainer = boundsSmallerThanMinDimensions(bounds,
-                minDimensions);
+        final ActivityStackAttributesCalculatorParams params =
+                new ActivityStackAttributesCalculatorParams(mPresenter.toParentContainerInfo(
+                        mPresenter.getTaskProperties(launchActivity)), overlayTag, options);
+        // Fallback to expand the bounds if there's no activityStackAttributes calculator.
+        final Rect relativeBounds = mActivityStackAttributesCalculator != null
+                ? new Rect(mActivityStackAttributesCalculator.apply(params).getRelativeBounds())
+                : new Rect();
+        final boolean shouldExpandContainer = boundsSmallerThanMinDimensions(relativeBounds,
+                getMinDimensions(intent));
+        // Expand the bounds if the requested bounds are smaller than minimum dimensions.
+        if (shouldExpandContainer) {
+            relativeBounds.setEmpty();
+        }
+        final int taskId = getTaskId(launchActivity);
         if (!overlayContainers.isEmpty()) {
             for (final TaskFragmentContainer overlayContainer : overlayContainers) {
                 if (!overlayTag.equals(overlayContainer.getOverlayTag())
@@ -2390,7 +2424,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                     final Rect taskBounds = overlayContainer.getTaskContainer().getTaskProperties()
                             .getTaskMetrics().getBounds();
                     final IBinder overlayToken = overlayContainer.getTaskFragmentToken();
-                    final Rect sanitizedBounds = sanitizeBounds(bounds, intent, taskBounds);
+                    final Rect sanitizedBounds = sanitizeBounds(relativeBounds, intent, taskBounds);
                     mPresenter.resizeTaskFragment(wct, overlayToken, sanitizedBounds);
                     mPresenter.setTaskFragmentIsolatedNavigation(wct, overlayToken,
                             !sanitizedBounds.isEmpty());
@@ -2402,8 +2436,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 }
             }
         }
-        return createEmptyContainer(wct, intent, taskId,
-                (shouldExpandContainer ? new Rect() : bounds), launchActivity, overlayTag);
+        // Launch the overlay container to the task with taskId.
+        return createEmptyContainer(wct, intent, taskId, relativeBounds, launchActivity, overlayTag,
+                options);
     }
 
     private final class LifecycleCallbacks extends EmptyLifecycleCallbacksAdapter {
@@ -2568,12 +2603,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 final TaskFragmentContainer launchedInTaskFragment;
                 if (launchingActivity != null) {
                     final int taskId = getTaskId(launchingActivity);
-                    final OverlayCreateParams overlayCreateParams =
-                            OverlayCreateParams.fromBundle(options);
+                    final String overlayTag = options.getString(KEY_OVERLAY_TAG);
                     if (Flags.activityEmbeddingOverlayPresentationFlag()
-                            && overlayCreateParams != null) {
+                            && overlayTag != null) {
                         launchedInTaskFragment = createOrUpdateOverlayTaskFragmentIfNeeded(wct,
-                                overlayCreateParams, taskId, intent, launchingActivity);
+                                options, intent, launchingActivity);
                     } else {
                         launchedInTaskFragment = resolveStartActivityIntent(wct, taskId, intent,
                                 launchingActivity);

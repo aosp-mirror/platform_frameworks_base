@@ -4332,6 +4332,13 @@ public interface WindowManager extends ViewManager {
         private float mDesiredHdrHeadroom = 0;
 
         /**
+         * For variable refresh rate project.
+         */
+        private boolean mFrameRateBoostOnTouch = true;
+        private static boolean sToolkitSetFrameRateReadOnlyFlagValue =
+                android.view.flags.Flags.toolkitSetFrameRateReadOnly();
+
+        /**
          * Carries the requests about {@link WindowInsetsController.Appearance} and
          * {@link WindowInsetsController.Behavior} to the system windows which can produce insets.
          *
@@ -4766,6 +4773,32 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
+         * Set the value whether we should enable Touch Boost
+         *
+         * @param enabled Whether we should enable Touch Boost
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public void setFrameRateBoostOnTouchEnabled(boolean enabled) {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                mFrameRateBoostOnTouch = enabled;
+            }
+        }
+
+        /**
+         * Get the value whether we should enable touch boost as set
+         * by {@link #setFrameRateBoostOnTouchEnabled(boolean)}
+         *
+         * @return A boolean value to indicate whether we should enable touch boost
+         */
+        @FlaggedApi(android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+        public boolean getFrameRateBoostOnTouchEnabled() {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                return mFrameRateBoostOnTouch;
+            }
+            return true;
+        }
+
+        /**
          * <p>
          * Blurs the screen behind the window. The effect is similar to that of {@link #dimAmount},
          * but instead of dimmed, the content behind the window will be blurred (or combined with
@@ -4916,6 +4949,9 @@ public interface WindowManager extends ViewManager {
             out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
             out.writeInt(mDisplayFlags);
             out.writeFloat(mDesiredHdrHeadroom);
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                out.writeBoolean(mFrameRateBoostOnTouch);
+            }
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -4988,6 +5024,9 @@ public interface WindowManager extends ViewManager {
             paramsForRotation = in.createTypedArray(LayoutParams.CREATOR);
             mDisplayFlags = in.readInt();
             mDesiredHdrHeadroom = in.readFloat();
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                mFrameRateBoostOnTouch = in.readBoolean();
+            }
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -5324,6 +5363,12 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
+            if (sToolkitSetFrameRateReadOnlyFlagValue
+                    && mFrameRateBoostOnTouch != o.mFrameRateBoostOnTouch) {
+                mFrameRateBoostOnTouch = o.mFrameRateBoostOnTouch;
+                changes |= LAYOUT_CHANGED;
+            }
+
             return changes;
         }
 
@@ -5545,6 +5590,11 @@ public interface WindowManager extends ViewManager {
                 sb.append(System.lineSeparator());
                 sb.append(prefix).append("  forciblyShownTypes=").append(
                         WindowInsets.Type.toString(forciblyShownTypes));
+            }
+            if (sToolkitSetFrameRateReadOnlyFlagValue && mFrameRateBoostOnTouch) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  frameRateBoostOnTouch=");
+                sb.append(mFrameRateBoostOnTouch);
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());

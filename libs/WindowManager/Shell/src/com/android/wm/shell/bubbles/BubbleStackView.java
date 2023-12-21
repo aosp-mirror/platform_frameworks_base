@@ -2323,7 +2323,8 @@ public class BubbleStackView extends FrameLayout
         updateOverflowVisibility();
         updatePointerPosition(false /* forIme */);
         mExpandedAnimationController.expandFromStack(() -> {
-            if (mIsExpanded && mExpandedBubble.getExpandedView() != null) {
+            if (mIsExpanded && mExpandedBubble != null
+                    && mExpandedBubble.getExpandedView() != null) {
                 maybeShowManageEdu();
             }
             updateOverflowDotVisibility(true /* expanding */);
@@ -2384,7 +2385,7 @@ public class BubbleStackView extends FrameLayout
         }
         mExpandedViewContainer.setAnimationMatrix(mExpandedViewContainerMatrix);
 
-        if (mExpandedBubble.getExpandedView() != null) {
+        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
             mExpandedBubble.getExpandedView().setContentAlpha(0f);
             mExpandedBubble.getExpandedView().setBackgroundAlpha(0f);
 

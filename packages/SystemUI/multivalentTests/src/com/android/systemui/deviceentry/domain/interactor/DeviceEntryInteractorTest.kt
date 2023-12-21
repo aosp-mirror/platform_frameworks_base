@@ -19,6 +19,7 @@ package com.android.systemui.deviceentry.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
@@ -346,12 +347,14 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun successfulAuthenticationChallengeAttempt_updatedIsUnlockedState() =
+    fun successfulAuthenticationChallengeAttempt_updatesIsUnlockedState() =
         testScope.runTest {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.deviceEntryRepository.setLockscreenEnabled(true)
             assertThat(isUnlocked).isFalse()
 
-            utils.authenticationRepository.reportAuthenticationAttempt(true)
+            authenticationInteractor.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
 
             assertThat(isUnlocked).isTrue()
         }

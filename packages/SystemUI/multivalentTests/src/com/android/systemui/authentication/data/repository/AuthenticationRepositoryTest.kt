@@ -35,8 +35,10 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobile
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.function.Function
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runCurrent
@@ -58,6 +60,7 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
 
     private val testUtils = SceneTestUtils(this)
     private val testScope = testUtils.testScope
+    private val clock = FakeSystemClock()
     private val userRepository = FakeUserRepository()
     private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
 
@@ -78,8 +81,10 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
         underTest =
             AuthenticationRepositoryImpl(
                 applicationScope = testScope.backgroundScope,
-                getSecurityMode = getSecurityMode,
                 backgroundDispatcher = testUtils.testDispatcher,
+                flags = testUtils.sceneContainerFlags,
+                clock = clock,
+                getSecurityMode = getSecurityMode,
                 userRepository = userRepository,
                 lockPatternUtils = lockPatternUtils,
                 broadcastDispatcher = fakeBroadcastDispatcher,
@@ -141,22 +146,6 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun reportAuthenticationAttempt_emitsAuthenticationChallengeResult() =
-        testScope.runTest {
-            val authenticationChallengeResults by
-                collectValues(underTest.authenticationChallengeResult)
-
-            runCurrent()
-            underTest.reportAuthenticationAttempt(true)
-            runCurrent()
-            underTest.reportAuthenticationAttempt(false)
-            runCurrent()
-            underTest.reportAuthenticationAttempt(true)
-
-            assertThat(authenticationChallengeResults).isEqualTo(listOf(true, false, true))
-        }
-
-    @Test
     fun isPinEnhancedPrivacyEnabled() =
         testScope.runTest {
             whenever(lockPatternUtils.isPinEnhancedPrivacyEnabled(USER_INFOS[0].id))
@@ -170,6 +159,45 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
 
             userRepository.setSelectedUserInfo(USER_INFOS[1])
             assertThat(values.last()).isTrue()
+        }
+
+    @Test
+    fun lockoutEndTimestamp() =
+        testScope.runTest {
+            val lockoutEndMs = clock.elapsedRealtime() + 30.seconds.inWholeMilliseconds
+            whenever(lockPatternUtils.getLockoutAttemptDeadline(USER_INFOS[0].id))
+                .thenReturn(lockoutEndMs)
+            whenever(lockPatternUtils.getLockoutAttemptDeadline(USER_INFOS[1].id)).thenReturn(0)
+
+            // Switch to a user who is not locked-out.
+            userRepository.setSelectedUserInfo(USER_INFOS[1])
+            assertThat(underTest.lockoutEndTimestamp).isNull()
+
+            // Switch back to the locked-out user, verify the timestamp is up-to-date.
+            userRepository.setSelectedUserInfo(USER_INFOS[0])
+            assertThat(underTest.lockoutEndTimestamp).isEqualTo(lockoutEndMs)
+
+            // After the lockout expires, null is returned.
+            clock.setElapsedRealtime(lockoutEndMs)
+            assertThat(underTest.lockoutEndTimestamp).isNull()
+        }
+
+    @Test
+    fun hasLockoutOccurred() =
+        testScope.runTest {
+            val hasLockoutOccurred by collectLastValue(underTest.hasLockoutOccurred)
+            assertThat(hasLockoutOccurred).isFalse()
+
+            underTest.reportLockoutStarted(1000)
+            assertThat(hasLockoutOccurred).isTrue()
+
+            clock.setElapsedRealtime(clock.elapsedRealtime() + 60.seconds.inWholeMilliseconds)
+
+            underTest.reportAuthenticationAttempt(isSuccessful = false)
+            assertThat(hasLockoutOccurred).isTrue()
+
+            underTest.reportAuthenticationAttempt(isSuccessful = true)
+            assertThat(hasLockoutOccurred).isFalse()
         }
 
     private fun setSecurityModeAndDispatchBroadcast(

@@ -20,7 +20,6 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
-import static com.android.server.job.JobSchedulerService.EXEMPTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_BATTERY_NOT_LOW;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CHARGING;
@@ -181,12 +180,8 @@ public final class FlexibilityController extends StateController {
                 }
             };
 
-    private static final int MSG_CHECK_ALL_JOBS = 0;
-    /** Check the jobs in {@link #mJobsToCheck} */
-    private static final int MSG_CHECK_JOBS = 1;
-
-    @GuardedBy("mLock")
-    private final ArraySet<JobStatus> mJobsToCheck = new ArraySet<>();
+    private static final int MSG_UPDATE_JOBS = 0;
+    private static final int MSG_UPDATE_JOB = 1;
 
     public FlexibilityController(
             JobSchedulerService service, PrefetchController prefetchController) {
@@ -271,14 +266,7 @@ public final class FlexibilityController extends StateController {
     @GuardedBy("mLock")
     boolean isFlexibilitySatisfiedLocked(JobStatus js) {
         return !mFlexibilityEnabled
-                // Exclude all jobs of the TOP app
                 || mService.getUidBias(js.getSourceUid()) == JobInfo.BIAS_TOP_APP
-                // Only exclude DEFAULT+ priority jobs for BFGS+ apps
-                || (mService.getUidBias(js.getSourceUid()) >= JobInfo.BIAS_BOUND_FOREGROUND_SERVICE
-                        && js.getEffectivePriority() >= JobInfo.PRIORITY_DEFAULT)
-                // Only exclude DEFAULT+ priority jobs for EXEMPTED apps
-                || (js.getStandbyBucket() == EXEMPTED_INDEX
-                        && js.getEffectivePriority() >= JobInfo.PRIORITY_DEFAULT)
                 || hasEnoughSatisfiedConstraintsLocked(js)
                 || mService.isCurrentlyRunningLocked(js);
     }
@@ -383,16 +371,8 @@ public final class FlexibilityController extends StateController {
 
                 // Push the job update to the handler to avoid blocking other controllers and
                 // potentially batch back-to-back controller state updates together.
-                mHandler.obtainMessage(MSG_CHECK_ALL_JOBS).sendToTarget();
+                mHandler.obtainMessage(MSG_UPDATE_JOBS).sendToTarget();
             }
-        }
-    }
-
-    /** Called with a set of apps who have been added to or removed from the exempted bucket. */
-    public void onExemptedBucketChanged(@NonNull ArraySet<JobStatus> changedJobs) {
-        synchronized (mLock) {
-            mJobsToCheck.addAll(changedJobs);
-            mHandler.sendEmptyMessage(MSG_CHECK_JOBS);
         }
     }
 
@@ -505,9 +485,7 @@ public final class FlexibilityController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void onUidBiasChangedLocked(int uid, int prevBias, int newBias) {
-        if (prevBias < JobInfo.BIAS_BOUND_FOREGROUND_SERVICE
-                && newBias < JobInfo.BIAS_BOUND_FOREGROUND_SERVICE) {
-            // All changes are below BFGS. There's no significant change to care about.
+        if (prevBias != JobInfo.BIAS_TOP_APP && newBias != JobInfo.BIAS_TOP_APP) {
             return;
         }
         final long nowElapsed = sElapsedRealtimeClock.millis();
@@ -732,8 +710,7 @@ public final class FlexibilityController extends StateController {
                     }
                     mFlexibilityTracker.setNumDroppedFlexibleConstraints(js,
                             js.getNumAppliedFlexibleConstraints());
-                    mJobsToCheck.add(js);
-                    mHandler.sendEmptyMessage(MSG_CHECK_JOBS);
+                    mHandler.obtainMessage(MSG_UPDATE_JOB, js).sendToTarget();
                     return;
                 }
                 if (nextTimeElapsed == NO_LIFECYCLE_END) {
@@ -784,11 +761,10 @@ public final class FlexibilityController extends StateController {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_CHECK_ALL_JOBS:
-                    removeMessages(MSG_CHECK_ALL_JOBS);
+                case MSG_UPDATE_JOBS:
+                    removeMessages(MSG_UPDATE_JOBS);
 
                     synchronized (mLock) {
-                        mJobsToCheck.clear();
                         final long nowElapsed = sElapsedRealtimeClock.millis();
                         final ArraySet<JobStatus> changedJobs = new ArraySet<>();
 
@@ -814,25 +790,19 @@ public final class FlexibilityController extends StateController {
                     }
                     break;
 
-                case MSG_CHECK_JOBS:
+                case MSG_UPDATE_JOB:
                     synchronized (mLock) {
-                        final long nowElapsed = sElapsedRealtimeClock.millis();
-                        ArraySet<JobStatus> changedJobs = new ArraySet<>();
-
-                        for (int i = mJobsToCheck.size() - 1; i >= 0; --i) {
-                            final JobStatus js = mJobsToCheck.valueAt(i);
-                            if (DEBUG) {
-                                Slog.d(TAG, "Checking on " + js.toShortString());
-                            }
-                            if (js.setFlexibilityConstraintSatisfied(
-                                    nowElapsed, isFlexibilitySatisfiedLocked(js))) {
-                                changedJobs.add(js);
-                            }
+                        final JobStatus js = (JobStatus) msg.obj;
+                        if (DEBUG) {
+                            Slog.d("blah", "Checking on " + js.toShortString());
                         }
-
-                        mJobsToCheck.clear();
-                        if (changedJobs.size() > 0) {
-                            mStateChangedListener.onControllerStateChanged(changedJobs);
+                        final long nowElapsed = sElapsedRealtimeClock.millis();
+                        if (js.setFlexibilityConstraintSatisfied(
+                                nowElapsed, isFlexibilitySatisfiedLocked(js))) {
+                            // TODO(141645789): add method that will take a single job
+                            ArraySet<JobStatus> changedJob = new ArraySet<>();
+                            changedJob.add(js);
+                            mStateChangedListener.onControllerStateChanged(changedJob);
                         }
                     }
                     break;
@@ -1015,10 +985,7 @@ public final class FlexibilityController extends StateController {
             pw.println(":");
             pw.increaseIndent();
 
-            pw.print(KEY_APPLIED_CONSTRAINTS, APPLIED_CONSTRAINTS);
-            pw.print("(");
-            JobStatus.dumpConstraints(pw, APPLIED_CONSTRAINTS);
-            pw.println(")");
+            pw.print(KEY_APPLIED_CONSTRAINTS, APPLIED_CONSTRAINTS).println();
             pw.print(KEY_DEADLINE_PROXIMITY_LIMIT, DEADLINE_PROXIMITY_LIMIT_MS).println();
             pw.print(KEY_FALLBACK_FLEXIBILITY_DEADLINE, FALLBACK_FLEXIBILITY_DEADLINE_MS).println();
             pw.print(KEY_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS,

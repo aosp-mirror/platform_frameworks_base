@@ -111,6 +111,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -120,7 +121,6 @@ import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.utils.RequestThrottle;
 

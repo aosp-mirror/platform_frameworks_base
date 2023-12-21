@@ -96,7 +96,7 @@ import kotlinx.coroutines.withContext
 class MobileConnectionRepositoryImpl(
     override val subId: Int,
     private val context: Context,
-    subscriptionModel: StateFlow<SubscriptionModel?>,
+    subscriptionModel: Flow<SubscriptionModel?>,
     defaultNetworkName: NetworkNameModel,
     networkNameSeparator: String,
     connectivityManager: ConnectivityManager,
@@ -448,7 +448,7 @@ class MobileConnectionRepositoryImpl(
         fun build(
             subId: Int,
             mobileLogger: TableLogBuffer,
-            subscriptionModel: StateFlow<SubscriptionModel?>,
+            subscriptionModel: Flow<SubscriptionModel?>,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
         ): MobileConnectionRepository {

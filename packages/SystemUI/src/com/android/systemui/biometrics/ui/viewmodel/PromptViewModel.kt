@@ -192,6 +192,28 @@ constructor(
     val iconViewModel: PromptIconViewModel =
         PromptIconViewModel(this, displayStateInteractor, promptSelectorInteractor)
 
+    private val _isIconViewLoaded = MutableStateFlow(false)
+
+    /**
+     * For prompts with an iconView, false until the prompt's iconView animation has been loaded in
+     * the view, otherwise true by default. Used for BiometricViewSizeBinder to wait for the icon
+     * asset to be loaded before determining the prompt size.
+     */
+    val isIconViewLoaded: Flow<Boolean> =
+        combine(credentialKind, _isIconViewLoaded.asStateFlow()) { credentialKind, isIconViewLoaded
+            ->
+            if (credentialKind is PromptKind.Biometric) {
+                isIconViewLoaded
+            } else {
+                true
+            }
+        }
+
+    // Sets whether the prompt's iconView animation has been loaded in the view yet.
+    fun setIsIconViewLoaded(iconViewLoaded: Boolean) {
+        _isIconViewLoaded.value = iconViewLoaded
+    }
+
     /** Padding for prompt UI elements */
     val promptPadding: Flow<Rect> =
         combine(size, displayStateInteractor.currentRotation) { size, rotation ->

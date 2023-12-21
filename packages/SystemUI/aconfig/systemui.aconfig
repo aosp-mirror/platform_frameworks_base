@@ -261,3 +261,24 @@ flag {
         "prefer using alpha to distinguish network activity."
     bug: "310715220"
 }
+
+flag {
+    name: "haptic_volume_slider"
+    namespace: "systemui"
+    description: "Adds haptic feedback to the volume slider."
+    bug: "316953430"
+}
+
+flag {
+    name: "screenshare_notification_hiding"
+    namespace: "systemui"
+    description: "Enable hiding of notifications during screenshare"
+    bug: "312784809"
+}
+
+flag {
+   name: "bluetooth_qs_tile_dialog_auto_on_toggle"
+   namespace: "systemui"
+   description: "Displays the auto on toggle in the bluetooth QS tile dialog"
+   bug: "316985153"
+}

@@ -16,13 +16,19 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import android.transition.TransitionManager
+import android.view.View
+import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
+import kotlinx.coroutines.launch
 
 object KeyguardSmartspaceViewBinder {
     @JvmStatic
@@ -30,14 +36,62 @@ object KeyguardSmartspaceViewBinder {
         smartspaceSection: SmartspaceSection,
         keyguardRootView: ConstraintLayout,
         clockViewModel: KeyguardClockViewModel,
+        smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) {
         keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                clockViewModel.hasCustomWeatherDataDisplay.collect {
-                    val constraintSet = ConstraintSet().apply { clone(keyguardRootView) }
-                    smartspaceSection.applyConstraints(constraintSet)
-                    constraintSet.applyTo(keyguardRootView)
+                launch {
+                    clockViewModel.hasCustomWeatherDataDisplay.collect { hasCustomWeatherDataDisplay
+                        ->
+                        if (hasCustomWeatherDataDisplay) {
+                            removeDateWeatherToBurnInLayer(keyguardRootView, smartspaceViewModel)
+                        } else {
+                            addDateWeatherToBurnInLayer(keyguardRootView, smartspaceViewModel)
+                        }
+                        clockViewModel.burnInLayer?.updatePostLayout(keyguardRootView)
+                        val constraintSet = ConstraintSet().apply { clone(keyguardRootView) }
+                        smartspaceSection.applyConstraints(constraintSet)
+                        TransitionManager.beginDelayedTransition(keyguardRootView)
+                        constraintSet.applyTo(keyguardRootView)
+                    }
                 }
+            }
+        }
+    }
+
+    private fun addDateWeatherToBurnInLayer(
+        constraintLayout: ConstraintLayout,
+        smartspaceViewModel: KeyguardSmartspaceViewModel
+    ) {
+        val burnInLayer = constraintLayout.requireViewById<Layer>(R.id.burn_in_layer)
+        burnInLayer.apply {
+            if (
+                smartspaceViewModel.isSmartspaceEnabled &&
+                    smartspaceViewModel.isDateWeatherDecoupled
+            ) {
+                val dateView = constraintLayout.requireViewById<View>(smartspaceViewModel.dateId)
+                val weatherView =
+                    constraintLayout.requireViewById<View>(smartspaceViewModel.weatherId)
+                addView(weatherView)
+                addView(dateView)
+            }
+        }
+    }
+
+    private fun removeDateWeatherToBurnInLayer(
+        constraintLayout: ConstraintLayout,
+        smartspaceViewModel: KeyguardSmartspaceViewModel
+    ) {
+        val burnInLayer = constraintLayout.requireViewById<Layer>(R.id.burn_in_layer)
+        burnInLayer.apply {
+            if (
+                smartspaceViewModel.isSmartspaceEnabled &&
+                    smartspaceViewModel.isDateWeatherDecoupled
+            ) {
+                val dateView = smartspaceViewModel.dateView
+                val weatherView = smartspaceViewModel.weatherView
+                removeView(weatherView)
+                removeView(dateView)
             }
         }
     }

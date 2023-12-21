@@ -16,8 +16,6 @@
 
 package com.android.settingslib.volume;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +39,9 @@ import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.PrintWriter;
 import java.util.HashMap;

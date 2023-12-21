@@ -141,7 +141,6 @@ private fun SettingsCollapsibleCardPreview() {
                     imageVector = Icons.Outlined.Shield,
                     buttons = listOf(
                         CardButton(text = "Action") {},
-                        CardButton(text = "Main action", isMain = true) {},
                     )
                 )
             )

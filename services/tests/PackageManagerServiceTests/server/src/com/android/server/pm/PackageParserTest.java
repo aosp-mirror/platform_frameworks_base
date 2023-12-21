@@ -58,6 +58,8 @@ import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.parsing.PackageParserException;
 import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.permission.CompatibilityPermissionInfo;
@@ -84,7 +86,7 @@ import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.parsing.PackageParserUtils;
 import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -185,7 +187,7 @@ public class PackageParserTest {
 
     @Test
     public void test_serializePackage() throws Exception {
-        try (PackageParser2 pp = PackageParser2.forParsingFileWithDefaults()) {
+        try (PackageParser2 pp = PackageParserUtils.forParsingFileWithDefaults()) {
             AndroidPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
                     true /* useCaches */).hideAsFinal();
 
@@ -363,7 +365,7 @@ public class PackageParserTest {
                     actualDisplayCategory = activity.getRequiredDisplayCategory();
                 }
             }
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             assertThat(e.getMessage()).contains(
                     "requiredDisplayCategory attribute can only consist"
                             + " of alphanumeric characters, '_', and '.'");

@@ -453,11 +453,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void initNotificationIconArea() {
         ViewGroup notificationIconArea = mStatusBar.requireViewById(R.id.notification_icon_area);
         if (NotificationIconContainerRefactor.isEnabled()) {
-            mNotificationIconAreaInner =
-                LayoutInflater.from(getContext())
-                        .inflate(R.layout.notification_icon_area, notificationIconArea, true);
+            LayoutInflater.from(getContext())
+                    .inflate(R.layout.notification_icon_area, notificationIconArea, true);
             NotificationIconContainer notificationIcons =
                     notificationIconArea.requireViewById(R.id.notificationIcons);
+            mNotificationIconAreaInner = notificationIcons;
             mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons);
         } else {
             mNotificationIconAreaInner =

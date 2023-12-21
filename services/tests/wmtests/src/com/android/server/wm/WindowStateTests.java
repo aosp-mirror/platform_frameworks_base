@@ -52,7 +52,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doThrow;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -368,28 +367,26 @@ public class WindowStateTests extends WindowTestsBase {
         firstWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         secondWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        final WindowState.PowerManagerWrapper powerManagerWrapper =
-                mSystemServicesTestRule.getPowerManagerWrapper();
-        reset(powerManagerWrapper);
+        final var powerManager = mWm.mPowerManager;
+        clearInvocations(powerManager);
         firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
 
-        reset(powerManagerWrapper);
+        clearInvocations(powerManager);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+        verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(WindowState appWindow,
             boolean expectedWakeupCalled, boolean expectedCurrentLaunchCanTurnScreenOn) {
-        final WindowState.PowerManagerWrapper powerManagerWrapper =
-                mSystemServicesTestRule.getPowerManagerWrapper();
-        reset(powerManagerWrapper);
+        final var powerManager = mWm.mPowerManager;
+        clearInvocations(powerManager);
         appWindow.prepareWindowToDisplayDuringRelayout(false /* wasVisible */);
 
         if (expectedWakeupCalled) {
-            verify(powerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager).wakeUp(anyLong(), anyInt(), anyString());
         } else {
-            verify(powerManagerWrapper, never()).wakeUp(anyLong(), anyInt(), anyString());
+            verify(powerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
         }
         // If wakeup is expected to be called, the currentLaunchCanTurnScreenOn should be false
         // because the state will be consumed.

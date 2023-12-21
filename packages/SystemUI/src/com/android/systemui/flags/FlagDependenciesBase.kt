@@ -73,9 +73,19 @@ abstract class FlagDependenciesBase(
     ) {
         val isMet = !alphaEnabled || betaEnabled
         override fun toString(): String {
-            val isMetBullet = if (isMet) "+" else "-"
-            return "$isMetBullet $alphaName ($alphaEnabled) DEPENDS ON $betaName ($betaEnabled)"
+            val prefix =
+                when {
+                    !isMet -> "  [NOT MET]"
+                    alphaEnabled -> "      [met]"
+                    betaEnabled -> "    [ready]"
+                    else -> "[not ready]"
+                }
+            val alphaState = if (alphaEnabled) "enabled" else "disabled"
+            val betaState = if (betaEnabled) "enabled" else "disabled"
+            return "$prefix $alphaName ($alphaState) DEPENDS ON $betaName ($betaState)"
         }
+        /** Used whe posting a notification of unmet dependencies */
+        fun shortUnmetString(): String = "$alphaName DEPENDS ON $betaName"
     }
 
     protected infix fun UnreleasedFlag.dependsOn(other: UnreleasedFlag) =
@@ -124,7 +134,7 @@ constructor(
         unmet: List<FlagDependenciesBase.Dependency>
     ) {
         val title = "Invalid flag dependencies: ${unmet.size} of ${all.size}"
-        val details = unmet.joinToString("\n")
+        val details = unmet.joinToString("\n") { it.shortUnmetString() }
         Log.e("FlagDependencies", "$title:\n$details")
         val channel = NotificationChannel("FLAGS", "Flags", NotificationManager.IMPORTANCE_DEFAULT)
         val notification =

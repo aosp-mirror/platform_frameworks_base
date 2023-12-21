@@ -17,9 +17,9 @@
 package android.content.pm;
 
 import android.annotation.FlaggedApi;
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -53,7 +53,7 @@ public final class SigningInfo implements Parcelable {
      * schemas</a>
      */
     @FlaggedApi(Flags.FLAG_ARCHIVING)
-    public SigningInfo(@IntRange(from = 0) int schemeVersion,
+    public SigningInfo(@SignatureSchemeVersion int schemeVersion,
             @Nullable Collection<Signature> apkContentsSigners,
             @Nullable Collection<PublicKey> publicKeys,
             @Nullable Collection<Signature> signingCertificateHistory) {
@@ -168,7 +168,7 @@ public final class SigningInfo implements Parcelable {
      * schemas</a>
      */
     @FlaggedApi(Flags.FLAG_ARCHIVING)
-    public @IntRange(from = 0) int getSchemeVersion() {
+    public @SignatureSchemeVersion int getSchemeVersion() {
         return mSigningDetails.getSignatureSchemeVersion();
     }
 

@@ -19,7 +19,6 @@ package com.android.systemui.biometrics.domain.interactor
 import android.app.ActivityManager
 import android.app.ActivityTaskManager
 import android.content.ComponentName
-import android.platform.test.annotations.RequiresFlagsEnabled
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
@@ -44,7 +43,6 @@ import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
-@RequiresFlagsEnabled(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
@@ -59,6 +57,7 @@ class BiometricStatusInteractorImplTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         biometricStatusRepository = FakeBiometricStatusRepository()
         underTest = BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
     }

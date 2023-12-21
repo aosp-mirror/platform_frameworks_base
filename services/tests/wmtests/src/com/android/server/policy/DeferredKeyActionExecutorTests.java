@@ -95,6 +95,26 @@ public final class DeferredKeyActionExecutorTests {
         assertFalse(action.executed);
     }
 
+    @Test
+    public void queueKeyAction_beforeAndAfterCancelQueuedActions_onlyActionsAfterCancelExecuted() {
+        TestAction action1 = new TestAction();
+        TestAction action2 = new TestAction();
+        TestAction action3 = new TestAction();
+        mKeyActionExecutor.queueKeyAction(
+                KeyEvent.KEYCODE_STEM_PRIMARY, /* downTime= */ 1, action1);
+        mKeyActionExecutor.queueKeyAction(
+                KeyEvent.KEYCODE_STEM_PRIMARY, /* downTime= */ 1, action2);
+        mKeyActionExecutor.cancelQueuedAction(KeyEvent.KEYCODE_STEM_PRIMARY);
+        mKeyActionExecutor.queueKeyAction(
+                KeyEvent.KEYCODE_STEM_PRIMARY, /* downTime= */ 1, action3);
+
+        mKeyActionExecutor.setActionsExecutable(KeyEvent.KEYCODE_STEM_PRIMARY, /* downTime= */ 1);
+
+        assertFalse(action1.executed);
+        assertFalse(action2.executed);
+        assertTrue(action3.executed);
+    }
+
     static class TestAction implements Runnable {
         public boolean executed;
 

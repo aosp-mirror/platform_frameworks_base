@@ -21,14 +21,18 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
-import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.None
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Password
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -43,21 +47,23 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     private val testScope = utils.testScope
     private val underTest = utils.authenticationInteractor()
 
+    private val onAuthenticationResult by
+        testScope.collectLastValue(underTest.onAuthenticationResult)
+    private val failedAuthenticationAttempts by
+        testScope.collectLastValue(underTest.failedAuthenticationAttempts)
+
     @Test
     fun authenticationMethod() =
         testScope.runTest {
             val authMethod by collectLastValue(underTest.authenticationMethod)
             runCurrent()
-            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.Pin)
-            assertThat(underTest.getAuthenticationMethod()).isEqualTo(AuthenticationMethodModel.Pin)
+            assertThat(authMethod).isEqualTo(Pin)
+            assertThat(underTest.getAuthenticationMethod()).isEqualTo(Pin)
 
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
-            )
+            utils.authenticationRepository.setAuthenticationMethod(Password)
 
-            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.Password)
-            assertThat(underTest.getAuthenticationMethod())
-                .isEqualTo(AuthenticationMethodModel.Password)
+            assertThat(authMethod).isEqualTo(Password)
+            assertThat(underTest.getAuthenticationMethod()).isEqualTo(Password)
         }
 
     @Test
@@ -66,51 +72,45 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val authMethod by collectLastValue(underTest.authenticationMethod)
             runCurrent()
 
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            utils.authenticationRepository.setAuthenticationMethod(None)
 
-            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.None)
-            assertThat(underTest.getAuthenticationMethod())
-                .isEqualTo(AuthenticationMethodModel.None)
+            assertThat(authMethod).isEqualTo(None)
+            assertThat(underTest.getAuthenticationMethod()).isEqualTo(None)
         }
 
     @Test
     fun authenticate_withCorrectPin_succeeds() =
         testScope.runTest {
-            val lockout by collectLastValue(underTest.lockout)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
 
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
-                .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(lockout).isNull()
-            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
+            assertSucceeded(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
         }
 
     @Test
     fun authenticate_withIncorrectPin_fails() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
 
-            assertThat(underTest.authenticate(listOf(9, 8, 7, 6, 5, 4)))
-                .isEqualTo(AuthenticationResult.FAILED)
+            assertFailed(underTest.authenticate(listOf(9, 8, 7, 6, 5, 4)))
         }
 
     @Test(expected = IllegalArgumentException::class)
     fun authenticate_withEmptyPin_throwsException() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
             underTest.authenticate(listOf())
         }
 
     @Test
     fun authenticate_withCorrectMaxLengthPin_succeeds() =
         testScope.runTest {
-            val pin = List(16) { 9 }
+            val correctMaxLengthPin = List(16) { 9 }
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
-                overrideCredential(pin)
+                setAuthenticationMethod(Pin)
+                overrideCredential(correctMaxLengthPin)
             }
 
-            assertThat(underTest.authenticate(pin)).isEqualTo(AuthenticationResult.SUCCEEDED)
+            assertSucceeded(underTest.authenticate(correctMaxLengthPin))
         }
 
     @Test
@@ -122,88 +122,64 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             // If the policy changes, there is work to do in SysUI.
             assertThat(DevicePolicyManager.MAX_PASSWORD_LENGTH).isLessThan(17)
 
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            assertThat(underTest.authenticate(List(17) { 9 }))
-                .isEqualTo(AuthenticationResult.FAILED)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
+
+            assertFailed(underTest.authenticate(List(17) { 9 }))
         }
 
     @Test
     fun authenticate_withCorrectPassword_succeeds() =
         testScope.runTest {
-            val lockout by collectLastValue(underTest.lockout)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
-            )
+            utils.authenticationRepository.setAuthenticationMethod(Password)
 
-            assertThat(underTest.authenticate("password".toList()))
-                .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(lockout).isNull()
-            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
+            assertSucceeded(underTest.authenticate("password".toList()))
         }
 
     @Test
     fun authenticate_withIncorrectPassword_fails() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
-            )
+            utils.authenticationRepository.setAuthenticationMethod(Password)
 
-            assertThat(underTest.authenticate("alohomora".toList()))
-                .isEqualTo(AuthenticationResult.FAILED)
+            assertFailed(underTest.authenticate("alohomora".toList()))
         }
 
     @Test
     fun authenticate_withCorrectPattern_succeeds() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pattern
-            )
+            utils.authenticationRepository.setAuthenticationMethod(Pattern)
 
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN))
-                .isEqualTo(AuthenticationResult.SUCCEEDED)
+            assertSucceeded(underTest.authenticate(FakeAuthenticationRepository.PATTERN))
         }
 
     @Test
     fun authenticate_withIncorrectPattern_fails() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pattern
-            )
-
-            assertThat(
-                    underTest.authenticate(
-                        listOf(
-                            AuthenticationPatternCoordinate(x = 2, y = 0),
-                            AuthenticationPatternCoordinate(x = 2, y = 1),
-                            AuthenticationPatternCoordinate(x = 2, y = 2),
-                            AuthenticationPatternCoordinate(x = 1, y = 2),
-                        )
-                    )
+            utils.authenticationRepository.setAuthenticationMethod(Pattern)
+            val wrongPattern =
+                listOf(
+                    AuthenticationPatternCoordinate(x = 2, y = 0),
+                    AuthenticationPatternCoordinate(x = 2, y = 1),
+                    AuthenticationPatternCoordinate(x = 2, y = 2),
+                    AuthenticationPatternCoordinate(x = 1, y = 2),
                 )
-                .isEqualTo(AuthenticationResult.FAILED)
+
+            assertFailed(underTest.authenticate(wrongPattern))
         }
 
     @Test
     fun tryAutoConfirm_withAutoConfirmPinAndShorterPin_returnsNull() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            val lockout by collectLastValue(underTest.lockout)
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
             }
             assertThat(isAutoConfirmEnabled).isTrue()
+            val shorterPin =
+                FakeAuthenticationRepository.DEFAULT_PIN.toMutableList().apply { removeLast() }
 
-            assertThat(
-                    underTest.authenticate(
-                        FakeAuthenticationRepository.DEFAULT_PIN.toMutableList().apply {
-                            removeLast()
-                        },
-                        tryAutoConfirm = true
-                    )
-                )
-                .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(lockout).isNull()
+            assertSkipped(underTest.authenticate(shorterPin, tryAutoConfirm = true))
+            assertThat(underTest.lockoutEndTimestamp).isNull()
             assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         }
 
@@ -212,18 +188,17 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
             }
             assertThat(isAutoConfirmEnabled).isTrue()
 
-            assertThat(
-                    underTest.authenticate(
-                        FakeAuthenticationRepository.DEFAULT_PIN.map { it + 1 },
-                        tryAutoConfirm = true
-                    )
-                )
-                .isEqualTo(AuthenticationResult.FAILED)
+            val wrongPin = FakeAuthenticationRepository.DEFAULT_PIN.map { it + 1 }
+
+            assertFailed(
+                underTest.authenticate(wrongPin, tryAutoConfirm = true),
+                assertNoResultEvents = true,
+            )
         }
 
     @Test
@@ -231,18 +206,17 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
             }
             assertThat(isAutoConfirmEnabled).isTrue()
 
-            assertThat(
-                    underTest.authenticate(
-                        FakeAuthenticationRepository.DEFAULT_PIN + listOf(7),
-                        tryAutoConfirm = true
-                    )
-                )
-                .isEqualTo(AuthenticationResult.FAILED)
+            val longerPin = FakeAuthenticationRepository.DEFAULT_PIN + listOf(7)
+
+            assertFailed(
+                underTest.authenticate(longerPin, tryAutoConfirm = true),
+                assertNoResultEvents = true,
+            )
         }
 
     @Test
@@ -250,69 +224,54 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
             }
             assertThat(isAutoConfirmEnabled).isTrue()
 
-            assertThat(
-                    underTest.authenticate(
-                        FakeAuthenticationRepository.DEFAULT_PIN,
-                        tryAutoConfirm = true
-                    )
-                )
-                .isEqualTo(AuthenticationResult.SUCCEEDED)
+            val correctPin = FakeAuthenticationRepository.DEFAULT_PIN
+
+            assertSucceeded(underTest.authenticate(correctPin, tryAutoConfirm = true))
         }
 
     @Test
     fun tryAutoConfirm_withAutoConfirmCorrectPinButDuringLockout_returnsNull() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
-                setLockoutDuration(42)
+                reportLockoutStarted(42)
             }
 
-            val authResult =
-                underTest.authenticate(
-                    FakeAuthenticationRepository.DEFAULT_PIN,
-                    tryAutoConfirm = true
-                )
+            val correctPin = FakeAuthenticationRepository.DEFAULT_PIN
 
-            assertThat(authResult).isEqualTo(AuthenticationResult.SKIPPED)
+            assertSkipped(underTest.authenticate(correctPin, tryAutoConfirm = true))
             assertThat(isAutoConfirmEnabled).isFalse()
-            assertThat(isUnlocked).isFalse()
             assertThat(hintedPinLength).isNull()
+            assertThat(underTest.lockoutEndTimestamp).isNotNull()
         }
 
     @Test
     fun tryAutoConfirm_withoutAutoConfirmButCorrectPin_returnsNull() =
         testScope.runTest {
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(false)
             }
-            assertThat(
-                    underTest.authenticate(
-                        FakeAuthenticationRepository.DEFAULT_PIN,
-                        tryAutoConfirm = true
-                    )
-                )
-                .isEqualTo(AuthenticationResult.SKIPPED)
+
+            val correctPin = FakeAuthenticationRepository.DEFAULT_PIN
+
+            assertSkipped(underTest.authenticate(correctPin, tryAutoConfirm = true))
         }
 
     @Test
     fun tryAutoConfirm_withoutCorrectPassword_returnsNull() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
-            )
+            utils.authenticationRepository.setAuthenticationMethod(Password)
 
-            assertThat(underTest.authenticate("password".toList(), tryAutoConfirm = true))
-                .isEqualTo(AuthenticationResult.SKIPPED)
+            assertSkipped(underTest.authenticate("password".toList(), tryAutoConfirm = true))
         }
 
     @Test
@@ -337,7 +296,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun isAutoConfirmEnabled_featureEnabledButDisabledByLockout() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            val lockout by collectLastValue(underTest.lockout)
             utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             // The feature is enabled.
@@ -345,92 +303,104 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             // Make many wrong attempts to trigger lockout.
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
+                assertFailed(underTest.authenticate(listOf(5, 6, 7))) // Wrong PIN
             }
-            assertThat(lockout).isNotNull()
+            assertThat(underTest.lockoutEndTimestamp).isNotNull()
             assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
 
             // Lockout disabled auto-confirm.
             assertThat(isAutoConfirmEnabled).isFalse()
 
             // Move the clock forward one more second, to completely finish the lockout period:
-            advanceTimeBy(FakeAuthenticationRepository.LOCKOUT_DURATION_MS + 1000L)
-            assertThat(lockout).isNull()
+            advanceTimeBy(
+                FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS.seconds.plus(1.seconds)
+            )
+            assertThat(underTest.lockoutEndTimestamp).isNull()
 
             // Auto-confirm is still disabled, because lockout occurred at least once in this
             // session.
             assertThat(isAutoConfirmEnabled).isFalse()
 
             // Correct PIN and unlocks successfully, resetting the 'session'.
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
-                .isEqualTo(AuthenticationResult.SUCCEEDED)
+            assertSucceeded(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
 
             // Auto-confirm is re-enabled.
             assertThat(isAutoConfirmEnabled).isTrue()
-
-            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
         }
 
     @Test
-    fun lockout() =
+    fun failedAuthenticationAttempts() =
         testScope.runTest {
-            val lockout by collectLastValue(underTest.lockout)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
-            assertThat(lockout).isNull()
+            val failedAuthenticationAttempts by
+                collectLastValue(underTest.failedAuthenticationAttempts)
+
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            val correctPin = FakeAuthenticationRepository.DEFAULT_PIN
+
+            assertSucceeded(underTest.authenticate(correctPin))
+            assertThat(failedAuthenticationAttempts).isEqualTo(0)
+
+            // Make many wrong attempts, leading to lockout:
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) { index ->
+                underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
+                assertThat(failedAuthenticationAttempts).isEqualTo(index + 1)
+            }
+
+            // Correct PIN, but locked out, so doesn't attempt it:
+            assertSkipped(underTest.authenticate(correctPin), assertNoResultEvents = false)
+            assertThat(failedAuthenticationAttempts)
+                .isEqualTo(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT)
+
+            // Move the clock forward to finish the lockout period:
+            advanceTimeBy(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS.seconds)
+            assertThat(failedAuthenticationAttempts)
+                .isEqualTo(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT)
+
+            // Correct PIN and no longer locked out so unlocks successfully:
+            assertSucceeded(underTest.authenticate(correctPin))
+            assertThat(failedAuthenticationAttempts).isEqualTo(0)
+        }
+
+    @Test
+    fun lockoutEndTimestamp() =
+        testScope.runTest {
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            val correctPin = FakeAuthenticationRepository.DEFAULT_PIN
+
+            underTest.authenticate(correctPin)
+            assertThat(underTest.lockoutEndTimestamp).isNull()
 
             // Make many wrong attempts, but just shy of what's needed to get locked out:
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
                 underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
-                assertThat(lockout).isNull()
+                assertThat(underTest.lockoutEndTimestamp).isNull()
             }
 
             // Make one more wrong attempt, leading to lockout:
             underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
-            assertThat(lockout)
-                .isEqualTo(
-                    AuthenticationLockoutModel(
-                        failedAttemptCount =
-                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT,
-                        remainingSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS,
-                    )
-                )
+
+            val expectedLockoutEndTimestamp =
+                testScope.currentTime + FakeAuthenticationRepository.LOCKOUT_DURATION_MS
+            assertThat(underTest.lockoutEndTimestamp).isEqualTo(expectedLockoutEndTimestamp)
             assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
 
             // Correct PIN, but locked out, so doesn't attempt it:
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
-                .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(lockout)
-                .isEqualTo(
-                    AuthenticationLockoutModel(
-                        failedAttemptCount =
-                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT,
-                        remainingSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS,
-                    )
-                )
+            assertSkipped(underTest.authenticate(correctPin), assertNoResultEvents = false)
+            assertThat(underTest.lockoutEndTimestamp).isEqualTo(expectedLockoutEndTimestamp)
 
             // Move the clock forward to ALMOST skip the lockout, leaving one second to go:
-            val lockoutTimeoutSec = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS
-            repeat(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS - 1) { time ->
-                advanceTimeBy(1000)
-                assertThat(lockout)
-                    .isEqualTo(
-                        AuthenticationLockoutModel(
-                            failedAttemptCount =
-                                FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT,
-                            remainingSeconds = lockoutTimeoutSec - (time + 1),
-                        )
-                    )
+            repeat(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS - 1) {
+                advanceTimeBy(1.seconds)
+                assertThat(underTest.lockoutEndTimestamp).isEqualTo(expectedLockoutEndTimestamp)
             }
 
             // Move the clock forward one more second, to completely finish the lockout period:
-            advanceTimeBy(1000)
-            assertThat(lockout).isNull()
+            advanceTimeBy(1.seconds)
+            assertThat(underTest.lockoutEndTimestamp).isNull()
 
             // Correct PIN and no longer locked out so unlocks successfully:
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
-                .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(lockout).isNull()
+            assertSucceeded(underTest.authenticate(correctPin))
+            assertThat(underTest.lockoutEndTimestamp).isNull()
         }
 
     @Test
@@ -438,7 +408,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(false)
             }
 
@@ -450,7 +420,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 overrideCredential(
                     buildList {
                         repeat(utils.authenticationRepository.hintedPinLength - 1) { add(it + 1) }
@@ -467,7 +437,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
                 overrideCredential(
                     buildList {
@@ -484,7 +454,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
             utils.authenticationRepository.apply {
-                setAuthenticationMethod(AuthenticationMethodModel.Pin)
+                setAuthenticationMethod(Pin)
                 overrideCredential(
                     buildList {
                         repeat(utils.authenticationRepository.hintedPinLength + 1) { add(it + 1) }
@@ -499,18 +469,45 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withTooShortPassword() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
-            )
-            assertThat(
-                    underTest.authenticate(
-                        buildList {
-                            repeat(utils.authenticationRepository.minPasswordLength - 1) { time ->
-                                add("$time")
-                            }
-                        }
-                    )
-                )
-                .isEqualTo(AuthenticationResult.SKIPPED)
+            utils.authenticationRepository.setAuthenticationMethod(Password)
+
+            val tooShortPassword = buildList {
+                repeat(utils.authenticationRepository.minPasswordLength - 1) { time ->
+                    add("$time")
+                }
+            }
+            assertSkipped(underTest.authenticate(tooShortPassword))
         }
+
+    private fun assertSucceeded(authenticationResult: AuthenticationResult) {
+        assertThat(authenticationResult).isEqualTo(AuthenticationResult.SUCCEEDED)
+        assertThat(onAuthenticationResult).isTrue()
+        assertThat(underTest.lockoutEndTimestamp).isNull()
+        assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
+        assertThat(failedAuthenticationAttempts).isEqualTo(0)
+    }
+
+    private fun assertFailed(
+        authenticationResult: AuthenticationResult,
+        assertNoResultEvents: Boolean = false,
+    ) {
+        assertThat(authenticationResult).isEqualTo(AuthenticationResult.FAILED)
+        if (assertNoResultEvents) {
+            assertThat(onAuthenticationResult).isNull()
+        } else {
+            assertThat(onAuthenticationResult).isFalse()
+        }
+    }
+
+    private fun assertSkipped(
+        authenticationResult: AuthenticationResult,
+        assertNoResultEvents: Boolean = true,
+    ) {
+        assertThat(authenticationResult).isEqualTo(AuthenticationResult.SKIPPED)
+        if (assertNoResultEvents) {
+            assertThat(onAuthenticationResult).isNull()
+        } else {
+            assertThat(onAuthenticationResult).isNotNull()
+        }
+    }
 }

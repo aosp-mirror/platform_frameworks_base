@@ -43,6 +43,7 @@ import static android.view.WindowManager.TransitionFlags;
 import static android.view.WindowManager.TransitionType;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
+import static android.window.TransitionInfo.FLAGS_IS_OCCLUDED_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
@@ -3066,6 +3067,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     if (topActivity.mLaunchTaskBehind) {
                         Slog.e(TAG, "Unexpected launch-task-behind operation in shell transition");
                         flags |= FLAG_TASK_LAUNCHING_BEHIND;
+                    }
+                    if ((topActivity.mTransitionChangeFlags & FLAGS_IS_OCCLUDED_NO_ANIMATION)
+                            == FLAGS_IS_OCCLUDED_NO_ANIMATION) {
+                        flags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
                     }
                 }
                 if (task.voiceSession != null) {

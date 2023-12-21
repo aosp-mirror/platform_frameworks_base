@@ -16,7 +16,6 @@
 
 package com.android.settingslib.net;
 
-import android.annotation.NonNull;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
@@ -27,6 +26,7 @@ import android.text.format.DateUtils;
 import android.util.Pair;
 import android.util.Range;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.loader.content.AsyncTaskLoader;
 

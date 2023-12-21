@@ -24,6 +24,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.statusbar.data.repository.notificationListenerSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.notificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.headsUpNotificationIconInteractor
 import com.android.wm.shell.bubbles.bubblesOptional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -43,6 +44,7 @@ val Kosmos.notificationIconsInteractor by Fixture {
     NotificationIconsInteractor(
         activeNotificationsInteractor = activeNotificationsInteractor,
         bubbles = bubblesOptional,
+        headsUpNotificationIconInteractor = headsUpNotificationIconInteractor,
         keyguardViewStateRepository = notificationsKeyguardViewStateRepository,
     )
 }

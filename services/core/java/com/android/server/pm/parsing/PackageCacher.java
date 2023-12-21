@@ -28,6 +28,7 @@ import android.system.StructStat;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.IPackageCacher;
 import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.ApexManager;
@@ -39,7 +40,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PackageCacher {
+public class PackageCacher implements IPackageCacher {
 
     private static final String TAG = "PackageCacher";
 
@@ -162,6 +163,7 @@ public class PackageCacher {
      * Returns the cached parse result for {@code packageFile} for parse flags {@code flags},
      * or {@code null} if no cached result exists.
      */
+    @Override
     public ParsedPackage getCachedResult(File packageFile, int flags) {
         final String cacheKey = getCacheKey(packageFile, flags);
         final File cacheFile = new File(mCacheDir, cacheKey);
@@ -192,6 +194,7 @@ public class PackageCacher {
     /**
      * Caches the parse result for {@code packageFile} with flags {@code flags}.
      */
+    @Override
     public void cacheResult(File packageFile, int flags, ParsedPackage parsed) {
         try {
             final String cacheKey = getCacheKey(packageFile, flags);

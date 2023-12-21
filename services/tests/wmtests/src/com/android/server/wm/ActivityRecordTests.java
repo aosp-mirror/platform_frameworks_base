@@ -202,8 +202,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     private TestStartingWindowOrganizer registerTestStartingWindowOrganizer() {
-        return new TestStartingWindowOrganizer(mAtm,
-                mSystemServicesTestRule.getPowerManagerWrapper());
+        return new TestStartingWindowOrganizer(mAtm);
     }
 
     @Test

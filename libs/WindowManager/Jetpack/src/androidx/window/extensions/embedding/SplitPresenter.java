@@ -1084,4 +1084,14 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     WindowMetrics getTaskWindowMetrics(@NonNull Activity activity) {
         return getTaskProperties(activity).getTaskMetrics();
     }
+
+    @NonNull
+    ParentContainerInfo toParentContainerInfo(@NonNull TaskProperties taskProperties) {
+        final Configuration configuration = taskProperties.getConfiguration();
+        final WindowLayoutInfo windowLayoutInfo = mWindowLayoutComponent
+                .getCurrentWindowLayoutInfo(taskProperties.getDisplayId(),
+                        configuration.windowConfiguration);
+        return new ParentContainerInfo(taskProperties.getTaskMetrics(), configuration,
+                windowLayoutInfo);
+    }
 }

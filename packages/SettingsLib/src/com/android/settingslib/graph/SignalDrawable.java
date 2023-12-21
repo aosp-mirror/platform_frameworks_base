@@ -16,8 +16,6 @@ package com.android.settingslib.graph;
 
 import android.animation.ArgbEvaluator;
 import android.annotation.IntRange;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
@@ -35,6 +33,9 @@ import android.os.Handler;
 import android.telephony.CellSignalStrength;
 import android.util.LayoutDirection;
 import android.util.PathParser;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;

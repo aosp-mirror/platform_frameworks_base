@@ -4940,6 +4940,13 @@ public final class Telephony {
          */
         public static final String COLUMN_IS_NTN = "is_ntn";
 
+        /**
+         * TelephonyProvider column name to indicate the service capability bitmasks.
+         *
+         * @hide
+         */
+        public static final String COLUMN_SERVICE_CAPABILITIES = "service_capabilities";
+
         /** All columns in {@link SimInfo} table. */
         private static final List<String> ALL_COLUMNS = List.of(
                 COLUMN_UNIQUE_KEY_SUBSCRIPTION_ID,
@@ -5011,7 +5018,8 @@ public final class Telephony {
                 COLUMN_USER_HANDLE,
                 COLUMN_SATELLITE_ENABLED,
                 COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER,
-                COLUMN_IS_NTN
+                COLUMN_IS_NTN,
+                COLUMN_SERVICE_CAPABILITIES
         );
 
         /**

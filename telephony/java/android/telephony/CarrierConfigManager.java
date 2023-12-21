@@ -3721,19 +3721,19 @@ public class CarrierConfigManager {
      * This configuration allows the system UI to display different 5G icons for different 5G
      * scenarios.
      *
-     * There are five 5G scenarios:
-     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
-     *    millimeter wave.
-     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
-     *    millimeter wave.
-     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability(not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in IDLE state.
-     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability(not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in CONNECTED state.
-     * 5. restricted: device camped on a network that has 5G capability(not necessary to connect a
-     *    5G cell as a secondary cell) but the use of 5G is restricted.
+     * There are six 5G scenarios for icon configuration:
+     * 1. connected_mmwave: device currently connected to 5G cell as the primary or secondary cell
+     *    and considered NR advanced.
+     * 2. connected: device currently connected to 5G cell as the primary or secondary cell but not
+     *    considered NR advanced.
+     * 3. connected_rrc_idle: device currently connected to 5G cell as the primary or secondary cell
+     *    and RRC currently in IDLE state.
+     * 4. not_restricted_rrc_idle: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in IDLE state.
+     * 5. not_restricted_rrc_con: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in CONNECTED state.
+     * 6. restricted: device camped on a network that has 5G capability but the use of 5G is
+     *    restricted.
      *
      * The configured string contains multiple key-value pairs separated by comma. For each pair,
      * the key and value are separated by a colon. The key corresponds to a 5G status above and
@@ -3754,21 +3754,21 @@ public class CarrierConfigManager {
      * This configuration allows the system UI to determine how long to continue to display 5G icons
      * when the device switches between different 5G scenarios.
      *
-     * There are seven 5G scenarios:
-     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
-     *    millimeter wave.
-     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
-     *    millimeter wave.
-     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability (not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in IDLE state.
-     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability (not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in CONNECTED state.
-     * 5. restricted: device camped on a network that has 5G capability (not necessary to connect a
-     *    5G cell as a secondary cell) but the use of 5G is restricted.
-     * 6. legacy: device is not camped on a network that has 5G capability
-     * 7. any: any of the above scenarios
+     * There are eight 5G scenarios:
+     * 1. connected_mmwave: device currently connected to 5G cell as the primary or secondary cell
+     *    and considered NR advanced.
+     * 2. connected: device currently connected to 5G cell as the primary or secondary cell but not
+     *    considered NR advanced.
+     * 3. connected_rrc_idle: device currently connected to 5G cell as the primary or secondary cell
+     *    and RRC currently in IDLE state.
+     * 4. not_restricted_rrc_idle: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in IDLE state.
+     * 5. not_restricted_rrc_con: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in CONNECTED state.
+     * 6. restricted: device camped on a network that has 5G capability but the use of 5G is
+     *    restricted.
+     * 7. legacy: device is not camped on a network that has 5G capability
+     * 8. any: any of the above scenarios
      *
      * The configured string contains various timer rules separated by a semicolon.
      * Each rule will have three items: prior 5G scenario, current 5G scenario, and grace period
@@ -3776,8 +3776,8 @@ public class CarrierConfigManager {
      * 5G scenario, the system UI will continue to show the icon for the prior 5G scenario (defined
      * in {@link #KEY_5G_ICON_CONFIGURATION_STRING}) for the amount of time specified by the grace
      * period. If the prior 5G scenario is reestablished, the timer will reset and start again if
-     * the UE changes 5G scenarios again. Defined states (5G scenarios #1-5) take precedence over
-     * 'any' (5G scenario #6), and unspecified transitions have a default grace period of 0.
+     * the UE changes 5G scenarios again. Defined states (5G scenarios #1-7) take precedence over
+     * 'any' (5G scenario #8), and unspecified transitions have a default grace period of 0.
      * The order of rules in the configuration determines the priority (the first applicable timer
      * rule will be used).
      *
@@ -3800,21 +3800,21 @@ public class CarrierConfigManager {
      * This configuration extends {@link #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING} to allow the
      * system UI to continue displaying 5G icons after the initial timer expires.
      *
-     * There are seven 5G scenarios:
-     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
-     *    millimeter wave.
-     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
-     *    millimeter wave.
-     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability (not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in IDLE state.
-     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability (not necessary
-     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
-     *    currently in CONNECTED state.
-     * 5. restricted: device camped on a network that has 5G capability (not necessary to connect a
-     *    5G cell as a secondary cell) but the use of 5G is restricted.
-     * 6. legacy: device is not camped on a network that has 5G capability
-     * 7. any: any of the above scenarios
+     * There are eight 5G scenarios:
+     * 1. connected_mmwave: device currently connected to 5G cell as the primary or secondary cell
+     *    and considered NR advanced.
+     * 2. connected: device currently connected to 5G cell as the primary or secondary cell but not
+     *    considered NR advanced.
+     * 3. connected_rrc_idle: device currently connected to 5G cell as the primary or secondary cell
+     *    and RRC currently in IDLE state.
+     * 4. not_restricted_rrc_idle: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in IDLE state.
+     * 5. not_restricted_rrc_con: device camped on a network that has 5G capability and the use of
+     *    5G is not restricted and RRC currently in CONNECTED state.
+     * 6. restricted: device camped on a network that has 5G capability but the use of 5G is
+     *    restricted.
+     * 7. legacy: device is not camped on a network that has 5G capability
+     * 8. any: any of the above scenarios
      *
      * The configured string contains various timer rules separated by a semicolon.
      * Each rule will have three items: primary 5G scenario, secondary 5G scenario, and
@@ -3824,7 +3824,7 @@ public class CarrierConfigManager {
      * period. If the primary 5G scenario is reestablished, the timers will reset and the system UI
      * will continue to display the icon for the primary 5G scenario without interruption. If the
      * secondary 5G scenario is lost, the timer will reset and the icon will reflect the true state.
-     * Defined states (5G scenarios #1-5) take precedence over 'any' (5G scenario #6), and
+     * Defined states (5G scenarios #1-7) take precedence over 'any' (5G scenario #8), and
      * unspecified transitions have a default grace period of 0. The order of rules in the
      * configuration determines the priority (the first applicable timer rule will be used).
      *
@@ -8891,18 +8891,18 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "epdg_static_address_roaming_string";
 
         /**
-         * Controls if the multiple SA proposals allowed for IKE session to include
-         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
-         * IKE SA proposals as per RFC 7296.
+         * Enables the use of multiple IKE SA proposals, encompassing both carrier-preferred
+         * ciphers and all supported ciphers from 3GPP TS 33.210 and RFC 8221,
+         * as defined in RFC 7296.
          */
         @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
         public static final String KEY_SUPPORTS_IKE_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
                 KEY_PREFIX + "supports_ike_session_multiple_sa_proposals_bool";
 
         /**
-         * Controls if the multiple SA proposals allowed for Child session to include
-         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
-         * Child SA proposals as per RFC 7296.
+         * Enables the use of multiple Child SA proposals, encompassing both carrier-preferred
+         * ciphers and all supported ciphers from 3GPP TS 33.210 and RFC 8221,
+         * as defined in RFC 7296.
          */
         @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
         public static final String KEY_SUPPORTS_CHILD_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
@@ -10050,6 +10050,49 @@ public class CarrierConfigManager {
     public static final String KEY_AUTO_DATA_SWITCH_RAT_SIGNAL_SCORE_BUNDLE =
             "auto_data_switch_rat_signal_score_string_bundle";
 
+    // TODO(b/316183370): replace @code with @link in javadoc after feature is released
+    /**
+     * An array of cellular services supported by a subscription.
+     *
+     * <p>Permissible values include:
+     * <ul>
+     *   <li>{@code SubscriptionManager#SERVICE_CAPABILITY_VOICE} for voice services</li>
+     *   <li>{@code SubscriptionManager#SERVICE_CAPABILITY_SMS} for SMS services</li>
+     *   <li>{@code SubscriptionManager#SERVICE_CAPABILITY_DATA} for data services</li>
+     * </ul>
+     *
+     * <p>Carrier-specific factors may influence how these services are supported. Therefore,
+     * modifying this carrier configuration might not always enable the specified services. These
+     * capability bitmasks should be considered as indicators of a carrier's preferred services
+     * to enhance user experience, rather than as absolute platform guarantees.
+     *
+     * <p>Device-level service capabilities, defined by
+     * {@code TelephonyManager#isDeviceVoiceCapable} and
+     * {@code TelephonyManager#isDeviceSmsCapable}, take precedence over these subscription-level
+     * settings. For instance, a device where {@code TelephonyManager#isDeviceVoiceCapable} returns
+     * false may not be able to make voice calls, even if subscribed to a service marked as
+     * voice-capable.
+     *
+     * <p>To determine a subscription's cellular service capabilities, use
+     * {@code SubscriptionInfo#getServiceCapabilities()}. To track changes in services, register
+     * a {@link SubscriptionManager.OnSubscriptionsChangedListener} and invoke the
+     * same method in its callback.
+     *
+     * <p>Emergency service availability may not depend on the cellular service capabilities.
+     * For example, emergency calls might be possible on a subscription even if it lacks
+     * {@code SubscriptionManager#SERVICE_CAPABILITY_VOICE}.
+     *
+     * <p>If unset, the default value is “[1, 2, 3]” (supports all cellular services).
+     *
+     * @see TelephonyManager#isDeviceVoiceCapable
+     * @see TelephonyManager#isDeviceSmsCapable
+     * @see SubscriptionInfo#getServiceCapabilities()
+     * @see SubscriptionManager.OnSubscriptionsChangedListener
+     */
+    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
+    public static final String KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY =
+            "cellular_service_capabilities_int_array";
+
     /** The default value for every variable. */
     private static final PersistableBundle sDefaults;
 
@@ -10565,7 +10608,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_CALL_WAITING_USSD_BOOL, false);
         sDefaults.putInt(KEY_CALL_WAITING_SERVICE_CLASS_INT, 1 /* SERVICE_CLASS_VOICE */);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
-                "connected_mmwave:5G,connected:5G,not_restricted_rrc_idle:5G,"
+                "connected_mmwave:5G,connected:5G,connected_rrc_idle:5G,not_restricted_rrc_idle:5G,"
                         + "not_restricted_rrc_con:5G");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING, "");
         sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
@@ -10837,6 +10880,7 @@ public class CarrierConfigManager {
                 new boolean[] {false, false, true, false, false});
         sDefaults.putStringArray(KEY_CARRIER_SERVICE_NAME_STRING_ARRAY, new String[0]);
         sDefaults.putStringArray(KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY, new String[0]);
+        sDefaults.putIntArray(KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY, new int[]{1, 2, 3});
     }
 
     /**

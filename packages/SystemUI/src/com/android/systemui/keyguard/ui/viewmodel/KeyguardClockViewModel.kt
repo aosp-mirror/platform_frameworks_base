@@ -27,8 +27,8 @@ import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.plugins.clocks.ClockController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
@@ -79,10 +79,10 @@ constructor(
                         ?: false
             )
 
-    val clockShouldBeCentered: Flow<Boolean> =
+    val clockShouldBeCentered: StateFlow<Boolean> =
         keyguardInteractor.clockShouldBeCentered.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
-            initialValue = true
+            initialValue = false
         )
 }

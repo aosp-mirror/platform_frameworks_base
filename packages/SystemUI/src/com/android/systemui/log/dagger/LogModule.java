@@ -26,6 +26,7 @@ import com.android.systemui.log.echo.LogcatEchoTrackerDebug;
 import com.android.systemui.log.echo.LogcatEchoTrackerProd;
 import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.log.table.TableLogBufferFactory;
+import com.android.systemui.plugins.clocks.ClockMessageBuffers;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
 import com.android.systemui.qs.pipeline.shared.TileSpec;
@@ -414,6 +415,18 @@ public class LogModule {
     @KeyguardLargeClockLog
     public static LogBuffer provideKeyguardLargeClockLog(LogBufferFactory factory) {
         return factory.create("KeyguardLargeClockLog", 100);
+    }
+
+    /**
+     * Provides a {@link ClockMessageBuffers} which contains the keyguard clock message buffers.
+     */
+    @Provides
+    public static ClockMessageBuffers provideKeyguardClockMessageBuffers(
+            @KeyguardClockLog LogBuffer infraClockLog,
+            @KeyguardSmallClockLog LogBuffer smallClockLog,
+            @KeyguardLargeClockLog LogBuffer largeClockLog
+    ) {
+        return new ClockMessageBuffers(infraClockLog, smallClockLog, largeClockLog);
     }
 
     /**

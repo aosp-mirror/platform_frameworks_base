@@ -24,13 +24,13 @@ import android.os.UserHandle
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel
-import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
@@ -43,9 +43,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -59,12 +57,6 @@ import kotlinx.coroutines.withContext
 
 /** Defines interface for classes that can access authentication-related application state. */
 interface AuthenticationRepository {
-    /**
-     * Emits the result whenever a PIN/Pattern/Password security challenge is attempted by the user
-     * in order to unlock the device.
-     */
-    val authenticationChallengeResult: SharedFlow<Boolean>
-
     /**
      * The exact length a PIN should be for us to enable PIN length hinting.
      *
@@ -80,22 +72,34 @@ interface AuthenticationRepository {
     val isPatternVisible: StateFlow<Boolean>
 
     /**
-     * The current authentication lockout (aka "throttling") state, set when the user has to wait
-     * before being able to try another authentication attempt. `null` indicates throttling isn't
-     * active.
-     */
-    val lockout: MutableStateFlow<AuthenticationLockoutModel?>
-
-    /** Whether throttling has occurred at least once since the last successful authentication. */
-    val hasLockoutOccurred: MutableStateFlow<Boolean>
-
-    /**
      * Whether the auto confirm feature is enabled for the currently-selected user.
      *
      * Note that the length of the PIN is also important to take into consideration, please see
      * [hintedPinLength].
      */
     val isAutoConfirmFeatureEnabled: StateFlow<Boolean>
+
+    /**
+     * The number of failed authentication attempts for the selected user since their last
+     * successful authentication.
+     */
+    val failedAuthenticationAttempts: StateFlow<Int>
+
+    /**
+     * Timestamp for when the current lockout (aka "throttling") will end, allowing the user to
+     * attempt authentication again. Returns `null` if no lockout is active.
+     *
+     * Note that the value is in milliseconds and matches [SystemClock.elapsedRealtime].
+     *
+     * Also note that the value may change when the selected user is changed.
+     */
+    val lockoutEndTimestamp: Long?
+
+    /**
+     * Whether lockout has occurred at least once since the last successful authentication of any
+     * user.
+     */
+    val hasLockoutOccurred: StateFlow<Boolean>
 
     /**
      * The currently-configured authentication method. This determines how the authentication
@@ -142,23 +146,6 @@ interface AuthenticationRepository {
     /** Reports that the user has entered a temporary device lockout (throttling). */
     suspend fun reportLockoutStarted(durationMs: Int)
 
-    /** Returns the current number of failed authentication attempts. */
-    suspend fun getFailedAuthenticationAttemptCount(): Int
-
-    /**
-     * Returns the timestamp for when the current lockout will end, allowing the user to attempt
-     * authentication again.
-     *
-     * Note that this is in milliseconds and it matches [SystemClock.elapsedRealtime].
-     */
-    suspend fun getLockoutEndTimestamp(): Long
-
-    /**
-     * Sets the lockout timeout duration (time during which the user should not be allowed to
-     * attempt authentication).
-     */
-    suspend fun setLockoutDuration(durationMs: Int)
-
     /**
      * Checks the given [LockscreenCredential] to see if it's correct, returning an
      * [AuthenticationResultModel] representing what happened.
@@ -172,14 +159,14 @@ class AuthenticationRepositoryImpl
 constructor(
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    flags: SceneContainerFlags,
+    private val clock: SystemClock,
     private val getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>,
     private val userRepository: UserRepository,
     private val lockPatternUtils: LockPatternUtils,
     broadcastDispatcher: BroadcastDispatcher,
     mobileConnectionsRepository: MobileConnectionsRepository,
 ) : AuthenticationRepository {
-
-    override val authenticationChallengeResult = MutableSharedFlow<Boolean>()
 
     override val hintedPinLength: Int = 6
 
@@ -188,10 +175,6 @@ constructor(
             initialValue = true,
             getFreshValue = lockPatternUtils::isVisiblePatternEnabled,
         )
-
-    override val lockout: MutableStateFlow<AuthenticationLockoutModel?> = MutableStateFlow(null)
-
-    override val hasLockoutOccurred: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
         refreshingFlow(
@@ -234,6 +217,31 @@ constructor(
             getFreshValue = { userId -> lockPatternUtils.isPinEnhancedPrivacyEnabled(userId) },
         )
 
+    private val _failedAuthenticationAttempts = MutableStateFlow(0)
+    override val failedAuthenticationAttempts: StateFlow<Int> =
+        _failedAuthenticationAttempts.asStateFlow()
+
+    override val lockoutEndTimestamp: Long?
+        get() =
+            lockPatternUtils.getLockoutAttemptDeadline(selectedUserId).takeIf {
+                clock.elapsedRealtime() < it
+            }
+
+    private val _hasLockoutOccurred = MutableStateFlow(false)
+    override val hasLockoutOccurred: StateFlow<Boolean> = _hasLockoutOccurred.asStateFlow()
+
+    init {
+        if (flags.isEnabled()) {
+            // Hydrate failedAuthenticationAttempts initially and whenever the selected user
+            // changes.
+            applicationScope.launch {
+                userRepository.selectedUserInfo.collect {
+                    _failedAuthenticationAttempts.value = getFailedAuthenticationAttemptCount()
+                }
+            }
+        }
+    }
+
     override suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
         return withContext(backgroundDispatcher) {
             blockingAuthenticationMethodInternal(selectedUserId)
@@ -248,35 +256,20 @@ constructor(
         withContext(backgroundDispatcher) {
             if (isSuccessful) {
                 lockPatternUtils.reportSuccessfulPasswordAttempt(selectedUserId)
+                _hasLockoutOccurred.value = false
             } else {
                 lockPatternUtils.reportFailedPasswordAttempt(selectedUserId)
             }
-            authenticationChallengeResult.emit(isSuccessful)
+            _failedAuthenticationAttempts.value = getFailedAuthenticationAttemptCount()
         }
     }
 
     override suspend fun reportLockoutStarted(durationMs: Int) {
-        return withContext(backgroundDispatcher) {
+        lockPatternUtils.setLockoutAttemptDeadline(selectedUserId, durationMs)
+        withContext(backgroundDispatcher) {
             lockPatternUtils.reportPasswordLockout(durationMs, selectedUserId)
         }
-    }
-
-    override suspend fun getFailedAuthenticationAttemptCount(): Int {
-        return withContext(backgroundDispatcher) {
-            lockPatternUtils.getCurrentFailedPasswordAttempts(selectedUserId)
-        }
-    }
-
-    override suspend fun getLockoutEndTimestamp(): Long {
-        return withContext(backgroundDispatcher) {
-            lockPatternUtils.getLockoutAttemptDeadline(selectedUserId)
-        }
-    }
-
-    override suspend fun setLockoutDuration(durationMs: Int) {
-        withContext(backgroundDispatcher) {
-            lockPatternUtils.setLockoutAttemptDeadline(selectedUserId, durationMs)
-        }
+        _hasLockoutOccurred.value = true
     }
 
     override suspend fun checkCredential(
@@ -289,6 +282,12 @@ constructor(
             } catch (ex: LockPatternUtils.RequestThrottledException) {
                 AuthenticationResultModel(isSuccessful = false, lockoutDurationMs = ex.timeoutMs)
             }
+        }
+    }
+
+    private suspend fun getFailedAuthenticationAttemptCount(): Int {
+        return withContext(backgroundDispatcher) {
+            lockPatternUtils.getCurrentFailedPasswordAttempts(selectedUserId)
         }
     }
 

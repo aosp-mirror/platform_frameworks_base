@@ -17,8 +17,6 @@
 package com.android.systemui.keyguard.ui.composable.section
 
 import android.content.Context
-import android.graphics.Point
-import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.compose.foundation.background
@@ -28,11 +26,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
 import com.android.systemui.res.R
 import javax.inject.Inject
 
@@ -49,8 +53,33 @@ constructor(
             key = LockIconElementKey,
             modifier = modifier,
         ) {
+            val context = LocalContext.current
             Box(
-                modifier = Modifier.background(Color.Red),
+                modifier =
+                    Modifier.background(Color.Red).layout { measurable, _ ->
+                        val lockIconBounds = lockIconBounds(context)
+                        val placeable =
+                            measurable.measure(
+                                Constraints.fixed(
+                                    width = lockIconBounds.width,
+                                    height = lockIconBounds.height,
+                                )
+                            )
+                        layout(
+                            width = placeable.width,
+                            height = placeable.height,
+                            alignmentLines =
+                                mapOf(
+                                    BlueprintAlignmentLines.LockIcon.Left to lockIconBounds.left,
+                                    BlueprintAlignmentLines.LockIcon.Top to lockIconBounds.top,
+                                    BlueprintAlignmentLines.LockIcon.Right to lockIconBounds.right,
+                                    BlueprintAlignmentLines.LockIcon.Bottom to
+                                        lockIconBounds.bottom,
+                                ),
+                        ) {
+                            placeable.place(0, 0)
+                        }
+                    },
             ) {
                 Text(
                     text = "TODO(b/316211368): Lock",
@@ -67,9 +96,9 @@ constructor(
      * On devices that support UDFPS (under-display fingerprint sensor), the bounds of the icon are
      * the same as the bounds of the sensor.
      */
-    fun lockIconBounds(
+    private fun lockIconBounds(
         context: Context,
-    ): Rect {
+    ): IntRect {
         val windowViewBounds = windowManager.currentWindowMetrics.bounds
         var widthPx = windowViewBounds.right.toFloat()
         if (featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)) {
@@ -85,36 +114,33 @@ constructor(
         val lockIconRadiusPx = (defaultDensity * 36).toInt()
 
         val udfpsLocation = authController.udfpsLocation
-        return if (authController.isUdfpsSupported && udfpsLocation != null) {
-            centerLockIcon(udfpsLocation, authController.udfpsRadius)
-        } else {
-            val scaleFactor = authController.scaleFactor
-            val bottomPaddingPx =
-                context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
-            val heightPx = windowViewBounds.bottom.toFloat()
+        val (center, radius) =
+            if (authController.isUdfpsSupported && udfpsLocation != null) {
+                Pair(
+                    IntOffset(
+                        x = udfpsLocation.x,
+                        y = udfpsLocation.y,
+                    ),
+                    authController.udfpsRadius.toInt(),
+                )
+            } else {
+                val scaleFactor = authController.scaleFactor
+                val bottomPaddingPx =
+                    context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
+                val heightPx = windowViewBounds.bottom.toFloat()
 
-            centerLockIcon(
-                Point(
-                    (widthPx / 2).toInt(),
-                    (heightPx - ((bottomPaddingPx + lockIconRadiusPx) * scaleFactor)).toInt()
-                ),
-                lockIconRadiusPx * scaleFactor
-            )
-        }
-    }
+                Pair(
+                    IntOffset(
+                        x = (widthPx / 2).toInt(),
+                        y =
+                            (heightPx - ((bottomPaddingPx + lockIconRadiusPx) * scaleFactor))
+                                .toInt(),
+                    ),
+                    (lockIconRadiusPx * scaleFactor).toInt(),
+                )
+            }
 
-    private fun centerLockIcon(
-        center: Point,
-        radius: Float,
-    ): Rect {
-        return Rect().apply {
-            set(
-                center.x - radius.toInt(),
-                center.y - radius.toInt(),
-                center.x + radius.toInt(),
-                center.y + radius.toInt(),
-            )
-        }
+        return IntRect(center, radius)
     }
 }
 
