@@ -528,6 +528,194 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         verifyNoMoreInteractions(sliderStateListener)
     }
 
+    @Test
+    fun onProgressChangeByProgram_atTheMiddle_onIdle_movesToArrowHandleMovedOnce() = runTest {
+        // GIVEN an initialized tracker in the IDLE state
+        initTracker(testScheduler)
+
+        // GIVEN a progress due to an external source that lands at the middle of the slider
+        val progress = 0.5f
+        sliderEventProducer.sendEvent(
+            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+        )
+
+        // THEN the state moves to ARROW_HANDLE_MOVED_ONCE and the listener is called to play
+        // haptics
+        assertThat(mSeekableSliderTracker.currentState)
+            .isEqualTo(SliderState.ARROW_HANDLE_MOVED_ONCE)
+        verify(sliderStateListener).onSelectAndArrow(progress)
+    }
+
+    @Test
+    fun onProgressChangeByProgram_atUpperBookend_onIdle_movesToIdle() = runTest {
+        // GIVEN an initialized tracker in the IDLE state
+        val config = SeekableSliderTrackerConfig()
+        initTracker(testScheduler, config)
+
+        // GIVEN a progress due to an external source that lands at the upper bookend
+        val progress = config.upperBookendThreshold + 0.01f
+        sliderEventProducer.sendEvent(
+            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+        )
+
+        // THEN the tracker executes upper bookend haptics before moving back to IDLE
+        verify(sliderStateListener).onUpperBookend()
+        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+    }
+
+    @Test
+    fun onProgressChangeByProgram_atLowerBookend_onIdle_movesToIdle() = runTest {
+        // GIVEN an initialized tracker in the IDLE state
+        val config = SeekableSliderTrackerConfig()
+        initTracker(testScheduler, config)
+
+        // WHEN a progress is recorded due to an external source that lands at the lower bookend
+        val progress = config.lowerBookendThreshold - 0.01f
+        sliderEventProducer.sendEvent(
+            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+        )
+
+        // THEN the tracker executes lower bookend haptics before moving to IDLE
+        verify(sliderStateListener).onLowerBookend()
+        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+    }
+
+    @Test
+    fun onArrowUp_onArrowMovedOnce_movesToIdle() = runTest {
+        // GIVEN an initialized tracker in the ARROW_HANDLE_MOVED_ONCE state
+        initTracker(testScheduler)
+        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVED_ONCE)
+
+        // WHEN the external stimulus is released
+        val progress = 0.5f
+        sliderEventProducer.sendEvent(SliderEvent(SliderEventType.ARROW_UP, progress))
+
+        // THEN the tracker moves back to IDLE and there are no haptics
+        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        verifyZeroInteractions(sliderStateListener)
+    }
+
+    @Test
+    fun onStartTrackingTouch_onArrowMovedOnce_movesToWait() = runTest {
+        // GIVEN an initialized tracker in the ARROW_HANDLE_MOVED_ONCE state
+        initTracker(testScheduler)
+        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVED_ONCE)
+
+        // WHEN the slider starts tracking touch
+        val progress = 0.5f
+        sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STARTED_TRACKING_TOUCH, progress))
+
+        // THEN the tracker moves back to WAIT and starts the waiting job. Also, there are no
+        // haptics
+        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.WAIT)
+        assertThat(mSeekableSliderTracker.isWaiting).isTrue()
+        verifyZeroInteractions(sliderStateListener)
+    }
+
+    @Test
+    fun onProgressChangeByProgram_onArrowMovedOnce_movesToArrowMovesContinuously() = runTest {
+        // GIVEN an initialized tracker in the ARROW_HANDLE_MOVED_ONCE state
+        initTracker(testScheduler)
+        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVED_ONCE)
+
+        // WHEN the slider gets an external progress change
+        val progress = 0.5f
+        sliderEventProducer.sendEvent(
+            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+        )
+
+        // THEN the tracker moves to ARROW_HANDLE_MOVES_CONTINUOUSLY and calls the appropriate
+        // haptics
+        assertThat(mSeekableSliderTracker.currentState)
+            .isEqualTo(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+        verify(sliderStateListener).onProgress(progress)
+    }
+
+    @Test
+    fun onArrowUp_onArrowMovesContinuously_movesToIdle() = runTest {
+        // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
+        initTracker(testScheduler)
+        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+
+        // WHEN the external stimulus is released
+        val progress = 0.5f
+        sliderEventProducer.sendEvent(SliderEvent(SliderEventType.ARROW_UP, progress))
+
+        // THEN the tracker moves to IDLE and no haptics are played
+        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        verifyZeroInteractions(sliderStateListener)
+    }
+
+    @Test
+    fun onStartTrackingTouch_onArrowMovesContinuously_movesToWait() = runTest {
+        // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
+        initTracker(testScheduler)
+        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+
+        // WHEN the slider starts tracking touch
+        val progress = 0.5f
+        sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STARTED_TRACKING_TOUCH, progress))
+
+        // THEN the tracker moves to WAIT and the wait job starts.
+        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.WAIT)
+        assertThat(mSeekableSliderTracker.isWaiting).isTrue()
+        verifyZeroInteractions(sliderStateListener)
+    }
+
+    @Test
+    fun onProgressChangeByProgram_onArrowMovesContinuously_preservesState() = runTest {
+        // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
+        initTracker(testScheduler)
+        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+
+        // WHEN the slider changes progress programmatically at the middle
+        val progress = 0.5f
+        sliderEventProducer.sendEvent(
+            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+        )
+
+        // THEN the tracker stays in the same state and haptics are delivered appropriately
+        assertThat(mSeekableSliderTracker.currentState)
+            .isEqualTo(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+        verify(sliderStateListener).onProgress(progress)
+    }
+
+    @Test
+    fun onProgramProgress_atLowerBookend_onArrowMovesContinuously_movesToIdle() = runTest {
+        // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
+        val config = SeekableSliderTrackerConfig()
+        initTracker(testScheduler, config)
+        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+
+        // WHEN the slider reaches the lower bookend programmatically
+        val progress = config.lowerBookendThreshold - 0.01f
+        sliderEventProducer.sendEvent(
+            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+        )
+
+        // THEN the tracker executes lower bookend haptics before moving to IDLE
+        verify(sliderStateListener).onLowerBookend()
+        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+    }
+
+    @Test
+    fun onProgramProgress_atUpperBookend_onArrowMovesContinuously_movesToIdle() = runTest {
+        // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
+        val config = SeekableSliderTrackerConfig()
+        initTracker(testScheduler, config)
+        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+
+        // WHEN the slider reaches the lower bookend programmatically
+        val progress = config.upperBookendThreshold + 0.01f
+        sliderEventProducer.sendEvent(
+            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+        )
+
+        // THEN the tracker executes upper bookend haptics before moving to IDLE
+        verify(sliderStateListener).onUpperBookend()
+        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun initTracker(
         scheduler: TestCoroutineScheduler,
