@@ -413,6 +413,25 @@
     <!-- Height of desktop mode caption for fullscreen tasks. -->
     <dimen name="desktop_mode_fullscreen_decor_caption_height">36dp</dimen>
 
+    <!-- Required empty space to be visible for partially offscreen tasks. -->
+    <dimen name="freeform_required_visible_empty_space_in_header">48dp</dimen>
+
+    <!-- Required empty space to be visible for partially offscreen tasks on a smaller screen. -->
+    <dimen name="small_screen_required_visible_empty_space_in_header">12dp</dimen>
+
+    <!-- 32dp width back button + 10dp margin -->
+    <dimen name="caption_left_buttons_width">32dp</dimen>
+
+    <!-- (32 dp buttons + 10dp margins) * 3 buttons-->
+    <dimen name="caption_right_buttons_width">126dp</dimen>
+
+    <!-- 2 buttons * 48dp button size. -->
+    <dimen name="desktop_mode_right_edge_buttons_width">96dp</dimen>
+
+    <!-- 22dp padding + 24dp app icon + 16dp expand button.
+         Text varies in size, we will calculate that width separately. -->
+    <dimen name="desktop_mode_app_details_width_minus_text">62dp</dimen>
+
     <!-- The width of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_width">287dp</dimen>
 

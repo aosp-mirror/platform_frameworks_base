@@ -22,6 +22,7 @@ import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
@@ -34,6 +35,7 @@ import android.window.WindowContainerTransaction;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 /**
@@ -83,6 +85,69 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     void setDragPositioningCallback(DragPositioningCallback dragPositioningCallback) {
         mDragPositioningCallback = dragPositioningCallback;
     }
+
+    @Override
+    Rect calculateValidDragArea() {
+        final int leftButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.caption_left_buttons_width);
+
+        // On a smaller screen, don't require as much empty space on screen, as offscreen
+        // drags will be restricted too much.
+        final int requiredEmptySpaceId = mDisplayController.getDisplayContext(mTaskInfo.taskId)
+                .getResources().getConfiguration().smallestScreenWidthDp >= 600
+                ? R.dimen.freeform_required_visible_empty_space_in_header :
+                R.dimen.small_screen_required_visible_empty_space_in_header;
+        final int requiredEmptySpace = loadDimensionPixelSize(mContext.getResources(),
+                requiredEmptySpaceId);
+
+        final int rightButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.caption_right_buttons_width);
+        final int taskWidth = mTaskInfo.configuration.windowConfiguration.getBounds().width();
+        final DisplayLayout layout = mDisplayController.getDisplayLayout(mTaskInfo.displayId);
+        final int displayWidth = layout.width();
+        final Rect stableBounds = new Rect();
+        layout.getStableBounds(stableBounds);
+        return new Rect(
+                determineMinX(leftButtonsWidth, rightButtonsWidth, requiredEmptySpace,
+                        taskWidth),
+                stableBounds.top,
+                determineMaxX(leftButtonsWidth, rightButtonsWidth, requiredEmptySpace, taskWidth,
+                        displayWidth),
+                determineMaxY(requiredEmptySpace, stableBounds));
+    }
+
+
+    /**
+     * Determine the lowest x coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMinX(int leftButtonsWidth, int rightButtonsWidth, int requiredEmptySpace,
+            int taskWidth) {
+        // Do not let apps with < 48dp empty header space go off the left edge at all.
+        if (leftButtonsWidth + rightButtonsWidth + requiredEmptySpace > taskWidth) {
+            return 0;
+        }
+        return -taskWidth + requiredEmptySpace + rightButtonsWidth;
+    }
+
+    /**
+     * Determine the highest x coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMaxX(int leftButtonsWidth, int rightButtonsWidth, int requiredEmptySpace,
+            int taskWidth, int displayWidth) {
+        // Do not let apps with < 48dp empty header space go off the right edge at all.
+        if (leftButtonsWidth + rightButtonsWidth + requiredEmptySpace > taskWidth) {
+            return displayWidth - taskWidth;
+        }
+        return displayWidth - requiredEmptySpace - leftButtonsWidth;
+    }
+
+    /**
+     * Determine the highest y coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMaxY(int requiredEmptySpace, Rect stableBounds) {
+        return stableBounds.bottom - requiredEmptySpace;
+    }
+
 
     void setDragDetector(DragDetector dragDetector) {
         mDragDetector = dragDetector;

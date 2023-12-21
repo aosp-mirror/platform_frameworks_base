@@ -118,6 +118,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             configuration.windowConfiguration.setBounds(STARTING_BOUNDS)
             configuration.windowConfiguration.displayRotation = ROTATION_90
         }
+        `when`(mockDesktopWindowDecoration.calculateValidDragArea()).thenReturn(VALID_DRAG_AREA)
         mockDesktopWindowDecoration.mDisplay = mockDisplay
         whenever(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
 
@@ -379,6 +380,38 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     }
 
     @Test
+    fun testDragResize_drag_taskPositionedInValidDragArea() {
+        taskPositioner.onDragPositioningStart(
+            CTRL_TYPE_UNDEFINED, // drag
+            STARTING_BOUNDS.left.toFloat(),
+            STARTING_BOUNDS.top.toFloat()
+        )
+
+        val newX = VALID_DRAG_AREA.left - 500f
+        val newY = VALID_DRAG_AREA.bottom + 500f
+        taskPositioner.onDragPositioningMove(
+            newX,
+            newY
+        )
+        verify(mockTransaction).setPosition(any(), eq(newX), eq(newY))
+
+        taskPositioner.onDragPositioningEnd(
+            newX,
+            newY
+        )
+        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
+                        change.configuration.windowConfiguration.bounds.top ==
+                        VALID_DRAG_AREA.bottom &&
+                        change.configuration.windowConfiguration.bounds.left ==
+                        VALID_DRAG_AREA.left
+            }
+        })
+    }
+
+    @Test
     fun testDragResize_drag_updatesStableBoundsOnRotate() {
         // Test landscape stable bounds
         performDrag(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.bottom.toFloat(),
@@ -469,6 +502,12 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             DISPLAY_BOUNDS.left + CAPTION_HEIGHT,
             DISPLAY_BOUNDS.bottom,
             DISPLAY_BOUNDS.right - NAVBAR_HEIGHT
+        )
+        private val VALID_DRAG_AREA = Rect(
+            DISPLAY_BOUNDS.left - 100,
+            STABLE_BOUNDS_LANDSCAPE.top,
+            DISPLAY_BOUNDS.right - 100,
+            DISPLAY_BOUNDS.bottom - 100
         )
     }
 }
