@@ -96,8 +96,8 @@ constructor(
                     iconsViewData.visibleIcons.firstOrNull { it.notifKey == isolatedNotif }
                 }
             }
-            .pairwise(initialValue = null)
             .distinctUntilChanged()
+            .pairwise(initialValue = null)
             .sample(shadeInteractor.shadeExpansion) { (prev, iconInfo), shadeExpansion ->
                 val animate =
                     when {

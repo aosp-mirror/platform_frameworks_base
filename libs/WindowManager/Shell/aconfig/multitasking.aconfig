@@ -57,3 +57,10 @@ flag {
     description: "Enables left/right split in portrait"
     bug: "291018646"
 }
+
+flag {
+    name: "enable_new_bubble_animations"
+    namespace: "multitasking"
+    description: "Enables new animations for expand and collapse for bubbles"
+    bug: "311450609"
+}

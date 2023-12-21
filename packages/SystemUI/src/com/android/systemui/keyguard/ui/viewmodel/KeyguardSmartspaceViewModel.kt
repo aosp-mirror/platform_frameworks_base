@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
 import android.util.Log
+import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
@@ -25,7 +26,7 @@ import javax.inject.Inject
 @SysUISingleton
 class KeyguardSmartspaceViewModel
 @Inject
-constructor(val context: Context, smartspaceController: LockscreenSmartspaceController) {
+constructor(val context: Context, val smartspaceController: LockscreenSmartspaceController) {
     val isSmartspaceEnabled: Boolean = smartspaceController.isEnabled()
     val isWeatherEnabled: Boolean = smartspaceController.isWeatherEnabled()
     val isDateWeatherDecoupled: Boolean = smartspaceController.isDateWeatherDecoupled()
@@ -37,6 +38,10 @@ constructor(val context: Context, smartspaceController: LockscreenSmartspaceCont
 
     val weatherId: Int
         get() = getId("weather_smartspace_view")
+
+    var smartspaceView: View? = null
+    var weatherView: View? = null
+    var dateView: View? = null
 
     private fun getId(name: String): Int {
         return context.resources.getIdentifier(name, "id", context.packageName).also {

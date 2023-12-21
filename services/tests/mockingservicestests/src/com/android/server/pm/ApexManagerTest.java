@@ -50,9 +50,10 @@ import android.util.ArraySet;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.parsing.PackageParserException;
 import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.Before;
@@ -175,7 +176,7 @@ public class ApexManagerTest {
                     mPmService.getPlatformPackage(), /* isUpdatedSystemApp */ false);
             // isUpdatedSystemApp is ignoreable above, only used for shared library adjustment
             return parsedPackage.hideAsFinal();
-        } catch (PackageManagerException e) {
+        } catch (PackageParserException e) {
             throw new RuntimeException(e);
         }
     }

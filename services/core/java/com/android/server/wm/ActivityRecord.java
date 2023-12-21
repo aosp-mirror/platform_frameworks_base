@@ -125,6 +125,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.window.TransitionInfo.FLAGS_IS_OCCLUDED_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -683,6 +684,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final WindowState.UpdateReportedVisibilityResults mReportedVisibilityResults =
             new WindowState.UpdateReportedVisibilityResults();
 
+    // TODO(b/317000737): Replace it with visibility states lookup.
     int mTransitionChangeFlags;
 
     /** Whether we need to setup the animation to animate only within the letterbox. */
@@ -5468,8 +5470,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Defer committing visibility until transition starts.
         if (isCollecting) {
             // It may be occluded by the activity above that calls convertFromTranslucent().
-            if (!visible && mTransitionController.inPlayingTransition(this)) {
-                mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
+            // Or it may be restoring transient launch to invisible when finishing transition.
+            if (!visible) {
+                if (mTransitionController.inPlayingTransition(this)) {
+                    mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
+                } else if (mTransitionController.inFinishingTransition(this)) {
+                    mTransitionChangeFlags |= FLAGS_IS_OCCLUDED_NO_ANIMATION;
+                }
             }
             return;
         }

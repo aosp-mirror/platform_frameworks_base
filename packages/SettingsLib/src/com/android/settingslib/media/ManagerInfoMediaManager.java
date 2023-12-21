@@ -16,8 +16,6 @@
 
 package com.android.settingslib.media;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.media.MediaRoute2Info;
@@ -26,6 +24,9 @@ import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -80,14 +81,17 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     @Override
     protected void transferToRoute(@NonNull MediaRoute2Info route) {
-        mRouterManager.transfer(mPackageName, route);
+        // TODO: b/279555229 - provide real user handle of a caller.
+        mRouterManager.transfer(mPackageName, route, android.os.Process.myUserHandle());
     }
 
     @Override
     protected boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device) {
         final RoutingSessionInfo info = mRouterManager.getSystemRoutingSession(null);
         if (info != null) {
-            mRouterManager.transfer(info, device.mRouteInfo);
+            // TODO: b/279555229 - provide real user handle and package name of a caller.
+            mRouterManager.transfer(
+                    info, device.mRouteInfo, android.os.Process.myUserHandle(), mPackageName);
             return true;
         }
         return false;

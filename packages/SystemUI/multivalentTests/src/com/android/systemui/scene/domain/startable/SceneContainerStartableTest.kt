@@ -90,8 +90,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
             falsingCollector = falsingCollector,
             powerInteractor = powerInteractor,
             bouncerInteractor = bouncerInteractor,
-            simBouncerInteractor = utils.simBouncerInteractor,
-            authenticationInteractor = authenticationInteractor,
+            simBouncerInteractor = dagger.Lazy { utils.simBouncerInteractor },
+            authenticationInteractor = dagger.Lazy { authenticationInteractor },
         )
 
     @Test

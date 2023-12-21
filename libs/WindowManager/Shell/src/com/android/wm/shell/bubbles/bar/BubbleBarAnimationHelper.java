@@ -48,12 +48,14 @@ public class BubbleBarAnimationHelper {
     private static final float EXPANDED_VIEW_ANIMATE_OUT_SCALE_AMOUNT = .75f;
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
     private static final int EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION = 100;
+    private static final int EXPANDED_VIEW_ANIMATE_POSITION_DURATION = 300;
+    private static final int EXPANDED_VIEW_DISMISS_DURATION = 250;
+    private static final int EXPANDED_VIEW_DRAG_ANIMATION_DURATION = 150;
     /**
      * Additional scale applied to expanded view when it is positioned inside a magnetic target.
      */
-    private static final float EXPANDED_VIEW_IN_TARGET_SCALE = 0.75f;
-    private static final int EXPANDED_VIEW_ANIMATE_POSITION_DURATION = 300;
-    private static final int EXPANDED_VIEW_DISMISS_DURATION = 250;
+    private static final float EXPANDED_VIEW_IN_TARGET_SCALE = 0.6f;
+    private static final float EXPANDED_VIEW_DRAG_SCALE = 0.5f;
 
     /** Spring config for the expanded view scale-in animation. */
     private final PhysicsAnimator.SpringConfig mScaleInSpringConfig =
@@ -72,6 +74,7 @@ public class BubbleBarAnimationHelper {
     private final Context mContext;
     private final BubbleBarLayerView mLayerView;
     private final BubblePositioner mPositioner;
+    private final int[] mTmpLocation = new int[2];
 
     private BubbleViewProvider mExpandedBubble;
     private boolean mIsExpanded = false;
@@ -220,6 +223,25 @@ public class BubbleBarAnimationHelper {
     }
 
     /**
+     * Animate the expanded bubble when it is being dragged
+     */
+    public void animateStartDrag() {
+        final BubbleBarExpandedView bbev = getExpandedView();
+        if (bbev == null) {
+            Log.w(TAG, "Trying to animate start drag without a bubble");
+            return;
+        }
+        bbev.setPivotX(bbev.getWidth() / 2f);
+        bbev.setPivotY(0f);
+        bbev.animate()
+                .scaleX(EXPANDED_VIEW_DRAG_SCALE)
+                .scaleY(EXPANDED_VIEW_DRAG_SCALE)
+                .setInterpolator(Interpolators.EMPHASIZED)
+                .setDuration(EXPANDED_VIEW_DRAG_ANIMATION_DURATION)
+                .start();
+    }
+
+    /**
      * Animates dismissal of currently expanded bubble
      *
      * @param endRunnable a runnable to run at the end of the animation
@@ -261,7 +283,10 @@ public class BubbleBarAnimationHelper {
                 .setDuration(EXPANDED_VIEW_ANIMATE_POSITION_DURATION)
                 .setInterpolator(Interpolators.EMPHASIZED_DECELERATE)
                 .withStartAction(() -> bbev.setAnimating(true))
-                .withEndAction(() -> bbev.setAnimating(false))
+                .withEndAction(() -> {
+                    bbev.setAnimating(false);
+                    bbev.resetPivot();
+                })
                 .start();
     }
 
@@ -277,25 +302,52 @@ public class BubbleBarAnimationHelper {
             Log.w(TAG, "Trying to snap the expanded view to target without a bubble");
             return;
         }
-        Point expandedViewCenter = getViewCenterOnScreen(bbev);
-
-        // Calculate the difference between the target's center coordinates and the object's.
-        // Animating the object's x/y properties by these values will center the object on top
-        // of the magnetic target.
-        float xDiff = target.getCenterOnScreen().x - expandedViewCenter.x;
-        float yDiff = target.getCenterOnScreen().y - expandedViewCenter.y;
 
         // Calculate scale of expanded view so it fits inside the magnetic target
         float bbevMaxSide = Math.max(bbev.getWidth(), bbev.getHeight());
-        float targetMaxSide = Math.max(target.getTargetView().getWidth(),
-                target.getTargetView().getHeight());
-        float scale = (targetMaxSide * EXPANDED_VIEW_IN_TARGET_SCALE) / bbevMaxSide;
+        View targetView = target.getTargetView();
+        float targetMaxSide = Math.max(targetView.getWidth(), targetView.getHeight());
+        // Reduce target size to have some padding between the target and expanded view
+        targetMaxSide *= EXPANDED_VIEW_IN_TARGET_SCALE;
+        float scaleInTarget = targetMaxSide / bbevMaxSide;
+
+        // Scale around the top center of the expanded view. Same as when dragging.
+        bbev.setPivotX(bbev.getWidth() / 2f);
+        bbev.setPivotY(0);
+
+        // When the view animates into the target, it is scaled down with the pivot at center top.
+        // Find the point on the view that would be the center of the view at its final scale.
+        // Once we know that, we can calculate x and y distance from the center of the target view
+        // and use that for the translation animation to ensure that the view at final scale is
+        // placed at the center of the target.
+
+        // Set mTmpLocation to the current location of the view on the screen, taking into account
+        // any scale applied.
+        bbev.getLocationOnScreen(mTmpLocation);
+        // Since pivotX is at the center of the x-axis, even at final scale, center of the view on
+        // x-axis will be the same as the center of the view at current size.
+        // Get scaled width of the view and adjust mTmpLocation so that point on x-axis is at the
+        // center of the view at its current size.
+        float currentWidth = bbev.getWidth() * bbev.getScaleX();
+        mTmpLocation[0] += currentWidth / 2;
+        // Since pivotY is at the top of the view, at final scale, top coordinate of the view
+        // remains the same.
+        // Get height of the view at final scale and adjust mTmpLocation so that point on y-axis is
+        // moved down by half of the height at final scale.
+        float targetHeight = bbev.getHeight() * scaleInTarget;
+        mTmpLocation[1] += targetHeight / 2;
+        // mTmpLocation is now set to the point on the view that will be the center of the view once
+        // scale is applied.
+
+        // Calculate the difference between the target's center coordinates and mTmpLocation
+        float xDiff = target.getCenterOnScreen().x - mTmpLocation[0];
+        float yDiff = target.getCenterOnScreen().y - mTmpLocation[1];
 
         bbev.animate()
                 .translationX(bbev.getTranslationX() + xDiff)
                 .translationY(bbev.getTranslationY() + yDiff)
-                .scaleX(scale)
-                .scaleY(scale)
+                .scaleX(scaleInTarget)
+                .scaleY(scaleInTarget)
                 .setDuration(EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION)
                 .setInterpolator(Interpolators.EMPHASIZED)
                 .withStartAction(() -> bbev.setAnimating(true))
@@ -319,8 +371,8 @@ public class BubbleBarAnimationHelper {
         }
         expandedView
                 .animate()
-                .scaleX(1f)
-                .scaleY(1f)
+                .scaleX(EXPANDED_VIEW_DRAG_SCALE)
+                .scaleY(EXPANDED_VIEW_DRAG_SCALE)
                 .setDuration(EXPANDED_VIEW_SNAP_TO_DISMISS_DURATION)
                 .setInterpolator(Interpolators.EMPHASIZED)
                 .withStartAction(() -> expandedView.setAnimating(true))
@@ -384,13 +436,5 @@ public class BubbleBarAnimationHelper {
         final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
         final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
         return new Size(width, height);
-    }
-
-    private Point getViewCenterOnScreen(View view) {
-        Point center = new Point();
-        int[] onScreenLocation = view.getLocationOnScreen();
-        center.x = (int) (onScreenLocation[0] + (view.getWidth() / 2f));
-        center.y = (int) (onScreenLocation[1] + (view.getHeight() / 2f));
-        return center;
     }
 }

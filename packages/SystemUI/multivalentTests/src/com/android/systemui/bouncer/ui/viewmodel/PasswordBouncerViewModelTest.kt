@@ -19,7 +19,6 @@ package com.android.systemui.bouncer.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
@@ -28,6 +27,7 @@ import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,11 +45,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val authenticationRepository = utils.authenticationRepository
-    private val authenticationInteractor =
-        utils.authenticationInteractor(
-            repository = authenticationRepository,
-        )
+    private val authenticationInteractor = utils.authenticationInteractor()
     private val sceneInteractor = utils.sceneInteractor()
     private val bouncerInteractor =
         utils.bouncerInteractor(
@@ -61,12 +57,13 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             authenticationInteractor = authenticationInteractor,
             actionButtonInteractor = utils.bouncerActionButtonInteractor(),
         )
+    private val isInputEnabled = MutableStateFlow(true)
 
     private val underTest =
         PasswordBouncerViewModel(
             viewModelScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
-            isInputEnabled = MutableStateFlow(true).asStateFlow(),
+            isInputEnabled.asStateFlow(),
         )
 
     @Before
@@ -123,8 +120,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onAuthenticateKeyPressed_whenCorrect() =
         testScope.runTest {
-            val authResult by
-                collectLastValue(authenticationInteractor.authenticationChallengeResult)
+            val authResult by collectLastValue(authenticationInteractor.onAuthenticationResult)
             lockDeviceAndOpenPasswordBouncer()
 
             underTest.onPasswordInputChanged("password")
@@ -169,8 +165,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onAuthenticateKeyPressed_correctAfterWrong() =
         testScope.runTest {
-            val authResult by
-                collectLastValue(authenticationInteractor.authenticationChallengeResult)
+            val authResult by collectLastValue(authenticationInteractor.onAuthenticationResult)
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
             lockDeviceAndOpenPasswordBouncer()
@@ -333,19 +328,15 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     ) {
         if (isLockedOut) {
             repeat(failedAttemptCount) {
-                authenticationRepository.reportAuthenticationAttempt(false)
+                utils.authenticationRepository.reportAuthenticationAttempt(false)
             }
-            val remainingTimeSeconds = 30
-            authenticationRepository.setLockoutDuration(remainingTimeSeconds * 1000)
-            authenticationRepository.lockout.value =
-                AuthenticationLockoutModel(
-                    failedAttemptCount = failedAttemptCount,
-                    remainingSeconds = remainingTimeSeconds,
-                )
+            utils.authenticationRepository.reportLockoutStarted(
+                30.seconds.inWholeMilliseconds.toInt()
+            )
         } else {
-            authenticationRepository.reportAuthenticationAttempt(true)
-            authenticationRepository.lockout.value = null
+            utils.authenticationRepository.reportAuthenticationAttempt(true)
         }
+        isInputEnabled.value = !isLockedOut
 
         runCurrent()
     }

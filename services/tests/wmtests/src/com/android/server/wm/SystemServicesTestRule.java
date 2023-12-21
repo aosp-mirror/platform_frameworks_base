@@ -134,7 +134,6 @@ public class SystemServicesTestRule implements TestRule {
     private StaticMockitoSession mMockitoSession;
     private ActivityTaskManagerService mAtmService;
     private WindowManagerService mWmService;
-    private WindowState.PowerManagerWrapper mPowerManagerWrapper;
     private InputManagerService mImService;
     private InputChannel mInputChannel;
     private Runnable mOnBeforeServicesCreated;
@@ -360,7 +359,6 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void setUpWindowManagerService() {
-        mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
         TestWindowManagerPolicy wmPolicy = new TestWindowManagerPolicy();
         TestDisplayWindowSettingsProvider testDisplayWindowSettingsProvider =
                 new TestDisplayWindowSettingsProvider();
@@ -483,10 +481,6 @@ public class SystemServicesTestRule implements TestRule {
 
     ActivityTaskManagerService getActivityTaskManagerService() {
         return mAtmService;
-    }
-
-    WindowState.PowerManagerWrapper getPowerManagerWrapper() {
-        return mPowerManagerWrapper;
     }
 
     /** Creates a no-op wakelock object. */

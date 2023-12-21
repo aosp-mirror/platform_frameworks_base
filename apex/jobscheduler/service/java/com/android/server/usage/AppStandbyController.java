@@ -59,6 +59,7 @@ import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.usage.AppIdleHistory.STANDBY_BUCKET_UNKNOWN;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -2144,6 +2145,15 @@ public class AppStandbyController
         synchronized (mAppIdleLock) {
             mAppIdleHistory.clearLastUsedTimestamps(packageName, userId);
         }
+    }
+
+    /**
+     * Flush the handler.
+     * Returns true if successfully flushed within the timeout, otherwise return false.
+     */
+    @VisibleForTesting
+    boolean flushHandler(@DurationMillisLong long timeoutMillis) {
+        return mHandler.runWithScissors(() -> {}, timeoutMillis);
     }
 
     @Override

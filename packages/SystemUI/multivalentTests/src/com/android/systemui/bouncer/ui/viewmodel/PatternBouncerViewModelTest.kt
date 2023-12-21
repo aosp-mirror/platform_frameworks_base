@@ -111,8 +111,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onDragEnd_whenCorrect() =
         testScope.runTest {
-            val authResult by
-                collectLastValue(authenticationInteractor.authenticationChallengeResult)
+            val authResult by collectLastValue(authenticationInteractor.onAuthenticationResult)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
             lockDeviceAndOpenPatternBouncer()
@@ -334,8 +333,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onDragEnd_correctAfterWrong() =
         testScope.runTest {
-            val authResult by
-                collectLastValue(authenticationInteractor.authenticationChallengeResult)
+            val authResult by collectLastValue(authenticationInteractor.onAuthenticationResult)
             val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)

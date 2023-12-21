@@ -637,14 +637,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
     WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
             int ownerId, boolean ownerCanAddInternalSystemWindow, IWindow iwindow) {
         return createWindow(parent, type, token, name, ownerId, UserHandle.getUserId(ownerId),
-                ownerCanAddInternalSystemWindow, mWm, getTestSession(token), iwindow,
-                mSystemServicesTestRule.getPowerManagerWrapper());
+                ownerCanAddInternalSystemWindow, mWm, getTestSession(token), iwindow);
     }
 
     static WindowState createWindow(WindowState parent, int type, WindowToken token,
             String name, int ownerId, int userId, boolean ownerCanAddInternalSystemWindow,
-            WindowManagerService service, Session session, IWindow iWindow,
-            WindowState.PowerManagerWrapper powerManagerWrapper) {
+            WindowManagerService service, Session session, IWindow iWindow) {
         SystemServicesTestRule.checkHoldsLock(service.mGlobalLock);
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
@@ -652,9 +650,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         attrs.packageName = "test";
 
         final WindowState w = new WindowState(service, session, iWindow, token, parent,
-                OP_NONE, attrs, VISIBLE, ownerId, userId,
-                ownerCanAddInternalSystemWindow,
-                powerManagerWrapper);
+                OP_NONE, attrs, VISIBLE, ownerId, userId, ownerCanAddInternalSystemWindow);
         // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
         // adding it to the token...
         token.addWindow(w);
@@ -1738,17 +1734,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
     static class TestStartingWindowOrganizer extends WindowOrganizerTests.StubOrganizer {
         private final ActivityTaskManagerService mAtm;
         private final WindowManagerService mWMService;
-        private final WindowState.PowerManagerWrapper mPowerManagerWrapper;
 
         private Runnable mRunnableWhenAddingSplashScreen;
         private final SparseArray<IBinder> mTaskAppMap = new SparseArray<>();
         private final HashMap<IBinder, WindowState> mAppWindowMap = new HashMap<>();
 
-        TestStartingWindowOrganizer(ActivityTaskManagerService service,
-                WindowState.PowerManagerWrapper powerManagerWrapper) {
+        TestStartingWindowOrganizer(ActivityTaskManagerService service) {
             mAtm = service;
             mWMService = mAtm.mWindowManager;
-            mPowerManagerWrapper = powerManagerWrapper;
             mAtm.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer(Runnable::run);
             mAtm.mTaskOrganizerController.registerTaskOrganizer(this);
         }
@@ -1767,8 +1760,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 final WindowState window = WindowTestsBase.createWindow(null,
                         TYPE_APPLICATION_STARTING, activity,
                         "Starting window", 0 /* ownerId */, 0 /* userId*/,
-                        false /* internalWindows */, mWMService, createTestSession(mAtm), iWindow,
-                        mPowerManagerWrapper);
+                        false /* internalWindows */, mWMService, createTestSession(mAtm), iWindow);
                 activity.mStartingWindow = window;
                 mAppWindowMap.put(info.appToken, window);
                 mTaskAppMap.put(info.taskInfo.taskId, info.appToken);

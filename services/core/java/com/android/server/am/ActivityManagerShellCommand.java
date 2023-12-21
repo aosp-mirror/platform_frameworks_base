@@ -2238,6 +2238,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         pw.println("Performing idle maintenance...");
         mInterface.sendIdleJobTrigger();
+        mInternal.performIdleMaintenance();
         return 0;
     }
 

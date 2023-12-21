@@ -399,4 +399,29 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
             assertThat(isolatedIcon?.value?.notifKey).isEqualTo("notif1")
         }
+
+    @Test
+    fun isolatedIcon_lastMessageIsFromReply_notNull() =
+        testComponent.runTest {
+            val icon: Icon = mock()
+            headsUpViewStateRepository.isolatedNotification.value = "notif1"
+            activeNotificationsRepository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply {
+                        addIndividualNotif(
+                            activeNotificationModel(
+                                key = "notif1",
+                                groupKey = "group",
+                                statusBarIcon = icon,
+                                isLastMessageFromReply = true,
+                            )
+                        )
+                    }
+                    .build()
+
+            val isolatedIcon by collectLastValue(underTest.isolatedIcon)
+            runCurrent()
+
+            assertThat(isolatedIcon?.value?.notifKey).isEqualTo("notif1")
+        }
 }

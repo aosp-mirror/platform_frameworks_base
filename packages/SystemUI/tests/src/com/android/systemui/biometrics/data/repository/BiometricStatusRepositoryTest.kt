@@ -24,7 +24,6 @@ import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_OTHER
 import android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_SETTINGS
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING
 import android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_FIND_SENSOR
-import android.platform.test.annotations.RequiresFlagsEnabled
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
@@ -48,7 +47,6 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
-@RequiresFlagsEnabled(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
@@ -62,6 +60,7 @@ class BiometricStatusRepositoryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         underTest = BiometricStatusRepositoryImpl(testScope.backgroundScope, biometricManager)
     }
 

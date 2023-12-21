@@ -76,6 +76,18 @@ class DeferredKeyActionExecutor {
         getActionsBufferWithLazyCleanUp(keyCode, downTime).setExecutable();
     }
 
+    /**
+     * Clears all the queued action for given key code.
+     *
+     * @param keyCode the key code whose queued actions will be cleared.
+     */
+    public void cancelQueuedAction(int keyCode) {
+        TimedActionsBuffer actionsBuffer = mBuffers.get(keyCode);
+        if (actionsBuffer != null) {
+            actionsBuffer.clear();
+        }
+    }
+
     private TimedActionsBuffer getActionsBufferWithLazyCleanUp(int keyCode, long downTime) {
         TimedActionsBuffer buffer = mBuffers.get(keyCode);
         if (buffer == null || buffer.getDownTime() != downTime) {
@@ -143,6 +155,10 @@ class DeferredKeyActionExecutor {
             for (Runnable action : mActions) {
                 action.run();
             }
+            mActions.clear();
+        }
+
+        void clear() {
             mActions.clear();
         }
 

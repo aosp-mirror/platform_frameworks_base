@@ -20,7 +20,6 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
-import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
@@ -29,7 +28,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,14 +38,10 @@ class FakeAuthenticationRepository(
     private val currentTime: () -> Long,
 ) : AuthenticationRepository {
 
-    override val authenticationChallengeResult = MutableSharedFlow<Boolean>()
-
     override val hintedPinLength: Int = HINTING_PIN_LENGTH
 
     private val _isPatternVisible = MutableStateFlow(true)
     override val isPatternVisible: StateFlow<Boolean> = _isPatternVisible.asStateFlow()
-
-    override val lockout: MutableStateFlow<AuthenticationLockoutModel?> = MutableStateFlow(null)
 
     override val hasLockoutOccurred = MutableStateFlow(false)
 
@@ -68,8 +62,6 @@ class FakeAuthenticationRepository(
     override val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> =
         _isPinEnhancedPrivacyEnabled.asStateFlow()
 
-    private var failedAttemptCount = 0
-    private var lockoutEndTimestamp = 0L
     private var credentialOverride: List<Any>? = null
     private var securityMode: SecurityMode = DEFAULT_AUTHENTICATION_METHOD.toSecurityMode()
 
@@ -89,11 +81,27 @@ class FakeAuthenticationRepository(
     }
 
     override suspend fun reportAuthenticationAttempt(isSuccessful: Boolean) {
-        failedAttemptCount = if (isSuccessful) 0 else failedAttemptCount + 1
-        authenticationChallengeResult.emit(isSuccessful)
+        if (isSuccessful) {
+            _failedAuthenticationAttempts.value = 0
+            _lockoutEndTimestamp = null
+            hasLockoutOccurred.value = false
+            lockoutStartedReportCount = 0
+        } else {
+            _failedAuthenticationAttempts.value++
+        }
     }
 
+    private var _failedAuthenticationAttempts = MutableStateFlow(0)
+    override val failedAuthenticationAttempts: StateFlow<Int> =
+        _failedAuthenticationAttempts.asStateFlow()
+
+    private var _lockoutEndTimestamp: Long? = null
+    override val lockoutEndTimestamp: Long?
+        get() = if (currentTime() < (_lockoutEndTimestamp ?: 0)) _lockoutEndTimestamp else null
+
     override suspend fun reportLockoutStarted(durationMs: Int) {
+        _lockoutEndTimestamp = (currentTime() + durationMs).takeIf { durationMs > 0 }
+        hasLockoutOccurred.value = true
         lockoutStartedReportCount++
     }
 
@@ -101,23 +109,8 @@ class FakeAuthenticationRepository(
         return (credentialOverride ?: DEFAULT_PIN).size
     }
 
-    override suspend fun getFailedAuthenticationAttemptCount(): Int {
-        return failedAttemptCount
-    }
-
-    override suspend fun getLockoutEndTimestamp(): Long {
-        return lockoutEndTimestamp
-    }
-
     fun setAutoConfirmFeatureEnabled(isEnabled: Boolean) {
         _isAutoConfirmFeatureEnabled.value = isEnabled
-    }
-
-    override suspend fun setLockoutDuration(durationMs: Int) {
-        lockoutEndTimestamp = if (durationMs > 0) currentTime() + durationMs else 0
-        if (durationMs > 0) {
-            hasLockoutOccurred.value = true
-        }
     }
 
     override suspend fun checkCredential(
@@ -136,8 +129,8 @@ class FakeAuthenticationRepository(
                 else -> error("Unexpected credential type ${credential.type}!")
             }
 
-        return if (isSuccessful || failedAttemptCount < MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
-            hasLockoutOccurred.value = false
+        val failedAttempts = _failedAuthenticationAttempts.value
+        return if (isSuccessful || failedAttempts < MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
             AuthenticationResultModel(
                 isSuccessful = isSuccessful,
                 lockoutDurationMs = 0,

@@ -130,7 +130,7 @@ public class CompanionTransportManager {
         synchronized (mTransports) {
             for (int i = 0; i < associationIds.length; i++) {
                 if (mTransports.contains(associationIds[i])) {
-                    mTransports.get(associationIds[i]).requestForResponse(message, data);
+                    mTransports.get(associationIds[i]).sendMessage(message, data);
                 }
             }
         }
@@ -220,7 +220,7 @@ public class CompanionTransportManager {
             if (transport == null) {
                 return CompletableFuture.failedFuture(new IOException("Missing transport"));
             }
-            return transport.requestForResponse(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
+            return transport.sendMessage(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
         }
     }
 

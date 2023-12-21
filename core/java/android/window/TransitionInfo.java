@@ -165,6 +165,9 @@ public final class TransitionInfo implements Parcelable {
     public static final int FLAGS_IS_NON_APP_WINDOW =
             FLAG_IS_WALLPAPER | FLAG_IS_INPUT_METHOD | FLAG_IS_SYSTEM_WINDOW;
 
+    /** The change will not participate in the animation. */
+    public static final int FLAGS_IS_OCCLUDED_NO_ANIMATION = FLAG_IS_OCCLUDED | FLAG_NO_ANIMATION;
+
     /** @hide */
     @IntDef(prefix = { "FLAG_" }, value = {
             FLAG_NONE,

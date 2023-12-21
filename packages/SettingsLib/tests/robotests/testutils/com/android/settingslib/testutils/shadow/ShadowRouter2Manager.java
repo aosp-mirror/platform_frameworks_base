@@ -15,11 +15,12 @@
  */
 package com.android.settingslib.testutils.shadow;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Implementation;

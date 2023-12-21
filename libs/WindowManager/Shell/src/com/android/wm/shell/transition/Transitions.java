@@ -757,6 +757,10 @@ public class Transitions implements RemoteCallable<Transitions>,
             }
             if (!change.hasFlags(FLAG_IS_OCCLUDED)) {
                 allOccluded = false;
+            } else if (change.hasAllFlags(TransitionInfo.FLAGS_IS_OCCLUDED_NO_ANIMATION)) {
+                // Remove the change because it should be invisible in the animation.
+                info.getChanges().remove(i);
+                continue;
             }
             // The change has already animated by back gesture, don't need to play transition
             // animation on it.

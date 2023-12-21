@@ -21,15 +21,15 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
-import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -79,7 +79,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             runCurrent()
             underTest.clearMessage()
-            assertThat(message).isEmpty()
+            assertThat(message).isNull()
 
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
@@ -149,7 +149,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Incomplete input.
             assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true))
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(message).isEmpty()
+            assertThat(message).isNull()
 
             // Correct input.
             assertThat(
@@ -159,7 +159,7 @@ class BouncerInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(message).isEmpty()
+            assertThat(message).isNull()
         }
 
     @Test
@@ -246,57 +246,40 @@ class BouncerInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun lockout() =
+    fun lockoutStarted() =
         testScope.runTest {
-            val lockout by collectLastValue(underTest.lockout)
+            val lockoutStartedEvents by collectValues(underTest.onLockoutStarted)
             val message by collectLastValue(underTest.message)
+
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            assertThat(lockout).isNull()
+            assertThat(lockoutStartedEvents).isEmpty()
+
+            // Try the wrong PIN repeatedly, until lockout is triggered:
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) { times ->
                 // Wrong PIN.
                 assertThat(underTest.authenticate(listOf(6, 7, 8, 9)))
                     .isEqualTo(AuthenticationResult.FAILED)
                 if (times < FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
-                    assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
+                    assertThat(lockoutStartedEvents).isEmpty()
+                    assertThat(message).isNotEmpty()
                 }
             }
-            assertThat(lockout)
-                .isEqualTo(
-                    AuthenticationLockoutModel(
-                        failedAttemptCount =
-                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT,
-                        remainingSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS,
-                    )
-                )
-            assertTryAgainMessage(
-                message,
-                FakeAuthenticationRepository.LOCKOUT_DURATION_MS.milliseconds.inWholeSeconds.toInt()
-            )
+            assertThat(authenticationInteractor.lockoutEndTimestamp).isNotNull()
+            assertThat(lockoutStartedEvents.size).isEqualTo(1)
+            assertThat(message).isNull()
 
-            // Correct PIN, but locked out, so doesn't change away from the bouncer scene:
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
-                .isEqualTo(AuthenticationResult.SKIPPED)
-            assertTryAgainMessage(
-                message,
-                FakeAuthenticationRepository.LOCKOUT_DURATION_MS.milliseconds.inWholeSeconds.toInt()
-            )
+            // Advance the time to finish the lockout:
+            advanceTimeBy(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS.seconds)
+            assertThat(authenticationInteractor.lockoutEndTimestamp).isNull()
+            assertThat(message).isNull()
+            assertThat(lockoutStartedEvents.size).isEqualTo(1)
 
-            lockout?.remainingSeconds?.let { seconds ->
-                repeat(seconds) { time ->
-                    advanceTimeBy(1000)
-                    val remainingTimeSec = seconds - time - 1
-                    if (remainingTimeSec > 0) {
-                        assertTryAgainMessage(message, remainingTimeSec)
-                    }
-                }
+            // Trigger lockout again:
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
+                // Wrong PIN.
+                underTest.authenticate(listOf(6, 7, 8, 9))
             }
-            assertThat(message).isEqualTo("")
-            assertThat(lockout).isNull()
-
-            // Correct PIN and no longer locked out so changes to the Gone scene:
-            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
-                .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(lockout).isNull()
+            assertThat(lockoutStartedEvents.size).isEqualTo(2)
         }
 
     @Test
@@ -325,13 +308,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             underTest.onIntentionalUserInput()
             verify(keyguardFaceAuthInteractor).onPrimaryBouncerUserInput()
         }
-
-    private fun assertTryAgainMessage(
-        message: String?,
-        time: Int,
-    ) {
-        assertThat(message).isEqualTo("Try again in $time seconds.")
-    }
 
     companion object {
         private const val MESSAGE_ENTER_YOUR_PIN = "Enter your PIN"

@@ -24,6 +24,7 @@ import android.app.WindowConfiguration.WindowingMode;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Size;
 import android.window.TaskFragmentAnimationParams;
@@ -105,6 +106,13 @@ class TaskFragmentContainer {
     @Nullable
     private final String mOverlayTag;
 
+    /**
+     * The launch options that was used to create this container. Must not be {@code null} for
+     * {@link #isOverlay()} container.
+     */
+    @Nullable
+    private final Bundle mLaunchOptions;
+
     /** Indicates whether the container was cleaned up after the last activity was removed. */
     private boolean mIsFinished;
 
@@ -165,7 +173,7 @@ class TaskFragmentContainer {
 
     /**
      * @see #TaskFragmentContainer(Activity, Intent, TaskContainer, SplitController,
-     * TaskFragmentContainer, String)
+     * TaskFragmentContainer, String, Bundle)
      */
     TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
                           @Nullable Intent pendingAppearedIntent,
@@ -173,7 +181,8 @@ class TaskFragmentContainer {
                           @NonNull SplitController controller,
                           @Nullable TaskFragmentContainer pairedPrimaryContainer) {
         this(pendingAppearedActivity, pendingAppearedIntent, taskContainer,
-                controller, pairedPrimaryContainer, null /* overlayTag */);
+                controller, pairedPrimaryContainer, null /* overlayTag */,
+                null /* launchOptions */);
     }
 
     /**
@@ -181,11 +190,14 @@ class TaskFragmentContainer {
      * container transaction.
      * @param pairedPrimaryContainer    when it is set, the new container will be add right above it
      * @param overlayTag                Sets to indicate this taskFragment is an overlay container
+     * @param launchOptions             The launch options to create this container. Must not be
+     *                                  {@code null} for an overlay container
      */
     TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
             @Nullable Intent pendingAppearedIntent, @NonNull TaskContainer taskContainer,
             @NonNull SplitController controller,
-            @Nullable TaskFragmentContainer pairedPrimaryContainer, @Nullable String overlayTag) {
+            @Nullable TaskFragmentContainer pairedPrimaryContainer, @Nullable String overlayTag,
+            @Nullable Bundle launchOptions) {
         if ((pendingAppearedActivity == null && pendingAppearedIntent == null)
                 || (pendingAppearedActivity != null && pendingAppearedIntent != null)) {
             throw new IllegalArgumentException(
@@ -195,6 +207,10 @@ class TaskFragmentContainer {
         mToken = new Binder("TaskFragmentContainer");
         mTaskContainer = taskContainer;
         mOverlayTag = overlayTag;
+        if (overlayTag != null) {
+            Objects.requireNonNull(launchOptions);
+        }
+        mLaunchOptions = launchOptions;
 
         if (pairedPrimaryContainer != null) {
             // The TaskFragment will be positioned right above the paired container.
@@ -903,8 +919,8 @@ class TaskFragmentContainer {
     }
 
     /**
-     * Returns the tag specified in {@link OverlayCreateParams#getTag()}. {@code null} if this
-     * taskFragment container is not an overlay container.
+     * Returns the tag specified in launch options. {@code null} if this taskFragment container is
+     * not an overlay container.
      */
     @Nullable
     String getOverlayTag() {

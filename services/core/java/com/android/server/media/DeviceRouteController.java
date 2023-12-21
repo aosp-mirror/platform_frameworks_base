@@ -81,6 +81,30 @@ import java.util.List;
         }
     }
 
+    /** Returns device route availability status. */
+    @MediaRoute2Info.SuitabilityStatus
+    static int getBuiltInSpeakerSuitabilityStatus(@NonNull Context context) {
+        if (!Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+            // Route is always suitable if the flag is disabled.
+            return MediaRoute2Info.SUITABILITY_STATUS_SUITABLE_FOR_DEFAULT_TRANSFER;
+        }
+
+        int availabilityStatus =
+                context.getResources()
+                        .getInteger(
+                                com.android.internal.R.integer
+                                        .config_mediaRouter_builtInSpeakerSuitability);
+
+        switch (availabilityStatus) {
+            case MediaRoute2Info.SUITABILITY_STATUS_SUITABLE_FOR_DEFAULT_TRANSFER:
+            case MediaRoute2Info.SUITABILITY_STATUS_SUITABLE_FOR_MANUAL_TRANSFER:
+            case MediaRoute2Info.SUITABILITY_STATUS_NOT_SUITABLE_FOR_TRANSFER:
+                return availabilityStatus;
+            default:
+                return MediaRoute2Info.SUITABILITY_STATUS_SUITABLE_FOR_DEFAULT_TRANSFER;
+        }
+    }
+
     /** Returns the currently selected device (built-in or wired) route. */
     @NonNull
     MediaRoute2Info getSelectedRoute();

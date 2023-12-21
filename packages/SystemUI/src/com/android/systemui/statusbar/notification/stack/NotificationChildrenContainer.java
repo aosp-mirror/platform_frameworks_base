@@ -869,8 +869,7 @@ public class NotificationChildrenContainer extends ViewGroup
         Path clipPath = mChildClipPath;
         if (clipPath != null) {
             final float translation;
-            if (child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) child;
+            if (child instanceof ExpandableNotificationRow notificationRow) {
                 translation = notificationRow.getTranslation();
             } else {
                 translation = child.getTranslationX();

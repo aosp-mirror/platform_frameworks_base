@@ -88,6 +88,10 @@ per-file InstantAppResolveInfo.aidl = file:/services/core/java/com/android/serve
 # Pinner
 per-file pinner-client.aconfig = file:/core/java/android/app/pinner/OWNERS
 
+# BackgroundInstallControlManager
+per-file BackgroundInstallControlManager.java = file:/services/core/java/com/android/server/pm/OWNERS
+per-file background_install_control_manager.aconfig = file:/services/core/java/com/android/server/pm/OWNERS
+
 # ResourcesManager
 per-file ResourcesManager.java = file:RESOURCES_OWNERS
 

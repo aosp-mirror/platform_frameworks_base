@@ -19,15 +19,18 @@ package com.android.server.display;
 import static android.text.TextUtils.formatSimple;
 
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessCorrection;
 import android.os.PowerManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.LongArray;
 import android.util.MathUtils;
 import android.util.Pair;
@@ -79,41 +82,50 @@ public abstract class BrightnessMappingStrategy {
      * Creates a BrightnessMapping strategy. We do not create a simple mapping strategy for idle
      * mode.
      *
-     * @param resources
+     * @param context
      * @param displayDeviceConfig
      * @param mode The auto-brightness mode. Different modes use different brightness curves
      * @param displayWhiteBalanceController
      * @return the BrightnessMappingStrategy
      */
     @Nullable
-    static BrightnessMappingStrategy create(Resources resources,
+    static BrightnessMappingStrategy create(Context context,
             DisplayDeviceConfig displayDeviceConfig,
             @AutomaticBrightnessController.AutomaticBrightnessMode int mode,
-            DisplayWhiteBalanceController displayWhiteBalanceController) {
+            @Nullable DisplayWhiteBalanceController displayWhiteBalanceController) {
 
         // Display independent, mode dependent values
         float[] brightnessLevelsNits = null;
         float[] brightnessLevels = null;
         float[] luxLevels = null;
+        int preset = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
+                Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_NORMAL, UserHandle.USER_CURRENT);
         switch (mode) {
             case AUTO_BRIGHTNESS_MODE_DEFAULT -> {
                 brightnessLevelsNits = displayDeviceConfig.getAutoBrightnessBrighteningLevelsNits();
-                luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux();
-                brightnessLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevels();
+                luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(mode, preset);
+                brightnessLevels =
+                        displayDeviceConfig.getAutoBrightnessBrighteningLevels(mode, preset);
             }
             case AUTO_BRIGHTNESS_MODE_IDLE -> {
-                brightnessLevelsNits = getFloatArray(resources.obtainTypedArray(
+                brightnessLevelsNits = getFloatArray(context.getResources().obtainTypedArray(
                         com.android.internal.R.array.config_autoBrightnessDisplayValuesNitsIdle));
-                luxLevels = getLuxLevels(resources.getIntArray(
+                luxLevels = getLuxLevels(context.getResources().getIntArray(
                         com.android.internal.R.array.config_autoBrightnessLevelsIdle));
+            }
+            case AUTO_BRIGHTNESS_MODE_DOZE -> {
+                luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(mode, preset);
+                brightnessLevels =
+                        displayDeviceConfig.getAutoBrightnessBrighteningLevels(mode, preset);
             }
         }
 
         // Display independent, mode independent values
-        float autoBrightnessAdjustmentMaxGamma = resources.getFraction(
+        float autoBrightnessAdjustmentMaxGamma = context.getResources().getFraction(
                 com.android.internal.R.fraction.config_autoBrightnessAdjustmentMaxGamma,
                 1, 1);
-        long shortTermModelTimeout = resources.getInteger(
+        long shortTermModelTimeout = context.getResources().getInteger(
                 com.android.internal.R.integer.config_autoBrightnessShortTermModelTimeout);
 
         // Display dependent values - used for physical mapping strategy nits -> brightness
@@ -818,6 +830,8 @@ public abstract class BrightnessMappingStrategy {
         private float mAutoBrightnessAdjustment;
         private float mUserLux;
         private float mUserBrightness;
+
+        @Nullable
         private final DisplayWhiteBalanceController mDisplayWhiteBalanceController;
 
         @AutomaticBrightnessController.AutomaticBrightnessMode
@@ -833,7 +847,7 @@ public abstract class BrightnessMappingStrategy {
         public PhysicalMappingStrategy(BrightnessConfiguration config, float[] nits,
                 float[] brightness, float maxGamma,
                 @AutomaticBrightnessController.AutomaticBrightnessMode int mode,
-                DisplayWhiteBalanceController displayWhiteBalanceController) {
+                @Nullable DisplayWhiteBalanceController displayWhiteBalanceController) {
 
             Preconditions.checkArgument(nits.length != 0 && brightness.length != 0,
                     "Nits and brightness arrays must not be empty!");

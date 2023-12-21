@@ -21,7 +21,6 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.ENABLED_B
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
-import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
@@ -35,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;

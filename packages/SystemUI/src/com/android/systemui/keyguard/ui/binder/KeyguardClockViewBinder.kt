@@ -32,8 +32,6 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import kotlinx.coroutines.launch
 
-private val TAG = KeyguardClockViewBinder::class.simpleName
-
 object KeyguardClockViewBinder {
     @JvmStatic
     fun bind(
@@ -71,12 +69,6 @@ object KeyguardClockViewBinder {
                 launch {
                     if (!migrateClocksToBlueprint()) return@launch
                     viewModel.clockShouldBeCentered.collect {
-                        applyConstraints(clockSection, keyguardRootView, true)
-                    }
-                }
-                launch {
-                    if (!migrateClocksToBlueprint()) return@launch
-                    viewModel.hasCustomWeatherDataDisplay.collect {
                         applyConstraints(clockSection, keyguardRootView, true)
                     }
                 }
@@ -132,7 +124,7 @@ object KeyguardClockViewBinder {
     fun applyConstraints(
         clockSection: ClockSection,
         rootView: ConstraintLayout,
-        animated: Boolean
+        animated: Boolean,
     ) {
         val constraintSet = ConstraintSet().apply { clone(rootView) }
         clockSection.applyConstraints(constraintSet)

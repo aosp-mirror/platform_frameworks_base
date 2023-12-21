@@ -41,3 +41,12 @@ flag {
   description: "This flag controls the fix for notifications autogroup summary icon updates"
   bug: "227693160"
 }
+
+flag {
+  name: "sensitive_notification_app_protection"
+  namespace: "systemui"
+  description: "This flag controls the sensitive notification app protections while screen sharing"
+  bug: "312784351"
+  # Referenced in WM where WM starts before DeviceConfig
+  is_fixed_read_only: true
+}

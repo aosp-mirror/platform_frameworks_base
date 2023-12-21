@@ -20,6 +20,7 @@ import android.view.LayoutInflater
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
+import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockMetadata
 import com.android.systemui.plugins.clocks.ClockProvider
 import com.android.systemui.plugins.clocks.ClockSettings
@@ -35,6 +36,12 @@ class DefaultClockProvider(
     val hasStepClockAnimation: Boolean = false,
     val migratedClocks: Boolean = false
 ) : ClockProvider {
+    private var messageBuffers: ClockMessageBuffers? = null
+
+    override fun initialize(buffers: ClockMessageBuffers?) {
+        messageBuffers = buffers
+    }
+
     override fun getClocks(): List<ClockMetadata> = listOf(ClockMetadata(DEFAULT_CLOCK_ID))
 
     override fun createClock(settings: ClockSettings): ClockController {
@@ -49,6 +56,7 @@ class DefaultClockProvider(
             settings,
             hasStepClockAnimation,
             migratedClocks,
+            messageBuffers,
         )
     }
 

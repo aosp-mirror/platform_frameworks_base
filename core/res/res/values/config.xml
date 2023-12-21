@@ -6862,4 +6862,8 @@
 
     <!-- Whether the media player is shown on the quick settings -->
     <bool name="config_quickSettingsShowMediaPlayer">true</bool>
+
+    <!-- Defines suitability of the built-in speaker route.
+         Refer to {@link MediaRoute2Info} to see supported values.  -->
+    <integer name="config_mediaRouter_builtInSpeakerSuitability">0</integer>
 </resources>

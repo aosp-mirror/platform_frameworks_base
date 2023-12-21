@@ -256,6 +256,9 @@
     <!-- launcher apps -->
     <uses-permission android:name="android.permission.ACCESS_SHORTCUTS" />
 
+    <!-- Permission to start Launcher's widget picker activity. -->
+    <uses-permission android:name="android.permission.START_WIDGET_PICKER_ACTIVITY" />
+
     <uses-permission android:name="android.permission.MODIFY_THEME_OVERLAY" />
 
     <!-- accessibility -->
@@ -973,15 +976,6 @@
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
-
-        <activity android:name="com.android.systemui.communal.widgets.WidgetPickerActivity"
-            android:theme="@style/Theme.EditWidgetsActivity"
-            android:excludeFromRecents="true"
-            android:autoRemoveFromRecents="true"
-            android:showOnLockScreen="true"
-            android:launchMode="singleTop"
-            android:exported="false">
-        </activity>
 
         <activity android:name="com.android.systemui.communal.widgets.EditWidgetsActivity"
             android:theme="@style/Theme.EditWidgetsActivity"

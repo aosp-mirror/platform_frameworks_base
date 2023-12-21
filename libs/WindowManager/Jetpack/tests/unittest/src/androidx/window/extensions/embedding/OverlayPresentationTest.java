@@ -18,14 +18,11 @@ package androidx.window.extensions.embedding;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static androidx.window.extensions.embedding.ActivityEmbeddingOptionsProperties.KEY_OVERLAY_TAG;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPairRuleBuilder;
-import static androidx.window.extensions.embedding.OverlayCreateParams.KEY_OVERLAY_CREATE_PARAMS;
-import static androidx.window.extensions.embedding.OverlayCreateParams.KEY_OVERLAY_CREATE_PARAMS_BOUNDS;
-import static androidx.window.extensions.embedding.OverlayCreateParams.KEY_OVERLAY_CREATE_PARAMS_TAG;
-import static androidx.window.extensions.embedding.OverlayCreateParams.KEY_OVERLAY_CREATE_PARAMS_TASK_ID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -45,6 +42,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -97,9 +95,6 @@ public class OverlayPresentationTest {
 
     @Rule
     public final SetFlagsRule mSetFlagRule = new SetFlagsRule();
-
-    private static final OverlayCreateParams TEST_OVERLAY_CREATE_PARAMS =
-            new OverlayCreateParams(TASK_ID, "test,", new Rect(0, 0, 200, 200));
 
     private SplitController.ActivityStartMonitor mMonitor;
 
@@ -165,37 +160,15 @@ public class OverlayPresentationTest {
     }
 
     @Test
-    public void testOverlayCreateParamsFromBundle() {
-        assertThat(OverlayCreateParams.fromBundle(new Bundle())).isNull();
-
-        assertThat(OverlayCreateParams.fromBundle(createOverlayCreateParamsTestBundle()))
-                .isEqualTo(TEST_OVERLAY_CREATE_PARAMS);
-    }
-
-    @Test
     public void testStartActivity_overlayFeatureDisabled_notInvokeCreateOverlayContainer() {
         mSetFlagRule.disableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_OVERLAY_PRESENTATION_FLAG);
 
-        mMonitor.onStartActivity(mActivity, mIntent, createOverlayCreateParamsTestBundle());
+        final Bundle optionsBundle = ActivityOptions.makeBasic().toBundle();
+        optionsBundle.putString(KEY_OVERLAY_TAG, "test");
+        mMonitor.onStartActivity(mActivity, mIntent, optionsBundle);
 
         verify(mSplitController, never()).createOrUpdateOverlayTaskFragmentIfNeeded(any(), any(),
-                anyInt(), any(), any());
-    }
-
-    @NonNull
-    private static Bundle createOverlayCreateParamsTestBundle() {
-        final Bundle bundle = new Bundle();
-
-        final Bundle paramsBundle = new Bundle();
-        paramsBundle.putInt(KEY_OVERLAY_CREATE_PARAMS_TASK_ID,
-                TEST_OVERLAY_CREATE_PARAMS.getTaskId());
-        paramsBundle.putString(KEY_OVERLAY_CREATE_PARAMS_TAG, TEST_OVERLAY_CREATE_PARAMS.getTag());
-        paramsBundle.putObject(KEY_OVERLAY_CREATE_PARAMS_BOUNDS,
-                TEST_OVERLAY_CREATE_PARAMS.getBounds());
-
-        bundle.putBundle(KEY_OVERLAY_CREATE_PARAMS, paramsBundle);
-
-        return bundle;
+                any(), any());
     }
 
     @Test
@@ -221,19 +194,11 @@ public class OverlayPresentationTest {
     }
 
     @Test
-    public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_taskIdNotMatch_throwException() {
-        assertThrows("The method must return null due to task mismatch between"
-                + " launchingActivity and OverlayCreateParams", IllegalArgumentException.class,
-                () -> createOrUpdateOverlayTaskFragmentIfNeeded(
-                        TEST_OVERLAY_CREATE_PARAMS, TASK_ID + 1));
-    }
-
-    @Test
     public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_anotherTagInTask_dismissOverlay() {
         createExistingOverlayContainers();
 
-        final TaskFragmentContainer overlayContainer = createOrUpdateOverlayTaskFragmentIfNeeded(
-                new OverlayCreateParams(TASK_ID, "test3", new Rect(0, 0, 100, 100)), TASK_ID);
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateOverlayTaskFragmentIfNeeded("test3");
 
         assertWithMessage("overlayContainer1 must be dismissed since the new overlay container"
                 + " is launched to the same task")
@@ -245,9 +210,9 @@ public class OverlayPresentationTest {
     public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_sameTagAnotherTask_dismissOverlay() {
         createExistingOverlayContainers();
 
-        final TaskFragmentContainer overlayContainer = createOrUpdateOverlayTaskFragmentIfNeeded(
-                new OverlayCreateParams(TASK_ID + 2, "test1", new Rect(0, 0, 100, 100)),
-                TASK_ID + 2);
+        doReturn(TASK_ID + 2).when(mActivity).getTaskId();
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateOverlayTaskFragmentIfNeeded("test1");
 
         assertWithMessage("overlayContainer1 must be dismissed since the new overlay container"
                 + " is launched with the same tag as an existing overlay container in a different "
@@ -261,9 +226,10 @@ public class OverlayPresentationTest {
         createExistingOverlayContainers();
 
         final Rect bounds = new Rect(0, 0, 100, 100);
+        mSplitController.setActivityStackAttributesCalculator(params ->
+                new ActivityStackAttributes.Builder().setRelativeBounds(bounds).build());
         final TaskFragmentContainer overlayContainer = createOrUpdateOverlayTaskFragmentIfNeeded(
-                new OverlayCreateParams(TASK_ID, "test1", bounds),
-                TASK_ID);
+                "test1");
 
         assertWithMessage("overlayContainer1 must be updated since the new overlay container"
                 + " is launched with the same tag and task")
@@ -279,9 +245,8 @@ public class OverlayPresentationTest {
     public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_dismissMultipleOverlays() {
         createExistingOverlayContainers();
 
-        final TaskFragmentContainer overlayContainer = createOrUpdateOverlayTaskFragmentIfNeeded(
-                new OverlayCreateParams(TASK_ID, "test2", new Rect(0, 0, 100, 100)),
-                TASK_ID);
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateOverlayTaskFragmentIfNeeded("test2");
 
         // OverlayContainer1 is dismissed since new container is launched in the same task with
         // different tag. OverlayContainer2 is dismissed since new container is launched with the
@@ -304,8 +269,11 @@ public class OverlayPresentationTest {
         mIntent.setComponent(new ComponentName(ApplicationProvider.getApplicationContext(),
                 MinimumDimensionActivity.class));
 
-        final TaskFragmentContainer overlayContainer = createOrUpdateOverlayTaskFragmentIfNeeded(
-                TEST_OVERLAY_CREATE_PARAMS, TASK_ID);
+        final Rect bounds = new Rect(0, 0, 100, 100);
+        mSplitController.setActivityStackAttributesCalculator(params ->
+                new ActivityStackAttributes.Builder().setRelativeBounds(bounds).build());
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateOverlayTaskFragmentIfNeeded("test");
         final IBinder overlayToken = overlayContainer.getTaskFragmentToken();
 
         assertThat(mSplitController.getAllOverlayTaskFragmentContainers())
@@ -316,7 +284,7 @@ public class OverlayPresentationTest {
 
         // Call createOrUpdateOverlayTaskFragmentIfNeeded again to check the update case.
         clearInvocations(mSplitPresenter);
-        createOrUpdateOverlayTaskFragmentIfNeeded(TEST_OVERLAY_CREATE_PARAMS, TASK_ID);
+        createOrUpdateOverlayTaskFragmentIfNeeded("test");
 
         verify(mSplitPresenter).resizeTaskFragment(mTransaction, overlayToken, new Rect());
         verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, overlayToken,
@@ -329,11 +297,11 @@ public class OverlayPresentationTest {
     public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_notInTaskBounds_expandOverlay() {
         final Rect bounds = new Rect(TASK_BOUNDS);
         bounds.offset(10, 10);
-        final OverlayCreateParams paramsOutsideTaskBounds = new OverlayCreateParams(TASK_ID,
-                "test", bounds);
+        mSplitController.setActivityStackAttributesCalculator(params ->
+                new ActivityStackAttributes.Builder().setRelativeBounds(bounds).build());
 
-        final TaskFragmentContainer overlayContainer = createOrUpdateOverlayTaskFragmentIfNeeded(
-                paramsOutsideTaskBounds, TASK_ID);
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateOverlayTaskFragmentIfNeeded("test");
         final IBinder overlayToken = overlayContainer.getTaskFragmentToken();
 
         assertThat(mSplitController.getAllOverlayTaskFragmentContainers())
@@ -344,7 +312,7 @@ public class OverlayPresentationTest {
 
         // Call createOrUpdateOverlayTaskFragmentIfNeeded again to check the update case.
         clearInvocations(mSplitPresenter);
-        createOrUpdateOverlayTaskFragmentIfNeeded(paramsOutsideTaskBounds, TASK_ID);
+        createOrUpdateOverlayTaskFragmentIfNeeded("test");
 
         verify(mSplitPresenter).resizeTaskFragment(mTransaction, overlayToken, new Rect());
         verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, overlayToken,
@@ -355,15 +323,17 @@ public class OverlayPresentationTest {
 
     @Test
     public void testCreateOrUpdateOverlayTaskFragmentIfNeeded_createOverlay() {
-        final TaskFragmentContainer overlayContainer = createOrUpdateOverlayTaskFragmentIfNeeded(
-                TEST_OVERLAY_CREATE_PARAMS, TASK_ID);
+        final Rect bounds = new Rect(0, 0, 100, 100);
+        mSplitController.setActivityStackAttributesCalculator(params ->
+                new ActivityStackAttributes.Builder().setRelativeBounds(bounds).build());
+        final TaskFragmentContainer overlayContainer =
+                createOrUpdateOverlayTaskFragmentIfNeeded("test");
 
         assertThat(mSplitController.getAllOverlayTaskFragmentContainers())
                 .containsExactly(overlayContainer);
         assertThat(overlayContainer.getTaskId()).isEqualTo(TASK_ID);
-        assertThat(overlayContainer
-                .areLastRequestedBoundsEqual(TEST_OVERLAY_CREATE_PARAMS.getBounds())).isTrue();
-        assertThat(overlayContainer.getOverlayTag()).isEqualTo(TEST_OVERLAY_CREATE_PARAMS.getTag());
+        assertThat(overlayContainer.areLastRequestedBoundsEqual(bounds)).isTrue();
+        assertThat(overlayContainer.getOverlayTag()).isEqualTo("test");
     }
 
     @Test
@@ -416,12 +386,14 @@ public class OverlayPresentationTest {
 
     @Test
     public void testGetTopNonFinishingActivityWithOverlay() {
-        createTestOverlayContainer(TASK_ID, "test1");
+        TaskFragmentContainer overlayContainer = createTestOverlayContainer(TASK_ID, "test1");
+
         final Activity activity = createMockActivity();
         final TaskFragmentContainer container = createMockTaskFragmentContainer(activity);
         final TaskContainer task = container.getTaskContainer();
 
-        assertThat(task.getTopNonFinishingActivity(true /* includeOverlay */)).isEqualTo(mActivity);
+        assertThat(task.getTopNonFinishingActivity(true /* includeOverlay */))
+                .isEqualTo(overlayContainer.getTopNonFinishingActivity());
         assertThat(task.getTopNonFinishingActivity(false /* includeOverlay */)).isEqualTo(activity);
     }
 
@@ -458,10 +430,11 @@ public class OverlayPresentationTest {
      * #createOrUpdateOverlayTaskFragmentIfNeeded}
      */
     @Nullable
-    private TaskFragmentContainer createOrUpdateOverlayTaskFragmentIfNeeded(
-            @NonNull OverlayCreateParams params, int taskId) {
-        return mSplitController.createOrUpdateOverlayTaskFragmentIfNeeded(mTransaction, params,
-                taskId, mIntent, mActivity);
+    private TaskFragmentContainer createOrUpdateOverlayTaskFragmentIfNeeded(@NonNull String tag) {
+        final Bundle launchOptions = new Bundle();
+        launchOptions.putString(KEY_OVERLAY_TAG, tag);
+        return mSplitController.createOrUpdateOverlayTaskFragmentIfNeeded(mTransaction,
+                launchOptions, mIntent, mActivity);
     }
 
     /** Creates a mock TaskFragment that has been registered and appeared in the organizer. */
@@ -475,10 +448,11 @@ public class OverlayPresentationTest {
 
     @NonNull
     private TaskFragmentContainer createTestOverlayContainer(int taskId, @NonNull String tag) {
+        Activity activity = createMockActivity();
         TaskFragmentContainer overlayContainer = mSplitController.newContainer(
-                null /* pendingAppearedActivity */, mIntent, mActivity, taskId,
-                null /* pairedPrimaryContainer */, tag);
-        setupTaskFragmentInfo(overlayContainer, mActivity);
+                null /* pendingAppearedActivity */, mIntent, activity, taskId,
+                null /* pairedPrimaryContainer */, tag, Bundle.EMPTY);
+        setupTaskFragmentInfo(overlayContainer, activity);
         return overlayContainer;
     }
 

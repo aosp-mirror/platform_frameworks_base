@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -26,6 +27,7 @@ import android.media.AudioManager;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
+import android.media.MediaRouter2Utils;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
@@ -39,6 +41,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.media.flags.Flags;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -78,6 +81,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private final Object mRequestLock = new Object();
     @GuardedBy("mRequestLock")
     private volatile SessionCreationRequest mPendingSessionCreationRequest;
+
+    private final Object mTransferLock = new Object();
+    @GuardedBy("mTransferLock")
+    @Nullable private volatile SessionCreationRequest mPendingTransferRequest;
 
     SystemMediaRoute2Provider(Context context, UserHandle user) {
         super(COMPONENT_NAME);
@@ -146,17 +153,30 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void requestCreateSession(long requestId, String packageName, String routeId,
-            Bundle sessionHints) {
+    public void requestCreateSession(
+            long requestId,
+            String packageName,
+            String routeId,
+            Bundle sessionHints,
+            @RoutingSessionInfo.TransferReason int transferReason,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName) {
         // Assume a router without MODIFY_AUDIO_ROUTING permission can't request with
         // a route ID different from the default route ID. The service should've filtered.
         if (TextUtils.equals(routeId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
             mCallback.onSessionCreated(this, requestId, mDefaultSessionInfo);
             return;
         }
-        if (TextUtils.equals(routeId, mSelectedRouteId)) {
-            mCallback.onSessionCreated(this, requestId, mSessionInfos.get(0));
-            return;
+
+        if (!Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+            if (TextUtils.equals(routeId, mSelectedRouteId)) {
+                RoutingSessionInfo currentSessionInfo;
+                synchronized (mLock) {
+                    currentSessionInfo = mSessionInfos.get(0);
+                }
+                mCallback.onSessionCreated(this, requestId, currentSessionInfo);
+                return;
+            }
         }
 
         synchronized (mRequestLock) {
@@ -165,10 +185,23 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 mCallback.onRequestFailed(this, mPendingSessionCreationRequest.mRequestId,
                         MediaRoute2ProviderService.REASON_UNKNOWN_ERROR);
             }
-            mPendingSessionCreationRequest = new SessionCreationRequest(requestId, routeId);
+            mPendingSessionCreationRequest =
+                    new SessionCreationRequest(
+                            requestId,
+                            routeId,
+                            RoutingSessionInfo.TRANSFER_REASON_FALLBACK,
+                            transferInitiatorUserHandle,
+                            transferInitiatorPackageName);
         }
 
-        transferToRoute(requestId, SYSTEM_SESSION_ID, routeId);
+        // Only unprivileged routers call this method, therefore we use TRANSFER_REASON_APP.
+        transferToRoute(
+                requestId,
+                transferInitiatorUserHandle,
+                transferInitiatorPackageName,
+                SYSTEM_SESSION_ID,
+                routeId,
+                transferReason);
     }
 
     @Override
@@ -193,12 +226,31 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void transferToRoute(long requestId, String sessionId, String routeId) {
+    public void transferToRoute(
+            long requestId,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName,
+            String sessionId,
+            String routeId,
+            @RoutingSessionInfo.TransferReason int transferReason) {
         if (TextUtils.equals(routeId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
             // The currently selected route is the default route.
             Log.w(TAG, "Ignoring transfer to " + MediaRoute2Info.ROUTE_ID_DEFAULT);
             return;
         }
+
+        if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+            synchronized (mTransferLock) {
+                mPendingTransferRequest =
+                        new SessionCreationRequest(
+                                requestId,
+                                routeId,
+                                transferReason,
+                                transferInitiatorUserHandle,
+                                transferInitiatorPackageName);
+            }
+        }
+
         MediaRoute2Info selectedDeviceRoute = mDeviceRouteController.getSelectedRoute();
         boolean isAvailableDeviceRoute =
                 mDeviceRouteController.getAvailableRoutes().stream()
@@ -217,6 +269,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             // The requested route is managed by the bluetooth route controller.
             mDeviceRouteController.transferTo(null);
             mBluetoothRouteController.transferTo(routeId);
+        }
+
+        if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()
+                && updateSessionInfosIfNeeded()) {
+            notifySessionInfoUpdated();
         }
     }
 
@@ -322,9 +379,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             MediaRoute2Info selectedDeviceRoute = mDeviceRouteController.getSelectedRoute();
             MediaRoute2Info selectedRoute = selectedDeviceRoute;
             MediaRoute2Info selectedBtRoute = mBluetoothRouteController.getSelectedRoute();
+            List<String> transferableRoutes = new ArrayList<>();
+
             if (selectedBtRoute != null) {
                 selectedRoute = selectedBtRoute;
-                builder.addTransferableRoute(selectedDeviceRoute.getId());
+                transferableRoutes.add(selectedDeviceRoute.getId());
             }
             mSelectedRouteId = selectedRoute.getId();
             mDefaultRoute =
@@ -337,12 +396,54 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 for (MediaRoute2Info route : mDeviceRouteController.getAvailableRoutes()) {
                     String routeId = route.getId();
                     if (!mSelectedRouteId.equals(routeId)) {
-                        builder.addTransferableRoute(routeId);
+                        transferableRoutes.add(routeId);
                     }
                 }
             }
             for (MediaRoute2Info route : mBluetoothRouteController.getTransferableRoutes()) {
-                builder.addTransferableRoute(route.getId());
+                transferableRoutes.add(route.getId());
+            }
+
+            for (String route : transferableRoutes) {
+                builder.addTransferableRoute(route);
+            }
+
+            if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+                int transferReason = RoutingSessionInfo.TRANSFER_REASON_FALLBACK;
+                UserHandle transferInitiatorUserHandle = null;
+                String transferInitiatorPackageName = null;
+
+                if (oldSessionInfo != null
+                        && containsSelectedRouteWithId(oldSessionInfo, selectedRoute.getId())) {
+                    transferReason = oldSessionInfo.getTransferReason();
+                    transferInitiatorUserHandle = oldSessionInfo.getTransferInitiatorUserHandle();
+                    transferInitiatorPackageName = oldSessionInfo.getTransferInitiatorPackageName();
+                }
+
+                synchronized (mTransferLock) {
+                    if (mPendingTransferRequest != null) {
+                        boolean isTransferringToTheSelectedRoute =
+                                mPendingTransferRequest.isTargetRoute(selectedRoute);
+                        boolean canBePotentiallyTransferred =
+                                mPendingTransferRequest.isInsideOfRoutesList(transferableRoutes);
+
+                        if (isTransferringToTheSelectedRoute) {
+                            transferReason = mPendingTransferRequest.mTransferReason;
+                            transferInitiatorUserHandle =
+                                    mPendingTransferRequest.mTransferInitiatorUserHandle;
+                            transferInitiatorPackageName =
+                                    mPendingTransferRequest.mTransferInitiatorPackageName;
+
+                            mPendingTransferRequest = null;
+                        } else if (!canBePotentiallyTransferred) {
+                            mPendingTransferRequest = null;
+                        }
+                    }
+                }
+
+                builder.setTransferReason(transferReason)
+                        .setTransferInitiator(
+                                transferInitiatorUserHandle, transferInitiatorPackageName);
             }
 
             RoutingSessionInfo newSessionInfo = builder.setProviderId(mUniqueId).build();
@@ -424,6 +525,22 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         return false;
     }
 
+    private boolean containsSelectedRouteWithId(
+            @Nullable RoutingSessionInfo sessionInfo, @NonNull String selectedRouteId) {
+        if (sessionInfo == null) {
+            return false;
+        }
+
+        List<String> selectedRoutes = sessionInfo.getSelectedRoutes();
+
+        if (selectedRoutes.size() != 1) {
+            throw new IllegalStateException("Selected routes list should contain only 1 route id.");
+        }
+
+        String oldSelectedRouteId = MediaRouter2Utils.getOriginalId(selectedRoutes.get(0));
+        return oldSelectedRouteId != null && oldSelectedRouteId.equals(selectedRouteId);
+    }
+
     void publishProviderState() {
         updateProviderState();
         notifyProviderState();
@@ -452,12 +569,47 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     private static class SessionCreationRequest {
-        final long mRequestId;
-        final String mRouteId;
+        private final long mRequestId;
+        @NonNull private final String mRouteId;
 
-        SessionCreationRequest(long requestId, String routeId) {
-            this.mRequestId = requestId;
-            this.mRouteId = routeId;
+        @RoutingSessionInfo.TransferReason private final int mTransferReason;
+
+        @NonNull private final UserHandle mTransferInitiatorUserHandle;
+        @NonNull private final String mTransferInitiatorPackageName;
+
+        SessionCreationRequest(
+                long requestId,
+                @NonNull String routeId,
+                @RoutingSessionInfo.TransferReason int transferReason,
+                @NonNull UserHandle transferInitiatorUserHandle,
+                @NonNull String transferInitiatorPackageName) {
+            mRequestId = requestId;
+            mRouteId = routeId;
+            mTransferReason = transferReason;
+            mTransferInitiatorUserHandle = transferInitiatorUserHandle;
+            mTransferInitiatorPackageName = transferInitiatorPackageName;
+        }
+
+        private boolean isTargetRoute(@Nullable MediaRoute2Info route2Info) {
+            if (route2Info == null) {
+                return false;
+            }
+
+            return isTargetRoute(route2Info.getId());
+        }
+
+        private boolean isTargetRoute(@Nullable String routeId) {
+            return mRouteId.equals(routeId);
+        }
+
+        private boolean isInsideOfRoutesList(@NonNull List<String> routesList) {
+            for (String routeId : routesList) {
+                if (isTargetRoute(routeId)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 

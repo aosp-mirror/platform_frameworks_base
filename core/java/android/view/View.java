@@ -32,6 +32,7 @@ import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_H
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH_ERROR_CODE;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
@@ -2309,6 +2310,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
 
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
+    private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
 
     static {
         EMPTY_STATE_SET = StateSet.get(0);
@@ -2393,6 +2395,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         | StateSet.VIEW_STATE_PRESSED);
 
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
+        sToolkitMetricsForFrameRateDecisionFlagValue = toolkitMetricsForFrameRateDecision();
     }
 
     /**
@@ -33056,7 +33059,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private float getSizePercentage() {
-        if (mResources == null || getVisibility() != VISIBLE) {
+        float alpha = mTransformationInfo != null ? mTransformationInfo.mAlpha : 1;
+        int visibility = mViewFlags & VISIBILITY_MASK;
+
+        if (mResources == null || alpha == 0 || visibility != VISIBLE) {
             return 0;
         }
 
@@ -33084,22 +33090,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ViewRootImpl viewRootImpl = getViewRootImpl();
         float sizePercentage = getSizePercentage();
         int frameRateCateogry = calculateFrameRateCategory(sizePercentage);
-        if (sToolkitSetFrameRateReadOnlyFlagValue && viewRootImpl != null
-                && sizePercentage > 0) {
-            if (mPreferredFrameRate < 0) {
-                if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
-                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
-                    frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
+        if (viewRootImpl != null && sizePercentage > 0) {
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                if (mPreferredFrameRate < 0) {
+                    if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
+                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
+                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
+                        frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
+                    }
+                } else {
+                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
                 }
-            } else {
-                viewRootImpl.votePreferredFrameRate(mPreferredFrameRate);
+                viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
             }
-            viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
+            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
+                viewRootImpl.recordViewPercentage(sizePercentage);
+            }
         }
     }
 

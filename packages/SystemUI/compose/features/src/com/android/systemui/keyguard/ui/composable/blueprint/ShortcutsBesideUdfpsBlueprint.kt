@@ -16,24 +16,13 @@
 
 package com.android.systemui.keyguard.ui.composable.blueprint
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.IntRect
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.modifiers.height
-import com.android.compose.modifiers.width
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
 import com.android.systemui.keyguard.ui.composable.section.ClockSection
@@ -42,12 +31,10 @@ import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
-import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 /**
  * Renders the lockscreen scene when showing with the default layout (e.g. vertical phone form
@@ -70,96 +57,107 @@ constructor(
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        val context = LocalContext.current
-        val lockIconBounds = lockSection.lockIconBounds(context)
         val isUdfpsVisible = viewModel.isUdfpsVisible
 
-        Box(
+        Layout(
+            content = {
+                // Constrained to above the lock icon.
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    with(statusBarSection) { StatusBar(modifier = Modifier.fillMaxWidth()) }
+                    with(clockSection) { SmallClock(modifier = Modifier.fillMaxWidth()) }
+                    with(smartSpaceSection) { SmartSpace(modifier = Modifier.fillMaxWidth()) }
+                    with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
+                    with(notificationSection) {
+                        Notifications(modifier = Modifier.fillMaxWidth().weight(1f))
+                    }
+                    if (!isUdfpsVisible) {
+                        with(ambientIndicationSection) {
+                            AmbientIndication(modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                }
+
+                // Constrained to the left of the lock icon (in left-to-right layouts).
+                with(bottomAreaSection) { Shortcut(isStart = true, applyPadding = false) }
+
+                with(lockSection) { LockIcon() }
+
+                // Constrained to the right of the lock icon (in left-to-right layouts).
+                with(bottomAreaSection) { Shortcut(isStart = false, applyPadding = false) }
+
+                // Aligned to bottom and constrained to below the lock icon.
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    if (isUdfpsVisible) {
+                        with(ambientIndicationSection) {
+                            AmbientIndication(modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+
+                    with(bottomAreaSection) { IndicationArea(modifier = Modifier.fillMaxWidth()) }
+                }
+            },
             modifier = modifier,
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().height { lockIconBounds.top },
-            ) {
-                with(statusBarSection) { StatusBar(modifier = Modifier.fillMaxWidth()) }
-                with(clockSection) { SmallClock(modifier = Modifier.fillMaxWidth()) }
-                with(smartSpaceSection) { SmartSpace(modifier = Modifier.fillMaxWidth()) }
-                with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
-                with(notificationSection) {
-                    Notifications(modifier = Modifier.fillMaxWidth().weight(1f))
-                }
-                if (!isUdfpsVisible) {
-                    with(ambientIndicationSection) {
-                        AmbientIndication(modifier = Modifier.fillMaxWidth())
-                    }
-                }
-            }
+        ) { measurables, constraints ->
+            check(measurables.size == 5)
+            val (
+                aboveLockIconMeasurable,
+                startSideShortcutMeasurable,
+                lockIconMeasurable,
+                endSideShortcutMeasurable,
+                belowLockIconMeasurable,
+            ) = measurables
 
-            val shortcutSizePx =
-                with(LocalDensity.current) { bottomAreaSection.shortcutSizeDp().toSize() }
+            val noMinConstraints =
+                constraints.copy(
+                    minWidth = 0,
+                    minHeight = 0,
+                )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier =
-                    Modifier.fillMaxWidth().offset {
-                        val rowTop =
-                            if (shortcutSizePx.height > lockIconBounds.height()) {
-                                (lockIconBounds.top -
-                                        (shortcutSizePx.height + lockIconBounds.height()) / 2)
-                                    .roundToInt()
-                            } else {
-                                lockIconBounds.top
-                            }
+            val lockIconPlaceable = lockIconMeasurable.measure(noMinConstraints)
+            val lockIconBounds =
+                IntRect(
+                    left = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Left],
+                    top = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Top],
+                    right = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Right],
+                    bottom = lockIconPlaceable[BlueprintAlignmentLines.LockIcon.Bottom],
+                )
 
-                        IntOffset(0, rowTop)
-                    },
-            ) {
-                Spacer(Modifier.weight(1f))
+            val aboveLockIconPlaceable =
+                aboveLockIconMeasurable.measure(
+                    noMinConstraints.copy(maxHeight = lockIconBounds.top)
+                )
+            val startSideShortcutPlaceable = startSideShortcutMeasurable.measure(noMinConstraints)
+            val endSideShortcutPlaceable = endSideShortcutMeasurable.measure(noMinConstraints)
+            val belowLockIconPlaceable =
+                belowLockIconMeasurable.measure(
+                    noMinConstraints.copy(maxHeight = constraints.maxHeight - lockIconBounds.bottom)
+                )
 
-                with(bottomAreaSection) { Shortcut(isStart = true) }
-
-                Spacer(Modifier.weight(1f))
-
-                with(lockSection) {
-                    LockIcon(
-                        modifier =
-                            Modifier.width { lockIconBounds.width() }
-                                .height { lockIconBounds.height() }
-                    )
-                }
-
-                Spacer(Modifier.weight(1f))
-
-                with(bottomAreaSection) { Shortcut(isStart = false) }
-
-                Spacer(Modifier.weight(1f))
-            }
-
-            Column(modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
-                if (isUdfpsVisible) {
-                    with(ambientIndicationSection) {
-                        AmbientIndication(modifier = Modifier.fillMaxWidth())
-                    }
-                }
-
-                with(bottomAreaSection) {
-                    IndicationArea(
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .padding(
-                                    horizontal =
-                                        dimensionResource(
-                                            R.dimen.keyguard_affordance_horizontal_offset
-                                        )
-                                )
-                                .padding(
-                                    bottom =
-                                        dimensionResource(
-                                            R.dimen.keyguard_affordance_vertical_offset
-                                        )
-                                )
-                                .heightIn(min = shortcutSizeDp().height),
-                    )
-                }
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                aboveLockIconPlaceable.place(
+                    x = 0,
+                    y = 0,
+                )
+                startSideShortcutPlaceable.placeRelative(
+                    x = lockIconBounds.left / 2 - startSideShortcutPlaceable.width / 2,
+                    y = lockIconBounds.center.y - startSideShortcutPlaceable.height / 2,
+                )
+                lockIconPlaceable.place(
+                    x = lockIconBounds.left,
+                    y = lockIconBounds.top,
+                )
+                endSideShortcutPlaceable.placeRelative(
+                    x =
+                        lockIconBounds.right + (constraints.maxWidth - lockIconBounds.right) / 2 -
+                            endSideShortcutPlaceable.width / 2,
+                    y = lockIconBounds.center.y - endSideShortcutPlaceable.height / 2,
+                )
+                belowLockIconPlaceable.place(
+                    x = 0,
+                    y = constraints.maxHeight - belowLockIconPlaceable.height,
+                )
             }
         }
     }

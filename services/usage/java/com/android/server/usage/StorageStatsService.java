@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.usage.ExternalStorageStats;
+import android.app.usage.Flags;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.StorageStats;
 import android.app.usage.UsageStatsManagerInternal;
@@ -434,6 +435,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         final long[] ceDataInodes = new long[packageNames.length];
         String[] codePaths = new String[0];
 
+        final PackageStats stats = new PackageStats(TAG);
         for (int i = 0; i < packageNames.length; i++) {
             try {
                 final ApplicationInfo appInfo = mPackage.getApplicationInfoAsUser(packageNames[i],
@@ -443,7 +445,11 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 } else {
                     if (appInfo.getCodePath() != null) {
                         codePaths = ArrayUtils.appendElement(String.class, codePaths,
-                                appInfo.getCodePath());
+                            appInfo.getCodePath());
+                    }
+                    if (Flags.getAppBytesByDataTypeApi()) {
+                        computeAppStatsByDataTypes(
+                            stats, appInfo.sourceDir);
                     }
                 }
             } catch (NameNotFoundException e) {
@@ -451,7 +457,6 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             }
         }
 
-        final PackageStats stats = new PackageStats(TAG);
         try {
             mInstaller.getAppSize(volumeUuid, packageNames, userId, getDefaultFlags(),
                     appId, ceDataInodes, codePaths, stats);
@@ -587,6 +592,9 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.codeBytes = stats.codeSize + stats.externalCodeSize;
         res.dataBytes = stats.dataSize + stats.externalDataSize;
         res.cacheBytes = stats.cacheSize + stats.externalCacheSize;
+        res.apkBytes = stats.apkSize;
+        res.libBytes = stats.libSize;
+        res.dmBytes = stats.dmSize;
         res.externalCacheBytes = stats.externalCacheSize;
         return res;
     }
@@ -893,5 +901,62 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 @NonNull String tag) {
             mStorageStatsAugmenters.add(Pair.create(tag, storageStatsAugmenter));
         }
+    }
+
+    private long getDirBytes(File dir) {
+        if (!dir.isDirectory()) {
+            return 0;
+        }
+
+        long size = 0;
+        try {
+            for (File file : dir.listFiles()) {
+                if (file.isFile()) {
+                    size += file.length();
+                    continue;
+                }
+                if (file.isDirectory()) {
+                    size += getDirBytes(file);
+                }
+            }
+        } catch (NullPointerException e) {
+            Slog.w(TAG, "Failed to list directory " + dir.getName());
+        }
+
+        return size;
+    }
+
+    private long getFileBytesInDir(File dir, String suffix) {
+        if (!dir.isDirectory()) {
+            return 0;
+        }
+
+        long size = 0;
+        try {
+            for (File file : dir.listFiles()) {
+                if (file.isFile() && file.getName().endsWith(suffix)) {
+                    size += file.length();
+                }
+            }
+        } catch (NullPointerException e) {
+             Slog.w(TAG, "Failed to list directory " + dir.getName());
+        }
+
+        return size;
+    }
+
+    private void computeAppStatsByDataTypes(
+        PackageStats stats, String sourceDirName) {
+
+        // Get apk, lib, dm file sizes.
+        File srcDir = new File(sourceDirName);
+        if (srcDir.isFile()) {
+            sourceDirName = srcDir.getParent();
+            srcDir = new File(sourceDirName);
+        }
+
+        stats.apkSize += getFileBytesInDir(srcDir, ".apk");
+        stats.dmSize += getFileBytesInDir(srcDir, ".dm");
+        stats.libSize += getDirBytes(new File(sourceDirName + "/lib/"));
     }
 }

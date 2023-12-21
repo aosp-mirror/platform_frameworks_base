@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.os.Handler
-import android.platform.test.annotations.RequiresFlagsEnabled
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -58,7 +57,6 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RequiresFlagsEnabled(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
 @SmallTest
 @RunWith(JUnit4::class)
 class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
@@ -80,6 +78,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         primaryBouncerInteractor =
             PrimaryBouncerInteractor(
                 bouncerRepository,
