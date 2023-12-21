@@ -189,6 +189,7 @@ final class PersistentDataStore {
     private static final String XML_ATTR_SELF_MANAGED = "self_managed";
     private static final String XML_ATTR_NOTIFY_DEVICE_NEARBY = "notify_device_nearby";
     private static final String XML_ATTR_REVOKED = "revoked";
+    private static final String XML_ATTR_PENDING = "pending";
     private static final String XML_ATTR_TIME_APPROVED = "time_approved";
     private static final String XML_ATTR_LAST_TIME_CONNECTED = "last_time_connected";
     private static final String XML_ATTR_SYSTEM_DATA_SYNC_FLAGS = "system_data_sync_flags";
@@ -464,8 +465,8 @@ final class PersistentDataStore {
 
         out.add(new AssociationInfo(associationId, userId, appPackage, tag,
                 MacAddress.fromString(deviceAddress), null, profile, null,
-                /* managedByCompanionApp */ false, notify, /* revoked */ false, timeApproved,
-                Long.MAX_VALUE, /* systemDataSyncFlags */ 0));
+                /* managedByCompanionApp */ false, notify, /* revoked */ false, /* pending */ false,
+                timeApproved, Long.MAX_VALUE, /* systemDataSyncFlags */ 0));
     }
 
     private static void readAssociationsV1(@NonNull TypedXmlPullParser parser,
@@ -496,6 +497,7 @@ final class PersistentDataStore {
         final boolean selfManaged = readBooleanAttribute(parser, XML_ATTR_SELF_MANAGED);
         final boolean notify = readBooleanAttribute(parser, XML_ATTR_NOTIFY_DEVICE_NEARBY);
         final boolean revoked = readBooleanAttribute(parser, XML_ATTR_REVOKED, false);
+        final boolean pending = readBooleanAttribute(parser, XML_ATTR_PENDING, false);
         final long timeApproved = readLongAttribute(parser, XML_ATTR_TIME_APPROVED, 0L);
         final long lastTimeConnected = readLongAttribute(
                 parser, XML_ATTR_LAST_TIME_CONNECTED, Long.MAX_VALUE);
@@ -504,7 +506,7 @@ final class PersistentDataStore {
 
         final AssociationInfo associationInfo = createAssociationInfoNoThrow(associationId, userId,
                 appPackage, tag, macAddress, displayName, profile, selfManaged, notify, revoked,
-                timeApproved, lastTimeConnected, systemDataSyncFlags);
+                pending, timeApproved, lastTimeConnected, systemDataSyncFlags);
         if (associationInfo != null) {
             out.add(associationInfo);
         }
@@ -558,8 +560,8 @@ final class PersistentDataStore {
         writeBooleanAttribute(serializer, XML_ATTR_SELF_MANAGED, a.isSelfManaged());
         writeBooleanAttribute(
                 serializer, XML_ATTR_NOTIFY_DEVICE_NEARBY, a.isNotifyOnDeviceNearby());
-        writeBooleanAttribute(
-                serializer, XML_ATTR_REVOKED, a.isRevoked());
+        writeBooleanAttribute(serializer, XML_ATTR_REVOKED, a.isRevoked());
+        writeBooleanAttribute(serializer, XML_ATTR_PENDING, a.isPending());
         writeLongAttribute(serializer, XML_ATTR_TIME_APPROVED, a.getTimeApprovedMs());
         writeLongAttribute(
                 serializer, XML_ATTR_LAST_TIME_CONNECTED, a.getLastTimeConnectedMs());
@@ -603,14 +605,14 @@ final class PersistentDataStore {
             @UserIdInt int userId, @NonNull String appPackage, @Nullable String tag,
             @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
             @Nullable String profile, boolean selfManaged, boolean notify, boolean revoked,
-            long timeApproved, long lastTimeConnected, int systemDataSyncFlags) {
+            boolean pending, long timeApproved, long lastTimeConnected, int systemDataSyncFlags) {
         AssociationInfo associationInfo = null;
         try {
             // We do not persist AssociatedDevice, which means that AssociationInfo retrieved from
             // datastore is not guaranteed to be identical to the one from initial association.
             associationInfo = new AssociationInfo(associationId, userId, appPackage, tag,
                     macAddress, displayName, profile, null, selfManaged, notify,
-                    revoked, timeApproved, lastTimeConnected, systemDataSyncFlags);
+                    revoked, pending, timeApproved, lastTimeConnected, systemDataSyncFlags);
         } catch (Exception e) {
             if (DEBUG) Log.w(TAG, "Could not create AssociationInfo", e);
         }
