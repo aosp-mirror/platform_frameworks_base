@@ -64,6 +64,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
+import android.location.LocationResult.BadLocationException;
 import android.location.altitude.AltitudeConverter;
 import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
@@ -910,7 +911,8 @@ public class LocationProviderManager extends
                                         < getRequest().getMinUpdateIntervalMillis() - maxJitterMs) {
                                     if (D) {
                                         Log.v(TAG, mName + " provider registration " + getIdentity()
-                                                + " dropped delivery - too fast");
+                                                + " dropped delivery - too fast (deltaMs="
+                                                + deltaMs + ").");
                                     }
                                     return false;
                                 }
@@ -2574,29 +2576,17 @@ public class LocationProviderManager extends
     @GuardedBy("mMultiplexerLock")
     @Nullable
     private LocationResult processReportedLocation(LocationResult locationResult) {
-        LocationResult processed = locationResult.filter(location -> {
-            if (!location.isMock()) {
-                if (location.getLatitude() == 0 && location.getLongitude() == 0) {
-                    Log.e(TAG, "blocking 0,0 location from " + mName + " provider");
-                    return false;
-                }
-            }
-
-            if (!location.isComplete()) {
-                Log.e(TAG, "blocking incomplete location from " + mName + " provider");
-                return false;
-            }
-
-            return true;
-        });
-        if (processed == null) {
+        try {
+            locationResult.validate();
+        } catch (BadLocationException e) {
+            Log.e(TAG, "Dropping invalid locations: " + e);
             return null;
         }
 
         // Attempt to add a missing MSL altitude on behalf of the provider.
         if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_LOCATION,
                 "enable_location_provider_manager_msl", true)) {
-            return processed.map(location -> {
+            return locationResult.map(location -> {
                 if (!location.hasMslAltitude() && location.hasAltitude()) {
                     try {
                         Location locationCopy = new Location(location);
@@ -2626,7 +2616,7 @@ public class LocationProviderManager extends
                 return location;
             });
         }
-        return processed;
+        return locationResult;
     }
 
     @GuardedBy("mMultiplexerLock")
