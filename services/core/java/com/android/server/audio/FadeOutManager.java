@@ -346,6 +346,7 @@ public final class FadeOutManager {
             if (apc.getPlayerProxy() != null) {
                 applyVolumeShaperInternal(apc, piid, volShaper,
                         skipRamp ? PLAY_SKIP_RAMP : PLAY_CREATE_IF_NEEDED);
+                mFadedPlayers.put(piid, volShaper);
             } else {
                 if (DEBUG) {
                     Slog.v(TAG, "Error fading out player piid:" + piid
