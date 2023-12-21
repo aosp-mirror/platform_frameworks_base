@@ -39,6 +39,7 @@ import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.VibratorHelper
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,6 +72,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
             FakeFeatureFlagsClassic().apply { set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false) }
         underTest =
             DefaultDeviceEntrySection(
+                TestScope().backgroundScope,
                 keyguardUpdateMonitor,
                 authController,
                 windowManager,

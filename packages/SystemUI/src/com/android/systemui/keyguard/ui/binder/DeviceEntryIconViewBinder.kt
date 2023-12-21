@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
@@ -48,6 +49,7 @@ object DeviceEntryIconViewBinder {
     @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
+        applicationScope: CoroutineScope,
         view: DeviceEntryIconView,
         viewModel: DeviceEntryIconViewModel,
         fgViewModel: DeviceEntryForegroundViewModel,
@@ -69,7 +71,7 @@ object DeviceEntryIconViewBinder {
                         view,
                         HapticFeedbackConstants.CONFIRM,
                     )
-                    viewModel.onLongPress()
+                    applicationScope.launch { viewModel.onLongPress() }
                 }
             }
 

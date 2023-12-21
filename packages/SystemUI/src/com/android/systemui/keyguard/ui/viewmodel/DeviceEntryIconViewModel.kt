@@ -20,6 +20,7 @@ import android.animation.FloatEvaluator
 import android.animation.IntEvaluator
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntrySourceInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -56,6 +57,7 @@ constructor(
     private val sceneContainerFlags: SceneContainerFlags,
     private val keyguardViewController: Lazy<KeyguardViewController>,
     private val deviceEntryInteractor: DeviceEntryInteractor,
+    private val deviceEntrySourceInteractor: DeviceEntrySourceInteractor,
 ) {
     private val intEvaluator = IntEvaluator()
     private val floatEvaluator = FloatEvaluator()
@@ -208,14 +210,13 @@ constructor(
             }
         }
 
-    fun onLongPress() {
-        // TODO (b/309804148): play auth ripple via an interactor
-
+    suspend fun onLongPress() {
         if (sceneContainerFlags.isEnabled()) {
             deviceEntryInteractor.attemptDeviceEntry()
         } else {
             keyguardViewController.get().showPrimaryBouncer(/* scrim */ true)
         }
+        deviceEntrySourceInteractor.attemptEnterDeviceFromDeviceEntryIcon()
     }
 
     private fun DeviceEntryIconView.IconType.toAccessibilityHintType():
