@@ -310,6 +310,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                         "swipeUpOnBouncer");
             }
         }
+
+        @Override
+        public void onSwipeDown() {
+            mViewMediatorCallback.onBouncerSwipeDown();
+        }
     };
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {

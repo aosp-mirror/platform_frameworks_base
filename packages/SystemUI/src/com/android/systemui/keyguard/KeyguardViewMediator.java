@@ -874,6 +874,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         @Override
+        public void onBouncerSwipeDown() {
+            mKeyguardViewControllerLazy.get().reset(/* hideBouncerWhenShowing= */ true);
+        }
+
+        @Override
         public void playTrustedSound() {
             KeyguardViewMediator.this.playTrustedSound();
         }
