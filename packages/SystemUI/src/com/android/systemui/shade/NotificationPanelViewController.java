@@ -1465,6 +1465,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
+        if (migrateClocksToBlueprint()) {
+            return;
+        }
         mKeyguardMediaController.attachSplitShadeContainer(container);
     }
 
