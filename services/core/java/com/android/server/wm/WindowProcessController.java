@@ -1271,8 +1271,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 & (ACTIVITY_STATE_FLAG_IS_VISIBLE | ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE)) != 0;
         if (!wasAnyVisible && anyVisible) {
             mAtm.mVisibleActivityProcessTracker.onAnyActivityVisible(this);
+            mAtm.mWindowManager.onProcessActivityVisibilityChanged(mUid, true /*visible*/);
         } else if (wasAnyVisible && !anyVisible) {
             mAtm.mVisibleActivityProcessTracker.onAllActivitiesInvisible(this);
+            mAtm.mWindowManager.onProcessActivityVisibilityChanged(mUid, false /*visible*/);
         } else if (wasAnyVisible && !wasResumed && hasResumedActivity()) {
             mAtm.mVisibleActivityProcessTracker.onActivityResumedWhileVisible(this);
         }
