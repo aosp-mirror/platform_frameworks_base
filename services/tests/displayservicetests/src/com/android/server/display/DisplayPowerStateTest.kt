@@ -23,8 +23,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.junit.MockitoJUnit
 
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import java.util.concurrent.Executor
 
 @SmallTest
 class DisplayPowerStateTest {
@@ -36,15 +38,21 @@ class DisplayPowerStateTest {
 
     private val mockBlanker = mock<DisplayBlanker>()
     private val mockColorFade = mock<ColorFade>()
+    private val mockExecutor = mock<Executor>()
 
     @Before
     fun setUp() {
-        displayPowerState = DisplayPowerState(mockBlanker, mockColorFade, 123, Display.STATE_ON)
+        displayPowerState = DisplayPowerState(mockBlanker, mockColorFade, 123, Display.STATE_ON,
+                mockExecutor)
     }
 
     @Test
     fun `destroys ColorFade on stop`() {
         displayPowerState.stop()
+        val runnableCaptor = argumentCaptor<Runnable>()
+
+        verify(mockExecutor).execute(runnableCaptor.capture())
+        runnableCaptor.firstValue.run()
 
         verify(mockColorFade).destroy()
     }
