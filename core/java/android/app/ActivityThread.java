@@ -407,7 +407,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private int mLastSessionId;
     // Holds the value of the last reported device ID value from the server for the top activity.
-    int mLastReportedDeviceId;
+    int mLastReportedDeviceId = Context.DEVICE_ID_DEFAULT;
     final ArrayMap<IBinder, CreateServiceData> mServicesData = new ArrayMap<>();
     @UnsupportedAppUsage
     final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
@@ -4856,10 +4856,13 @@ public final class ActivityThread extends ClientTransactionHandler
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManager.getService());
             if (!service.isUiContext()) { // WindowProviderService is a UI Context.
-                VirtualDeviceManager vdm = context.getSystemService(VirtualDeviceManager.class);
-                if (mLastReportedDeviceId == Context.DEVICE_ID_DEFAULT
-                        || vdm.isValidVirtualDeviceId(mLastReportedDeviceId)) {
+                if (mLastReportedDeviceId == Context.DEVICE_ID_DEFAULT) {
                     service.updateDeviceId(mLastReportedDeviceId);
+                } else {
+                    VirtualDeviceManager vdm = context.getSystemService(VirtualDeviceManager.class);
+                    if (vdm != null && vdm.isValidVirtualDeviceId(mLastReportedDeviceId)) {
+                        service.updateDeviceId(mLastReportedDeviceId);
+                    }
                 }
             }
             service.onCreate();
