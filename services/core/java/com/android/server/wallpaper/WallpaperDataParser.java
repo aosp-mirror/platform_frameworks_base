@@ -46,6 +46,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.JournaledFile;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.wallpaper.WallpaperData.BindSource;
 
 import libcore.io.IoUtils;
 
@@ -314,6 +315,14 @@ class WallpaperDataParser {
         wpData.mPadding.right = getAttributeInt(parser, "paddingRight", 0);
         wpData.mPadding.bottom = getAttributeInt(parser, "paddingBottom", 0);
         wallpaper.mWallpaperDimAmount = getAttributeFloat(parser, "dimAmount", 0f);
+        BindSource bindSource;
+        try {
+            bindSource = Enum.valueOf(BindSource.class,
+                    getAttributeString(parser, "bindSource", BindSource.UNKNOWN.name()));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            bindSource = BindSource.UNKNOWN;
+        }
+        wallpaper.mBindSource = bindSource;
         int dimAmountsCount = getAttributeInt(parser, "dimAmountsCount", 0);
         if (dimAmountsCount > 0) {
             SparseArray<Float> allDimAmounts = new SparseArray<>(dimAmountsCount);
@@ -362,6 +371,11 @@ class WallpaperDataParser {
 
     private float getAttributeFloat(TypedXmlPullParser parser, String name, float defValue) {
         return parser.getAttributeFloat(null, name, defValue);
+    }
+
+    private String getAttributeString(XmlPullParser parser, String name, String defValue) {
+        String s = parser.getAttributeValue(null, name);
+        return (s != null) ? s : defValue;
     }
 
     void saveSettingsLocked(int userId, WallpaperData wallpaper, WallpaperData lockWallpaper) {
@@ -423,6 +437,7 @@ class WallpaperDataParser {
         }
 
         out.attributeFloat(null, "dimAmount", wallpaper.mWallpaperDimAmount);
+        out.attribute(null, "bindSource", wallpaper.mBindSource.name());
         int dimAmountsCount = wallpaper.mUidToDimAmount.size();
         out.attributeInt(null, "dimAmountsCount", dimAmountsCount);
         if (dimAmountsCount > 0) {
