@@ -7869,6 +7869,18 @@
     <permission android:name="android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS"
         android:protectionLevel="signature|role" />
 
+    <!-- @SystemApi
+         @FlaggedApi("android.app.bic_client")
+         Allows app to call BackgroundInstallControlManager API to retrieve silently installed apps
+         for all users on device.
+         <p>Apps with a BackgroundInstallControlManager client will not be able to call any API without
+         this permission.
+         <p>Protection level: signature|role
+         @hide
+     -->
+    <permission android:name="android.permission.GET_BACKGROUND_INSTALLED_PACKAGES"
+        android:protectionLevel="signature|role" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

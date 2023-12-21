@@ -539,6 +539,8 @@ applications that come with the platform
         <permission name="android.permission.GET_BINDING_UID_IMPORTANCE"/>
         <!-- Permission required for CTS test NotificationManagerZenTest -->
         <permission name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
+        <!-- Permission required for BinaryTransparencyService shell API and host test -->
+        <permission name="android.permission.GET_BACKGROUND_INSTALLED_PACKAGES" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
