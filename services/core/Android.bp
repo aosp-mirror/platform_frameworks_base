@@ -212,6 +212,9 @@ java_library_static {
         "-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
         "-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 java_genrule {
@@ -230,6 +233,9 @@ java_genrule {
 java_library {
     name: "services.core",
     static_libs: ["services.core.priorityboosted"],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 java_library_host {
