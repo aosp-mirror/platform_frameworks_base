@@ -20,12 +20,12 @@ import android.content.Context
 import android.hardware.biometrics.SensorLocationInternal
 import com.android.settingslib.Utils
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.res.R
 import javax.inject.Inject
-import kotlin.math.roundToInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -45,6 +45,7 @@ constructor(
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     deviceEntryBackgroundViewModel: DeviceEntryBackgroundViewModel,
     fingerprintPropertyRepository: FingerprintPropertyRepository,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
     private val isSupported: Flow<Boolean> = deviceEntryUdfpsInteractor.isUdfpsSupported
     val iconLocation: Flow<IconLocation> =
@@ -73,11 +74,7 @@ constructor(
             .onStart {
                 emit(Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary))
             }
-    private val fgIconPadding: Flow<Int> =
-        configurationInteractor.scaleForResolution.map { scale ->
-            (context.resources.getDimensionPixelSize(R.dimen.lock_icon_padding) * scale)
-                .roundToInt()
-        }
+    private val fgIconPadding: Flow<Int> = udfpsOverlayInteractor.iconPadding
     val fgViewModel: Flow<DeviceEntryForegroundViewModel.ForegroundIconViewModel> =
         combine(
             fgIconColor,
