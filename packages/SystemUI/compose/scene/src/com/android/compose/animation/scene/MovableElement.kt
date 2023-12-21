@@ -18,7 +18,6 @@ package com.android.compose.animation.scene
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -102,7 +101,7 @@ private class ElementScopeImpl<ContentScope>(
         key: ValueKey,
         lerp: (start: T, stop: T, fraction: Float) -> T,
         canOverflow: Boolean
-    ): State<T> {
+    ): AnimatedState<T> {
         return animateSharedValueAsState(layoutImpl, scene, element, key, value, lerp, canOverflow)
     }
 

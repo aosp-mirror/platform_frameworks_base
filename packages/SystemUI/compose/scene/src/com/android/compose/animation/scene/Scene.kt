@@ -20,7 +20,6 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,7 +51,11 @@ internal class Scene(
     var targetSize by mutableStateOf(IntSize.Zero)
 
     /** The shared values in this scene that are not tied to a specific element. */
-    val sharedValues = SnapshotStateMap<ValueKey, Element.SharedValue<*>>()
+    private var _sharedValues: MutableMap<ValueKey, Element.SharedValue<*>>? = null
+    val sharedValues: MutableMap<ValueKey, Element.SharedValue<*>>
+        get() =
+            _sharedValues
+                ?: SnapshotStateMap<ValueKey, Element.SharedValue<*>>().also { _sharedValues = it }
 
     @Composable
     @OptIn(ExperimentalComposeUiApi::class)
@@ -110,7 +113,7 @@ internal class SceneScopeImpl(
         key: ValueKey,
         lerp: (T, T, Float) -> T,
         canOverflow: Boolean
-    ): State<T> {
+    ): AnimatedState<T> {
         return animateSharedValueAsState(
             layoutImpl = layoutImpl,
             scene = scene,

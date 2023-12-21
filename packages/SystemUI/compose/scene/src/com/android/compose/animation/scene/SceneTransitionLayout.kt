@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -245,7 +244,7 @@ interface SceneScope : BaseSceneScope {
         key: ValueKey,
         lerp: (start: T, stop: T, fraction: Float) -> T,
         canOverflow: Boolean,
-    ): State<T>
+    ): AnimatedState<T>
 }
 
 @Stable
@@ -272,7 +271,7 @@ interface ElementScope<ContentScope> {
         key: ValueKey,
         lerp: (start: T, stop: T, fraction: Float) -> T,
         canOverflow: Boolean,
-    ): State<T>
+    ): AnimatedState<T>
 
     /**
      * The content of this element.

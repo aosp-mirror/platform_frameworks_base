@@ -18,9 +18,12 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
@@ -29,8 +32,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.ui.util.lerp
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,10 +73,9 @@ class AnimatedSharedAsStateTest {
             val color by animateElementColorAsState(targetValues.color, key = TestValues.Value4)
 
             content {
-                // Make sure we read the values during composition, so that we recompose and call
-                // onCurrentValueChanged() with the latest values.
-                val currentValues = Values(int, float, dp, color)
-                SideEffect { onCurrentValueChanged(currentValues) }
+                LaunchedEffect(Unit) {
+                    snapshotFlow { Values(int, float, dp, color) }.collect(onCurrentValueChanged)
+                }
             }
         }
     }
@@ -88,11 +92,8 @@ class AnimatedSharedAsStateTest {
             val dp by animateElementDpAsState(targetValues.dp, key = TestValues.Value3)
             val color by animateElementColorAsState(targetValues.color, key = TestValues.Value4)
 
-            content {
-                // Make sure we read the values during composition, so that we recompose and call
-                // onCurrentValueChanged() with the latest values.
-                val currentValues = Values(int, float, dp, color)
-                SideEffect { onCurrentValueChanged(currentValues) }
+            LaunchedEffect(Unit) {
+                snapshotFlow { Values(int, float, dp, color) }.collect(onCurrentValueChanged)
             }
         }
     }
@@ -107,8 +108,9 @@ class AnimatedSharedAsStateTest {
         val dp by animateSceneDpAsState(targetValues.dp, key = TestValues.Value3)
         val color by animateSceneColorAsState(targetValues.color, key = TestValues.Value4)
 
-        val currentValues = Values(int, float, dp, color)
-        SideEffect { onCurrentValueChanged(currentValues) }
+        LaunchedEffect(Unit) {
+            snapshotFlow { Values(int, float, dp, color) }.collect(onCurrentValueChanged)
+        }
     }
 
     @Test
@@ -200,24 +202,22 @@ class AnimatedSharedAsStateTest {
             }
 
             at(16) {
-                // Given that we use MovableElement here, animateSharedXAsState is composed only
-                // once, in the highest scene (in this case, in toScene).
-                assertThat(lastValueInFrom).isEqualTo(fromValues)
+                assertThat(lastValueInFrom).isEqualTo(lerp(fromValues, toValues, fraction = 0.25f))
                 assertThat(lastValueInTo).isEqualTo(lerp(fromValues, toValues, fraction = 0.25f))
             }
 
             at(32) {
-                assertThat(lastValueInFrom).isEqualTo(fromValues)
+                assertThat(lastValueInFrom).isEqualTo(lerp(fromValues, toValues, fraction = 0.5f))
                 assertThat(lastValueInTo).isEqualTo(lerp(fromValues, toValues, fraction = 0.5f))
             }
 
             at(48) {
-                assertThat(lastValueInFrom).isEqualTo(fromValues)
+                assertThat(lastValueInFrom).isEqualTo(lerp(fromValues, toValues, fraction = 0.75f))
                 assertThat(lastValueInTo).isEqualTo(lerp(fromValues, toValues, fraction = 0.75f))
             }
 
             after {
-                assertThat(lastValueInFrom).isEqualTo(fromValues)
+                assertThat(lastValueInFrom).isEqualTo(toValues)
                 assertThat(lastValueInTo).isEqualTo(toValues)
             }
         }
@@ -278,6 +278,53 @@ class AnimatedSharedAsStateTest {
             after {
                 assertThat(lastValueInFrom).isEqualTo(toValues)
                 assertThat(lastValueInTo).isEqualTo(toValues)
+            }
+        }
+    }
+
+    @Test
+    fun readingAnimatedStateValueDuringCompositionThrows() {
+        assertThrows(IllegalStateException::class.java) {
+            rule.testTransition(
+                fromSceneContent = { animateSceneIntAsState(0, TestValues.Value1).value },
+                toSceneContent = {},
+                transition = {},
+            ) {}
+        }
+    }
+
+    @Test
+    fun readingAnimatedStateValueDuringCompositionIsStillPossible() {
+        @Composable
+        fun SceneScope.Bar(targetSize: Dp, modifier: Modifier = Modifier) {
+            val size = animateSceneDpAsState(targetSize, TestValues.Value1)
+            Box(modifier.element(TestElements.Bar).size(size.valueOrNull ?: targetSize))
+        }
+
+        rule.testTransition(
+            fromSceneContent = { Bar(targetSize = 10.dp) },
+            toSceneContent = { Bar(targetSize = 50.dp) },
+            transition = {
+                // The transition lasts 64ms = 4 frames.
+                spec = tween(durationMillis = 16 * 4, easing = LinearEasing)
+            },
+        ) {
+            before { onElement(TestElements.Bar).assertSizeIsEqualTo(10.dp, 10.dp) }
+
+            at(16) {
+                onElement(TestElements.Bar, TestScenes.SceneB).assertSizeIsEqualTo(20.dp, 20.dp)
+            }
+
+            at(32) {
+                onElement(TestElements.Bar, TestScenes.SceneB).assertSizeIsEqualTo(30.dp, 30.dp)
+            }
+
+            at(48) {
+                onElement(TestElements.Bar, TestScenes.SceneB).assertSizeIsEqualTo(40.dp, 40.dp)
+            }
+
+            after {
+                onElement(TestElements.Bar, TestScenes.SceneB).assertSizeIsEqualTo(50.dp, 50.dp)
             }
         }
     }

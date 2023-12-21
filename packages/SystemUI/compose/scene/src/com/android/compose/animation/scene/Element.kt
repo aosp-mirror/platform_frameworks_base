@@ -100,7 +100,11 @@ internal class Element(val key: ElementKey) {
         var targetSize by mutableStateOf(SizeUnspecified)
         var targetOffset by mutableStateOf(Offset.Unspecified)
 
-        val sharedValues = SnapshotStateMap<ValueKey, SharedValue<*>>()
+        private var _sharedValues: MutableMap<ValueKey, SharedValue<*>>? = null
+        val sharedValues: MutableMap<ValueKey, SharedValue<*>>
+            get() =
+                _sharedValues
+                    ?: SnapshotStateMap<ValueKey, SharedValue<*>>().also { _sharedValues = it }
 
         /**
          * The attached [ElementNode] a Modifier.element() for a given element and scene. During
