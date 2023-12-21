@@ -5472,20 +5472,13 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void setAutomaticZenRuleState(String id, Condition condition, boolean fromUser) {
+        public void setAutomaticZenRuleState(String id, Condition condition) {
             Objects.requireNonNull(id, "id is null");
             Objects.requireNonNull(condition, "Condition is null");
             condition.validate();
 
             enforcePolicyAccess(Binder.getCallingUid(), "setAutomaticZenRuleState");
-
-            if (android.app.Flags.modesApi()) {
-                if (fromUser != (condition.source == Condition.SOURCE_USER_ACTION)) {
-                    throw new IllegalArgumentException(String.format(
-                            "Mismatch between fromUser (%s) and condition.source (%s)",
-                            fromUser, Condition.sourceToString(condition.source)));
-                }
-            }
+            boolean fromUser = (condition.source == Condition.SOURCE_USER_ACTION);
 
             mZenModeHelper.setAutomaticZenRuleState(id, condition, computeZenOrigin(fromUser),
                     Binder.getCallingUid());
@@ -5508,7 +5501,7 @@ public class NotificationManagerService extends SystemService {
             if (android.app.Flags.modesApi()
                     && fromUser
                     && !isCallerSystemOrSystemUiOrShell()) {
-                throw new SecurityException(String.format(
+                throw new SecurityException(TextUtils.formatSimple(
                         "Calling %s with fromUser == true is only allowed for system", method));
             }
         }
