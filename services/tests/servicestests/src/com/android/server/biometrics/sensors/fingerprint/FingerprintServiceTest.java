@@ -40,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
+import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.fingerprint.IFingerprint;
@@ -61,6 +62,7 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
@@ -92,6 +94,7 @@ public class FingerprintServiceTest {
     private static final String NAME_VIRTUAL = "virtual";
     private static final List<FingerprintSensorPropertiesInternal> HIDL_AUTHENTICATORS =
             List.of();
+    private static final String OP_PACKAGE_NAME = "FingerprintServiceTest/SystemUi";
 
     @Rule
     public final MockitoRule mMockito = MockitoJUnit.rule();
@@ -341,6 +344,24 @@ public class FingerprintServiceTest {
         ArgumentCaptor<Integer> uidCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mVdmInternal).onAuthenticationPrompt(uidCaptor.capture());
         assertEquals((int) (uidCaptor.getValue()), Binder.getCallingUid());
+    }
+
+    @Test
+    public void testOptionsForDetect() throws Exception {
+        FingerprintAuthenticateOptions fingerprintAuthenticateOptions =
+                new FingerprintAuthenticateOptions.Builder()
+                        .setOpPackageName(ComponentName.unflattenFromString(
+                                OP_PACKAGE_NAME).getPackageName())
+                        .build();
+
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.config_keyguardComponent,
+                OP_PACKAGE_NAME);
+        initServiceWithAndWait(NAME_DEFAULT);
+        mService.mServiceWrapper.detectFingerprint(mToken, mServiceReceiver,
+                fingerprintAuthenticateOptions);
+
+        assertThat(fingerprintAuthenticateOptions.getSensorId()).isEqualTo(ID_DEFAULT);
     }
 
 

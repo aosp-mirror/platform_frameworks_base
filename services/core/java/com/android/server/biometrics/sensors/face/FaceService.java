@@ -78,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -99,6 +100,9 @@ public class FaceService extends SystemService {
             mBiometricStateCallback;
     @NonNull
     private final FaceProviderFunction mFaceProviderFunction;
+    @NonNull private final Function<String, FaceProvider> mFaceProvider;
+    @NonNull
+    private final Supplier<String[]> mAidlInstanceNameSupplier;
 
     interface FaceProviderFunction {
         FaceProvider getFaceProvider(Pair<String, SensorProps[]> filteredSensorProps,
@@ -671,23 +675,9 @@ public class FaceService extends SystemService {
             final List<ServiceProvider> providers = new ArrayList<>();
 
             for (String instance : instances) {
-                final String fqName = IFace.DESCRIPTOR + "/" + instance;
-                final IFace face = IFace.Stub.asInterface(
-                        Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
-                if (face == null) {
-                    Slog.e(TAG, "Unable to get declared service: " + fqName);
-                    continue;
-                }
-                try {
-                    final SensorProps[] props = face.getSensorProps();
-                    final FaceProvider provider = new FaceProvider(getContext(),
-                            mBiometricStateCallback, props, instance, mLockoutResetDispatcher,
-                            BiometricContext.getInstance(getContext()),
-                            false /* resetLockoutRequiresChallenge */);
-                    providers.add(provider);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
-                }
+                final FaceProvider provider = mFaceProvider.apply(instance);
+                Slog.i(TAG, "Adding AIDL provider: " + instance);
+                providers.add(provider);
             }
 
             return providers;
@@ -700,7 +690,7 @@ public class FaceService extends SystemService {
 
             mRegistry.registerAll(() -> {
                 List<String> aidlSensors = new ArrayList<>();
-                final String[] instances = ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR);
+                final String[] instances = mAidlInstanceNameSupplier.get();
                 if (instances != null) {
                     aidlSensors.addAll(Lists.newArrayList(instances));
                 }
@@ -813,11 +803,15 @@ public class FaceService extends SystemService {
 
     public FaceService(Context context) {
         this(context, null /* faceProviderFunction */, () -> IBiometricService.Stub.asInterface(
-                ServiceManager.getService(Context.BIOMETRIC_SERVICE)));
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE)), null /* faceProvider */,
+                () -> ServiceManager.getDeclaredInstances(IFace.DESCRIPTOR));
     }
 
-    @VisibleForTesting FaceService(Context context, FaceProviderFunction faceProviderFunction,
-            Supplier<IBiometricService> biometricServiceSupplier) {
+    @VisibleForTesting FaceService(Context context,
+            FaceProviderFunction faceProviderFunction,
+            Supplier<IBiometricService> biometricServiceSupplier,
+            Function<String, FaceProvider> faceProvider,
+            Supplier<String[]> aidlInstanceNameSupplier) {
         super(context);
         mServiceWrapper = new FaceServiceWrapper();
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
@@ -830,6 +824,28 @@ public class FaceService extends SystemService {
                 mBiometricStateCallback.start(mRegistry.getProviders());
             }
         });
+        mAidlInstanceNameSupplier = aidlInstanceNameSupplier;
+
+        mFaceProvider = faceProvider != null ? faceProvider : (name) -> {
+            final String fqName = IFace.DESCRIPTOR + "/" + name;
+            final IFace face = IFace.Stub.asInterface(
+                    Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
+            if (face == null) {
+                Slog.e(TAG, "Unable to get declared service: " + fqName);
+                return null;
+            }
+            try {
+                final SensorProps[] props = face.getSensorProps();
+                return new FaceProvider(getContext(),
+                        mBiometricStateCallback, props, name, mLockoutResetDispatcher,
+                        BiometricContext.getInstance(getContext()),
+                        false /* resetLockoutRequiresChallenge */);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
+            }
+
+            return null;
+        };
 
         if (Flags.deHidl()) {
             mFaceProviderFunction = faceProviderFunction != null ? faceProviderFunction :
