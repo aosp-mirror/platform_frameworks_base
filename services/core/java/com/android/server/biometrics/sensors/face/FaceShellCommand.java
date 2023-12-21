@@ -42,6 +42,8 @@ public class FaceShellCommand extends ShellCommand {
                     return doHelp();
                 case "sync":
                     return doSync();
+                case "notification":
+                    return doNotify();
                 default:
                     getOutPrintWriter().println("Unrecognized command: " + cmd);
             }
@@ -59,6 +61,8 @@ public class FaceShellCommand extends ShellCommand {
         pw.println("      Print this help text.");
         pw.println("  sync");
         pw.println("      Sync enrollments now (virtualized sensors only).");
+        pw.println("  notification");
+        pw.println("     Sends a Face re-enrollment notification");
     }
 
     private int doHelp() {
@@ -68,6 +72,11 @@ public class FaceShellCommand extends ShellCommand {
 
     private int doSync() {
         mService.syncEnrollmentsNow();
+        return 0;
+    }
+
+    private int doNotify() {
+        mService.sendFaceReEnrollNotification();
         return 0;
     }
 }
