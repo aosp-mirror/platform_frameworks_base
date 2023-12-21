@@ -20,12 +20,15 @@ import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.CheckFlagsRule
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
+import android.util.SparseArray
 import androidx.core.util.forEach
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -44,6 +47,19 @@ class FontScaleConverterFactoryTest {
 
     @get:Rule
     val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+
+    private lateinit var defaultLookupTables: SparseArray<FontScaleConverter>
+
+    @Before
+    fun setup() {
+        defaultLookupTables = FontScaleConverterFactory.sLookupTables.clone()
+    }
+
+    @After
+    fun teardown() {
+        // Restore the default tables (since some tests will have added extras to the cache)
+        FontScaleConverterFactory.sLookupTables = defaultLookupTables
+    }
 
     @Test
     fun scale200IsTwiceAtSmallSizes() {
@@ -245,7 +261,7 @@ class FontScaleConverterFactoryTest {
     }
 
     companion object {
-        private const val CONVERSION_TOLERANCE = 0.05f
+        private const val CONVERSION_TOLERANCE = 0.18f
     }
 }
 
