@@ -109,6 +109,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             )
         underTest =
             DeviceEntrySideFpsOverlayInteractor(
+                testScope.backgroundScope,
                 mContext,
                 FakeDeviceEntryFingerprintAuthRepository(),
                 primaryBouncerInteractor,
