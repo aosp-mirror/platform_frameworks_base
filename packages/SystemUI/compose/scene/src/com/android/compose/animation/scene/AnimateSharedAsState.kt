@@ -18,7 +18,6 @@ package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.graphics.Color
@@ -159,7 +158,10 @@ internal fun <T> animateSharedValueAsState(
     }
 
     return remember(layoutImpl, element, sharedValue, lerp, canOverflow) {
-        derivedStateOf { computeValue(layoutImpl, element, sharedValue, lerp, canOverflow) }
+        object : State<T> {
+            override val value: T
+                get() = computeValue(layoutImpl, element, sharedValue, lerp, canOverflow)
+        }
     }
 }
 
