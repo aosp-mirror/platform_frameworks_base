@@ -77,7 +77,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @VisibleForTesting
     SparseArray<SparseArray<Float>> mUsersScales = new SparseArray();
 
-    private static class ControllerSupplier extends
+    private static class WindowMagnificationControllerSupplier extends
             DisplayIdIndexSupplier<WindowMagnificationController> {
 
         private final Context mContext;
@@ -86,7 +86,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
         private final SysUiState mSysUiState;
         private final SecureSettings mSecureSettings;
 
-        ControllerSupplier(Context context, Handler handler,
+        WindowMagnificationControllerSupplier(Context context, Handler handler,
                 WindowMagnifierCallback windowMagnifierCallback,
                 DisplayManager displayManager, SysUiState sysUiState,
                 SecureSettings secureSettings) {
@@ -118,7 +118,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     }
 
     @VisibleForTesting
-    DisplayIdIndexSupplier<WindowMagnificationController> mMagnificationControllerSupplier;
+    DisplayIdIndexSupplier<WindowMagnificationController> mWindowMagnificationControllerSupplier;
 
     private static class SettingsSupplier extends
             DisplayIdIndexSupplier<MagnificationSettingsController> {
@@ -168,7 +168,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
         mOverviewProxyService = overviewProxyService;
         mDisplayTracker = displayTracker;
         mA11yLogger = a11yLogger;
-        mMagnificationControllerSupplier = new ControllerSupplier(context,
+        mWindowMagnificationControllerSupplier = new WindowMagnificationControllerSupplier(context,
                 mHandler, mWindowMagnifierCallback,
                 displayManager, sysUiState, secureSettings);
         mMagnificationSettingsSupplier = new SettingsSupplier(context,
@@ -196,7 +196,8 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     private void updateSysUiStateFlag() {
         //TODO(b/187510533): support multi-display once SysuiState supports it.
         final WindowMagnificationController controller =
-                mMagnificationControllerSupplier.valueAt(mDisplayTracker.getDefaultDisplayId());
+                mWindowMagnificationControllerSupplier.valueAt(
+                        mDisplayTracker.getDefaultDisplayId());
         if (controller != null) {
             controller.updateSysUIStateFlag();
         } else {
@@ -212,7 +213,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
             float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
         final WindowMagnificationController windowMagnificationController =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
             windowMagnificationController.enableWindowMagnification(scale, centerX, centerY,
                     magnificationFrameOffsetRatioX, magnificationFrameOffsetRatioY, callback);
@@ -222,7 +223,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @MainThread
     void setScaleForWindowMagnification(int displayId, float scale) {
         final WindowMagnificationController windowMagnificationController =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
             windowMagnificationController.setScale(scale);
         }
@@ -231,7 +232,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @MainThread
     void moveWindowMagnifier(int displayId, float offsetX, float offsetY) {
         final WindowMagnificationController windowMagnificationcontroller =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationcontroller != null) {
             windowMagnificationcontroller.moveWindowMagnifier(offsetX, offsetY);
         }
@@ -241,7 +242,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     void moveWindowMagnifierToPositionInternal(int displayId, float positionX, float positionY,
             IRemoteMagnificationAnimationCallback callback) {
         final WindowMagnificationController windowMagnificationController =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
             windowMagnificationController.moveWindowMagnifierToPosition(positionX, positionY,
                     callback);
@@ -252,7 +253,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     void disableWindowMagnification(int displayId,
             @Nullable IRemoteMagnificationAnimationCallback callback) {
         final WindowMagnificationController windowMagnificationController =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
             windowMagnificationController.deleteWindowMagnification(callback);
         }
@@ -417,7 +418,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @MainThread
     private void onSetMagnifierSizeInternal(int displayId, int index) {
         final WindowMagnificationController windowMagnificationController =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
             windowMagnificationController.changeMagnificationSize(index);
         }
@@ -426,7 +427,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @MainThread
     private void onSetDiagonalScrollingInternal(int displayId, boolean enable) {
         final WindowMagnificationController windowMagnificationController =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
             windowMagnificationController.setDiagonalScrolling(enable);
         }
@@ -435,7 +436,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @MainThread
     private void onEditMagnifierSizeModeInternal(int displayId, boolean enable) {
         final WindowMagnificationController windowMagnificationController =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null && windowMagnificationController.isActivated()) {
             windowMagnificationController.setEditMagnifierSizeMode(enable);
         }
@@ -444,7 +445,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @MainThread
     private void onModeSwitchInternal(int displayId, int newMode) {
         final WindowMagnificationController windowMagnificationController =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         final boolean isWindowMagnifierActivated = windowMagnificationController.isActivated();
         final boolean isSwitchToWindowMode = (newMode == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
         final boolean changed = isSwitchToWindowMode ^ isWindowMagnifierActivated;
@@ -463,7 +464,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @MainThread
     private void onSettingsPanelVisibilityChangedInternal(int displayId, boolean shown) {
         final WindowMagnificationController windowMagnificationController =
-                mMagnificationControllerSupplier.get(displayId);
+                mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
             boolean isWindowMagnifierActivated = windowMagnificationController.isActivated();
             if (isWindowMagnifierActivated) {
@@ -495,7 +496,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG);
-        mMagnificationControllerSupplier.forEach(
+        mWindowMagnificationControllerSupplier.forEach(
                 magnificationController -> magnificationController.dump(pw));
     }
 
