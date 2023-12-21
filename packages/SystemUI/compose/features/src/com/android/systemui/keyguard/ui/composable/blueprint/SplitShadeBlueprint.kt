@@ -24,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
@@ -33,18 +35,27 @@ import javax.inject.Inject
  * Renders the lockscreen scene when showing with a split shade (e.g. unfolded foldable and/or
  * tablet form factor).
  */
-class SplitShadeBlueprint @Inject constructor() : LockscreenSceneBlueprint {
+class SplitShadeBlueprint
+@Inject
+constructor(
+    private val viewModel: LockscreenContentViewModel,
+) : LockscreenSceneBlueprint {
 
     override val id: String = "split-shade"
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        Box(modifier.background(Color.Black)) {
-            Text(
-                text = "TODO(b/316211368): split shade blueprint",
-                color = Color.White,
-                modifier = Modifier.align(Alignment.Center),
-            )
+        LockscreenLongPress(
+            viewModel = viewModel.longPress,
+            modifier = modifier,
+        ) { _ ->
+            Box(modifier.background(Color.Black)) {
+                Text(
+                    text = "TODO(b/316211368): split shade blueprint",
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
         }
     }
 }
