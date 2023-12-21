@@ -278,6 +278,7 @@ packages_to_document = [
 // classpath (or sources) somehow.
 stubs_defaults {
     name: "android-non-updatable-stubs-defaults",
+    defaults: ["framework-minus-apex-aconfig-declarations"],
     srcs: [":android-non-updatable-stub-sources"],
     sdk_version: "none",
     system_modules: "none",
