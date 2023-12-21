@@ -1085,8 +1085,14 @@ class PackageManagerShellCommand extends ShellCommand {
         // the sdk or package name along with optional additional information based on opt.
         final Map<String, List<String>> out = new HashMap<>();
         for (int userId : userIds) {
-            final int translatedUserId =
+            final int translatedUserId;
+            try {
+                translatedUserId =
                     translateUserId(userId, UserHandle.USER_SYSTEM, "runListPackages");
+            } catch (RuntimeException ex) {
+                getErrPrintWriter().println("Error: " + ex.toString());
+                continue;
+            }
             @SuppressWarnings("unchecked") final ParceledListSlice<PackageInfo> slice =
                     mInterface.getInstalledPackages(getFlags, translatedUserId);
             final List<PackageInfo> packages = slice.getList();
