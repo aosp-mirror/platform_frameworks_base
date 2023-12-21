@@ -48,3 +48,10 @@ flag {
     description: "Enable NFC Polling Loop Notifications ST shim"
     bug: "294217286"
 }
+
+flag {
+    name: "enable_tag_detection_broadcasts"
+    namespace: "nfc"
+    description: "Enable sending broadcasts to Wallet role holder when a tag enters/leaves the field."
+    bug: "306203494"
+}
