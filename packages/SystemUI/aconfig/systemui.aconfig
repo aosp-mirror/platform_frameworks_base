@@ -277,6 +277,13 @@ flag {
 }
 
 flag {
+    name: "new_volume_panel"
+    namespace: "systemui"
+    description: "Switches to the new volume panel (without Slices)."
+    bug: "202262476"
+}
+
+flag {
     name: "screenshare_notification_hiding"
     namespace: "systemui"
     description: "Enable hiding of notifications during screenshare"
