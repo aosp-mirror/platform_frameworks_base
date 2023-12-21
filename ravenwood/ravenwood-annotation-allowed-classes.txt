@@ -55,6 +55,7 @@ android.os.PackageTagsList
 android.os.Parcel
 android.os.Parcelable
 android.os.Process
+android.os.ServiceSpecificException
 android.os.SystemClock
 android.os.ThreadLocalWorkSource
 android.os.TimestampedValue
