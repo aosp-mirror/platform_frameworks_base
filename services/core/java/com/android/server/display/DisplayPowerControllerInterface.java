@@ -237,4 +237,21 @@ public interface DisplayPowerControllerInterface {
      * Indicate that boot has been completed and the screen is ready to update.
      */
     void onBootCompleted();
+
+    /**
+     * Get the brightness levels used to determine automatic brightness based on lux levels.
+     * @param mode The auto-brightness mode
+     * @return The brightness levels for the specified mode. The values are between
+     * {@link PowerManager.BRIGHTNESS_MIN} and {@link PowerManager.BRIGHTNESS_MAX}.
+     */
+    float[] getAutoBrightnessLevels(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode);
+
+    /**
+     * Get the lux levels used to determine automatic brightness.
+     * @param mode The auto-brightness mode
+     * @return The lux levels for the specified mode
+     */
+    float[] getAutoBrightnessLuxLevels(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode);
 }
