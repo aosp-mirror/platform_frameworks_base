@@ -181,7 +181,7 @@ public class SatelliteImplBase extends SatelliteService {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
                             .sendSatelliteDatagram(datagram, isEmergency, resultCallback),
-                    "sendSatelliteDatagram");
+                    "sendDatagram");
         }
 
         @Override
@@ -201,7 +201,7 @@ public class SatelliteImplBase extends SatelliteService {
                     () -> SatelliteImplBase.this
                             .requestIsSatelliteCommunicationAllowedForCurrentLocation(
                                     resultCallback, callback),
-                    "requestIsSatelliteCommunicationAllowedForCurrentLocation");
+                    "requestIsCommunicationAllowedForCurrentLocation");
         }
 
         @Override
