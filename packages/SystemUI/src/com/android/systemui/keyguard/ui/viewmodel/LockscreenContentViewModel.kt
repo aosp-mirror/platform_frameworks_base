@@ -33,6 +33,7 @@ class LockscreenContentViewModel
 constructor(
     private val interactor: KeyguardBlueprintInteractor,
     private val authController: AuthController,
+    val longPress: KeyguardLongPressViewModel,
 ) {
     val isUdfpsVisible: Boolean
         get() = authController.isUdfpsSupported

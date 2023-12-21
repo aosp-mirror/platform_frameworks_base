@@ -24,24 +24,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
 import javax.inject.Inject
 
 /** Renders the lockscreen scene when showing the communal glanceable hub. */
-class CommunalBlueprint @Inject constructor() : LockscreenSceneBlueprint {
+class CommunalBlueprint
+@Inject
+constructor(
+    private val viewModel: LockscreenContentViewModel,
+) : LockscreenSceneBlueprint {
 
     override val id: String = "communal"
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        Box(modifier.background(Color.Black)) {
-            Text(
-                text = "TODO(b/316211368): communal blueprint",
-                color = Color.White,
-                modifier = Modifier.align(Alignment.Center),
-            )
+        LockscreenLongPress(
+            viewModel = viewModel.longPress,
+            modifier = modifier,
+        ) { _ ->
+            Box(modifier.background(Color.Black)) {
+                Text(
+                    text = "TODO(b/316211368): communal blueprint",
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
         }
     }
 }
