@@ -1929,14 +1929,87 @@ public class ActivityOptions extends ComponentOptions {
      */
     @SuppressLint("UnflaggedApi")
     @TestApi
-    public static final class LaunchCookie {
+    public static final class LaunchCookie implements Parcelable {
         /** @hide */
-        public final IBinder binder = new Binder();
+        public final IBinder binder;
 
         /** @hide */
         @SuppressLint("UnflaggedApi")
         @TestApi
-        public LaunchCookie() {}
+        public LaunchCookie() {
+            binder = new Binder();
+        }
+
+        /** @hide */
+        public LaunchCookie(@Nullable String descriptor) {
+            binder = new Binder(descriptor);
+        }
+
+        private LaunchCookie(Parcel in) {
+            this.binder = in.readStrongBinder();
+        }
+
+        /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeStrongBinder(binder);
+        }
+
+        /** @hide */
+        public static LaunchCookie readFromParcel(@NonNull Parcel in) {
+            return new LaunchCookie(in);
+        }
+
+        /** @hide */
+        public static void writeToParcel(@Nullable LaunchCookie launchCookie, Parcel out) {
+            if (launchCookie != null) {
+                launchCookie.writeToParcel(out, 0);
+            } else {
+                out.writeStrongBinder(null);
+            }
+        }
+
+        /** @hide */
+        @SuppressLint("UnflaggedApi")
+        @TestApi
+        @NonNull
+        public static final Parcelable.Creator<LaunchCookie> CREATOR =
+                new Parcelable.Creator<LaunchCookie>() {
+
+                    @Override
+                    public LaunchCookie createFromParcel(Parcel source) {
+                        return new LaunchCookie(source);
+                    }
+
+                    @Override
+                    public LaunchCookie[] newArray(int size) {
+                        return new LaunchCookie[size];
+                    }
+                };
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (obj instanceof LaunchCookie) {
+                LaunchCookie other = (LaunchCookie) obj;
+                return binder == other.binder;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return binder.hashCode();
+        }
     }
 
     /**

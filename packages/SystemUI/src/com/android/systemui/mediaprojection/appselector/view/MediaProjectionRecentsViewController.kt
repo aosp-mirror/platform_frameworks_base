@@ -17,10 +17,10 @@
 package com.android.systemui.mediaprojection.appselector.view
 
 import android.app.ActivityOptions
+import android.app.ActivityOptions.LaunchCookie
 import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.IActivityTaskManager
 import android.graphics.Rect
-import android.os.Binder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -121,7 +121,7 @@ constructor(
     }
 
     override fun onRecentAppClicked(task: RecentTask, view: View) {
-        val launchCookie = Binder()
+        val launchCookie = LaunchCookie()
         val activityOptions =
             ActivityOptions.makeScaleUpAnimation(
                 view,
@@ -132,7 +132,7 @@ constructor(
             )
         activityOptions.pendingIntentBackgroundActivityStartMode =
             MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-        activityOptions.launchCookie = launchCookie
+        activityOptions.setLaunchCookie(launchCookie)
         activityOptions.launchDisplayId = task.displayId
 
         activityTaskManager.startActivityFromRecents(task.taskId, activityOptions.toBundle())
