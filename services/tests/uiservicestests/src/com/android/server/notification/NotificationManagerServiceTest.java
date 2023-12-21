@@ -9258,41 +9258,46 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_fromUserMatchesConditionSource_okay() throws Exception {
+    public void setAutomaticZenRuleState_conditionFromUser_mappedToOriginUser() throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.setCallerIsNormalPackage();
 
-        Condition withSourceContext = new Condition(Uri.parse("uri"), "summary", STATE_TRUE,
-                SOURCE_CONTEXT);
-        mBinderService.setAutomaticZenRuleState("id", withSourceContext, /* fromUser= */ false);
-        verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
-                eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyInt());
-
         Condition withSourceUser = new Condition(Uri.parse("uri"), "summary", STATE_TRUE,
                 SOURCE_USER_ACTION);
-        mBinderService.setAutomaticZenRuleState("id", withSourceUser, /* fromUser= */ true);
+        mBinderService.setAutomaticZenRuleState("id", withSourceUser);
+
         verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceUser),
                 eq(ZenModeConfig.UPDATE_ORIGIN_USER), anyInt());
     }
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
-    public void setAutomaticZenRuleState_fromUserDoesNotMatchConditionSource_blocked()
+    public void setAutomaticZenRuleState_fromAppWithConditionNotFromUser_mappedToOriginApp()
             throws Exception {
         ZenModeHelper zenModeHelper = setUpMockZenTest();
         mService.setCallerIsNormalPackage();
 
         Condition withSourceContext = new Condition(Uri.parse("uri"), "summary", STATE_TRUE,
                 SOURCE_CONTEXT);
-        assertThrows(IllegalArgumentException.class,
-                () -> mBinderService.setAutomaticZenRuleState("id", withSourceContext,
-                        /* fromUser= */ true));
+        mBinderService.setAutomaticZenRuleState("id", withSourceContext);
 
-        Condition withSourceUser = new Condition(Uri.parse("uri"), "summary", STATE_TRUE,
-                SOURCE_USER_ACTION);
-        assertThrows(IllegalArgumentException.class,
-                () -> mBinderService.setAutomaticZenRuleState("id", withSourceUser,
-                        /* fromUser= */ false));
+        verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
+                eq(ZenModeConfig.UPDATE_ORIGIN_APP), anyInt());
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void setAutomaticZenRuleState_fromSystemWithConditionNotFromUser_mappedToOriginSystem()
+            throws Exception {
+        ZenModeHelper zenModeHelper = setUpMockZenTest();
+        mService.isSystemUid = true;
+
+        Condition withSourceContext = new Condition(Uri.parse("uri"), "summary", STATE_TRUE,
+                SOURCE_CONTEXT);
+        mBinderService.setAutomaticZenRuleState("id", withSourceContext);
+
+        verify(zenModeHelper).setAutomaticZenRuleState(eq("id"), eq(withSourceContext),
+                eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyInt());
     }
 
     private ZenModeHelper setUpMockZenTest() {
