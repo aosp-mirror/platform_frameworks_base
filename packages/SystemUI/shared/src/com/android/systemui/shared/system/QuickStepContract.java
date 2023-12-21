@@ -20,10 +20,11 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
+import static com.android.systemui.shared.Flags.shadeAllowBackGesture;
+
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.SystemProperties;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicyConstants;
 
@@ -132,8 +133,7 @@ public class QuickStepContract {
             SYSUI_STATE_WAKEFULNESS_TRANSITION | SYSUI_STATE_AWAKE;
 
     // Whether the back gesture is allowed (or ignored) by the Shade
-    public static final boolean ALLOW_BACK_GESTURE_IN_SHADE = SystemProperties.getBoolean(
-            "persist.wm.debug.shade_allow_back_gesture", false);
+    public static final boolean ALLOW_BACK_GESTURE_IN_SHADE = shadeAllowBackGesture();
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,

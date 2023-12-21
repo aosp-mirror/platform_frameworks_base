@@ -16,6 +16,9 @@
 
 package com.android.systemui.back.domain.interactor
 
+import android.platform.test.annotations.RequiresFlagsDisabled
+import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.view.ViewRootImpl
 import android.window.BackEvent
 import android.window.BackEvent.EDGE_LEFT
@@ -26,9 +29,8 @@ import android.window.WindowOnBackInvokedDispatcher
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.IStatusBarService
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
@@ -72,7 +74,6 @@ import org.mockito.junit.MockitoJUnit
 @OptIn(ExperimentalCoroutinesApi::class)
 class BackActionInteractorTest : SysuiTestCase() {
     private val testScope = TestScope()
-    private val featureFlags = FakeFeatureFlags()
     private val executor = FakeExecutor(FakeSystemClock())
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
@@ -107,17 +108,17 @@ class BackActionInteractorTest : SysuiTestCase() {
                 statusBarKeyguardViewManager,
                 shadeController,
                 notificationShadeWindowController,
-                windowRootViewVisibilityInteractor,
-                featureFlags,
+                windowRootViewVisibilityInteractor
             )
             .apply { this.setup(qsController, shadeViewController) }
     }
 
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor
 
+    @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+
     @Before
     fun setUp() {
-        featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, false)
         whenever(notificationShadeWindowController.windowRootView).thenReturn(windowRootView)
         whenever(windowRootView.viewRootImpl).thenReturn(viewRootImpl)
         whenever(viewRootImpl.onBackInvokedDispatcher).thenReturn(onBackInvokedDispatcher)
@@ -229,9 +230,9 @@ class BackActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_PREDICTIVE_BACK_ANIMATE_SHADE)
     fun animationFlagOff_onBackInvoked_keyguardNotified() {
         backActionInteractor.start()
-        featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, false)
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
         powerInteractor.setAwakeForTest()
         val callback = getBackInvokedCallback()
@@ -243,8 +244,8 @@ class BackActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_PREDICTIVE_BACK_ANIMATE_SHADE)
     fun animationFlagOn_onBackInvoked_keyguardNotified() {
-        featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true)
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
         powerInteractor.setAwakeForTest()
@@ -257,8 +258,8 @@ class BackActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_PREDICTIVE_BACK_ANIMATE_SHADE)
     fun animationFlagOn_callbackIsAnimationCallback() {
-        featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true)
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
         powerInteractor.setAwakeForTest()
@@ -269,8 +270,8 @@ class BackActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_PREDICTIVE_BACK_ANIMATE_SHADE)
     fun onBackProgressed_shadeCannotBeCollapsed_shadeViewControllerNotNotified() {
-        featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true)
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
         powerInteractor.setAwakeForTest()
@@ -284,8 +285,8 @@ class BackActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_PREDICTIVE_BACK_ANIMATE_SHADE)
     fun onBackProgressed_shadeCanBeCollapsed_shadeViewControllerNotified() {
-        featureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true)
         backActionInteractor.start()
         windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
         powerInteractor.setAwakeForTest()
