@@ -53,11 +53,11 @@ import java.util.List;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class VirtualCameraControllerTest {
 
-    private static final int CAMERA_DISPLAY_NAME_RES_ID_1 = 10;
+    private static final String CAMERA_NAME_1 = "Virtual camera 1";
     private static final int CAMERA_WIDTH_1 = 100;
     private static final int CAMERA_HEIGHT_1 = 200;
 
-    private static final int CAMERA_DISPLAY_NAME_RES_ID_2 = 11;
+    private static final String CAMERA_NAME_2 = "Virtual camera 2";
     private static final int CAMERA_WIDTH_2 = 400;
     private static final int CAMERA_HEIGHT_2 = 600;
     private static final int CAMERA_FORMAT = ImageFormat.YUV_420_888;
@@ -84,7 +84,7 @@ public class VirtualCameraControllerTest {
     @Test
     public void registerCamera_registersCamera() throws Exception {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_1));
+                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_NAME_1));
 
         ArgumentCaptor<VirtualCameraConfiguration> configurationCaptor =
                 ArgumentCaptor.forClass(VirtualCameraConfiguration.class);
@@ -98,7 +98,7 @@ public class VirtualCameraControllerTest {
     @Test
     public void unregisterCamera_unregistersCamera() throws Exception {
         VirtualCameraConfig config = createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_1);
+                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_NAME_1);
         mVirtualCameraController.registerCamera(config);
 
         mVirtualCameraController.unregisterCamera(config);
@@ -109,9 +109,9 @@ public class VirtualCameraControllerTest {
     @Test
     public void close_unregistersAllCameras() throws Exception {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_1));
+                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_NAME_1));
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_2));
+                CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT, CAMERA_NAME_2));
 
         mVirtualCameraController.close();
 
@@ -129,10 +129,10 @@ public class VirtualCameraControllerTest {
     }
 
     private VirtualCameraConfig createVirtualCameraConfig(
-            int width, int height, int format, int displayNameResId) {
+            int width, int height, int format, String displayName) {
         return new VirtualCameraConfig.Builder()
                 .addStreamConfig(width, height, format)
-                .setDisplayNameStringRes(displayNameResId)
+                .setName(displayName)
                 .setVirtualCameraCallback(mCallbackHandler, createNoOpCallback())
                 .build();
     }
