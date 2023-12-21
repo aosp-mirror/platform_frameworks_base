@@ -453,10 +453,31 @@ public class ZenModeHelper {
             ZenRule rule = new ZenRule();
             populateZenRule(pkg, automaticZenRule, rule, origin, /* isNew= */ true);
             newConfig.automaticRules.put(rule.id, rule);
+            maybeReplaceDefaultRule(newConfig, automaticZenRule);
+
             if (setConfigLocked(newConfig, origin, reason, rule.component, true, callingUid)) {
                 return rule.id;
             } else {
                 throw new AndroidRuntimeException("Could not create rule");
+            }
+        }
+    }
+
+    private static void maybeReplaceDefaultRule(ZenModeConfig config, AutomaticZenRule addedRule) {
+        if (!Flags.modesApi()) {
+            return;
+        }
+        if (addedRule.getType() == AutomaticZenRule.TYPE_BEDTIME) {
+            // Delete a built-in disabled "Sleeping" rule when a BEDTIME rule is added; it may have
+            // smarter triggers and it will prevent confusion about which one to use.
+            // Note: we must not verify canManageAutomaticZenRule here, since most likely they
+            // won't have the same owner (sleeping - system; bedtime - DWB).
+            ZenRule sleepingRule = config.automaticRules.get(
+                    ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID);
+            if (sleepingRule != null
+                    && !sleepingRule.enabled
+                    && sleepingRule.canBeUpdatedByApp() /* meaning it's not user-customized */) {
+                config.automaticRules.remove(ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID);
             }
         }
     }
@@ -1377,6 +1398,10 @@ public class ZenModeHelper {
                 // reset zen automatic rules to default on restore or upgrade if:
                 // - doesn't already have default rules and
                 // - all previous automatic rules were disabled
+                //
+                // Note: we don't need to check to avoid restoring the Sleeping rule if there is a
+                // TYPE_BEDTIME rule because the config is from an old version and thus by
+                // definition cannot have a rule with TYPE_BEDTIME (or any other type).
                 config.automaticRules = new ArrayMap<>();
                 for (ZenRule rule : mDefaultConfig.automaticRules.values()) {
                     config.automaticRules.put(rule.id, rule);
