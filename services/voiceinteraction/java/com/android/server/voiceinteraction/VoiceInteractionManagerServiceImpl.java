@@ -65,6 +65,7 @@ import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.VoiceInteractionManagerInternal.WearableHotwordDetectionCallback;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.system.OsConstants;
@@ -855,6 +856,24 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
         mHotwordDetectionConnection.startListeningFromExternalSourceLocked(audioStream, audioFormat,
                 options, token, callback);
+    }
+
+    public void startListeningFromWearableLocked(
+            ParcelFileDescriptor audioStream,
+            AudioFormat audioFormat,
+            PersistableBundle options,
+            WearableHotwordDetectionCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningFromWearable");
+        }
+        if (mHotwordDetectionConnection == null) {
+            callback.onError(
+                    "Unable to start listening from wearable because the hotword detection"
+                            + " connection is null.");
+            return;
+        }
+        mHotwordDetectionConnection.startListeningFromWearableLocked(
+                audioStream, audioFormat, options, callback);
     }
 
     public void stopListeningFromMicLocked() {

@@ -28,6 +28,7 @@ import android.annotation.SystemService;
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.companion.CompanionDeviceManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -92,9 +93,13 @@ public class WearableSensingManager {
     public static final int STATUS_SUCCESS = 1;
 
     /**
-     * The value of the status code that indicates one or more of the
-     * requested events are not supported.
+     * The value of the status code that indicates one or more of the requested events are not
+     * supported.
      */
+    // TODO(b/324635656): Deprecate this status code. Update Javadoc:
+    // @deprecated WearableSensingManager does not deal with events. Use {@link
+    // STATUS_UNSUPPORTED_OPERATION} instead for operations not supported by the implementation of
+    // {@link WearableSensingService}.
     public static final int STATUS_UNSUPPORTED = 2;
 
     /**
@@ -377,6 +382,83 @@ public class WearableSensingManager {
             RemoteCallback statusCallback = createStatusCallback(executor, statusConsumer);
             mService.unregisterDataRequestObserver(
                     dataType, dataRequestPendingIntent, statusCallback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests the wearable to start hotword recognition.
+     *
+     * <p>When this method is called, the system will attempt to provide a {@link
+     * android.service.wearable.WearableHotwordAudioConsumer} to {@link WearableSensingService}.
+     * After first-stage hotword is detected on a wearable, {@link WearableSensingService} should
+     * send the hotword audio to the {@link android.service.wearable.WearableHotwordAudioConsumer},
+     * which will forward the data to the {@link android.service.voice.HotwordDetectionService} for
+     * second-stage hotword validation. If hotword is detected there, the audio data will be
+     * forwarded to the {@link android.service.voice.VoiceInteractionService}.
+     *
+     * <p>If the {@code targetVisComponentName} provided here is not null, when {@link
+     * WearableSensingService} sends hotword audio to the {@link
+     * android.service.wearable.WearableHotwordAudioConsumer}, the system will check whether the
+     * {@link android.service.voice.VoiceInteractionService} at that time is {@code
+     * targetVisComponentName}. If not, the system will call {@link
+     * WearableSensingService#onActiveHotwordAudioStopRequested()} and will not forward the audio
+     * data to the current {@link android.service.voice.HotwordDetectionService} nor {@link
+     * android.service.voice.VoiceInteractionService}. The system will not send a status code to
+     * {@code statusConsumer} regarding the {@code targetVisComponentName} check. The caller is
+     * responsible for determining whether the system's {@link
+     * android.service.voice.VoiceInteractionService} is the same as {@code targetVisComponentName}.
+     * The check here is just a protection against race conditions.
+     *
+     * <p>Calling this method again will send a new {@link
+     * android.service.wearable.WearableHotwordAudioConsumer} to {@link WearableSensingService}. For
+     * audio data sent to the new consumer, the system will perform the above check using the newly
+     * provided {@code targetVisComponentName}. The {@link WearableSensingService} should not
+     * continue to use the previous consumers after receiving a new one.
+     *
+     * <p>If the {@code statusConsumer} returns {@link STATUS_SUCCESS}, the caller should call
+     * {@link #stopListeningForHotword(Executor, Consumer)} when it wants the wearable to stop
+     * listening for hotword. If the {@code statusConsumer} returns any other status code, a failure
+     * has occurred and calling {@link #stopListeningForHotword(Executor, Consumer)} is not
+     * required. The system will not retry listening automatically. The caller should call this
+     * method again if they want to retry.
+     *
+     * <p>If a failure occurred after the {@link statusConsumer} returns {@link STATUS_SUCCESS},
+     * {@link statusConsumer} will be invoked again with a status code other than {@link
+     * STATUS_SUCCESS}.
+     *
+     * @param targetVisComponentName The ComponentName of the target VoiceInteractionService.
+     * @param executor Executor on which to run the consumer callback.
+     * @param statusConsumer A consumer that handles the status codes.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    public void startHotwordRecognition(
+            @Nullable ComponentName targetVisComponentName,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull @StatusCode Consumer<Integer> statusConsumer) {
+        try {
+            mService.startHotwordRecognition(
+                    targetVisComponentName, createStatusCallback(executor, statusConsumer));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests the wearable to stop hotword recognition.
+     *
+     * @param executor Executor on which to run the consumer callback.
+     * @param statusConsumer A consumer that handles the status codes.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_HOTWORD_WEARABLE_SENSING_API)
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    public void stopHotwordRecognition(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull @StatusCode Consumer<Integer> statusConsumer) {
+        try {
+            mService.stopHotwordRecognition(createStatusCallback(executor, statusConsumer));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
