@@ -84,6 +84,7 @@ import com.android.systemui.keyguard.data.repository.BiometricType;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
@@ -114,8 +115,12 @@ import kotlinx.coroutines.CoroutineScope;
  * {@link com.android.keyguard.KeyguardUpdateMonitor}
  */
 @SysUISingleton
-public class AuthController implements CoreStartable, CommandQueue.Callbacks,
-        AuthDialogCallback, DozeReceiver {
+public class AuthController implements
+        CoreStartable,
+        ConfigurationController.ConfigurationListener,
+        CommandQueue.Callbacks,
+        AuthDialogCallback,
+        DozeReceiver {
 
     private static final String TAG = "AuthController";
     private static final boolean DEBUG = true;
@@ -1297,7 +1302,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         updateSensorLocations();
 
         // TODO(b/287311775): consider removing this to retain the UI cleanly vs re-creating
