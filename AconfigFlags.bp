@@ -249,6 +249,14 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "android.app.usage.flags-aconfig-java-host",
+    aconfig_declarations: "android.app.usage.flags-aconfig",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+
 // OS
 aconfig_declarations {
     name: "android.os.flags-aconfig",
