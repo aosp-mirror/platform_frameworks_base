@@ -911,6 +911,9 @@
     <!-- Permissions required for CTS test - CtsContactKeysProviderPrivilegedApp -->
     <uses-permission android:name="android.permission.WRITE_VERIFICATION_STATE_E2EE_CONTACT_KEYS"/>
 
+    <!-- Permission required for Cts test ScreenRecordingCallbackTests -->
+    <uses-permission android:name="android.permission.DETECT_SCREEN_RECORDING" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

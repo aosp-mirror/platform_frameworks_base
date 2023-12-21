@@ -128,8 +128,10 @@ import android.window.TrustedPresentationThresholds;
 
 import com.android.window.flags.Flags;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -6116,5 +6118,66 @@ public interface WindowManager extends ViewManager {
     default @NonNull IBinder getDefaultToken() {
         throw new UnsupportedOperationException(
                 "getDefaultToken is not implemented");
+    }
+
+    /** @hide */
+    @Target(ElementType.TYPE_USE)
+    @IntDef(
+            prefix = {"SCREEN_RECORDING_STATE"},
+            value = {SCREEN_RECORDING_STATE_NOT_VISIBLE, SCREEN_RECORDING_STATE_VISIBLE})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ScreenRecordingState {}
+
+    /** Indicates the app that registered the callback is not visible in screen recording. */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_SCREEN_RECORDING_CALLBACKS)
+    int SCREEN_RECORDING_STATE_NOT_VISIBLE = 0;
+
+    /** Indicates the app that registered the callback is visible in screen recording. */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_SCREEN_RECORDING_CALLBACKS)
+    int SCREEN_RECORDING_STATE_VISIBLE = 1;
+
+    /**
+     * Adds a screen recording callback. The callback will be invoked whenever the app becomes
+     * visible in screen recording or was visible in screen recording and becomes invisible in
+     * screen recording.
+     *
+     * <p>An app is considered visible in screen recording if any activities owned by the
+     * registering process's UID are being recorded.
+     *
+     * <p>Example:
+     *
+     * <pre>
+     * windowManager.addScreenRecordingCallback(state -> {
+     *     // handle change in screen recording state
+     * });
+     * </pre>
+     *
+     * @param executor The executor on which callback method will be invoked.
+     * @param callback The callback that will be invoked when screen recording visibility changes.
+     * @return the current screen recording state.
+     * @see #SCREEN_RECORDING_STATE_NOT_VISIBLE
+     * @see #SCREEN_RECORDING_STATE_VISIBLE
+     */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    @RequiresPermission(permission.DETECT_SCREEN_RECORDING)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_SCREEN_RECORDING_CALLBACKS)
+    default @ScreenRecordingState int addScreenRecordingCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<@ScreenRecordingState Integer> callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Removes a screen recording callback.
+     *
+     * @param callback The callback to remove.
+     * @see #addScreenRecordingCallback(Executor, Consumer)
+     */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    @RequiresPermission(permission.DETECT_SCREEN_RECORDING)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_SCREEN_RECORDING_CALLBACKS)
+    default void removeScreenRecordingCallback(
+            @NonNull Consumer<@ScreenRecordingState Integer> callback) {
+        throw new UnsupportedOperationException();
     }
 }
