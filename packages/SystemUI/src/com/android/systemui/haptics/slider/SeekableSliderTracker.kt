@@ -58,7 +58,7 @@ class SeekableSliderTracker(
 
     override suspend fun iterateState(event: SliderEvent) {
         when (currentState) {
-            SliderState.IDLE -> handleIdle(event.type)
+            SliderState.IDLE -> handleIdle(event.type, event.currentProgress)
             SliderState.WAIT -> handleWait(event.type, event.currentProgress)
             SliderState.DRAG_HANDLE_ACQUIRED_BY_TOUCH -> handleAcquired(event.type)
             SliderState.DRAG_HANDLE_DRAGGING -> handleDragging(event.type, event.currentProgress)
@@ -67,17 +67,26 @@ class SeekableSliderTracker(
             SliderState.DRAG_HANDLE_RELEASED_FROM_TOUCH -> setState(SliderState.IDLE)
             SliderState.JUMP_TRACK_LOCATION_SELECTED -> handleJumpToTrack(event.type)
             SliderState.JUMP_BOOKEND_SELECTED -> handleJumpToBookend(event.type)
+            SliderState.ARROW_HANDLE_MOVED_ONCE -> handleArrowOnce(event.type)
+            SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY ->
+                handleArrowContinuous(event.type, event.currentProgress)
+            SliderState.ARROW_HANDLE_REACHED_BOOKEND -> handleArrowBookend()
         }
         latestProgress = event.currentProgress
     }
 
-    private fun handleIdle(newEventType: SliderEventType) {
+    private fun handleIdle(newEventType: SliderEventType, currentProgress: Float) {
         if (newEventType == SliderEventType.STARTED_TRACKING_TOUCH) {
             timerJob = launchTimer()
             // The WAIT state will wait for the timer to complete or a slider progress to occur.
             // This will disambiguate between an imprecise touch that acquires the slider handle,
             // and a select and jump operation in the slider track.
             setState(SliderState.WAIT)
+        } else if (newEventType == SliderEventType.PROGRESS_CHANGE_BY_PROGRAM) {
+            val state =
+                if (bookendReached(currentProgress)) SliderState.ARROW_HANDLE_REACHED_BOOKEND
+                else SliderState.ARROW_HANDLE_MOVED_ONCE
+            setState(state)
         }
     }
 
@@ -176,6 +185,13 @@ class SeekableSliderTracker(
             SliderState.DRAG_HANDLE_REACHED_BOOKEND -> executeOnBookend()
             SliderState.JUMP_TRACK_LOCATION_SELECTED ->
                 sliderListener.onProgressJump(latestProgress)
+            SliderState.ARROW_HANDLE_MOVED_ONCE -> sliderListener.onSelectAndArrow(latestProgress)
+            SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY -> sliderListener.onProgress(latestProgress)
+            SliderState.ARROW_HANDLE_REACHED_BOOKEND -> {
+                executeOnBookend()
+                // This transitory execution must also reset the state
+                resetState()
+            }
             else -> {}
         }
     }
@@ -203,6 +219,43 @@ class SeekableSliderTracker(
         return currentProgress >= config.upperBookendThreshold ||
             currentProgress <= config.lowerBookendThreshold
     }
+
+    private fun handleArrowOnce(newEventType: SliderEventType) {
+        val nextState =
+            when (newEventType) {
+                SliderEventType.STARTED_TRACKING_TOUCH -> {
+                    // Launching the timer and going to WAIT
+                    timerJob = launchTimer()
+                    SliderState.WAIT
+                }
+                SliderEventType.PROGRESS_CHANGE_BY_PROGRAM ->
+                    SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY
+                SliderEventType.ARROW_UP -> SliderState.IDLE
+                else -> SliderState.ARROW_HANDLE_MOVED_ONCE
+            }
+        setState(nextState)
+    }
+
+    private fun handleArrowContinuous(newEventType: SliderEventType, currentProgress: Float) {
+        val reachedBookend = bookendReached(currentProgress)
+        val nextState =
+            when (newEventType) {
+                SliderEventType.ARROW_UP -> SliderState.IDLE
+                SliderEventType.STARTED_TRACKING_TOUCH -> {
+                    // Launching the timer and going to WAIT
+                    timerJob = launchTimer()
+                    SliderState.WAIT
+                }
+                SliderEventType.PROGRESS_CHANGE_BY_PROGRAM -> {
+                    if (reachedBookend) SliderState.ARROW_HANDLE_REACHED_BOOKEND
+                    else SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY
+                }
+                else -> SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY
+            }
+        setState(nextState)
+    }
+
+    private fun handleArrowBookend() = setState(SliderState.IDLE)
 
     @VisibleForTesting
     fun setState(state: SliderState) {
