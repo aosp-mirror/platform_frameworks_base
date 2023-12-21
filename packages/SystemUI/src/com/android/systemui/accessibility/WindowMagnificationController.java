@@ -1303,7 +1303,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         } else if (id == R.id.close_button) {
             setEditMagnifierSizeMode(false);
         } else {
-            animateBounceEffect();
+            animateBounceEffectIfNeeded();
         }
     }
 
@@ -1465,7 +1465,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mBounceEffectDuration = duration;
     }
 
-    private void animateBounceEffect() {
+    private void animateBounceEffectIfNeeded() {
+        if (mMirrorView == null) {
+            // run the animation only if the mirror view is not null
+            return;
+        }
+
         final ObjectAnimator scaleAnimator = ObjectAnimator.ofPropertyValuesHolder(mMirrorView,
                 PropertyValuesHolder.ofFloat(View.SCALE_X, 1, mBounceEffectAnimationScale, 1),
                 PropertyValuesHolder.ofFloat(View.SCALE_Y, 1, mBounceEffectAnimationScale, 1));
