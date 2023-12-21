@@ -99,6 +99,8 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -111,6 +113,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository;
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.GlanceableHubTransitions;
 import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -439,6 +442,8 @@ public class BubblesTest extends SysuiTestCase {
                         () -> keyguardInteractor,
                         () -> mFromLockscreenTransitionInteractor,
                         () -> mFromPrimaryBouncerTransitionInteractor);
+        CommunalInteractor communalInteractor =
+                CommunalInteractorFactory.create().getCommunalInteractor();
 
         mFromLockscreenTransitionInteractor = new FromLockscreenTransitionInteractor(
                 keyguardTransitionRepository,
@@ -450,6 +455,12 @@ public class BubblesTest extends SysuiTestCase {
                 featureFlags,
                 shadeRepository,
                 powerInteractor,
+                new GlanceableHubTransitions(
+                        mTestScope,
+                        keyguardTransitionInteractor,
+                        keyguardTransitionRepository,
+                        communalInteractor
+                ),
                 () ->
                         new InWindowLauncherUnlockAnimationInteractor(
                                 new InWindowLauncherUnlockAnimationRepository(),

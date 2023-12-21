@@ -31,6 +31,7 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -39,6 +40,9 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -69,9 +73,9 @@ class CommunalInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        testScope = TestScope()
+        testScope = TestScope(StandardTestDispatcher())
 
-        val withDeps = CommunalInteractorFactory.create()
+        val withDeps = CommunalInteractorFactory.create(testScope)
 
         tutorialRepository = withDeps.tutorialRepository
         communalRepository = withDeps.communalRepository
@@ -376,6 +380,131 @@ class CommunalInteractorTest : SysuiTestCase() {
             val desiredScene = collectLastValue(communalRepository.desiredScene)
             runCurrent()
             assertThat(desiredScene()).isEqualTo(targetScene)
+        }
+
+    @Test
+    fun transitionProgress_onTargetScene_fullProgress() =
+        testScope.runTest {
+            val targetScene = CommunalSceneKey.Blank
+            val transitionProgressFlow = underTest.transitionProgressToScene(targetScene)
+            val transitionProgress by collectLastValue(transitionProgressFlow)
+
+            val transitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(targetScene)
+                )
+            underTest.setTransitionState(transitionState)
+
+            // We're on the target scene.
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(targetScene))
+        }
+
+    @Test
+    fun transitionProgress_notOnTargetScene_noProgress() =
+        testScope.runTest {
+            val targetScene = CommunalSceneKey.Blank
+            val currentScene = CommunalSceneKey.Communal
+            val transitionProgressFlow = underTest.transitionProgressToScene(targetScene)
+            val transitionProgress by collectLastValue(transitionProgressFlow)
+
+            val transitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(currentScene)
+                )
+            underTest.setTransitionState(transitionState)
+
+            // Transition progress is still idle, but we're not on the target scene.
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(currentScene))
+        }
+
+    @Test
+    fun transitionProgress_transitioningToTrackedScene() =
+        testScope.runTest {
+            val currentScene = CommunalSceneKey.Communal
+            val targetScene = CommunalSceneKey.Blank
+            val transitionProgressFlow = underTest.transitionProgressToScene(targetScene)
+            val transitionProgress by collectLastValue(transitionProgressFlow)
+
+            var transitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(currentScene)
+                )
+            underTest.setTransitionState(transitionState)
+
+            // Progress starts at 0.
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(currentScene))
+
+            val progress = MutableStateFlow(0f)
+            transitionState =
+                MutableStateFlow(
+                    ObservableCommunalTransitionState.Transition(
+                        fromScene = currentScene,
+                        toScene = targetScene,
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            underTest.setTransitionState(transitionState)
+
+            // Partially transition.
+            progress.value = .4f
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Transition(.4f))
+
+            // Transition is at full progress.
+            progress.value = 1f
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Transition(1f))
+
+            // Transition finishes.
+            transitionState = MutableStateFlow(ObservableCommunalTransitionState.Idle(targetScene))
+            underTest.setTransitionState(transitionState)
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(targetScene))
+        }
+
+    @Test
+    fun transitionProgress_transitioningAwayFromTrackedScene() =
+        testScope.runTest {
+            val currentScene = CommunalSceneKey.Blank
+            val targetScene = CommunalSceneKey.Communal
+            val transitionProgressFlow = underTest.transitionProgressToScene(currentScene)
+            val transitionProgress by collectLastValue(transitionProgressFlow)
+
+            var transitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(currentScene)
+                )
+            underTest.setTransitionState(transitionState)
+
+            // Progress starts at 0.
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(currentScene))
+
+            val progress = MutableStateFlow(0f)
+            transitionState =
+                MutableStateFlow(
+                    ObservableCommunalTransitionState.Transition(
+                        fromScene = currentScene,
+                        toScene = targetScene,
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            underTest.setTransitionState(transitionState)
+
+            // Partially transition.
+            progress.value = .4f
+
+            // This is a transition we don't care about the progress of.
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.OtherTransition)
+
+            // Transition is at full progress.
+            progress.value = 1f
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.OtherTransition)
+
+            // Transition finishes.
+            transitionState = MutableStateFlow(ObservableCommunalTransitionState.Idle(targetScene))
+            underTest.setTransitionState(transitionState)
+            assertThat(transitionProgress).isEqualTo(CommunalTransitionProgress.Idle(targetScene))
         }
 
     @Test

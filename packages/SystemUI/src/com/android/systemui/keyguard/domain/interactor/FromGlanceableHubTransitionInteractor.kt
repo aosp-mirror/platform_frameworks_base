@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.systemui.Flags
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -32,6 +33,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 class FromGlanceableHubTransitionInteractor
 @Inject
 constructor(
+    private val glanceableHubTransitions: GlanceableHubTransitions,
     override val transitionRepository: KeyguardTransitionRepository,
     transitionInteractor: KeyguardTransitionInteractor,
     @Main mainDispatcher: CoroutineDispatcher,
@@ -47,6 +49,7 @@ constructor(
         if (!Flags.communalHub()) {
             return
         }
+        listenForHubToLockscreen()
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -54,6 +57,18 @@ constructor(
             interpolator = Interpolators.LINEAR
             duration = DEFAULT_DURATION.inWholeMilliseconds
         }
+    }
+
+    /**
+     * Listens for the glanceable hub transition to lock screen and directly drives the keyguard
+     * transition.
+     */
+    private fun listenForHubToLockscreen() {
+        glanceableHubTransitions.listenForLockscreenAndHubTransition(
+            transitionName = "listenForHubToLockscreen",
+            transitionOwnerName = TAG,
+            toScene = CommunalSceneKey.Blank
+        )
     }
 
     companion object {

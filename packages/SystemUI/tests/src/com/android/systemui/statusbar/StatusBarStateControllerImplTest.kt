@@ -27,6 +27,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
@@ -36,6 +37,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.GlanceableHubTransitions
 import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -139,6 +141,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 { fromLockscreenTransitionInteractor },
                 { fromPrimaryBouncerTransitionInteractor }
             )
+        val communalInteractor = CommunalInteractorFactory.create().communalInteractor
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                 keyguardTransitionRepository,
@@ -150,6 +153,12 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 featureFlags,
                 shadeRepository,
                 powerInteractor,
+                GlanceableHubTransitions(
+                    testScope,
+                    keyguardTransitionInteractor,
+                    keyguardTransitionRepository,
+                    communalInteractor
+                ),
                 {
                     InWindowLauncherUnlockAnimationInteractor(
                         InWindowLauncherUnlockAnimationRepository(),

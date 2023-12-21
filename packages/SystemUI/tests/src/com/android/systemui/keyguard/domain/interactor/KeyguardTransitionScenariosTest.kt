@@ -20,8 +20,13 @@ import android.app.StatusBarManager
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
@@ -50,6 +55,8 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -102,9 +109,12 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         FromPrimaryBouncerTransitionInteractor
     private lateinit var fromDreamingLockscreenHostedTransitionInteractor:
         FromDreamingLockscreenHostedTransitionInteractor
+    private lateinit var fromGlanceableHubTransitionInteractor:
+        FromGlanceableHubTransitionInteractor
 
     private lateinit var powerInteractor: PowerInteractor
     private lateinit var keyguardInteractor: KeyguardInteractor
+    private lateinit var communalInteractor: CommunalInteractor
 
     @Before
     fun setUp() {
@@ -118,10 +128,13 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         shadeRepository = FakeShadeRepository()
         transitionRepository = spy(FakeKeyguardTransitionRepository())
         powerInteractor = PowerInteractorFactory.create().powerInteractor
+        communalInteractor =
+            CommunalInteractorFactory.create(testScope = testScope).communalInteractor
 
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
         featureFlags = FakeFeatureFlags().apply { set(Flags.KEYGUARD_WM_STATE_REFACTOR, false) }
+        mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
 
         keyguardInteractor = createKeyguardInteractor()
 
@@ -137,6 +150,13 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                 )
                 .keyguardTransitionInteractor
 
+        val glanceableHubTransitions =
+            GlanceableHubTransitions(
+                testScope,
+                transitionInteractor,
+                transitionRepository,
+                communalInteractor
+            )
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                     scope = testScope,
@@ -148,6 +168,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     flags = featureFlags,
                     shadeRepository = shadeRepository,
                     powerInteractor = powerInteractor,
+                    glanceableHubTransitions = glanceableHubTransitions,
                     inWindowLauncherUnlockAnimationInteractor = {
                         InWindowLauncherUnlockAnimationInteractor(
                             InWindowLauncherUnlockAnimationRepository(),
@@ -253,6 +274,16 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
                     powerInteractor = powerInteractor,
+                )
+                .apply { start() }
+
+        fromGlanceableHubTransitionInteractor =
+            FromGlanceableHubTransitionInteractor(
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
+                    glanceableHubTransitions = glanceableHubTransitions,
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
                 )
                 .apply { start() }
     }
@@ -1406,6 +1437,124 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info2.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
             assertThat(info2.to).isEqualTo(KeyguardState.LOCKSCREEN)
             assertThat(info2.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun lockscreenToGlanceableHub() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to LOCKSCREEN
+            runTransitionAndSetWakefulness(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
+            runCurrent()
+
+            // WHEN a glanceable hub transition starts
+            val currentScene = CommunalSceneKey.Blank
+            val targetScene = CommunalSceneKey.Communal
+
+            val progress = MutableStateFlow(0f)
+            val transitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Transition(
+                        fromScene = currentScene,
+                        toScene = targetScene,
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            communalInteractor.setTransitionState(transitionState)
+            progress.value = .1f
+            runCurrent()
+
+            // THEN a transition from LOCKSCREEN => GLANCEABLE_HUB should occur
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+            assertThat(info.ownerName)
+                .isEqualTo(FromLockscreenTransitionInteractor::class.simpleName)
+            assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.to).isEqualTo(KeyguardState.GLANCEABLE_HUB)
+            assertThat(info.animator).isNull() // transition should be manually animated
+
+            // WHEN the user stops dragging and the glanceable hub opening is cancelled
+            clearInvocations(transitionRepository)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.GLANCEABLE_HUB)
+            val idleTransitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(currentScene)
+                )
+            communalInteractor.setTransitionState(idleTransitionState)
+            runCurrent()
+
+            // THEN a transition from GLANCEABLE_HUB => LOCKSCREEN should occur
+            val info2 =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+            assertThat(info2.from).isEqualTo(KeyguardState.GLANCEABLE_HUB)
+            assertThat(info2.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNull() // transition should be manually animated
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun glanceableHubToLockscreen() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to GLANCEABLE_HUB
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.GLANCEABLE_HUB)
+            runCurrent()
+
+            // WHEN a transition away from glanceable hub starts
+            val currentScene = CommunalSceneKey.Communal
+            val targetScene = CommunalSceneKey.Blank
+
+            val progress = MutableStateFlow(0f)
+            val transitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Transition(
+                        fromScene = currentScene,
+                        toScene = targetScene,
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            communalInteractor.setTransitionState(transitionState)
+            progress.value = .1f
+            runCurrent()
+
+            // THEN a transition from GLANCEABLE_HUB => LOCKSCREEN should occur
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+            assertThat(info.ownerName)
+                .isEqualTo(FromGlanceableHubTransitionInteractor::class.simpleName)
+            assertThat(info.from).isEqualTo(KeyguardState.GLANCEABLE_HUB)
+            assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNull() // transition should be manually animated
+
+            // WHEN the user stops dragging and the glanceable hub closing is cancelled
+            clearInvocations(transitionRepository)
+            runTransitionAndSetWakefulness(KeyguardState.GLANCEABLE_HUB, KeyguardState.LOCKSCREEN)
+            val idleTransitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(currentScene)
+                )
+            communalInteractor.setTransitionState(idleTransitionState)
+            runCurrent()
+
+            // THEN a transition from LOCKSCREEN => GLANCEABLE_HUB should occur
+            val info2 =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+            assertThat(info2.from).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info2.to).isEqualTo(KeyguardState.GLANCEABLE_HUB)
+            assertThat(info.animator).isNull() // transition should be manually animated
 
             coroutineContext.cancelChildren()
         }

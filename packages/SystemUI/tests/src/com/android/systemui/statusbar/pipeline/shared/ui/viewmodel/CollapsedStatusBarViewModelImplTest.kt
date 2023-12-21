@@ -25,6 +25,7 @@ import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.collectLastValue
 import com.android.systemui.collectValues
+import com.android.systemui.communal.dagger.CommunalModule
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -58,6 +59,7 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
         modules =
             [
                 SysUITestModule::class,
+                CommunalModule::class,
             ]
     )
     interface TestComponent : SysUITestComponent<CollapsedStatusBarViewModelImpl> {

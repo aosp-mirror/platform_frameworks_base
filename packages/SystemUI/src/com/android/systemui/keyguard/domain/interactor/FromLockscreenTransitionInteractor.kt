@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -62,6 +63,7 @@ constructor(
     private val flags: FeatureFlags,
     private val shadeRepository: ShadeRepository,
     private val powerInteractor: PowerInteractor,
+    private val glanceableHubTransitions: GlanceableHubTransitions,
     inWindowLauncherUnlockAnimationInteractor: Lazy<InWindowLauncherUnlockAnimationInteractor>,
 ) :
     TransitionInteractor(
@@ -81,6 +83,7 @@ constructor(
         listenForLockscreenToPrimaryBouncerDragging()
         listenForLockscreenToAlternateBouncer()
         listenForLockscreenTransitionToCamera()
+        listenForLockscreenToGlanceableHub()
     }
 
     /**
@@ -379,6 +382,22 @@ constructor(
                     }
                 }
         }
+    }
+
+    /**
+     * Listens for transition from glanceable hub back to lock screen and directly drives the
+     * keyguard transition.
+     */
+    private fun listenForLockscreenToGlanceableHub() {
+        if (!com.android.systemui.Flags.communalHub()) {
+            return
+        }
+
+        glanceableHubTransitions.listenForLockscreenAndHubTransition(
+            transitionName = "listenForLockscreenToGlanceableHub",
+            transitionOwnerName = TAG,
+            toScene = CommunalSceneKey.Communal
+        )
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
