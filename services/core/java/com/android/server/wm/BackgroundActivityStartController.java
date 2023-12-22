@@ -648,8 +648,7 @@ public class BackgroundActivityStartController {
                     Slog.d(TAG, "Activity start allowed by caller. "
                             + state.dump());
                 }
-                // return the realCaller result for backwards compatibility
-                return allowBasedOnRealCaller(state);
+                return allowBasedOnCaller(state);
             }
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG,
@@ -658,8 +657,7 @@ public class BackgroundActivityStartController {
                                 + " AND the PI sender upgrades target_sdk to 34+! "
                                 + state.dump());
                 showBalRiskToast();
-                // return the realCaller result for backwards compatibility
-                return allowBasedOnRealCaller(state);
+                return allowBasedOnCaller(state);
             }
             Slog.wtf(TAG,
                     "Without Android 15 BAL hardening this activity start would be allowed"
