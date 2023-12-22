@@ -16,23 +16,26 @@
 
 package com.android.server.os;
 
-import android.app.admin.flags.Flags;
-import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
-
 import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.flags.Flags;
 import android.app.role.RoleManager;
 import android.content.Context;
 import android.os.Binder;
 import android.os.BugreportManager.BugreportCallback;
+import android.os.BugreportParams;
 import android.os.IBinder;
 import android.os.IDumpstateListener;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -48,6 +51,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.FileDescriptor;
 import java.util.concurrent.CompletableFuture;
@@ -66,6 +71,11 @@ public class BugreportManagerServiceImplTest {
     private BugreportManagerServiceImpl mService;
     private BugreportManagerServiceImpl.BugreportFileManager mBugreportFileManager;
 
+    @Mock
+    private UserManager mMockUserManager;
+    @Mock
+    private DevicePolicyManager mMockDevicePolicyManager;
+
     private int mCallingUid = 1234;
     private String mCallingPackage  = "test.package";
     private AtomicFile mMappingFile;
@@ -75,14 +85,17 @@ public class BugreportManagerServiceImplTest {
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
         mMappingFile = new AtomicFile(mContext.getFilesDir(), "bugreport-mapping.xml");
         ArraySet<String> mAllowlistedPackages = new ArraySet<>();
         mAllowlistedPackages.add(mContext.getPackageName());
         mService = new BugreportManagerServiceImpl(
-                new BugreportManagerServiceImpl.Injector(mContext, mAllowlistedPackages,
-                        mMappingFile));
+                new TestInjector(mContext, mAllowlistedPackages, mMappingFile,
+                        mMockUserManager, mMockDevicePolicyManager));
         mBugreportFileManager = new BugreportManagerServiceImpl.BugreportFileManager(mMappingFile);
+        // The calling user is an admin user by default.
+        when(mMockUserManager.isUserAdmin(anyInt())).thenReturn(true);
     }
 
     @After
@@ -165,6 +178,36 @@ public class BugreportManagerServiceImplTest {
     }
 
     @Test
+    public void testStartBugreport_throwsForNonAdminUser() throws Exception {
+        when(mMockUserManager.isUserAdmin(anyInt())).thenReturn(false);
+
+        Exception thrown = assertThrows(Exception.class,
+                () -> mService.startBugreport(mCallingUid, mContext.getPackageName(),
+                        new FileDescriptor(), /* screenshotFd= */ null,
+                        BugreportParams.BUGREPORT_MODE_FULL,
+                        /* flags= */ 0, new Listener(new CountDownLatch(1)),
+                        /* isScreenshotRequested= */ false));
+
+        assertThat(thrown.getMessage()).contains("not an admin user");
+    }
+
+    @Test
+    public void testStartBugreport_throwsForNotAffiliatedUser() throws Exception {
+        when(mMockUserManager.isUserAdmin(anyInt())).thenReturn(false);
+        when(mMockDevicePolicyManager.getDeviceOwnerUserId()).thenReturn(-1);
+        when(mMockDevicePolicyManager.isAffiliatedUser(anyInt())).thenReturn(false);
+
+        Exception thrown = assertThrows(Exception.class,
+                () -> mService.startBugreport(mCallingUid, mContext.getPackageName(),
+                        new FileDescriptor(), /* screenshotFd= */ null,
+                        BugreportParams.BUGREPORT_MODE_REMOTE,
+                        /* flags= */ 0, new Listener(new CountDownLatch(1)),
+                        /* isScreenshotRequested= */ false));
+
+        assertThat(thrown.getMessage()).contains("not affiliated to the device owner");
+    }
+
+    @Test
     public void testRetrieveBugreportWithoutFilesForCaller() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
         Listener listener = new Listener(latch);
@@ -207,7 +250,8 @@ public class BugreportManagerServiceImplTest {
 
     private void clearAllowlist() {
         mService = new BugreportManagerServiceImpl(
-                new BugreportManagerServiceImpl.Injector(mContext, new ArraySet<>(), mMappingFile));
+                new TestInjector(mContext, new ArraySet<>(), mMappingFile,
+                        mMockUserManager, mMockDevicePolicyManager));
     }
 
     private static class Listener implements IDumpstateListener {
@@ -256,6 +300,29 @@ public class BugreportManagerServiceImplTest {
         @Override
         public void accept(Boolean successful) {
             complete(successful);
+        }
+    }
+
+    private static class TestInjector extends BugreportManagerServiceImpl.Injector {
+
+        private final UserManager mUserManager;
+        private final DevicePolicyManager mDevicePolicyManager;
+
+        TestInjector(Context context, ArraySet<String> allowlistedPackages, AtomicFile mappingFile,
+                UserManager um, DevicePolicyManager dpm) {
+            super(context, allowlistedPackages, mappingFile);
+            mUserManager = um;
+            mDevicePolicyManager = dpm;
+        }
+
+        @Override
+        public UserManager getUserManager() {
+            return mUserManager;
+        }
+
+        @Override
+        public DevicePolicyManager getDevicePolicyManager() {
+            return mDevicePolicyManager;
         }
     }
 }
