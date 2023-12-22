@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.data.repository
+package com.android.systemui.statusbar.policy.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.policy.data.repository.userSetupRepository
 
-var Kosmos.userSetupRepository: UserSetupRepository by Kosmos.Fixture { fakeUserSetupRepository }
-val Kosmos.fakeUserSetupRepository by Kosmos.Fixture { FakeUserSetupRepository() }
+val Kosmos.userSetupInteractor by Kosmos.Fixture { UserSetupInteractor(userSetupRepository) }

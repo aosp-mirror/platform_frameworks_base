@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.pipeline.mobile.data
 
-import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepositoryModule
-import dagger.Module
+package com.android.systemui.statusbar.policy.domain.interactor
 
-@Module(includes = [FakeUserSetupRepositoryModule::class])
-object FakeStatusBarPipelineMobileDataLayerModule
+import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
+import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+
+class UserSetupInteractor @Inject constructor(repository: UserSetupRepository) {
+    /** Whether the user has completed the setup steps. */
+    val isUserSetUp: Flow<Boolean> = repository.isUserSetUp
+}

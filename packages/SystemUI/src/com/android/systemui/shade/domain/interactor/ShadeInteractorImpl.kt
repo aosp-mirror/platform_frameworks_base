@@ -25,8 +25,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -94,7 +94,7 @@ constructor(
             disableFlagsRepository.disableFlags,
             isShadeEnabled,
             keyguardRepository.isDozing,
-            userSetupRepository.isUserSetupFlow,
+            userSetupRepository.isUserSetUp,
             deviceProvisioningRepository.isDeviceProvisioned,
         ) { disableFlags, isShadeEnabled, isDozing, isUserSetup, isDeviceProvisioned ->
             isDeviceProvisioned &&
