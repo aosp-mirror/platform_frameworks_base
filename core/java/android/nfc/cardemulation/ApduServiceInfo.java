@@ -21,10 +21,10 @@
 package android.nfc.cardemulation;
 
 import android.annotation.FlaggedApi;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -374,7 +374,7 @@ public final class ApduServiceInfo implements Parcelable {
         // Set uid
         mUid = si.applicationInfo.uid;
 
-        mCategoryOtherServiceEnabled = false;    // support other category
+        mCategoryOtherServiceEnabled = true;    // support other category
 
     }
 
