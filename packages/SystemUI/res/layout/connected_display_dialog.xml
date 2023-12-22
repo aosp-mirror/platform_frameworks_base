@@ -22,7 +22,7 @@
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/dialog_side_padding"
     android:paddingTop="@dimen/dialog_top_padding"
-    android:background="@*android:drawable/bottomsheet_background"
+    android:background="@drawable/connected_display_dialog_bg"
     android:paddingBottom="@dimen/dialog_bottom_padding">
 
     <ImageView
@@ -40,7 +40,7 @@
         android:id="@+id/connected_display_dialog_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/screenrecord_title_margin_top"
+        android:layout_marginTop="16dp"
         android:gravity="center"
         android:text="@string/connected_display_dialog_start_mirroring"
         android:textAppearance="@style/TextAppearance.Dialog.Title" />
@@ -51,13 +51,14 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:visibility="gone"
+        android:layout_marginTop="16dp"
         android:text="@string/connected_display_dialog_dual_display_stop_warning"
         android:textAppearance="@style/TextAppearance.Dialog.Body" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/screenrecord_buttons_margin_top"
+        android:layout_marginTop="16dp"
         android:orientation="horizontal">
 
         <Button
