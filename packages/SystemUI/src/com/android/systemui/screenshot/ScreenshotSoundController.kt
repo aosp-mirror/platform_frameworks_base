@@ -18,7 +18,7 @@ package com.android.systemui.screenshot
 
 import android.media.MediaPlayer
 import android.util.Log
-import com.android.app.tracing.TraceUtils.Companion.async
+import com.android.app.tracing.coroutines.async
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.google.errorprone.annotations.CanIgnoreReturnValue

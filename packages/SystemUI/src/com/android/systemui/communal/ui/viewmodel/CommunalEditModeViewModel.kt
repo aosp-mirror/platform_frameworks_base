@@ -47,5 +47,6 @@ constructor(
 
     override fun onDeleteWidget(id: Int) = communalInteractor.deleteWidget(id)
 
-    override fun onReorderWidgets(ids: List<Int>) = communalInteractor.updateWidgetOrder(ids)
+    override fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) =
+        communalInteractor.updateWidgetOrder(widgetIdToPriorityMap)
 }

@@ -20,11 +20,9 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.annotation.StringRes;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.companion.virtual.flags.Flags;
-import android.content.res.Resources;
 import android.graphics.ImageFormat;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -45,16 +43,16 @@ import java.util.concurrent.Executor;
 @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
 public final class VirtualCameraConfig implements Parcelable {
 
-    private final @StringRes int mNameStringRes;
+    private final String mName;
     private final Set<VirtualCameraStreamConfig> mStreamConfigurations;
     private final IVirtualCameraCallback mCallback;
 
     private VirtualCameraConfig(
-            int displayNameStringRes,
+            @NonNull String name,
             @NonNull Set<VirtualCameraStreamConfig> streamConfigurations,
             @NonNull Executor executor,
             @NonNull VirtualCameraCallback callback) {
-        mNameStringRes = displayNameStringRes;
+        mName = requireNonNull(name, "Missing name");
         mStreamConfigurations =
                 Set.copyOf(requireNonNull(streamConfigurations, "Missing stream configurations"));
         if (mStreamConfigurations.isEmpty()) {
@@ -68,7 +66,7 @@ public final class VirtualCameraConfig implements Parcelable {
     }
 
     private VirtualCameraConfig(@NonNull Parcel in) {
-        mNameStringRes = in.readInt();
+        mName = in.readString8();
         mCallback = IVirtualCameraCallback.Stub.asInterface(in.readStrongBinder());
         mStreamConfigurations =
                 Set.of(
@@ -84,18 +82,18 @@ public final class VirtualCameraConfig implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mNameStringRes);
+        dest.writeString8(mName);
         dest.writeStrongInterface(mCallback);
         dest.writeParcelableArray(
                 mStreamConfigurations.toArray(new VirtualCameraStreamConfig[0]), flags);
     }
 
     /**
-     * @return The display name of this VirtualCamera
+     * @return The name of this VirtualCamera
      */
-    @StringRes
-    public int getDisplayNameStringRes() {
-        return mNameStringRes;
+    @NonNull
+    public String getName() {
+        return mName;
     }
 
     /**
@@ -126,30 +124,22 @@ public final class VirtualCameraConfig implements Parcelable {
      * <li>At least one stream must be added with {@link #addStreamConfig(int, int, int)}.
      * <li>A callback must be set with {@link #setVirtualCameraCallback(Executor,
      *     VirtualCameraCallback)}
-     * <li>A user readable name can be set with {@link #setDisplayNameStringRes(int)}
+     * <li>A camera name must be set with {@link #setName(String)}
      */
     @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
     public static final class Builder {
 
-        private @StringRes int mDisplayNameStringRes = Resources.ID_NULL;
+        private String mName;
         private final ArraySet<VirtualCameraStreamConfig> mStreamConfigurations = new ArraySet<>();
         private Executor mCallbackExecutor;
         private VirtualCameraCallback mCallback;
 
         /**
-         * Set the visible name of this camera for the user.
-         *
-         * <p>Sets the resource to a string representing a user readable name for this virtual
-         * camera.
-         *
-         * @throws IllegalArgumentException if an invalid resource id is passed.
+         * Set the name of the virtual camera instance.
          */
         @NonNull
-        public Builder setDisplayNameStringRes(@StringRes int displayNameStringRes) {
-            if (displayNameStringRes <= 0) {
-                throw new IllegalArgumentException("Invalid resource passed for display name");
-            }
-            mDisplayNameStringRes = displayNameStringRes;
+        public Builder setName(@NonNull String name) {
+            mName = requireNonNull(name, "Display name cannot be null");
             return this;
         }
 
@@ -203,7 +193,7 @@ public final class VirtualCameraConfig implements Parcelable {
         @NonNull
         public VirtualCameraConfig build() {
             return new VirtualCameraConfig(
-                    mDisplayNameStringRes, mStreamConfigurations, mCallbackExecutor, mCallback);
+                    mName, mStreamConfigurations, mCallbackExecutor, mCallback);
         }
     }
 

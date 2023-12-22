@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.content.ComponentName
 import android.os.PowerManager
 import android.os.SystemClock
 import android.view.MotionEvent
@@ -53,6 +54,13 @@ abstract class BaseCommunalViewModel(
         communalInteractor.setTransitionState(transitionState)
     }
 
+    /**
+     * Called when a widget is added via drag and drop from the widget picker into the communal hub.
+     */
+    fun onAddWidget(componentName: ComponentName, priority: Int) {
+        communalInteractor.addWidget(componentName, priority)
+    }
+
     // TODO(b/308813166): remove once CommunalContainer is moved lower in z-order and doesn't block
     //  touches anymore.
     /** Called when a touch is received outside the edge swipe area when hub mode is closed. */
@@ -82,8 +90,14 @@ abstract class BaseCommunalViewModel(
     /** Called as the UI requests deleting a widget. */
     open fun onDeleteWidget(id: Int) {}
 
-    /** Called as the UI requests reordering widgets. */
-    open fun onReorderWidgets(ids: List<Int>) {}
+    /**
+     * Called as the UI requests reordering widgets.
+     *
+     * @param widgetIdToPriorityMap mapping of the widget ids to its priority. When re-ordering to
+     *   add a new item in the middle, provide the priorities of existing widgets as if the new item
+     *   existed, and then, call [onAddWidget] to add the new item at intended order.
+     */
+    open fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) {}
 
     /** Called as the UI requests opening the widget editor. */
     open fun onOpenWidgetEditor() {}

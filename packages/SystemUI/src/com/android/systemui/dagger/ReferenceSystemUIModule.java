@@ -23,6 +23,8 @@ import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 
 import com.android.keyguard.KeyguardViewController;
+import com.android.systemui.ScreenDecorationsModule;
+import com.android.systemui.accessibility.SystemActionsModule;
 import com.android.systemui.battery.BatterySaverModule;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
@@ -34,6 +36,7 @@ import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.power.dagger.PowerModule;
 import com.android.systemui.qs.dagger.QSModule;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
+import com.android.systemui.reardisplay.RearDisplayModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
 import com.android.systemui.rotationlock.RotationLockModule;
@@ -59,6 +62,7 @@ import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
+import com.android.systemui.toast.ToastModule;
 import com.android.systemui.volume.dagger.VolumeModule;
 import com.android.systemui.wallpapers.dagger.WallpaperModule;
 
@@ -89,19 +93,23 @@ import javax.inject.Named;
         CollapsedStatusBarFragmentStartableModule.class,
         GestureModule.class,
         HeadsUpModule.class,
+        KeyboardShortcutsModule.class,
         MediaModule.class,
         MultiUserUtilsModule.class,
         NavigationBarControllerModule.class,
         PowerModule.class,
         QSModule.class,
-        ShadeModule.class,
+        RearDisplayModule.class,
         ReferenceScreenshotModule.class,
         RotationLockModule.class,
-        SceneContainerFrameworkModule.class,
+        ScreenDecorationsModule.class,
+        SystemActionsModule.class,
+        ShadeModule.class,
         StartCentralSurfacesModule.class,
+        SceneContainerFrameworkModule.class,
+        ToastModule.class,
         VolumeModule.class,
-        WallpaperModule.class,
-        KeyboardShortcutsModule.class
+        WallpaperModule.class
 })
 public abstract class ReferenceSystemUIModule {
 

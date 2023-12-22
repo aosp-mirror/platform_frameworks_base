@@ -42,6 +42,8 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
     private val maximizeWindowButton: ImageButton = rootView.requireViewById(R.id.maximize_window)
     private val appNameTextView: TextView = rootView.requireViewById(R.id.application_name)
     private val appIconImageView: ImageView = rootView.requireViewById(R.id.application_icon)
+    val appNameTextWidth: Int
+        get() = appNameTextView.width
 
     init {
         captionView.setOnTouchListener(onCaptionTouchListener)

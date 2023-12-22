@@ -5,9 +5,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dagger.qualifiers.Tracing
-import com.android.systemui.Flags.coroutineTracing
-import com.android.app.tracing.TraceUtils.Companion.coroutineTracingIsEnabled
-import com.android.app.tracing.TraceContextElement
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher
@@ -16,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 /** Providers for various coroutines-related constructs. */
 @Module
@@ -83,9 +80,6 @@ class CoroutinesModule {
     @Tracing
     @SysUISingleton
     fun tracingCoroutineContext(): CoroutineContext {
-        return if (coroutineTracing()) {
-            coroutineTracingIsEnabled = true
-            TraceContextElement()
-        } else EmptyCoroutineContext
+        return createCoroutineTracingContext()
     }
 }

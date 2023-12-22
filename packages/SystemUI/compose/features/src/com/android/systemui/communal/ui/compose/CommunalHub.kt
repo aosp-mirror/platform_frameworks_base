@@ -20,10 +20,12 @@ import android.os.Bundle
 import android.util.SizeF
 import android.widget.FrameLayout
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,11 +33,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
@@ -98,7 +102,6 @@ fun CommunalHub(
         modifier = modifier.fillMaxSize().background(Color.White),
     ) {
         CommunalHubLazyGrid(
-            modifier = Modifier.align(Alignment.CenterStart),
             communalContent = communalContent,
             viewModel = viewModel,
             contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize),
@@ -138,21 +141,21 @@ fun CommunalHub(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CommunalHubLazyGrid(
+private fun BoxScope.CommunalHubLazyGrid(
     communalContent: List<CommunalContentModel>,
     viewModel: BaseCommunalViewModel,
-    modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
 ) {
-    var gridModifier = modifier
+    var gridModifier = Modifier.align(Alignment.CenterStart)
     val gridState = rememberLazyGridState()
     var list = communalContent
     var dragDropState: GridDragDropState? = null
     if (viewModel.isEditMode && viewModel is CommunalEditModeViewModel) {
         val contentListState = rememberContentListState(communalContent, viewModel)
         list = contentListState.list
+        // for drag & drop operations within the communal hub grid
         dragDropState =
             rememberGridDragDropState(
                 gridState = gridState,
@@ -164,9 +167,22 @@ private fun CommunalHubLazyGrid(
                 .fillMaxSize()
                 .dragContainer(dragDropState, beforeContentPadding(contentPadding))
                 .onGloballyPositioned { setGridCoordinates(it) }
+        // for widgets dropped from other activities
+        val dragAndDropTargetState =
+            rememberDragAndDropTargetState(
+                gridState = gridState,
+                contentListState = contentListState,
+                updateDragPositionForRemove = updateDragPositionForRemove
+            )
+
+        // A full size box in background that listens to widget drops from the picker.
+        // Since the grid has its own listener for in-grid drag events, we use a separate element
+        // for android drag events.
+        Box(Modifier.fillMaxSize().dragAndDropTarget(dragAndDropTargetState)) {}
     } else {
         gridModifier = gridModifier.height(Dimensions.GridHeight)
     }
+
     LazyHorizontalGrid(
         modifier = gridModifier,
         state = gridState,
@@ -309,10 +325,22 @@ private fun CommunalContent(
 ) {
     when (model) {
         is CommunalContentModel.Widget -> WidgetContent(model, size, elevation, modifier)
+        is CommunalContentModel.WidgetPlaceholder -> WidgetPlaceholderContent(size)
         is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, modifier)
     }
+}
+
+/** Presents a placeholder card for the new widget being dragged and dropping into the grid. */
+@Composable
+fun WidgetPlaceholderContent(size: SizeF) {
+    Card(
+        modifier = Modifier.size(Dp(size.width), Dp(size.height)),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(3.dp, LocalAndroidColorScheme.current.tertiaryFixed),
+        shape = RoundedCornerShape(16.dp)
+    ) {}
 }
 
 @Composable

@@ -20,6 +20,7 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetProviderInfo
 import android.widget.RemoteViews
 import com.android.systemui.communal.shared.model.CommunalContentSize
+import java.util.UUID
 
 /** Encapsulates data for a communal content. */
 sealed interface CommunalContentModel {
@@ -36,6 +37,13 @@ sealed interface CommunalContentModel {
     ) : CommunalContentModel {
         override val key = "widget_$appWidgetId"
         // Widget size is always half.
+        override val size = CommunalContentSize.HALF
+    }
+
+    /** A placeholder item representing a new widget being added */
+    class WidgetPlaceholder : CommunalContentModel {
+        override val key: String = "widget_placeholder_${UUID.randomUUID()}"
+        // Same as widget size.
         override val size = CommunalContentSize.HALF
     }
 

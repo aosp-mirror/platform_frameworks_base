@@ -21,11 +21,11 @@ import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsSourceConsumerProto.ANIMATION_STATE;
 import static android.view.InsetsSourceConsumerProto.HAS_WINDOW_FOCUS;
-import static android.view.InsetsSourceConsumerProto.INTERNAL_INSETS_TYPE;
 import static android.view.InsetsSourceConsumerProto.IS_REQUESTED_VISIBLE;
 import static android.view.InsetsSourceConsumerProto.PENDING_FRAME;
 import static android.view.InsetsSourceConsumerProto.PENDING_VISIBLE_FRAME;
 import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
+import static android.view.InsetsSourceConsumerProto.TYPE_NUMBER;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -393,7 +393,6 @@ public class InsetsSourceConsumer {
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        proto.write(INTERNAL_INSETS_TYPE, WindowInsets.Type.toString(mType));
         proto.write(HAS_WINDOW_FOCUS, mHasWindowFocus);
         proto.write(IS_REQUESTED_VISIBLE, isShowRequested());
         if (mSourceControl != null) {
@@ -406,6 +405,7 @@ public class InsetsSourceConsumer {
             mPendingVisibleFrame.dumpDebug(proto, PENDING_VISIBLE_FRAME);
         }
         proto.write(ANIMATION_STATE, mAnimationState);
+        proto.write(TYPE_NUMBER, mType);
         proto.end(token);
     }
 }

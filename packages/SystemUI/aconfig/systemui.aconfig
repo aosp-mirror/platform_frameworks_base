@@ -205,6 +205,13 @@ flag {
 }
 
 flag {
+   name: "pss_task_switcher"
+   namespace: "systemui"
+   description: "Enable the task switcher feature for partial screen sharing"
+   bug: "317208379"
+}
+
+flag {
    name: "rest_to_unlock"
    namespace: "systemui"
    description: "Require prolonged touch for fingerprint authentication"

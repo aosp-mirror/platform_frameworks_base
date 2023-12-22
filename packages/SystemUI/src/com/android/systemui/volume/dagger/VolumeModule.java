@@ -21,6 +21,7 @@ import android.media.AudioManager;
 import android.os.Looper;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
@@ -36,15 +37,30 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogImpl;
 import com.android.systemui.volume.VolumePanelFactory;
+import com.android.systemui.volume.VolumeUI;
 
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
+import dagger.multibindings.IntoSet;
 
 /** Dagger Module for code in the volume package. */
 @Module
 public interface VolumeModule {
+    /** Starts VolumeUI.  */
+    @Binds
+    @IntoMap
+    @ClassKey(VolumeUI.class)
+    CoreStartable bindVolumeUIStartable(VolumeUI impl);
+
+    /** Listen to config changes for VolumeUI. */
+    @Binds
+    @IntoSet
+    ConfigurationController.ConfigurationListener bindVolumeUIConfigChanges(VolumeUI impl);
+
     /** */
     @Binds
     VolumeComponent provideVolumeComponent(VolumeDialogComponent volumeDialogComponent);

@@ -16,8 +16,6 @@
 
 package com.android.systemui;
 
-import android.content.res.Configuration;
-
 import androidx.annotation.NonNull;
 
 import java.io.PrintWriter;
@@ -41,13 +39,6 @@ public interface CoreStartable extends Dumpable {
 
     /** Main entry point for implementations. Called shortly after SysUI startup. */
     void start();
-
-    /** Called when the device configuration changes. This will not be called before
-     * {@link #start()}, but it could be called before {@link #onBootCompleted()}.
-     *
-     * @see android.app.Application#onConfigurationChanged(Configuration)  */
-    default void onConfigurationChanged(Configuration newConfig) {
-    }
 
     @Override
     default void dump(@NonNull PrintWriter pw, @NonNull String[] args) {

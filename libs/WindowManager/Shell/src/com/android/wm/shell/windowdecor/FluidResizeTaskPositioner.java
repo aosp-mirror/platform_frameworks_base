@@ -136,7 +136,8 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
                 y)) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             DragPositioningCallbackUtility.onDragEnd(mRepositionTaskBounds,
-                    mTaskBoundsAtDragStart, mStableBounds, mRepositionStartPoint, x, y);
+                    mTaskBoundsAtDragStart, mRepositionStartPoint, x, y,
+                    mWindowDecoration.calculateValidDragArea());
             wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
             mTaskOrganizer.applyTransaction(wct);
         }

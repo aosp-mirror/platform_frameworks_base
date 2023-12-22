@@ -62,8 +62,12 @@ interface CommunalWidgetRepository {
     /** Delete a widget by id from app widget service and the database. */
     fun deleteWidget(widgetId: Int) {}
 
-    /** Update the order of widgets in the database. */
-    fun updateWidgetOrder(ids: List<Int>) {}
+    /**
+     * Update the order of widgets in the database.
+     *
+     * @param widgetIdToPriorityMap mapping of the widget ids to the priority of the widget.
+     */
+    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {}
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -168,11 +172,11 @@ constructor(
         }
     }
 
-    override fun updateWidgetOrder(ids: List<Int>) {
+    override fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {
         applicationScope.launch(bgDispatcher) {
-            communalWidgetDao.updateWidgetOrder(ids)
+            communalWidgetDao.updateWidgetOrder(widgetIdToPriorityMap)
             logger.i({ "Updated the order of widget list with ids: $str1." }) {
-                str1 = ids.toString()
+                str1 = widgetIdToPriorityMap.toString()
             }
         }
     }

@@ -461,6 +461,13 @@ public class NotificationLockscreenUserManagerImpl implements
         }
     }
 
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    public boolean isProfileAvailable(int userId) {
+        synchronized (mLock) {
+            return mUserManager.isUserRunning(userId);
+        }
+    }
+
     private void setShowLockscreenNotifications(boolean show) {
         mShowLockscreenNotifications = show;
     }

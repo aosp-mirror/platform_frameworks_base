@@ -40,6 +40,7 @@ constructor(
     private var windowManagerService: IWindowManager? = null,
 ) : ComponentActivity() {
     companion object {
+        private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
         private const val EXTRA_FILTER_STRATEGY = "filter_strategy"
         private const val FILTER_STRATEGY_GLANCEABLE_HUB = 1
         private const val TAG = "EditWidgetsActivity"
@@ -49,10 +50,23 @@ constructor(
         registerForActivityResult(StartActivityForResult()) { result ->
             when (result.resultCode) {
                 RESULT_OK -> {
-                    result.data
-                        ?.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME, ComponentName::class.java)
-                        ?.let { communalInteractor.addWidget(it, 0) }
-                        ?: run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
+                    result.data?.let { intent ->
+                        val isPendingWidgetDrag =
+                            intent.getBooleanExtra(EXTRA_IS_PENDING_WIDGET_DRAG, false)
+                        // Nothing to do when a widget is being dragged & dropped. The drop
+                        // target in the communal grid will receive the widget to be added (if
+                        // the user drops it over).
+                        if (!isPendingWidgetDrag) {
+                            intent
+                                .getParcelableExtra(
+                                    Intent.EXTRA_COMPONENT_NAME,
+                                    ComponentName::class.java
+                                )
+                                ?.let { communalInteractor.addWidget(it, 0) }
+                                ?: run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
+                        }
+                    }
+                        ?: run { Log.w(TAG, "No data in result.") }
                 }
                 else ->
                     Log.w(
@@ -64,8 +78,6 @@ constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setShowWhenLocked(true)
 
         setCommunalEditWidgetActivityContent(
             activity = this,

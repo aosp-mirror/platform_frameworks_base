@@ -141,6 +141,7 @@ public class SettingsToPropertiesMapper {
         "context_hub",
         "core_experiments_team_internal",
         "core_graphics",
+        "core_libraries",
         "dck_framework",
         "devoptions_settings",
         "game",

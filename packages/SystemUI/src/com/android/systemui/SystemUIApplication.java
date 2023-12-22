@@ -37,11 +37,11 @@ import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.View;
 
-import com.android.systemui.res.R;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.NotificationChannels;
 
@@ -354,19 +354,6 @@ public class SystemUIApplication extends Application implements
             }
             configController.onConfigurationChanged(newConfig);
             Trace.endSection();
-            int len = mServices.length;
-            for (int i = 0; i < len; i++) {
-                if (mServices[i] != null) {
-                    if (Trace.isEnabled()) {
-                        Trace.traceBegin(
-                                Trace.TRACE_TAG_APP,
-                                mServices[i].getClass().getSimpleName()
-                                        + ".onConfigurationChanged()");
-                    }
-                    mServices[i].onConfigurationChanged(newConfig);
-                    Trace.endSection();
-                }
-            }
         }
     }
 

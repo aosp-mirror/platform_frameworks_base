@@ -22,16 +22,17 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.android.systemui.CoreStartable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
 @SysUISingleton
-public class VolumeUI implements CoreStartable {
+public class VolumeUI implements CoreStartable, ConfigurationController.ConfigurationListener {
     private static final String TAG = "VolumeUI";
     private static boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -60,7 +61,7 @@ public class VolumeUI implements CoreStartable {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         if (!mEnabled) return;
         mVolumeComponent.onConfigurationChanged(newConfig);
     }

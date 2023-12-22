@@ -94,6 +94,7 @@ import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -204,6 +205,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock
     private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
+    @Mock
+    private ShadeInteractor mShadeInteractor;
     @Mock
     private SinglePointerTouchProcessor mSinglePointerTouchProcessor;
     @Mock
@@ -328,6 +331,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mActivityLaunchAnimator,
                 mBiometricExecutor,
                 mPrimaryBouncerInteractor,
+                mShadeInteractor,
                 mSinglePointerTouchProcessor,
                 mSessionTracker,
                 mAlternateBouncerInteractor,

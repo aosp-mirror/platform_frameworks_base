@@ -923,14 +923,14 @@ public class AuthControllerTest extends SysuiTestCase {
         doReturn(500).when(mResources)
                 .getDimensionPixelSize(eq(com.android.systemui.res.R.dimen
                         .physical_fingerprint_sensor_center_screen_location_y));
-        mAuthController.onConfigurationChanged(null /* newConfig */);
+        mAuthController.onConfigChanged(null /* newConfig */);
 
         final Point firstFpLocation = mAuthController.getFingerprintSensorLocation();
 
         doReturn(1000).when(mResources)
                 .getDimensionPixelSize(eq(com.android.systemui.res.R.dimen
                         .physical_fingerprint_sensor_center_screen_location_y));
-        mAuthController.onConfigurationChanged(null /* newConfig */);
+        mAuthController.onConfigChanged(null /* newConfig */);
 
         assertNotSame(firstFpLocation, mAuthController.getFingerprintSensorLocation());
     }

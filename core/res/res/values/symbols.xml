@@ -288,6 +288,7 @@
   <java-symbol type="integer" name="config_audio_ring_vol_default" />
   <java-symbol type="integer" name="config_audio_ring_vol_steps" />
   <java-symbol type="integer" name="config_audio_alarm_min_vol" />
+  <java-symbol type="bool" name="config_audio_ringer_mode_affects_alarm_stream" />
   <java-symbol type="bool" name="config_spatial_audio_head_tracking_enabled_default" />
   <java-symbol type="bool" name="config_avoidGfxAccel" />
   <java-symbol type="bool" name="config_bluetooth_address_validation" />

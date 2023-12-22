@@ -2320,6 +2320,15 @@ public final class InputMethodManager {
      * @hide
      */
     public boolean hideSoftInputFromView(@NonNull View view, @HideFlags int flags) {
+        final boolean isFocusedAndWindowFocused = view.hasWindowFocus() && view.isFocused();
+        synchronized (mH) {
+            if (!isFocusedAndWindowFocused && !hasServedByInputMethodLocked(view)) {
+                // Fail early if the view is not focused and not served
+                // to avoid logging many erroneous calls.
+                return false;
+            }
+        }
+
         final var reason = SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW;
         final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
                 null /* component */, Process.myUid(),

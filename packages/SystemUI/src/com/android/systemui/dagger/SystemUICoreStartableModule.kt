@@ -19,12 +19,9 @@ package com.android.systemui.dagger
 import com.android.keyguard.KeyguardBiometricLockoutLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.LatencyTester
-import com.android.systemui.ScreenDecorations
 import com.android.systemui.SliceBroadcastRelayHandler
-import com.android.systemui.accessibility.SystemActions
 import com.android.systemui.accessibility.Magnification
 import com.android.systemui.back.domain.interactor.BackActionInteractor
-import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.BiometricNotificationService
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.controls.dagger.StartControlsStartableModule
@@ -46,10 +43,6 @@ import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderCoordinator
 import com.android.systemui.mediaprojection.taskswitcher.MediaProjectionTaskSwitcherCoreStartable
-import com.android.systemui.power.PowerUI
-import com.android.systemui.reardisplay.RearDisplayDialogController
-import com.android.systemui.recents.Recents
-import com.android.systemui.recents.ScreenPinningRequest
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.ImmersiveModeConfirmation
@@ -61,11 +54,9 @@ import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener
 import com.android.systemui.stylus.StylusUsiPowerStartable
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.theme.ThemeOverlayController
-import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
 import com.android.systemui.util.NotificationChannels
 import com.android.systemui.util.StartBinderLoggerModule
-import com.android.systemui.volume.VolumeUI
 import com.android.systemui.wallpapers.dagger.WallpaperModule
 import com.android.systemui.wmshell.WMShell
 import dagger.Binds
@@ -74,7 +65,12 @@ import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
 /**
- * Collection of {@link CoreStartable}s that should be run on AOSP.
+ * DEPRECATED: DO NOT ADD THINGS TO THIS FILE.
+ *
+ * Add a feature specific daggger module for what you are working on. Bind your CoreStartable there.
+ * Include that module where it is needed.
+ *
+ * @deprecated
  */
 @Module(
     includes = [
@@ -85,12 +81,6 @@ import dagger.multibindings.IntoMap
     ]
 )
 abstract class SystemUICoreStartableModule {
-    /** Inject into AuthController.  */
-    @Binds
-    @IntoMap
-    @ClassKey(AuthController::class)
-    abstract fun bindAuthController(service: AuthController): CoreStartable
-
     /** Inject into BiometricNotificationService */
     @Binds
     @IntoMap
@@ -158,18 +148,6 @@ abstract class SystemUICoreStartableModule {
     @PerUser
     abstract fun bindNotificationChannels(sysui: NotificationChannels): CoreStartable
 
-    /** Inject into PowerUI.  */
-    @Binds
-    @IntoMap
-    @ClassKey(PowerUI::class)
-    abstract fun bindPowerUI(sysui: PowerUI): CoreStartable
-
-    /** Inject into Recents.  */
-    @Binds
-    @IntoMap
-    @ClassKey(Recents::class)
-    abstract fun bindRecents(sysui: Recents): CoreStartable
-
     /** Inject into ImmersiveModeConfirmation.  */
     @Binds
     @IntoMap
@@ -181,12 +159,6 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(RingtonePlayer::class)
     abstract fun bind(sysui: RingtonePlayer): CoreStartable
-
-    /** Inject into ScreenDecorations.  */
-    @Binds
-    @IntoMap
-    @ClassKey(ScreenDecorations::class)
-    abstract fun bindScreenDecorations(sysui: ScreenDecorations): CoreStartable
 
     /** Inject into GesturePointerEventHandler. */
     @Binds
@@ -218,35 +190,18 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(StorageNotification::class)
     abstract fun bindStorageNotification(sysui: StorageNotification): CoreStartable
 
-    /** Inject into SystemActions.  */
-    @Binds
-    @IntoMap
-    @ClassKey(SystemActions::class)
-    abstract fun bindSystemActions(sysui: SystemActions): CoreStartable
-
     /** Inject into ThemeOverlayController.  */
     @Binds
     @IntoMap
     @ClassKey(ThemeOverlayController::class)
     abstract fun bindThemeOverlayController(sysui: ThemeOverlayController): CoreStartable
 
-    /** Inject into ToastUI.  */
-    @Binds
-    @IntoMap
-    @ClassKey(ToastUI::class)
-    abstract fun bindToastUI(service: ToastUI): CoreStartable
 
     /** Inject into MediaOutputSwitcherDialogUI.  */
     @Binds
     @IntoMap
     @ClassKey(MediaOutputSwitcherDialogUI::class)
     abstract fun MediaOutputSwitcherDialogUI(sysui: MediaOutputSwitcherDialogUI): CoreStartable
-
-    /** Inject into VolumeUI.  */
-    @Binds
-    @IntoMap
-    @ClassKey(VolumeUI::class)
-    abstract fun bindVolumeUI(sysui: VolumeUI): CoreStartable
 
     /** Inject into Magnification.  */
     @Binds
@@ -293,11 +248,6 @@ abstract class SystemUICoreStartableModule {
     abstract fun bindChipbarController(sysui: ChipbarCoordinator): CoreStartable
 
 
-    /** Inject into RearDisplayDialogController) */
-    @Binds
-    @IntoMap
-    @ClassKey(RearDisplayDialogController::class)
-    abstract fun bindRearDisplayDialogController(sysui: RearDisplayDialogController): CoreStartable
 
     /** Inject into StylusUsiPowerStartable) */
     @Binds
@@ -361,9 +311,4 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(KeyguardDismissBinder::class)
     abstract fun bindKeyguardDismissBinder(impl: KeyguardDismissBinder): CoreStartable
-
-    @Binds
-    @IntoMap
-    @ClassKey(ScreenPinningRequest::class)
-    abstract fun bindScreenPinningRequest(impl: ScreenPinningRequest): CoreStartable
 }
