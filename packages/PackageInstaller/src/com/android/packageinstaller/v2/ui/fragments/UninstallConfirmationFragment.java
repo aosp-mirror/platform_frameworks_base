@@ -30,7 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired;
+import com.android.packageinstaller.v2.model.UninstallUserActionRequired;
 import com.android.packageinstaller.v2.ui.UninstallActionListener;
 
 /**
