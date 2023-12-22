@@ -570,6 +570,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManagerClient.getPackageUidAsUser(any(), anyInt())).thenReturn(mUid);
         when(mPackageManagerInternal.isSameApp(anyString(), anyInt(), anyInt())).thenAnswer(
                 (Answer<Boolean>) invocation -> {
+                    // TODO: b/317957802 - This is overly broad and basically makes ANY 
+                    //  isSameApp() check pass,  requiring Mockito.reset() for meaningful
+                    //  tests! Make it more precise.
                     Object[] args = invocation.getArguments();
                     return (int) args[1] == mUid;
                 });
@@ -9139,31 +9142,98 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
                 .setType(AutomaticZenRule.TYPE_MANAGED)
-                .setOwner(new ComponentName("pkg", "cls"))
+                .setOwner(new ComponentName(PKG, "cls"))
                 .build();
         when(mDevicePolicyManager.isActiveDeviceOwner(anyInt())).thenReturn(true);
 
-        mBinderService.addAutomaticZenRule(rule, "pkg", /* fromUser= */ false);
+        mBinderService.addAutomaticZenRule(rule, PKG, /* fromUser= */ false);
 
-        verify(zenModeHelper).addAutomaticZenRule(eq("pkg"), eq(rule), anyInt(), any(), anyInt());
+        verify(zenModeHelper).addAutomaticZenRule(eq(PKG), eq(rule), anyInt(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testAddAutomaticZenRule_typeManagedCanBeUsedBySystem() throws Exception {
+        addAutomaticZenRule_restrictedRuleTypeCanBeUsedBySystem(AutomaticZenRule.TYPE_MANAGED);
     }
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_API)
     public void testAddAutomaticZenRule_typeManagedCannotBeUsedByRegularApps() throws Exception {
+        addAutomaticZenRule_restrictedRuleTypeCannotBeUsedByRegularApps(
+                AutomaticZenRule.TYPE_MANAGED);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testAddAutomaticZenRule_typeBedtimeCanBeUsedByWellbeing() throws Exception {
+        ZenModeHelper zenModeHelper = setUpMockZenTest();
+        mService.setCallerIsNormalPackage();
+        reset(mPackageManagerInternal);
+        when(mPackageManagerInternal.isSameApp(eq(PKG), eq(mUid), anyInt())).thenReturn(true);
+        when(mResources
+                .getString(com.android.internal.R.string.config_systemWellbeing))
+                .thenReturn(PKG);
+        when(mContext.getResources()).thenReturn(mResources);
+
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
+                .setType(AutomaticZenRule.TYPE_BEDTIME)
+                .setOwner(new ComponentName(PKG, "cls"))
+                .build();
+
+        mBinderService.addAutomaticZenRule(rule, PKG, /* fromUser= */ false);
+
+        verify(zenModeHelper).addAutomaticZenRule(eq(PKG), eq(rule), anyInt(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testAddAutomaticZenRule_typeBedtimeCanBeUsedBySystem() throws Exception {
+        reset(mPackageManagerInternal);
+        when(mPackageManagerInternal.isSameApp(eq(PKG), eq(mUid), anyInt())).thenReturn(true);
+        addAutomaticZenRule_restrictedRuleTypeCanBeUsedBySystem(AutomaticZenRule.TYPE_BEDTIME);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testAddAutomaticZenRule_typeBedtimeCannotBeUsedByRegularApps() throws Exception {
+        reset(mPackageManagerInternal);
+        when(mPackageManagerInternal.isSameApp(eq(PKG), eq(mUid), anyInt())).thenReturn(true);
+        addAutomaticZenRule_restrictedRuleTypeCannotBeUsedByRegularApps(
+                AutomaticZenRule.TYPE_BEDTIME);
+    }
+
+    private void addAutomaticZenRule_restrictedRuleTypeCanBeUsedBySystem(
+            @AutomaticZenRule.Type int ruleType) throws Exception {
+        ZenModeHelper zenModeHelper = setUpMockZenTest();
+        mService.isSystemUid = true;
+
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
+                .setType(ruleType)
+                .setOwner(new ComponentName(PKG, "cls"))
+                .build();
+        when(mDevicePolicyManager.isActiveDeviceOwner(anyInt())).thenReturn(true);
+
+        mBinderService.addAutomaticZenRule(rule, PKG, /* fromUser= */ false);
+
+        verify(zenModeHelper).addAutomaticZenRule(eq(PKG), eq(rule), anyInt(), any(), anyInt());
+    }
+
+    private void addAutomaticZenRule_restrictedRuleTypeCannotBeUsedByRegularApps(
+            @AutomaticZenRule.Type int ruleType) {
         mService.setCallerIsNormalPackage();
         mService.setZenHelper(mock(ZenModeHelper.class));
         when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
                 .thenReturn(true);
 
         AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
-                .setType(AutomaticZenRule.TYPE_MANAGED)
-                .setOwner(new ComponentName("pkg", "cls"))
+                .setType(ruleType)
+                .setOwner(new ComponentName(PKG, "cls"))
                 .build();
         when(mDevicePolicyManager.isActiveDeviceOwner(anyInt())).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class,
-                () -> mBinderService.addAutomaticZenRule(rule, "pkg", /* fromUser= */ false));
+                () -> mBinderService.addAutomaticZenRule(rule, PKG, /* fromUser= */ false));
     }
 
     @Test

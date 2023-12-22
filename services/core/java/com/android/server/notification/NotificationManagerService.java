@@ -5429,13 +5429,28 @@ public class NotificationManagerService extends SystemService {
             Objects.requireNonNull(rule.getConditionId(), "ConditionId is null");
 
             if (android.app.Flags.modesApi()) {
+                if (isCallerSystemOrSystemUi()) {
+                    return; // System callers can use any type.
+                }
+                int uid = Binder.getCallingUid();
+                int userId = UserHandle.getUserId(uid);
+
                 if (rule.getType() == AutomaticZenRule.TYPE_MANAGED) {
-                    int uid = Binder.getCallingUid();
                     boolean isDeviceOwner = Binder.withCleanCallingIdentity(
                             () -> mDpm.isActiveDeviceOwner(uid));
                     if (!isDeviceOwner) {
                         throw new IllegalArgumentException(
                                 "Only Device Owners can use AutomaticZenRules with TYPE_MANAGED");
+                    }
+                } else if (rule.getType() == AutomaticZenRule.TYPE_BEDTIME) {
+                    String wellbeingPackage = getContext().getResources().getString(
+                            com.android.internal.R.string.config_systemWellbeing);
+                    boolean isCallerWellbeing = !TextUtils.isEmpty(wellbeingPackage)
+                            && mPackageManagerInternal.isSameApp(wellbeingPackage, uid, userId);
+                    if (!isCallerWellbeing) {
+                        throw new IllegalArgumentException(
+                                "Only the 'Wellbeing' package can use AutomaticZenRules with "
+                                        + "TYPE_BEDTIME");
                     }
                 }
             }
