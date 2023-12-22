@@ -2700,11 +2700,8 @@ class MediaRouter2ServiceImpl {
                 // session info from them.
                 sessionInfo = mSystemProvider.getDefaultSessionInfo();
             }
-            // TODO: b/279555229 - replace with matchingRequest.mRouterRecord.notifySessionCreated.
-            notifySessionCreatedToRouter(
-                    matchingRequest.mRouterRecord,
-                    toOriginalRequestId(uniqueRequestId),
-                    sessionInfo);
+            matchingRequest.mRouterRecord.notifySessionCreated(
+                    toOriginalRequestId(uniqueRequestId), sessionInfo);
         }
 
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
@@ -2810,11 +2807,6 @@ class MediaRouter2ServiceImpl {
                 }
             }
             return true;
-        }
-
-        private void notifySessionCreatedToRouter(@NonNull RouterRecord routerRecord,
-                int requestId, @NonNull RoutingSessionInfo sessionInfo) {
-            routerRecord.notifySessionCreated(requestId, sessionInfo);
         }
 
         private void notifySessionCreationFailedToRouter(@NonNull RouterRecord routerRecord,
