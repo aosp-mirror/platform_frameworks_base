@@ -290,28 +290,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 user.mPriorityStack.onSessionActiveStateChanged(record);
             }
-            notifyActivityManagerWithActiveStateChanges(record, record.isActive());
+            setForegroundServiceAllowance(
+                    record, /* allowRunningInForeground= */ record.isActive());
             mHandler.postSessionsChanged(record);
-        }
-    }
-
-    private void notifyActivityManagerWithActiveStateChanges(
-            MediaSessionRecordImpl record, boolean isActive) {
-        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
-            return;
-        }
-        ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
-                record.getForegroundServiceDelegationOptions();
-        if (foregroundServiceDelegationOptions == null) {
-            // This record doesn't support FGS delegation. In practice, this is MediaSession2.
-            return;
-        }
-        if (isActive) {
-            mActivityManagerInternal.startForegroundServiceDelegate(
-                    foregroundServiceDelegationOptions, /* connection= */ null);
-        } else {
-            mActivityManagerInternal.stopForegroundServiceDelegate(
-                    foregroundServiceDelegationOptions);
         }
     }
 
@@ -407,27 +388,10 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return;
             }
             user.mPriorityStack.onPlaybackStateChanged(record, shouldUpdatePriority);
-            notifyActivityManagerWithPlaybackStateChanges(record, playbackState);
-        }
-    }
-
-    private void notifyActivityManagerWithPlaybackStateChanges(
-            MediaSessionRecordImpl record, PlaybackState playbackState) {
-        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
-            return;
-        }
-        ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
-                record.getForegroundServiceDelegationOptions();
-        if (foregroundServiceDelegationOptions == null || playbackState == null) {
-            // This record doesn't support FGS delegation. In practice, this is MediaSession2.
-            return;
-        }
-        if (playbackState.shouldAllowServiceToRunInForeground()) {
-            mActivityManagerInternal.startForegroundServiceDelegate(
-                    foregroundServiceDelegationOptions, /* connection= */ null);
-        } else {
-            mActivityManagerInternal.stopForegroundServiceDelegate(
-                    foregroundServiceDelegationOptions);
+            if (playbackState != null) {
+                setForegroundServiceAllowance(
+                        record, playbackState.shouldAllowServiceToRunInForeground());
+            }
         }
     }
 
@@ -591,11 +555,12 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         session.close();
-        notifyActivityManagerWithSessionDestroyed(session);
+        setForegroundServiceAllowance(session, /* allowRunningInForeground= */ false);
         mHandler.postSessionsChanged(session);
     }
 
-    private void notifyActivityManagerWithSessionDestroyed(MediaSessionRecordImpl record) {
+    private void setForegroundServiceAllowance(
+            MediaSessionRecordImpl record, boolean allowRunningInForeground) {
         if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
             return;
         }
@@ -605,7 +570,13 @@ public class MediaSessionService extends SystemService implements Monitor {
             // This record doesn't support FGS delegation. In practice, this is MediaSession2.
             return;
         }
-        mActivityManagerInternal.stopForegroundServiceDelegate(foregroundServiceDelegationOptions);
+        if (allowRunningInForeground) {
+            mActivityManagerInternal.startForegroundServiceDelegate(
+                    foregroundServiceDelegationOptions, /* connection= */ null);
+        } else {
+            mActivityManagerInternal.stopForegroundServiceDelegate(
+                    foregroundServiceDelegationOptions);
+        }
     }
 
     void tempAllowlistTargetPkgIfPossible(int targetUid, String targetPackage,
