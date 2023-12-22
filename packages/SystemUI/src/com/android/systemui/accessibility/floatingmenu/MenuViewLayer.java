@@ -94,7 +94,7 @@ class MenuViewLayer extends FrameLayout implements
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final IAccessibilityFloatingMenu mFloatingMenu;
     private final SecureSettings mSecureSettings;
-    private final DismissAnimationController mDismissAnimationController;
+    private final DragToInteractAnimationController mDragToInteractAnimationController;
     private final MenuViewModel mMenuViewModel;
     private final Observer<Boolean> mDockTooltipObserver =
             this::onDockTooltipVisibilityChanged;
@@ -188,29 +188,30 @@ class MenuViewLayer extends FrameLayout implements
         mMenuAnimationController.setSpringAnimationsEndAction(this::onSpringAnimationsEndAction);
         mDismissView = new DismissView(context);
         DismissViewUtils.setup(mDismissView);
-        mDismissAnimationController = new DismissAnimationController(mDismissView, mMenuView);
-        mDismissAnimationController.setMagnetListener(new MagnetizedObject.MagnetListener() {
+        mDragToInteractAnimationController = new DragToInteractAnimationController(
+                mDismissView, mMenuView);
+        mDragToInteractAnimationController.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override
             public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                mDismissAnimationController.animateDismissMenu(/* scaleUp= */ true);
+                mDragToInteractAnimationController.animateDismissMenu(/* scaleUp= */ true);
             }
 
             @Override
             public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
                     float velocityX, float velocityY, boolean wasFlungOut) {
-                mDismissAnimationController.animateDismissMenu(/* scaleUp= */ false);
+                mDragToInteractAnimationController.animateDismissMenu(/* scaleUp= */ false);
             }
 
             @Override
             public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
                 hideMenuAndShowMessage();
                 mDismissView.hide();
-                mDismissAnimationController.animateDismissMenu(/* scaleUp= */ false);
+                mDragToInteractAnimationController.animateDismissMenu(/* scaleUp= */ false);
             }
         });
 
         mMenuListViewTouchHandler = new MenuListViewTouchHandler(mMenuAnimationController,
-                mDismissAnimationController);
+                mDragToInteractAnimationController);
         mMenuView.addOnItemTouchListenerToList(mMenuListViewTouchHandler);
         mMenuView.setMoveToTuckedListener(this);
 
@@ -243,7 +244,7 @@ class MenuViewLayer extends FrameLayout implements
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         mDismissView.updateResources();
-        mDismissAnimationController.updateResources();
+        mDragToInteractAnimationController.updateResources();
     }
 
     @Override

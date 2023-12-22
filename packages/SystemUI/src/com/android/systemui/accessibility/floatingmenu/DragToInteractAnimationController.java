@@ -31,7 +31,7 @@ import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
  * Controls the interaction between {@link MagnetizedObject} and
  * {@link MagnetizedObject.MagneticTarget}.
  */
-class DismissAnimationController {
+class DragToInteractAnimationController {
     private static final boolean ENABLE_FLING_TO_DISMISS_MENU = false;
     private static final float COMPLETELY_OPAQUE = 1.0f;
     private static final float COMPLETELY_TRANSPARENT = 0.0f;
@@ -45,7 +45,7 @@ class DismissAnimationController {
     private float mMinDismissSize;
     private float mSizePercent;
 
-    DismissAnimationController(DismissView dismissView, MenuView menuView) {
+    DragToInteractAnimationController(DismissView dismissView, MenuView menuView) {
         mDismissView = dismissView;
         mDismissView.setPivotX(dismissView.getWidth() / 2.0f);
         mDismissView.setPivotY(dismissView.getHeight() / 2.0f);
@@ -127,7 +127,7 @@ class DismissAnimationController {
      * @param event that move the magnetized object which is also the menu list view.
      * @return true if the location of the motion events moves within the magnetic field of a
      * target, but false if didn't set
-     * {@link DismissAnimationController#setMagnetListener(MagnetizedObject.MagnetListener)}.
+     * {@link DragToInteractAnimationController#setMagnetListener(MagnetizedObject.MagnetListener)}.
      */
     boolean maybeConsumeMoveMotionEvent(MotionEvent event) {
         return mMagnetizedObject.maybeConsumeMotionEvent(event);
@@ -140,7 +140,7 @@ class DismissAnimationController {
      * @param event that move the magnetized object which is also the menu list view.
      * @return true if the location of the motion events moves within the magnetic field of a
      * target, but false if didn't set
-     * {@link DismissAnimationController#setMagnetListener(MagnetizedObject.MagnetListener)}.
+     * {@link DragToInteractAnimationController#setMagnetListener(MagnetizedObject.MagnetListener)}.
      */
     boolean maybeConsumeUpMotionEvent(MotionEvent event) {
         return mMagnetizedObject.maybeConsumeMotionEvent(event);

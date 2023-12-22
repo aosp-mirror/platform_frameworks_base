@@ -40,12 +40,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-/** Tests for {@link DismissAnimationController}. */
+/** Tests for {@link DragToInteractAnimationController}. */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class DismissAnimationControllerTest extends SysuiTestCase {
-    private DismissAnimationController mDismissAnimationController;
+public class DragToInteractAnimationControllerTest extends SysuiTestCase {
+    private DragToInteractAnimationController mDragToInteractAnimationController;
     private DismissView mDismissView;
 
     @Rule
@@ -65,19 +65,20 @@ public class DismissAnimationControllerTest extends SysuiTestCase {
                 stubMenuViewAppearance);
         mDismissView = spy(new DismissView(mContext));
         DismissViewUtils.setup(mDismissView);
-        mDismissAnimationController = new DismissAnimationController(mDismissView, stubMenuView);
+        mDragToInteractAnimationController = new DragToInteractAnimationController(
+                mDismissView, stubMenuView);
     }
 
     @Test
     public void showDismissView_success() {
-        mDismissAnimationController.showDismissView(true);
+        mDragToInteractAnimationController.showDismissView(true);
 
         verify(mDismissView).show();
     }
 
     @Test
     public void hideDismissView_success() {
-        mDismissAnimationController.showDismissView(false);
+        mDragToInteractAnimationController.showDismissView(false);
 
         verify(mDismissView).hide();
     }

@@ -68,7 +68,7 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
     private MenuView mStubMenuView;
     private MenuListViewTouchHandler mTouchHandler;
     private MenuAnimationController mMenuAnimationController;
-    private DismissAnimationController mDismissAnimationController;
+    private DragToInteractAnimationController mDragToInteractAnimationController;
     private RecyclerView mStubListView;
     private DismissView mDismissView;
 
@@ -92,10 +92,10 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
                 mStubMenuView, stubMenuViewAppearance));
         mDismissView = spy(new DismissView(mContext));
         DismissViewUtils.setup(mDismissView);
-        mDismissAnimationController =
-                spy(new DismissAnimationController(mDismissView, mStubMenuView));
+        mDragToInteractAnimationController =
+                spy(new DragToInteractAnimationController(mDismissView, mStubMenuView));
         mTouchHandler = new MenuListViewTouchHandler(mMenuAnimationController,
-                mDismissAnimationController);
+                mDragToInteractAnimationController);
         final AccessibilityTargetAdapter stubAdapter = new AccessibilityTargetAdapter(mStubTargets);
         mStubListView = (RecyclerView) mStubMenuView.getChildAt(0);
         mStubListView.setAdapter(stubAdapter);
@@ -115,7 +115,7 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
 
     @Test
     public void onActionMoveEvent_notConsumedEvent_shouldMoveToPosition() {
-        doReturn(false).when(mDismissAnimationController).maybeConsumeMoveMotionEvent(
+        doReturn(false).when(mDragToInteractAnimationController).maybeConsumeMoveMotionEvent(
                 any(MotionEvent.class));
         final int offset = 100;
         final MotionEvent stubDownEvent =
