@@ -112,5 +112,6 @@ public class GlobalSettings {
         Settings.Global.Wearable.SCREENSHOT_ENABLED,
         Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
         Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,
+        Settings.Global.FORCE_ENABLE_PSS_PROFILING,
     };
 }
