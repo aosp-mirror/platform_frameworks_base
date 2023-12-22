@@ -4607,7 +4607,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 });
                 mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_UNSTOPPED,
                         packageName, extras, userIds, null /* instantUserIds */,
-                        broadcastAllowList, mHandler);
+                        broadcastAllowList, mHandler, null /* filterExtras */);
             }
         }
     }
@@ -7045,7 +7045,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_RESTARTED,
                     packageName, extras, userIds, null /* instantUserIds */,
-                    broadcastAllowList, mHandler);
+                    broadcastAllowList, mHandler, null /* filterExtras */);
         }
 
         @Override
