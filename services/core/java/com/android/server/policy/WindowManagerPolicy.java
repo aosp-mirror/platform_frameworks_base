@@ -706,12 +706,14 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Generally, it's best to keep as little as possible in the queue thread
      * because it's the most fragile.
      * @param displayId The display ID of the motion event.
+     * @param source the {@link InputDevice} source that caused the motion.
+     * @param action the {@link MotionEvent} action for the motion.
      * @param policyFlags The policy flags associated with the motion.
      *
      * @return Actions flags: may be {@link #ACTION_PASS_TO_USER}.
      */
-    int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
-            int policyFlags);
+    int interceptMotionBeforeQueueingNonInteractive(int displayId, int source, int action,
+            long whenNanos, int policyFlags);
 
     /**
      * Called from the input dispatcher thread before a key is dispatched to a window.

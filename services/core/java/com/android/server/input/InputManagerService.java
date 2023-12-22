@@ -2523,9 +2523,9 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private int interceptMotionBeforeQueueingNonInteractive(int displayId,
-            long whenNanos, int policyFlags) {
+            int source, int action, long whenNanos, int policyFlags) {
         return mWindowManagerCallbacks.interceptMotionBeforeQueueingNonInteractive(
-                displayId, whenNanos, policyFlags);
+                displayId, source, action, whenNanos, policyFlags);
     }
 
     // Native callback.
@@ -2901,8 +2901,8 @@ public class InputManagerService extends IInputManager.Stub
          * processing when the device is in a non-interactive state since these events are normally
          * dropped.
          */
-        int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
-                int policyFlags);
+        int interceptMotionBeforeQueueingNonInteractive(int displayId, int source, int action,
+                long whenNanos, int policyFlags);
 
         /**
          * This callback is invoked just before the key is about to be sent to an application.

@@ -358,8 +358,8 @@ public:
     void notifyVibratorState(int32_t deviceId, bool isOn) override;
     bool filterInputEvent(const InputEvent& inputEvent, uint32_t policyFlags) override;
     void interceptKeyBeforeQueueing(const KeyEvent& keyEvent, uint32_t& policyFlags) override;
-    void interceptMotionBeforeQueueing(int32_t displayId, nsecs_t when,
-                                       uint32_t& policyFlags) override;
+    void interceptMotionBeforeQueueing(int32_t displayId, uint32_t source, int32_t action,
+                                       nsecs_t when, uint32_t& policyFlags) override;
     nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token, const KeyEvent& keyEvent,
                                           uint32_t policyFlags) override;
     std::optional<KeyEvent> dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent& keyEvent,
@@ -1496,7 +1496,8 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent& keyEvent,
     handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
 }
 
-void NativeInputManager::interceptMotionBeforeQueueing(int32_t displayId, nsecs_t when,
+void NativeInputManager::interceptMotionBeforeQueueing(int32_t displayId, uint32_t source,
+                                                       int32_t action, nsecs_t when,
                                                        uint32_t& policyFlags) {
     ATRACE_CALL();
     // Policy:
@@ -1525,7 +1526,7 @@ void NativeInputManager::interceptMotionBeforeQueueing(int32_t displayId, nsecs_
     const jint wmActions =
             env->CallIntMethod(mServiceObj,
                                gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive,
-                               displayId, when, policyFlags);
+                               displayId, source, action, when, policyFlags);
     if (checkAndClearExceptionFromCallback(env, "interceptMotionBeforeQueueingNonInteractive")) {
         return;
     }
@@ -2943,7 +2944,7 @@ int register_android_server_InputManager(JNIEnv* env) {
             "interceptKeyBeforeQueueing", "(Landroid/view/KeyEvent;I)I");
 
     GET_METHOD_ID(gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive, clazz,
-            "interceptMotionBeforeQueueingNonInteractive", "(IJI)I");
+            "interceptMotionBeforeQueueingNonInteractive", "(IIIJI)I");
 
     GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",
