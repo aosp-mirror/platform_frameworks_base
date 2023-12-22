@@ -97,13 +97,7 @@ object BiometricViewBinder {
 
         val iconOverlayView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
         val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)
-        /**
-         * View is only set visible in BiometricViewSizeBinder once PromptSize is determined that
-         * accounts for iconView size, to prevent prompt resizing being visible to the user.
-         *
-         * TODO(b/288175072): May be able to remove this once constraint layout is implemented
-         */
-        iconView.addLottieOnCompositionLoadedListener { viewModel.setIsIconViewLoaded(true) }
+
         PromptIconViewBinder.bind(
             iconView,
             iconOverlayView,
