@@ -1345,7 +1345,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
         updateClockAppearance();
         mQsController.updateQsState();
-        if (!KeyguardShadeMigrationNssl.isEnabled()) {
+        if (!KeyguardShadeMigrationNssl.isEnabled() && !FooterViewRefactor.isEnabled()) {
             mNotificationStackScrollLayoutController.updateFooter();
         }
     }

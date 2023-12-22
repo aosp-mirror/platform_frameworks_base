@@ -24,17 +24,12 @@ import androidx.annotation.DimenRes
 import androidx.annotation.LayoutRes
 import com.android.settingslib.Utils
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onDensityOrFontScaleChanged
 import com.android.systemui.statusbar.policy.onThemeChanged
 import com.android.systemui.util.kotlin.emitOnStart
-import com.android.systemui.util.view.bindLatest
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
@@ -90,47 +85,4 @@ constructor(
             .emitOnStart()
             .map { layoutInflater.inflate(id, root, attachToRoot) as T }
     }
-}
-
-/**
- * Perform an inflation right away, then re-inflate whenever the device configuration changes, and
- * call [onInflate] on the resulting view each time. Disposes of the [DisposableHandle] returned by
- * [onInflate] when done.
- *
- * This never completes unless cancelled, it just suspends and waits for updates. It runs on a
- * background thread using [backgroundDispatcher].
- *
- * For parameters [resource], [root] and [attachToRoot], see [LayoutInflater.inflate].
- *
- * An example use-case of this is when a view needs to be re-inflated whenever a configuration
- * change occurs, which would require the ViewBinder to then re-bind the new view. For example, the
- * code in the parent view's binder would look like:
- * ```
- * parentView.repeatWhenAttached {
- *     configurationState
- *         .reinflateAndBindLatest(
- *             R.layout.my_layout,
- *             parentView,
- *             attachToRoot = false,
- *             coroutineScope = lifecycleScope,
- *             configurationController.onThemeChanged,
- *         ) { view: ChildView ->
- *             ChildViewBinder.bind(view, childViewModel)
- *         }
- * }
- * ```
- *
- * In turn, the bind method (passed through [onInflate]) uses [repeatWhenAttached], which returns a
- * [DisposableHandle].
- */
-suspend fun <T : View> ConfigurationState.reinflateAndBindLatest(
-    @LayoutRes resource: Int,
-    root: ViewGroup?,
-    attachToRoot: Boolean,
-    backgroundDispatcher: CoroutineDispatcher,
-    onInflate: (T) -> DisposableHandle?,
-) {
-    inflateLayout<T>(resource, root, attachToRoot)
-        .flowOn(backgroundDispatcher)
-        .bindLatest(onInflate)
 }

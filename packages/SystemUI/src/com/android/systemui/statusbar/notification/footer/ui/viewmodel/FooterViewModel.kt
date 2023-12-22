@@ -52,6 +52,9 @@ class FooterViewModel(
             isVisible =
                 activeNotificationsInteractor.hasClearableNotifications
                     .sample(
+                        // TODO(b/322167853): This check is currently duplicated in
+                        //  NotificationListViewModel, but instead it should be a field in
+                        //  ShadeAnimationInteractor.
                         combine(
                                 shadeInteractor.isShadeFullyExpanded,
                                 shadeInteractor.isShadeTouchable,

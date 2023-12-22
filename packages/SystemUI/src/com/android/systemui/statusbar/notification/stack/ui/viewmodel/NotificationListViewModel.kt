@@ -16,21 +16,32 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
+import com.android.systemui.statusbar.policy.domain.interactor.UserSetupInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.util.kotlin.combine
+import com.android.systemui.util.kotlin.sample
+import com.android.systemui.util.ui.AnimatableEvent
+import com.android.systemui.util.ui.AnimatedValue
+import com.android.systemui.util.ui.toAnimatedValueFlow
 import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 /** ViewModel for the list of notifications. */
@@ -42,9 +53,13 @@ constructor(
     val footer: Optional<FooterViewModel>,
     val logger: Optional<NotificationLoggerViewModel>,
     activeNotificationsInteractor: ActiveNotificationsInteractor,
+    keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    powerInteractor: PowerInteractor,
+    remoteInputInteractor: RemoteInputInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
+    userSetupInteractor: UserSetupInteractor,
     zenModeInteractor: ZenModeInteractor,
 ) {
     /**
@@ -76,6 +91,10 @@ constructor(
             combine(
                     activeNotificationsInteractor.areAnyNotificationsPresent,
                     shadeInteractor.isQsFullscreen,
+                    // TODO(b/293167744): It looks like we're essentially trying to check the same
+                    //  things for the empty shade visibility as we do for the footer, just in a
+                    //  slightly different way. We should change this so we also check
+                    //  statusBarState and isAwake instead of specific keyguard transitions.
                     keyguardTransitionInteractor.isInTransitionToState(KeyguardState.AOD).onStart {
                         emit(false)
                     },
@@ -94,6 +113,80 @@ constructor(
                         !isBouncerShowing
                 }
                 .distinctUntilChanged()
+        }
+    }
+
+    val shouldShowFooterView: Flow<AnimatedValue<Boolean>> by lazy {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(AnimatedValue.NotAnimating(false))
+        } else {
+            combine(
+                    activeNotificationsInteractor.areAnyNotificationsPresent,
+                    userSetupInteractor.isUserSetUp,
+                    keyguardInteractor.statusBarState.map { it == StatusBarState.KEYGUARD },
+                    shadeInteractor.qsExpansion,
+                    shadeInteractor.isQsFullscreen,
+                    powerInteractor.isAsleep,
+                    remoteInputInteractor.isRemoteInputActive,
+                    shadeInteractor.shadeExpansion.map { it == 0f }
+                ) {
+                    hasNotifications,
+                    isUserSetUp,
+                    isOnKeyguard,
+                    qsExpansion,
+                    qsFullScreen,
+                    isAsleep,
+                    isRemoteInputActive,
+                    isShadeClosed ->
+                    Pair(
+                        // Should the footer be visible?
+                        when {
+                            !hasNotifications -> false
+                            // Hide the footer until the user setup is complete, to prevent access
+                            // to settings (b/193149550).
+                            !isUserSetUp -> false
+                            // Do not show the footer if the lockscreen is visible (incl. AOD),
+                            // except if the shade is opened on top. See also b/219680200.
+                            isOnKeyguard -> false
+                            // Make sure we're not showing the footer in the transition to AOD while
+                            // going to sleep (b/190227875). The StatusBarState is unfortunately not
+                            // updated quickly enough when the power button is pressed, so this is
+                            // necessary in addition to the isOnKeyguard check.
+                            isAsleep -> false
+                            // Do not show the footer if quick settings are fully expanded (except
+                            // for the foldable split shade view). See b/201427195 && b/222699879.
+                            qsExpansion == 1f && qsFullScreen -> false
+                            // Hide the footer if remote input is active (i.e. user is replying to a
+                            // notification). See b/75984847.
+                            isRemoteInputActive -> false
+                            // Never show the footer if the shade is collapsed (e.g. when HUNing).
+                            isShadeClosed -> false
+                            else -> true
+                        },
+                        // This could in theory be in the .sample below, but it tends to be
+                        // inconsistent, so we're passing it on to make sure we have the same state.
+                        isOnKeyguard
+                    )
+                }
+                .distinctUntilChanged()
+                // Should we animate the visibility change?
+                .sample(
+                    // TODO(b/322167853): This check is currently duplicated in FooterViewModel,
+                    //  but instead it should be a field in ShadeAnimationInteractor.
+                    combine(
+                            shadeInteractor.isShadeFullyExpanded,
+                            shadeInteractor.isShadeTouchable,
+                            ::Pair
+                        )
+                        .onStart { emit(Pair(false, false)) }
+                ) { (visible, isOnKeyguard), (isShadeFullyExpanded, animationsEnabled) ->
+                    // Animate if the shade is interactive, but NOT on the lockscreen. Having
+                    // animations enabled while on the lockscreen makes the footer appear briefly
+                    // when transitioning between the shade and keyguard.
+                    val shouldAnimate = isShadeFullyExpanded && animationsEnabled && !isOnKeyguard
+                    AnimatableEvent(visible, shouldAnimate)
+                }
+                .toAnimatedValueFlow()
         }
     }
 
