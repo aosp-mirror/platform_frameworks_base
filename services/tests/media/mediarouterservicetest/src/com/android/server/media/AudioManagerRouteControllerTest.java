@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.Set;
 
 @RunWith(JUnit4.class)
-public class AudioPoliciesDeviceRouteControllerTest {
+public class AudioManagerRouteControllerTest {
 
     private static final String FAKE_ROUTE_NAME = "fake name";
     private static final AudioDeviceInfo FAKE_AUDIO_DEVICE_INFO_BUILTIN_SPEAKER =
@@ -89,7 +89,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
     private Set<AudioDeviceInfo> mAvailableAudioDeviceInfos;
     @Mock private AudioManager mMockAudioManager;
     @Mock private DeviceRouteController.OnDeviceRouteChangedListener mOnDeviceRouteChangedListener;
-    private AudioPoliciesDeviceRouteController mControllerUnderTest;
+    private AudioManagerRouteController mControllerUnderTest;
     private AudioDeviceCallback mAudioDeviceCallback;
     private AudioProductStrategy mMediaAudioProductStrategy;
 
@@ -116,7 +116,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
         BluetoothAdapter btAdapter =
                 realContext.getSystemService(BluetoothManager.class).getAdapter();
         mControllerUnderTest =
-                new AudioPoliciesDeviceRouteController(
+                new AudioManagerRouteController(
                         mockContext,
                         mMockAudioManager,
                         Looper.getMainLooper(),
