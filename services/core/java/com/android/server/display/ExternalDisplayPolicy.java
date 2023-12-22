@@ -57,7 +57,7 @@ class ExternalDisplayPolicy {
     @VisibleForTesting
     static final String ENABLE_ON_CONNECT = "persist.sys.display.enable_on_connect.external";
 
-    static boolean isExternalDisplay(@NonNull final LogicalDisplay logicalDisplay) {
+    static boolean isExternalDisplayLocked(@NonNull final LogicalDisplay logicalDisplay) {
         return logicalDisplay.getDisplayInfoLocked().type == TYPE_EXTERNAL;
     }
 
@@ -85,6 +85,9 @@ class ExternalDisplayPolicy {
 
         @NonNull
         Handler getHandler();
+
+        @NonNull
+        ExternalDisplayStatsService getExternalDisplayStatsService();
     }
 
     @NonNull
@@ -99,6 +102,8 @@ class ExternalDisplayPolicy {
     private final DisplayNotificationManager mDisplayNotificationManager;
     @NonNull
     private final Handler mHandler;
+    @NonNull
+    private final ExternalDisplayStatsService mExternalDisplayStatsService;
     @ThrottlingStatus
     private volatile int mStatus = THROTTLING_NONE;
 
@@ -109,6 +114,7 @@ class ExternalDisplayPolicy {
         mFlags = mInjector.getFlags();
         mDisplayNotificationManager = mInjector.getDisplayNotificationManager();
         mHandler = mInjector.getHandler();
+        mExternalDisplayStatsService = mInjector.getExternalDisplayStatsService();
     }
 
     /**
@@ -141,7 +147,7 @@ class ExternalDisplayPolicy {
      */
     void setExternalDisplayEnabledLocked(@NonNull final LogicalDisplay logicalDisplay,
             final boolean enabled) {
-        if (!isExternalDisplay(logicalDisplay)) {
+        if (!isExternalDisplayLocked(logicalDisplay)) {
             Slog.e(TAG, "setExternalDisplayEnabledLocked called for non external display");
             return;
         }
@@ -170,7 +176,7 @@ class ExternalDisplayPolicy {
      * user to decide how to use this display.
      */
     void handleExternalDisplayConnectedLocked(@NonNull final LogicalDisplay logicalDisplay) {
-        if (!isExternalDisplay(logicalDisplay)) {
+        if (!isExternalDisplayLocked(logicalDisplay)) {
             Slog.e(TAG, "handleExternalDisplayConnectedLocked called for non-external display");
             return;
         }
@@ -182,6 +188,8 @@ class ExternalDisplayPolicy {
             }
             return;
         }
+
+        mExternalDisplayStatsService.onDisplayConnected(logicalDisplay);
 
         if ((Build.IS_ENG || Build.IS_USERDEBUG)
                 && SystemProperties.getBoolean(ENABLE_ON_CONNECT, false)) {
@@ -209,9 +217,59 @@ class ExternalDisplayPolicy {
         }
     }
 
+    /**
+     * Upon external display become unavailable.
+     */
+    void handleLogicalDisplayDisconnectedLocked(@NonNull final LogicalDisplay logicalDisplay) {
+        // Type of the display here is always UNKNOWN, so we can't verify it is an external display
+
+        if (!mFlags.isConnectedDisplayManagementEnabled()) {
+            return;
+        }
+
+        mExternalDisplayStatsService.onDisplayDisconnected(logicalDisplay.getDisplayIdLocked());
+    }
+
+    /**
+     * Upon external display gets added.
+     */
+    void handleLogicalDisplayAddedLocked(@NonNull final LogicalDisplay logicalDisplay) {
+        if (!isExternalDisplayLocked(logicalDisplay)) {
+            return;
+        }
+
+        if (!mFlags.isConnectedDisplayManagementEnabled()) {
+            return;
+        }
+
+        mExternalDisplayStatsService.onDisplayAdded(logicalDisplay.getDisplayIdLocked());
+    }
+
+    /**
+     * Upon presentation started.
+     */
+    void onPresentation(int displayId, boolean isShown) {
+        synchronized (mSyncRoot) {
+            var logicalDisplay = mLogicalDisplayMapper.getDisplayLocked(displayId);
+            if (logicalDisplay == null || !isExternalDisplayLocked(logicalDisplay)) {
+                return;
+            }
+        }
+
+        if (!mFlags.isConnectedDisplayManagementEnabled()) {
+            return;
+        }
+
+        if (isShown) {
+            mExternalDisplayStatsService.onPresentationWindowAdded(displayId);
+        } else {
+            mExternalDisplayStatsService.onPresentationWindowRemoved(displayId);
+        }
+    }
+
     @GuardedBy("mSyncRoot")
     private void disableExternalDisplayLocked(@NonNull final LogicalDisplay logicalDisplay) {
-        if (!isExternalDisplay(logicalDisplay)) {
+        if (!isExternalDisplayLocked(logicalDisplay)) {
             return;
         }
 
@@ -244,6 +302,8 @@ class ExternalDisplayPolicy {
         }
 
         mLogicalDisplayMapper.setDisplayEnabledLocked(logicalDisplay, /*enabled=*/ false);
+
+        mExternalDisplayStatsService.onDisplayDisabled(logicalDisplay.getDisplayIdLocked());
 
         if (DEBUG) {
             Slog.d(TAG, "disableExternalDisplayLocked complete"

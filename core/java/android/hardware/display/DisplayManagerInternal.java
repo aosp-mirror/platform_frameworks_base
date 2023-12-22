@@ -431,6 +431,13 @@ public abstract class DisplayManagerInternal {
     public abstract IntArray getDisplayGroupIds();
 
     /**
+     * Called upon presentation started/ended on the display.
+     * @param displayId the id of the display where presentation started.
+     * @param isShown whether presentation is shown.
+     */
+    public abstract void onPresentation(int displayId, boolean isShown);
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the
