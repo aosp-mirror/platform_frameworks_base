@@ -443,6 +443,66 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
+     * Determine valid drag area for this task based on elements in the app chip.
+     */
+    @Override
+    Rect calculateValidDragArea() {
+        final int appTextWidth = ((DesktopModeAppControlsWindowDecorationViewHolder)
+                mWindowDecorViewHolder).getAppNameTextWidth();
+        final int leftButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.desktop_mode_app_details_width_minus_text) + appTextWidth;
+        final int requiredEmptySpace = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.freeform_required_visible_empty_space_in_header);
+        final int rightButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
+                R.dimen.desktop_mode_right_edge_buttons_width);
+        final int taskWidth = mTaskInfo.configuration.windowConfiguration.getBounds().width();
+        final DisplayLayout layout = mDisplayController.getDisplayLayout(mTaskInfo.displayId);
+        final int displayWidth = layout.width();
+        final Rect stableBounds = new Rect();
+        layout.getStableBounds(stableBounds);
+        return new Rect(
+                determineMinX(leftButtonsWidth, rightButtonsWidth, requiredEmptySpace,
+                        taskWidth),
+                stableBounds.top,
+                determineMaxX(leftButtonsWidth, rightButtonsWidth, requiredEmptySpace,
+                        taskWidth, displayWidth),
+                determineMaxY(requiredEmptySpace, stableBounds));
+    }
+
+
+    /**
+     * Determine the lowest x coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMinX(int leftButtonsWidth, int rightButtonsWidth, int requiredEmptySpace,
+            int taskWidth) {
+        // Do not let apps with < 48dp empty header space go off the left edge at all.
+        if (leftButtonsWidth + rightButtonsWidth + requiredEmptySpace > taskWidth) {
+            return 0;
+        }
+        return -taskWidth + requiredEmptySpace + rightButtonsWidth;
+    }
+
+    /**
+     * Determine the highest x coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMaxX(int leftButtonsWidth, int rightButtonsWidth, int requiredEmptySpace,
+            int taskWidth, int displayWidth) {
+        // Do not let apps with < 48dp empty header space go off the right edge at all.
+        if (leftButtonsWidth + rightButtonsWidth + requiredEmptySpace > taskWidth) {
+            return displayWidth - taskWidth;
+        }
+        return displayWidth - requiredEmptySpace - leftButtonsWidth;
+    }
+
+    /**
+     * Determine the highest y coordinate of a freeform task. Used for restricting drag inputs.
+     */
+    private int determineMaxY(int requiredEmptySpace, Rect stableBounds) {
+        return stableBounds.bottom - requiredEmptySpace;
+    }
+
+
+    /**
      * Create and display maximize menu window
      */
     void createMaximizeMenu() {

@@ -32,15 +32,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
-import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.ui.compose.extensions.plus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -112,7 +110,7 @@ internal constructor(
             .firstOrNull { item ->
                 // grid item offset is based off grid content container so we need to deduct
                 // before content padding from the initial pointer position
-                item.isEditable &&
+                contentListState.isItemEditable(item.index) &&
                     (offset.x - contentOffset.x).toInt() in item.offset.x..item.offsetEnd.x &&
                     (offset.y - contentOffset.y).toInt() in item.offset.y..item.offsetEnd.y
             }
@@ -149,7 +147,7 @@ internal constructor(
 
         val targetItem =
             state.layoutInfo.visibleItemsInfo.find { item ->
-                item.isEditable &&
+                contentListState.isItemEditable(item.index) &&
                     middleOffset.x.toInt() in item.offset.x..item.offsetEnd.x &&
                     middleOffset.y.toInt() in item.offset.y..item.offsetEnd.y &&
                     draggingItem.index != item.index
@@ -187,10 +185,6 @@ internal constructor(
     private val LazyGridItemInfo.offsetEnd: IntOffset
         get() = this.offset + this.size
 
-    /** Whether the grid item can be dragged or be a drop target. Only widget card is editable. */
-    private val LazyGridItemInfo.isEditable: Boolean
-        get() = contentListState.list[this.index] is CommunalContentModel.Widget
-
     /** Calculate the amount dragged out of bound on both sides. Returns 0f if not overscrolled */
     private fun checkForOverscroll(startOffset: Offset, endOffset: Offset): Float {
         return when {
@@ -208,14 +202,6 @@ internal constructor(
             updateDragPositionForRemove(startOffset + dragStartPointerOffset)
         else false
     }
-}
-
-private operator fun IntOffset.plus(size: IntSize): IntOffset {
-    return IntOffset(x + size.width, y + size.height)
-}
-
-private operator fun Offset.plus(size: Size): Offset {
-    return Offset(x + size.width, y + size.height)
 }
 
 fun Modifier.dragContainer(

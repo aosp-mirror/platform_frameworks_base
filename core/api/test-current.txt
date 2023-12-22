@@ -510,6 +510,7 @@ package android.app {
     method public int getActivityType();
     method @Nullable public android.graphics.Rect getAppBounds();
     method @NonNull public android.graphics.Rect getBounds();
+    method public int getDisplayRotation();
     method @NonNull public android.graphics.Rect getMaxBounds();
     method public int getRotation();
     method public int getWindowingMode();
@@ -3609,6 +3610,10 @@ package android.view {
   public abstract class Window {
     method @Nullable public android.view.View getNavigationBarBackgroundView();
     method @Nullable public android.view.View getStatusBarBackgroundView();
+  }
+
+  public static final class WindowInsets.Type {
+    method @NonNull public static String toString(int);
   }
 
   public interface WindowManager extends android.view.ViewManager {

@@ -1391,20 +1391,9 @@ public class NotificationManager {
      * @param condition The new state of this rule
      */
     public void setAutomaticZenRuleState(@NonNull String id, @NonNull Condition condition) {
-        if (Flags.modesApi()) {
-            setAutomaticZenRuleState(id, condition,
-                    /* fromUser= */ condition.source == Condition.SOURCE_USER_ACTION);
-        } else {
-            setAutomaticZenRuleState(id, condition, /* fromUser= */ false);
-        }
-    }
-
-    /** @hide */
-    public void setAutomaticZenRuleState(@NonNull String id, @NonNull Condition condition,
-            boolean fromUser) {
         INotificationManager service = getService();
         try {
-            service.setAutomaticZenRuleState(id, condition, fromUser);
+            service.setAutomaticZenRuleState(id, condition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

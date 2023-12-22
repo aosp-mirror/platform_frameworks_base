@@ -162,18 +162,29 @@ public class DragPositioningCallbackUtility {
 
     /**
      * Updates repositionTaskBounds to the final bounds of the task after the drag is finished. If
-     * the bounds are outside of the stable bounds, they are shifted to place task at the top of the
-     * stable bounds.
+     * the bounds are outside of the valid drag area, the task is shifted back onto the edge of the
+     * valid drag area.
      */
-    static void onDragEnd(Rect repositionTaskBounds, Rect taskBoundsAtDragStart, Rect stableBounds,
-            PointF repositionStartPoint, float x, float y)  {
+    static void onDragEnd(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
+            PointF repositionStartPoint, float x, float y, Rect validDragArea) {
         updateTaskBounds(repositionTaskBounds, taskBoundsAtDragStart, repositionStartPoint,
                 x, y);
+        snapTaskBoundsIfNecessary(repositionTaskBounds, validDragArea);
+    }
 
-        // If task is outside of stable bounds (in the status bar area), shift the task down.
-        if (stableBounds.top > repositionTaskBounds.top) {
-            final int yShift =  stableBounds.top - repositionTaskBounds.top;
-            repositionTaskBounds.offset(0, yShift);
+    private static void snapTaskBoundsIfNecessary(Rect repositionTaskBounds, Rect validDragArea) {
+        // If we were never supplied a valid drag area, do not restrict movement.
+        // Otherwise, we restrict deltas to keep task position inside the Rect.
+        if (validDragArea.width() == 0) return;
+        if (repositionTaskBounds.left < validDragArea.left) {
+            repositionTaskBounds.offset(validDragArea.left - repositionTaskBounds.left, 0);
+        } else if (repositionTaskBounds.left > validDragArea.right) {
+            repositionTaskBounds.offset(validDragArea.right - repositionTaskBounds.left, 0);
+        }
+        if (repositionTaskBounds.top < validDragArea.top) {
+            repositionTaskBounds.offset(0, validDragArea.top - repositionTaskBounds.top);
+        } else if (repositionTaskBounds.top > validDragArea.bottom) {
+            repositionTaskBounds.offset(0, validDragArea.bottom - repositionTaskBounds.top);
         }
     }
 

@@ -30,8 +30,8 @@
         android:orientation="horizontal"
         android:clickable="true"
         android:focusable="true"
-        android:paddingStart="16dp">
-
+        android:paddingStart="6dp"
+        android:paddingEnd="8dp">
         <ImageView
             android:id="@+id/application_icon"
             android:layout_width="@dimen/desktop_mode_caption_icon_radius"
@@ -43,7 +43,7 @@
             android:id="@+id/application_name"
             android:layout_width="0dp"
             android:layout_height="20dp"
-            android:minWidth="80dp"
+            android:maxWidth="86dp"
             android:textAppearance="@android:style/TextAppearance.Material.Title"
             android:textSize="14sp"
             android:textFontWeight="500"

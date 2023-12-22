@@ -34,6 +34,9 @@ java_library {
     srcs: [
         ":statslog-SystemUI-java-gen",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 android_library {
@@ -70,6 +73,9 @@ android_library {
     min_sdk_version: "current",
     plugins: ["dagger2-compiler"],
     kotlincflags: ["-Xjvm-default=all"],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 java_library {
@@ -81,6 +87,9 @@ java_library {
     static_kotlin_stdlib: false,
     java_version: "1.8",
     min_sdk_version: "current",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 java_library {
@@ -100,4 +109,7 @@ java_library {
     },
     java_version: "1.8",
     min_sdk_version: "current",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

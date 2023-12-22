@@ -32,11 +32,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 
 /**
  * Assists in creating sub-flows for a KeyguardTransition. Call [setup] once for a transition, and
@@ -68,8 +65,6 @@ constructor(
          * in the range of [0, 1]. View animations should begin and end within a subset of this
          * range. This function maps the [startTime] and [duration] into [0, 1], when this subset is
          * valid.
-         *
-         * Will produce a [SharedFlow], so that identical animations can use the same value.
          */
         fun sharedFlow(
             duration: Duration,
@@ -80,7 +75,7 @@ constructor(
             onFinish: (() -> Float)? = null,
             interpolator: Interpolator = LINEAR,
             name: String? = null
-        ): SharedFlow<Float> {
+        ): Flow<Float> {
             if (!duration.isPositive()) {
                 throw IllegalArgumentException("duration must be a positive number: $duration")
             }
@@ -137,7 +132,6 @@ constructor(
                     value
                 }
                 .filterNotNull()
-                .shareIn(scope, SharingStarted.WhileSubscribed())
         }
 
         /**

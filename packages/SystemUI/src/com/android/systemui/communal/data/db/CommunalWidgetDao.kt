@@ -117,10 +117,10 @@ interface CommunalWidgetDao {
     fun updateItemRank(itemUid: Long, order: Int)
 
     @Transaction
-    fun updateWidgetOrder(ids: List<Int>) {
-        ids.forEachIndexed { index, it ->
-            val widget = getWidgetByIdNow(it)
-            updateItemRank(widget.itemId, ids.size - index)
+    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {
+        widgetIdToPriorityMap.forEach { (id, priority) ->
+            val widget = getWidgetByIdNow(id)
+            updateItemRank(widget.itemId, priority)
         }
     }
 
@@ -129,7 +129,7 @@ interface CommunalWidgetDao {
         return insertWidget(
             widgetId = widgetId,
             componentName = provider.flattenToString(),
-            insertItemRank(priority),
+            itemId = insertItemRank(priority),
         )
     }
 

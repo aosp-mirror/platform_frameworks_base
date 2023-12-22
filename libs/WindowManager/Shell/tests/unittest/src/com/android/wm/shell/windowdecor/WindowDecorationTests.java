@@ -702,6 +702,11 @@ public class WindowDecorationTests extends ShellTestCase {
             relayout(taskInfo, false /* applyStartTransactionOnDraw */);
         }
 
+        @Override
+        Rect calculateValidDragArea() {
+            return null;
+        }
+
         void relayout(ActivityManager.RunningTaskInfo taskInfo,
                 boolean applyStartTransactionOnDraw) {
             mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;

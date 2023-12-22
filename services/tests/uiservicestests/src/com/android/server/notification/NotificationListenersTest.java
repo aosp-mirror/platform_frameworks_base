@@ -68,10 +68,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
@@ -111,7 +108,7 @@ import java.util.concurrent.CountDownLatch;
 public class NotificationListenersTest extends UiServiceTestCase {
 
     @Rule
-    public CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private PackageManager mPm;
@@ -696,8 +693,8 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testListenerTrusted_withPermission() throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         when(mNm.mPackageManager.checkUidPermission(RECEIVE_SENSITIVE_NOTIFICATIONS, mUid1))
                 .thenReturn(PERMISSION_GRANTED);
         ManagedServices.ManagedServiceInfo info = getMockServiceInfo();
@@ -706,8 +703,8 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testListenerTrusted_withSystemSignature() {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         when(mNm.mPackageManagerInternal.isPlatformSigned(mCn1.getPackageName())).thenReturn(true);
         ManagedServices.ManagedServiceInfo info = getMockServiceInfo();
         mListeners.onServiceAdded(info);
@@ -715,8 +712,8 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testListenerTrusted_withCdmAssociation() throws Exception {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         mNm.mCompanionManager = mock(ICompanionDeviceManager.class);
         AssociationInfo assocInfo = mock(AssociationInfo.class);
         when(assocInfo.isRevoked()).thenReturn(false);
@@ -731,16 +728,16 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
-    @RequiresFlagsDisabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testListenerTrusted_ifFlagDisabled() {
+        mSetFlagsRule.disableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         ManagedServices.ManagedServiceInfo info = getMockServiceInfo();
         mListeners.onServiceAdded(info);
         assertTrue(mListeners.isUidTrusted(mUid1));
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testRedaction_whenPosted() {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         ArrayList<ManagedServices.ManagedServiceInfo> infos = new ArrayList<>();
         infos.add(getMockServiceInfo());
         doReturn(infos).when(mListeners).getServices();
@@ -762,13 +759,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
         mListeners.notifyPostedLocked(r, old);
         verify(mListeners, atLeast(1)).redactStatusBarNotification(eq(sbn));
         verify(mListeners, never()).redactStatusBarNotification(eq(oldSbn));
-
-
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testRedaction_whenPosted_oldRemoved() {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         ArrayList<ManagedServices.ManagedServiceInfo> infos = new ArrayList<>();
         infos.add(getMockServiceInfo());
         doReturn(infos).when(mListeners).getServices();
@@ -795,8 +790,8 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testRedaction_whenRemoved() {
+        mSetFlagsRule.enableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         doReturn(mock(StatusBarNotification.class))
                 .when(mListeners).redactStatusBarNotification(any());
         ArrayList<ManagedServices.ManagedServiceInfo> infos = new ArrayList<>();
@@ -816,8 +811,8 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
-    @RequiresFlagsDisabled(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
     public void testRedaction_noneIfFlagDisabled() {
+        mSetFlagsRule.disableFlags(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS);
         ArrayList<ManagedServices.ManagedServiceInfo> infos = new ArrayList<>();
         infos.add(getMockServiceInfo());
         doReturn(infos).when(mListeners).getServices();

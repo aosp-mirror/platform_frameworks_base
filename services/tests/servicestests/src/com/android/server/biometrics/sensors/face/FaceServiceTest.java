@@ -16,21 +16,30 @@
 
 package com.android.server.biometrics.sensors.face;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.hardware.face.FaceSensorProperties.TYPE_UNKNOWN;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceSensorConfigurations;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
+import android.hardware.face.IFaceServiceReceiver;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -42,6 +51,7 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.biometrics.Flags;
@@ -66,6 +76,7 @@ public class FaceServiceTest {
     private static final int ID_VIRTUAL = 6;
     private static final String NAME_DEFAULT = "default";
     private static final String NAME_VIRTUAL = "virtual";
+    private static final String OP_PACKAGE_NAME = "FaceServiceTest/SystemUi";
 
     @Rule
     public final MockitoRule mMockito = MockitoJUnit.rule();
@@ -78,15 +89,19 @@ public class FaceServiceTest {
     @Rule
     public final FakeSettingsProviderRule mSettingsRule = FakeSettingsProvider.rule();
     @Mock
-    FaceProvider mFaceProviderDefault;
+    private FaceProvider mFaceProviderDefault;
     @Mock
-    FaceProvider mFaceProviderVirtual;
+    private FaceProvider mFaceProviderVirtual;
     @Mock
-    IFace mDefaultFaceDaemon;
+    private IFace mDefaultFaceDaemon;
     @Mock
-    IFace mVirtualFaceDaemon;
+    private IFace mVirtualFaceDaemon;
     @Mock
-    IBiometricService mIBiometricService;
+    private IBiometricService mIBiometricService;
+    @Mock
+    private IBinder mToken;
+    @Mock
+    private IFaceServiceReceiver mFaceServiceReceiver;
 
     private final SensorProps mDefaultSensorProps = new SensorProps();
     private final SensorProps mVirtualSensorProps = new SensorProps();
@@ -117,7 +132,13 @@ public class FaceServiceTest {
                 new SensorProps[]{mVirtualSensorProps});
         when(mFaceProviderDefault.getSensorProperties()).thenReturn(List.of(mSensorPropsDefault));
         when(mFaceProviderVirtual.getSensorProperties()).thenReturn(List.of(mSensorPropsVirtual));
+        when(mFaceProviderDefault.containsSensor(anyInt()))
+                .thenAnswer(i -> i.getArguments()[0].equals(ID_DEFAULT));
+        when(mFaceProviderVirtual.containsSensor(anyInt()))
+                .thenAnswer(i -> i.getArguments()[0].equals(ID_VIRTUAL));
 
+        mContext.getTestablePermissions().setPermission(
+                USE_BIOMETRIC_INTERNAL, PackageManager.PERMISSION_GRANTED);
         mFaceSensorConfigurations = new FaceSensorConfigurations(false);
         mFaceSensorConfigurations.addAidlConfigs(new String[]{NAME_DEFAULT, NAME_VIRTUAL},
                 (name) -> {
@@ -136,7 +157,13 @@ public class FaceServiceTest {
                     if (NAME_DEFAULT.equals(filteredSensorProps.first)) return mFaceProviderDefault;
                     if (NAME_VIRTUAL.equals(filteredSensorProps.first)) return mFaceProviderVirtual;
                     return null;
-                }, () -> mIBiometricService);
+                }, () -> mIBiometricService,
+                (name) -> {
+                    if (NAME_DEFAULT.equals(name)) return mFaceProviderDefault;
+                    if (NAME_VIRTUAL.equals(name)) return mFaceProviderVirtual;
+                    return null;
+                },
+                () -> new String[]{NAME_DEFAULT, NAME_VIRTUAL});
     }
 
     @Test
@@ -189,6 +216,39 @@ public class FaceServiceTest {
         verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL),
                 eq(BiometricAuthenticator.TYPE_FACE),
                 eq(Utils.propertyStrengthToAuthenticatorStrength(STRENGTH_STRONG)), any());
+    }
+
+    @Test
+    public void testOptionsForAuthentication() throws Exception {
+        FaceAuthenticateOptions faceAuthenticateOptions = new FaceAuthenticateOptions.Builder()
+                .build();
+        initService();
+        mFaceService.mServiceWrapper.registerAuthenticators(List.of());
+        waitForRegistration();
+
+        final long operationId = 5;
+        mFaceService.mServiceWrapper.authenticate(mToken, operationId, mFaceServiceReceiver,
+                faceAuthenticateOptions);
+
+        assertThat(faceAuthenticateOptions.getSensorId()).isEqualTo(ID_DEFAULT);
+    }
+
+    @Test
+    public void testOptionsForDetect() throws Exception {
+        FaceAuthenticateOptions faceAuthenticateOptions = new FaceAuthenticateOptions.Builder()
+                .setOpPackageName(ComponentName.unflattenFromString(OP_PACKAGE_NAME)
+                        .getPackageName())
+                .build();
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.config_keyguardComponent,
+                OP_PACKAGE_NAME);
+        initService();
+        mFaceService.mServiceWrapper.registerAuthenticators(List.of());
+        waitForRegistration();
+        mFaceService.mServiceWrapper.detectFace(mToken, mFaceServiceReceiver,
+                faceAuthenticateOptions);
+
+        assertThat(faceAuthenticateOptions.getSensorId()).isEqualTo(ID_DEFAULT);
     }
 
     private void waitForRegistration() throws Exception {

@@ -38,6 +38,8 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.graphics.Insets;
@@ -1519,6 +1521,9 @@ public final class WindowInsets {
         }
 
         /** @hide */
+        @TestApi
+        @NonNull
+        @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
         public static String toString(@InsetsType int types) {
             StringBuilder result = new StringBuilder();
             if ((types & STATUS_BARS) != 0) {

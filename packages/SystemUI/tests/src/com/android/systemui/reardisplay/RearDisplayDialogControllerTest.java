@@ -28,8 +28,8 @@ import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -82,7 +82,7 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
         TextView deviceClosedTitleTextView = controller.mRearDisplayEducationDialog.findViewById(
                 R.id.rear_display_title_text_view);
 
-        controller.onConfigurationChanged(new Configuration());
+        controller.onConfigChanged(new Configuration());
         assertTrue(controller.mRearDisplayEducationDialog.isShowing());
         TextView deviceClosedTitleTextView2 = controller.mRearDisplayEducationDialog.findViewById(
                 R.id.rear_display_title_text_view);

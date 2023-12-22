@@ -248,8 +248,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
             }
 
             @Override
-            public void onConfigurationChanged(Configuration newConfig) {
-                super.onConfigurationChanged(newConfig);
+            public void onConfigChanged(Configuration newConfig) {
+                super.onConfigChanged(newConfig);
                 mExecutor.runAllReady();
             }
 
@@ -892,7 +892,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Switch to long edge cutout(left).
         mMockCutoutList.set(0, new CutoutDecorProviderImpl(BOUNDS_POSITION_LEFT));
 
-        mScreenDecorations.onConfigurationChanged(new Configuration());
+        mScreenDecorations.onConfigChanged(new Configuration());
         verifyOverlaysExistAndAdded(true, false, false, false, View.VISIBLE);
     }
 
@@ -913,7 +913,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // Switch to long edge cutout(left).
         mMockCutoutList.set(0, new CutoutDecorProviderImpl(BOUNDS_POSITION_LEFT));
 
-        mScreenDecorations.onConfigurationChanged(new Configuration());
+        mScreenDecorations.onConfigChanged(new Configuration());
         verifyOverlaysExistAndAdded(true, false, true, false, View.VISIBLE);
         verify(mDotViewController, times(2)).initialize(any(), any(), any(), any());
         verify(mDotViewController, times(2)).setShowingListener(null);
@@ -949,7 +949,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // top cutout
         mMockCutoutList.add(new CutoutDecorProviderImpl(BOUNDS_POSITION_TOP));
 
-        mScreenDecorations.onConfigurationChanged(new Configuration());
+        mScreenDecorations.onConfigChanged(new Configuration());
 
         // Only top windows should be added.
         verifyOverlaysExistAndAdded(false, true, false, false, View.VISIBLE);
@@ -976,7 +976,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         // top cutout
         mMockCutoutList.add(new CutoutDecorProviderImpl(BOUNDS_POSITION_TOP));
 
-        mScreenDecorations.onConfigurationChanged(new Configuration());
+        mScreenDecorations.onConfigChanged(new Configuration());
 
         // Both top and bottom windows should be added with VISIBLE because of privacy dot and
         // cutout, but rounded corners visibility shall be gone because of no rounding.
@@ -1013,7 +1013,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         doReturn(2f).when(mScreenDecorations).getPhysicalPixelDisplaySizeRatio();
         mDisplayInfo.rotation = Surface.ROTATION_270;
 
-        mScreenDecorations.onConfigurationChanged(null);
+        mScreenDecorations.onConfigChanged(null);
 
         assertEquals(new Size(6, 6), resDelegate.getTopRoundedSize());
         assertEquals(new Size(8, 8), resDelegate.getBottomRoundedSize());
@@ -1145,7 +1145,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertThat(mScreenDecorations.mIsRegistered, is(false));
 
         doReturn(true).when(mScreenDecorations).hasOverlays();
-        mScreenDecorations.onConfigurationChanged(new Configuration());
+        mScreenDecorations.onConfigChanged(new Configuration());
         assertThat(mScreenDecorations.mIsRegistered, is(true));
     }
 
@@ -1156,7 +1156,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.start();
         assertThat(mScreenDecorations.mIsRegistered, is(true));
 
-        mScreenDecorations.onConfigurationChanged(new Configuration());
+        mScreenDecorations.onConfigChanged(new Configuration());
         assertThat(mScreenDecorations.mIsRegistered, is(true));
     }
 
@@ -1168,7 +1168,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertThat(mScreenDecorations.mIsRegistered, is(true));
 
         doReturn(false).when(mScreenDecorations).hasOverlays();
-        mScreenDecorations.onConfigurationChanged(new Configuration());
+        mScreenDecorations.onConfigChanged(new Configuration());
         assertThat(mScreenDecorations.mIsRegistered, is(false));
     }
 

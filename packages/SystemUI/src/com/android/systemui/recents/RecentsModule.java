@@ -18,20 +18,45 @@ package com.android.systemui.recents;
 
 import android.content.Context;
 
-import com.android.systemui.res.R;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.ContextComponentHelper;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+import dagger.multibindings.IntoSet;
 
 /**
  * Dagger injection module for {@link RecentsImplementation}
  */
 @Module
 public abstract class RecentsModule {
+
+    /** Start Recents.  */
+    @Binds
+    @IntoMap
+    @ClassKey(Recents.class)
+    abstract CoreStartable bindRecentsStartable(Recents impl);
+
+    /** Listen to config changes for Recents.  */
+    @Binds
+    @IntoSet
+    abstract ConfigurationListener bindRecentsConfigChanges(Recents impl);
+
+    /** Start ScreenPinningRequest.  */
+    @Binds
+    @IntoMap
+    @ClassKey(ScreenPinningRequest.class)
+    abstract CoreStartable bindScreenPinningRequestStartable(ScreenPinningRequest impl);
+
+    /** Listen to config changes for ScreenPinningRequest.  */
+    @Binds
+    @IntoSet
+    abstract ConfigurationListener bindScreenPinningRequestConfigChanges(ScreenPinningRequest impl);
 
     /**
      * @return The {@link RecentsImplementation} from the config.

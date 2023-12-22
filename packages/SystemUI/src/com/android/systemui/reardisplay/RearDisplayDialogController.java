@@ -29,11 +29,12 @@ import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieDrawable;
@@ -57,7 +58,10 @@ import javax.inject.Inject;
  */
 @SuppressLint("VisibleForTests") // TODO(b/260264542) Migrate away from DeviceStateManagerGlobal
 @SysUISingleton
-public class RearDisplayDialogController implements CoreStartable, CommandQueue.Callbacks {
+public class RearDisplayDialogController implements
+        CoreStartable,
+        ConfigurationController.ConfigurationListener,
+        CommandQueue.Callbacks {
 
     private int[] mFoldedStates;
     private boolean mStartedFolded;
@@ -96,7 +100,7 @@ public class RearDisplayDialogController implements CoreStartable, CommandQueue.
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         if (mRearDisplayEducationDialog != null && mRearDisplayEducationDialog.isShowing()
                 && mDialogViewContainer != null) {
             // Refresh the dialog view when configuration is changed.

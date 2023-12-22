@@ -237,7 +237,7 @@ object NotificationIconContainerViewBinder {
 
                 // Add and bind.
                 val toAdd: Sequence<String> = iconsDiff.added.asSequence() + failedBindings.toList()
-                for ((idx, notifKey) in toAdd.withIndex()) {
+                for (notifKey in toAdd) {
                     // Lookup the StatusBarIconView from the store.
                     val sbiv = viewStore.iconView(notifKey)
                     if (sbiv == null) {
@@ -256,7 +256,7 @@ object NotificationIconContainerViewBinder {
                         // added again.
                         removeTransientView(sbiv)
                     }
-                    view.addView(sbiv, idx)
+                    view.addView(sbiv)
                     boundViewsByNotifKey.remove(notifKey)?.second?.cancel()
                     boundViewsByNotifKey[notifKey] =
                         Pair(

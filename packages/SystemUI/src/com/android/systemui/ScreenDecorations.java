@@ -89,6 +89,7 @@ import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.events.PrivacyDotViewController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.SecureSettings;
@@ -109,7 +110,8 @@ import javax.inject.Inject;
  * for antialiasing and emulation purposes.
  */
 @SysUISingleton
-public class ScreenDecorations implements CoreStartable, Dumpable {
+public class ScreenDecorations implements
+        CoreStartable, ConfigurationController.ConfigurationListener, Dumpable {
     private static final boolean DEBUG_LOGGING = false;
     private static final String TAG = "ScreenDecorations";
 
@@ -575,7 +577,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
 
                     if (mPendingManualConfigUpdate) {
                         mPendingManualConfigUpdate = false;
-                        onConfigurationChanged(mContext.getResources().getConfiguration());
+                        onConfigChanged(mContext.getResources().getConfiguration());
                     }
                 }
             }
@@ -1062,7 +1064,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
             Log.i(TAG, "ScreenDecorations is disabled");
             return;

@@ -91,6 +91,13 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     /** Non-zero if this controller is triggered by shell transition. */
     private final @TransitionOp int mTransitionOp;
 
+    /**
+     * Whether {@link #setupStartTransaction} is called when the transition is ready.
+     * If this is never set for {@link #OP_CHANGE}, the display may be changed to original state
+     * before the transition is ready, then this controller should be finished.
+     */
+    private boolean mIsStartTransactionPrepared;
+
     /** Whether the start transaction of the transition is committed (by shell). */
     private boolean mIsStartTransactionCommitted;
 
@@ -226,7 +233,8 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     void updateTargetWindows() {
         if (mTransitionOp == OP_LEGACY) return;
         if (!mIsStartTransactionCommitted) {
-            if (mTimeoutRunnable == null && !mDisplayContent.hasTopFixedRotationLaunchingApp()
+            if ((mTimeoutRunnable == null || !mIsStartTransactionPrepared)
+                    && !mDisplayContent.hasTopFixedRotationLaunchingApp()
                     && !mDisplayContent.isRotationChanging() && !mDisplayContent.inTransition()) {
                 Slog.d(TAG, "Cancel for no change");
                 mDisplayContent.finishAsyncRotationIfPossible();
@@ -401,9 +409,18 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (mTimeoutRunnable == null) {
             mTimeoutRunnable = () -> {
                 synchronized (mService.mGlobalLock) {
-                    Slog.i(TAG, "Async rotation timeout: " + (!mIsStartTransactionCommitted
-                            ? " start transaction is not committed" : mTargetWindowTokens));
+                    final String reason;
                     if (!mIsStartTransactionCommitted) {
+                        if (!mIsStartTransactionPrepared) {
+                            reason = "setupStartTransaction is not called";
+                        } else {
+                            reason = "start transaction is not committed";
+                        }
+                    } else {
+                        reason = "unfinished windows " + mTargetWindowTokens;
+                    }
+                    Slog.i(TAG, "Async rotation timeout: " + reason);
+                    if (!mIsStartTransactionCommitted && mIsStartTransactionPrepared) {
                         // The transaction commit timeout will be handled by:
                         // 1. BLASTSyncEngine will notify onTransactionCommitTimeout() and then
                         //    apply the start transaction of transition.
@@ -558,6 +575,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
                 }
             }
         });
+        mIsStartTransactionPrepared = true;
     }
 
     /** Called when the start transition is ready, but it is not applied in time. */
@@ -577,6 +595,10 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     /** Called when the transition by shell is done. */
     void onTransitionFinished() {
         if (mTransitionOp == OP_CHANGE) {
+            if (mTargetWindowTokens.isEmpty()) {
+                // If nothing was handled, then complete with the transition.
+                mDisplayContent.finishAsyncRotationIfPossible();
+            }
             // With screen rotation animation, the windows are always faded in when they are drawn.
             // Because if they are drawn fast enough, the fade animation should not be observable.
             return;

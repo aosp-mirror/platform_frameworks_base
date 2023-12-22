@@ -102,8 +102,9 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
                 getContext().getMainThreadHandler(), mCommandQueue,
                 mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
                 mDisplayTracker, getContext().getSystemService(DisplayManager.class), mA11yLogger);
-        mMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
-                mContext.getSystemService(DisplayManager.class));
+        mMagnification.mWindowMagnificationControllerSupplier =
+                new FakeWindowMagnificationControllerSupplier(
+                        mContext.getSystemService(DisplayManager.class));
         mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
                 mContext.getSystemService(DisplayManager.class));
 
@@ -201,10 +202,10 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
         verify(mMagnificationSettingsController).setMagnificationScale(eq(testScale));
     }
 
-    private class FakeControllerSupplier extends
+    private class FakeWindowMagnificationControllerSupplier extends
             DisplayIdIndexSupplier<WindowMagnificationController> {
 
-        FakeControllerSupplier(DisplayManager displayManager) {
+        FakeWindowMagnificationControllerSupplier(DisplayManager displayManager) {
             super(displayManager);
         }
 

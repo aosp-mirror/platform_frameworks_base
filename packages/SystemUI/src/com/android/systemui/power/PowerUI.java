@@ -48,12 +48,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -62,7 +63,10 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 @SysUISingleton
-public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
+public class PowerUI implements
+        CoreStartable,
+        ConfigurationController.ConfigurationListener,
+        CommandQueue.Callbacks {
 
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -223,7 +227,7 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigChanged(Configuration newConfig) {
         final int mask = ActivityInfo.CONFIG_MCC | ActivityInfo.CONFIG_MNC;
 
         // Safe to modify mLastConfiguration here as it's only updated by the main thread (here).

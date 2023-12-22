@@ -18,10 +18,12 @@
 
 #include <aidl/android/hardware/power/SessionHint.h>
 #include <aidl/android/hardware/power/SessionMode.h>
+#include <android-base/stringprintf.h>
 #include <android/WorkDuration.h>
 #include <android/os/IHintManager.h>
 #include <android/os/IHintSession.h>
 #include <android/performance_hint.h>
+#include <android/trace.h>
 #include <binder/Binder.h>
 #include <binder/IBinder.h>
 #include <binder/IServiceManager.h>
@@ -30,6 +32,7 @@
 #include <utils/SystemClock.h>
 
 #include <chrono>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -40,6 +43,7 @@ using namespace std::chrono_literals;
 
 using AidlSessionHint = aidl::android::hardware::power::SessionHint;
 using AidlSessionMode = aidl::android::hardware::power::SessionMode;
+using android::base::StringPrintf;
 
 struct APerformanceHintSession;
 
@@ -98,10 +102,21 @@ private:
     std::vector<int64_t> mLastHintSentTimestamp;
     // Cached samples
     std::vector<WorkDuration> mActualWorkDurations;
+    std::string mSessionName;
+    static int32_t sIDCounter;
+    // The most recent set of thread IDs
+    std::vector<int32_t> mLastThreadIDs;
+    // Tracing helpers
+    void traceThreads(std::vector<int32_t>& tids);
+    void tracePowerEfficient(bool powerEfficient);
+    void traceActualDuration(int64_t actualDuration);
+    void traceBatchSize(size_t batchSize);
+    void traceTargetDuration(int64_t targetDuration);
 };
 
 static IHintManager* gIHintManagerForTesting = nullptr;
 static APerformanceHintManager* gHintManagerForTesting = nullptr;
+int32_t APerformanceHintSession::sIDCounter = 0;
 
 // ===================================== APerformanceHintManager implementation
 APerformanceHintManager::APerformanceHintManager(sp<IHintManager> manager,
@@ -150,8 +165,12 @@ APerformanceHintSession* APerformanceHintManager::createSession(
     if (!ret.isOk() || !session) {
         return nullptr;
     }
-    return new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,
-                                       initialTargetWorkDurationNanos);
+    auto out = new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,
+                                           initialTargetWorkDurationNanos);
+    out->traceThreads(tids);
+    out->traceTargetDuration(initialTargetWorkDurationNanos);
+    out->tracePowerEfficient(false);
+    return out;
 }
 
 int64_t APerformanceHintManager::getPreferredRateNanos() const {
@@ -174,6 +193,7 @@ APerformanceHintSession::APerformanceHintSession(sp<IHintManager> hintManager,
                                                         ndk::enum_range<AidlSessionHint>().end()};
 
     mLastHintSentTimestamp = std::vector<int64_t>(sessionHintRange.size(), 0);
+    mSessionName = android::base::StringPrintf("ADPF Session %" PRId32, ++sIDCounter);
 }
 
 APerformanceHintSession::~APerformanceHintSession() {
@@ -200,6 +220,8 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
      * as they are most likely obsolete.
      */
     mActualWorkDurations.clear();
+    traceBatchSize(0);
+    traceTargetDuration(targetDurationNanos);
     mFirstTargetMetTimestamp = 0;
     mLastTargetMetTimestamp = 0;
     return 0;
@@ -254,6 +276,9 @@ int APerformanceHintSession::setThreads(const int32_t* threadIds, size_t size) {
         }
         return EPIPE;
     }
+
+    traceThreads(tids);
+
     return 0;
 }
 
@@ -289,6 +314,7 @@ int APerformanceHintSession::setPreferPowerEfficiency(bool enabled) {
               ret.exceptionMessage().c_str());
         return EPIPE;
     }
+    tracePowerEfficient(enabled);
     return OK;
 }
 
@@ -318,6 +344,7 @@ int APerformanceHintSession::reportActualWorkDurationInternal(WorkDuration* work
     int64_t actualTotalDurationNanos = workDuration->actualTotalDurationNanos;
     int64_t now = uptimeNanos();
     workDuration->timestampNanos = now;
+    traceActualDuration(workDuration->actualTotalDurationNanos);
     mActualWorkDurations.push_back(std::move(*workDuration));
 
     if (actualTotalDurationNanos >= mTargetDurationNanos) {
@@ -335,6 +362,7 @@ int APerformanceHintSession::reportActualWorkDurationInternal(WorkDuration* work
          */
         if (now - mFirstTargetMetTimestamp > mPreferredRateNanos &&
             now - mLastTargetMetTimestamp <= mPreferredRateNanos) {
+            traceBatchSize(mActualWorkDurations.size());
             return 0;
         }
         mLastTargetMetTimestamp = now;
@@ -346,11 +374,53 @@ int APerformanceHintSession::reportActualWorkDurationInternal(WorkDuration* work
               ret.exceptionMessage().c_str());
         mFirstTargetMetTimestamp = 0;
         mLastTargetMetTimestamp = 0;
+        traceBatchSize(mActualWorkDurations.size());
         return ret.exceptionCode() == binder::Status::EX_ILLEGAL_ARGUMENT ? EINVAL : EPIPE;
     }
     mActualWorkDurations.clear();
+    traceBatchSize(0);
 
     return 0;
+}
+// ===================================== Tracing helpers
+
+void APerformanceHintSession::traceThreads(std::vector<int32_t>& tids) {
+    std::set<int32_t> tidSet{tids.begin(), tids.end()};
+
+    // Disable old TID tracing
+    for (int32_t tid : mLastThreadIDs) {
+        if (!tidSet.count(tid)) {
+            std::string traceName =
+                    android::base::StringPrintf("%s TID: %" PRId32, mSessionName.c_str(), tid);
+            ATrace_setCounter(traceName.c_str(), 0);
+        }
+    }
+
+    // Add new TID tracing
+    for (int32_t tid : tids) {
+        std::string traceName =
+                android::base::StringPrintf("%s TID: %" PRId32, mSessionName.c_str(), tid);
+        ATrace_setCounter(traceName.c_str(), 1);
+    }
+
+    mLastThreadIDs = std::move(tids);
+}
+
+void APerformanceHintSession::tracePowerEfficient(bool powerEfficient) {
+    ATrace_setCounter((mSessionName + " power efficiency mode").c_str(), powerEfficient);
+}
+
+void APerformanceHintSession::traceActualDuration(int64_t actualDuration) {
+    ATrace_setCounter((mSessionName + " actual duration").c_str(), actualDuration);
+}
+
+void APerformanceHintSession::traceBatchSize(size_t batchSize) {
+    std::string traceName = StringPrintf("%s batch size", mSessionName.c_str());
+    ATrace_setCounter((mSessionName + " batch size").c_str(), batchSize);
+}
+
+void APerformanceHintSession::traceTargetDuration(int64_t targetDuration) {
+    ATrace_setCounter((mSessionName + " target duration").c_str(), targetDuration);
 }
 
 // ===================================== C API
