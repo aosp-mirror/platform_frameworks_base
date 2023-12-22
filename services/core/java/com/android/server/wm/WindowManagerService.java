@@ -5748,7 +5748,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 case INSETS_CHANGED: {
                     synchronized (mGlobalLock) {
                         if (mWindowsInsetsChanged > 0) {
-                            mWindowsInsetsChanged = 0;
                             // We need to update resizing windows and dispatch the new insets state
                             // to them.
                             mWindowPlacerLocked.performSurfacePlacement();
@@ -6848,6 +6847,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.println(defaultDisplayContent.getLastOrientation());
             pw.print("  mWaitingForConfig=");
                     pw.println(defaultDisplayContent.mWaitingForConfig);
+            pw.print("  mWindowsInsetsChanged="); pw.println(mWindowsInsetsChanged);
             mRotationWatcherController.dump(pw);
 
             pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
