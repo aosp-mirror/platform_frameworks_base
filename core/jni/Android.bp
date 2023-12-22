@@ -415,6 +415,24 @@ cc_library_shared {
                 dir: "robolectric/nativeruntime/linux",
             },
         },
+        windows_x86_64: {
+            dist: {
+                targets: ["robolectric_native_runtime"],
+                dir: "robolectric/nativeruntime/windows",
+            },
+        },
+        not_windows: {
+            srcs: [
+                "android_database_CursorWindow.cpp",
+                "android_database_SQLiteCommon.cpp",
+                "android_database_SQLiteConnection.cpp",
+                "android_database_SQLiteGlobal.cpp",
+                "android_database_SQLiteDebug.cpp",
+              ],
+        },
+        windows: {
+          enabled: true,
+        },
         host: {
             cflags: [
                 "-Wno-unused-const-variable",
@@ -425,11 +443,6 @@ cc_library_shared {
             srcs: [
                 "android_animation_PropertyValuesHolder.cpp",
                 "libcore_util_NativeAllocationRegistry.cpp",
-                "android_database_CursorWindow.cpp",
-                "android_database_SQLiteCommon.cpp",
-                "android_database_SQLiteConnection.cpp",
-                "android_database_SQLiteGlobal.cpp",
-                "android_database_SQLiteDebug.cpp",
                 "android_util_Log.cpp",
                 "com_android_internal_util_VirtualRefBasePtr.cpp",
                 "android_view_Surface.cpp",

@@ -16,8 +16,10 @@ extern int register_android_media_ImageReader(JNIEnv* env);
 namespace android {
 
 extern int register_android_animation_PropertyValuesHolder(JNIEnv* env);
+#ifndef _WIN32
 extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
+#endif
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv* env);
 
@@ -28,8 +30,10 @@ struct RegJNIRec {
 };
 
 static const RegJNIRec sqliteJNI[] = {
+#ifndef _WIN32
         REG_JNI(register_android_database_CursorWindow),
         REG_JNI(register_android_database_SQLiteConnection),
+#endif
 };
 
 static const RegJNIRec graphicsJNI[] = {

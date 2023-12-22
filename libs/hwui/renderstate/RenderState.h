@@ -18,6 +18,7 @@
 
 #include "utils/Macros.h"
 
+#include <pthread.h>
 #include <utils/RefBase.h>
 #include <set>
 
