@@ -70,7 +70,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private @Nullable Supplier<Rect> mLayerBoundsSupplier;
     private @Nullable Listener mListener;
 
-    private BubbleBarHandleView mHandleView = new BubbleBarHandleView(getContext());
+    private BubbleBarHandleView mHandleView;
     private @Nullable TaskView mTaskView;
     private @Nullable BubbleOverflowContainerView mOverflowView;
 
@@ -111,7 +111,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         setElevation(getResources().getDimensionPixelSize(R.dimen.bubble_elevation));
         mCaptionHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.bubble_bar_expanded_view_caption_height);
-        addView(mHandleView);
+        mHandleView = findViewById(R.id.bubble_bar_handle_view);
         applyThemeAttrs();
         setClipToOutline(true);
         setOutlineProvider(new ViewOutlineProvider() {
