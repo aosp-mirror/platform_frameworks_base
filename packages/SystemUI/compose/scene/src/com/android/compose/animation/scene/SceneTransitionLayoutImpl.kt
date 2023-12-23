@@ -58,10 +58,11 @@ internal class SceneTransitionLayoutImpl(
     /**
      * The map of [Element]s.
      *
-     * Note that this map is *mutated* directly during composition, so it is a [SnapshotStateMap] to
-     * make sure that mutations are reverted if composition is cancelled.
+     * Important: [Element]s from this map should never be accessed during composition because the
+     * Elements are added when the associated Modifier.element() node is attached to the Modifier
+     * tree, i.e. after composition.
      */
-    internal val elements = SnapshotStateMap<ElementKey, Element>()
+    internal val elements = mutableMapOf<ElementKey, Element>()
 
     /**
      * The map of contents of movable elements.
@@ -96,6 +97,8 @@ internal class SceneTransitionLayoutImpl(
      *
      * Note that this map is *read* during composition, so it is a [SnapshotStateMap] to make sure
      * that we recompose when modifications are made to this map.
+     *
+     * TODO(b/316901148): Remove this map.
      */
     private val readyScenes = SnapshotStateMap<SceneKey, Boolean>()
 

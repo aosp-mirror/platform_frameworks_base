@@ -20,8 +20,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -57,7 +55,7 @@ internal class Element(val key: ElementKey) {
     val lastSharedState = State()
 
     /** The mapping between a scene and the state this element has in that scene, if any. */
-    val sceneStates = SnapshotStateMap<SceneKey, SceneState>()
+    val sceneStates = mutableMapOf<SceneKey, SceneState>()
 
     override fun toString(): String {
         return "Element(key=$key)"
@@ -115,23 +113,15 @@ internal fun Modifier.element(
     scene: Scene,
     key: ElementKey,
 ): Modifier {
-    val element: Element
-    val sceneState: Element.SceneState
-
-    // Get the element associated to [key] if it was already composed in another scene,
-    // otherwise create it and add it to our Map<ElementKey, Element>. This is done inside a
-    // withoutReadObservation() because there is no need to recompose when that map is mutated.
-    Snapshot.withoutReadObservation {
-        element = layoutImpl.elements[key] ?: Element(key).also { layoutImpl.elements[key] = it }
-        sceneState =
-            element.sceneStates[scene.key]
-                ?: Element.SceneState(scene.key).also { element.sceneStates[scene.key] = it }
-    }
-
-    return this.then(ElementModifier(layoutImpl, scene, element, sceneState))
+    return this.then(ElementModifier(layoutImpl, scene, key))
         // TODO(b/311132415): Move this into ElementNode once we can create a delegate
         // IntermediateLayoutModifierNode.
         .intermediateLayout { measurable, constraints ->
+            // TODO(b/311132415): No need to fetch the element and sceneState from the map anymore
+            // once this is merged into ElementNode.
+            val element = layoutImpl.elements.getValue(key)
+            val sceneState = element.sceneStates.getValue(scene.key)
+
             val placeable = measure(layoutImpl, scene, element, sceneState, measurable, constraints)
             layout(placeable.width, placeable.height) {
                 place(layoutImpl, scene, element, sceneState, placeable, placementScope = this)
@@ -147,26 +137,41 @@ internal fun Modifier.element(
 private data class ElementModifier(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val scene: Scene,
-    private val element: Element,
-    private val sceneState: Element.SceneState,
+    private val key: ElementKey,
 ) : ModifierNodeElement<ElementNode>() {
-    override fun create(): ElementNode = ElementNode(layoutImpl, scene, element, sceneState)
+    override fun create(): ElementNode = ElementNode(layoutImpl, scene, key)
 
     override fun update(node: ElementNode) {
-        node.update(layoutImpl, scene, element, sceneState)
+        node.update(layoutImpl, scene, key)
     }
 }
 
 internal class ElementNode(
     private var layoutImpl: SceneTransitionLayoutImpl,
     private var scene: Scene,
-    private var element: Element,
-    private var sceneState: Element.SceneState,
+    private var key: ElementKey,
 ) : Modifier.Node(), DrawModifierNode {
+    private var _element: Element? = null
+    private val element: Element
+        get() = _element!!
+
+    private var _sceneState: Element.SceneState? = null
+    private val sceneState: Element.SceneState
+        get() = _sceneState!!
 
     override fun onAttach() {
         super.onAttach()
+        updateElementAndSceneValues()
         addNodeToSceneState()
+    }
+
+    private fun updateElementAndSceneValues() {
+        val element =
+            layoutImpl.elements[key] ?: Element(key).also { layoutImpl.elements[key] = it }
+        _element = element
+        _sceneState =
+            element.sceneStates[scene.key]
+                ?: Element.SceneState(scene.key).also { element.sceneStates[scene.key] = it }
     }
 
     private fun addNodeToSceneState() {
@@ -178,7 +183,7 @@ internal class ElementNode(
             // this element was composed multiple times in the same scene.
             val nCodeLocations = sceneState.nodes.size
             if (nCodeLocations != 1 || !sceneState.nodes.contains(this@ElementNode)) {
-                error("${element.key} was composed $nCodeLocations times in ${sceneState.scene}")
+                error("$key was composed $nCodeLocations times in ${sceneState.scene}")
             }
         }
     }
@@ -187,6 +192,9 @@ internal class ElementNode(
         super.onDetach()
         removeNodeFromSceneState()
         maybePruneMaps(layoutImpl, element, sceneState)
+
+        _element = null
+        _sceneState = null
     }
 
     private fun removeNodeFromSceneState() {
@@ -196,16 +204,15 @@ internal class ElementNode(
     fun update(
         layoutImpl: SceneTransitionLayoutImpl,
         scene: Scene,
-        element: Element,
-        sceneState: Element.SceneState,
+        key: ElementKey,
     ) {
         check(layoutImpl == this.layoutImpl && scene == this.scene)
         removeNodeFromSceneState()
 
         val prevElement = this.element
         val prevSceneState = this.sceneState
-        this.element = element
-        this.sceneState = sceneState
+        this.key = key
+        updateElementAndSceneValues()
 
         addNodeToSceneState()
         maybePruneMaps(layoutImpl, prevElement, prevSceneState)
