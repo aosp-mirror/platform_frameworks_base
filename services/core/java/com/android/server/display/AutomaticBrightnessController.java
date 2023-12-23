@@ -82,6 +82,7 @@ public class AutomaticBrightnessController {
     public static final int AUTO_BRIGHTNESS_MODE_DEFAULT = 0;
     public static final int AUTO_BRIGHTNESS_MODE_IDLE = 1;
     public static final int AUTO_BRIGHTNESS_MODE_DOZE = 2;
+    public static final int AUTO_BRIGHTNESS_MODE_MAX = AUTO_BRIGHTNESS_MODE_DOZE;
 
     // How long the current sensor reading is assumed to be valid beyond the current time.
     // This provides a bit of prediction, as well as ensures that the weight for the last sample is

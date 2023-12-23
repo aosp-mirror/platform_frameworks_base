@@ -73,7 +73,7 @@ class MenuAnimationController {
     private final ValueAnimator mFadeOutAnimator;
     private final Handler mHandler;
     private boolean mIsFadeEffectEnabled;
-    private DismissAnimationController.DismissCallback mDismissCallback;
+    private DragToInteractAnimationController.DismissCallback mDismissCallback;
     private Runnable mSpringAnimationsEndAction;
 
     // Cache the animations state of {@link DynamicAnimation.TRANSLATION_X} and {@link
@@ -171,7 +171,7 @@ class MenuAnimationController {
     }
 
     void setDismissCallback(
-            DismissAnimationController.DismissCallback dismissCallback) {
+            DragToInteractAnimationController.DismissCallback dismissCallback) {
         mDismissCallback = dismissCallback;
     }
 

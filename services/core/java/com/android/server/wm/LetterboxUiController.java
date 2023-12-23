@@ -46,6 +46,7 @@ import static android.content.pm.ActivityInfo.screenOrientationToString;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_16_9;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_3_2;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_4_3;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_APP_DEFAULT;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_DISPLAY_SIZE;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_FULLSCREEN;
 import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_SPLIT_SCREEN;
@@ -1185,6 +1186,7 @@ final class LetterboxUiController {
         mUserAspectRatio = getUserMinAspectRatioOverrideCode();
 
         return mUserAspectRatio != USER_MIN_ASPECT_RATIO_UNSET
+                && mUserAspectRatio != USER_MIN_ASPECT_RATIO_APP_DEFAULT
                 && mUserAspectRatio != USER_MIN_ASPECT_RATIO_FULLSCREEN;
     }
 

@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_MAX;
+
 import android.annotation.Nullable;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
@@ -63,6 +65,22 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
         }
         mDisplayOffloader.onBlockingScreenOn(unblocker);
         return true;
+    }
+
+    @Override
+    public float[] getAutoBrightnessLevels(int mode) {
+        if (mode < 0 || mode > AUTO_BRIGHTNESS_MODE_MAX) {
+            throw new IllegalArgumentException("Unknown auto-brightness mode: " + mode);
+        }
+        return mDisplayPowerController.getAutoBrightnessLevels(mode);
+    }
+
+    @Override
+    public float[] getAutoBrightnessLuxLevels(int mode) {
+        if (mode < 0 || mode > AUTO_BRIGHTNESS_MODE_MAX) {
+            throw new IllegalArgumentException("Unknown auto-brightness mode: " + mode);
+        }
+        return mDisplayPowerController.getAutoBrightnessLuxLevels(mode);
     }
 
     /**

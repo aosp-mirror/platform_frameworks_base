@@ -37,6 +37,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 
+import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -62,6 +63,8 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     String[] mTempArray = new String[1];
 
     PackageMonitorCallback mPackageMonitorCallback;
+
+    private Executor mExecutor;
 
     @UnsupportedAppUsage
     public PackageMonitor() {
@@ -106,8 +109,8 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         if (mPackageMonitorCallback == null) {
             PackageManager pm = mRegisteredContext.getPackageManager();
             if (pm != null) {
-                mPackageMonitorCallback = new PackageMonitorCallback(this,
-                        new HandlerExecutor(mRegisteredHandler));
+                mExecutor = new HandlerExecutor(mRegisteredHandler);
+                mPackageMonitorCallback = new PackageMonitorCallback(this);
                 int userId = user != null ? user.getIdentifier() : mRegisteredContext.getUserId();
                 pm.registerPackageMonitorCallback(mPackageMonitorCallback, userId);
             }
@@ -131,6 +134,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         }
         mPackageMonitorCallback = null;
         mRegisteredContext = null;
+        mExecutor = null;
     }
 
     public void onBeginPackageChanges() {
@@ -362,6 +366,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         doHandlePackageEvent(intent);
     }
 
+
+    private void postHandlePackageEvent(Intent intent) {
+        if (mExecutor != null) {
+            mExecutor.execute(() -> doHandlePackageEvent(intent));
+        }
+    }
+
     /**
      * Handle the package related event
      * @param intent the intent that contains package related event information
@@ -516,13 +527,10 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     }
 
     private static final class PackageMonitorCallback extends IRemoteCallback.Stub {
+        private final WeakReference<PackageMonitor> mMonitorWeakReference;
 
-        private final PackageMonitor mPackageMonitor;
-        private final Executor mExecutor;
-
-        PackageMonitorCallback(PackageMonitor monitor, Executor executor) {
-            mPackageMonitor = monitor;
-            mExecutor = executor;
+        PackageMonitorCallback(PackageMonitor monitor) {
+            mMonitorWeakReference = new WeakReference<>(monitor);
         }
 
         @Override
@@ -537,7 +545,10 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 Log.w(TAG, "No intent is set for PackageMonitorCallback");
                 return;
             }
-            mExecutor.execute(() -> mPackageMonitor.doHandlePackageEvent(intent));
+            PackageMonitor monitor = mMonitorWeakReference.get();
+            if (monitor != null) {
+                monitor.postHandlePackageEvent(intent);
+            }
         }
     }
 }

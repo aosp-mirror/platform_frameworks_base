@@ -751,6 +751,23 @@ public abstract class DisplayManagerInternal {
          */
         boolean blockScreenOn(Runnable unblocker);
 
+        /**
+         * Get the brightness levels used to determine automatic brightness based on lux levels.
+         * @param mode The auto-brightness mode
+         *             (AutomaticBrightnessController.AutomaticBrightnessMode)
+         * @return The brightness levels for the specified mode. The values are between
+         * {@link PowerManager.BRIGHTNESS_MIN} and {@link PowerManager.BRIGHTNESS_MAX}.
+         */
+        float[] getAutoBrightnessLevels(int mode);
+
+        /**
+         * Get the lux levels used to determine automatic brightness.
+         * @param mode The auto-brightness mode
+         *             (AutomaticBrightnessController.AutomaticBrightnessMode)
+         * @return The lux levels for the specified mode
+         */
+        float[] getAutoBrightnessLuxLevels(int mode);
+
         /** Returns whether displayoffload supports the given display state. */
         static boolean isSupportedOffloadState(int displayState) {
             return Display.isSuspendedState(displayState);

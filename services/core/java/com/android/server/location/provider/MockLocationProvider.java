@@ -21,6 +21,7 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import android.annotation.Nullable;
 import android.location.Location;
 import android.location.LocationResult;
+import android.location.LocationResult.BadLocationException;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
@@ -55,7 +56,11 @@ public class MockLocationProvider extends AbstractLocationProvider {
         Location location = new Location(l);
         location.setIsFromMockProvider(true);
         mLocation = location;
-        reportLocation(LocationResult.wrap(location).validate());
+        try {
+            reportLocation(LocationResult.wrap(location).validate());
+        } catch (BadLocationException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Override

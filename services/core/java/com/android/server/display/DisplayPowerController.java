@@ -2214,6 +2214,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     @Override
+    public float[] getAutoBrightnessLevels(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
+        // The old DPC is no longer supported
+        return null;
+    }
+
+    @Override
+    public float[] getAutoBrightnessLuxLevels(
+            @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
+        // The old DPC is no longer supported
+        return null;
+    }
+
+    @Override
     public BrightnessInfo getBrightnessInfo() {
         synchronized (mCachedBrightnessInfo) {
             return new BrightnessInfo(

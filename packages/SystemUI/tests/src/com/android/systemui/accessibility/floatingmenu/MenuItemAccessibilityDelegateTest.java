@@ -62,7 +62,7 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
     @Mock
     private SecureSettings mSecureSettings;
     @Mock
-    private DismissAnimationController.DismissCallback mStubDismissCallback;
+    private DragToInteractAnimationController.DismissCallback mStubDismissCallback;
 
     private RecyclerView mStubListView;
     private MenuView mMenuView;

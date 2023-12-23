@@ -101,7 +101,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
     }
 
     /** Alerts listener and plugin that the plugin has been created. */
-    public void onCreate() {
+    public synchronized void onCreate() {
         boolean loadPlugin = mListener.onPluginAttached(this);
         if (!loadPlugin) {
             if (mPlugin != null) {
@@ -128,7 +128,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
     }
 
     /** Alerts listener and plugin that the plugin is being shutdown. */
-    public void onDestroy() {
+    public synchronized void onDestroy() {
         logDebug("onDestroy");
         unloadPlugin();
         mListener.onPluginDetached(this);
@@ -143,12 +143,13 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
     /**
      * Loads and creates the plugin if it does not exist.
      */
-    public void loadPlugin() {
+    public synchronized void loadPlugin() {
         if (mPlugin != null) {
             logDebug("Load request when already loaded");
             return;
         }
 
+        // Both of these calls take about 1 - 1.5 seconds in test runs
         mPlugin = mPluginFactory.createPlugin();
         mPluginContext = mPluginFactory.createPluginContext();
         if (mPlugin == null || mPluginContext == null) {
@@ -171,7 +172,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
      *
      * This will free the associated memory if there are not other references.
      */
-    public void unloadPlugin() {
+    public synchronized void unloadPlugin() {
         if (mPlugin == null) {
             logDebug("Unload request when already unloaded");
             return;

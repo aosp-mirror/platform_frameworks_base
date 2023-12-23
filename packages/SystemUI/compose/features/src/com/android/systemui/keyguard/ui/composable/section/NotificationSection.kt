@@ -16,76 +16,25 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
-import android.view.View
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.viewinterop.AndroidView
-import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
-import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
-import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import com.android.systemui.notifications.ui.composable.NotificationStack
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 
 class NotificationSection
 @Inject
 constructor(
-    private val rootViewModel: KeyguardRootViewModel,
-    private val sharedNotificationContainer: SharedNotificationContainer,
-    private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
-    private val controller: NotificationStackScrollLayoutController,
-    private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
-    @Main private val dispatcher: CoroutineDispatcher,
-    private val sceneContainerFlags: SceneContainerFlags,
+    private val viewModel: NotificationsPlaceholderViewModel,
 ) {
     @Composable
     fun SceneScope.Notifications(modifier: Modifier = Modifier) {
-        MovableElement(
-            key = NotificationsElementKey,
+        NotificationStack(
+            viewModel = viewModel,
+            isScrimVisible = false,
             modifier = modifier,
-        ) {
-            val (bounds, onBoundsChanged) = remember { mutableStateOf<Pair<Float, Float>?>(null) }
-            LaunchedEffect(bounds) {
-                bounds?.let {
-                    rootViewModel.onNotificationContainerBoundsChanged(bounds.first, bounds.second)
-                }
-            }
-
-            AndroidView(
-                factory = { context ->
-                    View(context, null).apply {
-                        id = R.id.nssl_placeholder
-                        SharedNotificationContainerBinder.bind(
-                            view = sharedNotificationContainer,
-                            viewModel = sharedNotificationContainerViewModel,
-                            sceneContainerFlags = sceneContainerFlags,
-                            controller = controller,
-                            notificationStackSizeCalculator = notificationStackSizeCalculator,
-                            mainImmediateDispatcher = dispatcher,
-                        )
-                    }
-                },
-                modifier =
-                    modifier.onPlaced {
-                        val positionInRoot = it.positionInWindow()
-                        val size = it.size
-                        onBoundsChanged(positionInRoot.y to positionInRoot.y + size.height)
-                    },
-            )
-        }
+        )
     }
 }
-
-private val NotificationsElementKey = ElementKey("Notifications")

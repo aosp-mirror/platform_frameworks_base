@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.app.ForegroundServiceDelegationOptions;
 import android.media.MediaController2;
 import android.media.Session2CommandGroup;
 import android.media.Session2Token;
@@ -86,6 +87,12 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     @Override
     public int getUserId() {
         return UserHandle.getUserHandleForUid(mSessionToken.getUid()).getIdentifier();
+    }
+
+    @Override
+    public ForegroundServiceDelegationOptions getForegroundServiceDelegationOptions() {
+        // TODO: Implement when MediaSession2 knows about its owner pid.
+        return null;
     }
 
     @Override
@@ -217,7 +224,8 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
             synchronized (mLock) {
                 service = mService;
             }
-            service.onSessionPlaybackStateChanged(MediaSession2Record.this, playbackActive);
+            service.onSessionPlaybackStateChanged(
+                    MediaSession2Record.this, playbackActive, /* playbackState= */ null);
         }
     }
 }

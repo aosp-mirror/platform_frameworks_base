@@ -602,7 +602,7 @@ public class AppProfiler {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case COLLECT_PSS_BG_MSG:
-                    if (!Flags.removeAppProfilerPssCollection()) {
+                    if (isProfilingPss()) {
                         collectPssInBackground();
                     } else {
                         collectRssInBackground();
@@ -746,6 +746,11 @@ public class AppProfiler {
                 }
             }
         } while (true);
+    }
+
+    boolean isProfilingPss() {
+        return !Flags.removeAppProfilerPssCollection()
+                || mService.mConstants.mForceEnablePssProfiling;
     }
 
     // This method is analogous to collectPssInBackground() and is intended to be used as a

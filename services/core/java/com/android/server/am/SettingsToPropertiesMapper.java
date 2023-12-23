@@ -179,6 +179,7 @@ public class SettingsToPropertiesMapper {
         "text",
         "threadnetwork",
         "tv_system_ui",
+        "usb",
         "vibrator",
         "virtual_devices",
         "wallet_integration",

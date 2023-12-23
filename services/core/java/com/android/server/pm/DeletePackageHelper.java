@@ -829,6 +829,9 @@ final class DeletePackageHelper {
                         int returnCodeOfChild;
                         for (int childId : childUserIds) {
                             if (childId == userId) continue;
+                            if (mUserManagerInternal.getProfileParentId(childId) != userId) {
+                                continue;
+                            }
 
                             // If package is not present in child then don't attempt to delete.
                             if (!packageState.getUserStateOrDefault(childId).isInstalled()) {
