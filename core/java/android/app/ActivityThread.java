@@ -211,6 +211,7 @@ import android.view.contentcapture.IContentCaptureOptionsCallback;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationSpec;
 import android.webkit.WebView;
+import android.window.ActivityWindowInfo;
 import android.window.ITaskFragmentOrganizer;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
@@ -603,6 +604,9 @@ public final class ActivityThread extends ClientTransactionHandler
         boolean hideForNow;
         Configuration createdConfig;
         Configuration overrideConfig;
+        @NonNull
+        private ActivityWindowInfo mActivityWindowInfo;
+
         // Used for consolidating configs before sending on to Activity.
         private final Configuration tmpConfig = new Configuration();
         // Callback used for updating activity override config and camera compat control state.
@@ -670,7 +674,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 List<ReferrerIntent> pendingNewIntents, SceneTransitionInfo sceneTransitionInfo,
                 boolean isForward, ProfilerInfo profilerInfo, ClientTransactionHandler client,
                 IBinder assistToken, IBinder shareableActivityToken, boolean launchedFromBubble,
-                IBinder taskFragmentToken, IBinder initialCallerInfoAccessToken) {
+                IBinder taskFragmentToken, IBinder initialCallerInfoAccessToken,
+                ActivityWindowInfo activityWindowInfo) {
             this.token = token;
             this.assistToken = assistToken;
             this.shareableActivityToken = shareableActivityToken;
@@ -691,6 +696,7 @@ public final class ActivityThread extends ClientTransactionHandler
             mSceneTransitionInfo = sceneTransitionInfo;
             mLaunchedFromBubble = launchedFromBubble;
             mTaskFragmentToken = taskFragmentToken;
+            mActivityWindowInfo = activityWindowInfo;
             init();
         }
 
@@ -777,6 +783,11 @@ public final class ActivityThread extends ClientTransactionHandler
 
         public boolean isVisibleFromServer() {
             return activity != null && activity.mVisibleFromServer;
+        }
+
+        @NonNull
+        public ActivityWindowInfo getActivityWindowInfo() {
+            return mActivityWindowInfo;
         }
 
         public String toString() {
