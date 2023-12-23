@@ -89,8 +89,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int interceptMotionBeforeQueueingNonInteractive(int displayId, long whenNanos,
-            int policyFlags) {
+    public int interceptMotionBeforeQueueingNonInteractive(int displayId, int source, int action,
+            long whenNanos, int policyFlags) {
         return 0;
     }
 
