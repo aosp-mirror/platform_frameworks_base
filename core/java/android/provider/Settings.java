@@ -19638,6 +19638,15 @@ public final class Settings {
              */
             public static final String WEAR_POWER_ANOMALY_SERVICE_ENABLED =
                     "wear_power_anomaly_service_enabled";
+
+            /**
+             * A boolean that tracks whether Wrist Detection Auto-Locking is enabled.
+             *
+             * @hide
+             */
+            @Readable
+            public static final String WRIST_DETECTION_AUTO_LOCKING_ENABLED =
+                    "wear_wrist_detection_auto_locking_enabled";
         }
     }
 

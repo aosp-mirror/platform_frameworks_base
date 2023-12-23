@@ -25,7 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.v2.model.installstagedata.InstallInstalling;
+import com.android.packageinstaller.v2.model.InstallInstalling;
 
 /**
  * Dialog to show when an install is in progress.
