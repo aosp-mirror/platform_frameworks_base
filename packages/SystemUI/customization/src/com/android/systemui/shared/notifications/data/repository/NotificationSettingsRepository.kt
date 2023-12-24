@@ -47,7 +47,7 @@ class NotificationSettingsRepository(
 
     suspend fun setShowNotificationsOnLockscreenEnabled(enabled: Boolean) {
         withContext(backgroundDispatcher) {
-            secureSettingsRepository.set(
+            secureSettingsRepository.setInt(
                 name = Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
                 value = if (enabled) 1 else 0,
             )

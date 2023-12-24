@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.uninstallstagedata;
+package com.android.packageinstaller.v2.ui
 
-public class UninstallReady extends UninstallStage {
-
-    private final int mStage = UninstallStage.STAGE_READY;
-
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
+interface UninstallActionListener {
+    fun onPositiveResponse(keepData: Boolean)
+    fun onNegativeResponse()
 }

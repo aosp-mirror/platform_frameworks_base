@@ -3265,7 +3265,7 @@
     <!--- Title of the dialog appearing when an external display is connected, asking whether to start mirroring [CHAR LIMIT=NONE]-->
     <string name="connected_display_dialog_start_mirroring">Mirror to external display?</string>
     <!--- Body of the mirroring dialog, shown when dual display is enabled. This signals that enabling mirroring will stop concurrent displays on a foldable device. [CHAR LIMIT=NONE]-->
-    <string name="connected_display_dialog_dual_display_stop_warning">Any dual screen activity currently running will be stopped</string>
+    <string name="connected_display_dialog_dual_display_stop_warning">Your inner display will be mirrored. Your front display will be turned off.</string>
     <!--- Label of the "enable display" button of the dialog appearing when an external display is connected [CHAR LIMIT=NONE]-->
     <string name="mirror_display">Mirror display</string>
     <!--- Label of the dismiss button of the dialog appearing when an external display is connected [CHAR LIMIT=NONE]-->

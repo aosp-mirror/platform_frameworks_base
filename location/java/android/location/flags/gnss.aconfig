@@ -27,3 +27,10 @@ flag {
     description: "Flag for releasing SUPL connection on timeout"
     bug: "315024652"
 }
+
+flag {
+    name: "location_validation"
+    namespace: "location"
+    description: "Flag for location validation"
+    bug: "314328533"
+}

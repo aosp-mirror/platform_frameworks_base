@@ -40,13 +40,13 @@ class MenuListViewTouchHandler implements RecyclerView.OnItemTouchListener {
     private final PointF mMenuTranslationDown = new PointF();
     private boolean mIsDragging = false;
     private float mTouchSlop;
-    private final DismissAnimationController mDismissAnimationController;
+    private final DragToInteractAnimationController mDragToInteractAnimationController;
     private Optional<Runnable> mOnActionDownEnd = Optional.empty();
 
     MenuListViewTouchHandler(MenuAnimationController menuAnimationController,
-            DismissAnimationController dismissAnimationController) {
+            DragToInteractAnimationController dragToInteractAnimationController) {
         mMenuAnimationController = menuAnimationController;
-        mDismissAnimationController = dismissAnimationController;
+        mDragToInteractAnimationController = dragToInteractAnimationController;
     }
 
     @Override
@@ -67,7 +67,7 @@ class MenuListViewTouchHandler implements RecyclerView.OnItemTouchListener {
                 mMenuTranslationDown.set(menuView.getTranslationX(), menuView.getTranslationY());
 
                 mMenuAnimationController.cancelAnimations();
-                mDismissAnimationController.maybeConsumeDownMotionEvent(motionEvent);
+                mDragToInteractAnimationController.maybeConsumeDownMotionEvent(motionEvent);
 
                 mOnActionDownEnd.ifPresent(Runnable::run);
                 break;
@@ -78,9 +78,10 @@ class MenuListViewTouchHandler implements RecyclerView.OnItemTouchListener {
                         mMenuAnimationController.onDraggingStart();
                     }
 
-                    mDismissAnimationController.showDismissView(/* show= */ true);
+                    mDragToInteractAnimationController.showDismissView(/* show= */ true);
 
-                    if (!mDismissAnimationController.maybeConsumeMoveMotionEvent(motionEvent)) {
+                    if (!mDragToInteractAnimationController.maybeConsumeMoveMotionEvent(
+                            motionEvent)) {
                         mMenuAnimationController.moveToPositionX(mMenuTranslationDown.x + dx);
                         mMenuAnimationController.moveToPositionYIfNeeded(
                                 mMenuTranslationDown.y + dy);
@@ -94,17 +95,18 @@ class MenuListViewTouchHandler implements RecyclerView.OnItemTouchListener {
                     mIsDragging = false;
 
                     if (mMenuAnimationController.maybeMoveToEdgeAndHide(endX)) {
-                        mDismissAnimationController.showDismissView(/* show= */ false);
+                        mDragToInteractAnimationController.showDismissView(/* show= */ false);
                         mMenuAnimationController.fadeOutIfEnabled();
 
                         return true;
                     }
 
-                    if (!mDismissAnimationController.maybeConsumeUpMotionEvent(motionEvent)) {
+                    if (!mDragToInteractAnimationController.maybeConsumeUpMotionEvent(
+                            motionEvent)) {
                         mVelocityTracker.computeCurrentVelocity(VELOCITY_UNIT_SECONDS);
                         mMenuAnimationController.flingMenuThenSpringToEdge(endX,
                                 mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
-                        mDismissAnimationController.showDismissView(/* show= */ false);
+                        mDragToInteractAnimationController.showDismissView(/* show= */ false);
                     }
 
                     // Avoid triggering the listener of the item.

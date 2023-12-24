@@ -15021,6 +15021,16 @@ public final class Settings {
                 "foreground_service_starts_logging_enabled";
 
         /**
+         * Describes whether AM's AppProfiler should collect PSS even if RSS is the default. This
+         * can be set by a user in developer settings.
+         * Default: 0
+         * @hide
+         */
+        @Readable
+        public static final String FORCE_ENABLE_PSS_PROFILING =
+                "force_enable_pss_profiling";
+
+        /**
          * @hide
          * @see com.android.server.appbinding.AppBindingConstants
          */
@@ -19628,6 +19638,15 @@ public final class Settings {
              */
             public static final String WEAR_POWER_ANOMALY_SERVICE_ENABLED =
                     "wear_power_anomaly_service_enabled";
+
+            /**
+             * A boolean that tracks whether Wrist Detection Auto-Locking is enabled.
+             *
+             * @hide
+             */
+            @Readable
+            public static final String WRIST_DETECTION_AUTO_LOCKING_ENABLED =
+                    "wear_wrist_detection_auto_locking_enabled";
         }
     }
 

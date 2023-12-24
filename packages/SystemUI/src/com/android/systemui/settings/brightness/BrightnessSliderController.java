@@ -227,7 +227,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
                 mListener.onChanged(mTracking, progress, false);
                 SeekableSliderEventProducer eventProducer =
                         mBrightnessSliderHapticPlugin.getSeekableSliderEventProducer();
-                if (eventProducer != null) {
+                if (eventProducer != null && fromUser) {
                     eventProducer.onProgressChanged(seekBar, progress, fromUser);
                 }
             }

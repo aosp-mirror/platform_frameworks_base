@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.installstagedata;
+package com.android.packageinstaller.v2.ui
 
-public abstract class InstallStage {
+import android.content.Intent
 
-    public static final int STAGE_DEFAULT = -1;
-    public static final int STAGE_ABORTED = 0;
-    public static final int STAGE_STAGING = 1;
-    public static final int STAGE_READY = 2;
-    public static final int STAGE_USER_ACTION_REQUIRED = 3;
-    public static final int STAGE_INSTALLING = 4;
-    public static final int STAGE_SUCCESS = 5;
-    public static final int STAGE_FAILED = 6;
+interface InstallActionListener {
+    /**
+     * Method to handle a positive response from the user.
+     */
+    fun onPositiveResponse(reasonCode: Int)
 
     /**
-     * @return the integer value representing current install stage.
+     * Method to dispatch intent for toggling "install from unknown sources" setting for a package.
      */
-    public abstract int getStageCode();
+    fun sendUnknownAppsIntent(sourcePackageName: String)
+
+    /**
+     * Method to handle a negative response from the user.
+     */
+    fun onNegativeResponse(stageCode: Int)
+
+    /**
+     * Launch the intent to open the newly installed / updated app.
+     */
+    fun openInstalledApp(intent: Intent?)
 }
