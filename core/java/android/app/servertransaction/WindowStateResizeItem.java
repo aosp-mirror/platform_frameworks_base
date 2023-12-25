@@ -22,7 +22,9 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.MergedConfiguration;
@@ -59,6 +61,13 @@ public class WindowStateResizeItem extends ClientTransactionItem {
             // Should be a local call.
             throw new RuntimeException(e);
         }
+    }
+
+    @Nullable
+    @Override
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
+        // WindowStateResizeItem may update the global config with #mConfiguration.
+        return ActivityThread.currentApplication();
     }
 
     // ObjectPoolItem implementation
