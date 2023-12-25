@@ -10059,7 +10059,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     pendingResults, pendingNewIntents, configChangeFlags,
                     new MergedConfiguration(getProcessGlobalConfiguration(),
                             getMergedOverrideConfiguration()),
-                    preserveWindow);
+                    preserveWindow, getActivityWindowInfo());
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
                 lifecycleItem = ResumeActivityItem.obtain(token, isTransitionForward(),

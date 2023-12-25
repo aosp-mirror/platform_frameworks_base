@@ -151,7 +151,8 @@ public class ObjectPoolTests {
     @Test
     public void testRecycleActivityRelaunchItem() {
         testRecycle(() -> ActivityRelaunchItem.obtain(mActivityToken,
-                resultInfoList(), referrerIntentList(), 42, mergedConfig(), true));
+                resultInfoList(), referrerIntentList(), 42, mergedConfig(), true,
+                new ActivityWindowInfo()));
     }
 
     @Test
