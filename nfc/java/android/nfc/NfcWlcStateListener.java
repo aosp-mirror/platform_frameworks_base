@@ -98,8 +98,10 @@ public class NfcWlcStateListener extends INfcWlcStateListener.Stub {
             Executor executor = mListenerMap.get(listener);
             final long identity = Binder.clearCallingIdentity();
             try {
-                executor.execute(() -> listener.onWlcStateChanged(
-                        mCurrentState));
+                if (Flags.enableNfcCharging()) {
+                    executor.execute(() -> listener.onWlcStateChanged(
+                            mCurrentState));
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
