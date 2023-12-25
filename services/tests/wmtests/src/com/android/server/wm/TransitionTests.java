@@ -1495,8 +1495,7 @@ public class TransitionTests extends WindowTestsBase {
         verify(taskSnapshotController, times(0)).recordSnapshot(eq(task1));
 
         enteringAnimReports.clear();
-        doCallRealMethod().when(mWm.mRoot).ensureActivitiesVisible(any(),
-                anyInt(), anyBoolean(), anyBoolean());
+        doCallRealMethod().when(mWm.mRoot).ensureActivitiesVisible(any(), anyBoolean());
         final boolean[] wasInFinishingTransition = { false };
         controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener() {
             @Override

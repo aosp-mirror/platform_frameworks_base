@@ -73,7 +73,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_DEFAULT;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
@@ -1860,8 +1859,7 @@ class ActivityStarter {
                 // over is removed.
                 // Passing {@code null} as the start parameter ensures all activities are made
                 // visible.
-                mTargetRootTask.ensureActivitiesVisible(null /* starting */,
-                        0 /* configChanges */, !PRESERVE_WINDOWS);
+                mTargetRootTask.ensureActivitiesVisible(null /* starting */);
                 // Go ahead and tell window manager to execute app transition for this activity
                 // since the app transition will not be triggered through the resume channel.
                 mTargetRootTask.mDisplayContent.executeAppTransition();
@@ -2868,7 +2866,7 @@ class ActivityStarter {
                 mRootWindowContainer.resumeFocusedTasksTopActivities(mTargetRootTask, null,
                         mOptions, mTransientLaunch);
             } else {
-                mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+                mRootWindowContainer.ensureActivitiesVisible();
             }
         } else {
             ActivityOptions.abort(mOptions);

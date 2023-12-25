@@ -57,7 +57,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TRANSITION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
@@ -950,8 +949,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         }
 
         if (shouldSleep) {
-            updateActivityVisibilities(null /* starting */, 0 /* configChanges */,
-                    !PRESERVE_WINDOWS, true /* notifyClients */);
+            updateActivityVisibilities(null /* starting */, true /* notifyClients */);
         }
 
         return shouldSleep;
@@ -1218,12 +1216,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return top != null && top.mLaunchTaskBehind;
     }
 
-    final void updateActivityVisibilities(@Nullable ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
+    final void updateActivityVisibilities(@Nullable ActivityRecord starting,
+            boolean notifyClients) {
         mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
-            mEnsureActivitiesVisibleHelper.process(
-                    starting, configChanges, preserveWindows, notifyClients);
+            mEnsureActivitiesVisibleHelper.process(starting, notifyClients);
         } finally {
             mTaskSupervisor.endActivityVisibilityUpdate();
         }
@@ -1249,8 +1246,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (mResumedActivity == next && next.isState(RESUMED)
                 && taskDisplayArea.allResumedActivitiesComplete()) {
             // Ensure the visibility gets updated before execute app transition.
-            taskDisplayArea.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                    false /* preserveWindows */, true /* notifyClients */);
+            taskDisplayArea.ensureActivitiesVisible(null /* starting */, true /* notifyClients */);
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             executeAppTransition(options);
@@ -1907,7 +1903,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             prev.resumeKeyDispatchingLocked();
         }
 
-        mRootWindowContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
+        mRootWindowContainer.ensureActivitiesVisible(resuming);
 
         // Notify when the task stack has changed, but only if visibilities changed (not just
         // focus). Also if there is an active root pinned task - we always want to notify it about

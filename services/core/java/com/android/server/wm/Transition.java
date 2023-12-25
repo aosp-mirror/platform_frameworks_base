@@ -1136,8 +1136,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // The transient hide tasks could be occluded now, e.g. returning to home. So trigger
             // the update to make the activities in the tasks invisible-requested, then the next
             // step can continue to commit the visibility.
-            mController.mAtm.mRootWindowContainer.ensureActivitiesVisible(null /* starting */,
-                    0 /* configChanges */, true /* preserveWindows */);
+            mController.mAtm.mRootWindowContainer.ensureActivitiesVisible();
             // Record all the now-hiding activities so that they are committed. Just use
             // mParticipants because we can avoid a new list this way.
             for (int i = 0; i < mTransientHideTasks.size(); ++i) {
@@ -2863,8 +2862,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * check whether to deliver the new configuration to clients.
      */
     @Nullable
-    ArrayList<ActivityRecord> applyDisplayChangeIfNeeded() {
-        ArrayList<ActivityRecord> activitiesMayChange = null;
+    void applyDisplayChangeIfNeeded(@NonNull ArraySet<WindowContainer<?>> activitiesMayChange) {
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WindowContainer<?> wc = mParticipants.valueAt(i);
             final DisplayContent dc = wc.asDisplayContent();
@@ -2881,18 +2879,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // If the update is deferred, sendNewConfiguration won't deliver new configuration to
             // clients, then it is the caller's responsibility to deliver the changes.
             if (mController.mAtm.mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
-                if (activitiesMayChange == null) {
-                    activitiesMayChange = new ArrayList<>();
-                }
-                final ArrayList<ActivityRecord> visibleActivities = activitiesMayChange;
                 dc.forAllActivities(r -> {
                     if (r.isVisibleRequested()) {
-                        visibleActivities.add(r);
+                        activitiesMayChange.add(r);
                     }
                 });
             }
         }
-        return activitiesMayChange;
     }
 
     boolean getLegacyIsReady() {

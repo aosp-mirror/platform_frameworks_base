@@ -989,7 +989,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             if (packageName.equals(r.packageName)
                     && r.applyAppSpecificConfig(nightMode, localesOverride, gender)
                     && r.isVisibleRequested()) {
-                r.ensureActivityConfiguration(0 /* globalChanges */, true /* preserveWindow */);
+                r.ensureActivityConfiguration();
             }
         }
     }
@@ -1723,7 +1723,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             overrideConfig.assetsSeq = assetSeq;
             r.onRequestedOverrideConfigurationChanged(overrideConfig);
             if (r.isVisibleRequested()) {
-                r.ensureActivityConfiguration(0, true);
+                r.ensureActivityConfiguration();
             }
         }
     }
