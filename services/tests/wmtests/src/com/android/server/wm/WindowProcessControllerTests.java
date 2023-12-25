@@ -306,10 +306,12 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
     @Test
     public void testCachedStateConfigurationChange() throws RemoteException {
-        doNothing().when(mClientLifecycleManager).scheduleTransactionItemUnlocked(any(), any());
+        doNothing().when(mClientLifecycleManager).scheduleTransactionItemNow(any(), any());
         final IApplicationThread thread = mWpc.getThread();
         final Configuration newConfig = new Configuration(mWpc.getConfiguration());
         newConfig.densityDpi += 100;
+        mWpc.mWindowSession = getTestSession();
+        mWpc.mWindowSession.onWindowAdded(mock(WindowState.class));
         // Non-cached state will send the change directly.
         mWpc.setReportedProcState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
         clearInvocations(mClientLifecycleManager);
@@ -322,13 +324,13 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         newConfig.densityDpi += 100;
         mWpc.onConfigurationChanged(newConfig);
         verify(mClientLifecycleManager, never()).scheduleTransactionItem(eq(thread), any());
-        verify(mClientLifecycleManager, never()).scheduleTransactionItemUnlocked(eq(thread), any());
+        verify(mClientLifecycleManager, never()).scheduleTransactionItemNow(eq(thread), any());
 
         // Cached -> non-cached will send the previous deferred config immediately.
         mWpc.setReportedProcState(ActivityManager.PROCESS_STATE_RECEIVER);
         final ArgumentCaptor<ConfigurationChangeItem> captor =
                 ArgumentCaptor.forClass(ConfigurationChangeItem.class);
-        verify(mClientLifecycleManager).scheduleTransactionItemUnlocked(
+        verify(mClientLifecycleManager).scheduleTransactionItemNow(
                 eq(thread), captor.capture());
         final ClientTransactionHandler client = mock(ClientTransactionHandler.class);
         captor.getValue().preExecute(client);

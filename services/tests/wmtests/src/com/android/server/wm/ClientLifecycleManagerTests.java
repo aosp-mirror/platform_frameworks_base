@@ -172,7 +172,7 @@ public class ClientLifecycleManagerTests {
     @Test
     public void testScheduleTransactionItemUnlocked() throws RemoteException {
         // Use non binder client to get non-recycled ClientTransaction.
-        mLifecycleManager.scheduleTransactionItemUnlocked(mNonBinderClient, mTransactionItem);
+        mLifecycleManager.scheduleTransactionItemNow(mNonBinderClient, mTransactionItem);
 
         // Dispatch immediately.
         assertTrue(mLifecycleManager.mPendingTransactions.isEmpty());
