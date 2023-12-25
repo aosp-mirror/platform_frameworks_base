@@ -3698,6 +3698,16 @@ class Task extends TaskFragment {
                 }
                 wc.assignLayer(t, layer++);
 
+                // Boost the adjacent TaskFragment for dimmer if needed.
+                final TaskFragment taskFragment = wc.asTaskFragment();
+                if (taskFragment != null && taskFragment.isEmbedded()
+                        && taskFragment.isVisibleRequested()) {
+                    final TaskFragment adjacentTf = taskFragment.getAdjacentTaskFragment();
+                    if (adjacentTf != null && adjacentTf.shouldBoostDimmer()) {
+                        adjacentTf.assignLayer(t, layer++);
+                    }
+                }
+
                 // Place the decor surface just above the owner TaskFragment.
                 if (mDecorSurfaceContainer != null && !decorSurfacePlaced
                         && wc == mDecorSurfaceContainer.mOwnerTaskFragment) {

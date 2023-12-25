@@ -1797,7 +1797,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Don't do layout here, the window must call
             // relayout to be displayed, so we'll do it there.
-            win.getParent().assignChildLayers();
+            if (win.mActivityRecord != null && win.mActivityRecord.isEmbedded()) {
+                // Assign child layers from the parent Task if the Activity is embedded.
+                win.getTask().assignChildLayers();
+            } else {
+                win.getParent().assignChildLayers();
+            }
 
             if (focusChanged) {
                 displayContent.getInputMonitor().setInputFocusLw(displayContent.mCurrentFocus,

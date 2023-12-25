@@ -43,6 +43,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
+import static com.android.server.wm.TaskFragment.EMBEDDED_DIM_AREA_PARENT_TASK;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -1617,6 +1618,29 @@ public class TaskTests extends WindowTestsBase {
         assertFalse(task.isDragResizing());
         task.setDragResizing(false);
         assertFalse(task.isDragResizing());
+    }
+
+    @Test
+    public void testBoostDimmingTaskFragmentOnTask() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment primary = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment secondary = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+
+        primary.mVisibleRequested = true;
+        secondary.mVisibleRequested = true;
+        primary.setAdjacentTaskFragment(secondary);
+        secondary.setAdjacentTaskFragment(primary);
+        primary.setEmbeddedDimArea(EMBEDDED_DIM_AREA_PARENT_TASK);
+        doReturn(true).when(primary).shouldBoostDimmer();
+        task.assignChildLayers(t);
+
+        // The layers are initially assigned via the hierarchy, but the primary will be boosted and
+        // assigned again to above of the secondary.
+        verify(primary).assignLayer(t, 0);
+        verify(secondary).assignLayer(t, 1);
+        verify(primary).assignLayer(t, 2);
     }
 
     @Test
