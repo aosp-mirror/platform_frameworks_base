@@ -2030,10 +2030,10 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Start sequence (infinite) type of flash notification. Use
-     * {@code Context.getOpPackageName()} as the identifier of this flash notification.
+     * Start sequence (infinite) type of flash notification. Use {@code Context} to retrieve the
+     * package name as the identifier of this flash notification.
      * The notification can be cancelled later by calling {@link #stopFlashNotificationSequence}
-     * with same {@code Context.getOpPackageName()}.
+     * with same {@code Context}.
      * If the binder associated with this {@link AccessibilityManager} instance dies then the
      * sequence will stop automatically. It is strongly recommended to call
      * {@link #stopFlashNotificationSequence} within a reasonable amount of time after calling
@@ -2067,8 +2067,8 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Stop sequence (infinite) type of flash notification. The flash notification with
-     * {@code Context.getOpPackageName()} as identifier will be stopped if exist.
+     * Stop sequence (infinite) type of flash notification. The flash notification with the
+     * package name retrieved from {@code Context} as identifier will be stopped if exist.
      * It is strongly recommended to call this method within a reasonable amount of time after
      * calling {@link #startFlashNotificationSequence} method.
      *
