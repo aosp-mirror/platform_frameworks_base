@@ -1609,7 +1609,7 @@
     <string name="fingerprints" msgid="148690767172613723">"Fingeravtryck:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256-fingeravtryck"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1-fingeravtryck:"</string>
-    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Visa alla"</string>
+    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Se alla"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Välj aktivitet"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Dela med"</string>
     <string name="sending" msgid="206925243621664438">"Skickar ..."</string>

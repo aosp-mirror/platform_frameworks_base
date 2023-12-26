@@ -277,7 +277,7 @@
     <string name="notification_channel_account" msgid="6436294521740148173">"ଆକାଉଣ୍ଟର ସ୍ଥିତି"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"ଡେଭଲପରଙ୍କ ମେସେଜ୍‍"</string>
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"ଗୁରୁତ୍ଵପୂର୍ଣ୍ଣ ଡେଭେଲପର୍ ମେସେଜ୍‌ଗୁଡ଼ିକ"</string>
-    <string name="notification_channel_updates" msgid="7907863984825495278">"ଅପଡେଟ୍‍"</string>
+    <string name="notification_channel_updates" msgid="7907863984825495278">"ଅପଡେଟ କରନ୍ତୁ"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"ନେଟୱର୍କ ସ୍ଥିତି"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ନେଟୱର୍କ ଅଲର୍ଟ"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"ନେଟ୍‌ୱର୍କ ଉପଲବ୍ଧ ଅଛି"</string>
