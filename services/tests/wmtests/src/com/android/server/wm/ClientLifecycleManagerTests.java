@@ -217,6 +217,8 @@ public class ClientLifecycleManagerTests {
 
     @Test
     public void testDispatchPendingTransactions() throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
         mLifecycleManager.mPendingTransactions.put(mClientBinder, mTransaction);
 
         mLifecycleManager.dispatchPendingTransactions();
