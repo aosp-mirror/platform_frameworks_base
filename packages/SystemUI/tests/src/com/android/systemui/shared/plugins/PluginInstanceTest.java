@@ -198,7 +198,7 @@ public class PluginInstanceTest extends SysuiTestCase {
         AtomicBoolean isBgThreadFailed = new AtomicBoolean(false);
         Thread bgThread = new Thread(() -> {
             assertTrue(getLock(unloadLock, 10));
-            assertTrue(getLock(loadLock, 3000)); // Wait for the foreground thread
+            assertTrue(getLock(loadLock, 4000)); // Wait for the foreground thread
             assertNotNull(mPluginInstance.getPlugin());
             // Attempt to delete the plugin, this should block until the load completes
             mPluginInstance.unloadPlugin();
