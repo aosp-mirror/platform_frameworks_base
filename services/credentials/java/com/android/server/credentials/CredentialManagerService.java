@@ -65,7 +65,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.content.PackageMonitor;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.infra.AbstractMasterSystemService;
@@ -1204,6 +1203,9 @@ public final class CredentialManagerService
         // If the app being removed matches any of the package names from
         // this list then don't add it in the output.
         Set<String> providers = new HashSet<>();
+        if (rawProviders == null || packageName == null) {
+            return providers;
+        }
         for (String rawComponentName : rawProviders.split(":")) {
             if (TextUtils.isEmpty(rawComponentName)
                     || rawComponentName.equals("null")) {
