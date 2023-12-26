@@ -21,11 +21,13 @@ import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.BugreportManager.BugreportCallback;
 import android.os.BugreportParams;
@@ -37,7 +39,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -95,7 +96,6 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private static final long DEFAULT_BUGREPORT_SERVICE_TIMEOUT_MILLIS = 30 * 1000;
 
     private final Object mLock = new Object();
-    private final Injector mInjector;
     private final Context mContext;
     private final AppOpsManager mAppOps;
     private final TelephonyManager mTelephonyManager;
@@ -346,14 +346,6 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         AtomicFile getMappingFile() {
             return mMappingFile;
         }
-
-        UserManager getUserManager() {
-            return mContext.getSystemService(UserManager.class);
-        }
-
-        DevicePolicyManager getDevicePolicyManager() {
-            return mContext.getSystemService(DevicePolicyManager.class);
-        }
     }
 
     BugreportManagerServiceImpl(Context context) {
@@ -365,7 +357,6 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     BugreportManagerServiceImpl(Injector injector) {
-        mInjector = injector;
         mContext = injector.getContext();
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
@@ -398,7 +389,12 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         int callingUid = Binder.getCallingUid();
         enforcePermission(callingPackage, callingUid, bugreportMode
                 == BugreportParams.BUGREPORT_MODE_TELEPHONY /* checkCarrierPrivileges */);
-        ensureUserCanTakeBugReport(bugreportMode);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            ensureUserCanTakeBugReport(bugreportMode);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
 
         Slogf.i(TAG, "Starting bugreport for %s / %d", callingPackage, callingUid);
         synchronized (mLock) {
@@ -437,6 +433,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     @RequiresPermission(value = Manifest.permission.DUMP, conditional = true)
     public void retrieveBugreport(int callingUidUnused, String callingPackage, int userId,
             FileDescriptor bugreportFd, String bugreportFile,
+
             boolean keepBugreportOnRetrievalUnused, IDumpstateListener listener) {
         int callingUid = Binder.getCallingUid();
         enforcePermission(callingPackage, callingUid, false);
@@ -568,48 +565,54 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     }
 
     /**
-     * Validates that the calling user is an admin user or, when bugreport is requested remotely
-     * that the user is an affiliated user.
+     * Validates that the current user is an admin user or, when bugreport is requested remotely
+     * that the current user is an affiliated user.
      *
-     * @throws IllegalArgumentException if the calling user is not an admin user
+     * @throws IllegalArgumentException if the current user is not an admin user
      */
     private void ensureUserCanTakeBugReport(int bugreportMode) {
-        // Get the calling userId before clearing the caller identity.
-        int callingUserId = UserHandle.getUserId(Binder.getCallingUid());
-        boolean isAdminUser = false;
-        final long identity = Binder.clearCallingIdentity();
+        UserInfo currentUser = null;
         try {
-            isAdminUser = mInjector.getUserManager().isUserAdmin(callingUserId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
+            currentUser = ActivityManager.getService().getCurrentUser();
+        } catch (RemoteException e) {
+            // Impossible to get RemoteException for an in-process call.
         }
-        if (!isAdminUser) {
+
+        if (currentUser == null) {
+            logAndThrow("There is no current user, so no bugreport can be requested.");
+        }
+
+        if (!currentUser.isAdmin()) {
             if (bugreportMode == BugreportParams.BUGREPORT_MODE_REMOTE
-                    && isUserAffiliated(callingUserId)) {
+                    && isCurrentUserAffiliated(currentUser.id)) {
                 return;
             }
-            logAndThrow(TextUtils.formatSimple("Calling user %s is not an admin user."
-                    + " Only admin users are allowed to take bugreport.", callingUserId));
+            logAndThrow(TextUtils.formatSimple("Current user %s is not an admin user."
+                    + " Only admin users are allowed to take bugreport.", currentUser.id));
         }
     }
 
     /**
-     * Returns {@code true} if the device has device owner and the specified user is affiliated
+     * Returns {@code true} if the device has device owner and the current user is affiliated
      * with the device owner.
      */
-    private boolean isUserAffiliated(int userId) {
-        DevicePolicyManager dpm = mInjector.getDevicePolicyManager();
+    private boolean isCurrentUserAffiliated(int currentUserId) {
+        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
         int deviceOwnerUid = dpm.getDeviceOwnerUserId();
         if (deviceOwnerUid == UserHandle.USER_NULL) {
             return false;
         }
 
-        if (DEBUG) {
-            Slog.d(TAG, "callingUid: " + userId + " deviceOwnerUid: " + deviceOwnerUid);
-        }
+        int callingUserId = UserHandle.getUserId(Binder.getCallingUid());
 
-        if (userId != deviceOwnerUid && !dpm.isAffiliatedUser(userId)) {
-            logAndThrow("User " + userId + " is not affiliated to the device owner.");
+        Slog.i(TAG, "callingUid: " + callingUserId + " deviceOwnerUid: " + deviceOwnerUid
+                + " currentUserId: " + currentUserId);
+
+        if (callingUserId != deviceOwnerUid) {
+            logAndThrow("Caller is not device owner on provisioned device.");
+        }
+        if (!dpm.isAffiliatedUser(currentUserId)) {
+            logAndThrow("Current user is not affiliated to the device owner.");
         }
         return true;
     }
