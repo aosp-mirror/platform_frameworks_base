@@ -270,6 +270,11 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         return source.getTaskDescription();
     }
 
+    @Override
+    protected Rect getLetterboxInsets(ActivityRecord topActivity) {
+        return topActivity.getLetterboxInsets();
+    }
+
     void getClosingTasksInner(Task task, ArraySet<Task> outClosingTasks) {
         // Since RecentsAnimation will handle task snapshot while switching apps with the
         // best capture timing (e.g. IME window capture),

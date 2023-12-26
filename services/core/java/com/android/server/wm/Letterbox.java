@@ -49,7 +49,7 @@ import java.util.function.Supplier;
  */
 public class Letterbox {
 
-    private static final Rect EMPTY_RECT = new Rect();
+    static final Rect EMPTY_RECT = new Rect();
     private static final Point ZERO_POINT = new Point(0, 0);
 
     private final Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
