@@ -131,3 +131,10 @@ flag {
     bug: "310801107"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "introduce_media_processing_type"
+    namespace: "backstage_power"
+    description: "Add a new FGS type for media processing use cases."
+    bug: "317788011"
+}
