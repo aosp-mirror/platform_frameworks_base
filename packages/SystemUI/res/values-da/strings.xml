@@ -200,7 +200,7 @@
     <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"Klik for at se alle enheder"</string>
     <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"Klik for at parre en ny enhed"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batteriniveauet er ukendt."</string>
-    <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Tilsluttet <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
+    <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Forbundet med <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Forbundet til <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Ikke tilsluttet."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
@@ -293,8 +293,8 @@
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Administrer brugere"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Udfør"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Luk"</string>
-    <string name="quick_settings_connected" msgid="3873605509184830379">"Tilsluttet"</string>
-    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Tilsluttet – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="quick_settings_connected" msgid="3873605509184830379">"Forbundet"</string>
+    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Forbundet – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Opretter forbindelse…"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Aktiverer…"</string>
@@ -330,12 +330,17 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Skærmoptagelse"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Start"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stop"</string>
-    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
-    <skip />
-    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
-    <skip />
-    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
-    <skip />
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"Optag problem"</string>
+    <string name="qs_record_issue_start" msgid="2979831312582567056">"Start"</string>
+    <string name="qs_record_issue_stop" msgid="3531747965741982657">"Stop"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Hvilken del af din enhedsoplevelse blev påvirket?"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Vælg problemtype"</string>
+    <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Skærmoptagelse"</string>
+  <string-array name="qs_record_issue_types">
+    <item msgid="2947988124014085798">"Ydeevne"</item>
+    <item msgid="1627504621139124393">"Brugerflade"</item>
+    <item msgid="8309220355268900335">"Batteri"</item>
+  </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Enhåndstilstand"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"Kontrast"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
@@ -408,12 +413,9 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Oplader • Fuldt opladet om <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Stryg mod venstre for at starte den fælles vejledning"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Åbn redigeringsværktøjet til widgets"</string>
-    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
-    <skip />
-    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
-    <skip />
-    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
-    <skip />
+    <string name="button_to_remove_widget" msgid="3948204829181214098">"Fjern"</string>
+    <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tilføj widget"</string>
+    <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Udfør"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Skift bruger"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rullemenu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apps og data i denne session slettes."</string>
@@ -867,7 +869,6 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"Tryk for at fastsætte en tidsplan for batterisparefunktionen"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktivér, når det ser ud til, at batteriet løber tør"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nej tak"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Gem SysUI-heap"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"I brug"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Apps anvender enhedens <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -1207,7 +1208,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Angiv standardapp til noter i Indstillinger"</string>
     <string name="install_app" msgid="5066668100199613936">"Installer app"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Vil du spejle til ekstern skærm?"</string>
-    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"Al aktivitet, der i øjeblikket anvender funktioner til brug af to skærme, stoppes"</string>
+    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
+    <skip />
     <string name="mirror_display" msgid="2515262008898122928">"Spejl skærm"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Luk"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Skærmen er tilsluttet"</string>
