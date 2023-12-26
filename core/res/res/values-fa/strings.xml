@@ -338,7 +338,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"نوشتاری را که تایپ می‌کنید مشاهده کند"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"اطلاعات شخصی مانند شماره کارت اعتباری و گذرواژه‌ها را لحاظ می‌کند."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"کنترل درشت‌نمایی نمایشگر"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"سطح و موقعیت بزرگ‌نمایی نمایشگر را کنترل کنید."</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"موقعیت و سطح بزرگ‌نمایی نمایشگر را کنترل کنید."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"اجرای اشاره‌ها"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"می‌توانید ضربه بزنید، انگشتتان را تند بکشید، انگشتانتان را به هم نزدیک یا از هم دور کنید و اشاره‌های دیگری اجرا کنید."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"اشاره‌های اثر انگشت"</string>
@@ -1906,8 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"آخر هفته"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"رویداد"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"خوابیدن"</string>
-    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
-    <skip />
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"تحت‌مدیریت <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"روشن"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"خاموش"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> درحال قطع کردن بعضی از صداهاست"</string>
@@ -2340,9 +2339,9 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"به برنامه همراه اجازه می‌دهد سرویس‌های پیش‌نما را از پس‌زمینه راه‌اندازی کند."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"میکروفون دردسترس است"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"میکروفون مسدود شد"</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"بازتاب دادن به نمایشگر ممکن نبود"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"قرینه‌سازی روی نمایشگر ممکن نبود"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"از کابل دیگری استفاده کنید و دوباره امتحان کنید"</string>
-    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"دستگاه بسیار گرم است و تا زمانی‌که خنک نشود نمی‌تواند محتوا را در نمایشگر بازتاب دهد."</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"دستگاه بسیار گرم است و تا زمانی‌که خنک نشود نمی‌تواند محتوا را روی نمایشگر قرینه‌سازی کند."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"‫Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏‫Dual Screen روشن است"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"‫<xliff:g id="APP_NAME">%1$s</xliff:g> از هر دو نمایشگر برای نمایش محتوا استفاده می‌کند"</string>
@@ -2366,4 +2365,5 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"کار ۳"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"آزمایش"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"عمومی"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
 </resources>

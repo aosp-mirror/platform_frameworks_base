@@ -1906,8 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Демалыс күндері"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Іс-шара"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Ұйқы режимі"</string>
-    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
-    <skip />
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> басқарады."</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Қосулы"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Өшірулі"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> кейбір дыбыстарды өшіруде"</string>
@@ -2340,8 +2339,8 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Серік қолданбаға экрандық режимдегі қызметтерді фоннан іске қосуға рұқсат беріледі."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон қолжетімді."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон блокталған."</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Дисплейге көшірмені көрсету мүмкін емес"</string>
-    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Басқа кабельмен әрекетті қайталап көріңіз."</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Экран көшірмесін көрсету мүмкін емес"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Басқа кабельмен көріңіз."</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Құрылғыңыз тым қызып кетті, сондықтан ол суымайынша, дисплейге экран көшірмесін көрсете алмайды."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen функциясы қосулы"</string>
@@ -2366,4 +2365,5 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Жұмыс 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Сынақ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Жалпы"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
 </resources>
