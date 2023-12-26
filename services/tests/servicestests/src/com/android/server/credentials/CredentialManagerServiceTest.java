@@ -53,6 +53,12 @@ public final class CredentialManagerServiceTest {
     }
 
     @Test
+    public void getStoredProviders_nullValue_success() {
+        Set<String> providers = CredentialManagerService.getStoredProviders(null, null);
+        assertThat(providers.size()).isEqualTo(0);
+    }
+
+    @Test
     public void getStoredProviders_success() {
         Set<String> providers =
                 CredentialManagerService.getStoredProviders(
