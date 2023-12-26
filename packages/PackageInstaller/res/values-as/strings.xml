@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"এই ব্যৱহাৰকাৰীয়ে অজ্ঞাত উৎসৰপৰা পোৱা এপ্‌সমূহ ইনষ্টল কৰিব নোৱাৰে"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"এই ব্যৱহাৰকাৰীজনৰ এপ্ ইনষ্টল কৰাৰ অনুমতি নাই"</string>
     <string name="ok" msgid="7871959885003339302">"ঠিক আছে"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"আৰ্কাইভ কৰক"</string>
     <string name="update_anyway" msgid="8792432341346261969">"যিকোনো প্ৰকাৰে আপডে’ট কৰক"</string>
     <string name="manage_applications" msgid="5400164782453975580">"এপ্ পৰিচালনা"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"খালী ঠাই নাই"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"আপডে’ট আনইনষ্টল কৰক"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> হৈছে তলৰ এপ্‌টোৰ এটা অংশ:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"আপুনি এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰে নেকি?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"আপোনাৰ ব্যক্তিগত ডেটা ছেভ কৰা হ’ব"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"সকলো ব্যৱহাৰকাৰীৰ বাবে এই এপ্‌টো আৰ্কাইভ কৰিবনে? আপোনাৰ ব্যক্তিগত ডেটা ছেভ কৰা হ’ব"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইলত এই এপ্‌টো আৰ্কাইভ কৰিবনে? আপোনাৰ ব্যক্তিগত ডেটা ছেভ কৰা হ’ব"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g>ৰ বাবে এই এপ্‌টো আৰ্কাইভ কৰিবনে? আপোনাৰ ব্যক্তিগত ডেটা ছেভ কৰা হ’ব"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"আপুনি আপোনাৰ ব্যক্তিগত স্পেচৰ পৰা এই এপ্‌টো আৰ্কাইভ কৰিব বিচাৰেনে? আপোনাৰ ব্যক্তিগত ডেটা ছেভ কৰা হ’ব"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"আপুনি "<b>"সকলো"</b>" ব্যৱহাৰকাৰীৰ বাবে এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰেনে? এপ্লিকেশ্বন আৰু ইয়াৰ ডেটা ডিভাইচটোত থকা "<b>"সকলো"</b>" ব্যৱহাৰকাৰীৰ পৰা আঁতৰোৱা হ\'ব৷"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"আপুনি ব্যৱহাৰকাৰীৰ <xliff:g id="USERNAME">%1$s</xliff:g> বাবে এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰেনে?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"আপুনি নিজৰ কৰ্মস্থানৰ প্ৰ’ফাইলৰ পৰা এই এপ্‌টো আনইনষ্টল কৰিব বিচাৰেনে?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"আপোনাৰ টেবলেট আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপ্‌টো ইনষ্টল কৰি এপ্‌টোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"আপোনাৰ টিভি আৰু ব্যক্তিগত ডেটা অজ্ঞাত এপৰ আক্ৰমণৰ বলি হোৱাৰ সম্ভাৱনা অধিক। আপুনি এই এপ্‌টো ইনষ্টল কৰি এপ্‌টোৰ ব্যৱহাৰৰ ফলত আপোনাৰ টিভিত হ\'ব পৰা যিকোনো ক্ষতি বা ডেটা ক্ষয়ৰ বাবে আপুনি নিজে দায়ী হ\'ব বুলি সন্মতি দিয়ে।"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ৰ ক্ল’ন"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> আৰ্কাইভ কৰিবনে?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"অব্যাহত ৰাখক"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ছেটিং"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ৱেৰ এপ্‌সমূহ ইনষ্টল/আনইনষ্টল কৰি থকা হৈছে"</string>

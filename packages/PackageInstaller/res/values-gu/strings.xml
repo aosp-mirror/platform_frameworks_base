@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"આ વપરાશકર્તા અજાણી ઍપ્લિકેશનોને ઇન્સ્ટૉલ કરી શકતા નથી"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"આ વપરાશકર્તાને ઍપ્લિકેશનો ઇન્સ્ટૉલ કરવાની મંજૂરી નથી"</string>
     <string name="ok" msgid="7871959885003339302">"ઓકે"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"આર્કાઇવ કરો"</string>
     <string name="update_anyway" msgid="8792432341346261969">"તો પણ અપડેટ કરો"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ઍપને મેનેજ કરો"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"સ્પેસ નથી"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"અપડેટ અનઇન્સ્ટૉલ કરો"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>, નીચેની ઍપ્લિકેશનનો ભાગ છે:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"શું તમે આ ઍપને અનઇન્સ્ટૉલ કરવા માંગો છો?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"શું આ ઍપને તમામ વપરાશકર્તાઓ માટે આર્કાઇવ કરીએ? તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"શું આ ઍપને તમારી ઑફિસની પ્રોફાઇલ પર આર્કાઇવ કરીએ? તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"શું આ ઍપને <xliff:g id="USERNAME">%1$s</xliff:g> માટે આર્કાઇવ કરીએ? તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"શું તમે તમારી ખાનગી સ્પેસમાંથી આ ઍપને આર્કાઇવ કરવા માગો છો? તમારો વ્યક્તિગત ડેટા સાચવવામાં આવશે"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"શું તમે "<b>"બધા"</b>" વપરાશકર્તાઓ માટે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માગો છો? ડિવાઇસ પરના "<b>"બધા"</b>" વપરાશકર્તાઓની ઍપ્લિકેશન અને તેનો ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"શું તમે <xliff:g id="USERNAME">%1$s</xliff:g> વપરાશકર્તા માટે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"શું તમે તમારી ઑફિસની પ્રોફાઇલમાંથી આ ઍપને અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"તમારું ટૅબ્લેટ અને વ્યક્તિગત ડેટા અજાણી ઍપ્લિકેશનો દ્વારા હુમલા માટે વધુ સંવેદનશીલ છે. આ ઍપ્લિકેશન ઇન્સ્ટૉલ કરીને તમે સંમત થાઓ છો કે આનો ઉપયોગ કરવાથી તમારા ટૅબ્લેટને થતી કોઈપણ હાનિ અથવા ડેટાના નુકસાન માટે તમે જવાબદાર છો."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"તમારું ટીવી અને વ્યક્તિગત ડેટા અજાણી ઍપ્લિકેશનો દ્વારા હુમલા માટે વધુ સંવેદનશીલ છે. આ ઍપ્લિકેશન ઇન્સ્ટૉલ કરીને તમે સંમત થાઓ છો કે આનો ઉપયોગ કરવાથી તમારા ટીવીને થતી કોઈપણ હાનિ અથવા ડેટાના નુકસાન માટે તમે જવાબદાર છો."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ની ક્લોન"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> આર્કાઇવ કરીએ?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"આગળ વધો"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"સેટિંગ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"એમ્બેડ ઍપ્લિકેશનો ઇન્સ્ટૉલ/અનઇન્સ્ટૉલ"</string>

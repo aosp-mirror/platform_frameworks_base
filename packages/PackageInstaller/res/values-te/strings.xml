@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ఈ వినియోగదారు తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయలేరు"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"యాప్‌లను ఇన్‌స్టాల్ చేయడానికి ఈ వినియోగదారుకు అనుమతి లేదు"</string>
     <string name="ok" msgid="7871959885003339302">"సరే"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"ఆర్కైవ్ చేయండి"</string>
     <string name="update_anyway" msgid="8792432341346261969">"ఏదేమైనా అప్‌డేట్ చేయండి"</string>
     <string name="manage_applications" msgid="5400164782453975580">"యాప్‌లను నిర్వహించండి"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ఖాళీ లేదు"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"అప్‌డేట్ అన్‌ఇన్‌స్టాల్ చేయి"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> అనేది కింది యాప్‌లో ఒక భాగం:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"మీరు ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"యూజర్‌లందరికీ ఈ యాప్‌ను ఆర్కైవ్ చేయాలా? మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"మీ వర్క్ ప్రొఫైల్‌లో ఈ యాప్‌ను ఆర్కైవ్ చేయాలా? మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g>‌కు ఈ యాప్‌ను ఆర్కైవ్ చేయాలా? మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"మీరు మీ ప్రైవేట్ స్పేస్ నుండి ఈ యాప్‌ను ఆర్కైవ్ చేయాలనుకుంటున్నారా? మీ వ్యక్తిగత డేటా సేవ్ చేయబడుతుంది"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"మీరు ఈ యాప్‌ను "<b>"అందరు"</b>" వినియోగదారులకు అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? అప్లికేషన్, దాని డేటా పరికరంలోని "<b>"అందరు"</b>" వినియోగదారుల నుండి తీసివేయబడుతుంది."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"మీరు వినియోగదారు <xliff:g id="USERNAME">%1$s</xliff:g> కోసం ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"మీ వర్క్ ప్రొఫైల్ నుండి ఈ యాప్‌ను మీరు అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"మీ టాబ్లెట్ మరియు వ్యక్తిగత డేటాపై తెలియని యాప్‌లు దాడి చేయడానికి ఎక్కువ అవకాశం ఉంది. మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయడం ద్వారా, దీనిని ఉపయోగించడం వలన మీ టాబ్లెట్‌కు ఏదైనా హాని జరిగినా లేదా డేటా కోల్పోయినా బాధ్యత మీదేనని అంగీకరిస్తున్నారు."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"మీ టీవీ మరియు వ్యక్తిగత డేటాపై తెలియని యాప్‌లు దాడి చేయడానికి ఎక్కువ అవకాశం ఉంది. మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయడం ద్వారా, దీనిని ఉపయోగించడం వలన మీ టీవీకి ఏదైనా హాని జరిగినా లేదా డేటా కోల్పోయినా బాధ్యత మీదేనని అంగీకరిస్తున్నారు."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> క్లోన్"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>‌ను ఆర్కైవ్ చేయాలా?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"కొనసాగండి"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"సెట్టింగ్‌లు"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear యాప్‌లను ఇన్‌స్టాల్/అన్‌ఇన్‌స్టాల్ చేస్తోంది"</string>

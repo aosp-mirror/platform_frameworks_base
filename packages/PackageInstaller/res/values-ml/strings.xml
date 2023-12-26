@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ഈ ഉപയോക്താവിന്, അജ്ഞാത ആപ്പുകൾ ഇൻസ്‌റ്റാൾ ചെയ്യാനാവില്ല"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ആപ്പുകൾ ഇൻ‌സ്‌റ്റാൾ ചെയ്യാൻ ഈ ഉപയോക്താവിന് അനുവാദമില്ല"</string>
     <string name="ok" msgid="7871959885003339302">"ശരി"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"ആർക്കൈവ് ചെയ്യുക"</string>
     <string name="update_anyway" msgid="8792432341346261969">"എന്തായാലും അപ്‌ഡേറ്റ് ചെയ്യുക"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ആപ്പുകൾ മാനേജ് ചെയ്യുക"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ഇടമില്ല"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"അപ്‌ഡേറ്റ്, അൺ ഇ‌ൻസ്‌റ്റാൾ ചെയ്യുക"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>, ഇനിപ്പറയുന്ന ആപ്പിന്റെ ഭാഗമാണ് :"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"ഈ ആപ്പ് അൺ ഇൻസ്‌റ്റാൾ ചെയ്യണോ?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"നിങ്ങളുടെ വ്യക്തിപരമായ ഡാറ്റ സംരക്ഷിക്കും"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഈ ആപ്പ് ആർക്കൈവ് ചെയ്യണോ? നിങ്ങളുടെ വ്യക്തിപരമായ ഡാറ്റ സംരക്ഷിക്കും"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലിൽ ഈ ആപ്പ് ആർക്കൈവ് ചെയ്യണോ? നിങ്ങളുടെ വ്യക്തിപരമായ ഡാറ്റ സംരക്ഷിക്കും"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g> എന്നയാൾക്കായി ഈ ആപ്പ് ആർക്കൈവ് ചെയ്യണോ? നിങ്ങളുടെ വ്യക്തിപരമായ ഡാറ്റ സംരക്ഷിക്കും"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"നിങ്ങളുടെ സ്വകാര്യ സ്‌പേസിൽ നിന്ന് ഈ ആപ്പ് ആർക്കൈവ് ചെയ്യണോ? നിങ്ങളുടെ വ്യക്തിപരമായ ഡാറ്റ സംരക്ഷിക്കും"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ഈ അപ്പ് "<b>"എല്ലാ"</b>" ഉപയോക്താക്കൾക്കുമായി അൺ ഇൻസ്‌റ്റാൾ ചെയ്യണോ? ഉപകരണത്തിലെ "<b>"എല്ലാ"</b>" ഉപയോക്താക്കളിൽ നിന്നും ആപ്പും അതിന്റെ ഡാറ്റയും നീക്കം ചെയ്യപ്പെടും."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിനായി ഈ ആപ്പ് അൺ ഇൻസ്‌റ്റാൾ ചെയ്യണോ?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലിൽ നിന്ന് ഈ ആപ്പ് അൺ ഇൻസ്‌റ്റാൾ ചെയ്യണോ?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ടാബ്‌ലെറ്റും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ടാബ്‌ലെറ്റിന് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ടിവിയും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ടിവിക്ക് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ക്ലോൺ ചെയ്യൽ"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ആർക്കൈവ് ചെയ്യണോ?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"തുടരുക"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ക്രമീകരണം"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear ആപ്പ് ഇൻസ്‌റ്റാൾ/അൺ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നു"</string>

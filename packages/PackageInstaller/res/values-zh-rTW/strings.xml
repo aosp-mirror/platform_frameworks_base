@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"這位使用者無法安裝不明的應用程式"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"這位使用者無法安裝應用程式"</string>
     <string name="ok" msgid="7871959885003339302">"確定"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"封存"</string>
     <string name="update_anyway" msgid="8792432341346261969">"仍要更新"</string>
     <string name="manage_applications" msgid="5400164782453975580">"管理應用程式"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"空間不足"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"解除安裝更新"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"「<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>」屬於下列應用程式："</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"要解除安裝這個應用程式嗎？"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"系統會儲存你的個人資料"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"要為所有使用者封存這個應用程式嗎？系統會儲存你的個人資料"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"要在工作資料夾封存這個應用程式嗎？系統會儲存你的個人資料"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"要為<xliff:g id="USERNAME">%1$s</xliff:g>封存這個應用程式嗎？系統會儲存你的個人資料"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"要從私人空間封存這個應用程式嗎？系統會儲存你的個人資料"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"要為"<b>"所有"</b>"使用者解除安裝這個應用程式嗎？該應用程式及其資料會從裝置上的"<b>"所有"</b>"使用者設定檔移除。"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"要為使用者 <xliff:g id="USERNAME">%1$s</xliff:g> 解除安裝這個應用程式嗎？"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"要從工作資料夾解除安裝這個應用程式嗎？"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"來歷不明的應用程式可能會損害你的平板電腦和個人資料。如因安裝及使用這個應用程式，導致你的平板電腦受損或資料遺失，請自行負責。"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"來歷不明的應用程式可能會損害你的電視和個人資料。如因安裝及使用這個應用程式，導致你的電視受損或資料遺失，請自行負責。"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」副本"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"要封存「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」嗎？"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"繼續"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"設定"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"安裝/解除安裝中的 Wear 應用程式"</string>

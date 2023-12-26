@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"このユーザーは不明なアプリをインストールできません"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"このユーザーはアプリをインストールできません"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"アーカイブ"</string>
     <string name="update_anyway" msgid="8792432341346261969">"更新する"</string>
     <string name="manage_applications" msgid="5400164782453975580">"アプリの管理"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"容量不足"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"アップデートのアンインストール"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> は次のアプリの一部です。"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"このアプリをアンインストールしますか？"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"個人データが保存されます"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"すべてのユーザーに対しこのアプリをアーカイブしますか？個人データが保存されます"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"仕事用プロファイルでこのアプリをアーカイブしますか？個人データが保存されます"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g> に対しこのアプリをアーカイブしますか？個人データが保存されます"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"プライベート スペースからこのアプリをアーカイブしますか？個人データが保存されます"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"このアプリを"<b>"すべての"</b>"ユーザーからアンインストールしますか？このアプリとそのデータはデバイスの"<b>"すべての"</b>"ユーザーから削除されます。"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> さんのアプリをアンインストールしますか？"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"このアプリを仕事用プロファイルからアンインストールしますか？"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"不明なアプリをインストールするとタブレットや個人データの侵害に対する安全性が低下します。このアプリをインストールすることで、アプリの使用により生じる可能性があるタブレットへの侵害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意することになります。"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"不明なアプリをインストールするとテレビや個人データの侵害に対する安全性が低下します。このアプリをインストールすることで、アプリの使用により生じる可能性があるテレビへの侵害やデータの損失について、ユーザーご自身が単独で責任を負うことに同意することになります。"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> のクローン"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> をアーカイブしますか？"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"次へ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"設定"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wearアプリ インストール/アンインストール"</string>
