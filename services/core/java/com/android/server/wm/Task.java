@@ -4712,6 +4712,9 @@ class Task extends TaskFragment {
                     mTransitionController.collect(topActivity);
 
                     final Task lastParentBeforePip = topActivity.getLastParentBeforePip();
+                    // Reset the activity windowing mode to match the parent.
+                    topActivity.getRequestedOverrideConfiguration()
+                            .windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
                     topActivity.reparent(lastParentBeforePip,
                             lastParentBeforePip.getChildCount() /* top */,
                             "movePinnedActivityToOriginalTask");
