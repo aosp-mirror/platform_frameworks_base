@@ -65,7 +65,6 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
@@ -571,14 +570,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mService.deferWindowLayout();
         mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
         try {
-            final ArrayList<ActivityRecord> activitiesMayChange =
-                    transition != null ? transition.applyDisplayChangeIfNeeded() : null;
-            if (activitiesMayChange != null) {
-                effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;
+            final ArraySet<WindowContainer<?>> haveConfigChanges = new ArraySet<>();
+            if (transition != null) {
+                transition.applyDisplayChangeIfNeeded(haveConfigChanges);
+                if (!haveConfigChanges.isEmpty()) {
+                    effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;
+                }
             }
             final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
             final int hopSize = hops.size();
-            final ArraySet<WindowContainer<?>> haveConfigChanges = new ArraySet<>();
             Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
                     t.getChanges().entrySet().iterator();
             while (entries.hasNext()) {
@@ -626,7 +626,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // When removing pip, make sure that onStop is sent to the app ahead of
                     // onPictureInPictureModeChanged.
                     // See also PinnedStackTests#testStopBeforeMultiWindowCallbacksOnDismiss
-                    wc.asTask().ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+                    wc.asTask().ensureActivitiesVisible(null /* starting */);
                     wc.asTask().mTaskSupervisor.processStoppingAndFinishingActivities(
                             null /* launchedActivity */, false /* processPausingActivities */,
                             "force-stop-on-removing-pip");
@@ -692,28 +692,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
                 mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
                 // Already calls ensureActivityConfig
-                mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+                mService.mRootWindowContainer.ensureActivitiesVisible();
                 mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
             } else if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
                 for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
                     haveConfigChanges.valueAt(i).forAllActivities(r -> {
-                        r.ensureActivityConfiguration(0, PRESERVE_WINDOWS);
-                        if (activitiesMayChange != null) {
-                            activitiesMayChange.remove(r);
+                        if (r.isVisibleRequested()) {
+                            r.ensureActivityConfiguration(true /* ignoreVisibility */);
                         }
                     });
-                }
-                // TODO(b/258618073): Combine with haveConfigChanges after confirming that there
-                //  is no problem to always preserve window. Currently this uses the parameters
-                //  as ATMS#ensureConfigAndVisibilityAfterUpdate.
-                if (activitiesMayChange != null) {
-                    for (int i = activitiesMayChange.size() - 1; i >= 0; --i) {
-                        final ActivityRecord ar = activitiesMayChange.get(i);
-                        if (!ar.isVisibleRequested()) continue;
-                        ar.ensureActivityConfiguration(0 /* globalChanges */,
-                                !PRESERVE_WINDOWS, true /* ignoreVisibility */,
-                                false /* isRequestedOrientationChanged */);
-                    }
                 }
             }
 

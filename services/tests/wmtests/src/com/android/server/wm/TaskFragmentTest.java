@@ -269,8 +269,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         mTaskFragment.getTask().addChild(activityBelow, 0);
 
         // Ensure the activity below is visible
-        mTaskFragment.getTask().ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */);
+        mTaskFragment.getTask().ensureActivitiesVisible(null /* starting */);
         assertEquals(true, activityBelow.isVisibleRequested());
     }
 

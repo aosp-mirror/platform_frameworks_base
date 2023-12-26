@@ -947,7 +947,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Recompute the natural configuration in the new display.
         mActivity.clearSizeCompatMode();
-        mActivity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+        mActivity.ensureActivityConfiguration();
         // Because the display cannot rotate, the portrait activity will fit the short side of
         // display with keeping portrait bounds [200, 0 - 700, 1000] in center.
         assertEquals(newDisplayBounds.height(), currentBounds.height());
@@ -4858,7 +4858,7 @@ public class SizeCompatTests extends WindowTestsBase {
         }
         // Make sure to use the provided configuration to construct the size compat fields.
         activity.clearSizeCompatMode();
-        activity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+        activity.ensureActivityConfiguration();
         // Make sure the display configuration reflects the change of activity.
         if (activity.mDisplayContent.updateOrientation()) {
             activity.mDisplayContent.sendNewConfiguration();
