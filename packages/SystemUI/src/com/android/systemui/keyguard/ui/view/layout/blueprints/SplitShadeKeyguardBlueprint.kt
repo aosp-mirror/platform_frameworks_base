@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsMod
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
+import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeMediaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeNotificationStackScrollLayoutSection
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
@@ -63,6 +64,7 @@ constructor(
     communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
     smartspaceSection: SmartspaceSection,
     clockSection: SplitShadeClockSection,
+    mediaSection: SplitShadeMediaSection,
 ) : KeyguardBlueprint {
     override val id: String = ID
 
@@ -81,6 +83,7 @@ constructor(
             aodBurnInSection,
             communalTutorialIndicatorSection,
             clockSection,
+            mediaSection,
             defaultDeviceEntrySection, // Add LAST: Intentionally has z-order above other views.
         )
 
