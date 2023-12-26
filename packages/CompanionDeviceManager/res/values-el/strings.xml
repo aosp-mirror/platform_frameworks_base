@@ -56,28 +56,18 @@
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Συσκευές σε κοντινή απόσταση"</string>
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Αλλαγή εξόδου μέσων"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Φωτογραφίες και μέσα"</string>
-    <!-- no translation found for permission_notifications (4099418516590632909) -->
-    <skip />
+    <string name="permission_notifications" msgid="4099418516590632909">"Ειδοποιήσεις"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Εφαρμογές"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Ροή"</string>
-    <!-- no translation found for permission_phone_summary (8246321093970051702) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (7545243592757693321) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (8499509535410068616) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (2840800622763086808) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (8430353935747336165) -->
-    <skip />
-    <!-- no translation found for permission_microphone_summary (4862628553869973259) -->
-    <skip />
-    <!-- no translation found for permission_nearby_devices_summary (1306752848196464817) -->
-    <skip />
-    <!-- no translation found for permission_notification_listener_access_summary (7856071768185367749) -->
-    <skip />
-    <!-- no translation found for permission_notifications_summary (2272810466047367030) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Πραγματοποίηση και διαχείριση τηλεφωνικών κλήσεων"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Ανάγνωση και εγγραφή αρχείου καταγραφής τηλεφωνικών κλήσεων"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Αποστολή και προβολή μηνυμάτων SMS"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Πρόσβαση στις επαφές σας"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Πρόσβαση στο ημερολόγιό σας"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Ηχογράφηση"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Εύρεση, σύνδεση και προσδιορισμός της σχετικής τοποθεσίας συσκευών σε κοντινή απόσταση"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Ανάγνωση όλων των ειδοποιήσεων, συμπεριλαμβανομένων πληροφοριών όπως επαφές, μηνύματα και φωτογραφίες"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Ανάγνωση όλων των ειδοποιήσεων, συμπεριλαμβανομένων πληροφοριών όπως επαφές, μηνύματα και φωτογραφίες&lt;br/&gt;• Αποστολή ειδοποιήσεων&lt;br/&gt;&lt;br/&gt;Μπορείτε να διαχειριστείτε τη δυνατότητα της εφαρμογής να διαβάζει και να στέλνει ειδοποιήσεις οποιαδήποτε στιγμή στις Ρυθμίσεις &gt; Ειδοποιήσεις."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Μεταδώστε σε ροή τις εφαρμογές του τηλεφώνου σας"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Ροή εφαρμογών και άλλων λειτουργιών του συστήματος από το τηλέφωνό σας"</string>
