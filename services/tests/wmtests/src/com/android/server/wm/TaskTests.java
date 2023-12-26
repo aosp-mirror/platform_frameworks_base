@@ -339,16 +339,14 @@ public class TaskTests extends WindowTestsBase {
         // Check visibility of occluded tasks
         doReturn(false).when(leafTask1).shouldBeVisible(any());
         doReturn(true).when(leafTask2).shouldBeVisible(any());
-        rootTask.ensureActivitiesVisible(
-                null /* starting */ , 0 /* configChanges */, false /* preserveWindows */);
+        rootTask.ensureActivitiesVisible(null /* starting */);
         assertFalse(activity1.isVisible());
         assertTrue(activity2.isVisible());
 
         // Check visibility of not occluded tasks
         doReturn(true).when(leafTask1).shouldBeVisible(any());
         doReturn(true).when(leafTask2).shouldBeVisible(any());
-        rootTask.ensureActivitiesVisible(
-                null /* starting */ , 0 /* configChanges */, false /* preserveWindows */);
+        rootTask.ensureActivitiesVisible(null /* starting */);
         assertTrue(activity1.isVisible());
         assertTrue(activity2.isVisible());
     }

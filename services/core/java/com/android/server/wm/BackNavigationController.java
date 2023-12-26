@@ -1614,7 +1614,7 @@ class BackNavigationController {
                 "Setting Activity.mLauncherTaskBehind to true. Activity=%s", activity);
         activity.mTaskSupervisor.mStoppingActivities.remove(activity);
         activity.getDisplayContent().ensureActivitiesVisible(null /* starting */,
-                0 /* configChanges */, false /* preserveWindows */, true);
+                true /* notifyClients */);
     }
 
     private static void restoreLaunchBehind(@NonNull ActivityRecord activity) {

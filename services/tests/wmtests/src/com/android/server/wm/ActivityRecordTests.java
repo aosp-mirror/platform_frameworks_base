@@ -320,7 +320,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     private void ensureActivityConfiguration(ActivityRecord activity) {
-        activity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+        activity.ensureActivityConfiguration();
     }
 
     @Test
@@ -718,7 +718,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Clear size compat.
         activity.clearSizeCompatMode();
-        activity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+        activity.ensureActivityConfiguration();
         mDisplayContent.sendNewConfiguration();
 
         // Relaunching the app should still respect the orientation request.
@@ -819,8 +819,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
             task.onConfigurationChanged(newConfig);
 
-            activity.ensureActivityConfiguration(0 /* globalChanges */,
-                    false /* preserveWindow */, true /* ignoreVisibility */);
+            activity.ensureActivityConfiguration(true /* ignoreVisibility */);
 
             final ActivityConfigurationChangeItem expected =
                     ActivityConfigurationChangeItem.obtain(activity.token,
@@ -1563,8 +1562,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         topActivity.nowVisible = true;
         topActivity.setState(RESUMED, "true");
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
-                any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
+                any() /* starting */, anyBoolean() /* notifyClients */);
         topActivity.setShowWhenLocked(true);
 
         // Verify the stack-top activity is occluded keyguard.
@@ -1624,7 +1622,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         secondActivity.finishing = true;
         secondActivity.completeFinishing("test");
         verify(secondActivity.mDisplayContent).ensureActivitiesVisible(null /* starting */,
-                0 /* configChanges */ , false /* preserveWindows */,
                 true /* notifyClients */);
 
         // Finish the first activity
@@ -1632,7 +1629,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         firstActivity.setVisibleRequested(true);
         firstActivity.completeFinishing("test");
         verify(firstActivity.mDisplayContent, times(2)).ensureActivitiesVisible(null /* starting */,
-                0 /* configChanges */ , false /* preserveWindows */,
                 true /* notifyClients */);
 
         // Remove the translucent activity and clear invocations for next test
@@ -1960,6 +1956,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         display.continueUpdateOrientationForDiffOrienLaunchingApp();
         assertTrue(display.isFixedRotationLaunchingApp(activity));
 
+        activity.stopFreezingScreen(true /* unfreezeSurfaceNow */, true /* force */);
         // Simulate the rotation has been updated to previous one, e.g. sensor updates before the
         // remote rotation is completed.
         doReturn(originalRotation).when(displayRotation).rotationForOrientation(
@@ -1970,14 +1967,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.finishFixedRotationTransform();
         final ScreenRotationAnimation rotationAnim = display.getRotationAnimation();
         assertNotNull(rotationAnim);
-        rotationAnim.setRotation(display.getPendingTransaction(), originalRotation);
 
         // Because the display doesn't rotate, the rotated activity needs to cancel the fixed
         // rotation. There should be a rotation animation to cover the change of activity.
         verify(activity).onCancelFixedRotationTransform(rotatedInfo.rotation);
         assertTrue(activity.isFreezingScreen());
         assertFalse(displayRotation.isRotatingSeamlessly());
-        assertTrue(rotationAnim.isRotating());
 
         // Simulate the remote rotation has completed and the configuration doesn't change, then
         // the rotated activity should also be restored by clearing the transform.
@@ -3697,7 +3692,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         doReturn(false).when(activity).showToCurrentUser();
         spyOn(taskFragment);
         doReturn(false).when(taskFragment).shouldBeVisible(any());
-        display.ensureActivitiesVisible(null, 0, false, false);
+        display.ensureActivitiesVisible(null /* starting */, false /* notifyClients */);
         assertFalse(activity.isVisibleRequested());
     }
 

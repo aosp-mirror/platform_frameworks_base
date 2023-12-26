@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
@@ -55,7 +57,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.dex.ArtManager;
-import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -91,6 +92,10 @@ import android.util.AndroidException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.PackageInfoCommonUtils;
+import com.android.internal.pm.parsing.PackageParser2;
+import com.android.internal.pm.parsing.PackageParserException;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DataClass;
 
@@ -817,6 +822,8 @@ public abstract class PackageManager {
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
             MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS,
+            MATCH_DIRECT_BOOT_AWARE,
+            MATCH_DIRECT_BOOT_UNAWARE,
             GET_ATTRIBUTIONS_LONG,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -3306,6 +3313,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports NFC charging.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_NFC_CHARGING)
+    public static final String FEATURE_NFC_CHARGING = "android.hardware.nfc.charging";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The Beam API is enabled on the device.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -3315,7 +3330,7 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports any
      * one of the {@link #FEATURE_NFC}, {@link #FEATURE_NFC_HOST_CARD_EMULATION},
-     * or {@link #FEATURE_NFC_HOST_CARD_EMULATION_NFCF} features.
+     * {@link #FEATURE_NFC_HOST_CARD_EMULATION_NFCF}, or {@link #FEATURE_NFC_CHARGING} features.
      *
      * @hide
      */
@@ -8620,28 +8635,56 @@ public abstract class PackageManager {
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
             @NonNull PackageInfoFlags flags) {
-        long flagsBits = flags.getValue();
-        final PackageParser parser = new PackageParser();
-        parser.setCallback(new PackageParser.CallbackImpl(this));
         final File apkFile = new File(archiveFilePath);
-        try {
-            if ((flagsBits & (MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE)) != 0) {
-                // Caller expressed an explicit opinion about what encryption
-                // aware/unaware components they want to see, so fall through and
-                // give them what they want
-            } else {
-                // Caller expressed no opinion, so match everything
-                flagsBits |= MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
-            }
 
-            PackageParser.Package pkg = parser.parsePackage(apkFile, 0, false);
-            if ((flagsBits & GET_SIGNATURES) != 0 || (flagsBits & GET_SIGNING_CERTIFICATES) != 0) {
-                PackageParser.collectCertificates(pkg, false /* skipVerify */);
-            }
-            return PackageParser.generatePackageInfo(pkg, null, (int) flagsBits, 0, 0, null,
-                    FrameworkPackageUserState.DEFAULT);
-        } catch (PackageParser.PackageParserException e) {
-            Log.w(TAG, "Failure to parse package archive", e);
+        @PackageInfoFlagsBits long flagsBits = flags.getValue();
+        if ((flagsBits & (MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE)) != 0) {
+            // Caller expressed an explicit opinion about what encryption
+            // aware/unaware components they want to see, so fall through and
+            // give them what they want
+        } else {
+            // Caller expressed no opinion, so match everything
+            flagsBits |= MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+        }
+
+        int parserFlags = 0;
+        if ((flagsBits & (GET_SIGNATURES | GET_SIGNING_CERTIFICATES)) != 0) {
+            parserFlags |= PARSE_COLLECT_CERTIFICATES;
+        }
+
+        final PackageParser2 parser2 = new PackageParser2(/*separateProcesses*/ null,
+                /*displayMetrics*/ null,/*cacher*/ null,
+                new PackageParser2.Callback() {
+                    @Override
+                    public boolean hasFeature(String feature) {
+                        return PackageManager.this.hasSystemFeature(feature);
+                    }
+
+                    @NonNull
+                    @Override
+                    public Set<String> getHiddenApiWhitelistedApps() {
+                        return Collections.emptySet();
+                    }
+
+                    @NonNull
+                    @Override
+                    public Set<String> getInstallConstraintsAllowlist() {
+                        return Collections.emptySet();
+                    }
+
+                    @Override
+                    public boolean isChangeEnabled(long changeId,
+                            @androidx.annotation.NonNull ApplicationInfo appInfo) {
+                        return false;
+                    }
+                });
+
+        try {
+            ParsedPackage pp = parser2.parsePackage(apkFile, parserFlags, false);
+
+            return PackageInfoCommonUtils.generate(pp, flagsBits, UserHandle.myUserId());
+        } catch (PackageParserException e) {
+            Log.w(TAG, "Failure to parse package archive apkFile= " +apkFile);
             return null;
         }
     }

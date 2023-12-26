@@ -20,6 +20,7 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.app.Application;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseInput;
@@ -40,6 +41,7 @@ import com.android.internal.pm.pkg.parsing.ParsingUtils;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -78,10 +80,19 @@ public class PackageParser2 implements AutoCloseable {
             displayMetrics.setToDefaults();
         }
 
-        PermissionManager permissionManager = ActivityThread.currentApplication()
-                .getSystemService(PermissionManager.class);
-        List<PermissionManager.SplitPermissionInfo> splitPermissions = permissionManager
-                .getSplitPermissions();
+        List<PermissionManager.SplitPermissionInfo> splitPermissions = null;
+
+        final Application application = ActivityThread.currentApplication();
+        if (application != null) {
+            final PermissionManager permissionManager =
+                    application.getSystemService(PermissionManager.class);
+            if (permissionManager != null) {
+                splitPermissions = permissionManager.getSplitPermissions();
+            }
+        }
+        if (splitPermissions == null) {
+            splitPermissions = new ArrayList<>();
+        }
 
         mCacher = cacher;
 
