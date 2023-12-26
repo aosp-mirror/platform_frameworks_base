@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
+import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
@@ -44,13 +45,9 @@ constructor(
     val smartspaceController: LockscreenSmartspaceController,
     val keyguardUnlockAnimationController: KeyguardUnlockAnimationController,
 ) : KeyguardSection() {
-    var smartspaceView by keyguardSmartspaceViewModel::smartspaceView
-    var weatherView by keyguardSmartspaceViewModel::weatherView
-    var dateView by keyguardSmartspaceViewModel::dateView
-
-    val smartspaceViewId = keyguardSmartspaceViewModel.smartspaceViewId
-    val weatherViewId = keyguardSmartspaceViewModel.weatherId
-    val dateViewId = keyguardSmartspaceViewModel.dateId
+    private var smartspaceView: View? = null
+    private var weatherView: View? = null
+    private var dateView: View? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!migrateClocksToBlueprint()) {
