@@ -32,7 +32,7 @@ import static android.app.servertransaction.TransactionExecutorHelper.shouldExcl
 import static android.app.servertransaction.TransactionExecutorHelper.tId;
 import static android.app.servertransaction.TransactionExecutorHelper.transactionToString;
 
-import static com.android.window.flags.Flags.syncWindowConfigUpdateFlag;
+import static com.android.window.flags.Flags.bundleClientTransactionFlag;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread.ActivityClientRecord;
@@ -183,9 +183,9 @@ public class TransactionExecutor {
         }
 
         // Can't read flag from isolated process.
-        final boolean isSyncWindowConfigUpdateFlagEnabled = !Process.isIsolated()
-                && syncWindowConfigUpdateFlag();
-        final Context configUpdatedContext = isSyncWindowConfigUpdateFlagEnabled
+        final boolean isBundleClientTransactionFlagEnabled = !Process.isIsolated()
+                && bundleClientTransactionFlag();
+        final Context configUpdatedContext = isBundleClientTransactionFlagEnabled
                 ? item.getContextToUpdate(mTransactionHandler)
                 : null;
         final Configuration preExecutedConfig = configUpdatedContext != null
