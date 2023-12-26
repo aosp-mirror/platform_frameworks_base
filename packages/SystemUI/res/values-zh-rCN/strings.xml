@@ -283,7 +283,7 @@
     <string name="quick_settings_connecting" msgid="2381969772953268809">"正在连接…"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"热点"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"正在开启…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"流量节省程序已开启"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"省流模式已开启"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# 部设备}other{# 部设备}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"手电筒"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"相机正在使用中"</string>
@@ -580,7 +580,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"不发出提示音，也不振动"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不发出提示音，也不振动；显示在对话部分的靠下位置"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"可能会响铃或振动，取决于设备设置"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"可能会响铃或振动，取决于设备设置。默认情况下，来自<xliff:g id="APP_NAME">%1$s</xliff:g>的对话会以对话泡的形式显示。"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"可能会响铃或振动，取决于设备设置。默认情况下，来自<xliff:g id="APP_NAME">%1$s</xliff:g>的对话会以消息气泡的形式显示。"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"让系统决定是否应让设备在收到此通知时发出提示音或振动"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;状态&lt;/b&gt;：已提升为“默认”"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;状态&lt;/b&gt;：已降低为“静音”"</string>
@@ -608,7 +608,7 @@
     <string name="notification_more_settings" msgid="4936228656989201793">"更多设置"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"自定义"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"显示气泡"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除对话泡"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除消息气泡"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g><xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"通知设置"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知延后选项"</string>
@@ -701,8 +701,8 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"打开“设置”"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"已连接到耳机"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"已连接到耳机"</string>
-    <string name="data_saver" msgid="3484013368530820763">"流量节省程序"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"流量节省程序已开启"</string>
+    <string name="data_saver" msgid="3484013368530820763">"省流模式"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"省流模式已开启"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"开启"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"关闭"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"不可用"</string>
