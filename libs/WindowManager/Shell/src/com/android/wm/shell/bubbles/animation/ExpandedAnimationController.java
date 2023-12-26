@@ -420,7 +420,7 @@ public class ExpandedAnimationController
             bubbleView.setTranslationY(y);
         }
 
-        final float expandedY = mPositioner.getExpandedViewYTopAligned();
+        final int expandedY = mPositioner.getExpandedViewYTopAligned();
         final boolean draggedOutEnough =
                 y > expandedY + mBubbleSizePx || y < expandedY - mBubbleSizePx;
         if (draggedOutEnough != mBubbleDraggedOutEnough) {
