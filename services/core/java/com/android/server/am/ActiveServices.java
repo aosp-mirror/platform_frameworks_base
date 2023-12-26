@@ -2118,11 +2118,6 @@ public final class ActiveServices {
                 // anyway, so we just remove the SHORT_SERVICE type.
                 foregroundServiceType &= ~FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
             }
-            if (!shouldAllowBootCompletedStart(r, foregroundServiceType)) {
-                throw new ForegroundServiceStartNotAllowedException("FGS type "
-                        + ServiceInfo.foregroundServiceTypeToLabel(foregroundServiceType)
-                        + " not allowed to start from BOOT_COMPLETED!");
-            }
 
             boolean alreadyStartedOp = false;
             boolean stopProcStatsOp = false;
@@ -2135,6 +2130,12 @@ public final class ActiveServices {
                 r.fgWaiting = false;
                 alreadyStartedOp = stopProcStatsOp = true;
                 mServiceFGAnrTimer.cancel(r);
+            }
+
+            if (!shouldAllowBootCompletedStart(r, foregroundServiceType)) {
+                throw new ForegroundServiceStartNotAllowedException("FGS type "
+                        + ServiceInfo.foregroundServiceTypeToLabel(foregroundServiceType)
+                        + " not allowed to start from BOOT_COMPLETED!");
             }
 
             final ProcessServiceRecord psr = r.app.mServices;
