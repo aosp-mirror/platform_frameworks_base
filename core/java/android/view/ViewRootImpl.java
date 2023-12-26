@@ -6954,7 +6954,11 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         private int doOnBackKeyEvent(KeyEvent keyEvent) {
-            OnBackInvokedCallback topCallback = getOnBackInvokedDispatcher().getTopCallback();
+            WindowOnBackInvokedDispatcher dispatcher = getOnBackInvokedDispatcher();
+            OnBackInvokedCallback topCallback = dispatcher.getTopCallback();
+            if (dispatcher.isDispatching()) {
+                return FINISH_NOT_HANDLED;
+            }
             if (topCallback instanceof OnBackAnimationCallback) {
                 final OnBackAnimationCallback animationCallback =
                         (OnBackAnimationCallback) topCallback;
