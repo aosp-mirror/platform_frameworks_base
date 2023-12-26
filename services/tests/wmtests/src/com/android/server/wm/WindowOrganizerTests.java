@@ -40,11 +40,11 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.server.wm.testing.Assert.assertThrows;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
+import static com.android.server.wm.testing.Assert.assertThrows;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -154,6 +154,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Before
     public void setUp() {
+        mSystemServicesTestRule.addProcess("pkgName", "procName",
+                WindowManagerService.MY_PID, WindowManagerService.MY_UID);
+
         // We defer callbacks since we need to adjust task surface visibility, but for these tests,
         // just run the callbacks synchronously
         mWm.mAtmService.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer((r) -> r.run());

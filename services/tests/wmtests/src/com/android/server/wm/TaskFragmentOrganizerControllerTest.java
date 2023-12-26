@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -74,6 +75,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -86,6 +88,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.RemoteAnimationDefinition;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
@@ -104,7 +107,10 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.window.flags.Flags;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -123,7 +129,9 @@ import java.util.List;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
-    private static final int TASK_ID = 10;
+
+    @Rule
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     private TaskFragmentOrganizerController mController;
     private WindowOrganizerController mWindowOrganizerController;
@@ -143,6 +151,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     private TaskFragmentInfo mTaskFragmentInfo;
     @Mock
     private Task mTask;
+    @Mock
+    private IApplicationThread mAppThread;
     @Captor
     private ArgumentCaptor<TaskFragmentTransaction> mTransactionCaptor;
 
@@ -178,6 +188,15 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         doReturn(new SurfaceControl()).when(mTaskFragment).getSurfaceControl();
         doReturn(mFragmentToken).when(mTaskFragment).getFragmentToken();
         doReturn(new Configuration()).when(mTaskFragmentInfo).getConfiguration();
+        doReturn(mAppThread).when(mController).getAppThread(anyInt(), anyInt());
+        doAnswer(invocation -> {
+            final ITaskFragmentOrganizer organizer =
+                    (ITaskFragmentOrganizer) invocation.getArguments()[0];
+            final TaskFragmentTransaction taskFragmentTransaction =
+                    (TaskFragmentTransaction) invocation.getArguments()[1];
+            organizer.onTransactionReady(taskFragmentTransaction);
+            return null;
+        }).when(mAppThread).scheduleTaskFragmentTransaction(any(), any());
 
         // To prevent it from calling the real server.
         doNothing().when(mOrganizer).applyTransaction(any(), anyInt(), anyBoolean());
@@ -204,12 +223,15 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testOnTaskFragmentAppeared() {
+    public void testOnTaskFragmentAppeared_throughTaskFragmentOrganizer() throws RemoteException {
+        mSetFlagsRule.disableFlags(Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+
         // No-op when the TaskFragment is not attached.
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
         verify(mOrganizer, never()).onTransactionReady(any());
+        verify(mAppThread, never()).scheduleTaskFragmentTransaction(any(), any());
 
         // Send callback when the TaskFragment is attached.
         setupMockParent(mTaskFragment, mTask);
@@ -217,6 +239,32 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
         mController.dispatchPendingEvents();
 
+        assertTaskFragmentParentInfoChangedTransaction(mTask);
+        assertTaskFragmentAppearedTransaction(false /* hasSurfaceControl */);
+        verify(mAppThread, never()).scheduleTaskFragmentTransaction(any(), any());
+    }
+
+    @Test
+    public void testOnTaskFragmentAppeared_throughApplicationThread() throws RemoteException  {
+        mSetFlagsRule.enableFlags(Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
+        // Re-register the organizer in case the flag was disabled during setup.
+        mController.unregisterOrganizer(mIOrganizer);
+        mController.registerOrganizer(mIOrganizer);
+
+        // No-op when the TaskFragment is not attached.
+        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
+
+        verify(mOrganizer, never()).onTransactionReady(any());
+        verify(mAppThread, never()).scheduleTaskFragmentTransaction(any(), any());
+
+        // Send callback when the TaskFragment is attached.
+        setupMockParent(mTaskFragment, mTask);
+
+        mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
+        mController.dispatchPendingEvents();
+
+        verify(mAppThread).scheduleTaskFragmentTransaction(eq(mIOrganizer), any());
         assertTaskFragmentParentInfoChangedTransaction(mTask);
         assertTaskFragmentAppearedTransaction(false /* hasSurfaceControl */);
     }

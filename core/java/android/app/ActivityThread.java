@@ -208,9 +208,11 @@ import android.view.contentcapture.IContentCaptureOptionsCallback;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationSpec;
 import android.webkit.WebView;
+import android.window.ITaskFragmentOrganizer;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
 import android.window.SplashScreenView;
+import android.window.TaskFragmentTransaction;
 import android.window.WindowContextInfo;
 import android.window.WindowProviderService;
 import android.window.WindowTokenClientController;
@@ -2044,6 +2046,14 @@ public final class ActivityThread extends ClientTransactionHandler
         @Override
         public void scheduleTransaction(ClientTransaction transaction) throws RemoteException {
             ActivityThread.this.scheduleTransaction(transaction);
+        }
+
+        @Override
+        public void scheduleTaskFragmentTransaction(@NonNull ITaskFragmentOrganizer organizer,
+                @NonNull TaskFragmentTransaction transaction) throws RemoteException {
+            // TODO(b/260873529): ITaskFragmentOrganizer can be cleanup to be a IBinder token
+            // after flag removal.
+            organizer.onTransactionReady(transaction);
         }
 
         @Override
