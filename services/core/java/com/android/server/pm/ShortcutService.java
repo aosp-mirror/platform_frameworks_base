@@ -1371,7 +1371,7 @@ public class ShortcutService extends IShortcutService.Stub {
     ShortcutNonPersistentUser getNonPersistentUserLocked(@UserIdInt int userId) {
         ShortcutNonPersistentUser ret = mShortcutNonPersistentUsers.get(userId);
         if (ret == null) {
-            ret = new ShortcutNonPersistentUser(this, userId);
+            ret = new ShortcutNonPersistentUser(userId);
             mShortcutNonPersistentUsers.put(userId, ret);
         }
         return ret;

@@ -67,7 +67,6 @@ final class RemovePackageHelper {
     private final PackageManagerService mPm;
     private final IncrementalManager mIncrementalManager;
     private final Installer mInstaller;
-    private final UserManagerInternal mUserManagerInternal;
     private final PermissionManagerServiceInternal mPermissionManager;
     private final SharedLibrariesImpl mSharedLibraries;
     private final AppDataHelper mAppDataHelper;
@@ -79,7 +78,6 @@ final class RemovePackageHelper {
         mPm = pm;
         mIncrementalManager = mPm.mInjector.getIncrementalManager();
         mInstaller = mPm.mInjector.getInstaller();
-        mUserManagerInternal = mPm.mInjector.getUserManagerInternal();
         mPermissionManager = mPm.mInjector.getPermissionManagerServiceInternal();
         mSharedLibraries = mPm.mInjector.getSharedLibrariesImpl();
         mAppDataHelper = appDataHelper;
