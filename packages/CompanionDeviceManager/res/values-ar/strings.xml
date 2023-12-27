@@ -54,8 +54,7 @@
     <string name="permission_microphone" msgid="2152206421428732949">"الميكروفون"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"سجلّ المكالمات"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"الأجهزة المجاورة"</string>
-    <!-- no translation found for permission_media_routing_control (5498639511586715253) -->
-    <skip />
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"تغيير جهاز إخراج الوسائط"</string>
     <string name="permission_storage" msgid="6831099350839392343">"الصور والوسائط"</string>
     <!-- no translation found for permission_notifications (4099418516590632909) -->
     <skip />
@@ -82,8 +81,7 @@
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"بث تطبيقات هاتفك"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"بثّ التطبيقات وميزات النظام الأخرى من هاتفك"</string>
-    <!-- no translation found for permission_media_routing_control_summary (2714631092321412250) -->
-    <skip />
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"يتيح لك هذا الإذن الاطّلاع على مجموعة من الأجهزة المتاحة وتحديد الجهاز المسموح له بتشغيل الصوت أو الفيديو أو بثّهما من التطبيقات الأخرى."</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"هاتف"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"جهاز لوحي"</string>
 </resources>

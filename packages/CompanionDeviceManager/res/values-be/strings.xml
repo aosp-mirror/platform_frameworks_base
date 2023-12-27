@@ -56,28 +56,18 @@
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Прылады паблізу"</string>
     <string name="permission_media_routing_control" msgid="5498639511586715253">"Змяніць прыладу вываду медыя"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Фота і медыяфайлы"</string>
-    <!-- no translation found for permission_notifications (4099418516590632909) -->
-    <skip />
+    <string name="permission_notifications" msgid="4099418516590632909">"Апавяшчэнні"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Праграмы"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Перадача плынню"</string>
-    <!-- no translation found for permission_phone_summary (8246321093970051702) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (7545243592757693321) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (8499509535410068616) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (2840800622763086808) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (8430353935747336165) -->
-    <skip />
-    <!-- no translation found for permission_microphone_summary (4862628553869973259) -->
-    <skip />
-    <!-- no translation found for permission_nearby_devices_summary (1306752848196464817) -->
-    <skip />
-    <!-- no translation found for permission_notification_listener_access_summary (7856071768185367749) -->
-    <skip />
-    <!-- no translation found for permission_notifications_summary (2272810466047367030) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Ажыццяўленне тэлефонных выклікаў і кіраванне імі"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Чытанне і запіс журнала тэлефонных выклікаў"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Адпраўка SMS-паведамленняў і іх прагляд"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Доступ да вашых кантактаў"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Доступ да вашага календара"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Запіс гуку"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Пошук прылад паблізу, падключэнне да іх і вызначэнне іх адноснага месцазнаходжання"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Чытанне ўсіх апавяшчэнняў, у тым ліку такой інфармацыі, як кантакты, паведамленні і фота"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Чытанне ўсіх апавяшчэнняў, у тым ліку такой інфармацыі, як кантакты, паведамленні і фота.&lt;br/&gt;• Адпраўка апавяшчэнняў.&lt;br/&gt;&lt;br/&gt;Дазволы гэтай праграмы на чытанне і адпраўку апавяшчэнняў можна змяніць у любы час, выбраўшы пункт меню \"Налады &gt; Апавяшчэнні\"."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Трансляцыя змесціва праграм з вашага тэлефона"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Перадача плынню змесціва праграм і іншых функцый сістэмы з вашага тэлефона"</string>
