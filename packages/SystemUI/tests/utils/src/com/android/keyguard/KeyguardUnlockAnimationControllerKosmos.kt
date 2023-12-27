@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics
+package com.android.keyguard
 
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
-val Kosmos.fpsUnlockTracker by Kosmos.Fixture { mock<FpsUnlockTracker>() }
+val Kosmos.keyguardUnlockAnimationController by
+    Kosmos.Fixture { mock<KeyguardUnlockAnimationController>() }
