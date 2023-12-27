@@ -96,8 +96,10 @@ public class PackageInfoCommonUtils {
         info.baseRevisionCode = pkg.getBaseRevisionCode();
         info.splitRevisionCodes = pkg.getSplitRevisionCodes();
         info.versionName = pkg.getVersionName();
-        info.sharedUserId = pkg.getSharedUserId();
-        info.sharedUserLabel = pkg.getSharedUserLabelResourceId();
+        if (!pkg.isLeavingSharedUser()) {
+            info.sharedUserId = pkg.getSharedUserId();
+            info.sharedUserLabel = pkg.getSharedUserLabelResourceId();
+        }
         info.applicationInfo = applicationInfo;
         info.installLocation = pkg.getInstallLocation();
         if ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
