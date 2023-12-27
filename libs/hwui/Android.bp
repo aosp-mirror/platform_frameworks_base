@@ -401,7 +401,7 @@ cc_defaults {
     ],
 
     static_libs: [
-        "libnativehelper_lazy",
+        "libnativehelper",
         "libziparchive_for_incfs",
     ],
 
@@ -619,6 +619,9 @@ cc_defaults {
             export_static_lib_headers: [
                 "libarect",
             ],
+        },
+        windows: {
+            enabled: true,
         },
     },
 }

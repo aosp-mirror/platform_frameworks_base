@@ -18,6 +18,7 @@
 
 #include <cutils/compiler.h>
 #include <jni.h>
+#include <sys/cdefs.h>
 
 __BEGIN_DECLS
 
@@ -31,5 +32,4 @@ ANDROID_API void zygote_preload_graphics();
 
 __END_DECLS
 
-
-#endif // ANDROID_GRAPHICS_JNI_RUNTIME_H
+#endif  // ANDROID_GRAPHICS_JNI_RUNTIME_H
