@@ -161,6 +161,7 @@ import androidx.test.filters.MediumTest;
 
 import com.android.internal.R;
 import com.android.server.wm.ActivityRecord.State;
+import com.android.window.flags.Flags;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -3365,7 +3366,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // to client if the app didn't request IME visible.
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
-        if (mWm.mFlags.mWindowStateResizeItemFlag) {
+        if (Flags.bundleClientTransactionFlag()) {
             verify(app2.getProcess()).scheduleClientTransactionItem(
                     isA(WindowStateResizeItem.class));
         } else {

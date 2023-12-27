@@ -50,7 +50,7 @@
       ]
     }
   ],
-  "presubmit": [
+  "postsubmit": [
     {
       "file_patterns": [
         "[^/]*(LoudnessCodec)[^/]*\\.java"

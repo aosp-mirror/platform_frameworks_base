@@ -16,7 +16,7 @@
 
 package android.app.servertransaction;
 
-import static com.android.window.flags.Flags.syncWindowConfigUpdateFlag;
+import static com.android.window.flags.Flags.bundleClientTransactionFlag;
 
 import static java.util.Objects.requireNonNull;
 
@@ -67,7 +67,7 @@ public class ClientTransactionListenerController {
      * window configuration.
      */
     public void onDisplayChanged(int displayId) {
-        if (!isSyncWindowConfigUpdateFlagEnabled()) {
+        if (!isBundleClientTransactionFlagEnabled()) {
             return;
         }
         if (ActivityThread.isSystem()) {
@@ -77,9 +77,9 @@ public class ClientTransactionListenerController {
         mDisplayManager.handleDisplayChangeFromWindowManager(displayId);
     }
 
-    /** Whether {@link #syncWindowConfigUpdateFlag} feature flag is enabled. */
-    public boolean isSyncWindowConfigUpdateFlagEnabled() {
+    /** Whether {@link #bundleClientTransactionFlag} feature flag is enabled. */
+    public boolean isBundleClientTransactionFlagEnabled() {
         // Can't read flag from isolated process.
-        return !Process.isIsolated() && syncWindowConfigUpdateFlag();
+        return !Process.isIsolated() && bundleClientTransactionFlag();
     }
 }

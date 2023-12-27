@@ -65,7 +65,7 @@ public class ClientTransactionListenerControllerTest {
         mHandler = getInstrumentation().getContext().getMainThreadHandler();
         mController = spy(ClientTransactionListenerController.createInstanceForTesting(
                 mDisplayManager));
-        doReturn(true).when(mController).isSyncWindowConfigUpdateFlagEnabled();
+        doReturn(true).when(mController).isBundleClientTransactionFlagEnabled();
     }
 
     @Test

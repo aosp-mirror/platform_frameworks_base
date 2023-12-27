@@ -271,6 +271,7 @@ public class AuthenticationStatsCollectorTest {
                 .thenReturn(true);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(false);
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
+        when(mContext.getSystemService(Context.FACE_SERVICE)).thenReturn(null);
 
         mAuthenticationStatsCollector.authenticate(USER_ID_1, false /* authenticated */);
 

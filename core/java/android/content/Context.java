@@ -3547,6 +3547,8 @@ public abstract class Context {
      *
      * @param receiver The BroadcastReceiver to unregister.
      *
+     * @throws IllegalArgumentException if the {@code receiver} was not previously registered or
+     *                                  already unregistered.
      * @see #registerReceiver
      */
     public abstract void unregisterReceiver(BroadcastReceiver receiver);

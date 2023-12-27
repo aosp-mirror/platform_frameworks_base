@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.share
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -418,13 +419,13 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun shadeCollpaseFadeIn() =
+    fun shadeCollapseFadeIn() =
         testScope.runTest {
+            val fadeIn by collectLastValue(underTest.shadeCollpaseFadeIn)
+
             // Start on lockscreen without the shade
             underTest.setShadeCollapseFadeInComplete(false)
             showLockscreen()
-
-            val fadeIn by collectLastValue(underTest.shadeCollpaseFadeIn)
             assertThat(fadeIn).isEqualTo(false)
 
             // ... then the shade expands
@@ -440,10 +441,12 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             assertThat(fadeIn).isEqualTo(false)
         }
 
-    private suspend fun showLockscreen() {
+    private suspend fun TestScope.showLockscreen() {
         shadeRepository.setLockscreenShadeExpansion(0f)
         shadeRepository.setQsExpansion(0f)
+        runCurrent()
         keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+        runCurrent()
         keyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
@@ -451,10 +454,12 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         )
     }
 
-    private suspend fun showLockscreenWithShadeExpanded() {
+    private suspend fun TestScope.showLockscreenWithShadeExpanded() {
         shadeRepository.setLockscreenShadeExpansion(1f)
         shadeRepository.setQsExpansion(0f)
+        runCurrent()
         keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
+        runCurrent()
         keyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
@@ -462,10 +467,12 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         )
     }
 
-    private suspend fun showLockscreenWithQSExpanded() {
+    private suspend fun TestScope.showLockscreenWithQSExpanded() {
         shadeRepository.setLockscreenShadeExpansion(0f)
         shadeRepository.setQsExpansion(1f)
+        runCurrent()
         keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
+        runCurrent()
         keyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,

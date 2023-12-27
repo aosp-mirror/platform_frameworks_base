@@ -27,6 +27,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
@@ -180,7 +181,11 @@ constructor(
     /** Called whenever the media hosts visibility changes */
     private fun onMediaHostVisibilityChanged(visible: Boolean) {
         refreshMediaPosition(reason = "onMediaHostVisibilityChanged")
+
         if (visible) {
+            if (migrateClocksToBlueprint() && useSplitShade) {
+                return
+            }
             mediaHost.hostView.layoutParams.apply {
                 height = ViewGroup.LayoutParams.WRAP_CONTENT
                 width = ViewGroup.LayoutParams.MATCH_PARENT
