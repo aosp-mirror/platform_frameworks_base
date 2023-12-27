@@ -111,6 +111,7 @@ import android.app.ICompatCameraControlCallback;
 import android.app.ResourcesManager;
 import android.app.WindowConfiguration;
 import android.app.compat.CompatChanges;
+import android.app.servertransaction.WindowStateResizeItem;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -2012,26 +2013,24 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /** Handles messages {@link #MSG_RESIZED} and {@link #MSG_RESIZED_REPORT}. */
-    private void handleResized(int msg, SomeArgs args) {
+    private void handleResized(ClientWindowFrames frames, boolean reportDraw,
+            MergedConfiguration mergedConfiguration, InsetsState insetsState, boolean forceLayout,
+            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, boolean dragResizing) {
         if (!mAdded) {
             return;
         }
 
-        final ClientWindowFrames frames = (ClientWindowFrames) args.arg1;
-        final MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg2;
         CompatibilityInfo.applyOverrideScaleIfNeeded(mergedConfiguration);
-        final boolean forceNextWindowRelayout = args.argi1 != 0;
-        final int displayId = args.argi3;
-        final boolean dragResizing = args.argi5 != 0;
-
         final Rect frame = frames.frame;
         final Rect displayFrame = frames.displayFrame;
         final Rect attachedFrame = frames.attachedFrame;
         if (mTranslator != null) {
+            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
             mTranslator.translateRectInScreenToAppWindow(frame);
             mTranslator.translateRectInScreenToAppWindow(displayFrame);
             mTranslator.translateRectInScreenToAppWindow(attachedFrame);
         }
+        mInsetsController.onStateChanged(insetsState);
         final float compatScale = frames.compatScale;
         final boolean frameChanged = !mWinFrame.equals(frame);
         final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
@@ -2040,8 +2039,8 @@ public final class ViewRootImpl implements ViewParent,
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
         final boolean compatScaleChanged = mTmpFrames.compatScale != compatScale;
         final boolean dragResizingChanged = mPendingDragResizing != dragResizing;
-        if (msg == MSG_RESIZED && !frameChanged && !configChanged && !attachedFrameChanged
-                && !displayChanged && !forceNextWindowRelayout
+        if (!reportDraw && !frameChanged && !configChanged && !attachedFrameChanged
+                && !displayChanged && !forceLayout
                 && !compatScaleChanged && !dragResizingChanged) {
             return;
         }
@@ -2073,11 +2072,11 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        mForceNextWindowRelayout |= forceNextWindowRelayout;
-        mPendingAlwaysConsumeSystemBars = args.argi2 != 0;
-        mSyncSeqId = args.argi4 > mSyncSeqId ? args.argi4 : mSyncSeqId;
+        mForceNextWindowRelayout |= forceLayout;
+        mPendingAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
+        mSyncSeqId = syncSeqId > mSyncSeqId ? syncSeqId : mSyncSeqId;
 
-        if (msg == MSG_RESIZED_REPORT) {
+        if (reportDraw) {
             reportNextDraw("resized");
         }
 
@@ -6232,8 +6231,17 @@ public final class ViewRootImpl implements ViewParent,
                 case MSG_RESIZED:
                 case MSG_RESIZED_REPORT: {
                     final SomeArgs args = (SomeArgs) msg.obj;
-                    mInsetsController.onStateChanged((InsetsState) args.arg3);
-                    handleResized(msg.what, args);
+                    final ClientWindowFrames frames = (ClientWindowFrames) args.arg1;
+                    final boolean reportDraw = msg.what == MSG_RESIZED_REPORT;
+                    final MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg2;
+                    final InsetsState insetsState = (InsetsState) args.arg3;
+                    final boolean forceLayout = args.argi1 != 0;
+                    final boolean alwaysConsumeSystemBars = args.argi2 != 0;
+                    final int displayId = args.argi3;
+                    final int syncSeqId = args.argi4;
+                    final boolean dragResizing = args.argi5 != 0;
+                    handleResized(frames, reportDraw, mergedConfiguration, insetsState, forceLayout,
+                            alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
                     args.recycle();
                     break;
                 }
@@ -9379,20 +9387,8 @@ public final class ViewRootImpl implements ViewParent,
             boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, boolean dragResizing) {
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         SomeArgs args = SomeArgs.obtain();
-        final boolean sameProcessCall = (Binder.getCallingPid() == android.os.Process.myPid());
-        if (sameProcessCall) {
-            insetsState = new InsetsState(insetsState, true /* copySource */);
-        }
-        if (mTranslator != null) {
-            mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
-        }
-        if (insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
-            ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchResized",
-                    getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
-        }
-        args.arg1 = sameProcessCall ? new ClientWindowFrames(frames) : frames;
-        args.arg2 = sameProcessCall && mergedConfiguration != null
-                ? new MergedConfiguration(mergedConfiguration) : mergedConfiguration;
+        args.arg1 = frames;
+        args.arg2 = mergedConfiguration;
         args.arg3 = insetsState;
         args.argi1 = forceLayout ? 1 : 0;
         args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
@@ -10815,9 +10811,10 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    static class W extends IWindow.Stub {
+    static class W extends IWindow.Stub implements WindowStateResizeItem.ResizeListener {
         private final WeakReference<ViewRootImpl> mViewAncestor;
         private final IWindowSession mWindowSession;
+        private boolean mIsFromResizeItem;
 
         W(ViewRootImpl viewAncestor) {
             mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
@@ -10825,17 +10822,46 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
+        public void onExecutingWindowStateResizeItem() {
+            mIsFromResizeItem = true;
+        }
+
+        @Override
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
                 boolean dragResizing) {
+            final boolean isFromResizeItem = mIsFromResizeItem;
+            mIsFromResizeItem = false;
             // Although this is a AIDL method, it will only be triggered in local process through
             // either WindowStateResizeItem or WindowlessWindowManager.
             final ViewRootImpl viewAncestor = mViewAncestor.get();
-            if (viewAncestor != null) {
-                viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, insetsState,
-                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
+            if (viewAncestor == null) {
+                return;
             }
+            if (insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
+                ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#resized",
+                        viewAncestor.getInsetsController().getHost().getInputMethodManager(),
+                        null /* icProto */);
+            }
+            // If the UI thread is the same as the current thread that is dispatching
+            // WindowStateResizeItem, then it can run directly.
+            if (isFromResizeItem && viewAncestor.mHandler.getLooper()
+                    == ActivityThread.currentActivityThread().getLooper()) {
+                viewAncestor.handleResized(frames, reportDraw, mergedConfiguration, insetsState,
+                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
+                return;
+            }
+            // The the parameters from WindowStateResizeItem are already copied.
+            final boolean needCopy =
+                    !isFromResizeItem && (Binder.getCallingPid() == Process.myPid());
+            if (needCopy) {
+                insetsState = new InsetsState(insetsState, true /* copySource */);
+                frames = new ClientWindowFrames(frames);
+                mergedConfiguration = new MergedConfiguration(mergedConfiguration);
+            }
+            viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, insetsState,
+                    forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
         }
 
         @Override

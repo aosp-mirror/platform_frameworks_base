@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.MergedConfiguration;
 import android.view.IWindow;
 import android.view.InsetsState;
@@ -52,6 +53,11 @@ public class WindowStateResizeItem extends ClientTransactionItem {
     @Override
     public void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER,
+                mReportDraw ? "windowResizedReport" : "windowResized");
+        if (mWindow instanceof ResizeListener listener) {
+            listener.onExecutingWindowStateResizeItem();
+        }
         try {
             mWindow.resized(mFrames, mReportDraw, mConfiguration, mInsetsState, mForceLayout,
                     mAlwaysConsumeSystemBars, mDisplayId, mSyncSeqId, mDragResizing);
@@ -59,6 +65,7 @@ public class WindowStateResizeItem extends ClientTransactionItem {
             // Should be a local call.
             throw new RuntimeException(e);
         }
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     // ObjectPoolItem implementation
@@ -80,7 +87,7 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         instance.mFrames = new ClientWindowFrames(frames);
         instance.mReportDraw = reportDraw;
         instance.mConfiguration = new MergedConfiguration(configuration);
-        instance.mInsetsState = new InsetsState(insetsState);
+        instance.mInsetsState = new InsetsState(insetsState, true /* copySources */);
         instance.mForceLayout = forceLayout;
         instance.mAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
         instance.mDisplayId = displayId;
@@ -189,5 +196,11 @@ public class WindowStateResizeItem extends ClientTransactionItem {
                 + ", reportDrawn=" + mReportDraw
                 + ", configuration=" + mConfiguration
                 + "}";
+    }
+
+    /** The interface for IWindow to perform resize directly if possible. */
+    public interface ResizeListener {
+        /** Notifies that IWindow#resized is going to be called from WindowStateResizeItem. */
+        void onExecutingWindowStateResizeItem();
     }
 }
