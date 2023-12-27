@@ -86,9 +86,9 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateKeyRepeatInfo()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_ROTARY_INPUT),
                         (reason) -> updateShowRotaryInput()),
-                Map.entry(Settings.System.getUriFor(Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS),
                         (reason) -> updateAccessibilityBounceKeys()),
-                Map.entry(Settings.System.getUriFor(Settings.Secure.ACCESSIBILITY_STICKY_KEYS),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_STICKY_KEYS),
                         (reason) -> updateAccessibilityStickyKeys()));
     }
 
