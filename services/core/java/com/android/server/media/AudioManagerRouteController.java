@@ -58,11 +58,9 @@ import java.util.Objects;
  * <p>This implementation obtains and manages all routes via {@link AudioManager}, with the
  * exception of {@link AudioManager#handleBluetoothActiveDeviceChanged inactive bluetooth} routes
  * which are managed by {@link AudioPoliciesBluetoothRouteController}, which depends on the
- * bluetooth stack (for example {@link BluetoothAdapter}.
+ * bluetooth stack ({@link BluetoothAdapter} and related classes).
  */
-// TODO: b/305199571 - Rename this class to avoid the AudioPolicies prefix, which has been flagged
-// by the audio team as a confusing name.
-/* package */ final class AudioPoliciesDeviceRouteController implements DeviceRouteController {
+/* package */ final class AudioManagerRouteController implements DeviceRouteController {
     private static final String TAG = SystemMediaRoute2Provider.TAG;
 
     @NonNull
@@ -103,7 +101,7 @@ import java.util.Objects;
                 Manifest.permission.MODIFY_AUDIO_ROUTING,
                 Manifest.permission.QUERY_AUDIO_STATE
             })
-    /* package */ AudioPoliciesDeviceRouteController(
+    /* package */ AudioManagerRouteController(
             @NonNull Context context,
             @NonNull AudioManager audioManager,
             @NonNull Looper looper,

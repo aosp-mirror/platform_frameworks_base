@@ -65,7 +65,7 @@ import java.util.List;
         if (strategyForMedia != null
                 && btAdapter != null
                 && Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
-            return new AudioPoliciesDeviceRouteController(
+            return new AudioManagerRouteController(
                     context,
                     audioManager,
                     looper,
