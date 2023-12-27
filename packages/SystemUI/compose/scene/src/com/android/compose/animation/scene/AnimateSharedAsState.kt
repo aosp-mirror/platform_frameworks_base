@@ -18,15 +18,19 @@ package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.lerp
 import com.android.compose.ui.util.lerp
+import kotlinx.coroutines.flow.collect
 
 /**
  * A [State] whose [value] is animated.
@@ -42,13 +46,20 @@ import com.android.compose.ui.util.lerp
  *
  * If you don't have the choice and *have to* get the value during composition, for instance because
  * a Modifier or Composable reading this value does not have a lazy/lambda-based API, then you can
- * access [valueOrNull] and use a fallback value for the first frame where this animated value can
- * not be computed yet. Note however that doing so will be bad for performance and might lead to
- * late-by-one-frame flickers.
+ * access [unsafeCompositionState] and use a fallback value for the first frame where this animated
+ * value can not be computed yet. Note however that doing so will be bad for performance and might
+ * lead to late-by-one-frame flickers.
  */
 @Stable
-interface AnimatedState<out T> : State<T> {
-    val valueOrNull: T?
+interface AnimatedState<T> : State<T> {
+    /**
+     * Return a [State] that can be read during composition.
+     *
+     * Important: You should avoid using this as much as possible and instead read [value] during
+     * layout/drawing, otherwise you will probably end up with a few frames that have a value that
+     * is not correctly interpolated.
+     */
+    @Composable fun unsafeCompositionState(initialValue: T): State<T>
 }
 
 /**
@@ -188,8 +199,17 @@ internal fun <T> animateSharedValueAsState(
             override val value: T
                 get() = value(layoutImpl, sceneKey, element, key, lerp, canOverflow)
 
-            override val valueOrNull: T?
-                get() = valueOrNull(layoutImpl, sceneKey, element, key, lerp, canOverflow)
+            @Composable
+            override fun unsafeCompositionState(initialValue: T): State<T> {
+                val state = remember { mutableStateOf(initialValue) }
+
+                val animatedState = this
+                LaunchedEffect(animatedState) {
+                    snapshotFlow { animatedState.value }.collect { state.value = it }
+                }
+
+                return state
+            }
         }
     }
 }
