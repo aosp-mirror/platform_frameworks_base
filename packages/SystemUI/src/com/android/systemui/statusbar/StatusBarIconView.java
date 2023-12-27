@@ -323,9 +323,14 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      * Update the icon dimens and drawable with current resources
      */
     public void updateIconDimens() {
-        reloadDimens();
-        updateDrawable();
-        maybeUpdateIconScaleDimens();
+        Trace.beginSection("StatusBarIconView#updateIconDimens");
+        try {
+            reloadDimens();
+            updateDrawable();
+            maybeUpdateIconScaleDimens();
+        } finally {
+            Trace.endSection();
+        }
     }
 
     private void reloadDimens() {

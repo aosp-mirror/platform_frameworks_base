@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.traceSection
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -44,25 +45,27 @@ constructor(
     private val viewStore: AlwaysOnDisplayNotificationIconViewStore,
 ) {
     fun bindWhileAttached(view: NotificationIconContainer): DisposableHandle {
-        return view.repeatWhenAttached {
-            lifecycleScope.launch {
-                launch {
-                    NotificationIconContainerViewBinder.bind(
-                        view = view,
-                        viewModel = viewModel,
-                        configuration = configuration,
-                        systemBarUtilsState = systemBarUtilsState,
-                        failureTracker = failureTracker,
-                        viewStore = viewStore,
-                    )
-                }
-                launch {
-                    KeyguardRootViewBinder.bindAodNotifIconVisibility(
-                        view = view,
-                        isVisible = keyguardRootViewModel.isNotifIconContainerVisible,
-                        configuration = configuration,
-                        screenOffAnimationController = screenOffAnimationController,
-                    )
+        return traceSection("NICAlwaysOnDisplay#bindWhileAttached") {
+            view.repeatWhenAttached {
+                lifecycleScope.launch {
+                    launch {
+                        NotificationIconContainerViewBinder.bind(
+                            view = view,
+                            viewModel = viewModel,
+                            configuration = configuration,
+                            systemBarUtilsState = systemBarUtilsState,
+                            failureTracker = failureTracker,
+                            viewStore = viewStore,
+                        )
+                    }
+                    launch {
+                        KeyguardRootViewBinder.bindAodNotifIconVisibility(
+                            view = view,
+                            isVisible = keyguardRootViewModel.isNotifIconContainerVisible,
+                            configuration = configuration,
+                            screenOffAnimationController = screenOffAnimationController,
+                        )
+                    }
                 }
             }
         }
