@@ -2478,6 +2478,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             return 0;
         }
         if (!mKeyguardBypassController.getBypassEnabled()) {
+            if (migrateClocksToBlueprint()) {
+                View nsslPlaceholder = mView.getRootView().findViewById(R.id.nssl_placeholder);
+                if (!mSplitShadeEnabled && nsslPlaceholder != null) {
+                    return nsslPlaceholder.getTop();
+                }
+            }
+
             return mClockPositionResult.stackScrollerPadding;
         }
         int collapsedPosition = mHeadsUpInset;
