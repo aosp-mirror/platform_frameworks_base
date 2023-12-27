@@ -395,6 +395,7 @@ message ActivityRecordProto {
     optional bool should_refresh_activity_for_camera_compat = 40;
     optional bool should_refresh_activity_via_pause_for_camera_compat = 41;
     optional bool should_override_min_aspect_ratio = 42;
+    optional bool should_ignore_orientation_request_loop = 43;
 }
 
 /* represents WindowToken */

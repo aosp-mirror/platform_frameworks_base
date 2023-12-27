@@ -972,10 +972,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     *
-     * @hide
      */
-    // TODO(b/274924641): Make this public API.
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     String PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
             "android.window.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED";
 
