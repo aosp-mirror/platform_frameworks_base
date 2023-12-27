@@ -68,5 +68,6 @@ cc_defaults {
         "android.hardware.gnss@2.1",
         "android.hardware.gnss.measurement_corrections@1.0",
         "android.hardware.gnss.visibility_control@1.0",
+        "android_location_flags_c_lib",
     ],
 }
