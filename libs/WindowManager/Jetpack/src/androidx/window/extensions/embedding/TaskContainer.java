@@ -145,7 +145,7 @@ class TaskContainer {
      *                              the pair of TaskFragments are stacked due to the limited space.
      */
     @WindowingMode
-    int getWindowingModeForSplitTaskFragment(@Nullable Rect taskFragmentBounds) {
+    int getWindowingModeForTaskFragment(@Nullable Rect taskFragmentBounds) {
         // Only set to multi-windowing mode if the pair are showing side-by-side. Otherwise, it
         // will be set to UNDEFINED which will then inherit the Task windowing mode.
         if (taskFragmentBounds == null || taskFragmentBounds.isEmpty() || isInPictureInPicture()) {
@@ -441,6 +441,26 @@ class TaskContainer {
             splitStates.add(splitInfo);
         }
         return splitStates;
+    }
+
+    // TODO(b/317358445): Makes ActivityStack and SplitInfo callback more stable.
+    /**
+     * Returns a list of currently active {@link ActivityStack activityStacks}.
+     *
+     * @return a list of {@link ActivityStack activityStacks} if all the containers are in
+     * a stable state, or {@code null} otherwise.
+     */
+    @Nullable
+    List<ActivityStack> getActivityStacksIfStable() {
+        final List<ActivityStack> activityStacks = new ArrayList<>();
+        for (TaskFragmentContainer container : mContainers) {
+            final ActivityStack activityStack = container.toActivityStackIfStable();
+            if (activityStack == null) {
+                return null;
+            }
+            activityStacks.add(activityStack);
+        }
+        return activityStacks;
     }
 
     /** A wrapper class which contains the information of {@link TaskContainer} */

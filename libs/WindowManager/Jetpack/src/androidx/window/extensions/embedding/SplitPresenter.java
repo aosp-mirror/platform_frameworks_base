@@ -16,6 +16,8 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.PackageManager.MATCH_ALL;
 
 import android.app.Activity;
@@ -187,7 +189,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final Rect secondaryRelBounds = getRelBoundsForPosition(POSITION_END, taskProperties,
                 splitAttributes);
         final int windowingMode = mController.getTaskContainer(taskId)
-                .getWindowingModeForSplitTaskFragment(secondaryRelBounds);
+                .getWindowingModeForTaskFragment(secondaryRelBounds);
         createTaskFragment(wct, secondaryContainer.getTaskFragmentToken(),
                 primaryActivity.getActivityToken(), secondaryRelBounds, windowingMode);
         updateAnimationParams(wct, secondaryContainer.getTaskFragmentToken(), splitAttributes);
@@ -259,7 +261,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         if (container == null || container == containerToAvoid) {
             container = mController.newContainer(activity, taskId);
             final int windowingMode = mController.getTaskContainer(taskId)
-                    .getWindowingModeForSplitTaskFragment(relBounds);
+                    .getWindowingModeForTaskFragment(relBounds);
             final IBinder reparentActivityToken = activity.getActivityToken();
             createTaskFragment(wct, container.getTaskFragmentToken(), reparentActivityToken,
                     relBounds, windowingMode, reparentActivityToken);
@@ -268,7 +270,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         } else {
             resizeTaskFragmentIfRegistered(wct, container, relBounds);
             final int windowingMode = mController.getTaskContainer(taskId)
-                    .getWindowingModeForSplitTaskFragment(relBounds);
+                    .getWindowingModeForTaskFragment(relBounds);
             updateTaskFragmentWindowingModeIfRegistered(wct, container, windowingMode);
         }
         updateAnimationParams(wct, container.getTaskFragmentToken(), splitAttributes);
@@ -310,7 +312,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 // Pass in the primary container to make sure it is added right above the primary.
                 primaryContainer);
         final TaskContainer taskContainer = mController.getTaskContainer(taskId);
-        final int windowingMode = taskContainer.getWindowingModeForSplitTaskFragment(
+        final int windowingMode = taskContainer.getWindowingModeForTaskFragment(
                 primaryRelBounds);
         mController.registerSplit(wct, primaryContainer, launchingActivity, secondaryContainer,
                 rule, splitAttributes);
@@ -347,6 +349,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 && secondaryContainer.areLastRequestedBoundsEqual(null /* bounds */)
                 && !secondaryRelBounds.isEmpty();
 
+        // TODO(b/243518738): remove usages of XXXIfRegistered.
         // If the task fragments are not registered yet, the positions will be updated after they
         // are created again.
         resizeTaskFragmentIfRegistered(wct, primaryContainer, primaryRelBounds);
@@ -357,7 +360,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             // When placeholder is shown in split, we should keep the focus on the primary.
             wct.requestFocusOnTaskFragment(primaryContainer.getTaskFragmentToken());
         }
-        final int windowingMode = taskContainer.getWindowingModeForSplitTaskFragment(
+        final int windowingMode = taskContainer.getWindowingModeForTaskFragment(
                 primaryRelBounds);
         updateTaskFragmentWindowingModeIfRegistered(wct, primaryContainer, windowingMode);
         updateTaskFragmentWindowingModeIfRegistered(wct, secondaryContainer, windowingMode);
@@ -398,13 +401,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      * Sets whether to enable isolated navigation for this {@link TaskFragmentContainer}
      */
     void setTaskFragmentIsolatedNavigation(@NonNull WindowContainerTransaction wct,
-                                           @NonNull TaskFragmentContainer taskFragmentContainer,
+                                           @NonNull TaskFragmentContainer container,
                                            boolean isolatedNavigationEnabled) {
-        if (taskFragmentContainer.isIsolatedNavigationEnabled() == isolatedNavigationEnabled) {
+        if (container.isIsolatedNavigationEnabled() == isolatedNavigationEnabled) {
             return;
         }
-        taskFragmentContainer.setIsolatedNavigationEnabled(isolatedNavigationEnabled);
-        setTaskFragmentIsolatedNavigation(wct, taskFragmentContainer.getTaskFragmentToken(),
+        container.setIsolatedNavigationEnabled(isolatedNavigationEnabled);
+        setTaskFragmentIsolatedNavigation(wct, container.getTaskFragmentToken(),
                 isolatedNavigationEnabled);
     }
 
@@ -564,6 +567,15 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         container.setLastCompanionTaskFragment(secondary);
         super.setCompanionTaskFragment(wct, primary, secondary);
+    }
+
+    void applyActivityStackAttributes(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskFragmentContainer container, @NonNull ActivityStackAttributes attributes) {
+        final Rect bounds = attributes.getRelativeBounds();
+
+        resizeTaskFragment(wct, container.getTaskFragmentToken(), bounds);
+        updateWindowingMode(wct, container.getTaskFragmentToken(),
+                bounds.isEmpty() ? WINDOWING_MODE_FULLSCREEN : WINDOWING_MODE_MULTI_WINDOW);
     }
 
     /**
@@ -1086,7 +1098,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     @NonNull
-    ParentContainerInfo toParentContainerInfo(@NonNull TaskProperties taskProperties) {
+    ParentContainerInfo createParentContainerInfoFromTaskProperties(
+            @NonNull TaskProperties taskProperties) {
         final Configuration configuration = taskProperties.getConfiguration();
         final WindowLayoutInfo windowLayoutInfo = mWindowLayoutComponent
                 .getCurrentWindowLayoutInfo(taskProperties.getDisplayId(),
