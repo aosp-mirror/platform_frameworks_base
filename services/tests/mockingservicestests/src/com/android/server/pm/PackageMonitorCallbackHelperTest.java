@@ -108,6 +108,20 @@ public class PackageMonitorCallbackHelperTest {
     }
 
     @Test
+    public void testPackageMonitorCallback_SuspendNoAccessCallbackNotCalled() throws Exception {
+        BiFunction<Integer, Bundle, Bundle> filterExtras = (callingUid, intentExtras) -> null;
+
+        IRemoteCallback callback = createMockPackageMonitorCallback();
+        mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, 0 /* userId */,
+                Binder.getCallingUid());
+        mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGES_SUSPENDED,
+                FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0}, null /* instantUserIds */,
+                null /* broadcastAllowList */, mHandler, filterExtras);
+
+        verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).never()).sendResult(any());
+    }
+
+    @Test
     public void testPackageMonitorCallback_SuspendCallbackCalled() throws Exception {
         Bundle result = new Bundle();
         result.putInt(Intent.EXTRA_UID, FAKE_PACKAGE_UID);
