@@ -34,6 +34,7 @@ import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
@@ -79,9 +80,12 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
+import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 import java.util.concurrent.Executor;
 
@@ -105,7 +109,7 @@ import kotlinx.coroutines.CoroutineDispatcher;
             StartKeyguardTransitionModule.class,
             ResourceTrimmerModule.class,
         })
-public class KeyguardModule {
+public interface KeyguardModule {
     /**
      * Provides our instance of KeyguardViewMediator which is considered optional.
      */
@@ -207,13 +211,19 @@ public class KeyguardModule {
 
     /** */
     @Provides
-    public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
+    static ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
         return viewMediator.getViewMediatorCallback();
     }
 
     /** */
     @Provides
-    public KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
+    static KeyguardQuickAffordancesMetricsLogger providesKeyguardQuickAffordancesMetricsLogger() {
         return new KeyguardQuickAffordancesMetricsLoggerImpl();
     }
+
+    /** Binds {@link KeyguardUpdateMonitor} as a {@link CoreStartable}. */
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardUpdateMonitor.class)
+    CoreStartable bindsKeyguardUpdateMonitor(KeyguardUpdateMonitor keyguardUpdateMonitor);
 }
