@@ -76,7 +76,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW,
                     "InsetsAsyncAnimation: " + WindowInsets.Type.toString(runner.getTypes()),
                     runner.getTypes());
-            releaseControls(mControl.getControls());
+            InsetsController.releaseControls(mControl.getControls());
             mMainThreadHandler.post(() ->
                     mOuterCallbacks.notifyFinished(InsetsAnimationThreadControlRunner.this, shown));
         }
@@ -128,12 +128,6 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
                     "InsetsAsyncAnimation: " + WindowInsets.Type.toString(types), types);
             listener.onReady(mControl, types);
         });
-    }
-
-    private void releaseControls(SparseArray<InsetsSourceControl> controls) {
-        for (int i = controls.size() - 1; i >= 0; i--) {
-            controls.valueAt(i).release(SurfaceControl::release);
-        }
     }
 
     @Override
