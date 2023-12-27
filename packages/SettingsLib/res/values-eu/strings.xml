@@ -155,8 +155,8 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Entzungailua"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Idazteko gailua"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth bidezko gailua"</string>
-    <string name="accessibility_wifi_off" msgid="1195445715254137155">"Desaktibatuta dago Wi-Fi konexioa."</string>
-    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Deskonektatu egin da Wi-Fi konexioa."</string>
+    <string name="accessibility_wifi_off" msgid="1195445715254137155">"Desaktibatuta dago wifi-konexioa."</string>
+    <string name="accessibility_no_wifi" msgid="5297119459491085771">"Deskonektatu egin da wifi-konexioa."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi sarearen barra bat."</string>
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi sarearen bi barra."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi sarearen hiru barra."</string>

@@ -85,15 +85,15 @@
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Afbrudt"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Afbryder ..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Opretter forbindelse..."</string>
-    <string name="bluetooth_connected" msgid="8065345572198502293">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Parrer..."</string>
-    <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen telefon)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen medier)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen telefon eller medier)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon eller medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen telefon)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen medier)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen telefon eller medier)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon eller medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktiv, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktivt, V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
@@ -129,7 +129,7 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Sluttet til SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Ikke forbundet til filoverførselsserver"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Forbundet til inputenhed"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Tilsluttet enhed for at få internetadgang"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Forbundet med enhed for at få internetadgang"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Deler lokal internetforbindelse med enhed"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Brug til internetadgang"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Brug til kort"</string>
