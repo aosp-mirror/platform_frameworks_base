@@ -73,7 +73,7 @@ internal class SceneGestureHandler(
     private val positionalThreshold
         get() = with(layoutImpl.density) { 56.dp.toPx() }
 
-    internal var gestureWithPriority: Any? = null
+    internal var currentSource: Any? = null
 
     /** The [UserAction]s associated to the current swipe. */
     private var actionUpOrLeft: UserAction? = null
@@ -520,20 +520,22 @@ internal class SceneGestureHandler(
 private class SceneDraggableHandler(
     private val gestureHandler: SceneGestureHandler,
 ) : DraggableHandler {
+    private val source = this
+
     override fun onDragStarted(startedPosition: Offset, overSlop: Float, pointersDown: Int) {
-        gestureHandler.gestureWithPriority = this
+        gestureHandler.currentSource = source
         gestureHandler.onDragStarted(pointersDown, startedPosition, overSlop)
     }
 
     override fun onDelta(pixels: Float) {
-        if (gestureHandler.gestureWithPriority == this) {
+        if (gestureHandler.currentSource == source) {
             gestureHandler.onDrag(delta = pixels)
         }
     }
 
     override fun onDragStopped(velocity: Float) {
-        if (gestureHandler.gestureWithPriority == this) {
-            gestureHandler.gestureWithPriority = null
+        if (gestureHandler.currentSource == source) {
+            gestureHandler.currentSource = null
             gestureHandler.onDragStopped(velocity = velocity, canChangeScene = true)
         }
     }
@@ -585,6 +587,8 @@ internal class SceneNestedScrollHandler(
                 }
             return nextScene != null
         }
+
+        val source = this
 
         return PriorityNestedScrollConnection(
             orientation = orientation,
@@ -656,7 +660,7 @@ internal class SceneNestedScrollHandler(
             canContinueScroll = { true },
             canScrollOnFling = false,
             onStart = { offsetAvailable ->
-                gestureHandler.gestureWithPriority = this
+                gestureHandler.currentSource = source
                 gestureHandler.onDragStarted(
                     pointersDown = 1,
                     startedPosition = null,
@@ -664,7 +668,7 @@ internal class SceneNestedScrollHandler(
                 )
             },
             onScroll = { offsetAvailable ->
-                if (gestureHandler.gestureWithPriority != this) {
+                if (gestureHandler.currentSource != source) {
                     return@PriorityNestedScrollConnection 0f
                 }
 
@@ -675,7 +679,7 @@ internal class SceneNestedScrollHandler(
                 offsetAvailable
             },
             onStop = { velocityAvailable ->
-                if (gestureHandler.gestureWithPriority != this) {
+                if (gestureHandler.currentSource != source) {
                     return@PriorityNestedScrollConnection 0f
                 }
 
