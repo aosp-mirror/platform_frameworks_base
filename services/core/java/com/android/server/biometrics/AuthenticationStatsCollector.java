@@ -54,8 +54,8 @@ public class AuthenticationStatsCollector {
 
     @NonNull private final Context mContext;
     @NonNull private final PackageManager mPackageManager;
-    @NonNull private final FaceManager mFaceManager;
-    @NonNull private final FingerprintManager mFingerprintManager;
+    @Nullable private final FaceManager mFaceManager;
+    @Nullable private final FingerprintManager mFingerprintManager;
 
     private final boolean mEnabled;
     private final float mThreshold;
@@ -197,11 +197,11 @@ public class AuthenticationStatsCollector {
     }
 
     private boolean hasEnrolledFace(int userId) {
-        return mFaceManager.hasEnrolledTemplates(userId);
+        return mFaceManager != null && mFaceManager.hasEnrolledTemplates(userId);
     }
 
     private boolean hasEnrolledFingerprint(int userId) {
-        return mFingerprintManager.hasEnrolledTemplates(userId);
+        return mFingerprintManager != null && mFingerprintManager.hasEnrolledTemplates(userId);
     }
 
     /**

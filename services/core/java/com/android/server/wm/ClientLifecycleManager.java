@@ -74,13 +74,13 @@ class ClientLifecycleManager {
     }
 
     /**
-     * Similar to {@link #scheduleTransactionItem}, but is called without WM lock.
+     * Similar to {@link #scheduleTransactionItem}, but it sends the transaction immediately and
+     * it can be called without WM lock.
      *
      * @see WindowProcessController#setReportedProcState(int)
      */
-    void scheduleTransactionItemUnlocked(@NonNull IApplicationThread client,
+    void scheduleTransactionItemNow(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem) throws RemoteException {
-        // Immediately dispatching to client, and must not access WMS.
         final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
         if (transactionItem.isActivityLifecycleItem()) {
             clientTransaction.setLifecycleStateRequest((ActivityLifecycleItem) transactionItem);

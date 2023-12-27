@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
+import static com.android.systemui.Flags.screenshareNotificationHiding;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
@@ -243,7 +244,11 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         params.setUseLowPriority(isLowPriority);
 
-        if (mNotificationLockscreenUserManager.needsRedaction(entry)) {
+        // If screenshareNotificationHiding is enabled, both public and private views should be
+        // inflated to avoid any latency associated with reinflating all notification views when
+        // screen share starts and stops
+        if (screenshareNotificationHiding()
+                || mNotificationLockscreenUserManager.needsRedaction(entry)) {
             params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
         } else {
             params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);

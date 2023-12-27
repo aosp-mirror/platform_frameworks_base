@@ -771,6 +771,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             if (mLastReportedAnimatorScale != mService.getCurrentAnimatorScale()) {
                 mService.dispatchNewAnimatorScaleLocked(this);
             }
+            mProcess.mWindowSession = this;
         }
         mAddedWindows.add(w);
     }
@@ -782,6 +783,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
+    boolean hasWindow() {
+        return !mAddedWindows.isEmpty();
+    }
 
     void onWindowSurfaceVisibilityChanged(WindowSurfaceController surfaceController,
             boolean visible, int type) {

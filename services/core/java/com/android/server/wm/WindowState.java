@@ -252,6 +252,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.RefreshRatePolicy.FrameRateVote;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -3675,7 +3676,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         markRedrawForSyncReported();
 
-        if (mWmService.mFlags.mWindowStateResizeItemFlag) {
+        if (Flags.bundleClientTransactionFlag()) {
             getProcess().scheduleClientTransactionItem(
                     WindowStateResizeItem.obtain(mClient, mClientWindowFrames, reportDraw,
                             mLastReportedConfiguration, getCompatInsetsState(), forceRelayout,
