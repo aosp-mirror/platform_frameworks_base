@@ -60,6 +60,8 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionControllerImpl;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.statusbar.policy.SplitShadeStateControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -143,6 +145,11 @@ public interface StatusBarPolicyModule {
     /** */
     @Binds
     SecurityController provideSecurityController(SecurityControllerImpl controllerImpl);
+
+    /** */
+    @Binds
+    SensitiveNotificationProtectionController provideSensitiveNotificationProtectionController(
+            SensitiveNotificationProtectionControllerImpl controllerImpl);
 
     /** */
     @Binds
