@@ -102,7 +102,15 @@ private class ElementScopeImpl<ContentScope>(
         lerp: (start: T, stop: T, fraction: Float) -> T,
         canOverflow: Boolean
     ): AnimatedState<T> {
-        return animateSharedValueAsState(layoutImpl, scene, element, key, value, lerp, canOverflow)
+        return animateSharedValueAsState(
+            layoutImpl,
+            scene.key,
+            element.key,
+            key,
+            value,
+            lerp,
+            canOverflow,
+        )
     }
 
     @Composable

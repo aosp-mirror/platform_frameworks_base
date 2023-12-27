@@ -24,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -49,13 +48,6 @@ internal class Scene(
     var userActions by mutableStateOf(actions)
     var zIndex by mutableFloatStateOf(zIndex)
     var targetSize by mutableStateOf(IntSize.Zero)
-
-    /** The shared values in this scene that are not tied to a specific element. */
-    private var _sharedValues: MutableMap<ValueKey, Element.SharedValue<*>>? = null
-    val sharedValues: MutableMap<ValueKey, Element.SharedValue<*>>
-        get() =
-            _sharedValues
-                ?: SnapshotStateMap<ValueKey, Element.SharedValue<*>>().also { _sharedValues = it }
 
     @Composable
     @OptIn(ExperimentalComposeUiApi::class)
@@ -116,7 +108,7 @@ internal class SceneScopeImpl(
     ): AnimatedState<T> {
         return animateSharedValueAsState(
             layoutImpl = layoutImpl,
-            scene = scene,
+            scene = scene.key,
             element = null,
             key = key,
             value = value,

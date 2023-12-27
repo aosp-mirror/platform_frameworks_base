@@ -62,6 +62,20 @@ internal class SceneTransitionLayoutImpl(
     internal val elements = SnapshotStateMap<ElementKey, Element>()
 
     /**
+     * The different values of a shared value keyed by a a [ValueKey] and the different elements and
+     * scenes it is associated to.
+     */
+    private var _sharedValues:
+        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>? =
+        null
+    internal val sharedValues:
+        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>
+        get() =
+            _sharedValues
+                ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>()
+                    .also { _sharedValues = it }
+
+    /**
      * The scenes that are "ready", i.e. they were composed and fully laid-out at least once.
      *
      * Note that this map is *read* during composition, so it is a [SnapshotStateMap] to make sure
