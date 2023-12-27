@@ -17,17 +17,20 @@
 package com.android.systemui.flags
 
 import android.os.SystemProperties
-import com.android.systemui.dagger.SysUISingleton
-
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Proxy to make {@link SystemProperties} easily testable.
  */
-@SysUISingleton
+@Singleton
 open class SystemPropertiesHelper @Inject constructor() {
     fun get(name: String): String {
         return SystemProperties.get(name)
+    }
+
+    fun get(name: String, def: String?): String {
+        return SystemProperties.get(name, def)
     }
 
     fun getBoolean(name: String, default: Boolean): Boolean {
