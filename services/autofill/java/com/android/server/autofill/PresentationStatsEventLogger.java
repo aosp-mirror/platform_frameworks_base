@@ -240,8 +240,18 @@ public final class PresentationStatsEventLogger {
         mEventInternal = Optional.of(new PresentationStatsEventInternal());
     }
 
+    /**
+     * Set request_id
+     */
     public void maybeSetRequestId(int requestId) {
         mEventInternal.ifPresent(event -> event.mRequestId = requestId);
+    }
+
+    /**
+     * Set is_credential_request
+     */
+    public void maybeSetIsCredentialRequest(boolean isCredentialRequest) {
+        mEventInternal.ifPresent(event -> event.mIsCredentialRequest = isCredentialRequest);
     }
 
     public void maybeSetNoPresentationEventReason(@NotShownReason int reason) {
@@ -567,7 +577,8 @@ public final class PresentationStatsEventLogger {
                     + " mSelectedDatasetPickedReason=" + event.mSelectedDatasetPickedReason
                     + " mDetectionPreference=" + event.mDetectionPreference
                     + " mFieldClassificationRequestId=" + event.mFieldClassificationRequestId
-                    + " mAppPackageUid=" + mCallingAppUid);
+                    + " mAppPackageUid=" + mCallingAppUid
+                    + " mIsCredentialRequest=" + event.mIsCredentialRequest);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -606,7 +617,8 @@ public final class PresentationStatsEventLogger {
                 event.mSelectedDatasetPickedReason,
                 event.mDetectionPreference,
                 event.mFieldClassificationRequestId,
-                mCallingAppUid);
+                mCallingAppUid,
+                event.mIsCredentialRequest);
         mEventInternal = Optional.empty();
     }
 
@@ -640,6 +652,7 @@ public final class PresentationStatsEventLogger {
         @DatasetPickedReason int mSelectedDatasetPickedReason = PICK_REASON_UNKNOWN;
         @DetectionPreference int mDetectionPreference = DETECTION_PREFER_UNKNOWN;
         int mFieldClassificationRequestId = -1;
+        boolean mIsCredentialRequest = false;
 
         PresentationStatsEventInternal() {}
     }
