@@ -1263,7 +1263,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Slog.v(TAG, "Requesting structure for request #" + ordinal + " ,requestId=" + requestId
                     + ", flags=" + flags);
         }
+        boolean isCredmanRequested = (flags & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0;
         mPresentationStatsEventLogger.maybeSetRequestId(requestId);
+        mPresentationStatsEventLogger.maybeSetIsCredentialRequest(isCredmanRequested);
         mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(
                 mFieldClassificationIdSnapshot);
         mFillRequestEventLogger.maybeSetRequestId(requestId);
@@ -4332,8 +4334,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 if (viewState.getResponse() != null) {
+                    boolean isCredmanRequested = (flags & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0;
                     FillResponse response = viewState.getResponse();
                     mPresentationStatsEventLogger.maybeSetRequestId(response.getRequestId());
+                    mPresentationStatsEventLogger.maybeSetIsCredentialRequest(isCredmanRequested);
                     mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(
                             mFieldClassificationIdSnapshot);
                     mPresentationStatsEventLogger.maybeSetAvailableCount(
