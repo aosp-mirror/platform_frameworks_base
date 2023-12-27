@@ -1614,7 +1614,7 @@
     <string name="fingerprints" msgid="148690767172613723">"Fingeravtryck:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256-fingeravtryck"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1-fingeravtryck:"</string>
-    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Visa alla"</string>
+    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Se alla"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Välj aktivitet"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Dela med"</string>
     <string name="sending" msgid="206925243621664438">"Skickar ..."</string>
@@ -1906,8 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"I helgen"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Händelse"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"När jag sover"</string>
-    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
-    <skip />
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Hanteras av <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"På"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Av"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> stänger av vissa ljud"</string>
@@ -2366,4 +2365,5 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Arbete 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Allmän"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
 </resources>

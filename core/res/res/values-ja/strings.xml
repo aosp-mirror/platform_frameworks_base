@@ -322,7 +322,7 @@
     <string name="permgrouplab_camera" msgid="9090413408963547706">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"写真と動画の撮影"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"付近のデバイス"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"付近のデバイスの\\n検出と接続"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"付近のデバイスの検出と接続"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"通話履歴"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"通話履歴の読み取りと書き込み"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"電話"</string>
@@ -1872,7 +1872,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2 番目の仕事用<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3 番目の仕事用<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> のクローン"</string>
-    <string name="private_profile_label_badge" msgid="1712086003787839183">"個人用<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"プライベートの<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"オフライン再生を解除する前にPINの入力を求める"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"画面固定を解除する前にロック解除パターンの入力を求める"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"オフライン再生を解除する前にパスワードの入力を求める"</string>
@@ -1906,8 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"週末"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"予定"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"睡眠中"</string>
-    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
-    <skip />
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> によって管理されています"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ON"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"OFF"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> により一部の音はミュートに設定"</string>
@@ -2366,4 +2365,5 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"仕事用 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"テスト"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"共用"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
 </resources>

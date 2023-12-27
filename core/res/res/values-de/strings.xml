@@ -1906,8 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Wochenende"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Termin"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Schlafen"</string>
-    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
-    <skip />
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Verwaltet von <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"An"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Aus"</string>
     <string name="muted_by" msgid="91464083490094950">"Einige Töne werden von <xliff:g id="THIRD_PARTY">%1$s</xliff:g> stummgeschaltet"</string>
@@ -2340,8 +2339,8 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Ermöglicht einer Companion-App, Dienste im Vordergrund aus dem Hintergrund zu starten."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon ist verfügbar"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon ist blockiert"</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Kann nicht auf das Display gespiegelt werden"</string>
-    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Verwende ein anderes Kabel und versuch es noch einmal"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Bildschirm kann nicht gespiegelt werden"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Versuch es mit einem anderen Kabel"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Dein Gerät ist zu heiß und kann den Bildschirm erst spiegeln, wenn es abgekühlt ist"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen ist aktiviert"</string>
@@ -2366,4 +2365,5 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Geschäftlich 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Gemeinsam genutzt"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
 </resources>
