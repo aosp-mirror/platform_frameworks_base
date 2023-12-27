@@ -91,3 +91,10 @@ flag {
     is_fixed_read_only: true
     bug: "315037695"
 }
+
+flag {
+    name: "strict_mode_restricted_network"
+    namespace: "backstage_power"
+    description: "Guards StrictMode APIs for detecting restricted network access."
+    bug: "317250784"
+}
