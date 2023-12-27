@@ -97,6 +97,11 @@ public class AppCompatTaskInfo implements Parcelable {
     public boolean isUserFullscreenOverrideEnabled;
 
     /**
+     * Whether the system has forced the activity to be fullscreen
+     */
+    public boolean isSystemFullscreenOverrideEnabled;
+
+    /**
      * Hint about the letterbox state of the top activity.
      */
     public boolean topActivityBoundsLetterboxed;
@@ -202,7 +207,8 @@ public class AppCompatTaskInfo implements Parcelable {
                 && topActivityLetterboxHeight == that.topActivityLetterboxHeight
                 && topActivityLetterboxHorizontalPosition
                     == that.topActivityLetterboxHorizontalPosition
-                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled;
+                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled
+                && isSystemFullscreenOverrideEnabled == that.isSystemFullscreenOverrideEnabled;
     }
 
     /**
@@ -224,7 +230,8 @@ public class AppCompatTaskInfo implements Parcelable {
                 && topActivityLetterboxWidth == that.topActivityLetterboxWidth
                 && topActivityLetterboxHeight == that.topActivityLetterboxHeight
                 && cameraCompatControlState == that.cameraCompatControlState
-                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled;
+                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled
+                && isSystemFullscreenOverrideEnabled == that.isSystemFullscreenOverrideEnabled;
     }
 
     /**
@@ -243,6 +250,7 @@ public class AppCompatTaskInfo implements Parcelable {
         topActivityLetterboxWidth = source.readInt();
         topActivityLetterboxHeight = source.readInt();
         isUserFullscreenOverrideEnabled = source.readBoolean();
+        isSystemFullscreenOverrideEnabled = source.readBoolean();
     }
 
     /**
@@ -262,6 +270,7 @@ public class AppCompatTaskInfo implements Parcelable {
         dest.writeInt(topActivityLetterboxWidth);
         dest.writeInt(topActivityLetterboxHeight);
         dest.writeBoolean(isUserFullscreenOverrideEnabled);
+        dest.writeBoolean(isSystemFullscreenOverrideEnabled);
     }
 
     @Override
@@ -280,6 +289,7 @@ public class AppCompatTaskInfo implements Parcelable {
                 + " topActivityLetterboxWidth=" + topActivityLetterboxWidth
                 + " topActivityLetterboxHeight=" + topActivityLetterboxHeight
                 + " isUserFullscreenOverrideEnabled=" + isUserFullscreenOverrideEnabled
+                + " isSystemFullscreenOverrideEnabled=" + isSystemFullscreenOverrideEnabled
                 + " cameraCompatControlState="
                 + cameraCompatControlStateToString(cameraCompatControlState)
                 + "}";
