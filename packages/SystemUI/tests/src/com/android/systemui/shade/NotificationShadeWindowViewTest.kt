@@ -28,6 +28,7 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
@@ -189,9 +190,9 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
         featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
-        featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         testScope = TestScope()
         controller =
             NotificationShadeWindowViewController(
@@ -232,7 +233,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                     repository = BouncerMessageRepositoryImpl(),
                     userRepository = FakeUserRepository(),
                     countDownTimerUtil = Mockito.mock(CountDownTimerUtil::class.java),
-                    featureFlags = featureFlags,
                     updateMonitor = Mockito.mock(KeyguardUpdateMonitor::class.java),
                     biometricSettingsRepository = FakeBiometricSettingsRepository(),
                     applicationScope = testScope.backgroundScope,

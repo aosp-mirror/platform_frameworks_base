@@ -35,7 +35,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
@@ -103,8 +102,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
 
         when(mPinBasedInputView.getResources()).thenReturn(getContext().getResources());
         FakeFeatureFlags featureFlags = new FakeFeatureFlags();
-        featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true);
-
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_REVAMPED_BOUNCER_MESSAGES);
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,

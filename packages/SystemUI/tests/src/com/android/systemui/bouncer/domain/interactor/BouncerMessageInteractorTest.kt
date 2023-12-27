@@ -25,6 +25,7 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FaceSensorInfo
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
@@ -35,8 +36,6 @@ import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
@@ -107,8 +106,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
 
     suspend fun TestScope.init() {
         userRepository.setSelectedUserInfo(PRIMARY_USER)
-        val featureFlags =
-            FakeFeatureFlagsClassic().apply { set(Flags.REVAMPED_BOUNCER_MESSAGES, true) }
+        mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         primaryBouncerInteractor =
             PrimaryBouncerInteractor(
                 bouncerRepository,
@@ -131,7 +129,6 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 repository = repository,
                 userRepository = userRepository,
                 countDownTimerUtil = countDownTimerUtil,
-                featureFlags = featureFlags,
                 updateMonitor = updateMonitor,
                 biometricSettingsRepository = biometricSettingsRepository,
                 applicationScope = this.backgroundScope,

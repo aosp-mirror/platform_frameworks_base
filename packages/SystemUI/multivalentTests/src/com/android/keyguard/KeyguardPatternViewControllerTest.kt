@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
@@ -75,8 +76,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     private lateinit var mKeyguardMessageAreaControllerFactory:
         KeyguardMessageAreaController.Factory
 
-    @Mock
-    private lateinit var mSelectedUserInteractor: SelectedUserInteractor
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     @Mock
     private lateinit var mKeyguardMessageAreaController:
@@ -95,7 +95,6 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
         whenever(mKeyguardMessageAreaControllerFactory.create(any()))
             .thenReturn(mKeyguardMessageAreaController)
         fakeFeatureFlags = FakeFeatureFlags()
-        fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, false)
         fakeFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
         mKeyguardPatternView =
             View.inflate(mContext, R.layout.keyguard_pattern_view, null) as KeyguardPatternView
@@ -166,7 +165,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
 
     @Test
     fun withFeatureFlagOn_oldMessage_isHidden() {
-        fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
 
         mKeyguardPatternViewController.onViewAttached()
 

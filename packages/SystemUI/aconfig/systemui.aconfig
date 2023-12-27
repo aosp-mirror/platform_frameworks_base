@@ -212,6 +212,13 @@ flag {
 }
 
 flag {
+   name: "revamped_bouncer_messages"
+   namespace: "systemui"
+   description: "Change the bouncer message to be a 2-line more descriptive message"
+   bug: "236891644"
+}
+
+flag {
    name: "rest_to_unlock"
    namespace: "systemui"
    description: "Require prolonged touch for fingerprint authentication"
