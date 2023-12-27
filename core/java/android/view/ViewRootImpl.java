@@ -209,7 +209,6 @@ import android.view.animation.Interpolator;
 import android.view.autofill.AutofillManager;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
-import android.view.contentcapture.MainContentCaptureSession;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
@@ -4103,7 +4102,7 @@ public final class ViewRootImpl implements ViewParent,
 
         final ContentCaptureManager manager = mAttachInfo.mContentCaptureManager;
         if (manager != null && mAttachInfo.mContentCaptureEvents != null) {
-            final MainContentCaptureSession session = manager.getMainContentCaptureSession();
+            final ContentCaptureSession session = manager.getMainContentCaptureSession();
             session.notifyContentCaptureEvents(mAttachInfo.mContentCaptureEvents);
         }
         mAttachInfo.mContentCaptureEvents = null;
@@ -5020,7 +5019,7 @@ public final class ViewRootImpl implements ViewParent,
 
             // Initial dispatch of window bounds to content capture
             if (mAttachInfo.mContentCaptureManager != null) {
-                MainContentCaptureSession session =
+                ContentCaptureSession session =
                         mAttachInfo.mContentCaptureManager.getMainContentCaptureSession();
                 session.notifyWindowBoundsChanged(session.getId(),
                         getConfiguration().windowConfiguration.getBounds());
@@ -8805,7 +8804,7 @@ public final class ViewRootImpl implements ViewParent,
         mSurfaceControl.setTransformHint(transformHint);
 
         if (mAttachInfo.mContentCaptureManager != null) {
-            MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
+            ContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
                     .getMainContentCaptureSession();
             mainSession.notifyWindowBoundsChanged(mainSession.getId(),
                     getConfiguration().windowConfiguration.getBounds());
