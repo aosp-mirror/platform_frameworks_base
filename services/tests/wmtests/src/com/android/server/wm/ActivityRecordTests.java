@@ -2640,6 +2640,9 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Can specify orientation if the current orientation candidate is orientation behind.
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE,
                 activity.getOrientation(SCREEN_ORIENTATION_BEHIND));
+        activity.makeFinishingLocked();
+        assertEquals("Finishing activity must not report orientation",
+                SCREEN_ORIENTATION_UNSET, activity.getOrientation(SCREEN_ORIENTATION_BEHIND));
 
         final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
                 .setActivityTheme(android.R.style.Theme_Translucent)
