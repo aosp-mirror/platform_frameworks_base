@@ -254,7 +254,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Tự động xoay màn hình"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Vị trí"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Trình bảo vệ màn hình"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Truy cập máy ảnh"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Quyền truy cập camera"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Quyền truy cập micrô"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Được phép"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bị chặn"</string>
