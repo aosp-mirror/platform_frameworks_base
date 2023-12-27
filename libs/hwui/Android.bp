@@ -401,7 +401,7 @@ cc_defaults {
     ],
 
     static_libs: [
-        "libnativehelper",
+        "libnativehelper_lazy",
         "libziparchive_for_incfs",
     ],
 
