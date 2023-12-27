@@ -47,9 +47,6 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
 
     @Override
     ContentCaptureSession getMainCaptureSession() {
-        if (mParent instanceof MainContentCaptureSession) {
-            return (MainContentCaptureSession) mParent;
-        }
         return mParent.getMainCaptureSession();
     }
 

@@ -499,7 +499,11 @@ public final class ContentCaptureManager {
 
     @Nullable
     @GuardedBy("mLock")
-    private Handler mHandler;
+    private Handler mUiHandler;
+
+    @Nullable
+    @GuardedBy("mLock")
+    private Handler mContentCaptureHandler;
 
     @GuardedBy("mLock")
     private ContentCaptureSession mMainSession;
@@ -590,8 +594,7 @@ public final class ContentCaptureManager {
     public ContentCaptureSession getMainContentCaptureSession() {
         synchronized (mLock) {
             if (mMainSession == null) {
-                mMainSession = new MainContentCaptureSession(
-                        mContext, this, prepareContentCaptureHandler(), mService);
+                mMainSession = prepareMainSession();
                 if (sVerbose) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
             }
             return mMainSession;
@@ -600,15 +603,36 @@ public final class ContentCaptureManager {
 
     @NonNull
     @GuardedBy("mLock")
-    private Handler prepareContentCaptureHandler() {
-        if (mHandler == null) {
-            if (runOnBackgroundThreadEnabled()) {
-                mHandler = BackgroundThread.getHandler();
-            } else {
-                mHandler = Handler.createAsync(Looper.getMainLooper());
-            }
+    private ContentCaptureSession prepareMainSession() {
+        if (runOnBackgroundThreadEnabled()) {
+            return new MainContentCaptureSessionV2(
+                    mContext,
+                    this,
+                    prepareUiHandler(),
+                    prepareContentCaptureHandler(),
+                    mService
+            );
+        } else {
+            return new MainContentCaptureSession(mContext, this, prepareUiHandler(), mService);
         }
-        return mHandler;
+    }
+
+    @NonNull
+    @GuardedBy("mLock")
+    private Handler prepareContentCaptureHandler() {
+        if (mContentCaptureHandler == null) {
+            mContentCaptureHandler = BackgroundThread.getHandler();
+        }
+        return mContentCaptureHandler;
+    }
+
+    @NonNull
+    @GuardedBy("mLock")
+    private Handler prepareUiHandler() {
+        if (mUiHandler == null) {
+            mUiHandler = Handler.createAsync(Looper.getMainLooper());
+        }
+        return mUiHandler;
     }
 
     /** @hide */
