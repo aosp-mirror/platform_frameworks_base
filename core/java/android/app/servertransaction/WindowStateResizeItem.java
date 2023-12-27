@@ -22,7 +22,9 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -66,6 +68,13 @@ public class WindowStateResizeItem extends ClientTransactionItem {
             throw new RuntimeException(e);
         }
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    @Nullable
+    @Override
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
+        // WindowStateResizeItem may update the global config with #mConfiguration.
+        return ActivityThread.currentApplication();
     }
 
     // ObjectPoolItem implementation
