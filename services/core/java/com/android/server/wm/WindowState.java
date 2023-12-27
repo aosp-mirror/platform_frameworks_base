@@ -1443,16 +1443,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         this, mWindowFrames.getInsetsChangedInfo(),
                         configChanged, didFrameInsetsChange);
 
-            if (insetsChanged) {
-                mWindowFrames.setInsetsChanged(false);
-                if (mWmService.mWindowsInsetsChanged > 0) {
-                    mWmService.mWindowsInsetsChanged--;
-                }
-                if (mWmService.mWindowsInsetsChanged == 0) {
-                    mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
-                }
-            }
-
+            consumeInsetsChange();
             onResizeHandled();
             mWmService.makeWindowFreezingScreenIfNeededLocked(this);
 
@@ -2349,6 +2340,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mWmService.mTrustedPresentationListenerController.removeIgnoredWindowTokens(
                 getWindowToken());
+
+        consumeInsetsChange();
     }
 
     @Override
@@ -3722,6 +3715,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mClient instanceof IWindow.Stub;
     }
 
+    private void consumeInsetsChange() {
+        if (mWindowFrames.hasInsetsChanged()) {
+            mWindowFrames.setInsetsChanged(false);
+            mWmService.mWindowsInsetsChanged--;
+            if (mWmService.mWindowsInsetsChanged == 0) {
+                mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
+            }
+        }
+    }
+
     /**
      * Called when the insets state changed.
      */
@@ -3729,10 +3732,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "notifyInsetsChanged for %s ", this);
         if (!mWindowFrames.hasInsetsChanged()) {
             mWindowFrames.setInsetsChanged(true);
+            mWmService.mWindowsInsetsChanged++;
 
             // If the new InsetsState won't be dispatched before releasing WM lock, the following
             // message will be executed.
-            mWmService.mWindowsInsetsChanged++;
             mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
             mWmService.mH.sendEmptyMessage(WindowManagerService.H.INSETS_CHANGED);
         }
