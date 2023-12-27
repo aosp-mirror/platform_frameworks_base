@@ -79,6 +79,7 @@ cc_library_static {
         ":lib_cachedAppOptimizer_native",
         ":lib_gameManagerService_native",
         ":lib_oomConnection_native",
+        ":lib_anrTimer_native",
     ],
 
     include_dirs: [
@@ -245,4 +246,11 @@ filegroup {
 filegroup {
     name: "lib_oomConnection_native",
     srcs: ["com_android_server_am_OomConnection.cpp"],
+}
+
+filegroup {
+    name: "lib_anrTimer_native",
+    srcs: [
+        "com_android_server_utils_AnrTimer.cpp",
+    ],
 }
