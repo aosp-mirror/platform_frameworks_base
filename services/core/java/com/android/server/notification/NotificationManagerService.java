@@ -16,7 +16,9 @@
 
 package com.android.server.notification;
 
+import static android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS;
 import static android.Manifest.permission.RECEIVE_SENSITIVE_NOTIFICATIONS;
+import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -67,6 +69,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OF
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.app.Flags.lifetimeExtensionRefactor;
+import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
+import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
@@ -210,6 +214,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -3369,9 +3374,7 @@ public class NotificationManagerService extends SystemService {
                             .setChannelName(r.getChannel().getName().toString())
                             .setPostedTimeMs(System.currentTimeMillis())
                             .setTitle(getHistoryTitle(r.getNotification()))
-                            .setText(getHistoryText(
-                                    r.getSbn().getPackageContext(getContext()),
-                                    r.getNotification()))
+                            .setText(getHistoryText(r.getNotification()))
                             .setIcon(r.getNotification().getSmallIcon())
                             .build());
                 }
@@ -3414,12 +3417,11 @@ public class NotificationManagerService extends SystemService {
     /**
      * Returns the appropriate substring for this notification based on the style of notification.
      */
-    private String getHistoryText(Context appContext, Notification n) {
+    private String getHistoryText(Notification n) {
         CharSequence text = null;
         if (n.extras != null) {
             text = n.extras.getCharSequence(EXTRA_TEXT);
-
-            Notification.Builder nb = Notification.Builder.recoverBuilder(appContext, n);
+            Notification.Builder nb = Notification.Builder.recoverBuilder(getContext(), n);
 
             if (nb.getStyle() instanceof Notification.BigTextStyle) {
                 text = ((Notification.BigTextStyle) nb.getStyle()).getBigText();
@@ -5569,7 +5571,7 @@ public class NotificationManagerService extends SystemService {
 
         private void enforceSystemOrSystemUI(String message) {
             if (isCallerSystemOrPhone()) return;
-            getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+            getContext().enforceCallingPermission(STATUS_BAR_SERVICE,
                     message);
         }
 
@@ -5578,7 +5580,7 @@ public class NotificationManagerService extends SystemService {
                 checkCallerIsSystemOrSameApp(pkg);
             } catch (SecurityException e) {
                 getContext().enforceCallingPermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE,
+                        STATUS_BAR_SERVICE,
                         message);
             }
         }
@@ -6183,13 +6185,20 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setPrivateNotificationsAllowed(boolean allow) {
             if (PackageManager.PERMISSION_GRANTED
-                    != getContext().checkCallingPermission(
-                            permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)) {
+                    != getContext().checkCallingPermission(CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)) {
                 throw new SecurityException(
                         "Requires CONTROL_KEYGUARD_SECURE_NOTIFICATIONS permission");
             }
             if (allow != mLockScreenAllowSecureNotifications) {
                 mLockScreenAllowSecureNotifications = allow;
+                if (android.app.Flags.keyguardPrivateNotifications()) {
+                    getContext().sendBroadcast(
+                            new Intent(ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED)
+                                    .putExtra(EXTRA_KM_PRIVATE_NOTIFS_ALLOWED,
+                                            mLockScreenAllowSecureNotifications),
+                            STATUS_BAR_SERVICE);
+                }
+
                 handleSavePolicyFile();
             }
         }
@@ -6197,8 +6206,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public boolean getPrivateNotificationsAllowed() {
             if (PackageManager.PERMISSION_GRANTED
-                    != getContext().checkCallingPermission(
-                            permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)) {
+                    != getContext().checkCallingPermission(CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)) {
                 throw new SecurityException(
                         "Requires CONTROL_KEYGUARD_SECURE_NOTIFICATIONS permission");
             }
@@ -8369,6 +8377,8 @@ public class NotificationManagerService extends SystemService {
             boolean posted = false;
             try {
                 posted = postNotification();
+            }  catch (Exception e) {
+                Slog.e(TAG, "Error posting", e);
             } finally {
                 if (!posted) {
                     mTracker.cancel();
@@ -10589,7 +10599,7 @@ public class NotificationManagerService extends SystemService {
         if (isCallerSystemOrPhone()) {
             return true;
         }
-        return getContext().checkCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+        return getContext().checkCallingPermission(STATUS_BAR_SERVICE)
                 == PERMISSION_GRANTED;
     }
 
@@ -10628,7 +10638,7 @@ public class NotificationManagerService extends SystemService {
         if (isCallerSystemOrPhone()) {
             return;
         }
-        getContext().enforceCallingPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+        getContext().enforceCallingPermission(STATUS_BAR_SERVICE,
                 message);
     }
 
