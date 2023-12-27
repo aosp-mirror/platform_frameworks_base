@@ -26,9 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Appen er installeret."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vil du installere denne app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vil du opdatere denne app?"</string>
-    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Vil du opdatere denne app via &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne app modtager normalt opdateriner fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på din tablet fremover. Dette kan påvirke appfunktionaliteten.&lt;/p&gt;"</string>
-    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Vil du opdatere denne app via &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne app modtager normalt opdateriner fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på dit fjernsyn fremover. Dette kan påvirke appfunktionaliteten.&lt;/p&gt;"</string>
-    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Vil du opdatere denne app via &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne app modtager normalt opdateriner fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på din telefon fremover. Dette kan påvirke appfunktionaliteten.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Vil du opdatere denne app via &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne app modtager normalt opdateringer fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på din tablet fremover. Dette kan påvirke appfunktionaliteten.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Vil du opdatere denne app via &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne app modtager normalt opdateringer fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på dit fjernsyn fremover. Dette kan påvirke appfunktionaliteten.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Vil du opdatere denne app via &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Denne app modtager normalt opdateringer fra &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Hvis du opdaterer fra en anden kilde, vil du kunne modtage opdateringer fra en hvilken som helst kilde på din telefon fremover. Dette kan påvirke appfunktionaliteten.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Appen blev ikke installeret."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakken blev forhindret i at blive installeret."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Appen blev ikke installeret, da pakken er i strid med en eksisterende pakke."</string>
@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Denne bruger kan ikke installere ukendte apps"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Denne bruger har ikke tilladelse til at installere apps"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"Arkivér"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Opdater alligevel"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Administrer apps"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Der er ikke mere plads"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Afinstaller opdatering"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> er en del af følgende app:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Vil du afinstallere denne app?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"Dine private data gemmes"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Vil du arkivere denne app for alle brugere? Dine private data gemmes"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Vil du arkivere denne app fra din arbejdsprofil? Dine private data gemmes"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Vil du arkivere denne app for <xliff:g id="USERNAME">%1$s</xliff:g>? Dine private data gemmes"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Vil du arkivere denne app fra dit private område? Dine private data gemmes"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Vil du afinstallere denne app for "<b>"alle"</b>" brugere? Appen og dens data fjernes fra "<b>"alle"</b>" brugere på denne enhed."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Vil du afinstallere denne app for brugeren <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Vil du afinstallere denne app fra din arbejdsprofil?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Din tablet og dine personlige data er mere sårbare over for angreb fra ukendte apps. Når du installerer denne app, accepterer du, at du er ansvarlig for skader på din tablet eller tab af data, der kan skyldes brug af appen."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Dit fjernsyn og dine personlige data er mere sårbare over for angreb fra ukendte apps. Når du installerer denne app, accepterer du, at du er ansvarlig for skader på dit fjernsyn eller tab af data, der kan skyldes brug af appen."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Klon af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"Vil du arkivere <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Fortsæt"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Indstillinger"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Installerer/afinstallerer Wear-apps"</string>
