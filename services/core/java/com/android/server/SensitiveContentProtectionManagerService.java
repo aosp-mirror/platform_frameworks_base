@@ -34,11 +34,11 @@ import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import com.android.server.wm.WindowManagerInternal;
 
-import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -53,6 +53,10 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     NotificationListener mNotificationListener;
     private @Nullable MediaProjectionManager mProjectionManager;
     private @Nullable WindowManagerInternal mWindowManager;
+
+    final Object mSensitiveContentProtectionLock = new Object();
+    @GuardedBy("mSensitiveContentProtectionLock")
+    private boolean mProjectionActive = false;
 
     private final MediaProjectionManager.Callback mProjectionCallback =
             new MediaProjectionManager.Callback() {
@@ -132,14 +136,23 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     }
 
     private void onProjectionStart() {
-        StatusBarNotification[] notifications;
-        try {
-            notifications = mNotificationListener.getActiveNotifications();
-        } catch (SecurityException e) {
-            Log.e(TAG, "SensitiveContentProtectionManagerService doesn't have access.", e);
-            notifications = new StatusBarNotification[0];
+        synchronized (mSensitiveContentProtectionLock) {
+            mProjectionActive = true;
+            updateAppsThatShouldBlockScreenCapture();
         }
+    }
 
+    private void onProjectionEnd() {
+        synchronized (mSensitiveContentProtectionLock) {
+            mProjectionActive = false;
+
+            // notify windowmanager to clear any sensitive notifications observed during projection
+            // session
+            mWindowManager.clearBlockedApps();
+        }
+    }
+
+    private void updateAppsThatShouldBlockScreenCapture() {
         RankingMap rankingMap;
         try {
             rankingMap = mNotificationListener.getCurrentRanking();
@@ -148,41 +161,98 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             rankingMap = null;
         }
 
-        // notify windowmanager of any currently posted sensitive content notifications
-        Set<PackageInfo> packageInfos = getSensitivePackagesFromNotifications(
-                notifications,
-                rankingMap);
-
-        mWindowManager.setShouldBlockScreenCaptureForApp(packageInfos);
+        updateAppsThatShouldBlockScreenCapture(rankingMap);
     }
 
-    private void onProjectionEnd() {
-        // notify windowmanager to clear any sensitive notifications observed during projection
-        // session
-        mWindowManager.setShouldBlockScreenCaptureForApp(Collections.emptySet());
-    }
-
-    private Set<PackageInfo> getSensitivePackagesFromNotifications(
-            StatusBarNotification[] notifications, RankingMap rankingMap) {
-        if (rankingMap == null) {
-            Log.w(TAG, "Ranking map not initialized.");
-            return Collections.emptySet();
+    private void updateAppsThatShouldBlockScreenCapture(RankingMap rankingMap) {
+        StatusBarNotification[] notifications;
+        try {
+            notifications = mNotificationListener.getActiveNotifications();
+        } catch (SecurityException e) {
+            Log.e(TAG, "SensitiveContentProtectionManagerService doesn't have access.", e);
+            notifications = new StatusBarNotification[0];
         }
 
-        Set<PackageInfo> sensitivePackages = new ArraySet<>();
+        // notify windowmanager of any currently posted sensitive content notifications
+        ArraySet<PackageInfo> packageInfos = getSensitivePackagesFromNotifications(
+                notifications, rankingMap);
+
+        mWindowManager.addBlockScreenCaptureForApps(packageInfos);
+    }
+
+    private ArraySet<PackageInfo> getSensitivePackagesFromNotifications(
+            @NonNull StatusBarNotification[] notifications, RankingMap rankingMap) {
+        ArraySet<PackageInfo> sensitivePackages = new ArraySet<>();
+        if (rankingMap == null) {
+            Log.w(TAG, "Ranking map not initialized.");
+            return sensitivePackages;
+        }
+
         for (StatusBarNotification sbn : notifications) {
-            NotificationListenerService.Ranking ranking =
-                    rankingMap.getRawRankingObject(sbn.getKey());
-            if (ranking != null && ranking.hasSensitiveContent()) {
-                PackageInfo info = new PackageInfo(sbn.getPackageName(), sbn.getUid());
+            PackageInfo info = getSensitivePackageFromNotification(sbn, rankingMap);
+            if (info != null) {
                 sensitivePackages.add(info);
             }
         }
         return sensitivePackages;
     }
 
-    // TODO(b/317251408): add trigger that updates on onNotificationPosted,
-    //  onNotificationRankingUpdate and onListenerConnected
+    private PackageInfo getSensitivePackageFromNotification(StatusBarNotification sbn,
+            RankingMap rankingMap) {
+        if (sbn == null) {
+            Log.w(TAG, "Unable to protect null notification");
+            return null;
+        }
+        if (rankingMap == null) {
+            Log.w(TAG, "Ranking map not initialized.");
+            return null;
+        }
+
+        NotificationListenerService.Ranking ranking = rankingMap.getRawRankingObject(sbn.getKey());
+        if (ranking != null && ranking.hasSensitiveContent()) {
+            return new PackageInfo(sbn.getPackageName(), sbn.getUid());
+        }
+        return null;
+    }
+
     @VisibleForTesting
-    static class NotificationListener extends NotificationListenerService {}
+    class NotificationListener extends NotificationListenerService {
+        @Override
+        public void onListenerConnected() {
+            super.onListenerConnected();
+            // Projection started before notification listener was connected
+            synchronized (mSensitiveContentProtectionLock) {
+                if (mProjectionActive) {
+                    updateAppsThatShouldBlockScreenCapture();
+                }
+            }
+        }
+
+        @Override
+        public void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
+            super.onNotificationPosted(sbn, rankingMap);
+            synchronized (mSensitiveContentProtectionLock) {
+                if (!mProjectionActive) {
+                    return;
+                }
+
+                // notify windowmanager of any currently posted sensitive content notifications
+                PackageInfo packageInfo = getSensitivePackageFromNotification(sbn, rankingMap);
+
+                if (packageInfo != null) {
+                    mWindowManager.addBlockScreenCaptureForApps(new ArraySet(Set.of(packageInfo)));
+                }
+            }
+        }
+
+        @Override
+        public void onNotificationRankingUpdate(RankingMap rankingMap) {
+            super.onNotificationRankingUpdate(rankingMap);
+            synchronized (mSensitiveContentProtectionLock) {
+                if (mProjectionActive) {
+                    updateAppsThatShouldBlockScreenCapture(rankingMap);
+                }
+            }
+        }
+    }
 }

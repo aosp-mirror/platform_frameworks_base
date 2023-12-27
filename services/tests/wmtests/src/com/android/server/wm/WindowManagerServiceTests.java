@@ -115,7 +115,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Build/Install/Run:
@@ -139,7 +138,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @After
     public void tearDown() {
-        mWm.mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(Collections.emptySet());
+        mWm.mSensitiveContentPackages.clearBlockedApps();
     }
 
     @Test
@@ -824,7 +823,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
-    public void setShouldBlockScreenCaptureForApp() {
+    public void addBlockScreenCaptureForApps() {
         String testPackage = "test";
         int ownerId1 = 20;
         int ownerId2 = 21;
@@ -833,7 +832,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         blockedPackages.add(blockedPackage);
 
         WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
-        wmInternal.setShouldBlockScreenCaptureForApp(blockedPackages);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
 
         assertTrue(mWm.mSensitiveContentPackages
                 .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
@@ -843,7 +842,47 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
-    public void setShouldBlockScreenCaptureForApp_emptySet_clearsCache() {
+    public void addBlockScreenCaptureForApps_duplicate_verifyNoRefresh() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+
+        verify(mWm, times(1)).refreshScreenCaptureDisabled();
+    }
+
+    @Test
+    public void addBlockScreenCaptureForApps_notDuplicate_verifyRefresh() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        PackageInfo blockedPackage2 = new PackageInfo(testPackage, ownerId2);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+        ArraySet<PackageInfo> blockedPackages2 = new ArraySet();
+        blockedPackages2.add(blockedPackage);
+        blockedPackages2.add(blockedPackage2);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages2);
+
+        assertTrue(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
+        assertTrue(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId2));
+        verify(mWm, times(2)).refreshScreenCaptureDisabled();
+    }
+
+    @Test
+    public void clearBlockedApps_clearsCache() {
         String testPackage = "test";
         int ownerId1 = 20;
         PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
@@ -851,12 +890,20 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         blockedPackages.add(blockedPackage);
 
         WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
-        wmInternal.setShouldBlockScreenCaptureForApp(blockedPackages);
-        wmInternal.setShouldBlockScreenCaptureForApp(Collections.emptySet());
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+        wmInternal.clearBlockedApps();
 
         assertFalse(mWm.mSensitiveContentPackages
                 .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
         verify(mWm, times(2)).refreshScreenCaptureDisabled();
+    }
+
+    @Test
+    public void clearBlockedApps_alreadyEmpty_verifyNoRefresh() {
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.clearBlockedApps();
+
+        verify(mWm, never()).refreshScreenCaptureDisabled();
     }
 
     @Test

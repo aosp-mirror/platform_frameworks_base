@@ -369,7 +369,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -8566,10 +8565,23 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void setShouldBlockScreenCaptureForApp(Set<PackageInfo> packageInfos) {
+        public void addBlockScreenCaptureForApps(ArraySet<PackageInfo> packageInfos) {
             synchronized (mGlobalLock) {
-                mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(packageInfos);
-                WindowManagerService.this.refreshScreenCaptureDisabled();
+                boolean modified =
+                        mSensitiveContentPackages.addBlockScreenCaptureForApps(packageInfos);
+                if (modified) {
+                    WindowManagerService.this.refreshScreenCaptureDisabled();
+                }
+            }
+        }
+
+        @Override
+        public void clearBlockedApps() {
+            synchronized (mGlobalLock) {
+                boolean modified = mSensitiveContentPackages.clearBlockedApps();
+                if (modified) {
+                    WindowManagerService.this.refreshScreenCaptureDisabled();
+                }
             }
         }
     }

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
@@ -28,7 +29,6 @@ import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import org.junit.After;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -52,18 +52,21 @@ public class SensitiveContentPackagesTest {
 
     @After
     public void tearDown() {
-        mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(Collections.emptySet());
+        mSensitiveContentPackages.clearBlockedApps();
     }
 
     @Test
-    public void setShouldBlockScreenCaptureForApp() {
-        Set<PackageInfo> blockedApps =
+    public void addBlockScreenCaptureForApps() {
+        ArraySet<PackageInfo> blockedApps = new ArraySet(
                 Set.of(new PackageInfo(APP_PKG_1, APP_UID_1),
                         new PackageInfo(APP_PKG_1, APP_UID_2),
                         new PackageInfo(APP_PKG_2, APP_UID_1),
-                        new PackageInfo(APP_PKG_2, APP_UID_2));
+                        new PackageInfo(APP_PKG_2, APP_UID_2)
+                ));
 
-        mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(blockedApps);
+        boolean modified = mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedApps);
+
+        assertTrue(modified);
 
         assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_1));
         assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_2));
@@ -79,15 +82,93 @@ public class SensitiveContentPackagesTest {
     }
 
     @Test
-    public void setShouldBlockScreenCaptureForApp_empty() {
-        Set<PackageInfo> blockedApps =
+    public void addBlockScreenCaptureForApps_addedTwice() {
+        ArraySet<PackageInfo> blockedApps = new ArraySet(
                 Set.of(new PackageInfo(APP_PKG_1, APP_UID_1),
                         new PackageInfo(APP_PKG_1, APP_UID_2),
                         new PackageInfo(APP_PKG_2, APP_UID_1),
-                        new PackageInfo(APP_PKG_2, APP_UID_2));
+                        new PackageInfo(APP_PKG_2, APP_UID_2)
+                ));
 
-        mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(blockedApps);
-        mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(Collections.emptySet());
+        mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedApps);
+        boolean modified = mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedApps);
+
+        assertFalse(modified);
+
+        assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_1));
+        assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_2));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_3));
+
+        assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_2, APP_UID_1));
+        assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_2, APP_UID_2));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_2, APP_UID_3));
+
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_3, APP_UID_1));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_3, APP_UID_2));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_3, APP_UID_3));
+    }
+
+    @Test
+    public void addBlockScreenCaptureForApps_withPartialPreviousPackages() {
+        ArraySet<PackageInfo> blockedApps = new ArraySet(
+                Set.of(new PackageInfo(APP_PKG_1, APP_UID_1),
+                        new PackageInfo(APP_PKG_1, APP_UID_2),
+                        new PackageInfo(APP_PKG_2, APP_UID_1),
+                        new PackageInfo(APP_PKG_2, APP_UID_2)
+                ));
+
+        mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedApps);
+        boolean modified = mSensitiveContentPackages
+                .addBlockScreenCaptureForApps(
+                        new ArraySet(Set.of(new PackageInfo(APP_PKG_3, APP_UID_1))));
+
+        assertTrue(modified);
+
+        assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_1));
+        assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_2));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_3));
+
+        assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_2, APP_UID_1));
+        assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_2, APP_UID_2));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_2, APP_UID_3));
+
+        assertTrue(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_3, APP_UID_1));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_3, APP_UID_2));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_3, APP_UID_3));
+    }
+
+    @Test
+    public void clearBlockedApps() {
+        ArraySet<PackageInfo> blockedApps = new ArraySet(
+                Set.of(new PackageInfo(APP_PKG_1, APP_UID_1),
+                        new PackageInfo(APP_PKG_1, APP_UID_2),
+                        new PackageInfo(APP_PKG_2, APP_UID_1),
+                        new PackageInfo(APP_PKG_2, APP_UID_2)
+                ));
+
+        mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedApps);
+        boolean modified = mSensitiveContentPackages.clearBlockedApps();
+
+        assertTrue(modified);
+
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_1));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_2));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_3));
+
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_2, APP_UID_1));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_2, APP_UID_2));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_2, APP_UID_3));
+
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_3, APP_UID_1));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_3, APP_UID_2));
+        assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_3, APP_UID_3));
+    }
+
+    @Test
+    public void clearBlockedApps_alreadyEmpty() {
+        boolean modified = mSensitiveContentPackages.clearBlockedApps();
+
+        assertFalse(modified);
 
         assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_1));
         assertFalse(mSensitiveContentPackages.shouldBlockScreenCaptureForApp(APP_PKG_1, APP_UID_2));
