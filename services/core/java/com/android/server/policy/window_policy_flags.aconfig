@@ -1,0 +1,8 @@
+package: "com.android.server.policy"
+
+flag {
+    name: "support_input_wakeup_delegate"
+    namespace: "wear_frameworks"
+    description: "Whether or not window policy allows injecting input wake-up delegate."
+    bug: "298055811"
+}
