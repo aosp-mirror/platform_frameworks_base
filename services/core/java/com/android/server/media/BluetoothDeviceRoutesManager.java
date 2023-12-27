@@ -58,9 +58,7 @@ import java.util.stream.Collectors;
  * <p>This class also serves as ground truth for assigning {@link MediaRoute2Info#getId() route ids}
  * for bluetooth routes via {@link #getRouteIdForBluetoothAddress}.
  */
-// TODO: b/305199571 - Rename this class to remove the RouteController suffix, which causes
-// confusion with the BluetoothRouteController interface.
-/* package */ class AudioPoliciesBluetoothRouteController {
+/* package */ class BluetoothDeviceRoutesManager {
     private static final String TAG = SystemMediaRoute2Provider.TAG;
 
     private static final String HEARING_AID_ROUTE_ID_PREFIX = "HEARING_AID_";
@@ -86,7 +84,7 @@ import java.util.stream.Collectors;
     @NonNull
     private final BluetoothProfileMonitor mBluetoothProfileMonitor;
 
-    AudioPoliciesBluetoothRouteController(@NonNull Context context,
+    BluetoothDeviceRoutesManager(@NonNull Context context,
             @NonNull BluetoothAdapter bluetoothAdapter,
             @NonNull BluetoothRouteController.BluetoothRoutesUpdatedListener listener) {
         this(context, bluetoothAdapter,
@@ -94,7 +92,7 @@ import java.util.stream.Collectors;
     }
 
     @VisibleForTesting
-    AudioPoliciesBluetoothRouteController(@NonNull Context context,
+    BluetoothDeviceRoutesManager(@NonNull Context context,
             @NonNull BluetoothAdapter bluetoothAdapter,
             @NonNull BluetoothProfileMonitor bluetoothProfileMonitor,
             @NonNull BluetoothRouteController.BluetoothRoutesUpdatedListener listener) {
@@ -276,7 +274,7 @@ import java.util.stream.Collectors;
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
             if (state == BluetoothAdapter.STATE_OFF
                     || state == BluetoothAdapter.STATE_TURNING_OFF) {
-                synchronized (AudioPoliciesBluetoothRouteController.this) {
+                synchronized (BluetoothDeviceRoutesManager.this) {
                     mBluetoothRoutes.clear();
                 }
                 notifyBluetoothRoutesUpdated();
@@ -284,7 +282,7 @@ import java.util.stream.Collectors;
                 updateBluetoothRoutes();
 
                 boolean shouldCallListener;
-                synchronized (AudioPoliciesBluetoothRouteController.this) {
+                synchronized (BluetoothDeviceRoutesManager.this) {
                     shouldCallListener = !mBluetoothRoutes.isEmpty();
                 }
 
