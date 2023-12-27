@@ -139,10 +139,13 @@ static bool nativeSyncNextTransaction(JNIEnv* env, jclass clazz, jlong ptr, jobj
     return queue->syncNextTransaction(
             [globalCallbackRef](SurfaceComposerClient::Transaction* t) {
                 JNIEnv* env = getenv(globalCallbackRef->vm());
+                ScopedLocalRef<jobject>
+                        transactionObject(env,
+                                          env->NewObject(gTransactionClassInfo.clazz,
+                                                         gTransactionClassInfo.ctor,
+                                                         reinterpret_cast<jlong>(t)));
                 env->CallVoidMethod(globalCallbackRef->object(), gTransactionConsumer.accept,
-                                    env->NewObject(gTransactionClassInfo.clazz,
-                                                   gTransactionClassInfo.ctor,
-                                                   reinterpret_cast<jlong>(t)));
+                                    transactionObject.get());
             },
             acquireSingleBuffer);
 }
