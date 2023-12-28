@@ -71,13 +71,13 @@ import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -584,7 +584,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void addDeviceToPlayMedia_triggersFromLocalMediaManager() {
+    public void addDeviceToPlayMedia_callsLocalMediaManager() {
         MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
                 null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
@@ -592,16 +592,15 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
 
-        LocalMediaManager testLocalMediaManager = spy(testMediaOutputController.mLocalMediaManager);
-        testMediaOutputController.mLocalMediaManager = testLocalMediaManager;
+        LocalMediaManager mockLocalMediaManager = mock(LocalMediaManager.class);
+        testMediaOutputController.mLocalMediaManager = mockLocalMediaManager;
 
         testMediaOutputController.addDeviceToPlayMedia(mMediaDevice2);
-
-        verify(testLocalMediaManager).addDeviceToPlayMedia(mMediaDevice2);
+        verify(mockLocalMediaManager).addDeviceToPlayMedia(mMediaDevice2);
     }
 
     @Test
-    public void removeDeviceFromPlayMedia_triggersFromLocalMediaManager() {
+    public void removeDeviceFromPlayMedia_callsLocalMediaManager() {
         MediaOutputController testMediaOutputController = new MediaOutputController(mSpyContext,
                 null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
@@ -609,12 +608,11 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
 
-        LocalMediaManager testLocalMediaManager = spy(testMediaOutputController.mLocalMediaManager);
-        testMediaOutputController.mLocalMediaManager = testLocalMediaManager;
+        LocalMediaManager mockLocalMediaManager = mock(LocalMediaManager.class);
+        testMediaOutputController.mLocalMediaManager = mockLocalMediaManager;
 
         testMediaOutputController.removeDeviceFromPlayMedia(mMediaDevice2);
-
-        verify(testLocalMediaManager).removeDeviceFromPlayMedia(mMediaDevice2);
+        verify(mockLocalMediaManager).removeDeviceFromPlayMedia(mMediaDevice2);
     }
 
     @Test

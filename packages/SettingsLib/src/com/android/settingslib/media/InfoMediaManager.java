@@ -98,14 +98,15 @@ public abstract class InfoMediaManager extends MediaManager {
     private final Map<String, RouteListingPreference.Item> mPreferenceItemMap =
             new ConcurrentHashMap<>();
 
-    public InfoMediaManager(Context context, String packageName, Notification notification,
+    public InfoMediaManager(
+            Context context,
+            @NonNull String packageName,
+            Notification notification,
             LocalBluetoothManager localBluetoothManager) {
         super(context, notification);
 
         mBluetoothManager = localBluetoothManager;
-        if (!TextUtils.isEmpty(packageName)) {
-            mPackageName = packageName;
-        }
+        mPackageName = packageName;
     }
 
     /** Creates an instance of InfoMediaManager. */
@@ -114,6 +115,14 @@ public abstract class InfoMediaManager extends MediaManager {
             String packageName,
             Notification notification,
             LocalBluetoothManager localBluetoothManager) {
+
+        // The caller is only interested in system routes (headsets, built-in speakers, etc), and is
+        // not interested in a specific app's routing. The media routing APIs still require a
+        // package name, so we use the package name of the calling app.
+        if (TextUtils.isEmpty(packageName)) {
+            packageName = context.getPackageName();
+        }
+
         if (Flags.useMediaRouter2ForInfoMediaManager()) {
             try {
                 return new RouterInfoMediaManager(
