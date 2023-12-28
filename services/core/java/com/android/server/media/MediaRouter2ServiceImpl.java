@@ -2264,7 +2264,6 @@ class MediaRouter2ServiceImpl {
                     indexOfRouteProviderInfoByUniqueId(provider.getUniqueId(), mLastProviderInfos);
             MediaRoute2ProviderInfo oldInfo =
                     providerInfoIndex == -1 ? null : mLastProviderInfos.get(providerInfoIndex);
-            MediaRouter2ServiceImpl mediaRouter2Service = mServiceRef.get();
 
             if (oldInfo == newInfo) {
                 // Nothing to do.
