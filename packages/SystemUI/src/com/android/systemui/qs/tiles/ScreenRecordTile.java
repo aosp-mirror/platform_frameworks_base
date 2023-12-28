@@ -194,7 +194,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         ActivityStarter.OnDismissAction dismissAction = () -> {
             if (shouldAnimateFromView) {
                 mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(
-                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG));
+                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG),
+                        /* animateBackgroundBoundsChange= */ true);
             } else {
                 dialog.show();
             }
