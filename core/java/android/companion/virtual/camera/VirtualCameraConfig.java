@@ -24,9 +24,11 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.flags.Flags;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
+import android.hardware.camera2.CameraMetadata;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -47,6 +49,8 @@ import java.util.concurrent.Executor;
 @SystemApi
 @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
 public final class VirtualCameraConfig implements Parcelable {
+
+    private static final int LENS_FACING_UNKNOWN = -1;
 
     /**
      * Sensor orientation of {@code 0} degrees.
@@ -83,14 +87,20 @@ public final class VirtualCameraConfig implements Parcelable {
     private final IVirtualCameraCallback mCallback;
     @SensorOrientation
     private final int mSensorOrientation;
+    private final int mLensFacing;
 
     private VirtualCameraConfig(
             @NonNull String name,
             @NonNull Set<VirtualCameraStreamConfig> streamConfigurations,
             @NonNull Executor executor,
             @NonNull VirtualCameraCallback callback,
-            @SensorOrientation int sensorOrientation) {
+            @SensorOrientation int sensorOrientation,
+            int lensFacing) {
         mName = requireNonNull(name, "Missing name");
+        if (lensFacing == LENS_FACING_UNKNOWN) {
+            throw new IllegalArgumentException("Lens facing must be set");
+        }
+        mLensFacing = lensFacing;
         mStreamConfigurations =
                 Set.copyOf(requireNonNull(streamConfigurations, "Missing stream configurations"));
         if (mStreamConfigurations.isEmpty()) {
@@ -113,6 +123,7 @@ public final class VirtualCameraConfig implements Parcelable {
                                 VirtualCameraStreamConfig.class.getClassLoader(),
                                 VirtualCameraStreamConfig.class));
         mSensorOrientation = in.readInt();
+        mLensFacing = in.readInt();
     }
 
     @Override
@@ -127,6 +138,7 @@ public final class VirtualCameraConfig implements Parcelable {
         dest.writeParcelableArray(
                 mStreamConfigurations.toArray(new VirtualCameraStreamConfig[0]), flags);
         dest.writeInt(mSensorOrientation);
+        dest.writeInt(mLensFacing);
     }
 
     /**
@@ -169,6 +181,15 @@ public final class VirtualCameraConfig implements Parcelable {
     }
 
     /**
+     * Returns the direction that the virtual camera faces relative to the virtual device's screen.
+     *
+     * @see Builder#setLensFacing(int)
+     */
+    public int getLensFacing() {
+        return mLensFacing;
+    }
+
+    /**
      * Builder for {@link VirtualCameraConfig}.
      *
      * <p>To build an instance of {@link VirtualCameraConfig} the following conditions must be met:
@@ -176,6 +197,7 @@ public final class VirtualCameraConfig implements Parcelable {
      * <li>A callback must be set with {@link #setVirtualCameraCallback(Executor,
      *     VirtualCameraCallback)}
      * <li>A camera name must be set with {@link #setName(String)}
+     * <li>A lens facing must be set with {@link #setLensFacing(int)}
      */
     @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
     public static final class Builder {
@@ -185,9 +207,10 @@ public final class VirtualCameraConfig implements Parcelable {
         private Executor mCallbackExecutor;
         private VirtualCameraCallback mCallback;
         private int mSensorOrientation = SENSOR_ORIENTATION_0;
+        private int mLensFacing = LENS_FACING_UNKNOWN;
 
         /**
-         * Set the name of the virtual camera instance.
+         * Sets the name of the virtual camera instance.
          */
         @NonNull
         public Builder setName(@NonNull String name) {
@@ -196,7 +219,7 @@ public final class VirtualCameraConfig implements Parcelable {
         }
 
         /**
-         * Add an available stream configuration fot this {@link VirtualCamera}.
+         * Adds a supported input stream configuration for this {@link VirtualCamera}.
          *
          * <p>At least one {@link VirtualCameraStreamConfig} must be added.
          *
@@ -267,6 +290,27 @@ public final class VirtualCameraConfig implements Parcelable {
         }
 
         /**
+         * Sets the lens facing direction of the virtual camera, can be either
+         * {@link CameraMetadata#LENS_FACING_FRONT} or {@link CameraMetadata#LENS_FACING_BACK}.
+         *
+         * <p>A {@link VirtualDevice} can have at most one {@link VirtualCamera} with
+         * {@link CameraMetadata#LENS_FACING_FRONT} and at most one {@link VirtualCamera} with
+         * {@link CameraMetadata#LENS_FACING_BACK}.
+         *
+         * @param lensFacing The direction that the virtual camera faces relative to the device's
+         *                   screen.
+         */
+        @NonNull
+        public Builder setLensFacing(int lensFacing) {
+            if (lensFacing != CameraMetadata.LENS_FACING_BACK
+                    && lensFacing != CameraMetadata.LENS_FACING_FRONT) {
+                throw new IllegalArgumentException("Unsupported lens facing: " + lensFacing);
+            }
+            mLensFacing = lensFacing;
+            return this;
+        }
+
+        /**
          * Sets the {@link VirtualCameraCallback} used by the framework to communicate with the
          * {@link VirtualCamera} owner.
          *
@@ -289,11 +333,13 @@ public final class VirtualCameraConfig implements Parcelable {
          * Builds a new instance of {@link VirtualCameraConfig}
          *
          * @throws NullPointerException if some required parameters are missing.
+         * @throws IllegalArgumentException if any parameter is invalid.
          */
         @NonNull
         public VirtualCameraConfig build() {
             return new VirtualCameraConfig(
-                    mName, mStreamConfigurations, mCallbackExecutor, mCallback, mSensorOrientation);
+                    mName, mStreamConfigurations, mCallbackExecutor, mCallback, mSensorOrientation,
+                    mLensFacing);
         }
     }
 

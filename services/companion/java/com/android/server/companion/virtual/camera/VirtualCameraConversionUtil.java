@@ -51,6 +51,7 @@ public final class VirtualCameraConversionUtil {
                         .map(VirtualCameraConversionUtil::convertSupportedStreamConfiguration)
                         .toArray(SupportedStreamConfiguration[]::new);
         serviceConfiguration.sensorOrientation = cameraConfig.getSensorOrientation();
+        serviceConfiguration.lensFacing = cameraConfig.getLensFacing();
         serviceConfiguration.virtualCameraCallback = convertCallback(cameraConfig.getCallback());
         return serviceConfiguration;
     }
