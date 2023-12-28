@@ -21,6 +21,7 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
+import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISSIBLE_KEYGUARD;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_NONE_SECURITY;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_PASSWORD;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_SIM;
@@ -862,7 +863,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         boolean finish = false;
         int eventSubtype = -1;
         BouncerUiEvent uiEvent = BouncerUiEvent.UNKNOWN;
-        if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
+        if (mUpdateMonitor.forceIsDismissibleIsKeepingDeviceUnlocked()) {
+            finish = true;
+            eventSubtype = BOUNCER_DISMISSIBLE_KEYGUARD;
+            // TODO: b/308417021 add UI event
+        } else if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
             finish = true;
             eventSubtype = BOUNCER_DISMISS_EXTENDED_ACCESS;
             uiEvent = BouncerUiEvent.BOUNCER_DISMISS_EXTENDED_ACCESS;
