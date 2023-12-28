@@ -145,6 +145,16 @@ flag {
 }
 
 flag {
+    name: "enable_background_keyguard_ondrawn_callback"
+    namespace: "systemui"
+    description: "Calls the onDrawn keyguard in the background, without being blocked by main"
+        "thread work. This results in the screen to turn on earlier when the main thread is stuck. "
+        "Note that, even after this callback is called, we're waiting for all windows to finish "
+        " drawing."
+    bug: "295873557"
+}
+
+flag {
     name: "qs_new_pipeline"
     namespace: "systemui"
     description: "Use the new pipeline for Quick Settings. Should have no behavior changes."
