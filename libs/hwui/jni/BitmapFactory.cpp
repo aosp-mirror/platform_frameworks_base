@@ -26,6 +26,10 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 jfieldID gOptions_justBoundsFieldID;
 jfieldID gOptions_sampleSizeFieldID;
 jfieldID gOptions_configFieldID;
@@ -523,10 +527,32 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
     return bitmap;
 }
 
+// Gets the 'handle' field from a FileDescriptor object. This field is only
+// populated in Windows.
+static jlong jniGetHandleFromFileDescriptor(JNIEnv* env, jobject fileDescriptor) {
+    jclass fileDescriptorClass = android::FindClassOrDie(env, "java/io/FileDescriptor");
+    jfieldID handleField = android::GetFieldIDOrDie(env, fileDescriptorClass, "handle", "J");
+    return env->GetLongField(fileDescriptor, handleField);
+}
+
 static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fileDescriptor,
         jobject padding, jobject bitmapFactoryOptions, jlong inBitmapHandle, jlong colorSpaceHandle) {
-#ifdef _WIN32  // LayoutLib for Windows does not support F_DUPFD_CLOEXEC
-    return nullObjectReturn("Not supported on Windows");
+#ifdef _WIN32
+    HANDLE fileHandle = (HANDLE)jniGetHandleFromFileDescriptor(env, fileDescriptor);
+
+    // Restore the handle's offset on existing this function.
+    AutoHandleSeek autoRestore(fileHandle);
+
+    // Duplicate the file handle
+    HANDLE duplicateHandle;
+    if (!DuplicateHandle(GetCurrentProcess(), fileHandle, GetCurrentProcess(), &duplicateHandle, 0,
+                         FALSE, DUPLICATE_SAME_ACCESS)) {
+        return nullObjectReturn("DuplicateHandle failed");
+    }
+
+    int dupDescriptor = _open_osfhandle((intptr_t)duplicateHandle, _O_RDONLY);
+    FILE* file = _fdopen(dupDescriptor, "r");
+    bool noOffset = SetFilePointer(fileHandle, 0, NULL, FILE_CURRENT) == 0;
 #else
     NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
 
@@ -550,6 +576,10 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     int dupDescriptor = fcntl(descriptor, F_DUPFD_CLOEXEC, 0);
 
     FILE* file = fdopen(dupDescriptor, "r");
+
+    bool noOffset = ::lseek(descriptor, 0, SEEK_CUR) == 0;
+#endif
+
     if (file == NULL) {
         // cleanup the duplicated descriptor since it will not be closed when the
         // file is cleaned up (fclose).
@@ -560,7 +590,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
 
     // If there is no offset for the file descriptor, we use SkFILEStream directly.
-    if (::lseek(descriptor, 0, SEEK_CUR) == 0) {
+    if (noOffset) {
         assert(isSeekable(dupDescriptor));
         return doDecode(env, std::move(fileStream), padding, bitmapFactoryOptions,
                         inBitmapHandle, colorSpaceHandle);
@@ -574,7 +604,6 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
 
     return doDecode(env, std::move(stream), padding, bitmapFactoryOptions, inBitmapHandle,
                     colorSpaceHandle);
-#endif
 }
 
 static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
@@ -596,8 +625,13 @@ static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
 }
 
 static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
+#ifdef _WIN32
+    HANDLE handle = (HANDLE)jniGetHandleFromFileDescriptor(env, fileDescriptor);
+    return isSeekable(handle);
+#else
     jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
     return isSeekable(descriptor) ? JNI_TRUE : JNI_FALSE;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

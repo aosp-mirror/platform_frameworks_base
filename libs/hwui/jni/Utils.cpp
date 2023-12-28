@@ -20,6 +20,10 @@
 
 #include <log/log.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 using namespace android;
 
 AssetStreamAdaptor::AssetStreamAdaptor(Asset* asset)
@@ -151,6 +155,12 @@ jobject android::nullObjectReturn(const char msg[]) {
 bool android::isSeekable(int descriptor) {
     return ::lseek64(descriptor, 0, SEEK_CUR) != -1;
 }
+
+#ifdef _WIN32
+bool android::isSeekable(HANDLE handle) {
+    return SetFilePointer(handle, 0, NULL, FILE_CURRENT) != INVALID_SET_FILE_POINTER;
+}
+#endif
 
 JNIEnv* android::get_env_or_die(JavaVM* jvm) {
     JNIEnv* env;
