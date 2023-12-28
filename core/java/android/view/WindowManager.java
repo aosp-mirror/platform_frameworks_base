@@ -1307,9 +1307,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="true|false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     * @hide
      */
-    // TODO(b/280052089): Make this public API.
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     String PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES =
             "android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES";
 
