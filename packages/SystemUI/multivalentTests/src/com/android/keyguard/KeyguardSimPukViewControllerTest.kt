@@ -24,10 +24,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.res.R
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
@@ -75,8 +75,7 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
             LayoutInflater.from(context).inflate(R.layout.keyguard_sim_puk_view, null)
                 as KeyguardSimPukView
         val fakeFeatureFlags = FakeFeatureFlags()
-        fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
-
+        mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         underTest =
             KeyguardSimPukViewController(
                 simPukView,

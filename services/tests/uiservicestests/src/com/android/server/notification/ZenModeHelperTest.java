@@ -2429,7 +2429,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(0, mZenModeEventLogger.getNumRulesActive(1));
         assertFalse(mZenModeEventLogger.getIsUserAction(1));
         assertEquals(CUSTOM_PKG_UID, mZenModeEventLogger.getPackageUid(1));
-        checkDndProtoMatchesSetupZenConfig(mZenModeEventLogger.getPolicyProto(1));
+        if (Flags.modesApi()) {
+            assertThat(mZenModeEventLogger.getPolicyProto(1)).isNull();
+        } else {
+            checkDndProtoMatchesSetupZenConfig(mZenModeEventLogger.getPolicyProto(1));
+        }
     }
 
     @Test
@@ -2511,7 +2515,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(0, mZenModeEventLogger.getNumRulesActive(1));
         assertTrue(mZenModeEventLogger.getIsUserAction(1));
         assertEquals(Process.SYSTEM_UID, mZenModeEventLogger.getPackageUid(1));
-        checkDndProtoMatchesSetupZenConfig(mZenModeEventLogger.getPolicyProto(1));
+        if (Flags.modesApi()) {
+            assertThat(mZenModeEventLogger.getPolicyProto(1)).isNull();
+        } else {
+            checkDndProtoMatchesSetupZenConfig(mZenModeEventLogger.getPolicyProto(1));
+        }
 
         // When the system rule is enabled, this counts as an automatic action that comes from the
         // system and turns on DND
@@ -3016,6 +3024,48 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testZenModeEventLog_ruleWithInterruptionFilterAll_notLoggedAsDndChange() {
+        mTestFlagResolver.setFlagOverride(LOG_DND_STATE_EVENTS, true);
+        setupZenConfig();
+
+        // An app adds an automatic zen rule
+        AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                null,
+                new ComponentName(CUSTOM_PKG_NAME, "cls"),
+                Uri.parse("condition"),
+                null,
+                NotificationManager.INTERRUPTION_FILTER_ALL, true);
+        String id = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), zenRule,
+                UPDATE_ORIGIN_APP, "test", CUSTOM_PKG_UID);
+
+        // Event 1: App activates the rule automatically.
+        mZenModeHelper.setAutomaticZenRuleState(id,
+                new Condition(zenRule.getConditionId(), "", STATE_TRUE, SOURCE_SCHEDULE),
+                UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        // Event 2: App deactivates the rule automatically.
+        mZenModeHelper.setAutomaticZenRuleState(id,
+                new Condition(zenRule.getConditionId(), "", STATE_FALSE, SOURCE_SCHEDULE),
+                UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        // In total, this represents 2 events.
+        assertEquals(2, mZenModeEventLogger.numLoggedChanges());
+
+        // However, they are not DND_TURNED_ON/_OFF (no notification filtering is taking place).
+        // Also, no consolidated ZenPolicy is logged (because of the same reason).
+        assertThat(mZenModeEventLogger.getEventId(0)).isEqualTo(
+                ZenModeEventLogger.ZenStateChangedEvent.DND_ACTIVE_RULES_CHANGED.getId());
+        assertThat(mZenModeEventLogger.getNumRulesActive(0)).isEqualTo(1);
+        assertThat(mZenModeEventLogger.getPolicyProto(0)).isNull();
+
+        assertThat(mZenModeEventLogger.getEventId(1)).isEqualTo(
+                ZenModeEventLogger.ZenStateChangedEvent.DND_ACTIVE_RULES_CHANGED.getId());
+        assertThat(mZenModeEventLogger.getNumRulesActive(1)).isEqualTo(0);
+        assertThat(mZenModeEventLogger.getPolicyProto(1)).isNull();
+    }
+
+    @Test
     public void testUpdateConsolidatedPolicy_defaultRulesOnly() {
         setupZenConfig();
 
@@ -3200,6 +3250,52 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // rule 2 should override rule 1
         assertFalse(mZenModeHelper.mConsolidatedPolicy.allowPriorityChannels());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testUpdateConsolidatedPolicy_ignoresActiveRulesWithInterruptionFilterAll() {
+        setupZenConfig();
+
+        // Rules with INTERRUPTION_FILTER_ALL are skipped when calculating consolidated policy.
+        // Note: rules with filter != PRIORITY should not have a custom policy. However, as of V
+        // this is only validated on rule addition, but not on rule update. :/
+
+        // Rule 1: PRIORITY, custom policy but not very strict (in fact, less strict than default).
+        AutomaticZenRule zenRuleWithPriority = new AutomaticZenRule("Priority",
+                null,
+                new ComponentName(CUSTOM_PKG_NAME, "cls"),
+                Uri.parse("priority"),
+                new ZenPolicy.Builder().allowMedia(true).build(),
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        String rule1Id = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                zenRuleWithPriority, UPDATE_ORIGIN_APP, "test", CUSTOM_PKG_UID);
+        mZenModeHelper.setAutomaticZenRuleState(rule1Id,
+                new Condition(zenRuleWithPriority.getConditionId(), "", STATE_TRUE),
+                UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        // Rule 2: ALL, but somehow with a super strict ZenPolicy.
+        AutomaticZenRule zenRuleWithAll = new AutomaticZenRule("All",
+                null,
+                new ComponentName(CUSTOM_PKG_NAME, "cls"),
+                Uri.parse("priority"),
+                new ZenPolicy.Builder().disallowAllSounds().build(),
+                NotificationManager.INTERRUPTION_FILTER_ALL, true);
+        String rule2Id = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                zenRuleWithAll, UPDATE_ORIGIN_APP, "test", CUSTOM_PKG_UID);
+        mZenModeHelper.setAutomaticZenRuleState(rule2Id,
+                new Condition(zenRuleWithPriority.getConditionId(), "", STATE_TRUE),
+                UPDATE_ORIGIN_APP, CUSTOM_PKG_UID);
+
+        // Consolidated Policy should be default + rule1.
+        assertThat(mZenModeHelper.mConsolidatedPolicy.allowAlarms()).isFalse();  // default
+        assertThat(mZenModeHelper.mConsolidatedPolicy.allowMedia()).isTrue(); // priority rule
+        assertThat(mZenModeHelper.mConsolidatedPolicy.allowSystem()).isFalse();  // default
+        assertThat(mZenModeHelper.mConsolidatedPolicy.allowReminders()).isTrue();  // default
+        assertThat(mZenModeHelper.mConsolidatedPolicy.allowCalls()).isTrue();  // default
+        assertThat(mZenModeHelper.mConsolidatedPolicy.allowMessages()).isTrue(); // default
+        assertThat(mZenModeHelper.mConsolidatedPolicy.allowConversations()).isTrue();  // default
+        assertThat(mZenModeHelper.mConsolidatedPolicy.allowRepeatCallers()).isTrue(); // default
     }
 
     @Test

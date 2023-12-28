@@ -22,6 +22,7 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.data.repository.BouncerMessageRepository
@@ -29,8 +30,6 @@ import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
@@ -100,7 +99,6 @@ constructor(
     private val repository: BouncerMessageRepository,
     private val userRepository: UserRepository,
     private val countDownTimerUtil: CountDownTimerUtil,
-    private val featureFlags: FeatureFlags,
     private val updateMonitor: KeyguardUpdateMonitor,
     trustRepository: TrustRepository,
     biometricSettingsRepository: BiometricSettingsRepository,
@@ -229,7 +227,7 @@ constructor(
             }
 
     fun onPrimaryAuthLockedOut(secondsBeforeLockoutReset: Long) {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
 
         val callback =
             object : CountDownTimerCallback {
@@ -250,7 +248,7 @@ constructor(
     }
 
     fun onPrimaryAuthIncorrectAttempt() {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
 
         repository.setMessage(
             incorrectSecurityInput(currentSecurityMode, isFingerprintAuthCurrentlyAllowed.value)
@@ -258,21 +256,21 @@ constructor(
     }
 
     fun setFingerprintAcquisitionMessage(value: String?) {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
         repository.setMessage(
             defaultMessage(currentSecurityMode, value, isFingerprintAuthCurrentlyAllowed.value)
         )
     }
 
     fun setFaceAcquisitionMessage(value: String?) {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
         repository.setMessage(
             defaultMessage(currentSecurityMode, value, isFingerprintAuthCurrentlyAllowed.value)
         )
     }
 
     fun setCustomMessage(value: String?) {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
 
         repository.setMessage(
             defaultMessage(currentSecurityMode, value, isFingerprintAuthCurrentlyAllowed.value)
@@ -283,7 +281,7 @@ constructor(
         get() = defaultMessage(currentSecurityMode, isFingerprintAuthCurrentlyAllowed.value)
 
     fun onPrimaryBouncerUserInput() {
-        if (!featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) return
+        if (!Flags.revampedBouncerMessages()) return
         repository.setMessage(defaultMessage)
     }
 

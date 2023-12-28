@@ -36,3 +36,10 @@ flag {
   description: "Guards the security fix that ensures all URIs in intents and Person.java are valid"
   bug: "281044385"
 }
+
+flag {
+  name: "keyguard_private_notifications"
+  namespace: "systemui"
+  description: "Fixes the behavior of KeyguardManager#setPrivateNotificationsAllowed()"
+  bug: "309920145"
+}

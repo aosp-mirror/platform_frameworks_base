@@ -1353,6 +1353,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 });
             }
 
+            // The leashes are copied, but they won't be used.
+            releaseControls(controls);
+
             // The requested visibilities should be delayed as well. Otherwise, we might override
             // the insets visibility before playing animation.
             setRequestedVisibleTypes(mReportedRequestedVisibleTypes, types);
@@ -1419,6 +1422,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         } else if (animationType == ANIMATION_TYPE_HIDE) {
             Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.hideRequestFromApi", 0);
+        }
+    }
+
+    static void releaseControls(SparseArray<InsetsSourceControl> controls) {
+        for (int i = controls.size() - 1; i >= 0; i--) {
+            controls.valueAt(i).release(SurfaceControl::release);
         }
     }
 

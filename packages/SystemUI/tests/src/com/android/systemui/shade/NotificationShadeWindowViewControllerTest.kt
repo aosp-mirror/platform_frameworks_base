@@ -51,7 +51,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
-import com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES
 import com.android.systemui.flags.Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION
 import com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON
 import com.android.systemui.flags.Flags.TRACKPAD_GESTURE_FEATURES
@@ -197,9 +196,9 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         featureFlagsClassic.set(TRACKPAD_GESTURE_COMMON, true)
         featureFlagsClassic.set(TRACKPAD_GESTURE_FEATURES, false)
         featureFlagsClassic.set(SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
-        featureFlagsClassic.set(REVAMPED_BOUNCER_MESSAGES, true)
         featureFlagsClassic.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
 
         testScope = TestScope()
         fakeClock = FakeSystemClock()
@@ -242,7 +241,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                     repository = BouncerMessageRepositoryImpl(),
                     userRepository = FakeUserRepository(),
                     countDownTimerUtil = mock(CountDownTimerUtil::class.java),
-                    featureFlags = featureFlagsClassic,
                     updateMonitor = mock(KeyguardUpdateMonitor::class.java),
                     biometricSettingsRepository = FakeBiometricSettingsRepository(),
                     applicationScope = testScope.backgroundScope,

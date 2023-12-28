@@ -208,10 +208,6 @@ object Flags {
     val WALLPAPER_PICKER_GRID_APPLY_BUTTON =
             unreleasedFlag("wallpaper_picker_grid_apply_button")
 
-    /** Provide new auth messages on the bouncer. */
-    // TODO(b/277961132): Tracking bug.
-    @JvmField val REVAMPED_BOUNCER_MESSAGES = unreleasedFlag("revamped_bouncer_messages")
-
     /** Keyguard Migration */
 
     // TODO(b/297037052): Tracking bug.

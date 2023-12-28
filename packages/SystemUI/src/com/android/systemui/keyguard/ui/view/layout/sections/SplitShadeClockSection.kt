@@ -20,7 +20,6 @@ import android.content.Context
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
@@ -30,17 +29,9 @@ class SplitShadeClockSection
 constructor(
     clockInteractor: KeyguardClockInteractor,
     keyguardClockViewModel: KeyguardClockViewModel,
-    smartspaceViewModel: KeyguardSmartspaceViewModel,
     context: Context,
     splitShadeStateController: SplitShadeStateController,
-) :
-    ClockSection(
-        clockInteractor,
-        keyguardClockViewModel,
-        smartspaceViewModel,
-        context,
-        splitShadeStateController
-    ) {
+) : ClockSection(clockInteractor, keyguardClockViewModel, context, splitShadeStateController) {
     override fun applyDefaultConstraints(constraints: ConstraintSet) {
         super.applyDefaultConstraints(constraints)
         val largeClockEndGuideline =

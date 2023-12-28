@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
+import com.android.systemui.shared.R as sharedR
 import javax.inject.Inject
 
 /** Adds a layer to group elements for translation for burn-in preventation */
@@ -87,7 +88,7 @@ constructor(
         burnInLayer.apply {
             if (smartspaceViewModel.isSmartspaceEnabled) {
                 val smartspaceView =
-                    constraintLayout.requireViewById<View>(smartspaceViewModel.smartspaceViewId)
+                    constraintLayout.requireViewById<View>(sharedR.id.bc_smartspace_view)
                 addView(smartspaceView)
             }
         }

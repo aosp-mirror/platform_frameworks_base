@@ -578,6 +578,7 @@
     <protected-broadcast android:name="com.android.settings.network.SWITCH_TO_SUBSCRIPTION" />
     <protected-broadcast android:name="com.android.settings.wifi.action.NETWORK_REQUEST" />
 
+    <protected-broadcast android:name="android.app.action.KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED" />
     <protected-broadcast android:name="NotificationManagerService.TIMEOUT" />
     <protected-broadcast android:name="NotificationHistoryDatabase.CLEANUP" />
     <protected-broadcast android:name="ScheduleConditionProvider.EVALUATE" />

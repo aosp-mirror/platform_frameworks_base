@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.shared.R as sharedR
 import kotlinx.coroutines.launch
 
 object KeyguardSmartspaceViewBinder {
@@ -69,9 +70,10 @@ object KeyguardSmartspaceViewBinder {
                 smartspaceViewModel.isSmartspaceEnabled &&
                     smartspaceViewModel.isDateWeatherDecoupled
             ) {
-                val dateView = constraintLayout.requireViewById<View>(smartspaceViewModel.dateId)
+                val dateView =
+                    constraintLayout.requireViewById<View>(sharedR.id.date_smartspace_view)
                 val weatherView =
-                    constraintLayout.requireViewById<View>(smartspaceViewModel.weatherId)
+                    constraintLayout.requireViewById<View>(sharedR.id.weather_smartspace_view)
                 addView(weatherView)
                 addView(dateView)
             }
@@ -88,8 +90,10 @@ object KeyguardSmartspaceViewBinder {
                 smartspaceViewModel.isSmartspaceEnabled &&
                     smartspaceViewModel.isDateWeatherDecoupled
             ) {
-                val dateView = smartspaceViewModel.dateView
-                val weatherView = smartspaceViewModel.weatherView
+                val dateView =
+                    constraintLayout.requireViewById<View>(sharedR.id.date_smartspace_view)
+                val weatherView =
+                    constraintLayout.requireViewById<View>(sharedR.id.weather_smartspace_view)
                 removeView(weatherView)
                 removeView(dateView)
             }

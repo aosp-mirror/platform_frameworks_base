@@ -196,9 +196,9 @@ class ViewHierarchyAnimator {
          *
          * @param includeFadeIn true if the animator should also fade in the view and child views.
          * @param fadeInInterpolator the interpolator to use when fading in the view. Unused if
-         *   [includeFadeIn] is false.
-         * @param onAnimationEnd an optional runnable that will be run once the animation finishes
-         *   successfully. Will not be run if the animation is cancelled.
+         *     [includeFadeIn] is false.
+         * @param onAnimationEnd an optional runnable that will be run once the animation
+         *    finishes successfully. Will not be run if the animation is cancelled.
          */
         @JvmOverloads
         fun animateAddition(
@@ -241,10 +241,7 @@ class ViewHierarchyAnimator {
                 // First, fade in the container view
                 val containerDuration = duration / 6
                 createAndStartFadeInAnimator(
-                    rootView,
-                    containerDuration,
-                    startDelay = 0,
-                    interpolator = fadeInInterpolator
+                    rootView, containerDuration, startDelay = 0, interpolator = fadeInInterpolator
                 )
 
                 // Then, fade in the child views
@@ -400,7 +397,7 @@ class ViewHierarchyAnimator {
          * included by specifying [includeMargins].
          *
          * @param onAnimationEnd an optional runnable that will be run once the animation finishes
-         *   successfully. Will not be run if the animation is cancelled.
+         *    successfully. Will not be run if the animation is cancelled.
          */
         @JvmOverloads
         fun animateRemoval(
@@ -619,7 +616,6 @@ class ViewHierarchyAnimator {
          * not newly introduced margins are included.
          *
          * Base case
-         *
          * ```
          *     1) origin=TOP
          *         x---------x    x---------x    x---------x    x---------x    x---------x
@@ -640,11 +636,9 @@ class ViewHierarchyAnimator {
          *                                         x-----x       x-------x     |         |
          *                                                                     x---------x
          * ```
-         *
          * In case the start and end values differ in the direction of the origin, and
          * [ignorePreviousValues] is false, the previous values are used and a translation is
          * included in addition to the view expansion.
-         *
          * ```
          *     origin=TOP_LEFT - (0,0,0,0) -> (30,30,70,70)
          *         x
@@ -783,7 +777,8 @@ class ViewHierarchyAnimator {
             includeMargins: Boolean = false,
         ): Map<Bound, Int> {
             val marginAdjustment =
-                if (includeMargins && (rootView.layoutParams is ViewGroup.MarginLayoutParams)) {
+                if (includeMargins &&
+                    (rootView.layoutParams is ViewGroup.MarginLayoutParams)) {
                     val marginLp = rootView.layoutParams as ViewGroup.MarginLayoutParams
                     DimenHolder(
                         left = marginLp.leftMargin,
@@ -791,9 +786,9 @@ class ViewHierarchyAnimator {
                         right = marginLp.rightMargin,
                         bottom = marginLp.bottomMargin
                     )
-                } else {
-                    DimenHolder(0, 0, 0, 0)
-                }
+            } else {
+                DimenHolder(0, 0, 0, 0)
+            }
 
             // These are the end values to use *if* this bound is part of the destination.
             val endLeft = left - marginAdjustment.left
@@ -810,69 +805,60 @@ class ViewHierarchyAnimator {
             //  - If destination=BOTTOM_LEFT, then endBottom == endTop AND endLeft == endRight.
 
             return when (destination) {
-                Hotspot.TOP ->
-                    mapOf(
-                        Bound.TOP to endTop,
-                        Bound.BOTTOM to endTop,
-                        Bound.LEFT to left,
-                        Bound.RIGHT to right,
-                    )
-                Hotspot.TOP_RIGHT ->
-                    mapOf(
-                        Bound.TOP to endTop,
-                        Bound.BOTTOM to endTop,
-                        Bound.RIGHT to endRight,
-                        Bound.LEFT to endRight,
-                    )
-                Hotspot.RIGHT ->
-                    mapOf(
-                        Bound.RIGHT to endRight,
-                        Bound.LEFT to endRight,
-                        Bound.TOP to top,
-                        Bound.BOTTOM to bottom,
-                    )
-                Hotspot.BOTTOM_RIGHT ->
-                    mapOf(
-                        Bound.BOTTOM to endBottom,
-                        Bound.TOP to endBottom,
-                        Bound.RIGHT to endRight,
-                        Bound.LEFT to endRight,
-                    )
-                Hotspot.BOTTOM ->
-                    mapOf(
-                        Bound.BOTTOM to endBottom,
-                        Bound.TOP to endBottom,
-                        Bound.LEFT to left,
-                        Bound.RIGHT to right,
-                    )
-                Hotspot.BOTTOM_LEFT ->
-                    mapOf(
-                        Bound.BOTTOM to endBottom,
-                        Bound.TOP to endBottom,
-                        Bound.LEFT to endLeft,
-                        Bound.RIGHT to endLeft,
-                    )
-                Hotspot.LEFT ->
-                    mapOf(
-                        Bound.LEFT to endLeft,
-                        Bound.RIGHT to endLeft,
-                        Bound.TOP to top,
-                        Bound.BOTTOM to bottom,
-                    )
-                Hotspot.TOP_LEFT ->
-                    mapOf(
-                        Bound.TOP to endTop,
-                        Bound.BOTTOM to endTop,
-                        Bound.LEFT to endLeft,
-                        Bound.RIGHT to endLeft,
-                    )
-                Hotspot.CENTER ->
-                    mapOf(
-                        Bound.LEFT to (endLeft + endRight) / 2,
-                        Bound.RIGHT to (endLeft + endRight) / 2,
-                        Bound.TOP to (endTop + endBottom) / 2,
-                        Bound.BOTTOM to (endTop + endBottom) / 2,
-                    )
+                Hotspot.TOP -> mapOf(
+                    Bound.TOP to endTop,
+                    Bound.BOTTOM to endTop,
+                    Bound.LEFT to left,
+                    Bound.RIGHT to right,
+                )
+                Hotspot.TOP_RIGHT -> mapOf(
+                    Bound.TOP to endTop,
+                    Bound.BOTTOM to endTop,
+                    Bound.RIGHT to endRight,
+                    Bound.LEFT to endRight,
+                )
+                Hotspot.RIGHT -> mapOf(
+                    Bound.RIGHT to endRight,
+                    Bound.LEFT to endRight,
+                    Bound.TOP to top,
+                    Bound.BOTTOM to bottom,
+                )
+                Hotspot.BOTTOM_RIGHT -> mapOf(
+                    Bound.BOTTOM to endBottom,
+                    Bound.TOP to endBottom,
+                    Bound.RIGHT to endRight,
+                    Bound.LEFT to endRight,
+                )
+                Hotspot.BOTTOM -> mapOf(
+                    Bound.BOTTOM to endBottom,
+                    Bound.TOP to endBottom,
+                    Bound.LEFT to left,
+                    Bound.RIGHT to right,
+                )
+                Hotspot.BOTTOM_LEFT -> mapOf(
+                    Bound.BOTTOM to endBottom,
+                    Bound.TOP to endBottom,
+                    Bound.LEFT to endLeft,
+                    Bound.RIGHT to endLeft,
+                )
+                Hotspot.LEFT -> mapOf(
+                    Bound.LEFT to endLeft,
+                    Bound.RIGHT to endLeft,
+                    Bound.TOP to top,
+                    Bound.BOTTOM to bottom,
+                )
+                Hotspot.TOP_LEFT -> mapOf(
+                    Bound.TOP to endTop,
+                    Bound.BOTTOM to endTop,
+                    Bound.LEFT to endLeft,
+                    Bound.RIGHT to endLeft,
+                )
+                Hotspot.CENTER -> mapOf(
+                    Bound.LEFT to (endLeft + endRight) / 2,
+                    Bound.RIGHT to (endLeft + endRight) / 2,
+                    Bound.TOP to (endTop + endBottom) / 2,
+                    Bound.BOTTOM to (endTop + endBottom) / 2,
+                )
             }
         }
 
@@ -1097,13 +1083,11 @@ class ViewHierarchyAnimator {
             animator.startDelay = startDelay
             animator.duration = duration
             animator.interpolator = interpolator
-            animator.addListener(
-                object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        view.setTag(R.id.tag_alpha_animator, null /* tag */)
-                    }
+            animator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    view.setTag(R.id.tag_alpha_animator, null /* tag */)
                 }
-            )
+            })
 
             (view.getTag(R.id.tag_alpha_animator) as? ObjectAnimator)?.cancel()
             view.setTag(R.id.tag_alpha_animator, animator)
