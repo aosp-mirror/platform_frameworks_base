@@ -62,3 +62,10 @@ flag {
     description: "Exempt the default sms app of the context user for suspension when calling setPersonalAppsSuspended"
     bug: "309183330"
 }
+
+flag {
+  name: "backup_service_security_log_event_enabled"
+  namespace: "enterprise"
+  description: "Emit a security log event when DPM.setBackupServiceEnabled is called"
+  bug: "304999634"
+}

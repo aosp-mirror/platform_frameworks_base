@@ -48,3 +48,4 @@ option java_package android.app.admin
 210041 security_package_installed               (package_name|3),(version_code|1),(user_id|1)
 210042 security_package_updated                 (package_name|3),(version_code|1),(user_id|1)
 210043 security_package_uninstalled             (package_name|3),(version_code|1),(user_id|1)
+210044 security_backup_service_toggled          (package|3),(admin_user|1),(enabled|1)
