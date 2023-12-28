@@ -164,6 +164,19 @@ public class GenericWindowPolicyControllerTest {
     }
 
     @Test
+    public void userNotAllowlisted_systemUserCanLaunchBlockedAppStreamingActivity() {
+        GenericWindowPolicyController gwpc = createGwpcWithNoAllowedUsers();
+        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
+
+        ActivityInfo activityInfo = getActivityInfo(
+                BLOCKED_APP_STREAMING_COMPONENT.getPackageName(),
+                BLOCKED_APP_STREAMING_COMPONENT.getClassName(),
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+        assertActivityCanBeLaunched(gwpc, activityInfo);
+    }
+
+    @Test
     public void openNonBlockedAppOnVirtualDisplay_isNotBlocked() {
         GenericWindowPolicyController gwpc = createGwpc();
         gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);

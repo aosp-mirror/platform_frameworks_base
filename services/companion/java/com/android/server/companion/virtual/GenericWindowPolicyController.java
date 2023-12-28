@@ -288,15 +288,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         }
         final UserHandle activityUser =
                 UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid);
+        final ComponentName activityComponent = activityInfo.getComponentName();
+        if (BLOCKED_APP_STREAMING_COMPONENT.equals(activityComponent) && activityUser.isSystem()) {
+            // The error dialog alerting users that streaming is blocked is always allowed.
+            return true;
+        }
         if (!mAllowedUsers.contains(activityUser)) {
             Slog.d(TAG, "Virtual device launch disallowed from user " + activityUser);
             return false;
-        }
-
-        final ComponentName activityComponent = activityInfo.getComponentName();
-        if (BLOCKED_APP_STREAMING_COMPONENT.equals(activityComponent)) {
-            // The error dialog alerting users that streaming is blocked is always allowed.
-            return true;
         }
         if (!activityMatchesDisplayCategory(activityInfo)) {
             Slog.d(TAG, "The activity's required display category '"
