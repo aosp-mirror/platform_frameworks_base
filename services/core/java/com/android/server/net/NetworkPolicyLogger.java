@@ -42,6 +42,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.Keep;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.RingBuffer;
 import com.android.server.am.ProcessList;
@@ -693,6 +694,7 @@ public class NetworkPolicyLogger {
      * Note: This class needs to be public for RingBuffer class to be able to create
      * new instances of this.
      */
+    @Keep
     public static final class Data {
         public int type;
         public long timeStamp;
