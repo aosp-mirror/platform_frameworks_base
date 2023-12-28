@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.test.assertSizeIsEqualTo
 import com.google.common.truth.Truth.assertThat
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -252,6 +253,41 @@ class MovableElementTest {
                             .size
                     )
                     .isEqualTo(1)
+            }
+        }
+    }
+
+    @Test
+    @Ignore("b/317972419#comment2")
+    fun movableElementContentIsRecomposedIfContentParametersChange() {
+        @Composable
+        fun SceneScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
+            MovableElement(TestElements.Foo, modifier) { content { Text(text) } }
+        }
+
+        rule.testTransition(
+            fromSceneContent = { MovableFoo(text = "fromScene") },
+            toSceneContent = { MovableFoo(text = "toScene") },
+            transition = { spec = tween(durationMillis = 16 * 4, easing = LinearEasing) },
+            fromScene = TestScenes.SceneA,
+            toScene = TestScenes.SceneB,
+        ) {
+            // Before the transition, only fromScene is composed.
+            before {
+                rule.onNodeWithText("fromScene").assertIsDisplayed()
+                rule.onNodeWithText("toScene").assertDoesNotExist()
+            }
+
+            // During the transition, the element is composed in toScene.
+            at(32) {
+                rule.onNodeWithText("fromScene").assertDoesNotExist()
+                rule.onNodeWithText("toScene").assertIsDisplayed()
+            }
+
+            // At the end of the transition, the element is composed in toScene.
+            after {
+                rule.onNodeWithText("fromScene").assertDoesNotExist()
+                rule.onNodeWithText("toScene").assertIsDisplayed()
             }
         }
     }

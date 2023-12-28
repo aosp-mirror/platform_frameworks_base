@@ -34,14 +34,19 @@ internal fun Element(
     modifier: Modifier,
     content: @Composable ElementScope<ElementContentScope>.() -> Unit,
 ) {
+    val contentScope = scene.scope
+    val elementScope =
+        remember(layoutImpl, key, scene, contentScope) {
+            ElementScopeImpl(layoutImpl, key, scene, contentScope)
+        }
+
     ElementBase(
         layoutImpl,
         scene,
         key,
         modifier,
+        elementScope,
         content,
-        scene.scope,
-        isMovable = false,
     )
 }
 
@@ -53,14 +58,19 @@ internal fun MovableElement(
     modifier: Modifier,
     content: @Composable ElementScope<MovableElementContentScope>.() -> Unit,
 ) {
+    val contentScope = scene.scope
+    val elementScope =
+        remember(layoutImpl, key, scene, contentScope) {
+            MovableElementScopeImpl(layoutImpl, key, scene, contentScope)
+        }
+
     ElementBase(
         layoutImpl,
         scene,
         key,
         modifier,
+        elementScope,
         content,
-        scene.scope,
-        isMovable = true,
     )
 }
 
@@ -70,26 +80,16 @@ private inline fun <ContentScope> ElementBase(
     scene: Scene,
     key: ElementKey,
     modifier: Modifier,
-    content: @Composable ElementScope<ContentScope>.() -> Unit,
-    contentScope: ContentScope,
-    isMovable: Boolean,
+    elementScope: ElementScope<ContentScope>,
+    content: @Composable (ElementScope<ContentScope>.() -> Unit),
 ) {
-    Box(modifier.element(layoutImpl, scene, key)) {
-        val elementScope =
-            remember(layoutImpl, key, scene, contentScope, isMovable) {
-                ElementScopeImpl(layoutImpl, key, scene, contentScope, isMovable)
-            }
-
-        elementScope.content()
-    }
+    Box(modifier.element(layoutImpl, scene, key)) { elementScope.content() }
 }
 
-private class ElementScopeImpl<ContentScope>(
+private abstract class BaseElementScope<ContentScope>(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val element: ElementKey,
     private val scene: Scene,
-    private val contentScope: ContentScope,
-    private val isMovable: Boolean,
 ) : ElementScope<ContentScope> {
     @Composable
     override fun <T> animateElementValueAsState(
@@ -108,14 +108,28 @@ private class ElementScopeImpl<ContentScope>(
             canOverflow,
         )
     }
+}
 
+private class ElementScopeImpl(
+    layoutImpl: SceneTransitionLayoutImpl,
+    element: ElementKey,
+    scene: Scene,
+    private val contentScope: ElementContentScope,
+) : BaseElementScope<ElementContentScope>(layoutImpl, element, scene) {
     @Composable
-    override fun content(content: @Composable ContentScope.() -> Unit) {
-        if (!isMovable) {
-            contentScope.content()
-            return
-        }
+    override fun content(content: @Composable ElementContentScope.() -> Unit) {
+        contentScope.content()
+    }
+}
 
+private class MovableElementScopeImpl(
+    private val layoutImpl: SceneTransitionLayoutImpl,
+    private val element: ElementKey,
+    private val scene: Scene,
+    private val contentScope: MovableElementContentScope,
+) : BaseElementScope<MovableElementContentScope>(layoutImpl, element, scene) {
+    @Composable
+    override fun content(content: @Composable MovableElementContentScope.() -> Unit) {
         // Whether we should compose the movable element here. The scene picker logic to know in
         // which scene we should compose/draw a movable element might depend on the current
         // transition progress, so we put this in a derivedStateOf to prevent many recompositions
@@ -130,10 +144,14 @@ private class ElementScopeImpl<ContentScope>(
         if (shouldComposeMovableElement) {
             val movableContent: MovableElementContent =
                 layoutImpl.movableContents[element]
-                    ?: movableContentOf { content: @Composable () -> Unit -> content() }
+                    ?: movableContentOf {
+                            contentScope: MovableElementContentScope,
+                            content: @Composable MovableElementContentScope.() -> Unit ->
+                            contentScope.content()
+                        }
                         .also { layoutImpl.movableContents[element] = it }
 
-            movableContent { contentScope.content() }
+            movableContent(contentScope, content)
         } else {
             // If we are not composed, we still need to lay out an empty space with the same *target
             // size* as its movable content, i.e. the same *size when idle*. During transitions,
