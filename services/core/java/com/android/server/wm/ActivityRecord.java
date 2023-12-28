@@ -4327,7 +4327,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         mTaskSupervisor.mStoppingActivities.remove(this);
         mLetterboxUiController.destroy();
-        waitingToShow = false;
 
         // Defer removal of this activity when either a child is animating, or app transition is on
         // going. App transition animation might be applied on the parent task not on the activity,
@@ -5401,7 +5400,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final DisplayContent displayContent = getDisplayContent();
         displayContent.mOpeningApps.remove(this);
         displayContent.mClosingApps.remove(this);
-        waitingToShow = false;
         setVisibleRequested(visible);
         mLastDeferHidingClient = deferHidingClient;
 
@@ -5426,25 +5424,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // stopped, then we need to set up to wait for its windows to be ready.
             if (!isVisible() || mAppStopped) {
                 clearAllDrawn();
-
-                // If the app was already visible, don't reset the waitingToShow state.
-                if (!isVisible()) {
-                    waitingToShow = true;
-
-                    // If the client isn't hidden, we don't need to reset the drawing state.
-                    if (!isClientVisible()) {
-                        // Let's reset the draw state in order to prevent the starting window to be
-                        // immediately dismissed when the app still has the surface.
-                        forAllWindows(w -> {
-                            if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
-                                w.mWinAnimator.resetDrawState();
-
-                                // Force add to mResizingWindows, so that we are guaranteed to get
-                                // another reportDrawn callback.
-                                w.forceReportingResized();
-                            }
-                        }, true /* traverseTopToBottom */);
-                    }
+                // Reset the draw state in order to prevent the starting window to be immediately
+                // dismissed when the app still has the surface.
+                if (!isVisible() && !isClientVisible()) {
+                    forAllWindows(w -> {
+                        if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
+                            w.mWinAnimator.resetDrawState();
+                            // Force add to mResizingWindows, so the window will report drawn.
+                            w.forceReportingResized();
+                        }
+                    }, true /* traverseTopToBottom */);
                 }
             }
 
