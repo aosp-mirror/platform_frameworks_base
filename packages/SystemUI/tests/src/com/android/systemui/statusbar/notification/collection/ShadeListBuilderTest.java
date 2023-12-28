@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpTree;
 import static com.android.systemui.statusbar.notification.collection.ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS;
 

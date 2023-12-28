@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
 
-import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 
 import static org.junit.Assert.assertFalse;

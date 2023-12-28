@@ -29,7 +29,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.logcatLogBuffer
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
