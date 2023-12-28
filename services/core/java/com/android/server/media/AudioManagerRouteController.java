@@ -57,7 +57,7 @@ import java.util.Objects;
  *
  * <p>This implementation obtains and manages all routes via {@link AudioManager}, with the
  * exception of {@link AudioManager#handleBluetoothActiveDeviceChanged inactive bluetooth} routes
- * which are managed by {@link AudioPoliciesBluetoothRouteController}, which depends on the
+ * which are managed by {@link BluetoothDeviceRoutesManager}, which depends on the
  * bluetooth stack ({@link BluetoothAdapter} and related classes).
  */
 /* package */ final class AudioManagerRouteController implements DeviceRouteController {
@@ -75,7 +75,7 @@ import java.util.Objects;
     @NonNull private final AudioManager mAudioManager;
     @NonNull private final Handler mHandler;
     @NonNull private final OnDeviceRouteChangedListener mOnDeviceRouteChangedListener;
-    @NonNull private final AudioPoliciesBluetoothRouteController mBluetoothRouteController;
+    @NonNull private final BluetoothDeviceRoutesManager mBluetoothRouteController;
 
     @NonNull
     private final Map<String, MediaRoute2InfoHolder> mRouteIdToAvailableDeviceRoutes =
@@ -118,7 +118,7 @@ import java.util.Objects;
                 DeviceRouteController.getBuiltInSpeakerSuitabilityStatus(mContext);
 
         mBluetoothRouteController =
-                new AudioPoliciesBluetoothRouteController(
+                new BluetoothDeviceRoutesManager(
                         mContext, btAdapter, this::rebuildAvailableRoutesAndNotify);
         // Just build routes but don't notify. The caller may not expect the listener to be invoked
         // before this constructor has finished executing.
