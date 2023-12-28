@@ -344,6 +344,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private ActiveNotificationsInteractor mActiveNotificationsInteractor;
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
     @Mock private NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
+    @Mock private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
@@ -425,7 +426,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                                 mContext,
                                 new ResourcesSplitShadeStateController(),
                                 mKeyguardInteractor,
-                                deviceEntryUdfpsInteractor
+                                deviceEntryUdfpsInteractor,
+                                () -> mLargeScreenHeaderHelper
                         ),
                         mShadeRepository
                 )
@@ -806,7 +808,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mActiveNotificationsInteractor,
                 mJavaAdapter,
                 mCastController,
-                new ResourcesSplitShadeStateController()
+                new ResourcesSplitShadeStateController(),
+                () -> mLargeScreenHeaderHelper
         );
     }
 

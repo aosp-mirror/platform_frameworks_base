@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -52,7 +53,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.Mockito.any
@@ -74,15 +74,16 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
-    @Mock lateinit var view: NotificationsQuickSettingsContainer
-    @Mock lateinit var navigationModeController: NavigationModeController
-    @Mock lateinit var overviewProxyService: OverviewProxyService
-    @Mock lateinit var shadeHeaderController: ShadeHeaderController
-    @Mock lateinit var shadeInteractor: ShadeInteractor
-    @Mock lateinit var fragmentService: FragmentService
-    @Mock lateinit var fragmentHostManager: FragmentHostManager
-    @Mock
-    lateinit var notificationStackScrollLayoutController: NotificationStackScrollLayoutController
+    private val view = mock<NotificationsQuickSettingsContainer>()
+    private val navigationModeController = mock<NavigationModeController>()
+    private val overviewProxyService = mock<OverviewProxyService>()
+    private val shadeHeaderController = mock<ShadeHeaderController>()
+    private val shadeInteractor = mock<ShadeInteractor>()
+    private val fragmentService = mock<FragmentService>()
+    private val fragmentHostManager = mock<FragmentHostManager>()
+    private val notificationStackScrollLayoutController =
+        mock<NotificationStackScrollLayoutController>()
+    private val largeScreenHeaderHelper = mock<LargeScreenHeaderHelper>()
 
     @Captor lateinit var navigationModeCaptor: ArgumentCaptor<ModeChangedListener>
     @Captor lateinit var taskbarVisibilityCaptor: ArgumentCaptor<OverviewProxyListener>
@@ -123,7 +124,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 delayableExecutor,
                 featureFlags,
                 notificationStackScrollLayoutController,
-                ResourcesSplitShadeStateController()
+                ResourcesSplitShadeStateController(),
+                largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
             )
 
         overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
@@ -480,7 +482,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 delayableExecutor,
                 featureFlags,
                 notificationStackScrollLayoutController,
-                ResourcesSplitShadeStateController()
+                ResourcesSplitShadeStateController(),
+                largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
             )
         controller.updateConstraints()
 

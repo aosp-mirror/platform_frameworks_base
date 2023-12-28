@@ -143,6 +143,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private UserTracker mUserTracker;
     @Mock private SceneContainerFlags mSceneContainerFlags;
+    @Mock private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
 
@@ -261,7 +262,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                                 mContext,
                                 new ResourcesSplitShadeStateController(),
                                 keyguardInteractor,
-                                deviceEntryUdfpsInteractor),
+                                deviceEntryUdfpsInteractor,
+                                () -> mLargeScreenHeaderHelper),
                         shadeRepository
                 )
         );

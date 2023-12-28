@@ -126,6 +126,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
@@ -349,6 +350,8 @@ public class BubblesTest extends SysuiTestCase {
     private Display mDefaultDisplay;
     @Mock
     private SceneContainerFlags mSceneContainerFlags;
+    @Mock
+    private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
 
     private final SceneTestUtils mUtils = new SceneTestUtils(this);
     private final TestScope mTestScope = mUtils.getTestScope();
@@ -490,7 +493,8 @@ public class BubblesTest extends SysuiTestCase {
                                         mContext,
                                         splitShadeStateController,
                                         keyguardInteractor,
-                                        deviceEntryUdfpsInteractor),
+                                        deviceEntryUdfpsInteractor,
+                                        () -> mLargeScreenHeaderHelper),
                                 shadeRepository
                         )
                 );

@@ -18,6 +18,8 @@ package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
+import static com.android.systemui.Flags.centralizedStatusBarDimensRefactor;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Path;
@@ -30,6 +32,7 @@ import android.widget.FrameLayout;
 import com.android.systemui.Dumpable;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
 
@@ -162,8 +165,12 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
             QuickStatusBarHeaderController quickStatusBarHeaderController) {
         int topPadding = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
         if (!LargeScreenUtils.shouldUseLargeScreenShadeHeader(mContext.getResources())) {
-            topPadding = mContext.getResources()
-                    .getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
+            topPadding =
+                    centralizedStatusBarDimensRefactor()
+                            ? LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext)
+                            : mContext.getResources()
+                                    .getDimensionPixelSize(
+                                            R.dimen.large_screen_shade_header_height);
         }
         mQSPanelContainer.setPaddingRelative(
                 mQSPanelContainer.getPaddingStart(),
