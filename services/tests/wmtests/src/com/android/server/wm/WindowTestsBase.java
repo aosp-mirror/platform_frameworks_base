@@ -107,6 +107,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
+import android.window.ITaskFragmentOrganizer;
 import android.window.ITransitionPlayer;
 import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
@@ -889,6 +890,22 @@ class WindowTestsBase extends SystemServiceTestsBase {
         parentTask.mAtmService.mWindowOrganizerController.mLaunchTaskFragments
                 .put(fragmentToken, taskFragment);
         return taskFragment;
+    }
+
+    /** @see TaskFragmentOrganizerController#registerOrganizer */
+    void registerTaskFragmentOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
+        registerTaskFragmentOrganizer(organizer, false /* isSystemOrganizer */);
+    }
+
+    /** @see TaskFragmentOrganizerController#registerOrganizer */
+    void registerTaskFragmentOrganizer(@NonNull ITaskFragmentOrganizer organizer,
+            boolean isSystemOrganizer) {
+        // Ensure there is an IApplicationThread to dispatch TaskFragmentTransaction.
+        if (mAtm.mProcessMap.getProcess(WindowManagerService.MY_PID) == null) {
+            mSystemServicesTestRule.addProcess("pkgName", "procName",
+                    WindowManagerService.MY_PID, WindowManagerService.MY_UID);
+        }
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(organizer, isSystemOrganizer);
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */

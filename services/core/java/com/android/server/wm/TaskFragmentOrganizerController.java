@@ -477,11 +477,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 : null;
     }
 
-    @VisibleForTesting
-    void registerOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
-        registerOrganizerInternal(organizer, false /* isSystemOrganizer */);
-    }
-
     @Override
     public void registerOrganizer(
             @NonNull ITaskFragmentOrganizer organizer, boolean isSystemOrganizer) {
@@ -490,8 +485,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 Flags.taskFragmentSystemOrganizerFlag() && isSystemOrganizer);
     }
 
-    @VisibleForTesting
-    void registerOrganizerInternal(
+    private void registerOrganizerInternal(
             @NonNull ITaskFragmentOrganizer organizer, boolean isSystemOrganizer) {
         if (isSystemOrganizer) {
             enforceTaskPermission("registerSystemOrganizer()");

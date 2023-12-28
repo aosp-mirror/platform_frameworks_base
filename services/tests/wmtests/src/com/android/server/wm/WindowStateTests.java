@@ -814,7 +814,7 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testEmbeddedActivityResizing_clearAllDrawn() {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+        registerTaskFragmentOrganizer(
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
         final Task task = createTask(mDisplayContent);
         final TaskFragment embeddedTf = createTaskFragmentWithEmbeddedActivity(task, organizer);

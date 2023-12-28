@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -88,7 +87,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.RemoteAnimationDefinition;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
@@ -110,7 +108,6 @@ import androidx.test.filters.SmallTest;
 import com.android.window.flags.Flags;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -129,9 +126,6 @@ import java.util.List;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
-
-    @Rule
-    public SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     private TaskFragmentOrganizerController mController;
     private WindowOrganizerController mWindowOrganizerController;
@@ -202,7 +196,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         doNothing().when(mOrganizer).applyTransaction(any(), anyInt(), anyBoolean());
         doNothing().when(mOrganizer).onTransactionHandled(any(), any(), anyInt(), anyBoolean());
 
-        mController.registerOrganizer(mIOrganizer);
+        registerTaskFragmentOrganizer(mIOrganizer);
     }
 
     @Test
@@ -249,7 +243,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mSetFlagsRule.enableFlags(Flags.FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
         // Re-register the organizer in case the flag was disabled during setup.
         mController.unregisterOrganizer(mIOrganizer);
-        mController.registerOrganizer(mIOrganizer);
+        registerTaskFragmentOrganizer(mIOrganizer);
 
         // No-op when the TaskFragment is not attached.
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
@@ -271,8 +265,10 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testOnTaskFragmentAppeared_systemOrganizer() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         mController.unregisterOrganizer(mIOrganizer);
-        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
 
         // No-op when the TaskFragment is not attached.
         mController.onTaskFragmentAppeared(mTaskFragment.getTaskFragmentOrganizer(), mTaskFragment);
@@ -613,8 +609,10 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testApplyTransaction_allowRemoteTransitionForSystemOrganizer() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         mController.unregisterOrganizer(mIOrganizer);
-        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
 
         mTransaction.setRelativeBounds(mFragmentWindowToken, new Rect(0, 0, 100, 100));
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
@@ -1104,7 +1102,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         // Nothing should happen as the organizer is not registered.
         assertNull(mWindowOrganizerController.getTaskFragment(fragmentToken));
 
-        mController.registerOrganizer(mIOrganizer);
+        registerTaskFragmentOrganizer(mIOrganizer);
         assertApplyTransactionAllowed(mTransaction);
 
         // Successfully created when the organizer is registered.
@@ -1740,8 +1738,10 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testApplyTransaction_reorderToBottomOfTask() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         mController.unregisterOrganizer(mIOrganizer);
-        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
         final Task task = createTask(mDisplayContent);
         // Create a non-embedded Activity at the bottom.
         final ActivityRecord bottomActivity = new ActivityBuilder(mAtm)
@@ -1775,8 +1775,10 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testApplyTransaction_reorderToTopOfTask() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         mController.unregisterOrganizer(mIOrganizer);
-        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
         final Task task = createTask(mDisplayContent);
         // Create a non-embedded Activity at the bottom.
         final ActivityRecord bottomActivity = new ActivityBuilder(mAtm)
@@ -1810,9 +1812,11 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testApplyTransaction_createTaskFragmentDecorSurface() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         // TODO(b/293654166) remove system organizer requirement once security review is cleared.
         mController.unregisterOrganizer(mIOrganizer);
-        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
         final Task task = createTask(mDisplayContent);
 
         final TaskFragment tf = createTaskFragment(task);
@@ -1827,9 +1831,11 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
     @Test
     public void testApplyTransaction_removeTaskFragmentDecorSurface() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         // TODO(b/293654166) remove system organizer requirement once security review is cleared.
         mController.unregisterOrganizer(mIOrganizer);
-        mController.registerOrganizerInternal(mIOrganizer, true /* isSystemOrganizer */);
+        registerTaskFragmentOrganizer(mIOrganizer, true /* isSystemOrganizer */);
         final Task task = createTask(mDisplayContent);
         final TaskFragment tf = createTaskFragment(task);
 
