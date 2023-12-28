@@ -207,4 +207,20 @@ constructor(
             seenNotificationsInteractor.hasFilteredOutSeenNotifications
         }
     }
+
+    val hasClearableAlertingNotifications: Flow<Boolean> by lazy {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            activeNotificationsInteractor.hasClearableAlertingNotifications
+        }
+    }
+
+    val hasNonClearableSilentNotifications: Flow<Boolean> by lazy {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            activeNotificationsInteractor.hasNonClearableSilentNotifications
+        }
+    }
 }

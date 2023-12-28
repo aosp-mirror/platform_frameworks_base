@@ -22,10 +22,11 @@ import com.android.systemui.common.ui.configurationState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.statusbar.notification.collection.render.silentHeaderController
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.notificationIconContainerShelfViewBinder
 import com.android.systemui.statusbar.notification.notificationActivityStarter
-import com.android.systemui.statusbar.notification.stack.ui.view.notificationStatsLogger
 import com.android.systemui.statusbar.notification.stack.displaySwitchNotificationsHiderTracker
+import com.android.systemui.statusbar.notification.stack.ui.view.notificationStatsLogger
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationListViewModel
 import com.android.systemui.statusbar.phone.notificationIconAreaController
 import java.util.Optional
@@ -42,5 +43,6 @@ val Kosmos.notificationListViewBinder by Fixture {
         hiderTracker = displaySwitchNotificationsHiderTracker,
         nicBinder = notificationIconContainerShelfViewBinder,
         notificationActivityStarter = { notificationActivityStarter },
+        silentHeaderController = silentHeaderController,
     )
 }
