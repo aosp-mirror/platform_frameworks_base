@@ -178,6 +178,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     int applyKeyguardOcclusionChange();
 
     /**
+     * Shows the keyguard immediately if not already shown.
+     * Does NOT immediately request the device to lock.
+     */
+    void showDismissibleKeyguard();
+
+    /**
      * Interface to the Window Manager state associated with a particular
      * window. You can hold on to an instance of this interface from the call
      * to prepareAddWindow() until removeWindow().

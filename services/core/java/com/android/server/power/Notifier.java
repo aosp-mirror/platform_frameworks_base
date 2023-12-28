@@ -411,6 +411,11 @@ public class Notifier {
         mWakeLockLog.onWakeLockReleased(tag, ownerUid);
     }
 
+    /** Shows the keyguard without requesting the device to immediately lock. */
+    public void showDismissibleKeyguard() {
+        mPolicy.showDismissibleKeyguard();
+    }
+
     private int getBatteryStatsWakeLockMonitorType(int flags) {
         switch (flags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
             case PowerManager.PARTIAL_WAKE_LOCK:

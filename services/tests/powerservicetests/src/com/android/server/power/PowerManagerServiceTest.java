@@ -97,6 +97,7 @@ import android.view.DisplayInfo;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -164,6 +165,7 @@ public class PowerManagerServiceTest {
     @Mock private AttentionManagerInternal mAttentionManagerInternalMock;
     @Mock private DreamManagerInternal mDreamManagerInternalMock;
     @Mock private PowerManagerService.NativeWrapper mNativeWrapperMock;
+    @Mock private FoldGracePeriodProvider mFoldGracePeriodProvider;
     @Mock private Notifier mNotifierMock;
     @Mock private WirelessChargerDetector mWirelessChargerDetectorMock;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfigurationMock;
@@ -359,6 +361,11 @@ public class PowerManagerServiceTest {
             DeviceConfigParameterProvider createDeviceConfigParameterProvider() {
                 return mDeviceParameterProvider;
             }
+
+            @Override
+            FoldGracePeriodProvider createFoldGracePeriodProvider() {
+                return mFoldGracePeriodProvider;
+            }
         });
         return mService;
     }
@@ -520,6 +527,8 @@ public class PowerManagerServiceTest {
 
     @Test
     public void testWakefulnessSleep_SoftSleepFlag_NoWakelocks() {
+        when(mFoldGracePeriodProvider.isEnabled()).thenReturn(false);
+
         createService();
         // Start with AWAKE state
         startSystem();
@@ -530,6 +539,23 @@ public class PowerManagerServiceTest {
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
                 PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
+    }
+
+    @Test
+    public void testWakefulnessAwakeShowKeyguard_SoftSleepFlag_NoWakelocks() {
+        when(mFoldGracePeriodProvider.isEnabled()).thenReturn(true);
+
+        createService();
+        // Start with AWAKE state
+        startSystem();
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+
+        // Take a nap and verify we stay awake and the keyguard is requested
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
+                PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
+                PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        verify(mNotifierMock).showDismissibleKeyguard();
     }
 
     @Test
@@ -548,7 +574,7 @@ public class PowerManagerServiceTest {
                 null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
                 null /* callback */);
 
-        // Take a nap and verify we stay awake.
+        // Take a nap and verify we go to sleep.
         mService.getBinderServiceInstance().goToSleep(mClock.now(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
                 PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
