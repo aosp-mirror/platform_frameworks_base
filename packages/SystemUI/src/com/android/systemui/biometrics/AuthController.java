@@ -106,6 +106,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.Job;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -136,6 +137,7 @@ public class AuthController implements
     private final Provider<UdfpsController> mUdfpsControllerFactory;
     private final Provider<SideFpsController> mSidefpsControllerFactory;
     private final CoroutineScope mApplicationCoroutineScope;
+    private Job mBiometricContextListenerJob = null;
 
     // TODO: these should be migrated out once ready
     @NonNull private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
@@ -914,7 +916,11 @@ public class AuthController implements
 
     @Override
     public void setBiometricContextListener(IBiometricContextListener listener) {
-        mLogContextInteractor.get().addBiometricContextListener(listener);
+        if (mBiometricContextListenerJob != null) {
+            mBiometricContextListenerJob.cancel(null);
+        }
+        mBiometricContextListenerJob =
+                mLogContextInteractor.get().addBiometricContextListener(listener);
     }
 
     /**
