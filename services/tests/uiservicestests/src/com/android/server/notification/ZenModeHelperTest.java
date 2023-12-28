@@ -3780,6 +3780,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .allowCalls(PEOPLE_TYPE_CONTACTS)
                 .allowConversations(CONVERSATION_SENDERS_IMPORTANT)
                 .hideAllVisualEffects()
+                .allowChannels(ZenPolicy.CHANNEL_TYPE_PRIORITY)
                 .build();
         assertThat(mZenModeHelper.mConfig.automaticRules.values())
                 .comparingElementsUsing(IGNORE_TIMESTAMPS)
@@ -3811,6 +3812,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .allowCalls(PEOPLE_TYPE_STARRED)
                 .allowConversations(CONVERSATION_SENDERS_IMPORTANT)
                 .hideAllVisualEffects()
+                .allowChannels(ZenPolicy.CHANNEL_TYPE_PRIORITY)
                 .build();
         assertThat(mZenModeHelper.mConfig.automaticRules.values())
                 .comparingElementsUsing(IGNORE_TIMESTAMPS)
