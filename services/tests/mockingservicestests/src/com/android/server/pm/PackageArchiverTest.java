@@ -210,6 +210,9 @@ public class PackageArchiverTest {
                 anyInt())).thenReturn(1);
         when(mInstallerService.getExistingDraftSessionId(anyInt(), any(), anyInt())).thenReturn(
                 PackageInstaller.SessionInfo.INVALID_ID);
+        PackageInstallerSession session = mock(PackageInstallerSession.class);
+        when(mInstallerService.getSession(anyInt())).thenReturn(session);
+        when(session.getUnarchivalStatus()).thenReturn(PackageInstaller.UNARCHIVAL_STATUS_UNSET);
         doReturn(new ParceledListSlice<>(List.of(mock(ResolveInfo.class))))
                 .when(mPackageManagerService).queryIntentReceivers(any(), any(), any(), anyLong(),
                         eq(mUserId));
