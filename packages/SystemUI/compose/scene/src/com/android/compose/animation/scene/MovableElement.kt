@@ -194,7 +194,7 @@ private fun placeholderContentSize(
 ): IntSize {
     // If the content of the movable element was already composed in this scene before, use that
     // target size.
-    val targetValueInScene = element.sceneValues.getValue(scene).targetSize
+    val targetValueInScene = element.sceneStates.getValue(scene).targetSize
     if (targetValueInScene != Element.SizeUnspecified) {
         return targetValueInScene
     }
@@ -208,7 +208,7 @@ private fun placeholderContentSize(
     // TODO(b/317026105): Provide a way to give a hint size/content for cases where this is not
     // true.
     val otherScene = if (transition.fromScene == scene) transition.toScene else transition.fromScene
-    val targetValueInOtherScene = element.sceneValues[otherScene]?.targetSize
+    val targetValueInOtherScene = element.sceneStates[otherScene]?.targetSize
     if (targetValueInOtherScene != null && targetValueInOtherScene != Element.SizeUnspecified) {
         return targetValueInOtherScene
     }
