@@ -307,7 +307,13 @@ public abstract class WearableSensingService extends Service {
             @NonNull Consumer<Integer> statusConsumer);
 
     /**
-     * Called when a data request observer is registered.
+     * Called when a data request observer is registered. Each request must not be larger than
+     * {@link WearableSensingDataRequest#getMaxRequestSize()}. In addition, at most {@link
+     * WearableSensingDataRequester#getRateLimit()} requests can be sent every rolling {@link
+     * WearableSensingDataRequester#getRateLimitWindowSize()}. Requests that are too large or too
+     * frequent will be dropped by the system. See {@link
+     * WearableSensingDataRequester#requestData(WearableSensingDataRequest, Consumer)} for details
+     * about the status code returned for each request.
      *
      * <p>The implementing class should override this method. After the data requester is received,
      * it should send a {@link WearableSensingManager#STATUS_SUCCESS} status code to the {@code

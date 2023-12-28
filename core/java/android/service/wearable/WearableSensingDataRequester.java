@@ -48,15 +48,35 @@ public interface WearableSensingDataRequester {
      */
     int STATUS_OBSERVER_CANCELLED = 2;
 
+    /**
+     * The value of the status code that indicates the request is rejected because it is larger than
+     * {@link WearableSensingDataRequest#getMaxRequestSize()}.
+     */
+    int STATUS_TOO_LARGE = 3;
+
+    /**
+     * The value of the status code that indicates the request is rejected because it exceeds the
+     * rate limit. See {@link WearableSensingDataRequest#getRateLimit()}.
+     */
+    int STATUS_TOO_FREQUENT = 4;
+
     /** @hide */
     @IntDef(
             prefix = {"STATUS_"},
-            value = {STATUS_UNKNOWN, STATUS_SUCCESS, STATUS_OBSERVER_CANCELLED})
+            value = {
+                STATUS_UNKNOWN,
+                STATUS_SUCCESS,
+                STATUS_OBSERVER_CANCELLED,
+                STATUS_TOO_LARGE,
+                STATUS_TOO_FREQUENT
+            })
     @Retention(RetentionPolicy.SOURCE)
     @interface StatusCode {}
 
     /**
-     * Sends a data request.
+     * Sends a data request. See {@link WearableSensingService#onDataRequestObserverRegistered(int,
+     * String, WearableSensingDataRequester, Consumer)} for size and rate restrictions on data
+     * requests.
      *
      * @param dataRequest The data request to send.
      * @param statusConsumer A consumer that handles the status code for the data request.

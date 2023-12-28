@@ -52,6 +52,7 @@ import com.android.server.SystemService;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.pm.KnownPackages;
+import com.android.server.utils.quota.MultiRateLimiter;
 
 import java.io.FileDescriptor;
 import java.util.HashSet;
@@ -77,6 +78,10 @@ public class WearableSensingManagerService extends
 
     public static final int MAX_TEMPORARY_SERVICE_DURATION_MS = 30000;
 
+    private static final String RATE_LIMITER_PACKAGE_NAME = "android";
+    private static final String RATE_LIMITER_TAG =
+            WearableSensingManagerService.class.getSimpleName();
+
     private static final class DataRequestObserverContext {
         final int mDataType;
         final int mUserId;
@@ -101,6 +106,7 @@ public class WearableSensingManagerService extends
     private final Context mContext;
     private final AtomicInteger mNextDataRequestObserverId = new AtomicInteger(1);
     private final Set<DataRequestObserverContext> mDataRequestObserverContexts = new HashSet<>();
+    private final MultiRateLimiter mDataRequestRateLimiter;
     volatile boolean mIsServiceEnabled;
 
     public WearableSensingManagerService(Context context) {
@@ -112,6 +118,12 @@ public class WearableSensingManagerService extends
                 PACKAGE_UPDATE_POLICY_REFRESH_EAGER
                         | /*To avoid high latency*/ PACKAGE_RESTART_POLICY_REFRESH_EAGER);
         mContext = context;
+        mDataRequestRateLimiter =
+                new MultiRateLimiter.Builder(context)
+                        .addRateLimit(
+                                WearableSensingDataRequest.getRateLimit(),
+                                WearableSensingDataRequest.getRateLimitWindowSize())
+                        .build();
     }
 
     @Override
@@ -242,7 +254,8 @@ public class WearableSensingManagerService extends
     }
 
     @NonNull
-    private RemoteCallback createDataRequestRemoteCallback(PendingIntent dataRequestPendingIntent) {
+    private RemoteCallback createDataRequestRemoteCallback(
+            PendingIntent dataRequestPendingIntent, int userId) {
         return new RemoteCallback(
                 bundle -> {
                     WearableSensingDataRequest dataRequest =
@@ -261,6 +274,27 @@ public class WearableSensingManagerService extends
                         Slog.e(TAG, "Received data request callback without a status callback.");
                         return;
                     }
+                    if (dataRequest.getDataSize()
+                            > WearableSensingDataRequest.getMaxRequestSize()) {
+                        Slog.w(
+                                TAG,
+                                TextUtils.formatSimple(
+                                        "WearableSensingDataRequest size exceeds the maximum"
+                                            + " allowed size of %s bytes. Dropping the request.",
+                                        WearableSensingDataRequest.getMaxRequestSize()));
+                        WearableSensingManagerPerUserService.notifyStatusCallback(
+                                dataRequestStatusCallback,
+                                WearableSensingDataRequester.STATUS_TOO_LARGE);
+                        return;
+                    }
+                    if (!mDataRequestRateLimiter.isWithinQuota(
+                            userId, RATE_LIMITER_PACKAGE_NAME, RATE_LIMITER_TAG)) {
+                        Slog.w(TAG, "Data request exceeded rate limit. Dropping the request.");
+                        WearableSensingManagerPerUserService.notifyStatusCallback(
+                                dataRequestStatusCallback,
+                                WearableSensingDataRequester.STATUS_TOO_FREQUENT);
+                        return;
+                    }
                     Intent intent = new Intent();
                     intent.putExtra(
                             WearableSensingManager.EXTRA_WEARABLE_SENSING_DATA_REQUEST,
@@ -268,6 +302,8 @@ public class WearableSensingManagerService extends
                     BroadcastOptions options = BroadcastOptions.makeBasic();
                     options.setPendingIntentBackgroundActivityStartMode(
                             ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
+                    mDataRequestRateLimiter.noteEvent(
+                            userId, RATE_LIMITER_PACKAGE_NAME, RATE_LIMITER_TAG);
                     final long previousCallingIdentity = Binder.clearCallingIdentity();
                     try {
                         dataRequestPendingIntent.send(
@@ -395,7 +431,8 @@ public class WearableSensingManagerService extends
                     dataRequestCallback = previousObserverContext.mDataRequestRemoteCallback;
                     dataRequestObserverId = previousObserverContext.mDataRequestObserverId;
                 } else {
-                    dataRequestCallback = createDataRequestRemoteCallback(dataRequestPendingIntent);
+                    dataRequestCallback =
+                            createDataRequestRemoteCallback(dataRequestPendingIntent, userId);
                     dataRequestObserverId = mNextDataRequestObserverId.getAndIncrement();
                     mDataRequestObserverContexts.add(
                             new DataRequestObserverContext(

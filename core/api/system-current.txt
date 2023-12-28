@@ -3152,7 +3152,11 @@ package android.app.wearable {
 
   @FlaggedApi("android.app.wearable.enable_data_request_observer_api") public final class WearableSensingDataRequest implements android.os.Parcelable {
     method public int describeContents();
+    method public int getDataSize();
     method public int getDataType();
+    method public static int getMaxRequestSize();
+    method public static int getRateLimit();
+    method @NonNull public static java.time.Duration getRateLimitWindowSize();
     method @NonNull public android.os.PersistableBundle getRequestDetails();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.wearable.WearableSensingDataRequest> CREATOR;
@@ -13447,6 +13451,8 @@ package android.service.wearable {
     method public void requestData(@NonNull android.app.wearable.WearableSensingDataRequest, @NonNull java.util.function.Consumer<java.lang.Integer>);
     field public static final int STATUS_OBSERVER_CANCELLED = 2; // 0x2
     field public static final int STATUS_SUCCESS = 1; // 0x1
+    field public static final int STATUS_TOO_FREQUENT = 4; // 0x4
+    field public static final int STATUS_TOO_LARGE = 3; // 0x3
     field public static final int STATUS_UNKNOWN = 0; // 0x0
   }
 

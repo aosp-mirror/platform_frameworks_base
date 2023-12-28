@@ -23,6 +23,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 
+import java.time.Duration;
+
 /**
  * Data class for a data request for wearable sensing.
  *
@@ -31,6 +33,10 @@ import android.os.PersistableBundle;
 @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
 @SystemApi
 public final class WearableSensingDataRequest implements Parcelable {
+    private static final int MAX_REQUEST_SIZE = 200;
+    private static final Duration RATE_LIMIT_WINDOW_SIZE = Duration.ofMinutes(1);
+    private static final int RATE_LIMIT = 30;
+
     private final int mDataType;
     @NonNull private final PersistableBundle mRequestDetails;
 
@@ -48,6 +54,17 @@ public final class WearableSensingDataRequest implements Parcelable {
     @NonNull
     public PersistableBundle getRequestDetails() {
         return mRequestDetails;
+    }
+
+    /** Returns the data size of this object when it is parcelled. */
+    public int getDataSize() {
+        Parcel parcel = Parcel.obtain();
+        try {
+            writeToParcel(parcel, describeContents());
+            return parcel.dataSize();
+        } finally {
+            parcel.recycle();
+        }
     }
 
     @Override
@@ -119,6 +136,32 @@ public final class WearableSensingDataRequest implements Parcelable {
                     return new WearableSensingDataRequest(dataType, requestDetails);
                 }
             };
+
+    /**
+     * Returns the maximum allowed size of a WearableSensingDataRequest when it is parcelled.
+     * Instances that exceed this size can be constructed, but will be rejected by the system when
+     * they leave the isolated WearableSensingService.
+     */
+    public static int getMaxRequestSize() {
+        return MAX_REQUEST_SIZE;
+    }
+
+    /**
+     * Returns the rolling time window used to perform rate limiting on data requests leaving the
+     * WearableSensingService.
+     */
+    @NonNull
+    public static Duration getRateLimitWindowSize() {
+        return RATE_LIMIT_WINDOW_SIZE;
+    }
+
+    /**
+     * Returns the number of data requests allowed to leave the WearableSensingService in each
+     * {@link #getRateLimitWindowSize()}.
+     */
+    public static int getRateLimit() {
+        return RATE_LIMIT;
+    }
 
     /** A builder for WearableSensingDataRequest. */
     @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
