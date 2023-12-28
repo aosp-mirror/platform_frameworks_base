@@ -89,12 +89,10 @@ import android.view.ViewConfiguration;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.media.flags.Flags;
-import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.Watchdog.Monitor;
-import com.android.server.am.ActivityManagerLocal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -146,7 +144,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private KeyguardManager mKeyguardManager;
     private AudioManager mAudioManager;
     private boolean mHasFeatureLeanback;
-    private ActivityManagerLocal mActivityManagerLocal;
     private ActivityManagerInternal mActivityManagerInternal;
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
@@ -232,7 +229,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 NotificationManager.ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED);
         mContext.registerReceiver(mNotificationListenerEnabledChangedReceiver, filter);
 
-        mActivityManagerLocal = LocalManagerRegistry.getManager(ActivityManagerLocal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
     }
 
@@ -585,18 +581,21 @@ public class MediaSessionService extends SystemService implements Monitor {
         try {
             MediaServerUtils.enforcePackageName(mContext, callingPackage, callingUid);
             if (targetUid != callingUid) {
-                boolean canAllowWhileInUse = mActivityManagerLocal
-                        .canAllowWhileInUsePermissionInFgs(callingPid, callingUid, callingPackage);
-                boolean canStartFgs = canAllowWhileInUse
-                        || mActivityManagerLocal.canStartForegroundService(callingPid, callingUid,
-                        callingPackage);
+                boolean canAllowWhileInUse =
+                        mActivityManagerInternal.canAllowWhileInUsePermissionInFgs(
+                                callingPid, callingUid, callingPackage);
+                boolean canStartFgs =
+                        canAllowWhileInUse
+                                || mActivityManagerInternal.canStartForegroundService(
+                                        callingPid, callingUid, callingPackage);
                 Log.i(TAG, "tempAllowlistTargetPkgIfPossible callingPackage:"
                         + callingPackage + " targetPackage:" + targetPackage
                         + " reason:" + reason
                         + (canAllowWhileInUse ? " [WIU]" : "")
                         + (canStartFgs ? " [FGS]" : ""));
                 if (canAllowWhileInUse) {
-                    mActivityManagerLocal.tempAllowWhileInUsePermissionInFgs(targetUid,
+                    mActivityManagerInternal.tempAllowWhileInUsePermissionInFgs(
+                            targetUid,
                             MediaSessionDeviceConfig
                                     .getMediaSessionCallbackFgsWhileInUseTempAllowDurationMs());
                 }
