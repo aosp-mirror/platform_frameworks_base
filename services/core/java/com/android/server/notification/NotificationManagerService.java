@@ -5387,7 +5387,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public String addAutomaticZenRule(AutomaticZenRule automaticZenRule, String pkg,
                 boolean fromUser) {
-            validateAutomaticZenRule(automaticZenRule);
+            validateAutomaticZenRule(/* updateId= */ null, automaticZenRule);
             checkCallerIsSameApp(pkg);
             if (automaticZenRule.getZenPolicy() != null
                     && automaticZenRule.getInterruptionFilter() != INTERRUPTION_FILTER_PRIORITY) {
@@ -5413,7 +5413,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule,
                 boolean fromUser) throws RemoteException {
-            validateAutomaticZenRule(automaticZenRule);
+            validateAutomaticZenRule(id, automaticZenRule);
             enforcePolicyAccess(Binder.getCallingUid(), "updateAutomaticZenRule");
             enforceUserOriginOnlyFromSystem(fromUser, "updateAutomaticZenRule");
 
@@ -5421,14 +5421,31 @@ public class NotificationManagerService extends SystemService {
                     computeZenOrigin(fromUser), "updateAutomaticZenRule", Binder.getCallingUid());
         }
 
-        private void validateAutomaticZenRule(AutomaticZenRule rule) {
+        private void validateAutomaticZenRule(@Nullable String updateId, AutomaticZenRule rule) {
             Objects.requireNonNull(rule, "automaticZenRule is null");
             Objects.requireNonNull(rule.getName(), "Name is null");
             rule.validate();
-            if (rule.getOwner() == null
-                    && rule.getConfigurationActivity() == null) {
-                throw new NullPointerException(
-                        "Rule must have a conditionproviderservice and/or configuration activity");
+
+            // Implicit rules have no ConditionProvider or Activity. We allow the user to customize
+            // them (via Settings), but not the owner app. Should the app want to start using it as
+            // a "normal" rule, it must provide a CP/ConfigActivity too.
+            if (android.app.Flags.modesApi()) {
+                boolean isImplicitRuleUpdateFromSystem = updateId != null
+                        && ZenModeHelper.isImplicitRuleId(updateId)
+                        && isCallerSystemOrSystemUi();
+                if (!isImplicitRuleUpdateFromSystem
+                        && rule.getOwner() == null
+                        && rule.getConfigurationActivity() == null) {
+                    throw new NullPointerException(
+                            "Rule must have a ConditionProviderService and/or configuration "
+                                    + "activity");
+                }
+            } else {
+                if (rule.getOwner() == null && rule.getConfigurationActivity() == null) {
+                    throw new NullPointerException(
+                            "Rule must have a ConditionProviderService and/or configuration "
+                                    + "activity");
+                }
             }
             Objects.requireNonNull(rule.getConditionId(), "ConditionId is null");
 

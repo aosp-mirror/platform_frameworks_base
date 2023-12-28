@@ -111,6 +111,7 @@ import static com.android.server.notification.NotificationRecordLogger.Notificat
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -9370,6 +9371,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 eq(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI), anyInt());
     }
 
+    /** Prepares for a zen-related test that uses a mocked {@link ZenModeHelper}. */
     private ZenModeHelper setUpMockZenTest() {
         ZenModeHelper zenModeHelper = mock(ZenModeHelper.class);
         mService.setZenHelper(zenModeHelper);
@@ -13972,6 +13974,76 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             verify(zenModeHelper).applyGlobalZenModeAsImplicitZenRule(anyString(), anyInt(),
                     eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS));
         }
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void updateAutomaticZenRule_implicitRuleWithoutCPS_disallowedFromApp() throws Exception {
+        setUpRealZenTest();
+        mService.setCallerIsNormalPackage();
+        assertThat(mBinderService.getAutomaticZenRules()).isEmpty();
+
+        // Create an implicit zen rule by calling setNotificationPolicy from an app.
+        mBinderService.setNotificationPolicy(PKG, new NotificationManager.Policy(0, 0, 0), false);
+        assertThat(mBinderService.getAutomaticZenRules()).hasSize(1);
+        Map.Entry<String, AutomaticZenRule> rule = getOnlyElement(
+                mBinderService.getAutomaticZenRules().entrySet());
+        assertThat(rule.getValue().getOwner()).isNull();
+        assertThat(rule.getValue().getConfigurationActivity()).isNull();
+
+        // Now try to update said rule (e.g. disable it). Should fail.
+        // We also validate the exception message because NPE could be thrown by all sorts of test
+        // issues (e.g. misconfigured mocks).
+        rule.getValue().setEnabled(false);
+        NullPointerException e = assertThrows(NullPointerException.class,
+                () -> mBinderService.updateAutomaticZenRule(rule.getKey(), rule.getValue(), false));
+        assertThat(e.getMessage()).isEqualTo(
+                "Rule must have a ConditionProviderService and/or configuration activity");
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void updateAutomaticZenRule_implicitRuleWithoutCPS_allowedFromSystem() throws Exception {
+        setUpRealZenTest();
+        mService.setCallerIsNormalPackage();
+        assertThat(mBinderService.getAutomaticZenRules()).isEmpty();
+
+        // Create an implicit zen rule by calling setNotificationPolicy from an app.
+        mBinderService.setNotificationPolicy(PKG, new NotificationManager.Policy(0, 0, 0), false);
+        assertThat(mBinderService.getAutomaticZenRules()).hasSize(1);
+        Map.Entry<String, AutomaticZenRule> rule = getOnlyElement(
+                mBinderService.getAutomaticZenRules().entrySet());
+        assertThat(rule.getValue().getOwner()).isNull();
+        assertThat(rule.getValue().getConfigurationActivity()).isNull();
+
+        // Now update said rule from Settings (e.g. disable it). Should work!
+        mService.isSystemUid = true;
+        rule.getValue().setEnabled(false);
+        mBinderService.updateAutomaticZenRule(rule.getKey(), rule.getValue(), false);
+
+        Map.Entry<String, AutomaticZenRule> updatedRule = getOnlyElement(
+                mBinderService.getAutomaticZenRules().entrySet());
+        assertThat(updatedRule.getValue().isEnabled()).isFalse();
+    }
+
+    /** Prepares for a zen-related test that uses the real {@link ZenModeHelper}. */
+    private void setUpRealZenTest() throws Exception {
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+
+        int iconResId = 79;
+        String iconResName = "icon_79";
+        String pkg = mContext.getPackageName();
+        ApplicationInfo appInfoSpy = spy(new ApplicationInfo());
+        appInfoSpy.icon = iconResId;
+        when(appInfoSpy.loadLabel(any())).thenReturn("Test App");
+        when(mPackageManagerClient.getApplicationInfo(eq(pkg), anyInt())).thenReturn(appInfoSpy);
+
+        when(mResources.getResourceName(eq(iconResId))).thenReturn(iconResName);
+        when(mResources.getIdentifier(eq(iconResName), any(), any())).thenReturn(iconResId);
+        when(mPackageManagerClient.getResourcesForApplication(eq(pkg))).thenReturn(mResources);
     }
 
     @Test
