@@ -16,6 +16,7 @@
 
 package com.android.systemui.authentication.data.repository
 
+import android.os.UserHandle
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
@@ -105,6 +106,13 @@ class FakeAuthenticationRepository(
         lockoutStartedReportCount++
     }
 
+    override suspend fun getMaxFailedUnlockAttemptsForWipe(): Int =
+        MAX_FAILED_AUTH_TRIES_BEFORE_WIPE
+
+    var profileWithMinFailedUnlockAttemptsForWipe: Int = UserHandle.USER_SYSTEM
+    override suspend fun getProfileWithMinFailedUnlockAttemptsForWipe(): Int =
+        profileWithMinFailedUnlockAttemptsForWipe
+
     override suspend fun getPinLength(): Int {
         return (credentialOverride ?: DEFAULT_PIN).size
     }
@@ -169,6 +177,9 @@ class FakeAuthenticationRepository(
                 AuthenticationPatternCoordinate(0, 2),
             )
         const val MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT = 5
+        const val MAX_FAILED_AUTH_TRIES_BEFORE_WIPE =
+            MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT +
+                LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE
         const val LOCKOUT_DURATION_SECONDS = 30
         const val LOCKOUT_DURATION_MS = LOCKOUT_DURATION_SECONDS * 1000
         const val HINTING_PIN_LENGTH = 6

@@ -57,6 +57,7 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>
     @Mock private lateinit var tableLogger: TableLogBuffer
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     private val testUtils = SceneTestUtils(this)
     private val testScope = testUtils.testScope
@@ -87,6 +88,7 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
                 getSecurityMode = getSecurityMode,
                 userRepository = userRepository,
                 lockPatternUtils = lockPatternUtils,
+                devicePolicyManager = devicePolicyManager,
                 broadcastDispatcher = fakeBroadcastDispatcher,
                 mobileConnectionsRepository = mobileConnectionsRepository,
             )

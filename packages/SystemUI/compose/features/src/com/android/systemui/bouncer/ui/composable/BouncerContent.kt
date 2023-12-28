@@ -19,7 +19,6 @@
 package com.android.systemui.bouncer.ui.composable
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.DialogInterface
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
@@ -135,7 +134,7 @@ fun BouncerContent(
         }
 
         Dialog(
-            viewModel = viewModel,
+            bouncerViewModel = viewModel,
             dialogFactory = dialogFactory,
         )
     }
@@ -666,32 +665,30 @@ private fun ActionArea(
 
 @Composable
 private fun Dialog(
-    viewModel: BouncerViewModel,
+    bouncerViewModel: BouncerViewModel,
     dialogFactory: BouncerDialogFactory,
 ) {
-    val dialogMessage: String? by viewModel.dialogMessage.collectAsState()
-    var dialog: Dialog? by remember { mutableStateOf(null) }
+    val dialogViewModel by bouncerViewModel.dialogViewModel.collectAsState()
+    var dialog: AlertDialog? by remember { mutableStateOf(null) }
 
-    if (dialogMessage != null) {
+    dialogViewModel?.let { viewModel ->
         if (dialog == null) {
-            dialog =
-                dialogFactory().apply {
-                    setMessage(dialogMessage)
-                    setButton(
-                        DialogInterface.BUTTON_NEUTRAL,
-                        context.getString(R.string.ok),
-                    ) { _, _ ->
-                        viewModel.onDialogDismissed()
-                    }
-                    setCancelable(false)
-                    setCanceledOnTouchOutside(false)
-                    show()
-                }
+            dialog = dialogFactory()
         }
-    } else {
-        dialog?.dismiss()
-        dialog = null
+        dialog?.apply {
+            setMessage(viewModel.text)
+            setButton(DialogInterface.BUTTON_NEUTRAL, context.getString(R.string.ok)) { _, _ ->
+                viewModel.onDismiss()
+            }
+            setCancelable(false)
+            setCanceledOnTouchOutside(false)
+            show()
+        }
     }
+        ?: {
+            dialog?.dismiss()
+            dialog = null
+        }
 }
 
 /** Renders the UI of the user switcher that's displayed on large screens next to the bouncer UI. */
@@ -772,7 +769,7 @@ private fun UserSwitcher(
 }
 
 /**
- * Renders the dropdowm menu that displays the actual users and/or user actions that can be
+ * Renders the dropdown menu that displays the actual users and/or user actions that can be
  * selected.
  */
 @Composable

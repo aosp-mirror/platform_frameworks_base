@@ -303,7 +303,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     fun onDragEnd_whenPatternTooShort() =
         testScope.runTest {
             val message by collectLastValue(bouncerViewModel.message)
-            val dialogMessage by collectLastValue(bouncerViewModel.dialogMessage)
+            val dialogViewModel by collectLastValue(bouncerViewModel.dialogViewModel)
             lockDeviceAndOpenPatternBouncer()
 
             // Enter a pattern that's too short more than enough times that would normally trigger
@@ -326,7 +326,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
                 underTest.onDragEnd()
 
                 assertWithMessage("Attempt #$attempt").that(message?.text).isEqualTo(WRONG_PATTERN)
-                assertWithMessage("Attempt #$attempt").that(dialogMessage).isNull()
+                assertWithMessage("Attempt #$attempt").that(dialogViewModel).isNull()
             }
         }
 
