@@ -983,17 +983,6 @@ class ActivityStarter {
             }
         }
 
-        if (Flags.archiving()) {
-            PackageArchiver packageArchiver = mService
-                    .getPackageManagerInternalLocked()
-                    .getPackageArchiver();
-            if (packageArchiver.isIntentResolvedToArchivedApp(intent, mRequest.userId)) {
-                return packageArchiver
-                        .requestUnarchiveOnActivityStart(
-                                intent, callingPackage, mRequest.userId, realCallingUid);
-            }
-        }
-
         final int launchFlags = intent.getFlags();
         if ((launchFlags & Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0 && sourceRecord != null) {
             // Transfer the result target from the source activity to the new one being started,
@@ -1035,6 +1024,17 @@ class ActivityStarter {
         }
 
         if (err == ActivityManager.START_SUCCESS && aInfo == null) {
+            if (Flags.archiving()) {
+                PackageArchiver packageArchiver = mService
+                        .getPackageManagerInternalLocked()
+                        .getPackageArchiver();
+                if (packageArchiver.isIntentResolvedToArchivedApp(intent, mRequest.userId)) {
+                    return packageArchiver
+                            .requestUnarchiveOnActivityStart(
+                                    intent, callingPackage, mRequest.userId, realCallingUid);
+                }
+            }
+
             // We couldn't find the specific class specified in the Intent.
             // Also the end of the line.
             err = ActivityManager.START_CLASS_NOT_FOUND;
