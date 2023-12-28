@@ -111,6 +111,7 @@ import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
 import com.android.settingslib.Utils;
 import com.android.settingslib.WirelessUtils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
@@ -175,7 +176,7 @@ import javax.inject.Provider;
  * to be updated.
  */
 @SysUISingleton
-public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpable {
+public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpable, CoreStartable {
 
     private static final String TAG = "KeyguardUpdateMonitor";
     private static final int BIOMETRIC_LOCKOUT_RESET_DELAY_MS = 600;
@@ -347,6 +348,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final LatencyTracker mLatencyTracker;
     private final StatusBarStateController mStatusBarStateController;
     private final Executor mBackgroundExecutor;
+    private final Executor mMainExecutor;
     private final SensorPrivacyManager mSensorPrivacyManager;
     private final ActiveUnlockConfig mActiveUnlockConfig;
     private final IDreamManager mDreamManager;
@@ -354,7 +356,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @Nullable
     private final FingerprintManager mFpm;
     @Nullable
+    private final BiometricManager mBiometricManager;
+    @Nullable
     private KeyguardFaceAuthInteractor mFaceAuthInteractor;
+    private final DevicePostureController mDevicePostureController;
     private final TaskStackChangeListeners mTaskStackChangeListeners;
     private final IActivityTaskManager mActivityTaskManager;
     private final SelectedUserInteractor mSelectedUserInteractor;
@@ -370,7 +375,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mIsDreaming;
     private boolean mLogoutEnabled;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-    private FingerprintInteractiveToAuthProvider mFingerprintInteractiveToAuthProvider;
+    private final FingerprintInteractiveToAuthProvider mFingerprintInteractiveToAuthProvider;
 
     /**
      * Short delay before restarting fingerprint authentication after a successful try. This should
@@ -2105,6 +2110,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context);
         mBackgroundExecutor = backgroundExecutor;
+        mMainExecutor = mainExecutor;
         mBroadcastDispatcher = broadcastDispatcher;
         mInteractionJankMonitor = interactionJankMonitor;
         mLatencyTracker = latencyTracker;
@@ -2126,7 +2132,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mDevicePolicyManager = devicePolicyManager;
         mPackageManager = packageManager;
         mFpm = fingerprintManager;
-        mActiveUnlockConfig.setKeyguardUpdateMonitor(this);
+        mBiometricManager = biometricManager;
         mConfigFaceAuthSupportedPosture = mContext.getResources().getInteger(
                 R.integer.config_face_auth_supported_posture);
         mFaceWakeUpTriggersConfig = faceWakeUpTriggersConfig;
@@ -2134,9 +2140,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mContext.getResources().getStringArray(
                         R.array.config_fingerprint_listen_on_occluding_activity_packages))
                 .collect(Collectors.toSet());
+        mDevicePostureController = devicePostureController;
         mTaskStackChangeListeners = taskStackChangeListeners;
         mActivityTaskManager = activityTaskManagerService;
         mSelectedUserInteractor = selectedUserInteractor;
+
+        mFingerprintInteractiveToAuthProvider = interactiveToAuthProvider.orElse(null);
+        mIsSystemUser = mUserManager.isSystemUser();
 
         mHandler = new Handler(mainLooper) {
             @Override
@@ -2252,6 +2262,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         };
 
+        mTimeFormatChangeObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                mHandler.sendMessage(mHandler.obtainMessage(
+                        MSG_TIME_FORMAT_UPDATE,
+                        Settings.System.getString(
+                                mContext.getContentResolver(),
+                                Settings.System.TIME_12_24)));
+            }
+        };
+    }
+
+    @Override
+    public void start() {
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
         if (!mDeviceProvisioned) {
@@ -2297,7 +2321,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mHandler, UserHandle.ALL);
 
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
-        mUserTracker.addCallback(mUserChangedCallback, mainExecutor);
+        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
 
         mTrustManager.registerTrustListener(this);
 
@@ -2318,8 +2342,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             mFpm.addLockoutResetCallback(mFingerprintLockoutResetCallback);
         }
 
-        if (biometricManager != null) {
-            biometricManager.registerEnabledOnKeyguardCallback(mBiometricEnabledCallback);
+        if (mBiometricManager != null) {
+            mBiometricManager.registerEnabledOnKeyguardCallback(mBiometricEnabledCallback);
         }
 
         // in case authenticators aren't registered yet at this point:
@@ -2327,7 +2351,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             @Override
             public void onAllAuthenticatorsRegistered(
                     @BiometricAuthenticator.Modality int modality) {
-                mainExecutor.execute(
+                mMainExecutor.execute(
                         () -> updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE));
             }
 
@@ -2335,7 +2359,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             public void onEnrollmentsChanged(@BiometricAuthenticator.Modality int modality) {
                 mHandler.obtainMessage(MSG_BIOMETRIC_ENROLLMENT_STATE_CHANGED, modality, 0)
                         .sendToTarget();
-                mainExecutor.execute(
+                mMainExecutor.execute(
                         () -> updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE));
             }
 
@@ -2353,12 +2377,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         });
         if (mConfigFaceAuthSupportedPosture != DEVICE_POSTURE_UNKNOWN) {
-            devicePostureController.addCallback(mPostureCallback);
+            mDevicePostureController.addCallback(mPostureCallback);
         }
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
 
         mTaskStackChangeListeners.registerTaskStackListener(mTaskStackListener);
-        mIsSystemUser = mUserManager.isSystemUser();
         int user = mSelectedUserInteractor.getSelectedUserId(true);
         mUserIsUnlocked.put(user, mUserManager.isUserUnlocked(user));
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
@@ -2377,22 +2400,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
         initializeSimState();
 
-        mTimeFormatChangeObserver = new ContentObserver(mHandler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                mHandler.sendMessage(mHandler.obtainMessage(
-                        MSG_TIME_FORMAT_UPDATE,
-                        Settings.System.getString(
-                                mContext.getContentResolver(),
-                                Settings.System.TIME_12_24)));
-            }
-        };
-
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.TIME_12_24),
                 false, mTimeFormatChangeObserver, UserHandle.USER_ALL);
-
-        mFingerprintInteractiveToAuthProvider = interactiveToAuthProvider.orElse(null);
     }
 
     private void initializeSimState() {

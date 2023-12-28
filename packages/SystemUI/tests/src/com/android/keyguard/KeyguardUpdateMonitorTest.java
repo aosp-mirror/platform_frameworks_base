@@ -2283,6 +2283,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     Optional.of(mInteractiveToAuthProvider),
                     mTaskStackChangeListeners, mSelectedUserInteractor, mActivityTaskManager);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
+            start();
         }
 
         public boolean hasSimStateJustChanged() {

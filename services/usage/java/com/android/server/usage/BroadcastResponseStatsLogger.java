@@ -35,6 +35,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.Keep;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.RingBuffer;
 import com.android.server.usage.BroadcastResponseStatsTracker.NotificationEventType;
@@ -178,6 +179,7 @@ public class BroadcastResponseStatsLogger {
         }
     }
 
+    @Keep
     public static final class BroadcastEvent implements Data {
         public int sourceUid;
         public int targetUserId;
@@ -198,6 +200,7 @@ public class BroadcastResponseStatsLogger {
         }
     }
 
+    @Keep
     public static final class NotificationEvent implements Data {
         public int type;
         public String packageName;

@@ -19,9 +19,12 @@ package com.android.systemui.statusbar;
 import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.VISIBILITY_NO_OVERRIDE;
+import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
+import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+import static android.app.Flags.FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.os.UserHandle.USER_ALL;
 import static android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
@@ -111,7 +114,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
-        return FlagsParameterization.allCombinationsOf(FLAG_ALLOW_PRIVATE_PROFILE);
+        return FlagsParameterization.allCombinationsOf(
+                FLAG_ALLOW_PRIVATE_PROFILE,
+                FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS);
     }
 
     public NotificationLockscreenUserManagerTest(FlagsParameterization flags) {
@@ -242,6 +247,19 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         lockScreenUris.add(Settings.Secure.getUriFor(setting));
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false,
             lockScreenUris, 0);
+    }
+
+    @Test
+    @EnableFlags(FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS)
+    public void testInit() {
+        when(mKeyguardManager.getPrivateNotificationsAllowed()).thenReturn(false);
+        mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
+        mLockscreenUserManager.setUpWithPresenter(mPresenter);
+
+        mBackgroundExecutor.runAllReady();
+
+        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
     }
 
     @Test
@@ -579,6 +597,29 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS)
+    public void testKeyguardManager_noPrivateNotifications() {
+        Mockito.clearInvocations(mDevicePolicyManager);
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        changeSetting(LOCK_SCREEN_SHOW_NOTIFICATIONS);
+
+        BroadcastReceiver.PendingResult pr = new BroadcastReceiver.PendingResult(
+                0, null, null, 0, true, false, null, mCurrentUser.id, 0);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED)
+                        .putExtra(EXTRA_KM_PRIVATE_NOTIFS_ALLOWED, true));
+
+        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        // it's a global field, confirm secondary too
+        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+        assertFalse(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(mCurrentUser.id));
+        assertFalse(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
+                mSecondaryUser.id));
+    }
+
+    @Test
     public void testDevicePolicy_noPrivateNotifications() {
         Mockito.clearInvocations(mDevicePolicyManager);
         // User allows notifications
@@ -699,6 +740,29 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS)
+    public void testShouldShowLockscreenNotifications_keyguardManagerNoPrivateNotifications_show() {
+        // KeyguardManager does not allow notifications
+        when(mKeyguardManager.getPrivateNotificationsAllowed()).thenReturn(false);
+        // User allows notifications
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        changeSetting(LOCK_SCREEN_SHOW_NOTIFICATIONS);
+        // DevicePolicy allows notifications
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))
+                .thenReturn(0);
+        BroadcastReceiver.PendingResult pr = new BroadcastReceiver.PendingResult(
+                0, null, null, 0, true, false, null, mCurrentUser.id, 0);
+        mLockscreenUserManager.mKeyguardReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mKeyguardReceiver.onReceive(mContext,
+                new Intent(ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED)
+                        .putExtra(EXTRA_KM_PRIVATE_NOTIFS_ALLOWED, false));
+
+        assertTrue(mLockscreenUserManager.shouldShowLockscreenNotifications());
+        assertTrue(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+    }
+
+    @Test
+    @DisableFlags(FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS)
     public void testShouldShowLockscreenNotifications_keyguardManagerNoPrivateNotifications() {
         // KeyguardManager does not allow notifications
         when(mKeyguardManager.getPrivateNotificationsAllowed()).thenReturn(false);
@@ -718,6 +782,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS)
     public void testUserAllowsNotificationsInPublic_keyguardManagerNoPrivateNotifications() {
         // DevicePolicy allows notifications
         when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))

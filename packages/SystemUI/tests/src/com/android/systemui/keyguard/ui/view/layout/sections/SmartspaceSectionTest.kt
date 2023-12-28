@@ -29,7 +29,9 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
+import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.StateFlow
@@ -50,9 +52,9 @@ class SmartspaceSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var hasCustomWeatherDataDisplay: StateFlow<Boolean>
 
-    private val smartspaceView = View(mContext).also { it.id = View.generateViewId() }
-    private val weatherView = View(mContext).also { it.id = View.generateViewId() }
-    private val dateView = View(mContext).also { it.id = View.generateViewId() }
+    private val smartspaceView = View(mContext).also { it.id = sharedR.id.bc_smartspace_view }
+    private val weatherView = View(mContext).also { it.id = sharedR.id.weather_smartspace_view }
+    private val dateView = View(mContext).also { it.id = sharedR.id.date_smartspace_view }
     private lateinit var constraintLayout: ConstraintLayout
     private lateinit var constraintSet: ConstraintSet
 
@@ -69,13 +71,13 @@ class SmartspaceSectionTest : SysuiTestCase() {
                 keyguardUnlockAnimationController,
             )
         constraintLayout = ConstraintLayout(mContext)
-        whenever(keyguardSmartspaceViewModel.smartspaceView).thenReturn(smartspaceView)
-        whenever(keyguardSmartspaceViewModel.weatherView).thenReturn(weatherView)
-        whenever(keyguardSmartspaceViewModel.dateView).thenReturn(dateView)
+        whenever(lockscreenSmartspaceController.buildAndConnectView(any()))
+            .thenReturn(smartspaceView)
+        whenever(lockscreenSmartspaceController.buildAndConnectWeatherView(any()))
+            .thenReturn(weatherView)
+        whenever(lockscreenSmartspaceController.buildAndConnectDateView(any())).thenReturn(dateView)
         whenever(keyguardClockViewModel.hasCustomWeatherDataDisplay)
             .thenReturn(hasCustomWeatherDataDisplay)
-        whenever(keyguardSmartspaceViewModel.smartspaceController)
-            .thenReturn(lockscreenSmartspaceController)
         constraintSet = ConstraintSet()
     }
 

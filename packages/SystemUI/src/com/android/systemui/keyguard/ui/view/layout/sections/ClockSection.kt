@@ -32,7 +32,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardClockViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceLayout
 import com.android.systemui.res.R
@@ -55,7 +54,6 @@ open class ClockSection
 constructor(
     private val clockInteractor: KeyguardClockInteractor,
     protected val keyguardClockViewModel: KeyguardClockViewModel,
-    private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val context: Context,
     private val splitShadeStateController: SplitShadeStateController,
 ) : KeyguardSection() {
@@ -119,8 +117,8 @@ constructor(
                         com.android.systemui.customization.R.dimen.small_clock_padding_top
                     ) +
                     context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
-            largeClockTopMargin += smartspaceViewModel.getDimen(DATE_WEATHER_VIEW_HEIGHT)
-            largeClockTopMargin += smartspaceViewModel.getDimen(ENHANCED_SMARTSPACE_HEIGHT)
+            largeClockTopMargin += getDimen(DATE_WEATHER_VIEW_HEIGHT)
+            largeClockTopMargin += getDimen(ENHANCED_SMARTSPACE_HEIGHT)
             if (!keyguardClockViewModel.useLargeClock) {
                 largeClockTopMargin -=
                     context.resources.getDimensionPixelSize(
@@ -161,6 +159,12 @@ constructor(
             }
             connect(R.id.lockscreen_clock_view, TOP, PARENT_ID, TOP, smallClockTopMargin)
         }
+    }
+
+    private fun getDimen(name: String): Int {
+        val res = context.packageManager.getResourcesForApplication(context.packageName)
+        val id = res.getIdentifier(name, "dimen", context.packageName)
+        return res.getDimensionPixelSize(id)
     }
 
     companion object {

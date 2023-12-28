@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.media.controls.ui.KeyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.shared.R as sharedR
 import javax.inject.Inject
 
 /** Aligns media on left side for split shade, below smartspace, date, and weather. */
@@ -90,9 +91,9 @@ constructor(
                 Barrier.BOTTOM,
                 0,
                 *intArrayOf(
-                    keyguardSmartspaceViewModel.smartspaceViewId,
-                    keyguardSmartspaceViewModel.dateId,
-                    keyguardSmartspaceViewModel.weatherId,
+                    sharedR.id.bc_smartspace_view,
+                    sharedR.id.date_smartspace_view,
+                    sharedR.id.weather_smartspace_view,
                 )
             )
             connect(mediaContainerId, TOP, smartSpaceBarrier, BOTTOM)

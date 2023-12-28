@@ -250,7 +250,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 messageAreaControllerFactory,
                 bouncerMessageInteractor,
                 bouncerLogger,
-                featureFlagsClassic,
                 selectedUserInteractor);
 
         if (DeviceEntryUdfpsRefactor.isEnabled()) {

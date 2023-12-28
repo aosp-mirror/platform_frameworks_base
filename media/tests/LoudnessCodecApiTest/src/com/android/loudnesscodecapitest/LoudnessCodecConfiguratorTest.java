@@ -95,12 +95,17 @@ public class LoudnessCodecConfiguratorTest {
     @RequiresFlagsEnabled(FLAG_LOUDNESS_CONFIGURATOR_API)
     public void setAudioTrack_callsAudioServiceStart() throws Exception {
         final AudioTrack track = createAudioTrack();
+        final MediaCodec mediaCodec = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(createAndConfigureMediaCodec());
-        mLcc.setAudioTrack(track);
+        try {
+            mLcc.addMediaCodec(mediaCodec);
+            mLcc.setAudioTrack(track);
 
-        verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()),
-                anyList());
+            verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()),
+                    anyList());
+        } finally {
+            mediaCodec.release();
+        }
     }
 
     @Test
@@ -108,10 +113,15 @@ public class LoudnessCodecConfiguratorTest {
     public void getLoudnessCodecParams_callsAudioServiceGetLoudness() throws Exception {
         when(mAudioService.getLoudnessParams(anyInt(), any())).thenReturn(new PersistableBundle());
         final AudioTrack track = createAudioTrack();
+        final MediaCodec mediaCodec = createAndConfigureMediaCodec();
 
-        mLcc.getLoudnessCodecParams(track, createAndConfigureMediaCodec());
+        try {
+            mLcc.getLoudnessCodecParams(track, mediaCodec);
 
-        verify(mAudioService).getLoudnessParams(eq(track.getPlayerIId()), any());
+            verify(mAudioService).getLoudnessParams(eq(track.getPlayerIId()), any());
+        } finally {
+            mediaCodec.release();
+        }
     }
 
     @Test
@@ -120,10 +130,14 @@ public class LoudnessCodecConfiguratorTest {
         final AudioTrack track = createAudioTrack();
         final MediaCodec mediaCodec = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(mediaCodec);
-        mLcc.setAudioTrack(track);
+        try {
+            mLcc.addMediaCodec(mediaCodec);
+            mLcc.setAudioTrack(track);
 
-        verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
+            verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
+        } finally {
+            mediaCodec.release();
+        }
     }
 
     @Test
@@ -132,24 +146,33 @@ public class LoudnessCodecConfiguratorTest {
         final AudioTrack track = createAudioTrack();
         final MediaCodec mediaCodec = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(mediaCodec);
-        mLcc.setAudioTrack(track);
-        mLcc.setAudioTrack(track);
+        try {
+            mLcc.addMediaCodec(mediaCodec);
+            mLcc.setAudioTrack(track);
+            mLcc.setAudioTrack(track);
 
-        verify(mAudioService, times(1)).startLoudnessCodecUpdates(eq(track.getPlayerIId()),
-                anyList());
+            verify(mAudioService, times(1)).startLoudnessCodecUpdates(eq(track.getPlayerIId()),
+                    anyList());
+        } finally {
+            mediaCodec.release();
+        }
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_LOUDNESS_CONFIGURATOR_API)
     public void setTrackNull_stopCodecUpdates() throws Exception {
         final AudioTrack track = createAudioTrack();
+        final MediaCodec mediaCodec = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(createAndConfigureMediaCodec());
-        mLcc.setAudioTrack(track);
+        try {
+            mLcc.addMediaCodec(mediaCodec);
+            mLcc.setAudioTrack(track);
 
-        mLcc.setAudioTrack(null);  // stops updates
-        verify(mAudioService).stopLoudnessCodecUpdates(eq(track.getPlayerIId()));
+            mLcc.setAudioTrack(null);  // stops updates
+            verify(mAudioService).stopLoudnessCodecUpdates(eq(track.getPlayerIId()));
+        } finally {
+            mediaCodec.release();
+        }
     }
 
     @Test
@@ -157,27 +180,37 @@ public class LoudnessCodecConfiguratorTest {
     public void addMediaCodecTwice_triggersIAE() throws Exception {
         final MediaCodec mediaCodec = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(mediaCodec);
+        try {
+            mLcc.addMediaCodec(mediaCodec);
 
-        assertThrows(IllegalArgumentException.class, () -> mLcc.addMediaCodec(mediaCodec));
+            assertThrows(IllegalArgumentException.class, () -> mLcc.addMediaCodec(mediaCodec));
+        } finally {
+            mediaCodec.release();
+        }
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_LOUDNESS_CONFIGURATOR_API)
     public void setClearTrack_removeAllAudioServicePiidCodecs() throws Exception {
         final ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
-
         final AudioTrack track = createAudioTrack();
+        final MediaCodec mediaCodec1 = createAndConfigureMediaCodec();
+        final MediaCodec mediaCodec2 = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(createAndConfigureMediaCodec());
-        mLcc.setAudioTrack(track);
-        verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()),
-                argument.capture());
-        assertEquals(argument.getValue().size(), 1);
+        try {
+            mLcc.addMediaCodec(mediaCodec1);
+            mLcc.setAudioTrack(track);
+            verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()),
+                    argument.capture());
+            assertEquals(argument.getValue().size(), 1);
 
-        mLcc.addMediaCodec(createAndConfigureMediaCodec());
-        mLcc.setAudioTrack(null);
-        verify(mAudioService).stopLoudnessCodecUpdates(eq(track.getPlayerIId()));
+            mLcc.addMediaCodec(mediaCodec2);
+            mLcc.setAudioTrack(null);
+            verify(mAudioService).stopLoudnessCodecUpdates(eq(track.getPlayerIId()));
+        } finally {
+            mediaCodec1.release();
+            mediaCodec2.release();
+        }
     }
 
     @Test
@@ -186,24 +219,35 @@ public class LoudnessCodecConfiguratorTest {
         final AudioTrack track = createAudioTrack();
         final MediaCodec mediaCodec = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(mediaCodec);
-        mLcc.setAudioTrack(track);
-        mLcc.removeMediaCodec(mediaCodec);
+        try {
+            mLcc.addMediaCodec(mediaCodec);
+            mLcc.setAudioTrack(track);
+            mLcc.removeMediaCodec(mediaCodec);
 
-        verify(mAudioService).removeLoudnessCodecInfo(eq(track.getPlayerIId()), any());
+            verify(mAudioService).removeLoudnessCodecInfo(eq(track.getPlayerIId()), any());
+        } finally {
+            mediaCodec.release();
+        }
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_LOUDNESS_CONFIGURATOR_API)
     public void addMediaCodecAfterSetTrack_callsAudioServiceAdd() throws Exception {
         final AudioTrack track = createAudioTrack();
+        final MediaCodec mediaCodec1 = createAndConfigureMediaCodec();
+        final MediaCodec mediaCodec2 = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(createAndConfigureMediaCodec());
-        mLcc.setAudioTrack(track);
-        verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
+        try {
+            mLcc.addMediaCodec(mediaCodec1);
+            mLcc.setAudioTrack(track);
+            verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
 
-        mLcc.addMediaCodec(createAndConfigureMediaCodec());
-        verify(mAudioService).addLoudnessCodecInfo(eq(track.getPlayerIId()), anyInt(), any());
+            mLcc.addMediaCodec(mediaCodec2);
+            verify(mAudioService).addLoudnessCodecInfo(eq(track.getPlayerIId()), anyInt(), any());
+        } finally {
+            mediaCodec1.release();
+            mediaCodec2.release();
+        }
     }
 
     @Test
@@ -212,25 +256,36 @@ public class LoudnessCodecConfiguratorTest {
         final AudioTrack track = createAudioTrack();
         final MediaCodec mediaCodec = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(mediaCodec);
-        mLcc.setAudioTrack(track);
-        verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
+        try {
+            mLcc.addMediaCodec(mediaCodec);
+            mLcc.setAudioTrack(track);
+            verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
 
-        mLcc.removeMediaCodec(mediaCodec);
-        verify(mAudioService).removeLoudnessCodecInfo(eq(track.getPlayerIId()), any());
+            mLcc.removeMediaCodec(mediaCodec);
+            verify(mAudioService).removeLoudnessCodecInfo(eq(track.getPlayerIId()), any());
+        } finally {
+            mediaCodec.release();
+        }
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_LOUDNESS_CONFIGURATOR_API)
     public void removeWrongMediaCodecAfterSetTrack_triggersIAE() throws Exception {
         final AudioTrack track = createAudioTrack();
+        final MediaCodec mediaCodec1 = createAndConfigureMediaCodec();
+        final MediaCodec mediaCodec2 = createAndConfigureMediaCodec();
 
-        mLcc.addMediaCodec(createAndConfigureMediaCodec());
-        mLcc.setAudioTrack(track);
-        verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
+        try {
+            mLcc.addMediaCodec(mediaCodec1);
+            mLcc.setAudioTrack(track);
+            verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
 
-        assertThrows(IllegalArgumentException.class,
-                () -> mLcc.removeMediaCodec(createAndConfigureMediaCodec()));
+            assertThrows(IllegalArgumentException.class,
+                    () -> mLcc.removeMediaCodec(mediaCodec2));
+        } finally {
+            mediaCodec1.release();
+            mediaCodec2.release();
+        }
     }
 
     private static AudioTrack createAudioTrack() {
@@ -250,19 +305,21 @@ public class LoudnessCodecConfiguratorTest {
 
         MediaExtractor extractor;
         extractor = new MediaExtractor();
-        extractor.setDataSource(testFd.getFileDescriptor(), testFd.getStartOffset(),
+        try {
+            extractor.setDataSource(testFd.getFileDescriptor(), testFd.getStartOffset(),
                 testFd.getLength());
-        testFd.close();
+            assertEquals("wrong number of tracks", 1, extractor.getTrackCount());
+            MediaFormat format = extractor.getTrackFormat(0);
+            String mime = format.getString(MediaFormat.KEY_MIME);
+            assertTrue("not an audio file", mime.startsWith(TEST_MEDIA_AUDIO_CODEC_PREFIX));
+            final MediaCodec mediaCodec = MediaCodec.createDecoderByType(mime);
 
-        assertEquals("wrong number of tracks", 1, extractor.getTrackCount());
-        MediaFormat format = extractor.getTrackFormat(0);
-        String mime = format.getString(MediaFormat.KEY_MIME);
-        assertTrue("not an audio file", mime.startsWith(TEST_MEDIA_AUDIO_CODEC_PREFIX));
-        final MediaCodec mediaCodec = MediaCodec.createDecoderByType(mime);
-
-        Log.v(TAG, "configuring with " + format);
-        mediaCodec.configure(format, null /* surface */, null /* crypto */, 0 /* flags */);
-
-        return mediaCodec;
+            Log.v(TAG, "configuring with " + format);
+            mediaCodec.configure(format, null /* surface */, null /* crypto */, 0 /* flags */);
+            return mediaCodec;
+        } finally {
+            testFd.close();
+            extractor.release();
+        }
     }
 }

@@ -107,11 +107,11 @@ class TaskFragmentContainer {
     private final String mOverlayTag;
 
     /**
-     * The launch options that was used to create this container. Must not be {@code null} for
-     * {@link #isOverlay()} container.
+     * The launch options that was used to create this container. Must not {@link Bundle#isEmpty()}
+     * for {@link #isOverlay()} container.
      */
-    @Nullable
-    private final Bundle mLaunchOptions;
+    @NonNull
+    private final Bundle mLaunchOptions = new Bundle();
 
     /** Indicates whether the container was cleaned up after the last activity was removed. */
     private boolean mIsFinished;
@@ -210,7 +210,9 @@ class TaskFragmentContainer {
         if (overlayTag != null) {
             Objects.requireNonNull(launchOptions);
         }
-        mLaunchOptions = launchOptions;
+        if (launchOptions != null) {
+            mLaunchOptions.putAll(launchOptions);
+        }
 
         if (pairedPrimaryContainer != null) {
             // The TaskFragment will be positioned right above the paired container.
@@ -923,6 +925,17 @@ class TaskFragmentContainer {
     @Nullable
     String getOverlayTag() {
         return mOverlayTag;
+    }
+
+    /**
+     * Returns the options that was used to launch this {@link TaskFragmentContainer}.
+     * {@link Bundle#isEmpty()} means there's no launch option for this container.
+     * <p>
+     * Note that WM Jetpack owns the logic. The WM Extension library must not modify this object.
+     */
+    @NonNull
+    Bundle getLaunchOptions() {
+        return mLaunchOptions;
     }
 
     @Override

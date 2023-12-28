@@ -1490,7 +1490,12 @@ public class ZenModeHelper {
 
             for (ZenRule automaticRule : mConfig.automaticRules.values()) {
                 if (automaticRule.isAutomaticActive()) {
-                    applyCustomPolicy(policy, automaticRule);
+                    // Active rules with INTERRUPTION_FILTER_ALL are not included in consolidated
+                    // policy. This is relevant in case some other active rule has a more
+                    // restrictive INTERRUPTION_FILTER but a more lenient ZenPolicy!
+                    if (!Flags.modesApi() || automaticRule.zenMode != Global.ZEN_MODE_OFF) {
+                        applyCustomPolicy(policy, automaticRule);
+                    }
                     if (Flags.modesApi()) {
                         deviceEffectsBuilder.add(automaticRule.zenDeviceEffects);
                     }

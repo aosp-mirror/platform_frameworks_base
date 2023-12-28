@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
+import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
@@ -117,7 +118,7 @@ constructor(
             }
         constraintSet.apply {
             if (migrateClocksToBlueprint()) {
-                connect(nicId, TOP, smartspaceViewModel.smartspaceViewId, BOTTOM, bottomMargin)
+                connect(nicId, TOP, sharedR.id.bc_smartspace_view, BOTTOM, bottomMargin)
                 setGoneMargin(nicId, BOTTOM, bottomMargin)
             } else {
                 connect(nicId, TOP, R.id.keyguard_status_view, topAlignment, bottomMargin)

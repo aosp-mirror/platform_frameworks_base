@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
@@ -80,7 +81,7 @@ constructor(
                 connect(
                     R.id.nssl_placeholder,
                     TOP,
-                    smartspaceViewModel.smartspaceViewId,
+                    sharedR.id.bc_smartspace_view,
                     BOTTOM,
                     bottomMargin
                 )

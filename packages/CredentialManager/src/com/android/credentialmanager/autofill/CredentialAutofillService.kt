@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.autofill
 
+import android.R
 import android.app.assist.AssistStructure
 import android.content.Context
 import android.credentials.CredentialManager
@@ -41,18 +42,19 @@ import android.service.autofill.SaveRequest
 import android.service.credentials.CredentialProviderService
 import android.util.Log
 import android.view.autofill.AutofillId
-import org.json.JSONException
 import android.widget.inline.InlinePresentationSpec
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.android.credentialmanager.GetFlowUtils
-import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.common.ui.RemoteViewsFactory
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
-import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.getflow.toProviderDisplayInfo
 import com.android.credentialmanager.ktx.credentialEntry
+import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.model.get.ProviderInfo
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.concurrent.Executors
 
@@ -127,9 +129,11 @@ class CredentialAutofillService : AutofillService() {
                     is PasswordCredentialEntry -> {
                         entryIconMap[entry.key + entry.subkey] = credentialEntry.icon
                     }
+
                     is PublicKeyCredentialEntry -> {
                         entryIconMap[entry.key + entry.subkey] = credentialEntry.icon
                     }
+
                     is CustomCredentialEntry -> {
                         entryIconMap[entry.key + entry.subkey] = credentialEntry.icon
                     }
@@ -172,11 +176,11 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun processProvidersForAutofillId(
-        filLRequest: FillRequest,
-        autofillId: AutofillId,
-        providerList: List<ProviderInfo>,
-        entryIconMap: Map<String, Icon>,
-        fillResponseBuilder: FillResponse.Builder
+            filLRequest: FillRequest,
+            autofillId: AutofillId,
+            providerList: List<ProviderInfo>,
+            entryIconMap: Map<String, Icon>,
+            fillResponseBuilder: FillResponse.Builder
     ): Boolean {
         if (providerList.isEmpty()) {
             return false
@@ -197,7 +201,7 @@ class CredentialAutofillService : AutofillService() {
         var i = 0
         var datasetAdded = false
 
-        providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach usernameLoop@ {
+        providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach usernameLoop@{
             val primaryEntry = it.sortedCredentialEntryList.first()
             val pendingIntent = primaryEntry.pendingIntent
             val fillInIntent = primaryEntry.fillInIntent
@@ -206,37 +210,48 @@ class CredentialAutofillService : AutofillService() {
                 Log.e(TAG, "PendingIntent was missing from the entry.")
                 return@usernameLoop
             }
-            if (inlinePresentationSpecs == null || i >= maxItemCount) {
+            if (inlinePresentationSpecs == null) {
+                Log.i(TAG, "Inline presentation spec is null, " +
+                        "building dropdown presentation only")
+            }
+            if (i >= maxItemCount) {
                 Log.e(TAG, "Skipping because reached the max item count.")
                 return@usernameLoop
             }
-            // Create inline presentation
-            val spec: InlinePresentationSpec
-            if (i < inlinePresentationSpecsCount) {
-                spec = inlinePresentationSpecs[i]
-            } else {
-                spec = inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
-            }
-            val sliceBuilder = InlineSuggestionUi
-                    .newContentBuilder(pendingIntent)
-                    .setTitle(primaryEntry.userName)
-            val icon: Icon
-            if (primaryEntry.icon == null) {
+            val icon: Icon = if (primaryEntry.icon == null) {
                 // The empty entry icon has non-null icon reference but null drawable reference.
                 // If the drawable reference is null, then use the default icon.
-                icon = getDefaultIcon()
+                getDefaultIcon()
             } else {
-                icon = entryIconMap[primaryEntry.entryKey + primaryEntry.entrySubkey]
+                entryIconMap[primaryEntry.entryKey + primaryEntry.entrySubkey]
                         ?: getDefaultIcon()
             }
-            sliceBuilder.setStartIcon(icon)
-            val inlinePresentation = InlinePresentation(
-                    sliceBuilder.build().slice, spec, /* pinned= */ false)
+            // Create inline presentation
+            var inlinePresentation: InlinePresentation? = null;
+            if (inlinePresentationSpecs != null) {
+                val spec: InlinePresentationSpec
+                if (i < inlinePresentationSpecsCount) {
+                    spec = inlinePresentationSpecs[i]
+                } else {
+                    spec = inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
+                }
+                val sliceBuilder = InlineSuggestionUi
+                        .newContentBuilder(pendingIntent)
+                        .setTitle(primaryEntry.userName)
+                sliceBuilder.setStartIcon(icon)
+                inlinePresentation = InlinePresentation(
+                        sliceBuilder.build().slice, spec, /* pinned= */ false)
+            }
+            val dropdownPresentation = RemoteViewsFactory.createDropdownPresentation(
+                    this, icon, primaryEntry)
             i++
 
             val dataSetBuilder = Dataset.Builder()
             val presentationBuilder = Presentations.Builder()
-                    .setInlinePresentation(inlinePresentation)
+                    .setMenuPresentation(dropdownPresentation)
+            if (inlinePresentation != null) {
+                presentationBuilder.setInlinePresentation(inlinePresentation)
+            }
 
             fillResponseBuilder.addDataset(
                     dataSetBuilder
@@ -305,7 +320,7 @@ class CredentialAutofillService : AutofillService() {
     ): MutableMap<AutofillId, MutableList<CredentialEntryInfo>> {
         val autofillIdToCredentialEntries:
                 MutableMap<AutofillId, MutableList<CredentialEntryInfo>> = mutableMapOf()
-        credentialEntryList.forEach entryLoop@ { credentialEntry ->
+        credentialEntryList.forEach entryLoop@{ credentialEntry ->
             val autofillId: AutofillId? = credentialEntry
                     .fillInIntent
                     ?.getParcelableExtra(
@@ -323,8 +338,8 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun copyProviderInfo(
-        providerInfo: ProviderInfo,
-        credentialList: List<CredentialEntryInfo>
+            providerInfo: ProviderInfo,
+            credentialList: List<CredentialEntryInfo>
     ): ProviderInfo {
         return ProviderInfo(
                 providerInfo.id,

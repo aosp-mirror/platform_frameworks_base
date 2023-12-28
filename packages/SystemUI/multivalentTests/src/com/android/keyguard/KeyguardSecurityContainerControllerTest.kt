@@ -36,6 +36,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate
 import com.android.systemui.biometrics.SideFpsController
@@ -196,12 +197,12 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         whenever(deviceProvisionedController.isUserSetup(anyInt())).thenReturn(true)
 
         featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         featureFlags.set(Flags.BOUNCER_USER_SWITCHER, false)
         featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
         featureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
         featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
 
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         keyguardPasswordViewController =
             KeyguardPasswordViewController(
                 keyguardPasswordView,

@@ -5,8 +5,8 @@ apply plugin: 'kotlin-android'
 android {
     sourceSets {
         main {
-            java.srcDirs = ["${SYS_UI_DIR}/animation/core/src/com/android/systemui/surfaceeffects/"]
-            manifest.srcFile "${SYS_UI_DIR}/animation/core/AndroidManifest.xml"
+            java.srcDirs = ["${SYS_UI_DIR}/animation/src/com/android/systemui/surfaceeffects/"]
+            manifest.srcFile "${SYS_UI_DIR}/animation/AndroidManifest.xml"
         }
     }
 

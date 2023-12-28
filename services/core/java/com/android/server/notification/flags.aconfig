@@ -50,3 +50,10 @@ flag {
   # Referenced in WM where WM starts before DeviceConfig
   is_fixed_read_only: true
 }
+
+flag {
+  name: "notification_reduce_messagequeue_usage"
+  namespace: "systemui"
+  description: "When this flag is on, NMS will no longer call removeMessage() and hasCallbacks() on Handler"
+  bug: "311051285"
+}
