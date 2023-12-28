@@ -30,5 +30,13 @@ enum class CommunalContentSize(val span: Int) {
     HALF(3),
 
     /** Content takes a third of the height of the column. */
-    THIRD(2),
+    THIRD(2);
+
+    companion object {
+        /** Converts from span to communal content size. */
+        fun toSize(span: Int): CommunalContentSize {
+            return entries.find { it.span == span }
+                ?: throw Exception("Invalid span for communal content size")
+        }
+    }
 }
