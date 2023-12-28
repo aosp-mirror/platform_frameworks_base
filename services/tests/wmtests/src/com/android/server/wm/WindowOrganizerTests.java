@@ -92,6 +92,7 @@ import android.window.WindowContainerTransaction;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.TaskOrganizerController.PendingTaskEvent;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -154,9 +155,6 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Before
     public void setUp() {
-        mSystemServicesTestRule.addProcess("pkgName", "procName",
-                WindowManagerService.MY_PID, WindowManagerService.MY_UID);
-
         // We defer callbacks since we need to adjust task surface visibility, but for these tests,
         // just run the callbacks synchronously
         mWm.mAtmService.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer((r) -> r.run());
@@ -588,6 +586,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Test
     public void testTaskFragmentHiddenFocusableTranslucentChanges() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         removeGlobalMinSizeRestriction();
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
@@ -663,6 +663,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     private void testTaskFragmentChangesWithoutSystemOrganizerThrowException(
             BiConsumer<WindowContainerTransaction, WindowContainerToken> addOp) {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         removeGlobalMinSizeRestriction();
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
@@ -1738,11 +1740,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final ITaskFragmentOrganizer organizerInterface =
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
-        mWm.mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController
-                .registerOrganizerInternal(
-                        ITaskFragmentOrganizer.Stub.asInterface(
-                                organizer.getOrganizerToken().asBinder()),
-                        isSystemOrganizer);
+        registerTaskFragmentOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()),
+                isSystemOrganizer);
         t.setTaskFragmentOrganizer(organizerInterface);
 
         return organizer;

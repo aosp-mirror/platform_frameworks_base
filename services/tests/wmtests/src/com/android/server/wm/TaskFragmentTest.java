@@ -90,8 +90,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         mOrganizer = new TaskFragmentOrganizer(Runnable::run);
         mIOrganizer = ITaskFragmentOrganizer.Stub.asInterface(mOrganizer.getOrganizerToken()
                 .asBinder());
-        mAtm.mWindowOrganizerController.mTaskFragmentOrganizerController
-                .registerOrganizer(mIOrganizer);
+        registerTaskFragmentOrganizer(mIOrganizer);
         mTaskFragment = new TaskFragmentBuilder(mAtm)
                 .setCreateParentTask()
                 .setOrganizer(mOrganizer)

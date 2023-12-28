@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import android.os.Handler;
@@ -35,7 +37,7 @@ class SystemServiceTestsBase {
             new DexmakerShareClassLoaderRule();
 
     @Rule(order = 1)
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     @Rule(order = 2)
     public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule(

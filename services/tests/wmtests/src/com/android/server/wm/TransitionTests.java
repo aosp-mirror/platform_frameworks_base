@@ -1639,7 +1639,7 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord nonEmbeddedActivity = createActivityRecord(task);
         assertFalse(nonEmbeddedActivity.isEmbedded());
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+        registerTaskFragmentOrganizer(
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
         final TaskFragment embeddedTf = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
@@ -1689,7 +1689,7 @@ public class TransitionTests extends WindowTestsBase {
         task.getConfiguration().windowConfiguration.setBounds(taskBounds);
         final ActivityRecord nonEmbeddedActivity = createActivityRecord(task);
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+        registerTaskFragmentOrganizer(
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
         final TaskFragment embeddedTf = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
@@ -1818,7 +1818,7 @@ public class TransitionTests extends WindowTestsBase {
         // Skip manipulate the SurfaceControl.
         doNothing().when(activity).setDropInputMode(anyInt());
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+        registerTaskFragmentOrganizer(
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
         final TaskFragment embeddedTf = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
@@ -1849,7 +1849,7 @@ public class TransitionTests extends WindowTestsBase {
 
         // Test background color for Activity and embedded TaskFragment.
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(
+        registerTaskFragmentOrganizer(
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()));
         final Task task = createTask(mDisplayContent);
         final TaskFragment embeddedTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
