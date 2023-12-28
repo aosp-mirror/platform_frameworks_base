@@ -1164,6 +1164,30 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void logFgsApiEnd(int apiType, int uid, int pid);
 
+    /**
+     * Checks whether an app will be able to start a foreground service or not.
+     *
+     * @param pid The process id belonging to the app to be checked.
+     * @param uid The UID of the app to be checked.
+     * @param packageName The package name of the app to be checked.
+     * @return whether the app will be able to start a foreground service or not.
+     */
+    public abstract boolean canStartForegroundService(
+            int pid, int uid, @NonNull String packageName);
+
+    /**
+     * Returns {@code true} if a foreground service started by an uid is allowed to have
+     * while-in-use permissions.
+     *
+     * @param pid The process id belonging to the app to be checked.
+     * @param uid The UID of the app to be checked.
+     * @param packageName The package name of the app to be checked.
+     * @return whether the foreground service is allowed to have while-in-use permissions.
+     * @hide
+     */
+    public abstract boolean canAllowWhileInUsePermissionInFgs(
+            int pid, int uid, @NonNull String packageName);
+
      /**
      * Temporarily allow foreground service started by an uid to have while-in-use permission
      * for durationMs.
