@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -26,6 +28,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -94,7 +97,6 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                 KeyguardLongPressViewModel(
                     interactor = mock(),
                 ),
-            keyguardRoot = utils.keyguardRootViewModel(),
             notifications = utils.notificationsPlaceholderViewModel(),
         )
     }

@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandListener
+import com.android.systemui.keyguard.ui.viewmodel.AodAlphaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -83,6 +84,7 @@ constructor(
     private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
     private val vibratorHelper: VibratorHelper,
     private val falsingManager: FalsingManager,
+    private val aodAlphaViewModel: AodAlphaViewModel,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -126,7 +128,7 @@ constructor(
             KeyguardIndicationAreaBinder.bind(
                 notificationShadeWindowView.requireViewById(R.id.keyguard_indication_area),
                 keyguardIndicationAreaViewModel,
-                keyguardRootViewModel,
+                aodAlphaViewModel,
                 indicationController,
             )
     }
@@ -148,7 +150,6 @@ constructor(
                 keyguardRootView,
                 keyguardRootViewModel,
                 configuration,
-                featureFlags,
                 occludingAppDeviceEntryMessageViewModel,
                 chipbarCoordinator,
                 screenOffAnimationController,

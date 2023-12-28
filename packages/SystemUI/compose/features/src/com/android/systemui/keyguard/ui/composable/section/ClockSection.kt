@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChanged
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import javax.inject.Inject
 
@@ -35,8 +36,12 @@ constructor(
     private val viewModel: KeyguardClockViewModel,
 ) {
     @Composable
-    fun SceneScope.SmallClock(modifier: Modifier = Modifier) {
+    fun SceneScope.SmallClock(
+        onTopChanged: (top: Float?) -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
         if (viewModel.useLargeClock) {
+            onTopChanged(null)
             return
         }
 
@@ -45,7 +50,10 @@ constructor(
             modifier = modifier,
         ) {
             Box(
-                modifier = Modifier.fillMaxWidth().background(Color.Magenta),
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .background(Color.Magenta)
+                        .onTopPlacementChanged(onTopChanged)
             ) {
                 Text(
                     text = "TODO(b/316211368): Small clock",
