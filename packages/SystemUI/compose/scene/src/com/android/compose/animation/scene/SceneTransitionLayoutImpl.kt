@@ -36,6 +36,8 @@ import androidx.compose.ui.util.fastForEach
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 
+internal typealias MovableElementContent = @Composable (@Composable () -> Unit) -> Unit
+
 @Stable
 internal class SceneTransitionLayoutImpl(
     internal val state: SceneTransitionLayoutStateImpl,
@@ -60,6 +62,20 @@ internal class SceneTransitionLayoutImpl(
      * make sure that mutations are reverted if composition is cancelled.
      */
     internal val elements = SnapshotStateMap<ElementKey, Element>()
+
+    /**
+     * The map of contents of movable elements.
+     *
+     * Note that given that this map is mutated directly during a composition, it has to be a
+     * [SnapshotStateMap] to make sure that mutations are reverted if composition is cancelled.
+     */
+    private var _movableContents: SnapshotStateMap<ElementKey, MovableElementContent>? = null
+    val movableContents: SnapshotStateMap<ElementKey, MovableElementContent>
+        get() =
+            _movableContents
+                ?: SnapshotStateMap<ElementKey, MovableElementContent>().also {
+                    _movableContents = it
+                }
 
     /**
      * The different values of a shared value keyed by a a [ValueKey] and the different elements and

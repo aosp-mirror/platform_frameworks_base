@@ -16,10 +16,8 @@
 
 package com.android.compose.animation.scene
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
@@ -60,17 +58,6 @@ internal class Element(val key: ElementKey) {
 
     /** The mapping between a scene and the state this element has in that scene, if any. */
     val sceneStates = SnapshotStateMap<SceneKey, SceneState>()
-
-    /**
-     * The movable content of this element, if this element is composed using
-     * [SceneScope.MovableElement].
-     */
-    private var _movableContent: (@Composable (@Composable () -> Unit) -> Unit)? = null
-    val movableContent: @Composable (@Composable () -> Unit) -> Unit
-        get() =
-            _movableContent
-                ?: movableContentOf { content: @Composable () -> Unit -> content() }
-                    .also { _movableContent = it }
 
     override fun toString(): String {
         return "Element(key=$key)"

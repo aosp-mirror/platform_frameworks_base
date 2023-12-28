@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntSize
@@ -75,13 +75,9 @@ private inline fun <ContentScope> ElementBase(
     isMovable: Boolean,
 ) {
     Box(modifier.element(layoutImpl, scene, key)) {
-        // Get the Element from the map. It will always be the same and we don't want to recompose
-        // every time an element is added/removed from SceneTransitionLayoutImpl.elements, so we
-        // disable read observation during the look-up in that map.
-        val element = Snapshot.withoutReadObservation { layoutImpl.elements.getValue(key) }
         val elementScope =
-            remember(layoutImpl, element, scene, contentScope, isMovable) {
-                ElementScopeImpl(layoutImpl, element, scene, contentScope, isMovable)
+            remember(layoutImpl, key, scene, contentScope, isMovable) {
+                ElementScopeImpl(layoutImpl, key, scene, contentScope, isMovable)
             }
 
         elementScope.content()
@@ -90,7 +86,7 @@ private inline fun <ContentScope> ElementBase(
 
 private class ElementScopeImpl<ContentScope>(
     private val layoutImpl: SceneTransitionLayoutImpl,
-    private val element: Element,
+    private val element: ElementKey,
     private val scene: Scene,
     private val contentScope: ContentScope,
     private val isMovable: Boolean,
@@ -105,7 +101,7 @@ private class ElementScopeImpl<ContentScope>(
         return animateSharedValueAsState(
             layoutImpl,
             scene.key,
-            element.key,
+            element,
             key,
             value,
             lerp,
@@ -132,7 +128,12 @@ private class ElementScopeImpl<ContentScope>(
             }
 
         if (shouldComposeMovableElement) {
-            element.movableContent { contentScope.content() }
+            val movableContent: MovableElementContent =
+                layoutImpl.movableContents[element]
+                    ?: movableContentOf { content: @Composable () -> Unit -> content() }
+                        .also { layoutImpl.movableContents[element] = it }
+
+            movableContent { contentScope.content() }
         } else {
             // If we are not composed, we still need to lay out an empty space with the same *target
             // size* as its movable content, i.e. the same *size when idle*. During transitions,
@@ -140,7 +141,12 @@ private class ElementScopeImpl<ContentScope>(
             // layout pass.
             Layout { _, _ ->
                 // No need to measure or place anything.
-                val size = placeholderContentSize(layoutImpl, scene.key, element)
+                val size =
+                    placeholderContentSize(
+                        layoutImpl,
+                        scene.key,
+                        layoutImpl.elements.getValue(element),
+                    )
                 layout(size.width, size.height) {}
             }
         }
@@ -150,7 +156,7 @@ private class ElementScopeImpl<ContentScope>(
 private fun shouldComposeMovableElement(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: SceneKey,
-    element: Element,
+    element: ElementKey,
 ): Boolean {
     val transition =
         layoutImpl.state.currentTransition
@@ -179,7 +185,7 @@ private fun shouldComposeMovableElement(
         layoutImpl,
         transition,
         scene,
-        element.key,
+        element,
     )
 }
 
