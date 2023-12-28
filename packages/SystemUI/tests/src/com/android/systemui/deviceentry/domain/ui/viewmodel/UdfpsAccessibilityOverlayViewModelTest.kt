@@ -23,7 +23,7 @@ import com.android.systemui.accessibility.data.repository.fakeAccessibilityRepos
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.deviceentry.data.ui.viewmodel.udfpsAccessibilityOverlayViewModel
+import com.android.systemui.deviceentry.data.ui.viewmodel.deviceEntryUdfpsAccessibilityOverlayViewModel
 import com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
@@ -57,7 +57,7 @@ class UdfpsAccessibilityOverlayViewModelTest : SysuiTestCase() {
     private val deviceEntryFingerprintAuthRepository = kosmos.deviceEntryFingerprintAuthRepository
     private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
     private val shadeRepository = kosmos.fakeShadeRepository
-    private val underTest = kosmos.udfpsAccessibilityOverlayViewModel
+    private val underTest = kosmos.deviceEntryUdfpsAccessibilityOverlayViewModel
 
     @Test
     fun visible() =

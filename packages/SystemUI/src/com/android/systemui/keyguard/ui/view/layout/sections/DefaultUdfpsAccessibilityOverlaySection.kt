@@ -23,7 +23,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.Flags
 import com.android.systemui.deviceentry.ui.binder.UdfpsAccessibilityOverlayBinder
 import com.android.systemui.deviceentry.ui.view.UdfpsAccessibilityOverlay
-import com.android.systemui.deviceentry.ui.viewmodel.UdfpsAccessibilityOverlayViewModel
+import com.android.systemui.deviceentry.ui.viewmodel.DeviceEntryUdfpsAccessibilityOverlayViewModel
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -35,7 +35,7 @@ class DefaultUdfpsAccessibilityOverlaySection
 @Inject
 constructor(
     private val context: Context,
-    private val viewModel: UdfpsAccessibilityOverlayViewModel,
+    private val viewModel: DeviceEntryUdfpsAccessibilityOverlayViewModel,
 ) : KeyguardSection() {
     private val viewId = R.id.udfps_accessibility_overlay
     private var cachedConstraintLayout: ConstraintLayout? = null
