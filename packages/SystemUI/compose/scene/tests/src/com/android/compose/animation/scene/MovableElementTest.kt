@@ -28,13 +28,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
@@ -290,5 +294,39 @@ class MovableElementTest {
                 rule.onNodeWithText("toScene").assertIsDisplayed()
             }
         }
+    }
+
+    @Test
+    fun elementScopeExtendsBoxScope() {
+        rule.setContent {
+            TestSceneScope {
+                Element(TestElements.Foo, Modifier.size(200.dp)) {
+                    content {
+                        Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
+                        Box(Modifier.testTag("matchParentSize").matchParentSize())
+                    }
+                }
+            }
+        }
+
+        rule.onNodeWithTag("bottomEnd").assertPositionInRootIsEqualTo(200.dp, 200.dp)
+        rule.onNodeWithTag("matchParentSize").assertSizeIsEqualTo(200.dp, 200.dp)
+    }
+
+    @Test
+    fun movableElementScopeExtendsBoxScope() {
+        rule.setContent {
+            TestSceneScope {
+                MovableElement(TestElements.Foo, Modifier.size(200.dp)) {
+                    content {
+                        Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
+                        Box(Modifier.testTag("matchParentSize").matchParentSize())
+                    }
+                }
+            }
+        }
+
+        rule.onNodeWithTag("bottomEnd").assertPositionInRootIsEqualTo(200.dp, 200.dp)
+        rule.onNodeWithTag("matchParentSize").assertSizeIsEqualTo(200.dp, 200.dp)
     }
 }

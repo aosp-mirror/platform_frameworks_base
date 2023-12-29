@@ -74,7 +74,7 @@ internal class Scene(
 internal class SceneScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val scene: Scene,
-) : SceneScope, ElementContentScope, MovableElementContentScope {
+) : SceneScope {
     override val layoutState: SceneTransitionLayoutState = layoutImpl.state
 
     override fun Modifier.element(key: ElementKey): Modifier {

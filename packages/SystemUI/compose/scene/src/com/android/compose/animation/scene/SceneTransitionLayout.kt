@@ -24,6 +24,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -281,8 +282,25 @@ interface ElementScope<ContentScope> {
     @Composable fun content(content: @Composable ContentScope.() -> Unit)
 }
 
+/**
+ * The exact same scope as [androidx.compose.foundation.layout.BoxScope].
+ *
+ * We can't reuse BoxScope directly because of the @LayoutScopeMarker annotation on it, which would
+ * prevent us from calling Modifier.element() and other methods of [SceneScope] inside any Box {} in
+ * the [content][ElementScope.content] of a [SceneScope.Element] or a [SceneScope.MovableElement].
+ */
+@Stable
+@ElementDsl
+interface ElementBoxScope {
+    /** @see [androidx.compose.foundation.layout.BoxScope.align]. */
+    @Stable fun Modifier.align(alignment: Alignment): Modifier
+
+    /** @see [androidx.compose.foundation.layout.BoxScope.matchParentSize]. */
+    @Stable fun Modifier.matchParentSize(): Modifier
+}
+
 /** The scope for "normal" (not movable) elements. */
-@Stable @ElementDsl interface ElementContentScope : MovableElementContentScope, SceneScope
+@Stable @ElementDsl interface ElementContentScope : SceneScope, ElementBoxScope
 
 /**
  * The scope for the content of movable elements.
@@ -291,7 +309,7 @@ interface ElementScope<ContentScope> {
  * call [SceneScope.animateSceneValueAsState], given that their content is not composed in all
  * scenes.
  */
-@Stable @ElementDsl interface MovableElementContentScope : BaseSceneScope
+@Stable @ElementDsl interface MovableElementContentScope : BaseSceneScope, ElementBoxScope
 
 /** An action performed by the user. */
 sealed interface UserAction

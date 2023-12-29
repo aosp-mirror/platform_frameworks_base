@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -34,20 +35,16 @@ internal fun Element(
     modifier: Modifier,
     content: @Composable ElementScope<ElementContentScope>.() -> Unit,
 ) {
-    val contentScope = scene.scope
-    val elementScope =
-        remember(layoutImpl, key, scene, contentScope) {
-            ElementScopeImpl(layoutImpl, key, scene, contentScope)
-        }
+    Box(modifier.element(layoutImpl, scene, key)) {
+        val sceneScope = scene.scope
+        val boxScope = this
+        val elementScope =
+            remember(layoutImpl, key, scene, sceneScope, boxScope) {
+                ElementScopeImpl(layoutImpl, key, scene, sceneScope, boxScope)
+            }
 
-    ElementBase(
-        layoutImpl,
-        scene,
-        key,
-        modifier,
-        elementScope,
-        content,
-    )
+        content(elementScope)
+    }
 }
 
 @Composable
@@ -58,32 +55,16 @@ internal fun MovableElement(
     modifier: Modifier,
     content: @Composable ElementScope<MovableElementContentScope>.() -> Unit,
 ) {
-    val contentScope = scene.scope
-    val elementScope =
-        remember(layoutImpl, key, scene, contentScope) {
-            MovableElementScopeImpl(layoutImpl, key, scene, contentScope)
-        }
+    Box(modifier.element(layoutImpl, scene, key)) {
+        val sceneScope = scene.scope
+        val boxScope = this
+        val elementScope =
+            remember(layoutImpl, key, scene, sceneScope, boxScope) {
+                MovableElementScopeImpl(layoutImpl, key, scene, sceneScope, boxScope)
+            }
 
-    ElementBase(
-        layoutImpl,
-        scene,
-        key,
-        modifier,
-        elementScope,
-        content,
-    )
-}
-
-@Composable
-private inline fun <ContentScope> ElementBase(
-    layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
-    key: ElementKey,
-    modifier: Modifier,
-    elementScope: ElementScope<ContentScope>,
-    content: @Composable (ElementScope<ContentScope>.() -> Unit),
-) {
-    Box(modifier.element(layoutImpl, scene, key)) { elementScope.content() }
+        content(elementScope)
+    }
 }
 
 private abstract class BaseElementScope<ContentScope>(
@@ -114,8 +95,12 @@ private class ElementScopeImpl(
     layoutImpl: SceneTransitionLayoutImpl,
     element: ElementKey,
     scene: Scene,
-    private val contentScope: ElementContentScope,
+    private val sceneScope: SceneScope,
+    private val boxScope: BoxScope,
 ) : BaseElementScope<ElementContentScope>(layoutImpl, element, scene) {
+    private val contentScope =
+        object : ElementContentScope, SceneScope by sceneScope, BoxScope by boxScope {}
+
     @Composable
     override fun content(content: @Composable ElementContentScope.() -> Unit) {
         contentScope.content()
@@ -126,8 +111,12 @@ private class MovableElementScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val element: ElementKey,
     private val scene: Scene,
-    private val contentScope: MovableElementContentScope,
+    private val sceneScope: BaseSceneScope,
+    private val boxScope: BoxScope,
 ) : BaseElementScope<MovableElementContentScope>(layoutImpl, element, scene) {
+    private val contentScope =
+        object : MovableElementContentScope, BaseSceneScope by sceneScope, BoxScope by boxScope {}
+
     @Composable
     override fun content(content: @Composable MovableElementContentScope.() -> Unit) {
         // Whether we should compose the movable element here. The scene picker logic to know in
@@ -151,6 +140,10 @@ private class MovableElementScopeImpl(
                         }
                         .also { layoutImpl.movableContents[element] = it }
 
+            // Important: Don't introduce any parent Box or other layout here, because contentScope
+            // delegates its BoxScope implementation to the Box where this content() function is
+            // called, so it's important that this movableContent is composed directly under that
+            // Box.
             movableContent(contentScope, content)
         } else {
             // If we are not composed, we still need to lay out an empty space with the same *target
