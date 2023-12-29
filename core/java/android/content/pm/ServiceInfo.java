@@ -142,6 +142,28 @@ public class ServiceInfo extends ComponentInfo
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * Data(photo, file, account) upload/download, backup/restore, import/export, fetch,
      * transfer over network between device and cloud.
+     *
+     * <p>This type has time limit of 6 hours starting from Android version
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}.
+     * A foreground service of this type must be stopped within the timeout by
+     * {@link android.app.Service#stopSelf()},
+     * {@link android.content.Context#stopService(android.content.Intent)} or their overloads).
+     * {@link android.app.Service#stopForeground(int)} will also work, which will demote the
+     * service to a "background" service, which will soon be stopped by the system.
+     *
+     * <p>If the service isn't stopped within the timeout,
+     * {@link android.app.Service#onTimeout(int, int)} will be called.
+     *
+     * <p>Also note, even though
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_DATA_SYNC} can be used on
+     * Android versions prior to {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, since
+     * {@link android.app.Service#onTimeout(int, int)} did not exist on such versions, it will
+     * never be called.
+     *
+     * Because of this, developers must make sure to stop the foreground service even if
+     * {@link android.app.Service#onTimeout(int, int)} is not called on such versions.
+     *
+     * @see android.app.Service#onTimeout(int, int)
      */
     @RequiresPermission(
             value = Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
@@ -483,6 +505,27 @@ public class ServiceInfo extends ComponentInfo
      * Constant corresponding to {@code mediaProcessing} in
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * Media processing use cases such as video or photo editing and processing.
+     *
+     * This type has time limit of 6 hours.
+     * A foreground service of this type must be stopped within the timeout by
+     * {@link android.app.Service#stopSelf()},
+     * {@link android.content.Context#stopService(android.content.Intent)} or their overloads).
+     * {@link android.app.Service#stopForeground(int)} will also work, which will demote the
+     * service to a "background" service, which will soon be stopped by the system.
+     *
+     * <p>If the service isn't stopped within the timeout,
+     * {@link android.app.Service#onTimeout(int, int)} will be called.
+     *
+     * <p>Also note, even though
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING} was added in
+     * Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, it can be also used
+     * on prior android versions (just like other new foreground service types can be used).
+     * However, because {@link android.app.Service#onTimeout(int, int)} did not exist on prior
+     * versions, it will never be called on such versions.
+     * Because of this, developers must make sure to stop the foreground service even if
+     * {@link android.app.Service#onTimeout(int, int)} is not called on such versions.
+     *
+     * @see android.app.Service#onTimeout(int, int)
      */
     @RequiresPermission(
             value = Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING

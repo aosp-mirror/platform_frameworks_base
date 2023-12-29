@@ -178,5 +178,6 @@ oneway interface IApplicationThread {
             in TranslationSpec targetSpec, in List<AutofillId> viewIds,
             in UiTranslationSpec uiTranslationSpec);
     void scheduleTimeoutService(IBinder token, int startId);
+    void scheduleTimeoutServiceForType(IBinder token, int startId, int fgsType);
     void schedulePing(in RemoteCallback pong);
 }
