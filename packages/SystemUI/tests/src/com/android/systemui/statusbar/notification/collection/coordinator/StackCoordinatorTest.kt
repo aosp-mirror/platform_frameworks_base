@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStackC
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
@@ -80,7 +81,7 @@ class StackCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
+    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME, FooterViewRefactor.FLAG_NAME)
     fun testUpdateNotificationIcons() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(notificationIconAreaController).updateNotificationIcons(eq(listOf(entry)))
