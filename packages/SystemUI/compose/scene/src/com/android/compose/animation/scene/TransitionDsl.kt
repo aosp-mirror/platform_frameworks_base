@@ -136,6 +136,7 @@ interface TransitionBuilder : PropertyTransformationBuilder {
  * @see DefaultElementScenePicker
  * @see HighestZIndexScenePicker
  * @see LowestZIndexScenePicker
+ * @see MovableElementScenePicker
  */
 interface ElementScenePicker {
     /**
@@ -224,6 +225,31 @@ object LowestZIndexScenePicker : ElementScenePicker {
         } else {
             transition.toScene
         }
+    }
+}
+
+/**
+ * An [ElementScenePicker] that draws/composes elements in the scene we are transitioning to, iff
+ * that scene is in [scenes].
+ *
+ * This picker can be useful for movable elements whose content size depends on its content (because
+ * it wraps it) in at least one scene. That way, the target size of the MovableElement will be
+ * computed in the scene we are going to and, given that this element was probably already composed
+ * in the scene we are going from before starting the transition, the interpolated size of the
+ * movable element during the transition should be correct.
+ *
+ * The downside of this picker is that the zIndex of the element when going from scene A to scene B
+ * is not the same as when going from scene B to scene A, so it's not usable in situations where
+ * z-ordering during the transition matters.
+ */
+class MovableElementScenePicker(private val scenes: Set<SceneKey>) : ElementScenePicker {
+    override fun sceneDuringTransition(
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        fromSceneZIndex: Float,
+        toSceneZIndex: Float,
+    ): SceneKey {
+        return if (scenes.contains(transition.toScene)) transition.toScene else transition.fromScene
     }
 }
 
