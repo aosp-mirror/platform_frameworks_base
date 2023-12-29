@@ -70,10 +70,10 @@ class ElementKey(
     val isBackground: Boolean = false,
 
     /**
-     * The [SharedElementScenePicker] to use when deciding in which scene we should draw or compose
-     * this element when it is shared.
+     * The [ElementScenePicker] to use when deciding in which scene we should draw or compose this
+     * element when it is shared.
      */
-    val scenePicker: SharedElementScenePicker? = null,
+    val scenePicker: ElementScenePicker? = null,
 ) : Key(name, identity), ElementMatcher {
     @VisibleForTesting
     // TODO(b/240432457): Make internal once PlatformComposeSceneTransitionLayoutTestsUtils can

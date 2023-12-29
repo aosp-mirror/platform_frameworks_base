@@ -130,7 +130,7 @@ interface TransitionBuilder : PropertyTransformationBuilder {
     fun reversed(builder: TransitionBuilder.() -> Unit)
 }
 
-interface SharedElementScenePicker {
+interface ElementScenePicker {
     /**
      * Return the scene in which [element] should be drawn (when using `Modifier.element(key)`) or
      * composed (when using `MovableElement(key)`) during the given [transition].
@@ -183,7 +183,7 @@ interface SharedElementScenePicker {
     }
 }
 
-object DefaultSharedElementScenePicker : SharedElementScenePicker {
+object DefaultElementScenePicker : ElementScenePicker {
     override fun sceneDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,

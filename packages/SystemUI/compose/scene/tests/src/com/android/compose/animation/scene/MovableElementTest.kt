@@ -151,7 +151,7 @@ class MovableElementTest {
             ElementKey(
                 "Foo",
                 scenePicker =
-                    object : SharedElementScenePicker {
+                    object : ElementScenePicker {
                         override fun sceneDuringTransition(
                             element: ElementKey,
                             transition: TransitionState.Transition,
