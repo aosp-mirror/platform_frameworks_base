@@ -44,6 +44,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.media.flags.Flags;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -318,11 +319,19 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
     @Override
     public void onBindingDied(ComponentName name) {
-        if (DEBUG) {
-            Slog.d(TAG, this + ": Service binding died");
-        }
         unbind();
-        if (shouldBind()) {
+        if (Flags.enablePreventionOfKeepAliveRouteProviders()) {
+            Slog.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Route provider service (%s) binding died, but we did not rebind.",
+                            name.toString()));
+        } else if (shouldBind()) {
+            Slog.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Rebound to provider service (%s) after binding died.",
+                            name.toString()));
             bind();
         }
     }

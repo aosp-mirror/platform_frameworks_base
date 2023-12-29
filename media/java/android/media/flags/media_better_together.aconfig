@@ -83,3 +83,10 @@ flag {
     description: "Notify ActivityManager with the changes in playback state of the media session."
     bug: "295518668"
 }
+
+flag {
+    name: "enable_prevention_of_keep_alive_route_providers"
+    namespace: "media_solutions"
+    description: "Enables mechanisms to prevent route providers from keeping malicious apps alive."
+    bug: "263520343"
+}
