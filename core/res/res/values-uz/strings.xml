@@ -1906,8 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Dam olish kunlari"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Tadbir"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Uyquda"</string>
-    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
-    <skip />
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> tomonidan boshqariladi"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Yoniq"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Oʻchiq"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ayrim tovushlarni ovozsiz qilgan"</string>
@@ -2366,4 +2365,5 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Ish 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Umumiy"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
 </resources>

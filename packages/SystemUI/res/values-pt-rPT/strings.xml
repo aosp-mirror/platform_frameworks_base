@@ -333,6 +333,14 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Registar problema"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Iniciar"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Parar"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Que parte da experiência do disposit. foi afetada?"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Selecione o tipo de problema"</string>
+    <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Gravação de ecrã"</string>
+  <string-array name="qs_record_issue_types">
+    <item msgid="2947988124014085798">"Desempenho"</item>
+    <item msgid="1627504621139124393">"Interface do utilizador"</item>
+    <item msgid="8309220355268900335">"Bateria"</item>
+  </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo para uma mão"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contraste"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Padrão"</string>
@@ -861,7 +869,6 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"Tocar para agendar a Poupança de bateria"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Ativar quando for provável que a bateria se esgote"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Não"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Despejar pilha SysUI"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Em utilização"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"As aplicações estão a utilizar o(a) <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -1201,7 +1208,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Predefina a app de notas nas Definições"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalar app"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Espelhar para o ecrã externo?"</string>
-    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"Qualquer atividade de Dual Screen atualmente em curso vai ser interrompida"</string>
+    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
+    <skip />
     <string name="mirror_display" msgid="2515262008898122928">"Espelhar ecrã"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Ignorar"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Ecrã ligado"</string>

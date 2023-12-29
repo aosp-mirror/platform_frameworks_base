@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.shelf.ui.viewbinder
 
+import com.android.app.tracing.traceSection
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerShelfViewBinder
@@ -38,10 +39,12 @@ object NotificationShelfViewBinder {
     ): Unit = coroutineScope {
         ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
         shelf.apply {
-            if (NotificationIconContainerRefactor.isEnabled) {
-                launch { nicBinder.bind(shelfIcons) }
-            } else {
-                notificationIconAreaController.setShelfIcons(shelfIcons)
+            traceSection("NotifShelf#bindShelfIcons") {
+                if (NotificationIconContainerRefactor.isEnabled) {
+                    launch { nicBinder.bind(shelfIcons) }
+                } else {
+                    notificationIconAreaController.setShelfIcons(shelfIcons)
+                }
             }
             launch {
                 viewModel.canModifyColorOfNotifications.collect(::setCanModifyColorOfNotifications)

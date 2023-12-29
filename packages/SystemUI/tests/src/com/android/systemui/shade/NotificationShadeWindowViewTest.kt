@@ -44,7 +44,6 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.SystemPropertiesHelper
@@ -56,11 +55,10 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepo
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.log.BouncerLogger
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
@@ -70,7 +68,6 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.statusbar.notification.stack.AmbientState
@@ -268,11 +265,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 alternateBouncerInteractor,
                 mSelectedUserInteractor,
                 { Mockito.mock(JavaAdapter::class.java) },
-                { Mockito.mock(AlternateBouncerViewModel::class.java) },
-                { Mockito.mock(FalsingManager::class.java) },
-                { Mockito.mock(SwipeUpAnywhereGestureHandler::class.java) },
-                { Mockito.mock(TapGestureDetector::class.java) },
-                { Mockito.mock(AlternateBouncerUdfpsIconViewModel::class.java) },
+                { Mockito.mock(AlternateBouncerDependencies::class.java) },
             )
 
         controller.setupExpandedStatusBar()

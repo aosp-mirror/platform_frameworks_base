@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 
-import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
 
 import static com.google.common.truth.Truth.assertThat;

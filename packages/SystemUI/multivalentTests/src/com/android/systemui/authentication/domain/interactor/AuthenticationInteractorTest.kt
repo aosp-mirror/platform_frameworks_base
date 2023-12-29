@@ -19,6 +19,7 @@ package com.android.systemui.authentication.domain.interactor
 import android.app.admin.DevicePolicyManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.None
@@ -26,6 +27,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
+import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
@@ -401,6 +403,55 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             // Correct PIN and no longer locked out so unlocks successfully:
             assertSucceeded(underTest.authenticate(correctPin))
             assertThat(underTest.lockoutEndTimestamp).isNull()
+        }
+
+    @Test
+    fun upcomingWipe() =
+        testScope.runTest {
+            val upcomingWipe by collectLastValue(underTest.upcomingWipe)
+            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            val correctPin = FakeAuthenticationRepository.DEFAULT_PIN
+            val wrongPin = FakeAuthenticationRepository.DEFAULT_PIN.map { it + 1 }
+
+            underTest.authenticate(correctPin)
+            assertThat(upcomingWipe).isNull()
+
+            var expectedFailedAttempts = 0
+            var remainingFailedAttempts =
+                utils.authenticationRepository.getMaxFailedUnlockAttemptsForWipe()
+            assertThat(remainingFailedAttempts)
+                .isGreaterThan(LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE)
+
+            // Make many wrong attempts, until wipe is triggered:
+            repeat(remainingFailedAttempts) { attemptIndex ->
+                underTest.authenticate(wrongPin)
+                expectedFailedAttempts++
+                remainingFailedAttempts--
+                if (underTest.lockoutEndTimestamp != null) {
+                    // If there's a lockout, wait it out:
+                    advanceTimeBy(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS.seconds)
+                }
+
+                if (attemptIndex < LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE) {
+                    // No risk of wipe.
+                    assertThat(upcomingWipe).isNull()
+                } else {
+                    // Wipe grace period started; Make additional wrong attempts, confirm the
+                    // warning is shown each time:
+                    assertThat(upcomingWipe)
+                        .isEqualTo(
+                            AuthenticationWipeModel(
+                                wipeTarget = AuthenticationWipeModel.WipeTarget.WholeDevice,
+                                failedAttempts = expectedFailedAttempts,
+                                remainingAttempts = remainingFailedAttempts
+                            )
+                        )
+                }
+            }
+
+            // Unlock successfully, no more risk of upcoming wipe:
+            assertSucceeded(underTest.authenticate(correctPin))
+            assertThat(upcomingWipe).isNull()
         }
 
     @Test

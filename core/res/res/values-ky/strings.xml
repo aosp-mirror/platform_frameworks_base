@@ -1906,8 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Дем алыш"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Иш-чара"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Уйку режими"</string>
-    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
-    <skip />
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> башкарат"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Күйүк"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Өчүк"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> айрым үндөрдү өчүрүүдө"</string>
@@ -2340,7 +2339,7 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Көмөкчү колдонмого активдүү кызматтарды фондо иштетүүгө уруксат берет."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон жеткиликтүү"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон бөгөттөлгөн"</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Экранга күзгүдөй чагылдыруу мүмкүн эмес"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Башка экранга чыгаруу мүмкүн эмес"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Башка кабелди колдонуп, кайра аракет кылыңыз"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Түзмөгүңүз өтө ысып кетти жана ал муздамайынча башка экранга чыгара албайт"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Кош экран"</string>
@@ -2366,4 +2365,5 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Жумуш 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Сыноо"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Жалпы"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
 </resources>

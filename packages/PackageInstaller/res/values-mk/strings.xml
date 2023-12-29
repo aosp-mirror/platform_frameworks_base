@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Корисников не може да инсталира непознати апликации"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"На корисников не му е дозволено да инсталира апликации"</string>
     <string name="ok" msgid="7871959885003339302">"Во ред"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"Архивирај"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Сепак ажурирај"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Управување со апликациите"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Нема простор"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Деинсталирајте ажурирање"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> е дел од следната апликација:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Дали сакате да ја деинсталирате оваа апликација?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"Вашите лични податоци ќе се зачуваат"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Да се архивира апликацијава за сите корисници? Вашите лични податоци ќе се зачуваат"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Да се архивира апликацијава на вашиот работен профил? Вашите лични податоци ќе се зачуваат"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Да се архивира апликацијава за <xliff:g id="USERNAME">%1$s</xliff:g>? Вашите лични податоци ќе се зачуваат"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Дали сакате да ја архивирате апликацијава од вашиот „Приватен простор“? Вашите лични податоци ќе се зачуваат"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Дали сакате да ја деинсталирате оваа апликација за "<b>"сите"</b>" корисници? Апликацијата и нејзините податоци ќе се отстранат од "<b>"сите"</b>" корисници на уредот."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Дали сакате да ја деинсталирате апликацијава за корисникот <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Дали сакате да ја деинсталирате апликацијава од работниот профил?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Таблетот и личните податоци се поподложни на напади од апликации од непознати извори. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на таблетот или загуба на податоци поради нејзиното користење."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Телевизорот и личните податоци се поподложни на напади од апликации од непознати извори. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на телевизорот или загуба на податоци поради нејзиното користење."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Клон на <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"Да се архивира <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Продолжи"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Поставки"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Се инсталираат/деинсталираат аплик. Wear"</string>

@@ -256,7 +256,7 @@ public final class ZenPolicy implements Parcelable {
      * @return {@link #CONVERSATION_SENDERS_UNSET}, {@link #CONVERSATION_SENDERS_ANYONE},
      * {@link #CONVERSATION_SENDERS_IMPORTANT}, {@link #CONVERSATION_SENDERS_NONE}.
      */
-    public @PeopleType int getPriorityConversationSenders() {
+    public @ConversationSenders int getPriorityConversationSenders() {
         return mConversationSenders;
     }
 

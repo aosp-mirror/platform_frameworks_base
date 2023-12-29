@@ -21,7 +21,7 @@ import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
 

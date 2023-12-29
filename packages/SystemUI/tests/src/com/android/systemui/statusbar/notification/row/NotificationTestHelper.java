@@ -21,7 +21,7 @@ import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
-import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static org.junit.Assert.assertEquals;

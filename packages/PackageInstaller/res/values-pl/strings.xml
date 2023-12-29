@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ten użytkownik nie może instalować nieznanych aplikacji"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ten użytkownik nie może instalować aplikacji"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"Archiwizuj"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Zaktualizuj mimo to"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Zarządzaj aplikacjami"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Brak miejsca"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Odinstaluj aktualizację"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> jest częścią następującej aplikacji:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Odinstalować tę aplikację?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"Twoje dane osobiste zostaną zapisane"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Zarchiwizować tę aplikację dla wszystkich użytkowników? Twoje dane osobiste zostaną zapisane"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Zarchiwizować tę aplikację w profilu służbowym? Twoje dane osobiste zostaną zapisane"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Zarchiwizować tę aplikację dla użytkownika <xliff:g id="USERNAME">%1$s</xliff:g>? Twoje dane osobiste zostaną zapisane"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Chcesz zarchiwizować tę aplikację ze swojego obszaru prywatnego? Twoje dane osobiste zostaną zapisane"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Chcesz odinstalować tę aplikację dla "<b>"wszystkich"</b>" użytkowników? Ta aplikacja i jej dane zostaną usunięte dla "<b>"wszystkich"</b>" użytkowników na urządzeniu."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Chcesz odinstalować tę aplikację dla użytkownika <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Czy chcesz odinstalować tę aplikację z profilu służbowego?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Dane na tablecie i prywatne są bardziej narażone na atak nieznanych aplikacji. Instalując tę aplikację, bierzesz na siebie odpowiedzialność za ewentualne uszkodzenie tabletu lub utratę danych w wyniku jej używania."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Dane na telewizorze i prywatne są bardziej narażone na atak nieznanych aplikacji. Instalując tę aplikację, bierzesz na siebie odpowiedzialność za ewentualne uszkodzenie telewizora lub utratę danych w wyniku jej używania."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Klon aplikacji <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"Zarchiwizować aplikację <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Dalej"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Ustawienia"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalacja/usuwanie aplikacji na Wear"</string>
