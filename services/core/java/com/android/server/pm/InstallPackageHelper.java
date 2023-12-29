@@ -697,7 +697,7 @@ final class InstallPackageHelper {
                     pkgSetting.setUninstallReason(PackageManager.UNINSTALL_REASON_UNKNOWN, userId);
                     pkgSetting.setFirstInstallTime(System.currentTimeMillis(), userId);
                     // Clear any existing archive state.
-                    pkgSetting.setArchiveState(null, userId);
+                    mPm.mInstallerService.mPackageArchiver.clearArchiveState(packageName, userId);
                     mPm.mSettings.writePackageRestrictionsLPr(userId);
                     mPm.mSettings.writeKernelMappingLPr(pkgSetting);
                     installed = true;
@@ -2279,7 +2279,7 @@ final class InstallPackageHelper {
                                 installerPackageName);
                     }
                     // Clear any existing archive state.
-                    ps.setArchiveState(null, userId);
+                    mPm.mInstallerService.mPackageArchiver.clearArchiveState(pkgName, userId);
                 } else if (allUsers != null) {
                     // The caller explicitly specified INSTALL_ALL_USERS flag.
                     // Thus, updating the settings to install the app for all users.
@@ -2303,7 +2303,8 @@ final class InstallPackageHelper {
                                         installerPackageName);
                             }
                             // Clear any existing archive state.
-                            ps.setArchiveState(null, currentUserId);
+                            mPm.mInstallerService.mPackageArchiver.clearArchiveState(pkgName,
+                                    currentUserId);
                         } else {
                             ps.setInstalled(false, currentUserId);
                         }

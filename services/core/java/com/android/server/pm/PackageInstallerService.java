@@ -25,6 +25,7 @@ import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_NO_CONNECTIVI
 import static android.content.pm.PackageInstaller.UNARCHIVAL_ERROR_USER_ACTION_NEEDED;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_GENERIC_ERROR;
 import static android.content.pm.PackageInstaller.UNARCHIVAL_OK;
+import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -1402,7 +1403,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
-                canSilentlyInstallPackage, userId);
+                canSilentlyInstallPackage, userId, mPackageArchiver, flags);
         final boolean shouldShowConfirmationDialog =
                 (flags & PackageManager.DELETE_SHOW_DIALOG) != 0;
         if (!shouldShowConfirmationDialog
@@ -1756,7 +1757,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         binderUid, unarchiveId));
             }
 
-            session.reportUnarchivalStatus(unarchiveId, status, requiredStorageBytes,
+            session.reportUnarchivalStatus(status, unarchiveId, requiredStorageBytes,
                     userActionIntent);
         }
     }
@@ -1825,9 +1826,23 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         private final IntentSender mTarget;
         private final String mPackageName;
         private final Notification mNotification;
+        private final int mUserId;
 
-        public PackageDeleteObserverAdapter(Context context, IntentSender target,
+        @DeleteFlags
+        private final int mFlags;
+
+        @Nullable
+        private final PackageArchiver mPackageArchiver;
+
+        PackageDeleteObserverAdapter(Context context, IntentSender target,
                 String packageName, boolean showNotification, int userId) {
+            this(context, target, packageName, showNotification, userId,
+                    /* packageArchiver= */ null, /* flags= */ 0);
+        }
+
+        PackageDeleteObserverAdapter(Context context, IntentSender target,
+                String packageName, boolean showNotification, int userId,
+                PackageArchiver packageArchiver, @DeleteFlags int flags) {
             mContext = context;
             mTarget = target;
             mPackageName = packageName;
@@ -1839,6 +1854,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             } else {
                 mNotification = null;
             }
+            mUserId = userId;
+            mPackageArchiver = packageArchiver;
+            mFlags = flags;
         }
 
         private String getDeviceOwnerDeletedPackageMsg() {
@@ -1879,6 +1897,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 notificationManager.notify(basePackageName,
                         SystemMessage.NOTE_PACKAGE_STATE,
                         mNotification);
+            }
+            if (mPackageArchiver != null
+                    && PackageManager.DELETE_SUCCEEDED != returnCode
+                    && (mFlags & DELETE_ARCHIVE) != 0) {
+                mPackageArchiver.clearArchiveState(mPackageName, mUserId);
             }
             if (mTarget == null) {
                 return;
