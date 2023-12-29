@@ -130,10 +130,22 @@ interface TransitionBuilder : PropertyTransformationBuilder {
     fun reversed(builder: TransitionBuilder.() -> Unit)
 }
 
+/**
+ * An interface to decide where we should draw shared Elements or compose MovableElements.
+ *
+ * @see DefaultElementScenePicker
+ * @see HighestZIndexScenePicker
+ * @see LowestZIndexScenePicker
+ */
 interface ElementScenePicker {
     /**
      * Return the scene in which [element] should be drawn (when using `Modifier.element(key)`) or
      * composed (when using `MovableElement(key)`) during the given [transition].
+     *
+     * Important: For [MovableElements][SceneScope.MovableElement], this scene picker will *always*
+     * be used during transitions to decide whether we should compose that element in a given scene
+     * or not. Therefore, you should make sure that the returned [SceneKey] contains the movable
+     * element, otherwise that element will not be composed in any scene during the transition.
      */
     fun sceneDuringTransition(
         element: ElementKey,
@@ -183,25 +195,40 @@ interface ElementScenePicker {
     }
 }
 
-object DefaultElementScenePicker : ElementScenePicker {
+/** An [ElementScenePicker] that draws/composes elements in the scene with the highest z-order. */
+object HighestZIndexScenePicker : ElementScenePicker {
     override fun sceneDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
         fromSceneZIndex: Float,
         toSceneZIndex: Float
     ): SceneKey {
-        // By default shared elements are drawn in the highest scene possible, unless it is a
-        // background.
-        return if (
-            (fromSceneZIndex > toSceneZIndex && !element.isBackground) ||
-                (fromSceneZIndex < toSceneZIndex && element.isBackground)
-        ) {
+        return if (fromSceneZIndex > toSceneZIndex) {
             transition.fromScene
         } else {
             transition.toScene
         }
     }
 }
+
+/** An [ElementScenePicker] that draws/composes elements in the scene with the lowest z-order. */
+object LowestZIndexScenePicker : ElementScenePicker {
+    override fun sceneDuringTransition(
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        fromSceneZIndex: Float,
+        toSceneZIndex: Float
+    ): SceneKey {
+        return if (fromSceneZIndex < toSceneZIndex) {
+            transition.fromScene
+        } else {
+            transition.toScene
+        }
+    }
+}
+
+/** The default [ElementScenePicker]. */
+val DefaultElementScenePicker = HighestZIndexScenePicker
 
 @TransitionDsl
 interface PropertyTransformationBuilder {

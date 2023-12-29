@@ -291,7 +291,7 @@ internal fun shouldDrawOrComposeSharedElement(
     scene: SceneKey,
     element: ElementKey,
 ): Boolean {
-    val scenePicker = element.scenePicker ?: DefaultElementScenePicker
+    val scenePicker = element.scenePicker
     val fromScene = transition.fromScene
     val toScene = transition.toScene
 

@@ -64,16 +64,10 @@ class ElementKey(
     identity: Any = Object(),
 
     /**
-     * Whether this element is a background and usually drawn below other elements. This should be
-     * set to true to make sure that shared backgrounds are drawn below elements of other scenes.
+     * The [ElementScenePicker] to use when deciding in which scene we should draw shared Elements
+     * or compose MovableElements.
      */
-    val isBackground: Boolean = false,
-
-    /**
-     * The [ElementScenePicker] to use when deciding in which scene we should draw or compose this
-     * element when it is shared.
-     */
-    val scenePicker: ElementScenePicker? = null,
+    val scenePicker: ElementScenePicker = DefaultElementScenePicker,
 ) : Key(name, identity), ElementMatcher {
     @VisibleForTesting
     // TODO(b/240432457): Make internal once PlatformComposeSceneTransitionLayoutTestsUtils can
