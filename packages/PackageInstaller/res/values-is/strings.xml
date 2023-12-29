@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Þessi notandi getur ekki sett upp óþekkt forrit"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Þessi notandi hefur ekki leyfi til að setja upp forrit"</string>
     <string name="ok" msgid="7871959885003339302">"Í lagi"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"Setja í geymslu"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Uppfæra samt"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Stj. forritum"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Ekkert pláss eftir"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Fjarlægja uppfærslu"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> er hluti af þessu forriti:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Viltu fjarlægja þetta forrit?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"Persónuupplýsingarnar þínar verða vistaðar"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Setja þetta forrit í geymslu fyrir alla notendur? Persónuupplýsingarnar þínar verða vistaðar"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Setja þetta forrit á geymslu á vinnusniðinu þínu? Persónuupplýsingarnar þínar verða vistaðar"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Setja þetta forrit í geymslu fyrir <xliff:g id="USERNAME">%1$s</xliff:g>? Persónuupplýsingarnar þínar verða vistaðar"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Viltu setja þetta forrit úr einkarýminu í geymslu? Persónuupplýsingarnar þínar verða vistaðar"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Viltu fjarlægja þetta forrit hjá "<b>"öllum"</b>" notendum? Forritið og gögn þess verða fjarlægð hjá "<b>"öllum"</b>" notendum tækisins."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Viltu fjarlægja þetta forrit fyrir notandann <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Viltu fjarlægja þetta forrit af vinnuprófílnum þínum?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Spjaldtölvan þín og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á spjaldtölvunni eða gagnatapi sem leiða kann af notkun þess."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Sjónvarpið þitt og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á sjónvarpinu eða gagnatapi sem leiða kann af notkun þess."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Afrit af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"Setja <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> í geymslu?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Áfram"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Stillingar"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Uppsetning/fjarlæging Wear forrita"</string>

@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Naməlum tətbiqlər bu istifadəçi tərəfindən quraşdırıla bilməz"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Bu istifadəçinin tətbiqi quraşdırmaq üçün icazəsi yoxdur"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"Arxivə atın"</string>
     <string name="update_anyway" msgid="8792432341346261969">"İstənilən halda güncəlləyin"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Tətbiqi idarə edin"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Boş yer yoxdur"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Güncəlləməni silin"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> bu tətbiqin hissəsidir:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Bu tətbiqi sistemdən silmək istəyirsiniz?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"Şəxsi məlumatlarınız yadda saxlanacaq"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Bu tətbiq bütün istifadəçilər üçün arxivə atılsın? Şəxsi məlumatlarınız yadda saxlanacaq"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Bu tətbiq iş profilində arxivə atılsın? Şəxsi məlumatlarınız yadda saxlanacaq"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Bu tətbiq <xliff:g id="USERNAME">%1$s</xliff:g> üçün arxivə atılsın? Şəxsi məlumatlarınız yadda saxlanacaq"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Bu tətbiqi şəxsi sahədən arxivə atmaq istəyirsiniz? Şəxsi məlumatlarınız yadda saxlanacaq"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Bu tətbiqi "<b>"bütün"</b>" istifadəçilər üçün silmək istəyirsiz? Tətbiq və onun datası cihazdakı "<b>"bütün"</b>" istifadəçilər üçün silinəcək."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> adlı istifadəçi üçün bu tətbiqi sistemdən silmək istəyirsiniz?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Bu tətbiqi iş profilinizdən silmək istəyirsiniz?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Planşet və şəxsi data naməlum tətbiqlərin hücumuna qarşı daha həssasdır. Bu tətbiqi quraşdırmaqla planşetə dəyə biləcək zərər və ya onun istifadəsi nəticəsində baş verə biləcək data itkisinə görə məsuliyyət daşıdığınızı qəbul edirsiniz."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Tv və şəxsi data naməlum tətbiqlərin hücumuna qarşı daha həssasdır. Bu tətbiqi quraşdırmaqla Tv-yə dəyə biləcək zərər və ya onun istifadəsi nəticəsində baş verən data itkisinə görə məsuliyyət daşıdığınızı qəbul edirsiniz."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> Kopyalayın"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> arxivə atılsın?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Davam edin"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Ayarlar"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear tətbiqləri quraşdırılır/sistemdən silinir"</string>

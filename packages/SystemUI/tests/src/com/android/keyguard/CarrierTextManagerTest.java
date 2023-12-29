@@ -55,10 +55,10 @@ import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
 
 import com.android.keyguard.logging.CarrierTextManagerLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.LogBufferHelperKt;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.log.LogBufferHelperKt;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository;
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
 import com.android.systemui.telephony.TelephonyListenerManager;

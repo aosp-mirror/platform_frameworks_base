@@ -1906,8 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ਹਫ਼ਤੇ ਦਾ ਅੰਤਲਾ ਦਿਨ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ਇਵੈਂਟ"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ਸੌਣ ਵੇਲੇ"</string>
-    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
-    <skip />
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਪ੍ਰਬੰਧਿਤ"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ਚਾਲੂ ਹੈ"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ਬੰਦ ਹੈ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ਕੁਝ ਧੁਨੀਆਂ ਨੂੰ ਮਿਊਟ ਕਰ ਰਹੀ ਹੈ"</string>
@@ -1921,7 +1920,7 @@
     <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"SS ਬੇਨਤੀ ਨੂੰ ਵੀਡੀਓ ਕਾਲ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS ਬੇਨਤੀ ਨੂੰ USSD ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"ਨਵੀਂ SS ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
-    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ਫ਼ਿਸ਼ਿੰਗ ਸੰਬੰਧੀ ਸੁਚੇਤਨਾ"</string>
+    <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ਫ਼ਿਸ਼ਿੰਗ ਸੰਬੰਧੀ ਅਲਰਟ"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"ਪੁਸ਼ਟੀਕਿਰਤ"</string>
@@ -2366,4 +2365,5 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ਕੰਮ ਸੰਬੰਧੀ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ਜਾਂਚ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ਭਾਈਚਾਰਕ"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
 </resources>

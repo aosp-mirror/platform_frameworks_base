@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Энэ хэрэглэгч тодорхойгүй апп суулгах боломжгүй"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Энэ хэрэглэгч нь апп суулгах зөвшөөрөлгүй байна"</string>
     <string name="ok" msgid="7871959885003339302">"ОК"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"Архивлах"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Ямартай ч шинэчлэх"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Аппуудыг удирдах"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Орон зай дутагдаж байна"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Шинэчлэлтийг устгах"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> нь дараах аппын хэсэг болно:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Та энэ аппыг устгахыг хүсэж байна уу?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"Таны хувийн өгөгдлийг хадгална"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Энэ аппыг бүх хэрэглэгчид архивлах уу? Таны хувийн өгөгдлийг хадгална"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Энэ аппыг таны ажлын профайлд архивлах уу? Таны хувийн өгөгдлийг хадгална"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Энэ аппыг <xliff:g id="USERNAME">%1$s</xliff:g>-д архивлах уу? Таны хувийн өгөгдлийг хадгална"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Та энэ аппыг хувийн орон зайнаасаа архивлахыг хүсэж байна уу? Таны хувийн өгөгдлийг хадгална"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Та энэ аппыг "<b>"бүх"</b>" хэрэглэгчээс устгахыг хүсэж байна уу? Апп болон доторх өгөгдлийг төхөөрөмж дээрх "<b>"бүх"</b>" хэрэглэгчээс устгана."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Та энэ аппыг <xliff:g id="USERNAME">%1$s</xliff:g> хэрэглэгчийн өмнөөс устгахыг хүсэж байна уу?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Та энэ аппыг ажлын профайлаасаа устгахыг хүсэж байна уу?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Таны таблет болон хувийн өгөгдөл тодорхойгүй апп суулгасан тохиолдолд гэмтэж болзошгүй. Энэ аппыг суулгаснаар үүнийг ашигласнаас үүдэн таны таблетад гэмтэл гарах, эсвэл өгөгдөл устах зэрэг эрсдэлийг хариуцна гэдгээ зөвшөөрч байна."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Таны ТВ болон хувийн өгөгдөл тодорхойгүй апп суулгасан тохиолдолд гэмтэж болзошгүй. Энэ аппыг суулгаснаар үүнийг ашигласнаас үүдэн таны ТВ-д гэмтэл гарах, эсвэл өгөгдөл устах зэрэг эрсдэлийг хариуцна гэдгээ зөвшөөрч байна."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клон"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-г архивлах уу?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Үргэлжлүүлэх"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Тохиргоо"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear аппуудыг суулгаж/устгаж байна"</string>

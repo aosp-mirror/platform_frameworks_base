@@ -26,8 +26,8 @@ import com.android.internal.R
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.decor.FaceScanningProviderFactory
-import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.log.ScreenDecorationsLogger
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat

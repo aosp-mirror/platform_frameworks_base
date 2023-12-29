@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ผู้ใช้รายนี้ไม่สามารถติดตั้งแอปที่ไม่รู้จัก"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ผู้ใช้รายนี้ไม่ได้รับอนุญาตให้ติดตั้งแอป"</string>
     <string name="ok" msgid="7871959885003339302">"ตกลง"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"เก็บ"</string>
     <string name="update_anyway" msgid="8792432341346261969">"อัปเดตเลย"</string>
     <string name="manage_applications" msgid="5400164782453975580">"จัดการแอป"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ไม่มีพื้นที่"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"ถอนการติดตั้งการอัปเดต"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> เป็นส่วนหนึ่งของแอปต่อไปนี้"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"ต้องการถอนการติดตั้งแอปนี้ไหม"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"เก็บแอปนี้สำหรับผู้ใช้ทุกคนไหม ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"เก็บแอปนี้ในโปรไฟล์งานไหม ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"เก็บแอปนี้ไปสำหรับ <xliff:g id="USERNAME">%1$s</xliff:g> ไหม ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"คุณต้องการเก็บแอปนี้ไปจากพื้นที่ส่วนตัวไหม ระบบจะบันทึกข้อมูลส่วนตัวของคุณไว้"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ต้องการถอนการติดตั้งแอปนี้สำหรับผู้ใช้"<b>"ทั้งหมด"</b>"ไหม ระบบจะนำแอปและข้อมูลในแอปออกจากผู้ใช้"<b>"ทั้งหมด"</b>"ที่อยู่ในอุปกรณ์"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"ต้องการถอนการติดตั้งแอปนี้สำหรับผู้ใช้ <xliff:g id="USERNAME">%1$s</xliff:g> ไหม"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"คุณต้องการถอนการติดตั้งแอปนี้จากโปรไฟล์งานใช่ไหม"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"แท็บเล็ตและข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับแท็บเล็ตหรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ทีวีและข้อมูลส่วนตัวของคุณมีความเสี่ยงมากขึ้นที่จะถูกโจมตีจากแอปที่ไม่รู้จัก การติดตั้งแอปนี้แสดงว่าคุณยอมรับว่าจะรับผิดชอบต่อความเสียหายใดๆ ที่จะเกิดขึ้นกับทีวีหรือการสูญเสียข้อมูลที่อาจเกิดจากการใช้งานแอปดังกล่าว"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"โคลนของ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"เก็บ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ไหม"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ดำเนินการต่อ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"การตั้งค่า"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"กำลังติดตั้ง/ถอนการติดตั้งแอป Wear"</string>

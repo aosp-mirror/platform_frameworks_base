@@ -1906,8 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Viikonloppuna"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Tapahtuma"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Nukkuminen"</string>
-    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
-    <skip />
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Ylläpitäjä: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Päällä"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Pois päältä"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> mykistää joitakin ääniä"</string>
@@ -2342,7 +2341,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofoni on estetty"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Näytön peilaaminen ei onnistu"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Käytä eri johtoa ja yritä uudelleen"</string>
-    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Laite on liian kuuma eikä voi peilata näyttöön, kunnes se viilenee"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Laite on liian kuuma eikä voi peilata näyttöön, ennen kuin se viilenee"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Kaksoisnäyttö"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Kaksoisnäyttö on päällä"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> käyttää molempia näyttöjä sisällön näyttämiseen"</string>
@@ -2366,4 +2365,5 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Työ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Testi"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Jaettu"</string>
+    <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
 </resources>

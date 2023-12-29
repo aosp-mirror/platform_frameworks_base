@@ -20,6 +20,7 @@ import android.app.Fragment;
 import android.database.ContentObserver;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
@@ -451,6 +452,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     /** Initializes views related to the notification icon area. */
     public void initNotificationIconArea() {
+        Trace.beginSection("CollapsedStatusBarFragment#initNotifIconArea");
         ViewGroup notificationIconArea = mStatusBar.requireViewById(R.id.notification_icon_area);
         if (NotificationIconContainerRefactor.isEnabled()) {
             LayoutInflater.from(getContext())
@@ -470,6 +472,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
 
         updateNotificationIconAreaAndCallChip(/* animate= */ false);
+        Trace.endSection();
     }
 
     /**

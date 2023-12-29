@@ -50,7 +50,9 @@ private constructor(
 
     @Module
     interface Bindings {
+        @Binds @Main fun bindMainContext(dispatcher: TestDispatcher): CoroutineContext
         @Binds @Main fun bindMainDispatcher(dispatcher: TestDispatcher): CoroutineDispatcher
+        @Binds @Background fun bindBgContext(dispatcher: TestDispatcher): CoroutineContext
         @Binds @Background fun bindBgDispatcher(dispatcher: TestDispatcher): CoroutineDispatcher
     }
 }

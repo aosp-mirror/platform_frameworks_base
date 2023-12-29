@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Гэты карыстальнік не можа ўсталёўваць невядомыя праграмы"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Гэты карыстальнік не можа ўсталёўваць праграмы"</string>
     <string name="ok" msgid="7871959885003339302">"ОК"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"Архіваваць"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Усё роўна абнавіць"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Кіраваць"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Не хапае месца"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Выдаліць абнаўленне"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> з\'яўляецца часткай наступнай праграмы:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Выдаліць гэту праграму?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"Вашы асабістыя даныя будуць захаваны"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Архіваваць гэту праграму для ўсіх карыстальнікаў? Вашы асабістыя даныя будуць захаваны."</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Архіваваць гэту праграму з вашага працоўнага профілю? Вашы асабістыя даныя будуць захаваны."</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Архіваваць гэту праграму для карыстальніка <xliff:g id="USERNAME">%1$s</xliff:g>? Вашы асабістыя даныя будуць захаваны."</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Архіваваць гэту праграму з вашай прыватнай прасторы? Вашы асабістыя даныя будуць захаваны."</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Выдаліць гэту праграму для "<b>"ўсіх"</b>" карыстальнікаў? Праграма і яе даныя будуць выдалены для "<b>"ўсіх"</b>" карыстальнікаў прылады."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Хочаце выдаліць гэту праграму для карыстальніка <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Хочаце выдаліць гэту праграму з працоўнага профілю?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Ваш планшэт і асабістыя даныя больш прыступныя для атак невядомых праграм. Усталёўваючы гэту праграму, вы згаджаецеся з тым, што несяце адказнасць за любыя пашкоджанні планшэта ці страту даных, якія могуць адбыцца ў выніку выкарыстання гэтай праграмы."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Ваш тэлевізар і асабістыя даныя больш прыступныя для атак невядомых праграм. Усталёўваючы гэту праграму, вы згаджаецеся з тым, што несяце адказнасць за любыя пашкоджанні тэлевізара ці страту даных, якія могуць адбыцца ў выніку выкарыстання гэтай праграмы."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Клон \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\""</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"Архіваваць праграму \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\"?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Далей"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Налады"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Усталяванне і выдаленне праграм Wear"</string>

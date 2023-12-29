@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Apps desconhecidos não podem ser instalados por este usuário"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Este usuário não tem permissão para instalar apps"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"Arquivar"</string>
     <string name="update_anyway" msgid="8792432341346261969">"Atualizar mesmo assim"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Gerenciar apps"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Sem espaço"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Desinstalar atualização"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> é parte do seguinte app:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Você quer desinstalar este app?"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"Seus dados pessoais serão salvos"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"Arquivar esse app para todos os usuários? Seus dados pessoais serão salvos"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Arquivar esse app no seu perfil de trabalho? Seus dados pessoais serão salvos"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"Arquivar esse app para <xliff:g id="USERNAME">%1$s</xliff:g>? Seus dados pessoais serão salvos"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Você quer desinstalar esse app do seu espaço particular? Seus dados pessoais serão salvos"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Quer desinstalar este app para "<b>"todos"</b>" os usuários? O aplicativo e os dados dele serão removidos para "<b>"todos"</b>" os usuários do dispositivo."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Quer desinstalar este app para o usuário <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Você quer desinstalar esse app do seu perfil de trabalho?"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Seu tablet e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer perda de dados ou dano ao dispositivo causados pelo uso desses apps."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Sua TV e seus dados pessoais estão mais vulneráveis a ataques de apps desconhecidos. Ao instalar esse app, você concorda que é responsável por qualquer perda de dados ou dano ao dispositivo causados pelo uso desses apps."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"Arquivar <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>?"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Continuar"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Configurações"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalando/desinstalando apps do Wear"</string>

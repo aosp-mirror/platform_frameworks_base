@@ -71,11 +71,6 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
             LocalBluetoothManager localBluetoothManager) throws PackageNotAvailableException {
         super(context, packageName, notification, localBluetoothManager);
 
-        // TODO: b/291277292 - Change optional package name for a mandatory uid.
-        if (packageName == null) {
-            packageName = context.getPackageName();
-        }
-
         mRouter = MediaRouter2.getInstance(context, packageName);
 
         if (mRouter == null) {

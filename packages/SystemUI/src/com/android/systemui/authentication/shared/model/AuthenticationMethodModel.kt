@@ -30,13 +30,13 @@ sealed class AuthenticationMethodModel(
      * Device doesn't use a secure authentication method. Either there is no lockscreen or the lock
      * screen can be swiped away when displayed.
      */
-    object None : AuthenticationMethodModel(isSecure = false)
+    data object None : AuthenticationMethodModel(isSecure = false)
 
-    object Pin : AuthenticationMethodModel(isSecure = true)
+    data object Pin : AuthenticationMethodModel(isSecure = true)
 
-    object Password : AuthenticationMethodModel(isSecure = true)
+    data object Password : AuthenticationMethodModel(isSecure = true)
 
-    object Pattern : AuthenticationMethodModel(isSecure = true)
+    data object Pattern : AuthenticationMethodModel(isSecure = true)
 
-    object Sim : AuthenticationMethodModel(isSecure = true)
+    data object Sim : AuthenticationMethodModel(isSecure = true)
 }

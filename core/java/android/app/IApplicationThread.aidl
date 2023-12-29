@@ -48,6 +48,8 @@ import android.os.SharedMemory;
 import android.view.autofill.AutofillId;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationSpec;
+import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentTransaction;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
@@ -157,6 +159,8 @@ oneway interface IApplicationThread {
     void scheduleApplicationInfoChanged(in ApplicationInfo ai);
     void setNetworkBlockSeq(long procStateSeq);
     void scheduleTransaction(in ClientTransaction transaction);
+    void scheduleTaskFragmentTransaction(in ITaskFragmentOrganizer organizer,
+            in TaskFragmentTransaction transaction);
     void requestDirectActions(IBinder activityToken, IVoiceInteractor intractor,
             in RemoteCallback cancellationCallback, in RemoteCallback callback);
     void performDirectAction(IBinder activityToken, String actionId,

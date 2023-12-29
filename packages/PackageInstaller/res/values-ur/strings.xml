@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"یہ صارف نامعلوم ایپس کو انسٹال نہیں کر سکتا"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"اس صارف کو ایپس انسٹال کرنے کی اجازت نہیں ہے"</string>
     <string name="ok" msgid="7871959885003339302">"ٹھیک ہے"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"آرکائیو کریں"</string>
     <string name="update_anyway" msgid="8792432341346261969">"بہر حال اپ ڈیٹ کریں"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ایپس منظم کریں"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"جگہ نہیں ہے"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"اپ ڈیٹ اَن انسٹال کریں"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> درج ذیل ایپ کا حصہ ہے:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"کیا آپ اس ایپ کو اَن انسٹال کرنا چاہتے ہیں؟"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"اس ایپ کو تمام صارفین کے لیے آرکائیو کریں؟ آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"اس ایپ کو اپنی دفتری پروفائل پر آرکائیو کریں؟ آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"<xliff:g id="USERNAME">%1$s</xliff:g> کے لیے اس ایپ کو آرکائیو کریں؟ آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"کیا آپ اس ایپ کو اپنی نجی جگہ سے آرکائیو کرنا چاہتے ہیں؟ آپ کا ذاتی ڈیٹا محفوظ ہو جائے گا"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"کیا آپ "<b>"سبھی"</b>" صارفین کیلئے اس ایپ کو اَن انسٹال کرنا چاہتے ہیں؟ ایپلیکیشن اور اس کا ڈیٹا آلہ پر موجود "<b>"سبھی"</b>" صارفین سے ہٹا دیا جائے گا۔"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"کیا آپ اس ایپ کو صارف <xliff:g id="USERNAME">%1$s</xliff:g> کیلئے اَن انسٹال کرنا چاہتے ہیں؟"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"کیا آپ اپنے دفتری پروفائل سے یہ ایپ اَن انسٹال کرنا چاہتے ہیں؟"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"آپ کے ٹیبلیٹ اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے ٹیبلیٹ کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"‏آپ کے TV اور ذاتی ڈیٹا کو نامعلوم ایپس کی جانب سے حملے کا زیادہ خطرہ ہے۔ اس ایپ کو انسٹال کر کے، آپ اس بات سے اتفاق کرتے ہیں کہ آپ اس سے اپنے TV کو ہونے والے کسی بھی نقصان یا ڈیٹا کے نقصان کے لئے خود ذمہ دار ہیں۔"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون"</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کو آرکائیو کریں؟"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"جاری رکھیں"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ترتیبات"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"‏wear ایپس کو انسٹال/اَن انسٹال کرنا"</string>

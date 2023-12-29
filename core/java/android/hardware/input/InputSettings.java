@@ -18,6 +18,7 @@ package android.hardware.input;
 
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
+import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 
 import android.Manifest;
 import android.annotation.FloatRange;
@@ -338,6 +339,21 @@ public class InputSettings {
     }
 
     /**
+     * Whether Accessibility bounce keys feature is enabled.
+     *
+     * <p>
+     * Bounce keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to configure the device to ignore rapid, repeated keypresses of the
+     * same key.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilityBounceKeysFeatureEnabled() {
+        return keyboardA11yBounceKeysFlag() && enableInputFilterRustImpl();
+    }
+
+    /**
      * Whether Accessibility bounce keys is enabled.
      *
      * <p>
@@ -364,10 +380,10 @@ public class InputSettings {
      * @hide
      */
     public static int getAccessibilityBounceKeysThreshold(@NonNull Context context) {
-        if (!keyboardA11yBounceKeysFlag()) {
+        if (!isAccessibilityBounceKeysFeatureEnabled()) {
             return 0;
         }
-        return Settings.System.getIntForUser(context.getContentResolver(),
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS, 0, UserHandle.USER_CURRENT);
     }
 
@@ -388,7 +404,7 @@ public class InputSettings {
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setAccessibilityBounceKeysThreshold(@NonNull Context context,
             int thresholdTimeMillis) {
-        if (!keyboardA11yBounceKeysFlag()) {
+        if (!isAccessibilityBounceKeysFeatureEnabled()) {
             return;
         }
         if (thresholdTimeMillis < 0
@@ -397,9 +413,26 @@ public class InputSettings {
                     "Provided Bounce keys threshold should be in range [0, "
                             + MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS + "]");
         }
-        Settings.System.putIntForUser(context.getContentResolver(),
+        Settings.Secure.putIntForUser(context.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS, thresholdTimeMillis,
                 UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether Accessibility sticky keys feature is enabled.
+     *
+     * <p>
+     * 'Sticky keys' is an accessibility feature that assists users who have physical
+     * disabilities or help users reduce repetitive strain injury. It serializes keystrokes
+     * instead of pressing multiple keys at a time, allowing the user to press and release a
+     * modifier key, such as Shift, Ctrl, Alt, or any other modifier key, and have it remain
+     * active until any other key is pressed.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilityStickyKeysFeatureEnabled() {
+        return keyboardA11yStickyKeysFlag() && enableInputFilterRustImpl();
     }
 
     /**
@@ -416,10 +449,10 @@ public class InputSettings {
      * @hide
      */
     public static boolean isAccessibilityStickyKeysEnabled(@NonNull Context context) {
-        if (!keyboardA11yStickyKeysFlag()) {
+        if (!isAccessibilityStickyKeysFeatureEnabled()) {
             return false;
         }
-        return Settings.System.getIntForUser(context.getContentResolver(),
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_STICKY_KEYS, 0, UserHandle.USER_CURRENT) != 0;
     }
 
@@ -439,10 +472,10 @@ public class InputSettings {
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setAccessibilityStickyKeysEnabled(@NonNull Context context,
             boolean enabled) {
-        if (!keyboardA11yStickyKeysFlag()) {
+        if (!isAccessibilityStickyKeysFeatureEnabled()) {
             return;
         }
-        Settings.System.putIntForUser(context.getContentResolver(),
+        Settings.Secure.putIntForUser(context.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_STICKY_KEYS, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }

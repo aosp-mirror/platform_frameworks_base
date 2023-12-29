@@ -298,7 +298,7 @@
     <string name="quick_settings_connecting" msgid="2381969772953268809">"正在连接…"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"热点"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"正在开启…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"流量节省程序已开启"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"省流模式已开启"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# 部设备}other{# 部设备}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"手电筒"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"相机正在使用中"</string>
@@ -330,12 +330,17 @@
     <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"屏幕录制"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"开始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
-    <!-- no translation found for qs_record_issue_label (8166290137285529059) -->
-    <skip />
-    <!-- no translation found for qs_record_issue_start (2979831312582567056) -->
-    <skip />
-    <!-- no translation found for qs_record_issue_stop (3531747965741982657) -->
-    <skip />
+    <string name="qs_record_issue_label" msgid="8166290137285529059">"录制问题"</string>
+    <string name="qs_record_issue_start" msgid="2979831312582567056">"开始"</string>
+    <string name="qs_record_issue_stop" msgid="3531747965741982657">"停止"</string>
+    <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"设备体验的哪个方面受到影响？"</string>
+    <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"选择问题类型"</string>
+    <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"屏幕录制"</string>
+  <string-array name="qs_record_issue_types">
+    <item msgid="2947988124014085798">"性能"</item>
+    <item msgid="1627504621139124393">"界面"</item>
+    <item msgid="8309220355268900335">"电池"</item>
+  </string-array>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"单手模式"</string>
     <string name="quick_settings_contrast_label" msgid="988087460210159123">"对比度"</string>
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"标准"</string>
@@ -408,12 +413,9 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 正在充电 • 将于 <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>后充满"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"向左滑动即可启动公共教程"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"打开微件编辑器"</string>
-    <!-- no translation found for button_to_remove_widget (3948204829181214098) -->
-    <skip />
-    <!-- no translation found for hub_mode_add_widget_button_text (4831464661209971729) -->
-    <skip />
-    <!-- no translation found for hub_mode_editing_exit_button_text (3704686734192264771) -->
-    <skip />
+    <string name="button_to_remove_widget" msgid="3948204829181214098">"移除"</string>
+    <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"添加微件"</string>
+    <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"完成"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切换用户"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉菜单"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
@@ -609,7 +611,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"不发出提示音，也不振动"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不发出提示音，也不振动；显示在对话部分的靠下位置"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"可能会响铃或振动，取决于设备设置"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"可能会响铃或振动，取决于设备设置。默认情况下，来自<xliff:g id="APP_NAME">%1$s</xliff:g>的对话会以对话泡的形式显示。"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"可能会响铃或振动，取决于设备设置。默认情况下，来自<xliff:g id="APP_NAME">%1$s</xliff:g>的对话会以消息气泡的形式显示。"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"让系统决定是否应让设备在收到此通知时发出提示音或振动"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;状态&lt;/b&gt;：已提升为“默认”"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;状态&lt;/b&gt;：已降低为“静音”"</string>
@@ -637,7 +639,7 @@
     <string name="notification_more_settings" msgid="4936228656989201793">"更多设置"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"自定义"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"显示气泡"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除对话泡"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除消息气泡"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g><xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"通知设置"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知延后选项"</string>
@@ -736,8 +738,8 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"打开“设置”"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"已连接到耳机"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"已连接到耳机"</string>
-    <string name="data_saver" msgid="3484013368530820763">"流量节省程序"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"流量节省程序已开启"</string>
+    <string name="data_saver" msgid="3484013368530820763">"省流模式"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"省流模式已开启"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"开启"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"关闭"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"不可用"</string>
@@ -867,7 +869,6 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"点按即可预设省电模式"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"在电池电量可能会耗尽时，系统会开启此模式"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"不用了"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"转储 SysUI 堆"</string>
     <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"正在使用"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"有多个应用正在使用您的<xliff:g id="TYPES_LIST">%s</xliff:g>。"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"、 "</string>
@@ -1207,7 +1208,8 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在设置中设置默认记事应用"</string>
     <string name="install_app" msgid="5066668100199613936">"安装应用"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"镜像到外接显示屏？"</string>
-    <string name="connected_display_dialog_dual_display_stop_warning" msgid="2917631104216376315">"当前正在进行的任何双屏幕活动都将会停止"</string>
+    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
+    <skip />
     <string name="mirror_display" msgid="2515262008898122928">"镜像到显示屏"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"关闭"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"显示屏已连接"</string>

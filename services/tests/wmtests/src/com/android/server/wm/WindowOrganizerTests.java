@@ -40,11 +40,11 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.server.wm.testing.Assert.assertThrows;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
+import static com.android.server.wm.testing.Assert.assertThrows;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -92,6 +92,7 @@ import android.window.WindowContainerTransaction;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.TaskOrganizerController.PendingTaskEvent;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -585,6 +586,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @Test
     public void testTaskFragmentHiddenFocusableTranslucentChanges() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         removeGlobalMinSizeRestriction();
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
@@ -660,6 +663,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     private void testTaskFragmentChangesWithoutSystemOrganizerThrowException(
             BiConsumer<WindowContainerTransaction, WindowContainerToken> addOp) {
+        mSetFlagsRule.enableFlags(Flags.FLAG_TASK_FRAGMENT_SYSTEM_ORGANIZER_FLAG);
+
         removeGlobalMinSizeRestriction();
         final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).build();
@@ -1735,11 +1740,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
         final ITaskFragmentOrganizer organizerInterface =
                 ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder());
-        mWm.mAtmService.mWindowOrganizerController.mTaskFragmentOrganizerController
-                .registerOrganizerInternal(
-                        ITaskFragmentOrganizer.Stub.asInterface(
-                                organizer.getOrganizerToken().asBinder()),
-                        isSystemOrganizer);
+        registerTaskFragmentOrganizer(
+                ITaskFragmentOrganizer.Stub.asInterface(organizer.getOrganizerToken().asBinder()),
+                isSystemOrganizer);
         t.setTaskFragmentOrganizer(organizerInterface);
 
         return organizer;

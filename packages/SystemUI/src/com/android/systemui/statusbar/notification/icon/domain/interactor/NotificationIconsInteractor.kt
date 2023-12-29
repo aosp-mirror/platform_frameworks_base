@@ -17,6 +17,7 @@
 
 package com.android.systemui.statusbar.notification.icon.domain.interactor
 
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.statusbar.data.repository.NotificationListenerSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardViewStateRepository
@@ -26,11 +27,13 @@ import com.android.systemui.statusbar.notification.shared.ActiveNotificationMode
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlin.jvm.optionals.getOrNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 
 /** Domain logic related to notification icons. */
 class NotificationIconsInteractor
@@ -103,35 +106,41 @@ constructor(
 class AlwaysOnDisplayNotificationIconsInteractor
 @Inject
 constructor(
+    @Background bgContext: CoroutineContext,
     deviceEntryInteractor: DeviceEntryInteractor,
     iconsInteractor: NotificationIconsInteractor,
 ) {
     val aodNotifs: Flow<Set<ActiveNotificationModel>> =
-        deviceEntryInteractor.isBypassEnabled.flatMapLatest { isBypassEnabled ->
-            iconsInteractor.filteredNotifSet(
-                showAmbient = false,
-                showDismissed = false,
-                showRepliedMessages = false,
-                showPulsing = !isBypassEnabled,
-            )
-        }
+        deviceEntryInteractor.isBypassEnabled
+            .flatMapLatest { isBypassEnabled ->
+                iconsInteractor.filteredNotifSet(
+                    showAmbient = false,
+                    showDismissed = false,
+                    showRepliedMessages = false,
+                    showPulsing = !isBypassEnabled,
+                )
+            }
+            .flowOn(bgContext)
 }
 
 /** Domain logic related to notification icons shown in the status bar. */
 class StatusBarNotificationIconsInteractor
 @Inject
 constructor(
+    @Background bgContext: CoroutineContext,
     iconsInteractor: NotificationIconsInteractor,
     settingsRepository: NotificationListenerSettingsRepository,
 ) {
     val statusBarNotifs: Flow<Set<ActiveNotificationModel>> =
-        settingsRepository.showSilentStatusIcons.flatMapLatest { showSilentIcons ->
-            iconsInteractor.filteredNotifSet(
-                forceShowHeadsUp = true,
-                showAmbient = false,
-                showLowPriority = showSilentIcons,
-                showDismissed = false,
-                showRepliedMessages = false,
-            )
-        }
+        settingsRepository.showSilentStatusIcons
+            .flatMapLatest { showSilentIcons ->
+                iconsInteractor.filteredNotifSet(
+                    forceShowHeadsUp = true,
+                    showAmbient = false,
+                    showLowPriority = showSilentIcons,
+                    showDismissed = false,
+                    showRepliedMessages = false,
+                )
+            }
+            .flowOn(bgContext)
 }

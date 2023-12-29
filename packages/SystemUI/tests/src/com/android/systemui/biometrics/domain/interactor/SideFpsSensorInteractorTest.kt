@@ -36,8 +36,8 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation.ROTATION_90
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.log.SideFpsLogger
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
