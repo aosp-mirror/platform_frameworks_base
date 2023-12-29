@@ -22,6 +22,10 @@
 #include <jni.h>
 #include <androidfw/Asset.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace android {
 
 class AssetStreamAdaptor : public SkStreamRewindable {
@@ -69,11 +73,35 @@ private:
     off64_t   fCurr;
 };
 
+#ifdef _WIN32
+/** Restore the HANDLE offset in the destructor. Windows version of
+ * AutoFDSeek. */
+class AutoHandleSeek {
+public:
+    explicit AutoHandleSeek(HANDLE handle) : hFile(handle) {
+        fCurr = SetFilePointer(hFile, 0, NULL, FILE_CURRENT);
+    }
+    ~AutoHandleSeek() {
+        if (fCurr >= 0) {
+            SetFilePointer(hFile, fCurr, NULL, FILE_BEGIN);
+        }
+    }
+
+private:
+    HANDLE hFile;
+    off64_t fCurr;
+};
+#endif
+
 jobject nullObjectReturn(const char msg[]);
 
 /** Check if the file descriptor is seekable.
  */
 bool isSeekable(int descriptor);
+
+#ifdef _WIN32
+bool isSeekable(HANDLE handle);
+#endif
 
 JNIEnv* get_env_or_die(JavaVM* jvm);
 
