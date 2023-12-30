@@ -824,24 +824,24 @@ public class ActivityManagerServiceTest {
         final BroadcastOptions options = BroadcastOptions.makeWithDeferUntilActive(true);
 
         broadcastIntent(intent1, null, true);
-        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
+        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, TEST_USER),
                 StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
-        assertNull(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER));
-        assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
+        assertNull(mAms.getStickyBroadcastsForTest(TEST_ACTION2, TEST_USER));
+        assertNull(mAms.getStickyBroadcastsForTest(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent2, options.toBundle(), true);
-        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
+        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, TEST_USER),
                 StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
-        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
+        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION2, TEST_USER),
                 StickyBroadcast.create(intent2, true, Process.myUid(), PROCESS_STATE_UNKNOWN));
-        assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
+        assertNull(mAms.getStickyBroadcastsForTest(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent3, null, true);
-        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
+        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, TEST_USER),
                 StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
-        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
+        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION2, TEST_USER),
                 StickyBroadcast.create(intent2, true, Process.myUid(), PROCESS_STATE_UNKNOWN));
-        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER),
+        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION3, TEST_USER),
                 StickyBroadcast.create(intent3, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
     }
 

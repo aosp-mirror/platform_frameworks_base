@@ -112,7 +112,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         testServiceDefaultValue_On(ServiceType.NULL);
     }
 
-    @Suppress // TODO: b/317823111 - Remove once test fixed.
+    @Suppress
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_DefaultValueCorrect() {
         testDefaultValue(
@@ -219,7 +219,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
                 ServiceType.QUICK_DOZE);
     }
 
-    @Suppress // TODO: b/317823111 - Remove once test fixed.
+    @Suppress
     @SmallTest
     public void testUpdateConstants_getCorrectData() {
         mBatterySaverPolicy.updateConstantsLocked(BATTERY_SAVER_CONSTANTS, "");
@@ -327,7 +327,6 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         }
     }
 
-    @Suppress // TODO: b/317823111 - Remove once test fixed.
     public void testSetPolicyLevel_Adaptive() {
         mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_ADAPTIVE);
 
