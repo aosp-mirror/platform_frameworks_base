@@ -6,3 +6,10 @@ flag {
     description: "Enable Settings.System.resetToDefault APIs."
     bug: "279083734"
 }
+
+flag {
+    name: "user_keys"
+    namespace: "privacy_infra_policy"
+    description: "This flag controls new E2EE contact keys API"
+    bug: "290696572"
+}
