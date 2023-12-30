@@ -1221,7 +1221,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * by the user ID the sticky is for, and can include UserHandle.USER_ALL
      * for stickies that are sent to all users.
      */
-    @GuardedBy("this")
+    @GuardedBy("mStickyBroadcasts")
     final SparseArray<ArrayMap<String, ArrayList<StickyBroadcast>>> mStickyBroadcasts =
             new SparseArray<>();
 
@@ -4398,7 +4398,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (packageName == null) {
             // Remove all sticky broadcasts from this user.
-            mStickyBroadcasts.remove(userId);
+            synchronized (mStickyBroadcasts) {
+                mStickyBroadcasts.remove(userId);
+            }
         }
 
         ArrayList<ContentProviderRecord> providers = new ArrayList<>();
@@ -11335,20 +11337,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (BroadcastQueue q : mBroadcastQueues) {
             q.dumpDebug(proto, ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
         }
-        for (int user=0; user<mStickyBroadcasts.size(); user++) {
-            long token = proto.start(ActivityManagerServiceDumpBroadcastsProto.STICKY_BROADCASTS);
-            proto.write(StickyBroadcastProto.USER, mStickyBroadcasts.keyAt(user));
-            for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
-                    : mStickyBroadcasts.valueAt(user).entrySet()) {
-                long actionToken = proto.start(StickyBroadcastProto.ACTIONS);
-                proto.write(StickyBroadcastProto.StickyAction.NAME, ent.getKey());
-                for (StickyBroadcast broadcast : ent.getValue()) {
-                    broadcast.intent.dumpDebug(proto, StickyBroadcastProto.StickyAction.INTENTS,
-                            false, true, true, false);
+        synchronized (mStickyBroadcasts) {
+            for (int user = 0; user < mStickyBroadcasts.size(); user++) {
+                long token = proto.start(
+                        ActivityManagerServiceDumpBroadcastsProto.STICKY_BROADCASTS);
+                proto.write(StickyBroadcastProto.USER, mStickyBroadcasts.keyAt(user));
+                for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
+                        : mStickyBroadcasts.valueAt(user).entrySet()) {
+                    long actionToken = proto.start(StickyBroadcastProto.ACTIONS);
+                    proto.write(StickyBroadcastProto.StickyAction.NAME, ent.getKey());
+                    for (StickyBroadcast broadcast : ent.getValue()) {
+                        broadcast.intent.dumpDebug(proto, StickyBroadcastProto.StickyAction.INTENTS,
+                                false, true, true, false);
+                    }
+                    proto.end(actionToken);
                 }
-                proto.end(actionToken);
+                proto.end(token);
             }
-            proto.end(token);
         }
 
         long handlerToken = proto.start(ActivityManagerServiceDumpBroadcastsProto.HANDLER);
@@ -11488,45 +11493,50 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         needSep = true;
 
-        if (!onlyHistory && !onlyReceivers && mStickyBroadcasts != null && dumpPackage == null) {
-            for (int user=0; user<mStickyBroadcasts.size(); user++) {
-                if (needSep) {
-                    pw.println();
-                }
-                needSep = true;
-                printedAnything = true;
-                pw.print("  Sticky broadcasts for user ");
-                        pw.print(mStickyBroadcasts.keyAt(user)); pw.println(":");
-                StringBuilder sb = new StringBuilder(128);
-                for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
-                        : mStickyBroadcasts.valueAt(user).entrySet()) {
-                    pw.print("  * Sticky action "); pw.print(ent.getKey());
-                    if (dumpAll) {
-                        pw.println(":");
-                        ArrayList<StickyBroadcast> broadcasts = ent.getValue();
-                        final int N = broadcasts.size();
-                        for (int i=0; i<N; i++) {
-                            final Intent intent = broadcasts.get(i).intent;
-                            final boolean deferUntilActive = broadcasts.get(i).deferUntilActive;
-                            sb.setLength(0);
-                            sb.append("    Intent: ");
-                            intent.toShortString(sb, false, true, false, false);
-                            pw.print(sb);
-                            if (deferUntilActive) {
-                                pw.print(" [D]");
+        synchronized (mStickyBroadcasts) {
+            if (!onlyHistory && !onlyReceivers && mStickyBroadcasts != null
+                    && dumpPackage == null) {
+                for (int user = 0; user < mStickyBroadcasts.size(); user++) {
+                    if (needSep) {
+                        pw.println();
+                    }
+                    needSep = true;
+                    printedAnything = true;
+                    pw.print("  Sticky broadcasts for user ");
+                    pw.print(mStickyBroadcasts.keyAt(user));
+                    pw.println(":");
+                    StringBuilder sb = new StringBuilder(128);
+                    for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
+                            : mStickyBroadcasts.valueAt(user).entrySet()) {
+                        pw.print("  * Sticky action ");
+                        pw.print(ent.getKey());
+                        if (dumpAll) {
+                            pw.println(":");
+                            ArrayList<StickyBroadcast> broadcasts = ent.getValue();
+                            final int N = broadcasts.size();
+                            for (int i = 0; i < N; i++) {
+                                final Intent intent = broadcasts.get(i).intent;
+                                final boolean deferUntilActive = broadcasts.get(i).deferUntilActive;
+                                sb.setLength(0);
+                                sb.append("    Intent: ");
+                                intent.toShortString(sb, false, true, false, false);
+                                pw.print(sb);
+                                if (deferUntilActive) {
+                                    pw.print(" [D]");
+                                }
+                                pw.println();
+                                pw.print("      originalCallingUid: ");
+                                pw.println(broadcasts.get(i).originalCallingUid);
+                                pw.println();
+                                Bundle bundle = intent.getExtras();
+                                if (bundle != null) {
+                                    pw.print("      extras: ");
+                                    pw.println(bundle);
+                                }
                             }
-                            pw.println();
-                            pw.print("      originalCallingUid: ");
-                            pw.println(broadcasts.get(i).originalCallingUid);
-                            pw.println();
-                            Bundle bundle = intent.getExtras();
-                            if (bundle != null) {
-                                pw.print("      extras: ");
-                                pw.println(bundle);
-                            }
+                        } else {
+                            pw.println("");
                         }
-                    } else {
-                        pw.println("");
                     }
                 }
             }
@@ -14191,7 +14201,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int callingUid;
         int callingPid;
         boolean instantApp;
-        synchronized(this) {
+        synchronized (mProcLock) {
             callerApp = getRecordForAppLOSP(caller);
             if (callerApp == null) {
                 Slog.w(TAG, "registerReceiverWithFeature: no app for " + caller);
@@ -14207,57 +14217,59 @@ public class ActivityManagerService extends IActivityManager.Stub
             callingPid = callerApp.getPid();
 
             instantApp = isInstantApp(callerApp, callerPackage, callingUid);
-            userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
-                    ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
+        }
+        userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
+                ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
 
-            // Warn if system internals are registering for important broadcasts
-            // without also using a priority to ensure they process the event
-            // before normal apps hear about it
-            if (UserHandle.isCore(callingUid)) {
-                final int priority = filter.getPriority();
-                final boolean systemPriority = (priority >= IntentFilter.SYSTEM_HIGH_PRIORITY)
-                        || (priority <= IntentFilter.SYSTEM_LOW_PRIORITY);
-                if (!systemPriority) {
-                    final int N = filter.countActions();
-                    for (int i = 0; i < N; i++) {
-                        // TODO: expand to additional important broadcasts over time
-                        final String action = filter.getAction(i);
-                        if (action.startsWith("android.intent.action.USER_")
-                                || action.startsWith("android.intent.action.PACKAGE_")
-                                || action.startsWith("android.intent.action.UID_")
-                                || action.startsWith("android.intent.action.EXTERNAL_")
-                                || action.startsWith("android.bluetooth.")
-                                || action.equals(Intent.ACTION_SHUTDOWN)) {
-                            if (DEBUG_BROADCAST) {
-                                Slog.wtf(TAG,
-                                        "System internals registering for " + filter.toLongString()
-                                                + " with app priority; this will race with apps!",
-                                        new Throwable());
-                            }
-
-                            // When undefined, assume that system internals need
-                            // to hear about the event first; they can use
-                            // SYSTEM_LOW_PRIORITY if they need to hear last
-                            if (priority == 0) {
-                                filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-                            }
-                            break;
+        // Warn if system internals are registering for important broadcasts
+        // without also using a priority to ensure they process the event
+        // before normal apps hear about it
+        if (UserHandle.isCore(callingUid)) {
+            final int priority = filter.getPriority();
+            final boolean systemPriority = (priority >= IntentFilter.SYSTEM_HIGH_PRIORITY)
+                    || (priority <= IntentFilter.SYSTEM_LOW_PRIORITY);
+            if (!systemPriority) {
+                final int N = filter.countActions();
+                for (int i = 0; i < N; i++) {
+                    // TODO: expand to additional important broadcasts over time
+                    final String action = filter.getAction(i);
+                    if (action.startsWith("android.intent.action.USER_")
+                            || action.startsWith("android.intent.action.PACKAGE_")
+                            || action.startsWith("android.intent.action.UID_")
+                            || action.startsWith("android.intent.action.EXTERNAL_")
+                            || action.startsWith("android.bluetooth.")
+                            || action.equals(Intent.ACTION_SHUTDOWN)) {
+                        if (DEBUG_BROADCAST) {
+                            Slog.wtf(TAG,
+                                    "System internals registering for " + filter.toLongString()
+                                            + " with app priority; this will race with apps!",
+                                    new Throwable());
                         }
+
+                        // When undefined, assume that system internals need
+                        // to hear about the event first; they can use
+                        // SYSTEM_LOW_PRIORITY if they need to hear last
+                        if (priority == 0) {
+                            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+                        }
+                        break;
                     }
                 }
             }
+        }
 
-            Iterator<String> actions = filter.actionsIterator();
-            if (actions == null) {
-                ArrayList<String> noAction = new ArrayList<String>(1);
-                noAction.add(null);
-                actions = noAction.iterator();
-            }
-            boolean onlyProtectedBroadcasts = true;
+        Iterator<String> actions = filter.actionsIterator();
+        if (actions == null) {
+            ArrayList<String> noAction = new ArrayList<String>(1);
+            noAction.add(null);
+            actions = noAction.iterator();
+        }
+        boolean onlyProtectedBroadcasts = true;
 
-            // Collect stickies of users and check if broadcast is only registered for protected
-            // broadcasts
-            int[] userIds = { UserHandle.USER_ALL, UserHandle.getUserId(callingUid) };
+        // Collect stickies of users and check if broadcast is only registered for protected
+        // broadcasts
+        int[] userIds = { UserHandle.USER_ALL, UserHandle.getUserId(callingUid) };
+        synchronized (mStickyBroadcasts) {
             while (actions.hasNext()) {
                 String action = actions.next();
                 for (int id : userIds) {
@@ -14283,68 +14295,68 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
+        }
 
-            if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
-                SdkSandboxManagerLocal sdkSandboxManagerLocal =
-                        LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
-                if (sdkSandboxManagerLocal == null) {
-                    throw new IllegalStateException("SdkSandboxManagerLocal not found when checking"
-                            + " whether SDK sandbox uid can register to broadcast receivers.");
-                }
-                if (!sdkSandboxManagerLocal.canRegisterBroadcastReceiver(
-                        /*IntentFilter=*/ filter, flags, onlyProtectedBroadcasts)) {
-                    throw new SecurityException("SDK sandbox not allowed to register receiver"
-                            + " with the given IntentFilter: " + filter.toLongString());
-                }
+        if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
+            SdkSandboxManagerLocal sdkSandboxManagerLocal =
+                    LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
+            if (sdkSandboxManagerLocal == null) {
+                throw new IllegalStateException("SdkSandboxManagerLocal not found when checking"
+                        + " whether SDK sandbox uid can register to broadcast receivers.");
             }
-
-            // If the change is enabled, but neither exported or not exported is set, we need to log
-            // an error so the consumer can know to explicitly set the value for their flag.
-            // If the caller is registering for a sticky broadcast with a null receiver, we won't
-            // require a flag
-            final boolean explicitExportStateDefined =
-                    (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED)) != 0;
-            if (((flags & Context.RECEIVER_EXPORTED) != 0) && (
-                    (flags & Context.RECEIVER_NOT_EXPORTED) != 0)) {
-                throw new IllegalArgumentException(
-                        "Receiver can't specify both RECEIVER_EXPORTED and RECEIVER_NOT_EXPORTED"
-                                + "flag");
+            if (!sdkSandboxManagerLocal.canRegisterBroadcastReceiver(
+                    /*IntentFilter=*/ filter, flags, onlyProtectedBroadcasts)) {
+                throw new SecurityException("SDK sandbox not allowed to register receiver"
+                        + " with the given IntentFilter: " + filter.toLongString());
             }
+        }
 
-            // Don't enforce the flag check if we're EITHER registering for only protected
-            // broadcasts, or the receiver is null (a sticky broadcast). Sticky broadcasts should
-            // not be used generally, so we will be marking them as exported by default
-            boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
-                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid);
+        // If the change is enabled, but neither exported or not exported is set, we need to log
+        // an error so the consumer can know to explicitly set the value for their flag.
+        // If the caller is registering for a sticky broadcast with a null receiver, we won't
+        // require a flag
+        final boolean explicitExportStateDefined =
+                (flags & (Context.RECEIVER_EXPORTED | Context.RECEIVER_NOT_EXPORTED)) != 0;
+        if (((flags & Context.RECEIVER_EXPORTED) != 0) && (
+                (flags & Context.RECEIVER_NOT_EXPORTED) != 0)) {
+            throw new IllegalArgumentException(
+                    "Receiver can't specify both RECEIVER_EXPORTED and RECEIVER_NOT_EXPORTED"
+                            + "flag");
+        }
 
-            // A receiver that is visible to instant apps must also be exported.
-            final boolean unexportedReceiverVisibleToInstantApps =
-                    ((flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0) && (
-                            (flags & Context.RECEIVER_NOT_EXPORTED) != 0);
-            if (unexportedReceiverVisibleToInstantApps && requireExplicitFlagForDynamicReceivers) {
-                throw new IllegalArgumentException(
-                        "Receiver can't specify both RECEIVER_VISIBLE_TO_INSTANT_APPS and "
-                                + "RECEIVER_NOT_EXPORTED flag");
-            }
+        // Don't enforce the flag check if we're EITHER registering for only protected
+        // broadcasts, or the receiver is null (a sticky broadcast). Sticky broadcasts should
+        // not be used generally, so we will be marking them as exported by default
+        boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
+                DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid);
 
-            if (!onlyProtectedBroadcasts) {
-                if (receiver == null && !explicitExportStateDefined) {
-                    // sticky broadcast, no flag specified (flag isn't required)
-                    flags |= Context.RECEIVER_EXPORTED;
-                } else if (requireExplicitFlagForDynamicReceivers && !explicitExportStateDefined) {
-                    throw new SecurityException(
-                            callerPackage + ": One of RECEIVER_EXPORTED or "
-                                    + "RECEIVER_NOT_EXPORTED should be specified when a receiver "
-                                    + "isn't being registered exclusively for system broadcasts");
-                    // Assume default behavior-- flag check is not enforced
-                } else if (!requireExplicitFlagForDynamicReceivers && (
-                        (flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
-                    // Change is not enabled, assume exported unless otherwise specified.
-                    flags |= Context.RECEIVER_EXPORTED;
-                }
-            } else if ((flags & Context.RECEIVER_NOT_EXPORTED) == 0) {
+        // A receiver that is visible to instant apps must also be exported.
+        final boolean unexportedReceiverVisibleToInstantApps =
+                ((flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0) && (
+                        (flags & Context.RECEIVER_NOT_EXPORTED) != 0);
+        if (unexportedReceiverVisibleToInstantApps && requireExplicitFlagForDynamicReceivers) {
+            throw new IllegalArgumentException(
+                    "Receiver can't specify both RECEIVER_VISIBLE_TO_INSTANT_APPS and "
+                            + "RECEIVER_NOT_EXPORTED flag");
+        }
+
+        if (!onlyProtectedBroadcasts) {
+            if (receiver == null && !explicitExportStateDefined) {
+                // sticky broadcast, no flag specified (flag isn't required)
+                flags |= Context.RECEIVER_EXPORTED;
+            } else if (requireExplicitFlagForDynamicReceivers && !explicitExportStateDefined) {
+                throw new SecurityException(
+                        callerPackage + ": One of RECEIVER_EXPORTED or "
+                                + "RECEIVER_NOT_EXPORTED should be specified when a receiver "
+                                + "isn't being registered exclusively for system broadcasts");
+                // Assume default behavior-- flag check is not enforced
+            } else if (!requireExplicitFlagForDynamicReceivers && (
+                    (flags & Context.RECEIVER_NOT_EXPORTED) == 0)) {
+                // Change is not enabled, assume exported unless otherwise specified.
                 flags |= Context.RECEIVER_EXPORTED;
             }
+        } else if ((flags & Context.RECEIVER_NOT_EXPORTED) == 0) {
+            flags |= Context.RECEIVER_EXPORTED;
         }
 
         // Dynamic receivers are exported by default for versions prior to T
@@ -15334,55 +15346,58 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new SecurityException(
                         "Sticky broadcasts can't target a specific component");
             }
-            // We use userId directly here, since the "all" target is maintained
-            // as a separate set of sticky broadcasts.
-            if (userId != UserHandle.USER_ALL) {
-                // But first, if this is not a broadcast to all users, then
-                // make sure it doesn't conflict with an existing broadcast to
-                // all users.
-                ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(
-                        UserHandle.USER_ALL);
-                if (stickies != null) {
-                    ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
-                    if (list != null) {
-                        int N = list.size();
-                        int i;
-                        for (i=0; i<N; i++) {
-                            if (intent.filterEquals(list.get(i).intent)) {
-                                throw new IllegalArgumentException(
-                                        "Sticky broadcast " + intent + " for user "
-                                        + userId + " conflicts with existing global broadcast");
+            synchronized (mStickyBroadcasts) {
+                // We use userId directly here, since the "all" target is maintained
+                // as a separate set of sticky broadcasts.
+                if (userId != UserHandle.USER_ALL) {
+                    // But first, if this is not a broadcast to all users, then
+                    // make sure it doesn't conflict with an existing broadcast to
+                    // all users.
+                    ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(
+                            UserHandle.USER_ALL);
+                    if (stickies != null) {
+                        ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
+                        if (list != null) {
+                            int N = list.size();
+                            int i;
+                            for (i = 0; i < N; i++) {
+                                if (intent.filterEquals(list.get(i).intent)) {
+                                    throw new IllegalArgumentException("Sticky broadcast " + intent
+                                            + " for user " + userId
+                                            + " conflicts with existing global broadcast");
+                                }
                             }
                         }
                     }
                 }
-            }
-            ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(userId);
-            if (stickies == null) {
-                stickies = new ArrayMap<>();
-                mStickyBroadcasts.put(userId, stickies);
-            }
-            ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
-            if (list == null) {
-                list = new ArrayList<>();
-                stickies.put(intent.getAction(), list);
-            }
-            final boolean deferUntilActive = BroadcastRecord.calculateDeferUntilActive(
-                    callingUid, brOptions, resultTo, ordered,
-                    BroadcastRecord.calculateUrgent(intent, brOptions));
-            final int stickiesCount = list.size();
-            int i;
-            for (i = 0; i < stickiesCount; i++) {
-                if (intent.filterEquals(list.get(i).intent)) {
-                    // This sticky already exists, replace it.
-                    list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive,
-                            callingUid, callerAppProcessState));
-                    break;
+                ArrayMap<String, ArrayList<StickyBroadcast>> stickies =
+                        mStickyBroadcasts.get(userId);
+                if (stickies == null) {
+                    stickies = new ArrayMap<>();
+                    mStickyBroadcasts.put(userId, stickies);
                 }
-            }
-            if (i >= stickiesCount) {
-                list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive, callingUid,
-                        callerAppProcessState));
+                ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
+                if (list == null) {
+                    list = new ArrayList<>();
+                    stickies.put(intent.getAction(), list);
+                }
+                final boolean deferUntilActive = BroadcastRecord.calculateDeferUntilActive(
+                        callingUid, brOptions, resultTo, ordered,
+                        BroadcastRecord.calculateUrgent(intent, brOptions));
+                final int stickiesCount = list.size();
+                int i;
+                for (i = 0; i < stickiesCount; i++) {
+                    if (intent.filterEquals(list.get(i).intent)) {
+                        // This sticky already exists, replace it.
+                        list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive,
+                                callingUid, callerAppProcessState));
+                        break;
+                    }
+                }
+                if (i >= stickiesCount) {
+                    list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive,
+                            callingUid, callerAppProcessState));
+                }
             }
         }
 
@@ -15619,13 +15634,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @VisibleForTesting
-    ArrayList<StickyBroadcast> getStickyBroadcasts(String action, int userId) {
-        final ArrayMap<String, ArrayList<StickyBroadcast>> stickyBroadcasts =
-                mStickyBroadcasts.get(userId);
-        if (stickyBroadcasts == null) {
-            return null;
+    ArrayList<StickyBroadcast> getStickyBroadcastsForTest(String action, int userId) {
+        synchronized (mStickyBroadcasts) {
+            final ArrayMap<String, ArrayList<StickyBroadcast>> stickyBroadcasts =
+                    mStickyBroadcasts.get(userId);
+            if (stickyBroadcasts == null) {
+                return null;
+            }
+            return stickyBroadcasts.get(action);
         }
-        return stickyBroadcasts.get(action);
     }
 
     /**
@@ -15790,6 +15807,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
     public final void unbroadcastIntent(IApplicationThread caller, Intent intent, int userId) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors() == true) {
@@ -15799,23 +15817,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, true, ALLOW_NON_FULL, "removeStickyBroadcast", null);
 
-        synchronized(this) {
-            if (checkCallingPermission(android.Manifest.permission.BROADCAST_STICKY)
-                    != PackageManager.PERMISSION_GRANTED) {
-                String msg = "Permission Denial: unbroadcastIntent() from pid="
-                        + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
-                        + " requires " + android.Manifest.permission.BROADCAST_STICKY;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            }
+        if (checkCallingPermission(android.Manifest.permission.BROADCAST_STICKY)
+                != PackageManager.PERMISSION_GRANTED) {
+            String msg = "Permission Denial: unbroadcastIntent() from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.BROADCAST_STICKY;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        synchronized (mStickyBroadcasts) {
             ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(userId);
             if (stickies != null) {
                 ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
                 if (list != null) {
                     int N = list.size();
                     int i;
-                    for (i=0; i<N; i++) {
+                    for (i = 0; i < N; i++) {
                         if (intent.filterEquals(list.get(i).intent)) {
                             list.remove(i);
                             break;

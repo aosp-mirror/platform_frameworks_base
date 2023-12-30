@@ -18,8 +18,8 @@ package android.media;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
-import static com.android.media.flags.Flags.FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2;
 import static com.android.media.flags.Flags.FLAG_ENABLE_CROSS_USER_ROUTING_IN_MEDIA_ROUTER2;
+import static com.android.media.flags.Flags.FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
@@ -344,25 +344,13 @@ public final class MediaRouter2 {
         mImpl = new LocalMediaRouter2Impl(mContext.getPackageName());
         mHandler = new Handler(Looper.getMainLooper());
 
-        List<MediaRoute2Info> currentSystemRoutes = null;
-        try {
-            currentSystemRoutes = mMediaRouterService.getSystemRoutes();
-        } catch (RemoteException ex) {
-            ex.rethrowFromSystemServer();
-        }
-
-        if (currentSystemRoutes == null || currentSystemRoutes.isEmpty()) {
-            throw new RuntimeException("Null or empty currentSystemRoutes. Something is wrong.");
-        }
+        loadSystemRoutes();
 
         RoutingSessionInfo currentSystemSessionInfo = mImpl.getSystemSessionInfo();
         if (currentSystemSessionInfo == null) {
             throw new RuntimeException("Null currentSystemSessionInfo. Something is wrong.");
         }
 
-        for (MediaRoute2Info route : currentSystemRoutes) {
-            mRoutes.put(route.getId(), route);
-        }
         mSystemController = new SystemRoutingController(currentSystemSessionInfo);
     }
 
@@ -374,11 +362,31 @@ public final class MediaRouter2 {
                 IMediaRouterService.Stub.asInterface(
                         ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
 
+        loadSystemRoutes();
+
         mSystemController =
                 new SystemRoutingController(
                         ProxyMediaRouter2Impl.getSystemSessionInfoImpl(
                                 mMediaRouterService, clientPackageName));
         mImpl = new ProxyMediaRouter2Impl(context, clientPackageName, user);
+    }
+
+    @GuardedBy("mLock")
+    private void loadSystemRoutes() {
+        List<MediaRoute2Info> currentSystemRoutes = null;
+        try {
+            currentSystemRoutes = mMediaRouterService.getSystemRoutes();
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
+
+        if (currentSystemRoutes == null || currentSystemRoutes.isEmpty()) {
+            throw new RuntimeException("Null or empty currentSystemRoutes. Something is wrong.");
+        }
+
+        for (MediaRoute2Info route : currentSystemRoutes) {
+            mRoutes.put(route.getId(), route);
+        }
     }
 
     /**
