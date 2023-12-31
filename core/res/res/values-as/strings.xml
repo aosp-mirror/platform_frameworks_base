@@ -1170,7 +1170,7 @@
     <string name="yes" msgid="9069828999585032361">"ঠিক আছে"</string>
     <string name="no" msgid="5122037903299899715">"বাতিল কৰক"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"মনোযোগ দিব"</string>
-    <string name="loading" msgid="3138021523725055037">"ল\'ড কৰি থকা হৈছে…"</string>
+    <string name="loading" msgid="3138021523725055037">"ল’ড হৈ আছে…"</string>
     <string name="capital_on" msgid="2770685323900821829">"অন কৰক"</string>
     <string name="capital_off" msgid="7443704171014626777">"অফ কৰক"</string>
     <string name="checked" msgid="9179896827054513119">"টিক চিহ্ন দিয়া হৈছে"</string>
