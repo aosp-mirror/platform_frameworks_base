@@ -214,8 +214,6 @@ final class InputMethodUtils {
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
 
         private boolean mCopyOnWrite = false;
-        @NonNull
-        private String mEnabledInputMethodsStrCache = "";
         @UserIdInt
         private int mCurrentUserId;
 
@@ -246,9 +244,6 @@ final class InputMethodUtils {
         void switchCurrentUser(@UserIdInt int userId, boolean copyOnWrite) {
             if (DEBUG) {
                 Slog.d(TAG, "--- Switch the current user from " + mCurrentUserId + " to " + userId);
-            }
-            if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
-                mEnabledInputMethodsStrCache = "";
             }
             mCurrentUserId = userId;
             mCopyOnWrite = copyOnWrite;
@@ -408,18 +403,11 @@ final class InputMethodUtils {
             } else {
                 putString(Settings.Secure.ENABLED_INPUT_METHODS, str);
             }
-            // TODO: Update callers of putEnabledInputMethodsStr to make str @NonNull.
-            mEnabledInputMethodsStrCache = (str != null ? str : "");
         }
 
         @NonNull
         String getEnabledInputMethodsStr() {
-            mEnabledInputMethodsStrCache = getString(Settings.Secure.ENABLED_INPUT_METHODS, "");
-            if (DEBUG) {
-                Slog.d(TAG, "getEnabledInputMethodsStr: " + mEnabledInputMethodsStrCache
-                        + ", " + mCurrentUserId);
-            }
-            return mEnabledInputMethodsStrCache;
+            return getString(Settings.Secure.ENABLED_INPUT_METHODS, "");
         }
 
         private void saveSubtypeHistory(
@@ -853,7 +841,6 @@ final class InputMethodUtils {
         public void dumpLocked(final Printer pw, final String prefix) {
             pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
             pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
-            pw.println(prefix + "mEnabledInputMethodsStrCache=" + mEnabledInputMethodsStrCache);
         }
     }
 
