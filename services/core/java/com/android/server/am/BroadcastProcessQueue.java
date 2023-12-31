@@ -353,8 +353,7 @@ class BroadcastProcessQueue {
             // If we come across the record that's being enqueued in the queue, then that means
             // we already enqueued it for a receiver in this process and trying to insert a new
             // one past this could create priority inversion in the queue, so bail out.
-            if (record == testRecord && record.blockedUntilBeyondCount[recordIndex]
-                    > testRecord.blockedUntilBeyondCount[testRecordIndex]) {
+            if (record == testRecord) {
                 break;
             }
             if ((record.callingUid == testRecord.callingUid)

@@ -67,6 +67,7 @@ import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
@@ -1875,6 +1876,32 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
             verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
         }
         verifyScheduleRegisteredReceiver(times(1), receiverBlueApp, airplane);
+    }
+
+    @Test
+    public void testReplacePending_withSingletonReceiver() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_PHONE);
+        final ProcessRecord systemApp = makeActiveProcessRecord(PACKAGE_ANDROID, PROCESS_SYSTEM);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+                .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        final ResolveInfo systemReceiverA = makeManifestReceiver(PACKAGE_ANDROID, PROCESS_SYSTEM,
+                CLASS_BLUE, USER_SYSTEM);
+        final ResolveInfo systemReceiverB = makeManifestReceiver(PACKAGE_ANDROID, PROCESS_SYSTEM,
+                CLASS_BLUE, USER_GUEST);
+
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                systemReceiverA, systemReceiverB)));
+
+        assertEquals("Unexpected userId for receiverA", USER_SYSTEM,
+                UserHandle.getUserId(systemReceiverA.activityInfo.applicationInfo.uid));
+        assertEquals("Unexpected userId for receiverB", USER_SYSTEM,
+                UserHandle.getUserId(systemReceiverB.activityInfo.applicationInfo.uid));
+
+        waitForIdle();
+
+        verifyScheduleReceiver(times(2), systemApp, airplane);
     }
 
     @Test
