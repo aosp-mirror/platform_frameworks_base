@@ -213,7 +213,6 @@ final class InputMethodUtils {
     public static class InputMethodSettings {
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
 
-        private boolean mCopyOnWrite = false;
         @UserIdInt
         private int mCurrentUserId;
 
@@ -227,26 +226,21 @@ final class InputMethodUtils {
             }
         }
 
-        InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
-                boolean copyOnWrite) {
+        InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
             mMethodMap = methodMap;
-            switchCurrentUser(userId, copyOnWrite);
+            switchCurrentUser(userId);
         }
 
         /**
          * Must be called when the current user is changed.
          *
          * @param userId The user ID.
-         * @param copyOnWrite If {@code true}, for each settings key
-         * (e.g. {@link Settings.Secure#ACTION_INPUT_METHOD_SUBTYPE_SETTINGS}) we use the actual
-         * settings on the {@link Settings.Secure} until we do the first write operation.
          */
-        void switchCurrentUser(@UserIdInt int userId, boolean copyOnWrite) {
+        void switchCurrentUser(@UserIdInt int userId) {
             if (DEBUG) {
                 Slog.d(TAG, "--- Switch the current user from " + mCurrentUserId + " to " + userId);
             }
             mCurrentUserId = userId;
-            mCopyOnWrite = copyOnWrite;
         }
 
         private void putString(@NonNull String key, @Nullable String str) {
@@ -840,7 +834,6 @@ final class InputMethodUtils {
 
         public void dumpLocked(final Printer pw, final String prefix) {
             pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
-            pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
         }
     }
 
