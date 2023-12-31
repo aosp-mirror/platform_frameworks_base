@@ -352,16 +352,6 @@ final class InputMethodUtils {
             return imsList;
         }
 
-        void appendAndPutEnabledInputMethodLocked(String id) {
-            if (TextUtils.isEmpty(mEnabledInputMethodsStrCache)) {
-                // Add in the newly enabled input method.
-                putEnabledInputMethodsStr(id);
-            } else {
-                putEnabledInputMethodsStr(
-                        mEnabledInputMethodsStrCache + INPUT_METHOD_SEPARATOR + id);
-            }
-        }
-
         /**
          * Build and put a string of EnabledInputMethods with removing specified Id.
          * @return the specified id was removed or not.

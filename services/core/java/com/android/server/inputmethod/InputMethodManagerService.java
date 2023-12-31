@@ -5264,21 +5264,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     private boolean setInputMethodEnabledLocked(String id, boolean enabled) {
-        List<Pair<String, ArrayList<String>>> enabledInputMethodsList = mSettings
-                .getEnabledInputMethodsAndSubtypeListLocked();
-
         if (enabled) {
-            for (Pair<String, ArrayList<String>> pair: enabledInputMethodsList) {
-                if (pair.first.equals(id)) {
-                    // We are enabling this input method, but it is already enabled.
-                    // Nothing to do. The previous state was enabled.
-                    return true;
-                }
+            final String enabledImeIdsStr = mSettings.getEnabledInputMethodsStr();
+            final String newEnabledImeIdsStr = InputMethodUtils.concatEnabledImeIds(
+                    enabledImeIdsStr, id);
+            if (TextUtils.equals(enabledImeIdsStr, newEnabledImeIdsStr)) {
+                // We are enabling this input method, but it is already enabled.
+                // Nothing to do. The previous state was enabled.
+                return true;
             }
-            mSettings.appendAndPutEnabledInputMethodLocked(id);
+            mSettings.putEnabledInputMethodsStr(newEnabledImeIdsStr);
             // Previous state was disabled.
             return false;
         } else {
+            final List<Pair<String, ArrayList<String>>> enabledInputMethodsList = mSettings
+                    .getEnabledInputMethodsAndSubtypeListLocked();
             StringBuilder builder = new StringBuilder();
             if (mSettings.buildAndPutEnabledInputMethodsStrRemovingIdLocked(
                     builder, enabledInputMethodsList, id)) {
@@ -5610,9 +5610,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     return false; // IME is not found.
                 }
                 if (enabled) {
-                    if (!settings.getEnabledInputMethodListLocked().contains(
-                            methodMap.get(imeId))) {
-                        settings.appendAndPutEnabledInputMethodLocked(imeId);
+                    final String enabledImeIdsStr = settings.getEnabledInputMethodsStr();
+                    final String newEnabledImeIdsStr = InputMethodUtils.concatEnabledImeIds(
+                            enabledImeIdsStr, imeId);
+                    if (!TextUtils.equals(enabledImeIdsStr, newEnabledImeIdsStr)) {
+                        settings.putEnabledInputMethodsStr(newEnabledImeIdsStr);
                     }
                 } else {
                     settings.buildAndPutEnabledInputMethodsStrRemovingIdLocked(
@@ -6351,14 +6353,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (!methodMap.containsKey(imeId)) {
                     failedToEnableUnknownIme = true;
                 } else {
-                    for (InputMethodInfo imi : settings.getEnabledInputMethodListLocked()) {
-                        if (TextUtils.equals(imi.getId(), imeId)) {
-                            previouslyEnabled = true;
-                            break;
-                        }
-                    }
+                    final String enabledImeIdsStr = settings.getEnabledInputMethodsStr();
+                    final String newEnabledImeIdsStr = InputMethodUtils.concatEnabledImeIds(
+                            enabledImeIdsStr, imeId);
+                    previouslyEnabled = TextUtils.equals(enabledImeIdsStr, newEnabledImeIdsStr);
                     if (!previouslyEnabled) {
-                        settings.appendAndPutEnabledInputMethodLocked(imeId);
+                        settings.putEnabledInputMethodsStr(newEnabledImeIdsStr);
                     }
                 }
             } else {
