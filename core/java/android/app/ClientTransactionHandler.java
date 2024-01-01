@@ -167,11 +167,12 @@ public abstract class ClientTransactionHandler {
 
     /** Set pending activity configuration in case it will be updated by other transaction item. */
     public abstract void updatePendingActivityConfiguration(@NonNull IBinder token,
-            Configuration overrideConfig);
+            @NonNull Configuration overrideConfig);
 
     /** Deliver activity (override) configuration change. */
     public abstract void handleActivityConfigurationChanged(@NonNull ActivityClientRecord r,
-            Configuration overrideConfig, int displayId);
+            @NonNull Configuration overrideConfig, int displayId,
+            @NonNull ActivityWindowInfo activityWindowInfo);
 
     /** Deliver {@link android.window.WindowContextInfo} change. */
     public abstract void handleWindowContextInfoChanged(@NonNull IBinder clientToken,

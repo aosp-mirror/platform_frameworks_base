@@ -395,11 +395,13 @@ public class ActivityThreadTest {
             olderConfig.seq = seq + 1;
 
             final ActivityClientRecord r = getActivityClientRecord(activity);
-            activityThread.handleActivityConfigurationChanged(r, olderConfig, INVALID_DISPLAY);
+            activityThread.handleActivityConfigurationChanged(r, olderConfig, INVALID_DISPLAY,
+                    new ActivityWindowInfo());
             assertEquals(numOfConfig, activity.mNumOfConfigChanges);
             assertEquals(olderConfig.orientation, activity.mConfig.orientation);
 
-            activityThread.handleActivityConfigurationChanged(r, newerConfig, INVALID_DISPLAY);
+            activityThread.handleActivityConfigurationChanged(r, newerConfig, INVALID_DISPLAY,
+                    new ActivityWindowInfo());
             assertEquals(numOfConfig + 1, activity.mNumOfConfigChanges);
             assertEquals(newerConfig.orientation, activity.mConfig.orientation);
         });
@@ -417,7 +419,7 @@ public class ActivityThreadTest {
             config.orientation = ORIENTATION_PORTRAIT;
 
             activityThread.handleActivityConfigurationChanged(getActivityClientRecord(activity),
-                    config, INVALID_DISPLAY);
+                    config, INVALID_DISPLAY, new ActivityWindowInfo());
         });
 
         final IApplicationThread appThread = activityThread.getApplicationThread();
@@ -488,7 +490,7 @@ public class ActivityThreadTest {
             config.orientation = ORIENTATION_PORTRAIT;
 
             activityThread.handleActivityConfigurationChanged(getActivityClientRecord(activity),
-                    config, INVALID_DISPLAY);
+                    config, INVALID_DISPLAY, new ActivityWindowInfo());
         });
 
         final int numOfConfig = activity.mNumOfConfigChanges;
@@ -618,7 +620,7 @@ public class ActivityThreadTest {
             activityThread.updatePendingActivityConfiguration(activity.getActivityToken(),
                     newActivityConfig);
             activityThread.handleActivityConfigurationChanged(r, newActivityConfig,
-                    INVALID_DISPLAY);
+                    INVALID_DISPLAY, new ActivityWindowInfo());
 
             assertEquals("Virtual display orientation must not change when activity"
                             + " configuration orientation changes.",
@@ -783,8 +785,8 @@ public class ActivityThreadTest {
 
     /**
      * Calls {@link ActivityThread#handleActivityConfigurationChanged(ActivityClientRecord,
-     * Configuration, int)} to try to push activity configuration to the activity for the given
-     * sequence number.
+     * Configuration, int, ActivityWindowInfo)} to try to push activity configuration to the
+     * activity for the given sequence number.
      * <p>
      * It uses orientation to push the configuration and it tries a different orientation if the
      * first attempt doesn't make through, to rule out the possibility that the previous
@@ -803,7 +805,8 @@ public class ActivityThreadTest {
         Configuration config = new Configuration();
         config.orientation = ORIENTATION_PORTRAIT;
         config.seq = seq;
-        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY);
+        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY,
+                new ActivityWindowInfo());
 
         if (activity.mNumOfConfigChanges > numOfConfig) {
             return config.seq;
@@ -812,7 +815,8 @@ public class ActivityThreadTest {
         config = new Configuration();
         config.orientation = ORIENTATION_LANDSCAPE;
         config.seq = seq + 1;
-        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY);
+        activityThread.handleActivityConfigurationChanged(r, config, INVALID_DISPLAY,
+                new ActivityWindowInfo());
 
         return config.seq;
     }
