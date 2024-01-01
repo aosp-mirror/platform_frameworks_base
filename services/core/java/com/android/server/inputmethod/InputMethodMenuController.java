@@ -209,7 +209,9 @@ final class InputMethodMenuController {
     }
 
     void updateKeyboardFromSettingsLocked() {
-        mShowImeWithHardKeyboard = mSettings.isShowImeWithHardKeyboardEnabled();
+        mShowImeWithHardKeyboard =
+                SecureSettingsWrapper.getBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
+                        false, mService.getCurrentImeUserIdLocked());
         if (mSwitchingDialog != null && mSwitchingDialogTitleView != null
                 && mSwitchingDialog.isShowing()) {
             final Switch hardKeySwitch = mSwitchingDialogTitleView.findViewById(
