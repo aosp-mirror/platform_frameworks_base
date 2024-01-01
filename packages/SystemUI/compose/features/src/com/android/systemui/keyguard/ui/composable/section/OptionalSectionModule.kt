@@ -16,11 +16,14 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.android.compose.animation.scene.SceneScope
+import dagger.BindsOptionalOf
+import dagger.Module
 
-/** Defines interface for classes that can render the ambient indication area. */
-interface AmbientIndicationSection {
-    @Composable fun SceneScope.AmbientIndication(modifier: Modifier)
+/**
+ * Dagger module for providing placeholders for optional lockscreen scene sections that don't exist
+ * in AOSP but may be provided by OEMs.
+ */
+@Module
+interface OptionalSectionModule {
+    @BindsOptionalOf fun ambientIndicationSection(): AmbientIndicationSection
 }

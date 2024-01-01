@@ -20,6 +20,7 @@ import com.android.systemui.keyguard.ui.composable.blueprint.CommunalBlueprintMo
 import com.android.systemui.keyguard.ui.composable.blueprint.DefaultBlueprintModule
 import com.android.systemui.keyguard.ui.composable.blueprint.ShortcutsBesideUdfpsBlueprintModule
 import com.android.systemui.keyguard.ui.composable.blueprint.SplitShadeBlueprintModule
+import com.android.systemui.keyguard.ui.composable.section.OptionalSectionModule
 import dagger.Module
 
 @Module(
@@ -27,6 +28,7 @@ import dagger.Module
         [
             CommunalBlueprintModule::class,
             DefaultBlueprintModule::class,
+            OptionalSectionModule::class,
             ShortcutsBesideUdfpsBlueprintModule::class,
             SplitShadeBlueprintModule::class,
         ],
