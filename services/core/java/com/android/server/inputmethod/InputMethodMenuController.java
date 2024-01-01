@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.LayoutInflater;
@@ -78,9 +79,9 @@ final class InputMethodMenuController {
         if (DEBUG) Slog.v(TAG, "Show switching menu. showAuxSubtypes=" + showAuxSubtypes);
 
         synchronized (ImfLock.class) {
+            final int userId = mService.getCurrentImeUserIdLocked();
             final boolean isScreenLocked = mWindowManagerInternal.isKeyguardLocked()
-                    && mWindowManagerInternal.isKeyguardSecure(
-                            mService.getCurrentImeUserIdLocked());
+                    && mWindowManagerInternal.isKeyguardSecure(userId);
             final String lastInputMethodId = mSettings.getSelectedInputMethod();
             int lastInputMethodSubtypeId =
                     mSettings.getSelectedInputMethodSubtypeId(lastInputMethodId);
@@ -157,7 +158,8 @@ final class InputMethodMenuController {
                     com.android.internal.R.id.hard_keyboard_switch);
             hardKeySwitch.setChecked(mShowImeWithHardKeyboard);
             hardKeySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                mSettings.setShowImeWithHardKeyboard(isChecked);
+                SecureSettingsWrapper.putBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
+                        isChecked, userId);
                 // Ensure that the input method dialog is dismissed when changing
                 // the hardware keyboard state.
                 hideInputMethodMenu();
