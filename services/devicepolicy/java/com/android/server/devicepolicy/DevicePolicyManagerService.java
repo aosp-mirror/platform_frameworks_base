@@ -6243,9 +6243,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            final KeyChainConnection keyChainConnection =
-                    KeyChain.bindAsUser(mContext, caller.getUserHandle());
-            try {
+            try (KeyChainConnection keyChainConnection =
+                         KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
                 IKeyChainService keyChain = keyChainConnection.getService();
                 if (!keyChain.installKeyPair(privKey, cert, chain, alias, KeyStore.UID_SELF)) {
                     logInstallKeyPairFailure(caller, isCredentialManagementApp);
@@ -6263,10 +6262,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                         .write();
                 return true;
-            } catch (RemoteException e) {
+            } catch (RemoteException | AssertionError e) {
                 Slogf.e(LOG_TAG, "Installing certificate", e);
-            } finally {
-                keyChainConnection.close();
             }
         } catch (InterruptedException e) {
             Slogf.w(LOG_TAG, "Interrupted while installing certificate", e);
@@ -6313,9 +6310,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final long id = Binder.clearCallingIdentity();
         try {
-            final KeyChainConnection keyChainConnection =
-                    KeyChain.bindAsUser(mContext, caller.getUserHandle());
-            try {
+            try (KeyChainConnection keyChainConnection =
+                         KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
                 IKeyChainService keyChain = keyChainConnection.getService();
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.REMOVE_KEY_PAIR)
@@ -6325,10 +6321,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 ? CREDENTIAL_MANAGEMENT_APP : NOT_CREDENTIAL_MANAGEMENT_APP)
                         .write();
                 return keyChain.removeKeyPair(alias);
-            } catch (RemoteException e) {
+            } catch (RemoteException | AssertionError e) {
                 Slogf.e(LOG_TAG, "Removing keypair", e);
-            } finally {
-                keyChainConnection.close();
             }
         } catch (InterruptedException e) {
             Slogf.w(LOG_TAG, "Interrupted while removing keypair", e);
@@ -6355,7 +6349,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             try (KeyChainConnection keyChainConnection =
                          KeyChain.bindAsUser(mContext, caller.getUserHandle())) {
                 return keyChainConnection.getService().containsKeyPair(alias);
-            } catch (RemoteException e) {
+            } catch (RemoteException | AssertionError e) {
                 Slogf.e(LOG_TAG, "Querying keypair", e);
             } catch (InterruptedException e) {
                 Slogf.w(LOG_TAG, "Interrupted while querying keypair", e);
@@ -6417,7 +6411,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
                 return false;
-            } catch (RemoteException e) {
+            } catch (RemoteException | AssertionError e) {
                 Slogf.e(LOG_TAG, "Querying grant to wifi auth.", e);
                 return false;
             }
@@ -6497,7 +6491,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                     result.put(uid, new ArraySet<String>(packages));
                 }
-            } catch (RemoteException e) {
+            } catch (RemoteException | AssertionError e) {
                 Slogf.e(LOG_TAG, "Querying keypair grants", e);
             } catch (InterruptedException e) {
                 Slogf.w(LOG_TAG, "Interrupted while querying keypair grants", e);
@@ -6667,7 +6661,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         .write();
                 return true;
             }
-        } catch (RemoteException e) {
+        } catch (RemoteException | AssertionError e) {
             Slogf.e(LOG_TAG, "KeyChain error while generating a keypair", e);
         } catch (InterruptedException e) {
             Slogf.w(LOG_TAG, "Interrupted while generating keypair", e);
@@ -6742,7 +6736,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (InterruptedException e) {
             Slogf.w(LOG_TAG, "Interrupted while setting keypair certificate", e);
             Thread.currentThread().interrupt();
-        } catch (RemoteException e) {
+        } catch (RemoteException | AssertionError e) {
             Slogf.e(LOG_TAG, "Failed setting keypair certificate", e);
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
@@ -7227,7 +7221,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         connection.getService().getCredentialManagementAppPolicy();
                 return policy != null && !policy.getAppAndUriMappings().isEmpty()
                         && containsAlias(policy, alias);
-            } catch (RemoteException | InterruptedException e) {
+            } catch (RemoteException | InterruptedException | AssertionError e) {
                 return false;
             }
         });
