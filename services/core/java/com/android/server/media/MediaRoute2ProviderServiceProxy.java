@@ -231,18 +231,21 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     private boolean shouldBind() {
-        if (mRunning) {
-            boolean shouldBind =
-                    mLastDiscoveryPreference != null
-                            && !mLastDiscoveryPreference.getPreferredFeatures().isEmpty();
-            if (mIsSelfScanOnlyProvider) {
-                shouldBind &= mLastDiscoveryPreferenceIncludesThisPackage;
-            }
-            shouldBind |= mIsManagerScanning;
-            shouldBind |= !getSessionInfos().isEmpty();
-            return shouldBind;
+        if (!mRunning) {
+            return false;
         }
-        return false;
+        if (!getSessionInfos().isEmpty() || mIsManagerScanning) {
+            // We bind if any manager is scanning (regardless of whether an app is scanning) to give
+            // the opportunity for providers to publish routing sessions that were established
+            // directly between the app and the provider (typically via AndroidX MediaRouter). See
+            // b/176774510#comment20 for more information.
+            return true;
+        }
+        boolean anAppIsScanning =
+                mLastDiscoveryPreference != null
+                        && !mLastDiscoveryPreference.getPreferredFeatures().isEmpty();
+        return anAppIsScanning
+                && (mLastDiscoveryPreferenceIncludesThisPackage || !mIsSelfScanOnlyProvider);
     }
 
     private void bind() {
