@@ -13,3 +13,10 @@ flag {
     description: "Throw an exception if an unsupported app uses JobInfo.setBias"
     bug: "300477393"
 }
+
+flag {
+    name: "batch_jobs_on_network_activation"
+    namespace: "backstage_power"
+    description: "Have JobScheduler attempt to delay the start of some connectivity jobs until the network is actually active"
+    bug: "318394184"
+}
