@@ -37,6 +37,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.companion.AssociatedDevice;
 import android.companion.AssociationInfo;
@@ -398,7 +399,11 @@ class AssociationRequestsProcessor {
             pendingIntent = PendingIntent.getActivityAsUser(
                     mContext, /*requestCode */ packageUid, intent,
                     FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
-                    /* options= */ null, UserHandle.CURRENT);
+                    ActivityOptions.makeBasic()
+                            .setPendingIntentCreatorBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle(),
+                    UserHandle.CURRENT);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
