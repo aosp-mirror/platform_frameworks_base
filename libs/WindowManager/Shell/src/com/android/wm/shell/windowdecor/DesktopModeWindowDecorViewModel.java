@@ -335,7 +335,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) {
             createWindowDecoration(taskInfo, taskSurface, startT, finishT);
         } else {
-            decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */);
+            decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */,
+                    false /* shouldSetTaskPositionAndCrop */);
         }
     }
 
@@ -347,7 +348,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (decoration == null) return;
 
-        decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */);
+        decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */,
+                false /* shouldSetTaskPositionAndCrop */);
     }
 
     @Override
@@ -1010,8 +1012,23 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
         windowDecoration.createResizeVeil();
 
-        final DragPositioningCallback dragPositioningCallback = createDragPositioningCallback(
-                windowDecoration);
+        final DragPositioningCallback dragPositioningCallback;
+        final int transitionAreaHeight = mContext.getResources().getDimensionPixelSize(
+                R.dimen.desktop_mode_transition_area_height);
+        if (!DesktopModeStatus.isVeiledResizeEnabled()) {
+            dragPositioningCallback =  new FluidResizeTaskPositioner(
+                    mTaskOrganizer, mTransitions, windowDecoration, mDisplayController,
+                    mDragStartListener, mTransactionFactory, transitionAreaHeight);
+            windowDecoration.setTaskDragResizer(
+                    (FluidResizeTaskPositioner) dragPositioningCallback);
+        } else {
+            dragPositioningCallback =  new VeiledResizeTaskPositioner(
+                    mTaskOrganizer, windowDecoration, mDisplayController,
+                    mDragStartListener, mTransitions, transitionAreaHeight);
+            windowDecoration.setTaskDragResizer(
+                    (VeiledResizeTaskPositioner) dragPositioningCallback);
+        }
+
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, dragPositioningCallback);
 
@@ -1021,22 +1038,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setDragPositioningCallback(dragPositioningCallback);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT,
-                false /* applyStartTransactionOnDraw */);
+                false /* applyStartTransactionOnDraw */, false /* shouldSetTaskPositionAndCrop */);
         incrementEventReceiverTasks(taskInfo.displayId);
-    }
-    private DragPositioningCallback createDragPositioningCallback(
-            @NonNull DesktopModeWindowDecoration windowDecoration) {
-        final int transitionAreaHeight = mContext.getResources().getDimensionPixelSize(
-                R.dimen.desktop_mode_transition_area_height);
-        if (!DesktopModeStatus.isVeiledResizeEnabled()) {
-            return new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration,
-                    mDisplayController, mDragStartListener, mTransactionFactory,
-                    transitionAreaHeight);
-        } else {
-            return new VeiledResizeTaskPositioner(mTaskOrganizer, windowDecoration,
-                    mDisplayController, mDragStartListener, mTransitions,
-                    transitionAreaHeight);
-        }
     }
 
     private RunningTaskInfo getOtherSplitTask(int taskId) {
@@ -1138,7 +1141,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
         }
     }
-
 }
 
 

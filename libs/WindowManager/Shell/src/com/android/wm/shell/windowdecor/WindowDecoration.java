@@ -124,6 +124,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     private WindowlessWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
     private Configuration mWindowDecorConfig;
+    TaskDragResizer mTaskDragResizer;
     private boolean mIsCaptionVisible;
 
     private final Binder mOwner = new Binder();
@@ -311,25 +312,21 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         float shadowRadius;
         final Point taskPosition = mTaskInfo.positionInParent;
         if (isFullscreen) {
-            // Setting the task crop to the width/height stops input events from being sent to
-            // some regions of the app window. See b/300324920
-            // TODO(b/296921174): investigate whether crop/position needs to be set by window
-            // decorations at all when transition handlers are already taking ownership of the task
-            // surface placement/crop, especially when in fullscreen where tasks cannot be
-            // drag-resized by the window decoration.
-            startT.setWindowCrop(mTaskSurface, null);
-            finishT.setWindowCrop(mTaskSurface, null);
             // Shadow is not needed for fullscreen tasks
             shadowRadius = 0;
         } else {
-            startT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
-            finishT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
             shadowRadius = loadDimension(resources, params.mShadowRadiusId);
         }
+
+        if (params.mSetTaskPositionAndCrop) {
+            startT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
+            finishT.setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight)
+                    .setPosition(mTaskSurface, taskPosition.x, taskPosition.y);
+        }
+
         startT.setShadowRadius(mTaskSurface, shadowRadius)
                 .show(mTaskSurface);
-        finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
-                .setShadowRadius(mTaskSurface, shadowRadius);
+        finishT.setShadowRadius(mTaskSurface, shadowRadius);
         if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             if (!DesktopModeStatus.isVeiledResizeEnabled()) {
                 // When fluid resize is enabled, add a background to freeform tasks
@@ -392,6 +389,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
             return;
         }
+    }
+
+    void setTaskDragResizer(TaskDragResizer taskDragResizer) {
+        mTaskDragResizer = taskDragResizer;
     }
 
     private void setCaptionVisibility(View rootView, boolean visible) {
@@ -559,6 +560,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         Configuration mWindowDecorConfig;
 
         boolean mApplyStartTransactionOnDraw;
+        boolean mSetTaskPositionAndCrop;
 
         void reset() {
             mLayoutResId = Resources.ID_NULL;
@@ -572,6 +574,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionY = 0;
 
             mApplyStartTransactionOnDraw = false;
+            mSetTaskPositionAndCrop = false;
             mWindowDecorConfig = null;
         }
     }

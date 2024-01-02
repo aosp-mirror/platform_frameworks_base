@@ -187,20 +187,28 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
 
         final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+        // The crop and position of the task should only be set when a task is fluid resizing. In
+        // all other cases, it is expected that the transition handler positions and crops the task
+        // in order to allow the handler time to animate before the task before the final
+        // position and crop are set.
+        final boolean shouldSetTaskPositionAndCrop = !DesktopModeStatus.isVeiledResizeEnabled()
+                && mTaskDragResizer.isResizingOrAnimating();
         // Use |applyStartTransactionOnDraw| so that the transaction (that applies task crop) is
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
-        relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */);
+        relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */,
+                shouldSetTaskPositionAndCrop);
     }
 
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw) {
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
         if (isHandleMenuActive()) {
             mHandleMenu.relayout(startT);
         }
 
-        updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw);
+        updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
+                shouldSetTaskPositionAndCrop);
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
@@ -302,7 +310,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             RelayoutParams relayoutParams,
             Context context,
             ActivityManager.RunningTaskInfo taskInfo,
-            boolean applyStartTransactionOnDraw) {
+            boolean applyStartTransactionOnDraw,
+            boolean shouldSetTaskPositionAndCrop) {
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
         relayoutParams.mLayoutResId =
@@ -314,6 +323,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     : R.dimen.freeform_decor_shadow_unfocused_thickness;
         }
         relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
+        relayoutParams.mSetTaskPositionAndCrop = shouldSetTaskPositionAndCrop;
         // The configuration used to lay out the window decoration. The system context's config is
         // used when the task density has been overridden to a custom density so that the resources
         // and views of the decoration aren't affected and match the rest of the System UI, if not
