@@ -140,8 +140,8 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Tumia kwa kuingiza"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Tumia kwa visaidizi vya kusikia"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Tumia kwa ajili ya LE_AUDIO"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Oanisha"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"OANISHA"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Unganisha"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"UNGANISHA"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Ghairi"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Kuoanisha hutoa ruhusa ya kufikiwa kwa unaowasiliana nao na rekodi ya simu zilizopigwa unapounganishwa."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Haikuwezakulinganisha na <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -237,10 +237,10 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Hitilafu"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Utatuzi usiotumia waya"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Ili kuangalia na kutumia vifaa vinavyopatikana, washa utatuzi usiotumia waya"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Oanisha kifaa ukitumia msimbo wa QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Oanisha vifaa vipya ukitumia kichanganuzi cha Msimbo wa QR"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Oanisha kifaa ukitumia msimbo wa kuoanisha"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Oanisha vifaa vipya ukitumia msimbo wa tarakimu sita"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Unganisha kifaa ukitumia msimbo wa QR"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Unganisha vifaa vipya ukitumia kichanganuzi cha Msimbo wa QR"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Unganisha kifaa ukitumia msimbo wa kuunganisha"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Unganisha vifaa vipya ukitumia msimbo wa tarakimu sita"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Vifaa vilivyooanishwa"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Vilivyounganishwa kwa sasa"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Maelezo ya kifaa"</string>
@@ -248,16 +248,16 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Alama bainifu ya kifaa: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Imeshindwa kuunganisha"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Hakikisha kuwa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> kimeunganishwa kwenye mtandao sahihi"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Oanisha na kifaa"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Unganisha na kifaa"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Msimbo wa kuoanisha wa Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Imeshindwa kuoanisha"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Hakikisha kuwa kifaa kimeunganishwa kwenye mtandao mmoja."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Oanisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Unganisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Inaoanisha kifaa…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Imeshindwa kuoanisha kifaa. Huenda msimbo wa QR haukuwa sahihi au kifaa hakijaunganishwa kwenye mtandao mmoja."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Anwani ya IP na Mlango"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Changanua msimbo wa QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Oanisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Unganisha kifaa kupitia Wi-Fi kwa kuchanganua msimbo wa QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Tafadhali unganisha kwenye mtandao wa Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, tatua, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Njia ya mkato ya kuripoti hitilafu"</string>
