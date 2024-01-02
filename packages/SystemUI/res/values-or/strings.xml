@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ସେଟିଂସରେ ଡିଫଲ୍ଟ ନୋଟ୍ସ ଆପ ସେଟ କରନ୍ତୁ"</string>
     <string name="install_app" msgid="5066668100199613936">"ଆପ ଇନଷ୍ଟଲ କରନ୍ତୁ"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ଏକ୍ସଟର୍ନଲ ଡିସପ୍ଲେକୁ ମିରର କରିବେ?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"ଆପଣଙ୍କ ଇନର ଡିସପ୍ଲେକୁ ମିରର କରାଯିବ। ଆପଣଙ୍କ ଫ୍ରଣ୍ଟ ଡିସପ୍ଲେକୁ ବନ୍ଦ କରାଯିବ।"</string>
     <string name="mirror_display" msgid="2515262008898122928">"ଡିସପ୍ଲେ ମିରର କରନ୍ତୁ"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"ଡିସପ୍ଲେ କନେକ୍ଟ କରାଯାଇଛି"</string>
