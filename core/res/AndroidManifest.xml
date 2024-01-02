@@ -1709,6 +1709,7 @@
 
     <!-- @SystemApi Allows camera access by Headless System User 0 when device is running in
             HSUM Mode.
+         @FlaggedApi("com.android.internal.camera.flags.camera_hsum_permission")
     @hide -->
     <permission android:name="android.permission.CAMERA_HEADLESS_SYSTEM_USER"
         android:permissionGroup="android.permission-group.UNDEFINED"

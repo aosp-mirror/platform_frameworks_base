@@ -95,7 +95,7 @@ package android {
     field public static final String BYPASS_ROLE_QUALIFICATION = "android.permission.BYPASS_ROLE_QUALIFICATION";
     field public static final String CALL_AUDIO_INTERCEPTION = "android.permission.CALL_AUDIO_INTERCEPTION";
     field public static final String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
-    field public static final String CAMERA_HEADLESS_SYSTEM_USER = "android.permission.CAMERA_HEADLESS_SYSTEM_USER";
+    field @FlaggedApi("com.android.internal.camera.flags.camera_hsum_permission") public static final String CAMERA_HEADLESS_SYSTEM_USER = "android.permission.CAMERA_HEADLESS_SYSTEM_USER";
     field public static final String CAMERA_OPEN_CLOSE_LISTENER = "android.permission.CAMERA_OPEN_CLOSE_LISTENER";
     field public static final String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
     field public static final String CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD = "android.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD";
