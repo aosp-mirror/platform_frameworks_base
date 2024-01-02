@@ -198,7 +198,12 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
                 mIsConnected = true;
                 service = mService;
             }
-            service.onSessionActiveStateChanged(MediaSession2Record.this);
+
+            // TODO (b/318745416): Add support for FGS in MediaSession2. Passing a
+            // null playback state means the owning process will not be allowed to
+            // run in the foreground.
+            service.onSessionActiveStateChanged(MediaSession2Record.this,
+                    /* playbackState= */ null);
         }
 
         @Override
