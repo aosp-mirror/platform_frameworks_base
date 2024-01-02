@@ -173,7 +173,7 @@ final class LetterboxUiController {
     // Corresponds to OVERRIDE_ANY_ORIENTATION
     private final boolean mIsOverrideAnyOrientationEnabled;
     // Corresponds to OVERRIDE_ANY_ORIENTATION_TO_USER
-    private final boolean mIsOverrideToUserOrientationEnabled;
+    private final boolean mIsSystemOverrideToFullscreenEnabled;
     // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
     private final boolean mIsOverrideToPortraitOrientationEnabled;
     // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR
@@ -358,7 +358,7 @@ final class LetterboxUiController {
                         PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE);
 
         mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
-        mIsOverrideToUserOrientationEnabled =
+        mIsSystemOverrideToFullscreenEnabled =
                 isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION_TO_USER);
         mIsOverrideToPortraitOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT);
@@ -671,8 +671,7 @@ final class LetterboxUiController {
         final DisplayContent displayContent = mActivityRecord.mDisplayContent;
         final boolean isIgnoreOrientationRequestEnabled = displayContent != null
                 && displayContent.getIgnoreOrientationRequest();
-        if (shouldApplyUserFullscreenOverride()
-                && isIgnoreOrientationRequestEnabled) {
+        if (shouldApplyUserFullscreenOverride() && isIgnoreOrientationRequestEnabled) {
             Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
                     + mActivityRecord + " is overridden to "
                     + screenOrientationToString(SCREEN_ORIENTATION_USER)
@@ -707,8 +706,7 @@ final class LetterboxUiController {
         // mUserAspectRatio is always initialized first in shouldApplyUserFullscreenOverride(),
         // which will always come first before this check as user override > device
         // manufacturer override.
-        if (mUserAspectRatio == PackageManager.USER_MIN_ASPECT_RATIO_UNSET
-                && mIsOverrideToUserOrientationEnabled && isIgnoreOrientationRequestEnabled) {
+        if (isSystemOverrideToFullscreenEnabled() && isIgnoreOrientationRequestEnabled) {
             Slog.v(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
                     + mActivityRecord + " is overridden to "
                     + screenOrientationToString(SCREEN_ORIENTATION_USER));
@@ -1200,6 +1198,13 @@ final class LetterboxUiController {
         mUserAspectRatio = getUserMinAspectRatioOverrideCode();
 
         return mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN;
+    }
+
+    boolean isSystemOverrideToFullscreenEnabled() {
+        return mIsSystemOverrideToFullscreenEnabled
+                && !FALSE.equals(mBooleanPropertyAllowOrientationOverride)
+                && (mUserAspectRatio == USER_MIN_ASPECT_RATIO_UNSET
+                    || mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
     }
 
     float getUserMinAspectRatio() {
