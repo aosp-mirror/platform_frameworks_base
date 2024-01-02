@@ -213,9 +213,6 @@ final class InputMethodUtils {
     public static class InputMethodSettings {
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
 
-        private boolean mCopyOnWrite = false;
-        @NonNull
-        private String mEnabledInputMethodsStrCache = "";
         @UserIdInt
         private int mCurrentUserId;
 
@@ -229,29 +226,21 @@ final class InputMethodUtils {
             }
         }
 
-        InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
-                boolean copyOnWrite) {
+        InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
             mMethodMap = methodMap;
-            switchCurrentUser(userId, copyOnWrite);
+            switchCurrentUser(userId);
         }
 
         /**
          * Must be called when the current user is changed.
          *
          * @param userId The user ID.
-         * @param copyOnWrite If {@code true}, for each settings key
-         * (e.g. {@link Settings.Secure#ACTION_INPUT_METHOD_SUBTYPE_SETTINGS}) we use the actual
-         * settings on the {@link Settings.Secure} until we do the first write operation.
          */
-        void switchCurrentUser(@UserIdInt int userId, boolean copyOnWrite) {
+        void switchCurrentUser(@UserIdInt int userId) {
             if (DEBUG) {
                 Slog.d(TAG, "--- Switch the current user from " + mCurrentUserId + " to " + userId);
             }
-            if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
-                mEnabledInputMethodsStrCache = "";
-            }
             mCurrentUserId = userId;
-            mCopyOnWrite = copyOnWrite;
         }
 
         private void putString(@NonNull String key, @Nullable String str) {
@@ -352,16 +341,6 @@ final class InputMethodUtils {
             return imsList;
         }
 
-        void appendAndPutEnabledInputMethodLocked(String id) {
-            if (TextUtils.isEmpty(mEnabledInputMethodsStrCache)) {
-                // Add in the newly enabled input method.
-                putEnabledInputMethodsStr(id);
-            } else {
-                putEnabledInputMethodsStr(
-                        mEnabledInputMethodsStrCache + INPUT_METHOD_SEPARATOR + id);
-            }
-        }
-
         /**
          * Build and put a string of EnabledInputMethods with removing specified Id.
          * @return the specified id was removed or not.
@@ -418,18 +397,11 @@ final class InputMethodUtils {
             } else {
                 putString(Settings.Secure.ENABLED_INPUT_METHODS, str);
             }
-            // TODO: Update callers of putEnabledInputMethodsStr to make str @NonNull.
-            mEnabledInputMethodsStrCache = (str != null ? str : "");
         }
 
         @NonNull
         String getEnabledInputMethodsStr() {
-            mEnabledInputMethodsStrCache = getString(Settings.Secure.ENABLED_INPUT_METHODS, "");
-            if (DEBUG) {
-                Slog.d(TAG, "getEnabledInputMethodsStr: " + mEnabledInputMethodsStrCache
-                        + ", " + mCurrentUserId);
-            }
-            return mEnabledInputMethodsStrCache;
+            return getString(Settings.Secure.ENABLED_INPUT_METHODS, "");
         }
 
         private void saveSubtypeHistory(
@@ -862,8 +834,6 @@ final class InputMethodUtils {
 
         public void dumpLocked(final Printer pw, final String prefix) {
             pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
-            pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
-            pw.println(prefix + "mEnabledInputMethodsStrCache=" + mEnabledInputMethodsStrCache);
         }
     }
 
