@@ -325,8 +325,13 @@ class MobileConnectionRepositoryImpl(
     override val cdmaRoaming: StateFlow<Boolean> =
         telephonyPollingEvent
             .mapLatest {
-                val cdmaEri = telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber
-                cdmaEri == ERI_ON || cdmaEri == ERI_FLASH
+                try {
+                    val cdmaEri = telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber
+                    cdmaEri == ERI_ON || cdmaEri == ERI_FLASH
+                } catch (e: UnsupportedOperationException) {
+                    // Handles the same as a function call failure
+                    false
+                }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
