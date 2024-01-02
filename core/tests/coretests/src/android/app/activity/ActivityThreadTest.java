@@ -247,7 +247,7 @@ public class ActivityThreadTest {
             newConfig.smallestScreenWidthDp++;
             transaction = newTransaction(activityThread);
             transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
-                    activity.getActivityToken(), newConfig));
+                    activity.getActivityToken(), newConfig, new ActivityWindowInfo()));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
@@ -455,11 +455,11 @@ public class ActivityThreadTest {
 
         transaction = newTransaction(activityThread);
         transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
-                activity.getActivityToken(), activityConfigLandscape));
+                activity.getActivityToken(), activityConfigLandscape, new ActivityWindowInfo()));
         transaction.addTransactionItem(ConfigurationChangeItem.obtain(
                 processConfigPortrait, DEVICE_ID_INVALID));
         transaction.addTransactionItem(ActivityConfigurationChangeItem.obtain(
-                activity.getActivityToken(), activityConfigPortrait));
+                activity.getActivityToken(), activityConfigPortrait, new ActivityWindowInfo()));
         appThread.scheduleTransaction(transaction);
 
         activity.mTestLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
@@ -883,7 +883,7 @@ public class ActivityThreadTest {
     private static ClientTransaction newActivityConfigTransaction(@NonNull Activity activity,
             @NonNull Configuration config) {
         final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(
-                activity.getActivityToken(), config);
+                activity.getActivityToken(), config, new ActivityWindowInfo());
 
         final ClientTransaction transaction = newTransaction(activity);
         transaction.addTransactionItem(item);

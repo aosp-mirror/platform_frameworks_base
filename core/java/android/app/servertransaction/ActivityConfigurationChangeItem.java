@@ -40,6 +40,7 @@ import java.util.Objects;
 public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
 
     private Configuration mConfiguration;
+    private ActivityWindowInfo mActivityWindowInfo;
 
     @Override
     public void preExecute(@NonNull ClientTransactionHandler client) {
@@ -55,8 +56,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
         // TODO(lifecycler): detect if PIP or multi-window mode changed and report it here.
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
         client.handleActivityConfigurationChanged(r, mConfiguration, INVALID_DISPLAY,
-                // TODO(b/287582673): add ActivityWindowInfo
-                new ActivityWindowInfo());
+                mActivityWindowInfo);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -73,7 +73,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     /** Obtain an instance initialized with provided params. */
     @NonNull
     public static ActivityConfigurationChangeItem obtain(@NonNull IBinder activityToken,
-            @NonNull Configuration config) {
+            @NonNull Configuration config, @NonNull ActivityWindowInfo activityWindowInfo) {
         ActivityConfigurationChangeItem instance =
                 ObjectPool.obtain(ActivityConfigurationChangeItem.class);
         if (instance == null) {
@@ -81,6 +81,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
         }
         instance.setActivityToken(activityToken);
         instance.mConfiguration = new Configuration(config);
+        instance.mActivityWindowInfo = new ActivityWindowInfo(activityWindowInfo);
 
         return instance;
     }
@@ -89,6 +90,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     public void recycle() {
         super.recycle();
         mConfiguration = null;
+        mActivityWindowInfo = null;
         ObjectPool.recycle(this);
     }
 
@@ -100,12 +102,14 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeTypedObject(mConfiguration, flags);
+        dest.writeTypedObject(mActivityWindowInfo, flags);
     }
 
     /** Read from Parcel. */
     private ActivityConfigurationChangeItem(@NonNull Parcel in) {
         super(in);
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
+        mActivityWindowInfo = in.readTypedObject(ActivityWindowInfo.CREATOR);
     }
 
     public static final @NonNull Creator<ActivityConfigurationChangeItem> CREATOR =
@@ -128,7 +132,8 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
             return false;
         }
         final ActivityConfigurationChangeItem other = (ActivityConfigurationChangeItem) o;
-        return Objects.equals(mConfiguration, other.mConfiguration);
+        return Objects.equals(mConfiguration, other.mConfiguration)
+                && Objects.equals(mActivityWindowInfo, other.mActivityWindowInfo);
     }
 
     @Override
@@ -136,12 +141,14 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
         int result = 17;
         result = 31 * result + super.hashCode();
         result = 31 * result + Objects.hashCode(mConfiguration);
+        result = 31 * result + Objects.hashCode(mActivityWindowInfo);
         return result;
     }
 
     @Override
     public String toString() {
         return "ActivityConfigurationChange{" + super.toString()
-                + ",config=" + mConfiguration + "}";
+                + ",config=" + mConfiguration
+                + ",activityWindowInfo=" + mActivityWindowInfo + "}";
     }
 }
