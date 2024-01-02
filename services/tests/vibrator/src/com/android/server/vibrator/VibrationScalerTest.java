@@ -43,12 +43,17 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.test.TestLooper;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
+import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -68,6 +73,9 @@ public class VibrationScalerTest {
 
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock private PowerManagerInternal mPowerManagerInternalMock;
     @Mock private PackageManagerInternal mPackageManagerInternalMock;
@@ -254,6 +262,29 @@ public class VibrationScalerTest {
         scaled = getFirstSegment(mVibrationScaler.scale(composed, USAGE_TOUCH));
         // Haptic feedback does not scale.
         assertEquals(0.5, scaled.getScale(), 1e-5);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    public void scale_withAdaptiveHaptics_scalesVibrationsCorrectly() {
+        setDefaultIntensity(USAGE_RINGTONE, VIBRATION_INTENSITY_HIGH);
+        setDefaultIntensity(USAGE_NOTIFICATION, VIBRATION_INTENSITY_HIGH);
+
+        SparseArray<Float> adaptiveHapticsScales = new SparseArray<>();
+        adaptiveHapticsScales.put(USAGE_RINGTONE, 0.5f);
+        adaptiveHapticsScales.put(USAGE_NOTIFICATION, 0.5f);
+        mVibrationScaler.updateAdaptiveHapticsScales(adaptiveHapticsScales);
+
+        StepSegment scaled = getFirstSegment(mVibrationScaler.scale(
+                VibrationEffect.createOneShot(128, 128), USAGE_RINGTONE));
+        // Ringtone scales down.
+        assertTrue(scaled.getAmplitude() < 0.5);
+
+        scaled = getFirstSegment(mVibrationScaler.scale(
+                VibrationEffect.createWaveform(new long[]{128}, new int[]{128}, -1),
+                USAGE_NOTIFICATION));
+        // Notification scales down.
+        assertTrue(scaled.getAmplitude() < 0.5);
     }
 
     private void setDefaultIntensity(@VibrationAttributes.Usage int usage,
