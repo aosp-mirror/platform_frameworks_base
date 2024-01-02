@@ -34,3 +34,10 @@ flag {
     description: "Flag for location validation"
     bug: "314328533"
 }
+
+flag {
+    name: "gnss_configuration_from_resource"
+    namespace: "location"
+    description: "Flag for GNSS configuration from resource"
+    bug: "317734846"
+}
