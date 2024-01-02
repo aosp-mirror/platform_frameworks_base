@@ -1236,7 +1236,7 @@ public class InputMethodUtilsTest {
         // Init InputMethodSettings for the owner user (userId=0), verify calls can get the
         // corresponding user's context, contentResolver and the resources configuration.
         InputMethodUtils.InputMethodSettings settings = new InputMethodUtils.InputMethodSettings(
-                methodMap, 0 /* userId */, true);
+                methodMap, 0 /* userId */);
         assertEquals(0, settings.getCurrentUserId());
 
         settings.isShowImeWithHardKeyboardEnabled();
@@ -1247,7 +1247,7 @@ public class InputMethodUtilsTest {
 
         // Calling switchCurrentUser to the secondary user (userId=10), verify calls can get the
         // corresponding user's context, contentResolver and the resources configuration.
-        settings.switchCurrentUser(10 /* userId */, true);
+        settings.switchCurrentUser(10 /* userId */);
         assertEquals(10, settings.getCurrentUserId());
 
         settings.isShowImeWithHardKeyboardEnabled();
