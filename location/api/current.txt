@@ -414,7 +414,7 @@ package android.location {
     field public static final int TYPE_GPS_L5CNAV = 259; // 0x103
     field @FlaggedApi(Flags.FLAG_GNSS_API_NAVIC_L1) public static final int TYPE_IRN_L1 = 1795; // 0x703
     field @FlaggedApi(Flags.FLAG_GNSS_API_NAVIC_L1) public static final int TYPE_IRN_L5 = 1794; // 0x702
-    field @Deprecated public static final int TYPE_IRN_L5CA = 1793; // 0x701
+    field public static final int TYPE_IRN_L5CA = 1793; // 0x701
     field public static final int TYPE_QZS_L1CA = 1025; // 0x401
     field public static final int TYPE_SBS = 513; // 0x201
     field public static final int TYPE_UNKNOWN = 0; // 0x0
