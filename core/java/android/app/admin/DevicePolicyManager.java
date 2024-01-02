@@ -2598,8 +2598,8 @@ public class DevicePolicyManager {
      * There can be at most one app that has this delegation.
      * If another app already had delegated certificate selection access,
      * it will lose the delegation when a new app is delegated.
-     * <p> The delegaetd app can also call {@link #grantKeyPairToApp} and
-     * {@link #revokeKeyPairFromApp} to directly grant KeyCain keys to other apps.
+     * <p> The delegated app can also call {@link #grantKeyPairToApp} and
+     * {@link #revokeKeyPairFromApp} to directly grant KeyChain keys to other apps.
      * <p> Can be granted by Device Owner or Profile Owner.
      */
     public static final String DELEGATION_CERT_SELECTION = "delegation-cert-selection";
