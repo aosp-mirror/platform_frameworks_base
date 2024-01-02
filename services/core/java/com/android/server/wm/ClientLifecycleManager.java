@@ -24,6 +24,7 @@ import android.app.servertransaction.ClientTransactionItem;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -146,9 +147,10 @@ class ClientLifecycleManager {
 
     /** Executes all the pending transactions. */
     void dispatchPendingTransactions() {
-        if (!Flags.bundleClientTransactionFlag()) {
+        if (!Flags.bundleClientTransactionFlag() || mPendingTransactions.isEmpty()) {
             return;
         }
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "clientTransactionsDispatched");
         final int size = mPendingTransactions.size();
         for (int i = 0; i < size; i++) {
             final ClientTransaction transaction = mPendingTransactions.valueAt(i);
@@ -159,6 +161,7 @@ class ClientLifecycleManager {
             }
         }
         mPendingTransactions.clear();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     /**
