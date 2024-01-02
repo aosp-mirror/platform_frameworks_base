@@ -296,3 +296,10 @@ flag {
    description: "Displays the auto on toggle in the bluetooth QS tile dialog"
    bug: "316985153"
 }
+
+flag {
+   name: "smartspace_relocate_to_bottom"
+   namespace: "systemui"
+   description: "Relocate Smartspace to bottom of the Lock Screen"
+   bug: "316212788"
+}
