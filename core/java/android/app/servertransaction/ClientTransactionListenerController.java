@@ -16,15 +16,23 @@
 
 package android.app.servertransaction;
 
+import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.bundleClientTransactionFlag;
 
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
+import android.app.Activity;
 import android.app.ActivityThread;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.IBinder;
+import android.util.ArraySet;
+import android.window.ActivityWindowInfo;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.function.BiConsumer;
 
 /**
  * Singleton controller to manage listeners to individual {@link ClientTransaction}.
@@ -35,7 +43,13 @@ public class ClientTransactionListenerController {
 
     private static ClientTransactionListenerController sController;
 
+    private final Object mLock = new Object();
     private final DisplayManagerGlobal mDisplayManager;
+
+    /** Listeners registered via {@link #registerActivityWindowInfoChangedListener(BiConsumer)}. */
+    @GuardedBy("mLock")
+    private final ArraySet<BiConsumer<IBinder, ActivityWindowInfo>>
+            mActivityWindowInfoChangedListeners = new ArraySet<>();
 
     /** Gets the singleton controller. */
     @NonNull
@@ -59,6 +73,57 @@ public class ClientTransactionListenerController {
 
     private ClientTransactionListenerController(@NonNull DisplayManagerGlobal displayManager) {
         mDisplayManager = requireNonNull(displayManager);
+    }
+
+    /**
+     * Registers to listen on activity {@link ActivityWindowInfo} change.
+     * The listener will be invoked with two parameters: {@link Activity#getActivityToken()} and
+     * {@link ActivityWindowInfo}.
+     */
+    public void registerActivityWindowInfoChangedListener(
+            @NonNull BiConsumer<IBinder, ActivityWindowInfo> listener) {
+        if (!activityWindowInfoFlag()) {
+            return;
+        }
+        synchronized (mLock) {
+            mActivityWindowInfoChangedListeners.add(listener);
+        }
+    }
+
+    /**
+     * Unregisters the listener that was previously registered via
+     * {@link #registerActivityWindowInfoChangedListener(BiConsumer)}
+     */
+    public void unregisterActivityWindowInfoChangedListener(
+            @NonNull BiConsumer<IBinder, ActivityWindowInfo> listener) {
+        if (!activityWindowInfoFlag()) {
+            return;
+        }
+        synchronized (mLock) {
+            mActivityWindowInfoChangedListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Called when receives a {@link ClientTransaction} that is updating an activity's
+     * {@link ActivityWindowInfo}.
+     */
+    public void onActivityWindowInfoChanged(@NonNull IBinder activityToken,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
+        if (!activityWindowInfoFlag()) {
+            return;
+        }
+        final Object[] activityWindowInfoChangedListeners;
+        synchronized (mLock) {
+            if (mActivityWindowInfoChangedListeners.isEmpty()) {
+                return;
+            }
+            activityWindowInfoChangedListeners = mActivityWindowInfoChangedListeners.toArray();
+        }
+        for (Object activityWindowInfoChangedListener : activityWindowInfoChangedListeners) {
+            ((BiConsumer<IBinder, ActivityWindowInfo>) activityWindowInfoChangedListener)
+                    .accept(activityToken, activityWindowInfo);
+        }
     }
 
     /**
