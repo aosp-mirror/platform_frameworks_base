@@ -2051,6 +2051,7 @@ class MediaRouter2ServiceImpl {
             String indent = prefix + "  ";
 
             pw.println(indent + "mOwnerPackageName=" + mOwnerPackageName);
+            pw.println(indent + "mTargetPackageName=" + mTargetPackageName);
             pw.println(indent + "mManagerId=" + mManagerId);
             pw.println(indent + "mOwnerUid=" + mOwnerUid);
             pw.println(indent + "mOwnerPid=" + mOwnerPid);
