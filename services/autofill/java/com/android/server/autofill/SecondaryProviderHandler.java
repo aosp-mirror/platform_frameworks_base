@@ -16,14 +16,19 @@
 
 package com.android.server.autofill;
 
+import static com.android.server.autofill.Session.SESSION_ID_KEY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
+import android.os.Bundle;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.util.Slog;
+import android.view.autofill.IAutoFillManagerClient;
+import android.view.inputmethod.InlineSuggestionsRequest;
 
 /**
  * Requests autofill response from a Remote Autofill Service. This autofill service can be
@@ -95,10 +100,33 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
     /**
      * Requests a new fill response.
      */
-    public void onFillRequest(FillRequest pendingFillRequest, int flag) {
+    public void onFillRequest(FillRequest pendingFillRequest,
+            InlineSuggestionsRequest pendingInlineSuggestionsRequest, int flag, int id,
+            IAutoFillManagerClient client) {
         Slog.v(TAG, "Requesting fill response to secondary provider.");
         mLastFlag = flag;
-        mRemoteFillService.onFillRequest(pendingFillRequest);
+        if (mRemoteFillService != null && mRemoteFillService.isCredentialAutofillService()) {
+            Slog.v(TAG, "About to call CredAutofill service as secondary provider");
+            addSessionIdToClientState(pendingFillRequest, pendingInlineSuggestionsRequest, id);
+            mRemoteFillService.onFillCredentialRequest(pendingFillRequest, client);
+        } else {
+            mRemoteFillService.onFillRequest(pendingFillRequest);
+        }
+    }
+
+    private FillRequest addSessionIdToClientState(FillRequest pendingFillRequest,
+            InlineSuggestionsRequest pendingInlineSuggestionsRequest, int id) {
+        if (pendingFillRequest.getClientState() == null) {
+            pendingFillRequest = new FillRequest(pendingFillRequest.getId(),
+                    pendingFillRequest.getFillContexts(),
+                    pendingFillRequest.getHints(),
+                    new Bundle(),
+                    pendingFillRequest.getFlags(),
+                    pendingInlineSuggestionsRequest,
+                    pendingFillRequest.getDelayedFillIntentSender());
+        }
+        pendingFillRequest.getClientState().putInt(SESSION_ID_KEY, id);
+        return pendingFillRequest;
     }
 
     public void destroy() {
