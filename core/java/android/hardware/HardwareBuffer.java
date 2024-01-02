@@ -114,10 +114,16 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /** Format: 8 bits red */
     @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
     public static final int R_8           = 0x38;
-    /** Format: 16 bits red */
+    /**
+     * Format: 16 bits red. Bits should be represented in unsigned integer, instead of the
+     * implicit unsigned normalized.
+     */
     @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
     public static final int R_16_UINT     = 0x39;
-    /** Format: 16 bits each red, green */
+    /**
+     * Format: 16 bits each red, green. Bits should be represented in unsigned integer,
+     * instead of the implicit unsigned normalized.
+     */
     @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
     public static final int RG_1616_UINT  = 0x3a;
     /** Format: 10 bits each red, green, blue, alpha */
