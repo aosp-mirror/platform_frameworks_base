@@ -24,6 +24,9 @@ import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.shared.model.CommunalContentSize.FULL
+import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
+import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
@@ -133,12 +136,11 @@ constructor(
                         target.featureType == SmartspaceTarget.FEATURE_TIMER &&
                             target.remoteViews != null
                     }
-                    .map Target@{ target ->
+                    .mapIndexed Target@{ index, target ->
                         return@Target CommunalContentModel.Smartspace(
                             smartspaceTargetId = target.smartspaceTargetId,
                             remoteViews = target.remoteViews!!,
-                            // Smartspace always as HALF for now.
-                            size = CommunalContentSize.HALF,
+                            size = dynamicContentSize(targets.size, index),
                         )
                     }
             }
@@ -147,23 +149,50 @@ constructor(
     /** A list of tutorial content to be displayed in the communal hub in tutorial mode. */
     val tutorialContent: List<CommunalContentModel.Tutorial> =
         listOf(
-            CommunalContentModel.Tutorial(id = 0, CommunalContentSize.FULL),
-            CommunalContentModel.Tutorial(id = 1, CommunalContentSize.THIRD),
-            CommunalContentModel.Tutorial(id = 2, CommunalContentSize.THIRD),
-            CommunalContentModel.Tutorial(id = 3, CommunalContentSize.THIRD),
-            CommunalContentModel.Tutorial(id = 4, CommunalContentSize.HALF),
-            CommunalContentModel.Tutorial(id = 5, CommunalContentSize.HALF),
-            CommunalContentModel.Tutorial(id = 6, CommunalContentSize.HALF),
-            CommunalContentModel.Tutorial(id = 7, CommunalContentSize.HALF),
+            CommunalContentModel.Tutorial(id = 0, FULL),
+            CommunalContentModel.Tutorial(id = 1, THIRD),
+            CommunalContentModel.Tutorial(id = 2, THIRD),
+            CommunalContentModel.Tutorial(id = 3, THIRD),
+            CommunalContentModel.Tutorial(id = 4, HALF),
+            CommunalContentModel.Tutorial(id = 5, HALF),
+            CommunalContentModel.Tutorial(id = 6, HALF),
+            CommunalContentModel.Tutorial(id = 7, HALF),
         )
 
     val umoContent: Flow<List<CommunalContentModel.Umo>> =
         mediaRepository.mediaPlaying.flatMapLatest { mediaPlaying ->
             if (mediaPlaying) {
                 // TODO(b/310254801): support HALF and FULL layouts
-                flowOf(listOf(CommunalContentModel.Umo(CommunalContentSize.THIRD)))
+                flowOf(listOf(CommunalContentModel.Umo(THIRD)))
             } else {
                 flowOf(emptyList())
             }
         }
+
+    companion object {
+        /**
+         * Calculates the content size dynamically based on the total number of contents of that
+         * type.
+         *
+         * Contents with the same type are expected to fill each column evenly. Currently there are
+         * three possible sizes. When the total number is 1, size for that content is [FULL], when
+         * the total number is 2, size for each is [HALF], and 3, size for each is [THIRD].
+         *
+         * When dynamic contents fill in multiple columns, the first column follows the algorithm
+         * above, and the remaining contents are packed in [THIRD]s. For example, when the total
+         * number if 4, the first one is [FULL], filling the column, and the remaining 3 are
+         * [THIRD].
+         *
+         * @param size The total number of contents of this type.
+         * @param index The index of the current content of this type.
+         */
+        private fun dynamicContentSize(size: Int, index: Int): CommunalContentSize {
+            val remainder = size % CommunalContentSize.entries.size
+            return CommunalContentSize.toSize(
+                span =
+                    FULL.span /
+                        if (index > remainder - 1) CommunalContentSize.entries.size else remainder
+            )
+        }
+    }
 }
