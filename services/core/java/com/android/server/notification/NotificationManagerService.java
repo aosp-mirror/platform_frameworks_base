@@ -2025,6 +2025,8 @@ public class NotificationManagerService extends SystemService {
                     if (!mUserProfiles.isProfileUser(userId)) {
                         allowDefaultApprovedServices(userId);
                     }
+                    mHistoryManager.onUserAdded(userId);
+                    mSettingsObserver.update(null, userId);
                 }
             } else if (action.equals(Intent.ACTION_USER_REMOVED)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
@@ -2137,13 +2139,8 @@ public class NotificationManagerService extends SystemService {
                 mPreferencesHelper.updateBubblesEnabled();
             }
             if (uri == null || NOTIFICATION_HISTORY_ENABLED.equals(uri)) {
-                final IntArray userIds = mUserProfiles.getCurrentProfileIds();
-
-                for (int i = 0; i < userIds.size(); i++) {
-                    mArchive.updateHistoryEnabled(userIds.get(i),
-                            Settings.Secure.getIntForUser(resolver,
-                                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0,
-                                    userIds.get(i)) == 1);
+                for (UserInfo userInfo : mUm.getUsers()) {
+                    update(uri, userInfo.id);
                 }
             }
             if (uri == null || NOTIFICATION_SHOW_MEDIA_ON_QUICK_SETTINGS_URI.equals(uri)) {
@@ -2162,6 +2159,17 @@ public class NotificationManagerService extends SystemService {
                 if (!snoozeEnabled) {
                     unsnoozeAll();
                 }
+            }
+        }
+
+        public void update(Uri uri, int userId) {
+            ContentResolver resolver = getContext().getContentResolver();
+            if (uri == null || NOTIFICATION_HISTORY_ENABLED.equals(uri)) {
+                mArchive.updateHistoryEnabled(userId,
+                        Settings.Secure.getIntForUser(resolver,
+                                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0,
+                                userId) == 1);
+                // note: this setting is also handled in NotificationHistoryManager
             }
         }
     }
