@@ -41,6 +41,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -87,12 +88,17 @@ public class TransactionExecutor {
             Slog.d(TAG, transactionToString(transaction, mTransactionHandler));
         }
 
-        if (transaction.getTransactionItems() != null) {
-            executeTransactionItems(transaction);
-        } else {
-            // TODO(b/260873529): cleanup after launch.
-            executeCallbacks(transaction);
-            executeLifecycleState(transaction);
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "clientTransactionExecuted");
+        try {
+            if (transaction.getTransactionItems() != null) {
+                executeTransactionItems(transaction);
+            } else {
+                // TODO(b/260873529): cleanup after launch.
+                executeCallbacks(transaction);
+                executeLifecycleState(transaction);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
 
         if (!mContextToPreChangedConfigMap.isEmpty()) {
