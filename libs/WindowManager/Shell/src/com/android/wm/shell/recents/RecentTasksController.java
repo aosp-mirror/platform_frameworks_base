@@ -336,7 +336,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
-            final int pairedTaskId = mSplitTasks.get(taskInfo.taskId);
+            final int pairedTaskId = mSplitTasks.get(taskInfo.taskId, INVALID_TASK_ID);
             if (pairedTaskId != INVALID_TASK_ID && rawMapping.contains(
                     pairedTaskId)) {
                 final ActivityManager.RecentTaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
