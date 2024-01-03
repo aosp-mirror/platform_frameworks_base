@@ -34,15 +34,13 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** Encapsulates business-logic related to communal mode. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalInteractor
 @Inject
@@ -125,24 +123,16 @@ constructor(
             }
         }
 
-    /** A flow of available smartspace content. Currently only showing timer targets. */
-    val smartspaceContent: Flow<List<CommunalContentModel.Smartspace>> =
+    /** A flow of available smartspace targets. Currently only showing timers. */
+    private val smartspaceTargets: Flow<List<SmartspaceTarget>> =
         if (!smartspaceRepository.isSmartspaceRemoteViewsEnabled) {
             flowOf(emptyList())
         } else {
             smartspaceRepository.communalSmartspaceTargets.map { targets ->
-                targets
-                    .filter { target ->
-                        target.featureType == SmartspaceTarget.FEATURE_TIMER &&
-                            target.remoteViews != null
-                    }
-                    .mapIndexed Target@{ index, target ->
-                        return@Target CommunalContentModel.Smartspace(
-                            smartspaceTargetId = target.smartspaceTargetId,
-                            remoteViews = target.remoteViews!!,
-                            size = dynamicContentSize(targets.size, index),
-                        )
-                    }
+                targets.filter { target ->
+                    target.featureType == SmartspaceTarget.FEATURE_TIMER &&
+                        target.remoteViews != null
+                }
             }
         }
 
@@ -159,14 +149,43 @@ constructor(
             CommunalContentModel.Tutorial(id = 7, HALF),
         )
 
-    val umoContent: Flow<List<CommunalContentModel.Umo>> =
-        mediaRepository.mediaPlaying.flatMapLatest { mediaPlaying ->
-            if (mediaPlaying) {
-                // TODO(b/310254801): support HALF and FULL layouts
-                flowOf(listOf(CommunalContentModel.Umo(THIRD)))
-            } else {
-                flowOf(emptyList())
+    /**
+     * A flow of ongoing content, including smartspace timers and umo, ordered by creation time and
+     * sized dynamically.
+     */
+    val ongoingContent: Flow<List<CommunalContentModel.Ongoing>> =
+        combine(smartspaceTargets, mediaRepository.mediaModel) { smartspace, media ->
+            val ongoingContent = mutableListOf<CommunalContentModel.Ongoing>()
+
+            // Add smartspace
+            ongoingContent.addAll(
+                smartspace.map { target ->
+                    CommunalContentModel.Smartspace(
+                        smartspaceTargetId = target.smartspaceTargetId,
+                        remoteViews = target.remoteViews!!,
+                        createdTimestampMillis = target.creationTimeMillis,
+                    )
+                }
+            )
+
+            // Add UMO
+            if (media.hasAnyMediaOrRecommendation) {
+                ongoingContent.add(
+                    CommunalContentModel.Umo(
+                        createdTimestampMillis = media.createdTimestampMillis,
+                    )
+                )
             }
+
+            // Order by creation time descending
+            ongoingContent.sortByDescending { it.createdTimestampMillis }
+
+            // Dynamic sizing
+            ongoingContent.forEachIndexed { index, model ->
+                model.size = dynamicContentSize(ongoingContent.size, index)
+            }
+
+            return@combine ongoingContent
         }
 
     companion object {
