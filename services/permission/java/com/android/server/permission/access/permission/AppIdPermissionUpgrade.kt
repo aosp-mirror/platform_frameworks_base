@@ -20,7 +20,6 @@ import android.Manifest
 import android.os.Build
 import android.util.Slog
 import com.android.server.permission.access.MutateStateScope
-import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.andInv
 import com.android.server.permission.access.util.hasAnyBit
@@ -61,10 +60,11 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
         if (version <= 12 /*&& SdkLevel.isAtLeastT()*/) {
             Slog.v(
                 LOG_TAG,
-                "Upgrading scoped permissions for package: $packageName" +
+                "Upgrading scoped media and body sensor permissions for package: $packageName" +
                     ", version: $version, user: $userId"
             )
             upgradeAuralVisualMediaPermissions(packageState, userId)
+            upgradeBodySensorPermissions(packageState, userId)
         }
         // TODO Enable isAtLeastU check, when moving subsystem to mainline.
         if (version <= 14 /*&& SdkLevel.isAtLeastU()*/) {
@@ -179,6 +179,50 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
                     grantRuntimePermission(packageState, userId, permissionName)
                 }
             }
+        }
+    }
+
+    private fun MutateStateScope.upgradeBodySensorPermissions(
+        packageState: PackageState,
+        userId: Int
+    ) {
+        if (
+            Manifest.permission.BODY_SENSORS_BACKGROUND !in
+                packageState.androidPackage!!.requestedPermissions
+        ) {
+            return
+        }
+
+        // Should have been granted when first getting exempt as if the perm was just split
+        val appId = packageState.appId
+        val backgroundBodySensorsFlags =
+            with(policy) {
+                getPermissionFlags(appId, userId, Manifest.permission.BODY_SENSORS_BACKGROUND)
+            }
+        if (backgroundBodySensorsFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)) {
+            return
+        }
+
+        // Add Upgrade Exemption - BODY_SENSORS_BACKGROUND is a restricted permission
+        with(policy) {
+            updatePermissionFlags(
+                appId,
+                userId,
+                Manifest.permission.BODY_SENSORS_BACKGROUND,
+                PermissionFlags.UPGRADE_EXEMPT,
+                PermissionFlags.UPGRADE_EXEMPT,
+            )
+        }
+
+        val bodySensorsFlags =
+            with(policy) { getPermissionFlags(appId, userId, Manifest.permission.BODY_SENSORS) }
+        val isForegroundBodySensorsGranted = PermissionFlags.isAppOpGranted(bodySensorsFlags)
+        if (isForegroundBodySensorsGranted) {
+            grantRuntimePermission(
+                packageState,
+                userId,
+                Manifest.permission.BODY_SENSORS_BACKGROUND
+            )
         }
     }
 
