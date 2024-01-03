@@ -664,10 +664,6 @@ final class InputMethodUtils {
             return getBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, false);
         }
 
-        void setShowImeWithHardKeyboard(boolean show) {
-            putBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, show);
-        }
-
         @UserIdInt
         public int getCurrentUserId() {
             return mCurrentUserId;
