@@ -274,7 +274,8 @@ public class Surface implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_CATEGORY_"},
             value = {FRAME_RATE_CATEGORY_DEFAULT, FRAME_RATE_CATEGORY_NO_PREFERENCE,
-                    FRAME_RATE_CATEGORY_LOW, FRAME_RATE_CATEGORY_NORMAL, FRAME_RATE_CATEGORY_HIGH})
+                    FRAME_RATE_CATEGORY_LOW, FRAME_RATE_CATEGORY_NORMAL,
+                    FRAME_RATE_CATEGORY_HIGH_HINT, FRAME_RATE_CATEGORY_HIGH})
     public @interface FrameRateCategory {}
 
     // From native_window.h or window.h. Keep these in sync.
@@ -308,11 +309,21 @@ public class Surface implements Parcelable {
     public static final int FRAME_RATE_CATEGORY_NORMAL = 3;
 
     /**
+     * Hints that, as a result of a user interaction, an animation is likely to start.
+     * This category is a signal that a user interaction heuristic determined the need of a
+     * high refresh rate, and is not an explicit request from the app.
+     * As opposed to {@link #FRAME_RATE_CATEGORY_HIGH}, this vote may be ignored in favor of
+     * more explicit votes.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_HIGH_HINT = 4;
+
+    /**
      * Indicates a frame rate suitable for animations that require a high frame rate, which may
      * increase smoothness but may also increase power usage.
      * @hide
      */
-    public static final int FRAME_RATE_CATEGORY_HIGH = 4;
+    public static final int FRAME_RATE_CATEGORY_HIGH = 5;
 
     /**
      * Create an empty surface, which will later be filled in by readFromParcel().

@@ -810,6 +810,7 @@ public class GraphicsActivity extends Activity {
 
     private FpsRange convertCategory(int category) {
         switch (category) {
+            case Surface.FRAME_RATE_CATEGORY_HIGH_HINT:
             case Surface.FRAME_RATE_CATEGORY_HIGH:
                 return FRAME_RATE_CATEGORY_HIGH;
             case Surface.FRAME_RATE_CATEGORY_NORMAL:
