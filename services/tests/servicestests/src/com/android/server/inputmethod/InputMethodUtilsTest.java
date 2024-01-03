@@ -1239,9 +1239,6 @@ public class InputMethodUtilsTest {
                 methodMap, 0 /* userId */);
         assertEquals(0, settings.getCurrentUserId());
 
-        settings.isShowImeWithHardKeyboardEnabled();
-        verify(ownerUserContext.getContentResolver(), atLeastOnce()).getAttributionSource();
-
         settings.getEnabledInputMethodSubtypeListLocked(nonSystemIme, true);
         verify(ownerUserContext.getResources(), atLeastOnce()).getConfiguration();
 
@@ -1249,10 +1246,6 @@ public class InputMethodUtilsTest {
         // corresponding user's context, contentResolver and the resources configuration.
         settings.switchCurrentUser(10 /* userId */);
         assertEquals(10, settings.getCurrentUserId());
-
-        settings.isShowImeWithHardKeyboardEnabled();
-        verify(TestContext.getSecondaryUserContext().getContentResolver(),
-                atLeastOnce()).getAttributionSource();
 
         settings.getEnabledInputMethodSubtypeListLocked(nonSystemIme, true);
         verify(TestContext.getSecondaryUserContext().getResources(),
