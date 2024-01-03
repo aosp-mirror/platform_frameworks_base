@@ -18,17 +18,22 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
+import com.android.systemui.keyguard.domain.interactor.burnInInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
-import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-var Kosmos.goneToAodTransitionViewModel by Fixture {
-    GoneToAodTransitionViewModel(
-        interactor = keyguardTransitionInteractor,
-        deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,
-        animationFlow = keyguardTransitionAnimationFlow,
+val Kosmos.aodBurnInViewModel by Fixture {
+    AodBurnInViewModel(
+        burnInInteractor = burnInInteractor,
+        configurationInteractor = configurationInteractor,
+        keyguardInteractor = keyguardInteractor,
+        keyguardTransitionInteractor = keyguardTransitionInteractor,
+        goneToAodTransitionViewModel = goneToAodTransitionViewModel,
+        occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
+        keyguardClockViewModel = keyguardClockViewModel,
     )
 }

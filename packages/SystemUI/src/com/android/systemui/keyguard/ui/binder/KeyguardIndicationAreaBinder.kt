@@ -23,8 +23,8 @@ import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
+import com.android.systemui.keyguard.ui.viewmodel.AodAlphaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
@@ -51,7 +51,7 @@ object KeyguardIndicationAreaBinder {
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardIndicationAreaViewModel,
-        keyguardRootViewModel: KeyguardRootViewModel,
+        aodAlphaViewModel: AodAlphaViewModel,
         indicationController: KeyguardIndicationController,
     ): DisposableHandle {
         indicationController.setIndicationArea(view)
@@ -69,7 +69,7 @@ object KeyguardIndicationAreaBinder {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch {
                         if (keyguardBottomAreaRefactor()) {
-                            keyguardRootViewModel.alpha.collect { alpha ->
+                            aodAlphaViewModel.alpha.collect { alpha ->
                                 view.apply {
                                     this.importantForAccessibility =
                                         if (alpha == 0f) {

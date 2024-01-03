@@ -21,9 +21,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
@@ -78,7 +80,7 @@ constructor(
                     view
                 },
                 modifier =
-                    Modifier.fillMaxWidth().height {
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp).height {
                         Utils.getStatusBarHeaderHeightKeyguard(context)
                     },
             )

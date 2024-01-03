@@ -38,7 +38,6 @@ constructor(
     deviceEntryInteractor: DeviceEntryInteractor,
     communalInteractor: CommunalInteractor,
     val longPress: KeyguardLongPressViewModel,
-    val keyguardRoot: KeyguardRootViewModel,
     val notifications: NotificationsPlaceholderViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */
