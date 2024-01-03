@@ -19,7 +19,6 @@ package com.android.systemui.haptics.slider
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.view.VelocityTracker
-import android.view.animation.AccelerateInterpolator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -51,8 +50,6 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
     private val lowTickDuration = 12 // Mocked duration of a low tick
     private val dragTextureThresholdMillis =
         lowTickDuration * config.numberOfLowTicks + config.deltaMillisForDragInterval
-    private val progressInterpolator = AccelerateInterpolator(config.progressInterpolatorFactor)
-    private val velocityInterpolator = AccelerateInterpolator(config.velocityInterpolatorFactor)
     private lateinit var sliderHapticFeedbackProvider: SliderHapticFeedbackProvider
 
     @Before
@@ -60,7 +57,9 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(vibratorHelper.getPrimitiveDurations(any()))
             .thenReturn(intArrayOf(lowTickDuration))
-        whenever(velocityTracker.xVelocity).thenReturn(config.maxVelocityToScale)
+        whenever(velocityTracker.isAxisSupported(config.velocityAxis)).thenReturn(true)
+        whenever(velocityTracker.getAxisVelocity(config.velocityAxis))
+            .thenReturn(config.maxVelocityToScale)
         sliderHapticFeedbackProvider =
             SliderHapticFeedbackProvider(vibratorHelper, velocityTracker, config, clock)
     }
