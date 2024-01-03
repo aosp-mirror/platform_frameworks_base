@@ -112,6 +112,7 @@ import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.ConfigurationControllerModule;
 import com.android.systemui.statusbar.phone.LetterboxModule;
 import com.android.systemui.statusbar.phone.NotificationIconAreaControllerModule;
 import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule;
@@ -178,6 +179,7 @@ import javax.inject.Named;
         ClockRegistryModule.class,
         CommunalModule.class,
         CommonDataLayerModule.class,
+        ConfigurationControllerModule.class,
         ConnectivityModule.class,
         ControlsModule.class,
         CoroutinesModule.class,
