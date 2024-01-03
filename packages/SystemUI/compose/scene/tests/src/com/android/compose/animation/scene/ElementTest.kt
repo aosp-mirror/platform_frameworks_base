@@ -475,7 +475,7 @@ class ElementTest {
                     // page should be composed.
                     HorizontalPager(
                         pagerState,
-                        beyondBoundsPageCount = 0,
+                        outOfBoundsPageCount = 0,
                     ) { page ->
                         when (page) {
                             0 -> Box(Modifier.element(TestElements.Foo).fillMaxSize())
