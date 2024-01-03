@@ -334,6 +334,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     @Nullable
     SurfaceControl mPipOverlay;
 
+    /**
+     * The app bounds used for the buffer size of the
+     * {@link com.android.wm.shell.pip.PipContentOverlay.PipAppIconOverlay}.
+     *
+     * Note that this is empty if the overlay is removed or if it's some other type of overlay
+     * defined in {@link PipContentOverlay}.
+     */
+    @NonNull
+    final Rect mAppBounds = new Rect();
+
     public PipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
             @NonNull PipTransitionState pipTransitionState,
@@ -464,15 +474,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Expect {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)} afterwards.
      */
     public void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
-            SurfaceControl overlay) {
+            SurfaceControl overlay, Rect appBounds) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "stopSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
+                "stopSwipePipToHome: %s, stat=%s", componentName, mPipTransitionState);
         // do nothing if there is no startSwipePipToHome being called before
         if (!mPipTransitionState.getInSwipePipToHomeTransition()) {
             return;
         }
         mPipBoundsState.setBounds(destinationBounds);
-        mPipOverlay = overlay;
+        setContentOverlay(overlay, appBounds);
         if (ENABLE_SHELL_TRANSITIONS && overlay != null) {
             // With Shell transition, the overlay was attached to the remote transition leash, which
             // will be removed when the current transition is finished, so we need to reparent it
@@ -1888,7 +1898,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                         "%s: trying to remove overlay (%s) which is not local reference (%s)",
                         TAG, surface, mPipOverlay);
             }
-            mPipOverlay = null;
+            clearContentOverlay();
         }
         if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
             // Avoid double removal, which is fatal.
@@ -1903,6 +1913,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         tx.remove(surface);
         tx.apply();
         if (callback != null) callback.run();
+    }
+
+    void clearContentOverlay() {
+        mPipOverlay = null;
+        mAppBounds.setEmpty();
+    }
+
+    void setContentOverlay(@Nullable SurfaceControl leash, @NonNull Rect appBounds) {
+        mPipOverlay = leash;
+        if (mPipOverlay != null) {
+            mAppBounds.set(appBounds);
+        } else {
+            mAppBounds.setEmpty();
+        }
     }
 
     private void resetShadowRadius() {
