@@ -1891,6 +1891,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void removeContentOverlay(SurfaceControl surface, Runnable callback) {
+        ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "removeContentOverlay: %s, state=%s, surface=%s",
+                mTaskInfo, mPipTransitionState, surface);
         if (mPipOverlay != null) {
             if (mPipOverlay != surface) {
                 ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
