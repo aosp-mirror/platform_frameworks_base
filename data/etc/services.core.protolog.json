@@ -4453,6 +4453,12 @@
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
+    "1946983717": {
+      "message": "Waiting for screen on due to %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
     "1947239194": {
       "message": "Deferring rotation, still finishing previous rotation",
       "level": "VERBOSE",

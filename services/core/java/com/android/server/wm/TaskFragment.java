@@ -926,10 +926,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean sleepIfPossible(boolean shuttingDown) {
         boolean shouldSleep = true;
         if (mResumedActivity != null) {
-            // Still have something resumed; can't sleep until it is paused.
-            ProtoLog.v(WM_DEBUG_STATES, "Sleep needs to pause %s", mResumedActivity);
-            startPausing(false /* userLeaving */, true /* uiSleeping */, null /* resuming */,
-                    "sleep");
+            if (!shuttingDown && mResumedActivity.canTurnScreenOn()) {
+                ProtoLog.v(WM_DEBUG_STATES, "Waiting for screen on due to %s", mResumedActivity);
+            } else {
+                // Still have something resumed; can't sleep until it is paused.
+                ProtoLog.v(WM_DEBUG_STATES, "Sleep needs to pause %s", mResumedActivity);
+                startPausing(false /* userLeaving */, true /* uiSleeping */, null /* resuming */,
+                        "sleep");
+            }
             shouldSleep = false;
         } else if (mPausingActivity != null) {
             // Still waiting for something to pause; can't sleep yet.
