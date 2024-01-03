@@ -20,6 +20,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION;
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.Animator;
@@ -492,7 +493,12 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             boolean splitShadeEnabled,
             boolean shouldBeCentered,
             boolean animate) {
-        mKeyguardClockSwitchController.setSplitShadeCentered(splitShadeEnabled && shouldBeCentered);
+        if (migrateClocksToBlueprint()) {
+            mKeyguardInteractor.setClockShouldBeCentered(mSplitShadeEnabled && shouldBeCentered);
+        } else {
+            mKeyguardClockSwitchController.setSplitShadeCentered(
+                    splitShadeEnabled && shouldBeCentered);
+        }
         if (mStatusViewCentered == shouldBeCentered) {
             return;
         }
@@ -548,8 +554,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         ClockController clock = mKeyguardClockSwitchController.getClock();
         boolean customClockAnimation = clock != null
                 && clock.getLargeClock().getConfig().getHasCustomPositionUpdatedAnimation();
-
-        if (customClockAnimation) {
+        // When migrateClocksToBlueprint is on, customized clock animation is conducted in
+        // KeyguardClockViewBinder
+        if (customClockAnimation && !migrateClocksToBlueprint()) {
             // Find the clock, so we can exclude it from this transition.
             FrameLayout clockContainerView = mView.findViewById(R.id.lockscreen_clock_view_large);
 
