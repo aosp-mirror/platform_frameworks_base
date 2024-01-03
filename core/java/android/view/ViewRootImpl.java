@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ActivityInfo.OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS;
 import static android.graphics.HardwareRenderer.SYNC_CONTEXT_IS_STOPPED;
 import static android.graphics.HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND;
@@ -7232,7 +7233,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         private boolean performFocusNavigation(KeyEvent event) {
-            int direction = 0;
+            @FocusDirection int direction = 0;
             switch (event.getKeyCode()) {
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                     if (event.hasNoModifiers()) {
@@ -7284,6 +7285,8 @@ public final class ViewRootImpl implements ViewParent,
                                             isFastScrolling));
                             return true;
                         }
+                    } else if (moveFocusToAdjacentWindow(direction)) {
+                        return true;
                     }
 
                     // Give the focused view a last chance to handle the dpad key.
@@ -7293,10 +7296,24 @@ public final class ViewRootImpl implements ViewParent,
                 } else {
                     if (mView.restoreDefaultFocus()) {
                         return true;
+                    } else if (moveFocusToAdjacentWindow(direction)) {
+                        return true;
                     }
                 }
             }
             return false;
+        }
+
+        private boolean moveFocusToAdjacentWindow(@FocusDirection int direction) {
+            if (getConfiguration().windowConfiguration.getWindowingMode()
+                    != WINDOWING_MODE_MULTI_WINDOW) {
+                return false;
+            }
+            try {
+                return mWindowSession.moveFocusToAdjacentWindow(mWindow, direction);
+            } catch (RemoteException e) {
+                return false;
+            }
         }
 
         private boolean performKeyboardGroupNavigation(int direction) {

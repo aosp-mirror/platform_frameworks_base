@@ -75,6 +75,7 @@ import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.View.FocusDirection;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
@@ -1000,6 +1001,17 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
         return didTransfer;
     }
+
+    @Override
+    public boolean moveFocusToAdjacentWindow(IWindow fromWindow, @FocusDirection int direction) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mService.moveFocusToAdjacentWindow(this, fromWindow, direction);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     @Override
     public void generateDisplayHash(IWindow window, Rect boundsInWindow, String hashAlgorithm,
             RemoteCallback callback) {
