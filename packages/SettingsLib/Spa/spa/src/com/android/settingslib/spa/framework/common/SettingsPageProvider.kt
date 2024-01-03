@@ -34,6 +34,14 @@ interface SettingsPageProvider {
     /** The page provider name, needs to be *unique* and *stable*. */
     val name: String
 
+    enum class NavType {
+        Page,
+        Dialog,
+    }
+
+    val navType: NavType
+        get() = NavType.Page
+
     /** The display name of this page provider, for better readability. */
     val displayName: String
         get() = name
