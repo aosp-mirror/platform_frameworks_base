@@ -2073,6 +2073,17 @@ public class DisplayContentTests extends WindowTestsBase {
         assertNotEquals(testPlayer.mLastReady.getChange(dcToken).getEndRotation(),
                 testPlayer.mLastReady.getChange(dcToken).getStartRotation());
         testPlayer.finish();
+
+        // The AsyncRotationController should only exist if there is an ongoing rotation change.
+        dc.finishAsyncRotationIfPossible();
+        dc.setLastHasContent();
+        doReturn(dr.getRotation() + 1).when(dr).rotationForOrientation(anyInt(), anyInt());
+        dr.updateRotationUnchecked(true /* forceUpdate */);
+        assertNotNull(dc.getAsyncRotationController());
+        doReturn(dr.getRotation() - 1).when(dr).rotationForOrientation(anyInt(), anyInt());
+        dr.updateRotationUnchecked(true /* forceUpdate */);
+        assertNull("Cancel AsyncRotationController for the intermediate rotation changes 0->1->0",
+                dc.getAsyncRotationController());
     }
 
     @Test
