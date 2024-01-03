@@ -150,9 +150,12 @@ public class CredentialManagerUi {
      *
      * @param requestInfo      the information about the request
      * @param providerDataList the list of provider data from remote providers
+     * @param isRequestForAllOptions whether the bottom sheet should directly navigate to the
+     *                               all options page
      */
     public PendingIntent createPendingIntent(
-            RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
+            RequestInfo requestInfo, ArrayList<ProviderData> providerDataList,
+            boolean isRequestForAllOptions) {
         List<CredentialProviderInfo> allProviders =
                 CredentialProviderInfoFactory.getCredentialProviderServices(
                         mContext,
@@ -168,7 +171,8 @@ public class CredentialManagerUi {
                         disabledProvider.getComponentName().flattenToString())).toList();
 
         Intent intent = IntentFactory.createCredentialSelectorIntent(requestInfo, providerDataList,
-                        new ArrayList<>(disabledProviderDataList), mResultReceiver)
+                        new ArrayList<>(disabledProviderDataList), mResultReceiver,
+                        isRequestForAllOptions)
                 .setAction(UUID.randomUUID().toString());
         //TODO: Create unique pending intent using request code and cancel any pre-existing pending
         // intents

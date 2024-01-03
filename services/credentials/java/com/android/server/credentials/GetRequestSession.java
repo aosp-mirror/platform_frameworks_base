@@ -99,21 +99,24 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
         mRequestSessionMetric.collectUiCallStartTime(System.nanoTime());
         mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.USER_INTERACTION);
-        Binder.withCleanCallingIdentity(()-> {
-        try {
+        Binder.withCleanCallingIdentity(() -> {
+            try {
                 cancelExistingPendingIntent();
-            mPendingIntent = mCredentialManagerUi.createPendingIntent(
-                    RequestInfo.newGetRequestInfo(
-                            mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
-                            PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
-                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
-                    providerDataList);
-            mClientCallback.onPendingIntent(mPendingIntent);
-        } catch (RemoteException e) {
-            mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
-            mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.TERMINATED);
-            String exception = GetCredentialException.TYPE_UNKNOWN;
-            mRequestSessionMetric.collectFrameworkException(exception);
+                mPendingIntent = mCredentialManagerUi.createPendingIntent(
+                        RequestInfo.newGetRequestInfo(
+                                mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
+                                PermissionUtils.hasPermission(mContext,
+                                        mClientAppInfo.getPackageName(),
+                                        Manifest.permission
+                                                .CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
+                        providerDataList,
+                        /*isRequestForAllOptions=*/ false);
+                mClientCallback.onPendingIntent(mPendingIntent);
+            } catch (RemoteException e) {
+                mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
+                mCredentialManagerUi.setStatus(CredentialManagerUi.UiStatus.TERMINATED);
+                String exception = GetCredentialException.TYPE_UNKNOWN;
+                mRequestSessionMetric.collectFrameworkException(exception);
                 respondToClientWithErrorAndFinish(exception, "Unable to instantiate selector");
             }
         });
