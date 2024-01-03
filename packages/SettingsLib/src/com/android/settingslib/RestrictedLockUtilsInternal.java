@@ -19,6 +19,7 @@ package com.android.settingslib;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE;
 import static android.app.admin.DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+import static android.app.role.RoleManager.ROLE_FINANCED_DEVICE_KIOSK;
 
 import static com.android.settingslib.Utils.getColorAttrDefaultColor;
 
@@ -27,6 +28,7 @@ import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -69,6 +71,10 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     private static final String LOG_TAG = "RestrictedLockUtils";
     private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
     private static final Set<String> ECM_KEYS = new ArraySet<>();
+
+    // TODO(b/281701062): reference role name from role manager once its exposed.
+    private static final String ROLE_DEVICE_LOCK_CONTROLLER =
+            "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER";
 
     static {
         if (android.security.Flags.extendEcmToAllSettings()) {
@@ -476,16 +482,27 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
-     * Check if {@param packageName} is restricted by the profile or device owner from using
-     * metered data.
+     * Check if user control over metered data usage of {@code packageName} is disabled by the
+     * profile or device owner.
      *
      * @return EnforcedAdmin object containing the enforced admin component and admin user details,
-     * or {@code null} if the {@param packageName} is not restricted.
+     * or {@code null} if the user control is not disabled.
      */
-    public static EnforcedAdmin checkIfMeteredDataRestricted(Context context,
+    public static EnforcedAdmin checkIfMeteredDataUsageUserControlDisabled(Context context,
             String packageName, int userId) {
+        RoleManager roleManager = context.getSystemService(RoleManager.class);
+        UserHandle userHandle = getUserHandleOf(userId);
+        if (roleManager.getRoleHoldersAsUser(ROLE_FINANCED_DEVICE_KIOSK, userHandle)
+                .contains(packageName)
+                || roleManager.getRoleHoldersAsUser(ROLE_DEVICE_LOCK_CONTROLLER, userHandle)
+                .contains(packageName)) {
+            // There is no actual device admin for a financed device, but metered data usage
+            // control should still be disabled for both controller and kiosk apps.
+            return new EnforcedAdmin();
+        }
+
         final EnforcedAdmin enforcedAdmin = getProfileOrDeviceOwner(context,
-                getUserHandleOf(userId));
+                userHandle);
         if (enforcedAdmin == null) {
             return null;
         }
