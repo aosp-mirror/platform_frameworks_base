@@ -17,7 +17,9 @@
 package android.content.res;
 
 
+import android.annotation.AnyThread;
 import android.annotation.FlaggedApi;
+import android.annotation.Nullable;
 
 /**
  * A converter for non-linear font scaling. Converts font sizes given in "sp" dimensions to a
@@ -40,4 +42,35 @@ public interface FontScaleConverter {
      * Converts a dimension in "dp" back to "sp".
      */
     float convertDpToSp(float dp);
+
+    /**
+     * Returns true if non-linear font scaling curves would be in effect for the given scale, false
+     * if the scaling would follow a linear curve or for no scaling.
+     *
+     * <p>Example usage: {@code
+     * isNonLinearFontScalingActive(getResources().getConfiguration().fontScale)}
+     */
+    @AnyThread
+    static boolean isNonLinearFontScalingActive(float fontScale) {
+        return FontScaleConverterFactory.isNonLinearFontScalingActive(fontScale);
+    }
+
+    /**
+     * Finds a matching FontScaleConverter for the given fontScale factor.
+     *
+     * Generally you shouldn't need this; you can use {@link
+     * android.util.TypedValue#applyDimension(int, float, DisplayMetrics)} directly and it will do
+     * the scaling conversion for you. Dimens and resources loaded from XML will also be
+     * automatically converted. But for UI frameworks or other situations where you need to do the
+     * conversion without an Android Context, you can use this method.
+     *
+     * @param fontScale the scale factor, usually from {@link Configuration#fontScale}.
+     *
+     * @return a converter for the given scale, or null if non-linear scaling should not be used.
+     */
+    @Nullable
+    @AnyThread
+    static FontScaleConverter forScale(float fontScale) {
+        return FontScaleConverterFactory.forScale(fontScale);
+    }
 }

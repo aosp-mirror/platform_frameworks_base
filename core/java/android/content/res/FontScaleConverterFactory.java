@@ -17,7 +17,6 @@
 package android.content.res;
 
 import android.annotation.AnyThread;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.MathUtils;
@@ -32,8 +31,9 @@ import com.android.internal.annotations.VisibleForTesting;
  * android.util.TypedValue#applyDimension(int, float, DisplayMetrics)} directly and it will do the
  * scaling conversion for you. But for UI frameworks or other situations where you need to do the
  * conversion without an Android Context, you can use this class.
+ *
+ * @hide
  */
-@FlaggedApi(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
 public class FontScaleConverterFactory {
     private static final float SCALE_KEY_MULTIPLIER = 100f;
 
@@ -124,7 +124,6 @@ public class FontScaleConverterFactory {
      * <p>Example usage:
      * <code>isNonLinearFontScalingActive(getResources().getConfiguration().fontScale)</code>
      */
-    @FlaggedApi(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
     @AnyThread
     public static boolean isNonLinearFontScalingActive(float fontScale) {
         return fontScale >= sMinScaleBeforeCurvesApplied;
@@ -137,7 +136,6 @@ public class FontScaleConverterFactory {
      *
      * @return a converter for the given scale, or null if non-linear scaling should not be used.
      */
-    @FlaggedApi(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
     @Nullable
     @AnyThread
     public static FontScaleConverter forScale(float fontScale) {
