@@ -3785,9 +3785,9 @@ public class SubscriptionManager {
             Map<ParcelUuid, SubscriptionInfo> groupMap = new HashMap<>();
 
             for (SubscriptionInfo info : availableList) {
-                // Opportunistic subscriptions are considered invisible
+                // Grouped opportunistic subscriptions are considered invisible
                 // to users so they should never be returned.
-                if (!isSubscriptionVisible(info)) continue;
+                if (info.getGroupUuid() != null && info.isOpportunistic()) continue;
 
                 ParcelUuid groupUuid = info.getGroupUuid();
                 if (groupUuid == null) {
