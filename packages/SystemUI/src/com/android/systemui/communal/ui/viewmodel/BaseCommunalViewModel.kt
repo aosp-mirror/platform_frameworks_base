@@ -103,6 +103,9 @@ abstract class BaseCommunalViewModel(
     /** Called as the UI requests opening the widget editor. */
     open fun onOpenWidgetEditor() {}
 
+    /** Called as the UI requests to dismiss the CTA tile. */
+    open fun onDismissCtaTile() {}
+
     /** Gets the interaction handler used to handle taps on a remote view */
     abstract fun getInteractionHandler(): RemoteViews.InteractionHandler
 }

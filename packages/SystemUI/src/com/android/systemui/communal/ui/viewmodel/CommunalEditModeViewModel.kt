@@ -28,6 +28,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /** The view model for communal hub in edit mode. */
 @SysUISingleton
@@ -42,9 +43,11 @@ constructor(
 
     override val isEditMode = true
 
-    // Only widgets are editable.
+    // Only widgets are editable. The CTA tile comes last in the list and remains visible.
     override val communalContent: Flow<List<CommunalContentModel>> =
-        communalInteractor.widgetContent
+        communalInteractor.widgetContent.map { widgets ->
+            widgets + listOf(CommunalContentModel.CtaTileInEditMode())
+        }
 
     override fun onDeleteWidget(id: Int) = communalInteractor.deleteWidget(id)
 

@@ -91,7 +91,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun communalContent_onlyWidgetsAreShownInEditMode() =
+    fun communalContent_onlyWidgetsAndCtaTileAreShownInEditMode() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
@@ -123,12 +123,14 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
             val communalContent by collectLastValue(underTest.communalContent)
 
-            // Only Widgets are shown.
-            assertThat(communalContent?.size).isEqualTo(2)
+            // Only Widgets and CTA tile are shown.
+            assertThat(communalContent?.size).isEqualTo(3)
             assertThat(communalContent?.get(0))
                 .isInstanceOf(CommunalContentModel.Widget::class.java)
             assertThat(communalContent?.get(1))
                 .isInstanceOf(CommunalContentModel.Widget::class.java)
+            assertThat(communalContent?.get(2))
+                .isInstanceOf(CommunalContentModel.CtaTileInEditMode::class.java)
         }
 
     @Test

@@ -96,6 +96,9 @@ constructor(
         editWidgetsActivityStarter.startActivity()
     }
 
+    /** Dismiss the CTA tile from the hub in view mode. */
+    fun dismissCtaTile() = communalRepository.setCtaTileInViewModeVisibility(isVisible = false)
+
     /** Add a widget at the specified position. */
     fun addWidget(componentName: ComponentName, priority: Int) =
         widgetRepository.addWidget(componentName, priority)
@@ -134,6 +137,12 @@ constructor(
                         target.remoteViews != null
                 }
             }
+        }
+
+    /** CTA tile to be displayed in the glanceable hub (view mode). */
+    val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> =
+        communalRepository.isCtaTileInViewModeVisible.map { visible ->
+            if (visible) listOf(CommunalContentModel.CtaTileInViewMode()) else emptyList()
         }
 
     /** A list of tutorial content to be displayed in the communal hub in tutorial mode. */
