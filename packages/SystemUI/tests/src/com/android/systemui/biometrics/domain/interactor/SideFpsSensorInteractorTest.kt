@@ -36,15 +36,24 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation.ROTATION_90
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.SideFpsLogger
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -62,9 +71,10 @@ import org.mockito.junit.MockitoJUnit
 @SmallTest
 @RunWith(JUnit4::class)
 class SideFpsSensorInteractorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
-    private val testScope = TestScope(StandardTestDispatcher())
+    private val testScope = kosmos.testScope
 
     private val fingerprintRepository = FakeFingerprintPropertyRepository()
 
@@ -101,6 +111,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
                 windowManager,
                 displayStateInteractor,
                 Optional.of(fingerprintInteractiveToAuthProvider),
+                kosmos.keyguardTransitionInteractor,
                 SideFpsLogger(logcatLogBuffer("SfpsLogger"))
             )
     }
@@ -129,11 +140,62 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
             assertThat(isAvailable).isFalse()
         }
 
+    private suspend fun sendTransition(from: KeyguardState, to: KeyguardState) {
+        kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+            listOf(
+                TransitionStep(
+                    from = from,
+                    to = to,
+                    transitionState = TransitionState.STARTED,
+                ),
+                TransitionStep(
+                    from = from,
+                    to = to,
+                    transitionState = TransitionState.FINISHED,
+                    value = 1.0f
+                )
+            ),
+            testScope
+        )
+    }
+
     @Test
-    fun authenticationDurationIsAvailableWhenSFPSSensorIsAvailable() =
+    fun authenticationDurationIsLongerIfScreenIsOff() =
         testScope.runTest {
-            assertThat(underTest.authenticationDuration)
-                .isEqualTo(context.resources.getInteger(R.integer.config_restToUnlockDuration))
+            val authenticationDuration by collectLastValue(underTest.authenticationDuration)
+            val longDuration =
+                context.resources.getInteger(R.integer.config_restToUnlockDurationScreenOff)
+            sendTransition(LOCKSCREEN, OFF)
+
+            runCurrent()
+            assertThat(authenticationDuration).isEqualTo(longDuration)
+        }
+
+    @Test
+    fun authenticationDurationIsLongerIfScreenIsDozing() =
+        testScope.runTest {
+            val authenticationDuration by collectLastValue(underTest.authenticationDuration)
+            val longDuration =
+                context.resources.getInteger(R.integer.config_restToUnlockDurationScreenOff)
+            sendTransition(LOCKSCREEN, DOZING)
+            runCurrent()
+            assertThat(authenticationDuration).isEqualTo(longDuration)
+        }
+
+    @Test
+    fun authenticationDurationIsShorterIfScreenIsNotDozingOrOff() =
+        testScope.runTest {
+            val authenticationDuration by collectLastValue(underTest.authenticationDuration)
+            val shortDuration =
+                context.resources.getInteger(R.integer.config_restToUnlockDurationDefault)
+            val allOtherKeyguardStates = KeyguardState.entries.filter { it != OFF && it != DOZING }
+
+            allOtherKeyguardStates.forEach { destinationState ->
+                sendTransition(OFF, destinationState)
+
+                runCurrent()
+                assertThat(authenticationDuration).isEqualTo(shortDuration)
+            }
         }
 
     @Test

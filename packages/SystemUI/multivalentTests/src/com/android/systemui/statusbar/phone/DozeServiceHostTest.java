@@ -25,15 +25,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Point;
 import android.os.PowerManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -68,7 +67,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 public class DozeServiceHostTest extends SysuiTestCase {
 
@@ -181,6 +180,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
                         DozeLog.PULSE_REASON_DOCKING,
                         DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE,
                         DozeLog.REASON_SENSOR_QUICK_PICKUP,
+                        DozeLog.PULSE_REASON_FINGERPRINT_ACTIVATED,
                         DozeLog.REASON_SENSOR_TAP));
         HashSet<Integer> reasonsThatDontPulse = new HashSet<>(
                 Arrays.asList(DozeLog.REASON_SENSOR_PICKUP,
@@ -232,7 +232,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
     public void onSlpiTap_doesnt_pass_negative_values() {
         mDozeServiceHost.onSlpiTap(-1, 200);
         mDozeServiceHost.onSlpiTap(100, -2);
-        verifyZeroInteractions(mDozeInteractor);
+        verify(mDozeInteractor, never()).setLastTapToWakePosition(any());
     }
     @Test
     public void dozeTimeTickSentToDozeInteractor() {
