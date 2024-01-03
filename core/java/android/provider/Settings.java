@@ -112,6 +112,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -19647,6 +19648,15 @@ public final class Settings {
             @Readable
             public static final String WRIST_DETECTION_AUTO_LOCKING_ENABLED =
                     "wear_wrist_detection_auto_locking_enabled";
+
+            /**
+             * Whether consistent notification blocking experience is enabled.
+             *
+             * @hide
+             */
+            @Readable
+            public static final String CONSISTENT_NOTIFICATION_BLOCKING_ENABLED =
+                    "consistent_notification_blocking_enabled";
         }
     }
 
