@@ -52,6 +52,7 @@ int register_android_server_Watchdog(JNIEnv* env);
 int register_android_server_HardwarePropertiesManagerService(JNIEnv* env);
 int register_android_server_SyntheticPasswordManager(JNIEnv* env);
 int register_android_hardware_display_DisplayViewport(JNIEnv* env);
+int register_android_server_utils_AnrTimer(JNIEnv *env);
 int register_android_server_am_OomConnection(JNIEnv* env);
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env);
 int register_android_server_am_LowMemDetector(JNIEnv* env);
@@ -113,6 +114,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_storage_AppFuse(env);
     register_android_server_SyntheticPasswordManager(env);
     register_android_hardware_display_DisplayViewport(env);
+    register_android_server_utils_AnrTimer(env);
     register_android_server_am_OomConnection(env);
     register_android_server_am_CachedAppOptimizer(env);
     register_android_server_am_LowMemDetector(env);
