@@ -19,6 +19,7 @@ package com.android.systemui.log.dagger;
 import android.os.Build;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepositoryImpl;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.log.LogcatEchoTracker;
@@ -461,7 +462,7 @@ public class LogModule {
 
     /**
      * Provides a {@link LogBuffer} for use by
-     * {@link com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepositoryImpl}.
+     * {@link DeviceEntryFaceAuthRepositoryImpl}.
      */
     @Provides
     @SysUISingleton

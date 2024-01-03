@@ -29,6 +29,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
@@ -62,7 +63,7 @@ import org.mockito.junit.MockitoRule
 class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
     @JvmField @Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
 
-    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
+    @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 

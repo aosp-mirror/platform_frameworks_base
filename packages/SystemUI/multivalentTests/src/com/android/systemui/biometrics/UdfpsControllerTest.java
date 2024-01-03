@@ -85,10 +85,10 @@ import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayView
 import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
@@ -336,7 +336,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mSessionTracker,
                 mAlternateBouncerInteractor,
                 mInputManager,
-                mock(KeyguardFaceAuthInteractor.class),
+                mock(DeviceEntryFaceAuthInteractor.class),
                 mUdfpsKeyguardAccessibilityDelegate,
                 mSelectedUserInteractor,
                 mFpsUnlockTracker,

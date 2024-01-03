@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.deviceentry.data.repository
 
 import android.app.StatusBarManager
 import android.content.Context
@@ -22,7 +22,6 @@ import android.hardware.face.FaceManager
 import android.os.CancellationSignal
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEventLogger
-import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.Dumpable
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
@@ -32,19 +31,27 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
+import com.android.systemui.deviceentry.shared.model.AcquiredFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
+import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.BiometricType
+import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.FaceAuthTableLog
+import com.android.systemui.keyguard.data.repository.FaceDetectTableLog
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.AcquiredFaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
-import com.android.systemui.keyguard.shared.model.FailedFaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SysUiFaceAuthenticateOptions
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
