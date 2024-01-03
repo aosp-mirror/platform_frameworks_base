@@ -2984,7 +2984,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     @Override
     Dimmer getDimmer() {
         // If this is in an embedded TaskFragment and we want the dim applies on the TaskFragment.
-        if (mIsEmbedded && mEmbeddedDimArea == EMBEDDED_DIM_AREA_TASK_FRAGMENT) {
+        if (mIsEmbedded && !isDimmingOnParentTask()) {
             return mDimmer;
         }
 
@@ -2993,7 +2993,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     /** Bounds to be used for dimming, as well as touch related tests. */
     void getDimBounds(@NonNull Rect out) {
-        if (mIsEmbedded && mEmbeddedDimArea == EMBEDDED_DIM_AREA_PARENT_TASK) {
+        if (mIsEmbedded && isDimmingOnParentTask() && getDimmer().getDimBounds() != null) {
+            // Return the task bounds if the dimmer is showing and should cover on the Task (not
+            // just on this embedded TaskFragment).
             out.set(getTask().getBounds());
         } else {
             out.set(getBounds());
@@ -3002,6 +3004,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     void setEmbeddedDimArea(@EmbeddedDimArea int embeddedDimArea) {
         mEmbeddedDimArea = embeddedDimArea;
+    }
+
+    @VisibleForTesting
+    boolean isDimmingOnParentTask() {
+        return mEmbeddedDimArea == EMBEDDED_DIM_AREA_PARENT_TASK;
     }
 
     @Override

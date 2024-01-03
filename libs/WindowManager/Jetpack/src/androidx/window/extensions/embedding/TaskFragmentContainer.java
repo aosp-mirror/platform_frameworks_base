@@ -172,6 +172,11 @@ class TaskFragmentContainer {
     private boolean mIsIsolatedNavigationEnabled;
 
     /**
+     * Whether to apply dimming on the parent Task that was requested last.
+     */
+    private boolean mLastDimOnTask;
+
+    /**
      * @see #TaskFragmentContainer(Activity, Intent, TaskContainer, SplitController,
      * TaskFragmentContainer, String, Bundle)
      */
@@ -834,6 +839,16 @@ class TaskFragmentContainer {
     /** Sets whether to enable isolated navigation or not. */
     void setIsolatedNavigationEnabled(boolean isolatedNavigationEnabled) {
         mIsIsolatedNavigationEnabled = isolatedNavigationEnabled;
+    }
+
+    /** Sets whether to apply dim on the parent Task. */
+    void setLastDimOnTask(boolean lastDimOnTask) {
+        mLastDimOnTask = lastDimOnTask;
+    }
+
+    /** Returns whether to apply dim on the parent Task. */
+    boolean isLastDimOnTask() {
+        return mLastDimOnTask;
     }
 
     /**
