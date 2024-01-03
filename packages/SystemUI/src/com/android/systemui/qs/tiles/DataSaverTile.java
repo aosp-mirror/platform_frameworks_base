@@ -55,6 +55,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
 
     private final DataSaverController mDataSaverController;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final SystemUIDialog.Factory mSystemUIDialogFactory;
 
     @Inject
     public DataSaverTile(
@@ -68,12 +69,14 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             DataSaverController dataSaverController,
-            DialogLaunchAnimator dialogLaunchAnimator
+            DialogLaunchAnimator dialogLaunchAnimator,
+            SystemUIDialog.Factory systemUIDialogFactory
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mDataSaverController = dataSaverController;
         mDialogLaunchAnimator = dialogLaunchAnimator;
+        mSystemUIDialogFactory = systemUIDialogFactory;
         mDataSaverController.observe(getLifecycle(), this);
     }
 
@@ -98,7 +101,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
         // Show a dialog to confirm first. Dialogs shown by the DialogLaunchAnimator must be created
         // and shown on the main thread, so we post it to the UI handler.
         mUiHandler.post(() -> {
-            SystemUIDialog dialog = new SystemUIDialog(mContext);
+            SystemUIDialog dialog = mSystemUIDialogFactory.create();
             dialog.setTitle(com.android.internal.R.string.data_saver_enable_title);
             dialog.setMessage(com.android.internal.R.string.data_saver_description);
             dialog.setPositiveButton(com.android.internal.R.string.data_saver_enable_button,

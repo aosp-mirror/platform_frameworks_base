@@ -149,6 +149,14 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             return create(new DialogDelegate<>(){}, mContext);
         }
 
+        /** Creates a new instance of {@link SystemUIDialog} with no customized behavior.
+         *
+         * When you just need a dialog created with a specific {@link Context}, call this.
+         */
+        public SystemUIDialog create(Context context) {
+            return create(new DialogDelegate<>(){}, context);
+        }
+
         /**
          * Creates a new instance of {@link SystemUIDialog} with {@code delegate} as the {@link
          * Delegate}.
