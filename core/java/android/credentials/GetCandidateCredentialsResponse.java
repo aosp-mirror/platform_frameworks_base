@@ -18,6 +18,7 @@ package android.credentials;
 
 import android.annotation.Hide;
 import android.annotation.NonNull;
+import android.app.PendingIntent;
 import android.credentials.ui.GetCredentialProviderData;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,22 +36,39 @@ import java.util.List;
  */
 @Hide
 public final class GetCandidateCredentialsResponse implements Parcelable {
-    // TODO(b/299321990): Add members
-
     @NonNull
     private final List<GetCredentialProviderData> mCandidateProviderDataList;
+
+    private final PendingIntent mPendingIntent;
+
+    private final GetCredentialResponse mGetCredentialResponse;
 
     /**
      * @hide
      */
     @Hide
     public GetCandidateCredentialsResponse(
-            List<GetCredentialProviderData> candidateProviderDataList
+            GetCredentialResponse getCredentialResponse
+    ) {
+        mCandidateProviderDataList = null;
+        mPendingIntent = null;
+        mGetCredentialResponse = getCredentialResponse;
+    }
+
+    /**
+     * @hide
+     */
+    @Hide
+    public GetCandidateCredentialsResponse(
+            List<GetCredentialProviderData> candidateProviderDataList,
+            PendingIntent pendingIntent
     ) {
         Preconditions.checkCollectionNotEmpty(
                 candidateProviderDataList,
                 /*valueName=*/ "candidateProviderDataList");
         mCandidateProviderDataList = new ArrayList<>(candidateProviderDataList);
+        mPendingIntent = pendingIntent;
+        mGetCredentialResponse = null;
     }
 
     /**
@@ -62,17 +80,40 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
         return mCandidateProviderDataList;
     }
 
+    /**
+     * Returns candidate provider data list.
+     *
+     * @hide
+     */
+    public GetCredentialResponse getGetCredentialResponse() {
+        return mGetCredentialResponse;
+    }
+
+    /**
+     * Returns candidate provider data list.
+     *
+     * @hide
+     */
+    public PendingIntent getPendingIntent() {
+        return mPendingIntent;
+    }
+
     protected GetCandidateCredentialsResponse(Parcel in) {
         List<GetCredentialProviderData> candidateProviderDataList = new ArrayList<>();
         in.readTypedList(candidateProviderDataList, GetCredentialProviderData.CREATOR);
         mCandidateProviderDataList = candidateProviderDataList;
 
         AnnotationValidations.validate(NonNull.class, null, mCandidateProviderDataList);
+
+        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
+        mGetCredentialResponse = in.readTypedObject(GetCredentialResponse.CREATOR);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(mCandidateProviderDataList);
+        dest.writeTypedObject(mPendingIntent, flags);
+        dest.writeTypedObject(mGetCredentialResponse, flags);
     }
 
     @Override

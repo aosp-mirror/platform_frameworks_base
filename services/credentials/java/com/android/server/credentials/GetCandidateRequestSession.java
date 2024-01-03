@@ -16,6 +16,7 @@
 
 package com.android.server.credentials;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCandidateCredentialsException;
 import android.credentials.GetCandidateCredentialsResponse;
 import android.credentials.GetCredentialRequest;
+import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCandidateCredentialsCallback;
 import android.credentials.ui.GetCredentialProviderData;
 import android.credentials.ui.ProviderData;
@@ -30,7 +32,9 @@ import android.credentials.ui.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
+import android.service.credentials.PermissionUtils;
 import android.util.Slog;
+import android.view.autofill.IAutoFillManagerClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,18 +46,22 @@ import java.util.Set;
  */
 public class GetCandidateRequestSession extends RequestSession<GetCredentialRequest,
         IGetCandidateCredentialsCallback, GetCandidateCredentialsResponse>
-        implements ProviderSession.ProviderInternalCallback<GetCandidateCredentialsResponse> {
+        implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetCandidateRequestSession";
+
+    private final IAutoFillManagerClient mAutoFillCallback;
 
     public GetCandidateRequestSession(
             Context context, SessionLifetime sessionCallback,
             Object lock, int userId, int callingUid,
             IGetCandidateCredentialsCallback callback, GetCredentialRequest request,
             CallingAppInfo callingAppInfo, Set<ComponentName> enabledProviders,
-            CancellationSignal cancellationSignal) {
+            CancellationSignal cancellationSignal,
+            IAutoFillManagerClient autoFillCallback) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_GET, callingAppInfo, enabledProviders,
                 cancellationSignal, 0L);
+        mAutoFillCallback = autoFillCallback;
     }
 
     /**
@@ -92,12 +100,25 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
             return;
         }
 
+        cancelExistingPendingIntent();
+        mPendingIntent = mCredentialManagerUi.createPendingIntent(
+                RequestInfo.newGetRequestInfo(
+                        mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
+                        PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
+                                Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
+                providerDataList);
+
         List<GetCredentialProviderData> candidateProviderDataList = new ArrayList<>();
         for (ProviderData providerData : providerDataList) {
             candidateProviderDataList.add((GetCredentialProviderData) (providerData));
         }
-        respondToClientWithResponseAndFinish(new GetCandidateCredentialsResponse(
-                candidateProviderDataList));
+
+        try {
+            invokeClientCallbackSuccess(new GetCandidateCredentialsResponse(
+                    candidateProviderDataList, mPendingIntent));
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Issue while responding to client with error : " + e);
+        }
     }
 
     @Override
@@ -151,7 +172,8 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
 
     @Override
     public void onFinalResponseReceived(ComponentName componentName,
-            GetCandidateCredentialsResponse response) {
-        // Not applicable for session without UI
+            GetCredentialResponse response) {
+        Slog.d(TAG, "onFinalResponseReceived");
+        respondToClientWithResponseAndFinish(new GetCandidateCredentialsResponse(response));
     }
 }

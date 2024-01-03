@@ -284,6 +284,13 @@ flag {
 }
 
 flag {
+    name: "new_volume_panel"
+    namespace: "systemui"
+    description: "Switches to the new volume panel (without Slices)."
+    bug: "202262476"
+}
+
+flag {
     name: "screenshare_notification_hiding"
     namespace: "systemui"
     description: "Enable hiding of notifications during screenshare"
@@ -295,4 +302,11 @@ flag {
    namespace: "systemui"
    description: "Displays the auto on toggle in the bluetooth QS tile dialog"
    bug: "316985153"
+}
+
+flag {
+   name: "smartspace_relocate_to_bottom"
+   namespace: "systemui"
+   description: "Relocate Smartspace to bottom of the Lock Screen"
+   bug: "316212788"
 }

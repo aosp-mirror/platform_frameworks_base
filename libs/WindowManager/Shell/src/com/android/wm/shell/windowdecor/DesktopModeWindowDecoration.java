@@ -46,6 +46,7 @@ import android.view.ViewConfiguration;
 import android.widget.ImageButton;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.IconProvider;
@@ -186,55 +187,33 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
 
         final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+        // The crop and position of the task should only be set when a task is fluid resizing. In
+        // all other cases, it is expected that the transition handler positions and crops the task
+        // in order to allow the handler time to animate before the task before the final
+        // position and crop are set.
+        final boolean shouldSetTaskPositionAndCrop = !DesktopModeStatus.isVeiledResizeEnabled()
+                && mTaskDragResizer.isResizingOrAnimating();
         // Use |applyStartTransactionOnDraw| so that the transaction (that applies task crop) is
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
-        relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */);
+        relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */,
+                shouldSetTaskPositionAndCrop);
     }
 
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw) {
-        final int shadowRadiusID = taskInfo.isFocused
-                ? R.dimen.freeform_decor_shadow_focused_thickness
-                : R.dimen.freeform_decor_shadow_unfocused_thickness;
-        final boolean isFreeform =
-                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
-        final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
-
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
         if (isHandleMenuActive()) {
             mHandleMenu.relayout(startT);
         }
+
+        updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
+                shouldSetTaskPositionAndCrop);
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        final int windowDecorLayoutId = getDesktopModeWindowDecorLayoutId(
-                taskInfo.getWindowingMode());
-        mRelayoutParams.reset();
-        mRelayoutParams.mRunningTaskInfo = taskInfo;
-        mRelayoutParams.mLayoutResId = windowDecorLayoutId;
-        mRelayoutParams.mCaptionHeightId = getCaptionHeightId(taskInfo.getWindowingMode());
-        mRelayoutParams.mShadowRadiusId = shadowRadiusID;
-        mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
-        // The configuration used to lay out the window decoration. The system context's config is
-        // used when the task density has been overridden to a custom density so that the resources
-        // and views of the decoration aren't affected and match the rest of the System UI, if not
-        // then just use the task's configuration. A copy is made instead of using the original
-        // reference so that the configuration isn't mutated on config changes and diff checks can
-        // be made in WindowDecoration#relayout using the pre/post-relayout configuration.
-        // See b/301119301.
-        // TODO(b/301119301): consider moving the config data needed for diffs to relayout params
-        // instead of using a whole Configuration as a parameter.
-        final Configuration windowDecorConfig = new Configuration();
-        windowDecorConfig.setTo(DesktopTasksController.isDesktopDensityOverrideSet()
-                ? mContext.getResources().getConfiguration() // Use system context.
-                : mTaskInfo.configuration); // Use task configuration.
-        mRelayoutParams.mWindowDecorConfig = windowDecorConfig;
-
-        mRelayoutParams.mCornerRadius =
-                (int) ScreenDecorationsUtils.getWindowCornerRadius(mContext);
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
@@ -273,6 +252,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             closeMaximizeMenu();
         }
 
+        final boolean isFreeform =
+                taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
+        final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
         if (!isDragResizeable) {
             if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
                 // We still want to track caption bar's exclusion region on a non-resizeable task.
@@ -322,6 +304,47 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             }
         }
     }
+
+    @VisibleForTesting
+    static void updateRelayoutParams(
+            RelayoutParams relayoutParams,
+            Context context,
+            ActivityManager.RunningTaskInfo taskInfo,
+            boolean applyStartTransactionOnDraw,
+            boolean shouldSetTaskPositionAndCrop) {
+        relayoutParams.reset();
+        relayoutParams.mRunningTaskInfo = taskInfo;
+        relayoutParams.mLayoutResId =
+            getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
+        relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
+        if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ taskInfo.isFocused)) {
+            relayoutParams.mShadowRadiusId = taskInfo.isFocused
+                    ? R.dimen.freeform_decor_shadow_focused_thickness
+                    : R.dimen.freeform_decor_shadow_unfocused_thickness;
+        }
+        relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
+        relayoutParams.mSetTaskPositionAndCrop = shouldSetTaskPositionAndCrop;
+        // The configuration used to lay out the window decoration. The system context's config is
+        // used when the task density has been overridden to a custom density so that the resources
+        // and views of the decoration aren't affected and match the rest of the System UI, if not
+        // then just use the task's configuration. A copy is made instead of using the original
+        // reference so that the configuration isn't mutated on config changes and diff checks can
+        // be made in WindowDecoration#relayout using the pre/post-relayout configuration.
+        // See b/301119301.
+        // TODO(b/301119301): consider moving the config data needed for diffs to relayout params
+        // instead of using a whole Configuration as a parameter.
+        final Configuration windowDecorConfig = new Configuration();
+        windowDecorConfig.setTo(DesktopTasksController.isDesktopDensityOverrideSet()
+                ? context.getResources().getConfiguration() // Use system context.
+                : taskInfo.configuration); // Use task configuration.
+        relayoutParams.mWindowDecorConfig = windowDecorConfig;
+
+        if (DesktopModeStatus.useRoundedCorners()) {
+            relayoutParams.mCornerRadius =
+                    (int) ScreenDecorationsUtils.getWindowCornerRadius(context);
+        }
+    }
+
 
     private PointF calculateMaximizeMenuPosition() {
         final PointF position = new PointF();
@@ -684,7 +707,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         super.close();
     }
 
-    private int getDesktopModeWindowDecorLayoutId(@WindowingMode int windowingMode) {
+    private static int getDesktopModeWindowDecorLayoutId(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FREEFORM
                 ? R.layout.desktop_mode_app_controls_window_decor
                 : R.layout.desktop_mode_focused_window_decor;
@@ -730,6 +753,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     @Override
     int getCaptionHeightId(@WindowingMode int windowingMode) {
+        return getCaptionHeightIdStatic(windowingMode);
+    }
+
+    private static int getCaptionHeightIdStatic(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FULLSCREEN
                 ? R.dimen.desktop_mode_fullscreen_decor_caption_height
                 : R.dimen.desktop_mode_freeform_decor_caption_height;

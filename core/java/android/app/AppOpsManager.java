@@ -71,6 +71,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.Pools;
@@ -7705,6 +7706,14 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(int code, int uid, @Mode int mode) {
         try {
+            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
+            if (code == OP_BLUETOOTH_CONNECT) {
+                Log.i(DEBUG_LOGGING_TAG,
+                        "setUidMode called for OP_BLUETOOTH_CONNECT with mode: " + mode
+                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
+                                + " trace: "
+                                + Arrays.toString(Thread.currentThread().getStackTrace()));
+            }
             mService.setUidMode(code, uid, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -7725,6 +7734,15 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(@NonNull String appOp, int uid, @Mode int mode) {
         try {
+            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
+            if (appOp.equals(OPSTR_BLUETOOTH_CONNECT)) {
+                Log.i(DEBUG_LOGGING_TAG,
+                        "setUidMode called for OPSTR_BLUETOOTH_CONNECT with mode: " + mode
+                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
+                                + " trace: "
+                                + Arrays.toString(Thread.currentThread().getStackTrace()));
+            }
+
             mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -7765,6 +7783,14 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(int code, int uid, String packageName, @Mode int mode) {
         try {
+            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
+            if (code == OP_BLUETOOTH_CONNECT) {
+                Log.i(DEBUG_LOGGING_TAG,
+                        "setMode called for OPSTR_BLUETOOTH_CONNECT with mode: " + mode
+                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
+                                + " trace: "
+                                + Arrays.toString(Thread.currentThread().getStackTrace()));
+            }
             mService.setMode(code, uid, packageName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -7787,6 +7813,14 @@ public class AppOpsManager {
     public void setMode(@NonNull String op, int uid, @Nullable String packageName,
             @Mode int mode) {
         try {
+            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
+            if (op.equals(OPSTR_BLUETOOTH_CONNECT)) {
+                Log.i(DEBUG_LOGGING_TAG,
+                        "setMode called for OPSTR_BLUETOOTH_CONNECT with mode: " + mode
+                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
+                                + " trace: "
+                                + Arrays.toString(Thread.currentThread().getStackTrace()));
+            }
             mService.setMode(strOpToOp(op), uid, packageName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

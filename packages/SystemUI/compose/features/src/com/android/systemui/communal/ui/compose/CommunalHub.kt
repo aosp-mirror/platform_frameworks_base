@@ -194,6 +194,7 @@ private fun BoxScope.CommunalHubLazyGrid(
         items(
             count = list.size,
             key = { index -> list[index].key },
+            contentType = { index -> list[index].key },
             span = { index -> GridItemSpan(list[index].size.span) },
         ) { index ->
             val cardModifier = Modifier.width(Dimensions.CardWidth)
@@ -361,6 +362,8 @@ private fun WidgetContent(
                     .createView(context, model.appWidgetId, model.providerInfo)
                     .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
             },
+            // For reusing composition in lazy lists.
+            onReset = {},
         )
     }
 }
@@ -376,7 +379,7 @@ private fun SmartspaceContent(
             FrameLayout(context).apply { addView(model.remoteViews.apply(context, this)) }
         },
         // For reusing composition in lazy lists.
-        onReset = {}
+        onReset = {},
     )
 }
 

@@ -38,6 +38,7 @@ import android.service.autofill.ISaveCallback;
 import android.service.autofill.SaveRequest;
 import android.text.format.DateUtils;
 import android.util.Slog;
+import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.ServiceConnector;
@@ -56,11 +57,21 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
 
+    private static final ComponentName CREDMAN_SERVICE_COMPONENT_NAME =
+            new ComponentName("com.android.credentialmanager",
+                    "com.android.credentialmanager.autofill.CredentialAutofillService");
+
     private final FillServiceCallbacks mCallbacks;
     private final Object mLock = new Object();
     private CompletableFuture<FillResponse> mPendingFillRequest;
     private int mPendingFillRequestId = INVALID_REQUEST_ID;
     private final ComponentName mComponentName;
+
+    private final boolean mIsCredentialAutofillService;
+
+    public boolean isCredentialAutofillService() {
+        return mIsCredentialAutofillService;
+    }
 
     public interface FillServiceCallbacks
             extends AbstractRemoteService.VultureCallback<RemoteFillService> {
@@ -83,6 +94,7 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                 userId, IAutoFillService.Stub::asInterface);
         mCallbacks = callbacks;
         mComponentName = componentName;
+        mIsCredentialAutofillService = mComponentName.equals(CREDMAN_SERVICE_COMPONENT_NAME);
     }
 
     @Override // from ServiceConnector.Impl
@@ -117,6 +129,10 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
         super.addLast(iAutoFillServiceJob);
     }
 
+    public ComponentName getComponentName() {
+        return mComponentName;
+    }
+
     /**
      * Cancel the currently pending request.
      *
@@ -132,6 +148,78 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                     ? mPendingFillRequestId
                     : INVALID_REQUEST_ID;
         }
+    }
+
+    public void onFillCredentialRequest(@NonNull FillRequest request,
+            IAutoFillManagerClient autofillCallback) {
+        if (sVerbose) {
+            Slog.v(TAG, "onFillRequest:" + request);
+        }
+        AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
+        AtomicReference<CompletableFuture<FillResponse>> futureRef = new AtomicReference<>();
+
+        CompletableFuture<FillResponse> connectThenFillRequest = postAsync(remoteService -> {
+            if (sVerbose) {
+                Slog.v(TAG, "calling onFillRequest() for id=" + request.getId());
+            }
+
+            CompletableFuture<FillResponse> fillRequest = new CompletableFuture<>();
+            remoteService.onFillCredentialRequest(request, new IFillCallback.Stub() {
+                @Override
+                public void onCancellable(ICancellationSignal cancellation) {
+                    CompletableFuture<FillResponse> future = futureRef.get();
+                    if (future != null && future.isCancelled()) {
+                        dispatchCancellationSignal(cancellation);
+                    } else {
+                        cancellationSink.set(cancellation);
+                    }
+                }
+
+                @Override
+                public void onSuccess(FillResponse response) {
+                    fillRequest.complete(response);
+                }
+
+                @Override
+                public void onFailure(int requestId, CharSequence message) {
+                    String errorMessage = message == null ? "" : String.valueOf(message);
+                    fillRequest.completeExceptionally(
+                            new RuntimeException(errorMessage));
+                }
+            }, autofillCallback);
+            return fillRequest;
+        }).orTimeout(TIMEOUT_REMOTE_REQUEST_MILLIS, TimeUnit.MILLISECONDS);
+        futureRef.set(connectThenFillRequest);
+
+        synchronized (mLock) {
+            mPendingFillRequest = connectThenFillRequest;
+            mPendingFillRequestId = request.getId();
+        }
+
+        connectThenFillRequest.whenComplete((res, err) -> Handler.getMain().post(() -> {
+            synchronized (mLock) {
+                mPendingFillRequest = null;
+                mPendingFillRequestId = INVALID_REQUEST_ID;
+            }
+            if (mCallbacks == null) {
+                Slog.w(TAG, "Error calling RemoteFillService - service already unbound");
+                return;
+            }
+            if (err == null) {
+                mCallbacks.onFillRequestSuccess(request.getId(), res,
+                        mComponentName.getPackageName(), request.getFlags());
+            } else {
+                Slog.e(TAG, "Error calling on fill request", err);
+                if (err instanceof TimeoutException) {
+                    dispatchCancellationSignal(cancellationSink.get());
+                    mCallbacks.onFillRequestTimeout(request.getId());
+                } else if (err instanceof CancellationException) {
+                    dispatchCancellationSignal(cancellationSink.get());
+                } else {
+                    mCallbacks.onFillRequestFailure(request.getId(), err.getMessage());
+                }
+            }
+        }));
     }
 
     public void onFillRequest(@NonNull FillRequest request) {

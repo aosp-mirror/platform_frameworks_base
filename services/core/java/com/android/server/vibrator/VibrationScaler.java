@@ -17,11 +17,13 @@
 package com.android.server.vibrator;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.os.IExternalVibratorService;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
@@ -55,6 +57,8 @@ final class VibrationScaler {
     private final SparseArray<ScaleLevel> mScaleLevels;
     private final VibrationSettings mSettingsController;
     private final int mDefaultVibrationAmplitude;
+
+    private SparseArray<Float> mAdaptiveHapticsScales;
 
     VibrationScaler(Context context, VibrationSettings settingsController) {
         mSettingsController = settingsController;
@@ -140,6 +144,15 @@ final class VibrationScaler {
             if (scaleLevel != null) {
                 segment = segment.scale(scaleLevel.factor);
             }
+
+            // If adaptive haptics scaling is available for this usage, apply it to the segment.
+            if (Flags.adaptiveHapticsEnabled()
+                    && mAdaptiveHapticsScales != null && mAdaptiveHapticsScales.size() > 0
+                    && mAdaptiveHapticsScales.contains(usageHint)) {
+                float adaptiveScale = mAdaptiveHapticsScales.get(usageHint);
+                segment = segment.scale(adaptiveScale);
+            }
+
             segments.set(i, segment);
         }
         if (segments.equals(composedEffect.getSegments())) {
@@ -171,6 +184,16 @@ final class VibrationScaler {
 
         int newEffectStrength = intensityToEffectStrength(currentIntensity);
         return prebaked.applyEffectStrength(newEffectStrength);
+    }
+
+    /**
+     * Updates the adaptive haptics scales.
+     * @param scales the new vibration scales to apply.
+     *
+     * @hide
+     */
+    public void updateAdaptiveHapticsScales(@Nullable SparseArray<Float> scales) {
+        mAdaptiveHapticsScales = scales;
     }
 
     /** Mapping of Vibrator.VIBRATION_INTENSITY_* values to {@link EffectStrength}. */

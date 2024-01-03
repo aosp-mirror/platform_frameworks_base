@@ -20,3 +20,10 @@ flag {
   description: "Move state file IO to non-critical path"
   bug: "312949280"
 }
+
+flag {
+  name: "draw_data_parcel"
+  namespace: "app_widgets"
+  description: "Enable support for transporting draw instructions as data parcel"
+  bug: "286130467"
+}

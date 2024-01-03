@@ -3506,6 +3506,8 @@ class Task extends TaskFragment {
         appCompatTaskInfo.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.isUserFullscreenOverrideEnabled = top != null
                 && top.mLetterboxUiController.shouldApplyUserFullscreenOverride();
+        appCompatTaskInfo.isSystemFullscreenOverrideEnabled = top != null
+                && top.mLetterboxUiController.isSystemOverrideToFullscreenEnabled();
         appCompatTaskInfo.isFromLetterboxDoubleTap = top != null
                 && top.mLetterboxUiController.isFromDoubleTap();
         if (appCompatTaskInfo.isLetterboxDoubleTapEnabled) {

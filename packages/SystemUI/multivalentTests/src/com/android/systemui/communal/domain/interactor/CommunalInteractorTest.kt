@@ -28,6 +28,7 @@ import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
@@ -166,6 +167,109 @@ class CommunalInteractorTest : SysuiTestCase() {
             val smartspaceContent by collectLastValue(underTest.smartspaceContent)
             assertThat(smartspaceContent?.size).isEqualTo(1)
             assertThat(smartspaceContent?.get(0)?.key).isEqualTo("smartspace_target3")
+        }
+
+    @Test
+    fun smartspaceDynamicSizing_oneCard_fullSize() =
+        testSmartspaceDynamicSizing(
+            totalTargets = 1,
+            expectedSizes =
+                listOf(
+                    CommunalContentSize.FULL,
+                )
+        )
+
+    @Test
+    fun smartspace_dynamicSizing_twoCards_halfSize() =
+        testSmartspaceDynamicSizing(
+            totalTargets = 2,
+            expectedSizes =
+                listOf(
+                    CommunalContentSize.HALF,
+                    CommunalContentSize.HALF,
+                )
+        )
+
+    @Test
+    fun smartspace_dynamicSizing_threeCards_thirdSize() =
+        testSmartspaceDynamicSizing(
+            totalTargets = 3,
+            expectedSizes =
+                listOf(
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                )
+        )
+
+    @Test
+    fun smartspace_dynamicSizing_fourCards_oneFullAndThreeThirdSize() =
+        testSmartspaceDynamicSizing(
+            totalTargets = 4,
+            expectedSizes =
+                listOf(
+                    CommunalContentSize.FULL,
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                )
+        )
+
+    @Test
+    fun smartspace_dynamicSizing_fiveCards_twoHalfAndThreeThirdSize() =
+        testSmartspaceDynamicSizing(
+            totalTargets = 5,
+            expectedSizes =
+                listOf(
+                    CommunalContentSize.HALF,
+                    CommunalContentSize.HALF,
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                )
+        )
+
+    @Test
+    fun smartspace_dynamicSizing_sixCards_allThirdSize() =
+        testSmartspaceDynamicSizing(
+            totalTargets = 6,
+            expectedSizes =
+                listOf(
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                    CommunalContentSize.THIRD,
+                )
+        )
+
+    private fun testSmartspaceDynamicSizing(
+        totalTargets: Int,
+        expectedSizes: List<CommunalContentSize>,
+    ) =
+        testScope.runTest {
+            // Keyguard showing, and tutorial completed.
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            val targets = mutableListOf<SmartspaceTarget>()
+            for (index in 0 until totalTargets) {
+                val target = mock(SmartspaceTarget::class.java)
+                whenever(target.smartspaceTargetId).thenReturn("target$index")
+                whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
+                whenever(target.remoteViews).thenReturn(mock(RemoteViews::class.java))
+                targets.add(target)
+            }
+
+            smartspaceRepository.setCommunalSmartspaceTargets(targets)
+
+            val smartspaceContent by collectLastValue(underTest.smartspaceContent)
+            assertThat(smartspaceContent?.size).isEqualTo(totalTargets)
+            for (index in 0 until totalTargets) {
+                assertThat(smartspaceContent?.get(index)?.size).isEqualTo(expectedSizes[index])
+            }
         }
 
     @Test

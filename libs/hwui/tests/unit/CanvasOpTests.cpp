@@ -492,7 +492,7 @@ TEST(CanvasOp, simpleDrawImage) {
     CallCountingCanvas canvas;
     EXPECT_EQ(0, canvas.sumTotalDrawCalls());
     rasterizeCanvasBuffer(buffer, &canvas);
-    EXPECT_EQ(1, canvas.drawImageCount);
+    EXPECT_EQ(1, canvas.drawImageRectCount);
     EXPECT_EQ(1, canvas.sumTotalDrawCalls());
 }
 

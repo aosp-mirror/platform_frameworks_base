@@ -448,16 +448,16 @@ final class AccessibilityController {
         }
     }
 
-    void drawMagnifiedRegionBorderIfNeeded(int displayId, SurfaceControl.Transaction t) {
+    void drawMagnifiedRegionBorderIfNeeded(int displayId) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
             mAccessibilityTracing.logTrace(
                     TAG + ".drawMagnifiedRegionBorderIfNeeded",
                     FLAGS_MAGNIFICATION_CALLBACK,
-                    "displayId=" + displayId + "; transaction={" + t + "}");
+                    "displayId=" + displayId);
         }
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.drawMagnifiedRegionBorderIfNeeded(t);
+            displayMagnifier.drawMagnifiedRegionBorderIfNeeded();
         }
         // Not relevant for the window observer.
     }
@@ -855,12 +855,12 @@ final class AccessibilityController {
                     .sendToTarget();
         }
 
-        void drawMagnifiedRegionBorderIfNeeded(SurfaceControl.Transaction t) {
+        void drawMagnifiedRegionBorderIfNeeded() {
             if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
                 mAccessibilityTracing.logTrace(LOG_TAG + ".drawMagnifiedRegionBorderIfNeeded",
-                        FLAGS_MAGNIFICATION_CALLBACK, "transition={" + t + "}");
+                        FLAGS_MAGNIFICATION_CALLBACK);
             }
-            mMagnifedViewport.drawWindowIfNeeded(t);
+            mMagnifedViewport.drawWindowIfNeeded();
         }
 
         void dump(PrintWriter pw, String prefix) {
@@ -1106,11 +1106,11 @@ final class AccessibilityController {
             }
 
             void setMagnifiedRegionBorderShown(boolean shown, boolean animate) {
-                if (shown) {
+                if (mWindow.setShown(shown, animate)) {
                     mFullRedrawNeeded = true;
+                    // Clear the old region, so recomputeBounds will refresh the current region.
                     mOldMagnificationRegion.set(0, 0, 0, 0);
                 }
-                mWindow.setShown(shown, animate);
             }
 
             void getMagnifiedFrameInContentCoords(Rect rect) {
@@ -1128,9 +1128,9 @@ final class AccessibilityController {
                 return mMagnificationSpec;
             }
 
-            void drawWindowIfNeeded(SurfaceControl.Transaction t) {
+            void drawWindowIfNeeded() {
                 recomputeBounds();
-                mWindow.drawIfNeeded(t);
+                mWindow.postDrawIfNeeded();
             }
 
             void destroyWindow() {
@@ -1158,7 +1158,7 @@ final class AccessibilityController {
                 mWindow.dump(pw, prefix);
             }
 
-            private final class ViewportWindow {
+            private final class ViewportWindow implements Runnable {
                 private static final String SURFACE_TITLE = "Magnification Overlay";
 
                 private final Region mBounds = new Region();
@@ -1166,15 +1166,18 @@ final class AccessibilityController {
                 private final Paint mPaint = new Paint();
 
                 private final SurfaceControl mSurfaceControl;
+                /** After initialization, it should only be accessed from animation thread. */
+                private final SurfaceControl.Transaction mTransaction;
                 private final BLASTBufferQueue mBlastBufferQueue;
                 private final Surface mSurface;
 
                 private final AnimationController mAnimationController;
 
                 private boolean mShown;
+                private boolean mLastSurfaceShown;
                 private int mAlpha;
 
-                private boolean mInvalidated;
+                private volatile boolean mInvalidated;
 
                 ViewportWindow(Context context) {
                     SurfaceControl surfaceControl = null;
@@ -1202,6 +1205,7 @@ final class AccessibilityController {
                     InputMonitor.setTrustedOverlayInputInfo(mSurfaceControl, t,
                             mDisplayContent.getDisplayId(), "Magnification Overlay");
                     t.apply();
+                    mTransaction = t;
                     mSurface = mBlastBufferQueue.createSurface();
 
                     mAnimationController = new AnimationController(context,
@@ -1219,10 +1223,11 @@ final class AccessibilityController {
                     mInvalidated = true;
                 }
 
-                void setShown(boolean shown, boolean animate) {
+                /** Returns {@code true} if the shown state is changed. */
+                boolean setShown(boolean shown, boolean animate) {
                     synchronized (mService.mGlobalLock) {
                         if (mShown == shown) {
-                            return;
+                            return false;
                         }
                         mShown = shown;
                         mAnimationController.onFrameShownStateChanged(shown, animate);
@@ -1230,6 +1235,7 @@ final class AccessibilityController {
                             Slog.i(LOG_TAG, "ViewportWindow shown: " + mShown);
                         }
                     }
+                    return true;
                 }
 
                 @SuppressWarnings("unused")
@@ -1285,7 +1291,22 @@ final class AccessibilityController {
                     mService.scheduleAnimationLocked();
                 }
 
-                void drawIfNeeded(SurfaceControl.Transaction t) {
+                void postDrawIfNeeded() {
+                    if (mInvalidated) {
+                        mService.mAnimationHandler.post(this);
+                    }
+                }
+
+                @Override
+                public void run() {
+                    drawIfNeeded();
+                }
+
+                /**
+                 * This method must only be called by animation handler directly to make sure
+                 * thread safe and there is no lock held outside.
+                 */
+                private void drawIfNeeded() {
                     // Drawing variables (alpha, dirty rect, and bounds) access is synchronized
                     // using WindowManagerGlobalLock. Grab copies of these values before
                     // drawing on the canvas so that drawing can be performed outside of the lock.
@@ -1314,6 +1335,7 @@ final class AccessibilityController {
                         }
                     }
 
+                    final boolean showSurface;
                     // Draw without holding WindowManagerGlobalLock.
                     if (alpha > 0) {
                         Canvas canvas = null;
@@ -1329,9 +1351,17 @@ final class AccessibilityController {
                         mPaint.setAlpha(alpha);
                         canvas.drawPath(drawingBounds.getBoundaryPath(), mPaint);
                         mSurface.unlockCanvasAndPost(canvas);
-                        t.show(mSurfaceControl);
+                        showSurface = true;
                     } else {
-                        t.hide(mSurfaceControl);
+                        showSurface = false;
+                    }
+
+                    if (showSurface && !mLastSurfaceShown) {
+                        mTransaction.show(mSurfaceControl).apply();
+                        mLastSurfaceShown = true;
+                    } else if (!showSurface && mLastSurfaceShown) {
+                        mTransaction.hide(mSurfaceControl).apply();
+                        mLastSurfaceShown = false;
                     }
                 }
 
