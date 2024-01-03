@@ -53,37 +53,43 @@ constructor(
             key = StatusBarElementKey,
             modifier = modifier,
         ) {
-            AndroidView(
-                factory = {
-                    notificationPanelView.get().findViewById<View>(R.id.keyguard_header)?.let {
-                        (it.parent as ViewGroup).removeView(it)
-                    }
-
-                    val provider =
-                        object : ShadeViewStateProvider {
-                            override val lockscreenShadeDragProgress: Float = 0f
-                            override val panelViewExpandedHeight: Float = 0f
-                            override fun shouldHeadsUpBeVisible(): Boolean {
-                                return false
-                            }
+            content {
+                AndroidView(
+                    factory = {
+                        notificationPanelView.get().findViewById<View>(R.id.keyguard_header)?.let {
+                            (it.parent as ViewGroup).removeView(it)
                         }
 
-                    @SuppressLint("InflateParams")
-                    val view =
-                        LayoutInflater.from(context)
-                            .inflate(
-                                R.layout.keyguard_status_bar,
-                                null,
-                                false,
-                            ) as KeyguardStatusBarView
-                    componentFactory.build(view, provider).keyguardStatusBarViewController.init()
-                    view
-                },
-                modifier =
-                    Modifier.fillMaxWidth().padding(horizontal = 16.dp).height {
-                        Utils.getStatusBarHeaderHeightKeyguard(context)
+                        val provider =
+                            object : ShadeViewStateProvider {
+                                override val lockscreenShadeDragProgress: Float = 0f
+                                override val panelViewExpandedHeight: Float = 0f
+
+                                override fun shouldHeadsUpBeVisible(): Boolean {
+                                    return false
+                                }
+                            }
+
+                        @SuppressLint("InflateParams")
+                        val view =
+                            LayoutInflater.from(context)
+                                .inflate(
+                                    R.layout.keyguard_status_bar,
+                                    null,
+                                    false,
+                                ) as KeyguardStatusBarView
+                        componentFactory
+                            .build(view, provider)
+                            .keyguardStatusBarViewController
+                            .init()
+                        view
                     },
-            )
+                    modifier =
+                        Modifier.fillMaxWidth().padding(horizontal = 16.dp).height {
+                            Utils.getStatusBarHeaderHeightKeyguard(context)
+                        },
+                )
+            }
         }
     }
 }

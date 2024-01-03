@@ -92,6 +92,20 @@ sealed interface TransitionState {
 
         /** Whether user input is currently driving the transition. */
         abstract val isUserInputOngoing: Boolean
+
+        /**
+         * Whether we are transitioning. If [from] or [to] is empty, we will also check that they
+         * match the scenes we are animating from and/or to.
+         */
+        fun isTransitioning(from: SceneKey? = null, to: SceneKey? = null): Boolean {
+            return (from == null || fromScene == from) && (to == null || toScene == to)
+        }
+
+        /** Whether we are transitioning from [scene] to [other], or from [other] to [scene]. */
+        fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
+            return isTransitioning(from = scene, to = other) ||
+                isTransitioning(from = other, to = scene)
+        }
     }
 }
 
@@ -111,13 +125,12 @@ internal class SceneTransitionLayoutStateImpl(
 
     override fun isTransitioning(from: SceneKey?, to: SceneKey?): Boolean {
         val transition = currentTransition ?: return false
-        return (from == null || transition.fromScene == from) &&
-            (to == null || transition.toScene == to)
+        return transition.isTransitioning(from, to)
     }
 
     override fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
-        return isTransitioning(from = scene, to = other) ||
-            isTransitioning(from = other, to = scene)
+        val transition = currentTransition ?: return false
+        return transition.isTransitioningBetween(scene, other)
     }
 
     /** Start a new [transition], instantly interrupting any ongoing transition if there was one. */

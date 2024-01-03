@@ -36,6 +36,16 @@ import androidx.compose.ui.util.fastForEach
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 
+/**
+ * The type for the content of movable elements.
+ *
+ * TODO(b/317972419): Revert back to make this movable content have a single @Composable lambda
+ *   parameter.
+ */
+internal typealias MovableElementContent =
+    @Composable
+    (MovableElementContentScope, @Composable MovableElementContentScope.() -> Unit) -> Unit
+
 @Stable
 internal class SceneTransitionLayoutImpl(
     internal val state: SceneTransitionLayoutStateImpl,
@@ -56,16 +66,47 @@ internal class SceneTransitionLayoutImpl(
     /**
      * The map of [Element]s.
      *
-     * Note that this map is *mutated* directly during composition, so it is a [SnapshotStateMap] to
-     * make sure that mutations are reverted if composition is cancelled.
+     * Important: [Element]s from this map should never be accessed during composition because the
+     * Elements are added when the associated Modifier.element() node is attached to the Modifier
+     * tree, i.e. after composition.
      */
-    internal val elements = SnapshotStateMap<ElementKey, Element>()
+    internal val elements = mutableMapOf<ElementKey, Element>()
+
+    /**
+     * The map of contents of movable elements.
+     *
+     * Note that given that this map is mutated directly during a composition, it has to be a
+     * [SnapshotStateMap] to make sure that mutations are reverted if composition is cancelled.
+     */
+    private var _movableContents: SnapshotStateMap<ElementKey, MovableElementContent>? = null
+    val movableContents: SnapshotStateMap<ElementKey, MovableElementContent>
+        get() =
+            _movableContents
+                ?: SnapshotStateMap<ElementKey, MovableElementContent>().also {
+                    _movableContents = it
+                }
+
+    /**
+     * The different values of a shared value keyed by a a [ValueKey] and the different elements and
+     * scenes it is associated to.
+     */
+    private var _sharedValues:
+        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>? =
+        null
+    internal val sharedValues:
+        MutableMap<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>
+        get() =
+            _sharedValues
+                ?: mutableMapOf<ValueKey, MutableMap<ElementKey?, SnapshotStateMap<SceneKey, *>>>()
+                    .also { _sharedValues = it }
 
     /**
      * The scenes that are "ready", i.e. they were composed and fully laid-out at least once.
      *
      * Note that this map is *read* during composition, so it is a [SnapshotStateMap] to make sure
      * that we recompose when modifications are made to this map.
+     *
+     * TODO(b/316901148): Remove this map.
      */
     private val readyScenes = SnapshotStateMap<SceneKey, Boolean>()
 

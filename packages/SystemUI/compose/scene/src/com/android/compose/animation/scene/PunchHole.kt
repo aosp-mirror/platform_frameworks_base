@@ -75,8 +75,8 @@ private class PunchHoleNode(
 
         if (
             bounds == null ||
-                bounds.lastSharedValues.size == Element.SizeUnspecified ||
-                bounds.lastSharedValues.offset == Offset.Unspecified
+                bounds.lastSharedState.size == Element.SizeUnspecified ||
+                bounds.lastSharedState.offset == Offset.Unspecified
         ) {
             drawContent()
             return
@@ -87,14 +87,14 @@ private class PunchHoleNode(
             canvas.withSaveLayer(size.toRect(), Paint()) {
                 drawContent()
 
-                val offset = bounds.lastSharedValues.offset - element.lastSharedValues.offset
+                val offset = bounds.lastSharedState.offset - element.lastSharedState.offset
                 translate(offset.x, offset.y) { drawHole(bounds) }
             }
         }
     }
 
     private fun DrawScope.drawHole(bounds: Element) {
-        val boundsSize = bounds.lastSharedValues.size.toSize()
+        val boundsSize = bounds.lastSharedState.size.toSize()
         if (shape == RectangleShape) {
             drawRect(Color.Black, size = boundsSize, blendMode = BlendMode.DstOut)
             return

@@ -98,7 +98,7 @@ fun SceneScope.QuickSettings(
         key = QuickSettings.Elements.Content,
         modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 300.dp)
     ) {
-        QuickSettingsContent(qsSceneAdapter = qsSceneAdapter, contentState)
+        content { QuickSettingsContent(qsSceneAdapter = qsSceneAdapter, contentState) }
     }
 }
 

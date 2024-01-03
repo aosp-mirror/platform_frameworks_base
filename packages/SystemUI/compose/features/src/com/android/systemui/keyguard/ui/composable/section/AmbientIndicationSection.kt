@@ -35,14 +35,16 @@ class AmbientIndicationSection @Inject constructor() {
             key = AmbientIndicationElementKey,
             modifier = modifier,
         ) {
-            Box(
-                modifier = Modifier.fillMaxWidth().background(Color.Green),
-            ) {
-                Text(
-                    text = "TODO(b/316211368): Ambient indication",
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+            content {
+                Box(
+                    modifier = Modifier.fillMaxWidth().background(Color.Green),
+                ) {
+                    Text(
+                        text = "TODO(b/316211368): Ambient indication",
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                }
             }
         }
     }

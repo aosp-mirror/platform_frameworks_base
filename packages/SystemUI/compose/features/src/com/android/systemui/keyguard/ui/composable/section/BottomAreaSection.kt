@@ -74,20 +74,22 @@ constructor(
             key = if (isStart) StartButtonElementKey else EndButtonElementKey,
             modifier = modifier,
         ) {
-            Shortcut(
-                viewId = if (isStart) R.id.start_button else R.id.end_button,
-                viewModel = if (isStart) viewModel.startButton else viewModel.endButton,
-                transitionAlpha = viewModel.transitionAlpha,
-                falsingManager = falsingManager,
-                vibratorHelper = vibratorHelper,
-                indicationController = indicationController,
-                modifier =
-                    if (applyPadding) {
-                        Modifier.shortcutPadding()
-                    } else {
-                        Modifier
-                    }
-            )
+            content {
+                Shortcut(
+                    viewId = if (isStart) R.id.start_button else R.id.end_button,
+                    viewModel = if (isStart) viewModel.startButton else viewModel.endButton,
+                    transitionAlpha = viewModel.transitionAlpha,
+                    falsingManager = falsingManager,
+                    vibratorHelper = vibratorHelper,
+                    indicationController = indicationController,
+                    modifier =
+                        if (applyPadding) {
+                            Modifier.shortcutPadding()
+                        } else {
+                            Modifier
+                        }
+                )
+            }
         }
     }
 
@@ -99,11 +101,13 @@ constructor(
             key = IndicationAreaElementKey,
             modifier = modifier.shortcutPadding(),
         ) {
-            IndicationArea(
-                indicationAreaViewModel = indicationAreaViewModel,
-                alphaViewModel = alphaViewModel,
-                indicationController = indicationController,
-            )
+            content {
+                IndicationArea(
+                    indicationAreaViewModel = indicationAreaViewModel,
+                    alphaViewModel = alphaViewModel,
+                    indicationController = indicationController,
+                )
+            }
         }
     }
 

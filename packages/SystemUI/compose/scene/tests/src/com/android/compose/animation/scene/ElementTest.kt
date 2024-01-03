@@ -306,7 +306,7 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
         val element = layoutImpl.elements.getValue(key)
-        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneB)
+        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneB)
 
         // Scene C, state 0: the same element is reused.
         currentScene = TestScenes.SceneC
@@ -315,7 +315,7 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
         assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
-        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneC)
+        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneC)
 
         // Scene C, state 1: the same element is reused.
         sceneCState = 1
@@ -323,7 +323,7 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
         assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
-        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneC)
+        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneC)
 
         // Scene D, state 0: the same element is reused.
         currentScene = TestScenes.SceneD
@@ -332,7 +332,7 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
         assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
-        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneD)
+        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneD)
 
         // Scene D, state 1: the same element is reused.
         sceneDState = 1
@@ -340,13 +340,13 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(key)
         assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
-        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneD)
+        assertThat(element.sceneStates.keys).containsExactly(TestScenes.SceneD)
 
         // Scene D, state 2: the element is removed from the map.
         sceneDState = 2
         rule.waitForIdle()
 
-        assertThat(element.sceneValues).isEmpty()
+        assertThat(element.sceneStates).isEmpty()
         assertThat(layoutImpl.elements).isEmpty()
     }
 
@@ -442,7 +442,7 @@ class ElementTest {
         // There is only Foo in the elements map.
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
         val fooElement = layoutImpl.elements.getValue(TestElements.Foo)
-        assertThat(fooElement.sceneValues.keys).containsExactly(TestScenes.SceneA)
+        assertThat(fooElement.sceneStates.keys).containsExactly(TestScenes.SceneA)
 
         key = TestElements.Bar
 
@@ -450,8 +450,8 @@ class ElementTest {
         rule.waitForIdle()
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Bar)
         val barElement = layoutImpl.elements.getValue(TestElements.Bar)
-        assertThat(barElement.sceneValues.keys).containsExactly(TestScenes.SceneA)
-        assertThat(fooElement.sceneValues).isEmpty()
+        assertThat(barElement.sceneStates.keys).containsExactly(TestScenes.SceneA)
+        assertThat(fooElement.sceneStates).isEmpty()
     }
 
     @Test
@@ -505,7 +505,7 @@ class ElementTest {
         // There is only Foo in the elements map.
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
         val element = layoutImpl.elements.getValue(TestElements.Foo)
-        val sceneValues = element.sceneValues
+        val sceneValues = element.sceneStates
         assertThat(sceneValues.keys).containsExactly(TestScenes.SceneA)
 
         // Get the ElementModifier node that should be reused later on when coming back to this
@@ -528,7 +528,7 @@ class ElementTest {
 
         assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
         val newElement = layoutImpl.elements.getValue(TestElements.Foo)
-        val newSceneValues = newElement.sceneValues
+        val newSceneValues = newElement.sceneStates
         assertThat(newElement).isNotEqualTo(element)
         assertThat(newSceneValues).isNotEqualTo(sceneValues)
         assertThat(newSceneValues.keys).containsExactly(TestScenes.SceneA)
@@ -579,11 +579,11 @@ class ElementTest {
 
         fun foo() = layoutImpl().elements[TestElements.Foo] ?: error("Foo not in elements map")
 
-        fun Element.lastSharedOffset() = lastSharedValues.offset.toDpOffset()
+        fun Element.lastSharedOffset() = lastSharedState.offset.toDpOffset()
 
         fun Element.lastOffsetIn(scene: SceneKey) =
-            (sceneValues[scene] ?: error("$scene not in sceneValues map"))
-                .lastValues
+            (sceneStates[scene] ?: error("$scene not in sceneValues map"))
+                .lastState
                 .offset
                 .toDpOffset()
 
