@@ -3691,19 +3691,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return false;
         }
 
-        // If the app is using legacy-entry (not auto-enter), then we will get a client-request
-        // that was actually a server-request (via pause(userLeaving=true)). This happens when
-        // the app is PAUSING, so detect that case here.
-        boolean originallyFromClient = fromClient
-                && (!r.isState(PAUSING) || params.isAutoEnterEnabled());
-
-        // If PiP2 flag is on and client-request to enter PiP came via onUserLeaveHint(),
-        // we request a direct transition from Shell to TRANSIT_PIP_LEGACY to get the startWct
-        // with the right entry bounds.
-        if (isPip2ExperimentEnabled() && !originallyFromClient && !params.isAutoEnterEnabled()) {
+        // If PiP2 flag is on and client-request to enter PiP comes in,
+        // we request a direct transition from Shell to TRANSIT_PIP to get the startWct
+        // with the right entry bounds. So PiP activity isn't moved to a pinned task until after
+        // Shell calls back into Core with the entry bounds passed through.
+        if (isPip2ExperimentEnabled()) {
             final Transition legacyEnterPipTransition = new Transition(TRANSIT_PIP,
-                    0 /* flags */, getTransitionController(),
-                    mWindowManager.mSyncEngine);
+                    0 /* flags */, getTransitionController(), mWindowManager.mSyncEngine);
             legacyEnterPipTransition.setPipActivity(r);
             getTransitionController().startCollectOrQueue(legacyEnterPipTransition, (deferred) -> {
                 getTransitionController().requestStartTransition(legacyEnterPipTransition,
@@ -3711,6 +3705,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             });
             return true;
         }
+
+        // If the app is using legacy-entry (not auto-enter), then we will get a client-request
+        // that was actually a server-request (via pause(userLeaving=true)). This happens when
+        // the app is PAUSING, so detect that case here.
+        boolean originallyFromClient = fromClient
+                && (!r.isState(PAUSING) || params.isAutoEnterEnabled());
 
         // Create a transition only for this pip entry if it is coming from the app without the
         // system requesting that the app enter-pip. If the system requested it, that means it
