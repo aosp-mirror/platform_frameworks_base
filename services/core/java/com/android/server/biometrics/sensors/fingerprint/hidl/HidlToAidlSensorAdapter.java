@@ -147,7 +147,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
                 gestureAvailabilityDispatcher, () -> mCurrentUserId, getUserSwitchCallback()));
         mLockoutTracker = new LockoutFrameworkImpl(getContext(),
                 userId -> mLockoutResetDispatcher.notifyLockoutResetCallbacks(
-                        getSensorProperties().sensorId));
+                        getSensorProperties().sensorId), getHandler());
     }
 
     @Override

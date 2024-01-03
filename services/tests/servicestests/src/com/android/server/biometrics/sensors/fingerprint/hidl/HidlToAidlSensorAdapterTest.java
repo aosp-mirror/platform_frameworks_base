@@ -65,7 +65,6 @@ import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvide
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintResetLockoutClient;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -248,7 +247,6 @@ public class HidlToAidlSensorAdapterTest {
     }
 
     @Test
-    @Ignore("b/317403648")
     public void lockoutPermanentResetViaClient() {
         setLockoutPermanent();
 
