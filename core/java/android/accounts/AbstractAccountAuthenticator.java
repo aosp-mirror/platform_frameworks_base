@@ -142,10 +142,7 @@ public abstract class AbstractAccountAuthenticator {
     private static final String KEY_ACCOUNT =
             "android.accounts.AbstractAccountAuthenticator.KEY_ACCOUNT";
 
-    private final Context mContext;
-
     public AbstractAccountAuthenticator(Context context) {
-        mContext = context;
     }
 
     private class Transport extends IAccountAuthenticator.Stub {

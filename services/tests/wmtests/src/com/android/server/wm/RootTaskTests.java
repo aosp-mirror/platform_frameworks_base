@@ -140,7 +140,7 @@ public class RootTaskTests extends WindowTestsBase {
 
         final WindowContainer parent = activity1.getTask().getParent();
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, parent.getOrientation());
-        mDisplayContent.mClosingApps.add(activity2);
+        activity2.setVisibleRequested(false);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, parent.getOrientation());
     }
 

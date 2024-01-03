@@ -721,6 +721,9 @@ class DesktopTasksController(
             finishTransaction: SurfaceControl.Transaction
     ) {
         // Add rounded corners to freeform windows
+        if (!DesktopModeStatus.useRoundedCorners()) {
+            return
+        }
         val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
         info.changes
                 .filter { it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM }

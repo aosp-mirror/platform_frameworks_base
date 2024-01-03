@@ -697,6 +697,31 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
     @Test
     @EnableCompatChanges({OVERRIDE_ANY_ORIENTATION_TO_USER})
+    public void testOverrideOrientationIfNeeded_fullscreenOverrides_optOutSystem_returnsUser()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE, /* value */ false);
+        prepareActivityThatShouldApplyUserFullscreenOverride();
+
+        // fullscreen override still applied
+        assertEquals(SCREEN_ORIENTATION_USER, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_ANY_ORIENTATION_TO_USER})
+    public void testOverrideOrientationIfNeeded_fullscreenOverrides_optOutUser_returnsUser()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
+                /* value */ false);
+        prepareActivityThatShouldApplyUserFullscreenOverride();
+
+        // fullscreen override still applied
+        assertEquals(SCREEN_ORIENTATION_USER, mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_ANY_ORIENTATION_TO_USER})
     public void testOverrideOrientationIfNeeded_fullscreenOverrideEnabled_returnsUnchanged()
             throws Exception {
         mDisplayContent.setIgnoreOrientationRequest(false);

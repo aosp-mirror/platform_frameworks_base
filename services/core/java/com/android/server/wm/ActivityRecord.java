@@ -495,10 +495,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final boolean componentSpecified;  // did caller specify an explicit component?
     final boolean rootVoiceInteraction;  // was this the root activity of a voice interaction?
 
-    private CharSequence nonLocalizedLabel;  // the label information from the package mgr.
-    private int labelRes;           // the label information from the package mgr.
-    private int icon;               // resource identifier of activity's icon.
-    private int theme;              // resource identifier of activity's theme.
+    private final int theme;        // resource identifier of activity's theme.
     private Task task;              // the task this is in.
     private long createTime = System.currentTimeMillis();
     long lastVisibleTime;         // last time this activity became visible
@@ -506,7 +503,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     long launchTickTime;          // base time for launch tick messages
     long topResumedStateLossTime; // last time we reported top resumed state loss to an activity
     // Last configuration reported to the activity in the client process.
-    private MergedConfiguration mLastReportedConfiguration;
+    private final MergedConfiguration mLastReportedConfiguration;
     private int mLastReportedDisplayId;
     boolean mLastReportedMultiWindowMode;
     boolean mLastReportedPictureInPictureMode;
@@ -1058,17 +1055,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
         pw.print(prefix); pw.print("mActivityComponent=");
                 pw.println(mActivityComponent.flattenToShortString());
-        if (info != null && info.applicationInfo != null) {
-            final ApplicationInfo appInfo = info.applicationInfo;
-            pw.print(prefix); pw.print("baseDir="); pw.println(appInfo.sourceDir);
-            if (!Objects.equals(appInfo.sourceDir, appInfo.publicSourceDir)) {
-                pw.print(prefix); pw.print("resDir="); pw.println(appInfo.publicSourceDir);
-            }
-            pw.print(prefix); pw.print("dataDir="); pw.println(appInfo.dataDir);
-            if (appInfo.splitSourceDirs != null) {
-                pw.print(prefix); pw.print("splitDir=");
-                        pw.println(Arrays.toString(appInfo.splitSourceDirs));
-            }
+        final ApplicationInfo appInfo = info.applicationInfo;
+        pw.print(prefix); pw.print("baseDir="); pw.println(appInfo.sourceDir);
+        if (!Objects.equals(appInfo.sourceDir, appInfo.publicSourceDir)) {
+            pw.print(prefix); pw.print("resDir="); pw.println(appInfo.publicSourceDir);
+        }
+        pw.print(prefix); pw.print("dataDir="); pw.println(appInfo.dataDir);
+        if (appInfo.splitSourceDirs != null) {
+            pw.print(prefix); pw.print("splitDir=");
+            pw.println(Arrays.toString(appInfo.splitSourceDirs));
         }
         pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
                 pw.print(" componentSpecified="); pw.print(componentSpecified);
@@ -1079,8 +1074,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         pw.print(prefix); pw.print("compat=");
         pw.print(mAtmService.compatibilityInfoForPackageLocked(info.applicationInfo));
-                pw.print(" labelRes=0x"); pw.print(Integer.toHexString(labelRes));
-                pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
                 pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
         pw.println(prefix + "mLastReportedConfigurations:");
         mLastReportedConfiguration.dump(pw, prefix + "  ");
@@ -2157,14 +2150,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             sConstrainDisplayApisConfig = new ConstrainDisplayApisConfig();
         }
         stateNotNeeded = (aInfo.flags & FLAG_STATE_NOT_NEEDED) != 0;
-        nonLocalizedLabel = aInfo.nonLocalizedLabel;
-        labelRes = aInfo.labelRes;
-        if (nonLocalizedLabel == null && labelRes == 0) {
-            ApplicationInfo app = aInfo.applicationInfo;
-            nonLocalizedLabel = app.nonLocalizedLabel;
-            labelRes = app.labelRes;
-        }
-        icon = aInfo.getIconResource();
         theme = aInfo.getThemeResource();
         if ((aInfo.flags & FLAG_MULTIPROCESS) != 0 && _caller != null
                 && (aInfo.applicationInfo.uid == SYSTEM_UID
@@ -8079,8 +8064,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The {@link ActivityRecord} should only specify an orientation when it is not closing.
         // Allowing closing {@link ActivityRecord} to participate can lead to an Activity in another
         // task being started in the wrong orientation during the transition.
-        if (!getDisplayContent().mClosingApps.contains(this)
-                && (isVisibleRequested() || getDisplayContent().mOpeningApps.contains(this))) {
+        if (isVisibleRequested()) {
             return getOverrideOrientation();
         }
 

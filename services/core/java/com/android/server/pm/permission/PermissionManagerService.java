@@ -1229,11 +1229,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         sPlatformPermissions.put(permission, permissionInfo);
                     }
                 } catch (PackageManager.NameNotFoundException ignored) {
-                    // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                    if (permission.equals(Manifest.permission.BLUETOOTH_CONNECT)) {
-                        Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as package"
-                                + " not found when retrieving permission info");
-                    }
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
             }
@@ -1353,34 +1348,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // way we can avoid the datasource creating an attribution context for every call.
                 if (!(fromDatasource && current.equals(attributionSource))
                         && next != null && !current.isTrusted(context)) {
-                    // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                    if (permission.equals(Manifest.permission.BLUETOOTH_CONNECT)) {
-                        Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as "
-                                + current + " attribution source isn't a data source and "
-                                + current + " isn't trusted");
-                    }
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
 
                 // If we already checked the permission for this one, skip the work
                 if (!skipCurrentChecks && !checkPermission(context, permissionManagerServiceInt,
                         permission, current)) {
-                    // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                    if (permission.equals(Manifest.permission.BLUETOOTH_CONNECT)) {
-                        Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as we"
-                                + " aren't skipping permission checks and permission check returns"
-                                + " false for " + current);
-                    }
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
 
                 if (next != null && !checkPermission(context, permissionManagerServiceInt,
                         permission, next)) {
-                    // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                    if (permission.equals(Manifest.permission.BLUETOOTH_CONNECT)) {
-                        Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as"
-                                + " permission check returns false for next source " + next);
-                    }
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
 
@@ -1697,12 +1675,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 final AttributionSource resolvedAttributionSource = resolveAttributionSource(
                         context, accessorSource);
                 if (resolvedAttributionSource.getPackageName() == null) {
-                    // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                    if (op == OP_BLUETOOTH_CONNECT) {
-                        Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as resolved"
-                                + "package name for " + resolvedAttributionSource + " returned"
-                                + " null");
-                    }
                     return AppOpsManager.MODE_ERRORED;
                 }
                 int notedOp = op;
@@ -1716,13 +1688,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (attributedOp != AppOpsManager.OP_NONE && attributedOp != op) {
                     checkedOpResult = appOpsManager.checkOpNoThrow(op, resolvedAttributionSource);
                     if (checkedOpResult == MODE_ERRORED) {
-                        // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                        if (op == OP_BLUETOOTH_CONNECT) {
-                            Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as"
-                                    + " checkOp for resolvedAttributionSource "
-                                    + resolvedAttributionSource + " and op " + op
-                                    + " returned MODE_ERRORED");
-                        }
                         return checkedOpResult;
                     }
                     notedOp = attributedOp;

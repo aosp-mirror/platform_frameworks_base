@@ -273,7 +273,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
         if (ServiceManager.isDeclared(VIBRATOR_CONTROL_SERVICE)) {
             injector.addService(VIBRATOR_CONTROL_SERVICE,
-                    new VibratorControlService(new VibratorControllerHolder(), mLock));
+                    new VibratorControlService(new VibratorControllerHolder(), mVibrationScaler,
+                            mLock));
         }
 
     }

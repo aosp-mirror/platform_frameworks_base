@@ -37,6 +37,7 @@ import android.os.OutcomeReceiver;
 import android.os.RemoteException;
 import android.provider.DeviceConfig;
 import android.util.Log;
+import android.view.autofill.IAutoFillManagerClient;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -135,7 +136,8 @@ public final class CredentialManager {
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<GetCandidateCredentialsResponse,
-                    GetCandidateCredentialsException> callback
+                    GetCandidateCredentialsException> callback,
+            @NonNull IAutoFillManagerClient clientCallback
     ) {
         requireNonNull(request, "request must not be null");
         requireNonNull(callingPackage, "callingPackage must not be null");
@@ -153,6 +155,7 @@ public final class CredentialManager {
                     mService.getCandidateCredentials(
                             request,
                             new GetCandidateCredentialsTransport(executor, callback),
+                            clientCallback,
                             callingPackage);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();

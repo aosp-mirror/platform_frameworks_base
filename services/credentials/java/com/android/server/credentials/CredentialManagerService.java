@@ -63,6 +63,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.credentials.metrics.ApiName;
@@ -483,6 +484,7 @@ public final class CredentialManagerService
         public ICancellationSignal getCandidateCredentials(
                 GetCredentialRequest request,
                 IGetCandidateCredentialsCallback callback,
+                IAutoFillManagerClient clientCallback,
                 final String callingPackage) {
             Slog.i(TAG, "starting getCandidateCredentials with callingPackage: "
                     + callingPackage);
@@ -503,7 +505,8 @@ public final class CredentialManagerService
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
                             getEnabledProvidersForUser(userId),
-                            CancellationSignal.fromTransport(cancelTransport)
+                            CancellationSignal.fromTransport(cancelTransport),
+                            clientCallback
                     );
             addSessionLocked(userId, session);
 
