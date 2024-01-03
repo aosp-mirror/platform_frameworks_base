@@ -18,6 +18,8 @@ package com.android.systemui.qs.tiles.base.actions
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.UserHandle
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
@@ -32,13 +34,23 @@ import javax.inject.Inject
 interface QSTileIntentUserInputHandler {
 
     fun handle(view: View?, intent: Intent)
-    fun handle(view: View?, pendingIntent: PendingIntent)
+
+    /** @param requestLaunchingDefaultActivity used in case !pendingIndent.isActivity */
+    fun handle(
+        view: View?,
+        pendingIntent: PendingIntent,
+        requestLaunchingDefaultActivity: Boolean = false
+    )
 }
 
 @SysUISingleton
 class QSTileIntentUserInputHandlerImpl
 @Inject
-constructor(private val activityStarter: ActivityStarter) : QSTileIntentUserInputHandler {
+constructor(
+    private val activityStarter: ActivityStarter,
+    private val packageManager: PackageManager,
+    private val userHandle: UserHandle,
+) : QSTileIntentUserInputHandler {
 
     override fun handle(view: View?, intent: Intent) {
         val animationController: ActivityLaunchAnimator.Controller? =
@@ -52,21 +64,41 @@ constructor(private val activityStarter: ActivityStarter) : QSTileIntentUserInpu
     }
 
     // TODO(b/249804373): make sure to allow showing activities over the lockscreen. See b/292112939
-    override fun handle(view: View?, pendingIntent: PendingIntent) {
-        if (!pendingIntent.isActivity) {
-            return
-        }
-        val animationController: ActivityLaunchAnimator.Controller? =
-            view?.let {
-                ActivityLaunchAnimator.Controller.fromView(
-                    it,
-                    InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
+    override fun handle(
+        view: View?,
+        pendingIntent: PendingIntent,
+        requestLaunchingDefaultActivity: Boolean
+    ) {
+        if (pendingIntent.isActivity) {
+            val animationController: ActivityLaunchAnimator.Controller? =
+                view?.let {
+                    ActivityLaunchAnimator.Controller.fromView(
+                        it,
+                        InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
+                    )
+                }
+            activityStarter.postStartActivityDismissingKeyguard(pendingIntent, animationController)
+        } else if (requestLaunchingDefaultActivity) {
+            val intent =
+                Intent(Intent.ACTION_MAIN)
+                    .addCategory(Intent.CATEGORY_LAUNCHER)
+                    .setPackage(pendingIntent.creatorPackage)
+                    .addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                    )
+            val intents =
+                packageManager.queryIntentActivitiesAsUser(
+                    intent,
+                    PackageManager.ResolveInfoFlags.of(0L),
+                    userHandle.identifier
                 )
-            }
-        activityStarter.startPendingIntentMaybeDismissingKeyguard(
-            pendingIntent,
-            null,
-            animationController
-        )
+            intents
+                .firstOrNull { it.activityInfo.exported }
+                ?.let { resolved ->
+                    intent.setPackage(null)
+                    intent.setComponent(resolved.activityInfo.componentName)
+                    handle(view, intent)
+                }
+        }
     }
 }
