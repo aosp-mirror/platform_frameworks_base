@@ -35,6 +35,31 @@ import java.util.ArrayList;
  */
 @TestApi
 public class IntentFactory {
+
+    /**
+     * Generate a new launch intent to the Credential Selector UI.
+     *
+     * @hide
+     */
+    @NonNull
+    public static Intent createCredentialSelectorIntent(
+            @NonNull RequestInfo requestInfo,
+            @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
+            @NonNull
+            ArrayList<ProviderData> enabledProviderDataList,
+            @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
+            @NonNull
+            ArrayList<DisabledProviderData> disabledProviderDataList,
+            @NonNull ResultReceiver resultReceiver,
+            boolean isRequestForAllOptions) {
+
+        Intent intent = createCredentialSelectorIntent(requestInfo, enabledProviderDataList,
+                disabledProviderDataList, resultReceiver);
+        intent.putExtra(Constants.EXTRA_REQ_FOR_ALL_OPTIONS, isRequestForAllOptions);
+
+        return intent;
+    }
+
     /** Generate a new launch intent to the Credential Selector UI. */
     @NonNull
     public static Intent createCredentialSelectorIntent(

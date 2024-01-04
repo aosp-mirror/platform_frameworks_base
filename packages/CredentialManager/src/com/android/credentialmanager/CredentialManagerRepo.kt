@@ -53,6 +53,7 @@ class CredentialManagerRepo(
     isNewActivity: Boolean,
 ) {
     val requestInfo: RequestInfo?
+    var isReqForAllOptions: Boolean = false
     private val providerEnabledList: List<ProviderData>
     private val providerDisabledList: List<DisabledProviderData>?
     val resultReceiver: ResultReceiver?
@@ -102,6 +103,11 @@ class CredentialManagerRepo(
             ResultReceiver::class.java
         )
 
+        isReqForAllOptions = intent.getBooleanExtra(
+                Constants.EXTRA_REQ_FOR_ALL_OPTIONS,
+                /*defaultValue=*/ false
+        )
+
         val cancellationRequest = getCancelUiRequest(intent)
         val cancelUiRequestState = cancellationRequest?.let {
             CancelUiRequestState(getAppLabel(context.getPackageManager(), it.appPackageName))
@@ -141,7 +147,8 @@ class CredentialManagerRepo(
                 )
             }
             RequestInfo.TYPE_GET -> {
-                val getCredentialInitialUiState = getCredentialInitialUiState(originName)!!
+                val getCredentialInitialUiState = getCredentialInitialUiState(originName,
+                        isReqForAllOptions)!!
                 val autoSelectEntry =
                     findAutoSelectEntry(getCredentialInitialUiState.providerDisplayInfo)
                 UiState(
@@ -216,14 +223,18 @@ class CredentialManagerRepo(
     }
 
     // IMPORTANT: new invocation should be mindful that this method can throw.
-    private fun getCredentialInitialUiState(originName: String?): GetCredentialUiState? {
+    private fun getCredentialInitialUiState(
+            originName: String?,
+            isReqForAllOptions: Boolean
+    ): GetCredentialUiState? {
         val providerEnabledList = GetFlowUtils.toProviderList(
             providerEnabledList as List<GetCredentialProviderData>, context
         )
         val requestDisplayInfo = GetFlowUtils.toRequestDisplayInfo(requestInfo, context, originName)
         return GetCredentialUiState(
-            providerEnabledList,
-            requestDisplayInfo ?: return null,
+                isReqForAllOptions,
+                providerEnabledList,
+                requestDisplayInfo ?: return null
         )
     }
 

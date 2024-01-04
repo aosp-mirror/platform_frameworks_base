@@ -192,7 +192,7 @@ public class PrepareGetRequestSession extends GetRequestSession {
                             mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                     Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
-                    providerDataList);
+                    providerDataList, /*isRequestForAllOptions=*/ false);
         } else {
             return null;
         }
