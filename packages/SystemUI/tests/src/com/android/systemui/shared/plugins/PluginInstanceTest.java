@@ -112,7 +112,7 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstance = mPluginInstanceFactory.create(
                 mContext, mAppInfo, TEST_PLUGIN_COMPONENT_NAME,
                 TestPlugin.class, mPluginListener);
-        mPluginInstance.setIsDebug(true);
+        mPluginInstance.setLogFunc((tag, msg) -> Log.d((String) tag, (String) msg));
         mPluginContext = new WeakReference<>(mPluginInstance.getPluginContext());
     }
 
