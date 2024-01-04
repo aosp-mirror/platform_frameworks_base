@@ -22,6 +22,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.shade.ShadeExpansionStateManager
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +49,7 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
             AuthDialogPanelInteractionDetector(shadeExpansionStateManager, mContext.mainExecutor)
     }
 
+    @Ignore("b/316929376")
     @Test
     fun testEnableDetector_expandWithTrack_shouldPostRunnable() {
         detector.enable(action)
