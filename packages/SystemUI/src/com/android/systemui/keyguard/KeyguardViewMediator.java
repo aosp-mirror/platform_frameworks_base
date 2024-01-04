@@ -1478,6 +1478,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         mOrderUnlockAndWake = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_orderUnlockAndWake);
+
+        mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
+        mShowKeyguardWakeLock.setReferenceCounted(false);
     }
 
     public void userActivity() {
@@ -1485,9 +1488,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     private void setupLocked() {
-        mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
-        mShowKeyguardWakeLock.setReferenceCounted(false);
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SHUTDOWN);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter);
