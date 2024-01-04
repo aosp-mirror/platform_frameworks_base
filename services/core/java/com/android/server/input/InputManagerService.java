@@ -48,6 +48,7 @@ import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.IKeyboardBacklightListener;
+import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
@@ -319,6 +320,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages Keyboard backlight
     private final KeyboardBacklightControllerInterface mKeyboardBacklightController;
 
+    // Manages Sticky modifier state
+    private final StickyModifierStateController mStickyModifierStateController;
+
     // Manages Keyboard modifier keys remapping
     private final KeyRemapper mKeyRemapper;
 
@@ -464,6 +468,7 @@ public class InputManagerService extends IInputManager.Stub
                 ? new KeyboardBacklightController(mContext, mNative, mDataStore,
                         injector.getLooper(), injector.getUEventManager())
                 : new KeyboardBacklightControllerInterface() {};
+        mStickyModifierStateController = new StickyModifierStateController();
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
 
         mUseDevInputEventForAudioJack =
@@ -2825,6 +2830,33 @@ public class InputManagerService extends IInputManager.Stub
         mHandler.obtainMessage(MSG_POINTER_DISPLAY_ID_CHANGED,
                 new PointerDisplayIdChangedArgs(pointerDisplayId, xPosition,
                         yPosition)).sendToTarget();
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void registerStickyModifierStateListener(
+            @NonNull IStickyModifierStateListener listener) {
+        super.registerStickyModifierStateListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mStickyModifierStateController.registerStickyModifierStateListener(listener,
+                Binder.getCallingPid());
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void unregisterStickyModifierStateListener(
+            @NonNull IStickyModifierStateListener listener) {
+        super.unregisterStickyModifierStateListener_enforcePermission();
+        Objects.requireNonNull(listener);
+        mStickyModifierStateController.unregisterStickyModifierStateListener(listener,
+                Binder.getCallingPid());
+    }
+
+    // Native callback
+    @SuppressWarnings("unused")
+    void notifyStickyModifierStateChanged(int modifierState, int lockedModifierState) {
+        mStickyModifierStateController.notifyStickyModifierStateChanged(modifierState,
+                lockedModifierState);
     }
 
     // Native callback.

@@ -114,6 +114,7 @@ static struct {
     jmethodID notifyFocusChanged;
     jmethodID notifySensorEvent;
     jmethodID notifySensorAccuracy;
+    jmethodID notifyStickyModifierStateChanged;
     jmethodID notifyStylusGestureStarted;
     jmethodID isInputMethodConnectionActive;
     jmethodID notifyVibratorState;
@@ -270,7 +271,8 @@ static std::string getStringElementFromJavaArray(JNIEnv* env, jobjectArray array
 class NativeInputManager : public virtual InputReaderPolicyInterface,
                            public virtual InputDispatcherPolicyInterface,
                            public virtual PointerControllerPolicyInterface,
-                           public virtual PointerChoreographerPolicyInterface {
+                           public virtual PointerChoreographerPolicyInterface,
+                           public virtual InputFilterPolicyInterface {
 protected:
     virtual ~NativeInputManager();
 
@@ -388,6 +390,10 @@ public:
             PointerControllerInterface::ControllerType type) override;
     void notifyPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position) override;
 
+    /* --- InputFilterPolicyInterface implementation --- */
+    void notifyStickyModifierStateChanged(uint32_t modifierState,
+                                          uint32_t lockedModifierState) override;
+
 private:
     sp<InputManagerInterface> mInputManager;
 
@@ -477,7 +483,7 @@ NativeInputManager::NativeInputManager(jobject serviceObj, const sp<Looper>& loo
 
     mServiceObj = env->NewGlobalRef(serviceObj);
 
-    InputManager* im = new InputManager(this, *this, *this);
+    InputManager* im = new InputManager(this, *this, *this, *this);
     mInputManager = im;
     defaultServiceManager()->addService(String16("inputflinger"), im);
 }
@@ -804,6 +810,14 @@ void NativeInputManager::notifyPointerDisplayIdChanged(int32_t pointerDisplayId,
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDisplayIdChanged, pointerDisplayId,
                         position.x, position.y);
     checkAndClearExceptionFromCallback(env, "onPointerDisplayIdChanged");
+}
+
+void NativeInputManager::notifyStickyModifierStateChanged(uint32_t modifierState,
+                                                          uint32_t lockedModifierState) {
+    JNIEnv* env = jniEnv();
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyStickyModifierStateChanged,
+                        modifierState, lockedModifierState);
+    checkAndClearExceptionFromCallback(env, "notifyStickyModifierStateChanged");
 }
 
 sp<SurfaceControl> NativeInputManager::getParentSurfaceForPointers(int displayId) {
@@ -2956,6 +2970,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.onPointerDisplayIdChanged, clazz, "onPointerDisplayIdChanged",
                   "(IFF)V");
+
+    GET_METHOD_ID(gServiceClassInfo.notifyStickyModifierStateChanged, clazz,
+                  "notifyStickyModifierStateChanged", "(II)V");
 
     GET_METHOD_ID(gServiceClassInfo.onPointerDownOutsideFocus, clazz,
             "onPointerDownOutsideFocus", "(Landroid/os/IBinder;)V");
