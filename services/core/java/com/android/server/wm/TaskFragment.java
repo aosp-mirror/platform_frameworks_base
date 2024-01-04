@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
@@ -57,6 +58,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TRANSITION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ActivityTaskManagerService.checkPermission;
 import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
@@ -80,7 +82,9 @@ import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
+import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -744,7 +748,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // The system is trusted to embed other apps securely and for all users.
         return UserHandle.getAppId(uid) == SYSTEM_UID
                 // Activities from the same UID can be embedded freely by the host.
-                || a.isUid(uid);
+                || a.isUid(uid)
+                // Apps which have the signature MANAGE_ACTIVITY_TASK permission are trusted.
+                || hasManageTaskPermission(uid);
+    }
+
+    /**
+     * Checks if a particular app uid has the {@link MANAGE_ACTIVITY_TASKS} permission.
+     */
+    private static boolean hasManageTaskPermission(int uid) {
+        return checkPermission(MANAGE_ACTIVITY_TASKS, PermissionChecker.PID_UNKNOWN, uid)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
