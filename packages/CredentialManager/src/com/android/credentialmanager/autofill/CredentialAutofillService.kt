@@ -398,7 +398,7 @@ class CredentialAutofillService : AutofillService() {
         val sliceBuilder = InlineSuggestionUi
                 .newContentBuilder(bottomSheetPendingIntent)
                 .setStartIcon(Icon.createWithResource(this,
-                        com.android.credentialmanager.R.drawable.ic_other_sign_in_24))
+                        com.android.credentialmanager.R.drawable.more_horiz_24px))
         val presentationBuilder = Presentations.Builder()
                 .setInlinePresentation(InlinePresentation(
                         sliceBuilder.build().slice, spec, /* pinned= */ true))
