@@ -262,6 +262,7 @@ public final class BroadcastHelper {
             // Deliver LOCKED_BOOT_COMPLETED first
             Intent lockedBcIntent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
                     .setPackage(packageName);
+            lockedBcIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             if (includeStopped) {
                 lockedBcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             }
@@ -275,6 +276,7 @@ public final class BroadcastHelper {
             // Deliver BOOT_COMPLETED only if user is unlocked
             if (mUmInternal.isUserUnlockingOrUnlocked(userId)) {
                 Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED).setPackage(packageName);
+                bcIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 if (includeStopped) {
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 }
