@@ -50,7 +50,10 @@ import android.window.WindowContainerTransaction;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams.OccludingCaptionElement;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -293,13 +296,36 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
 
             // Caption insets
-            mCaptionInsetsRect.set(taskBounds);
             if (mIsCaptionVisible) {
-                mCaptionInsetsRect.bottom =
-                        mCaptionInsetsRect.top + outResult.mCaptionHeight;
+                // Caption inset is the full width of the task with the |captionHeight| and
+                // positioned at the top of the task bounds, also in absolute coordinates.
+                // So just reuse the task bounds and adjust the bottom coordinate.
+                mCaptionInsetsRect.set(taskBounds);
+                mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + outResult.mCaptionHeight;
+
+                // Caption bounding rectangles: these are optional, and are used to present finer
+                // insets than traditional |Insets| to apps about where their content is occluded.
+                // These are also in absolute coordinates.
+                final Rect[] boundingRects;
+                final int numOfElements = params.mOccludingCaptionElements.size();
+                if (numOfElements == 0) {
+                    boundingRects = null;
+                } else {
+                    boundingRects = new Rect[numOfElements];
+                    for (int i = 0; i < numOfElements; i++) {
+                        final OccludingCaptionElement element =
+                                params.mOccludingCaptionElements.get(i);
+                        final int elementWidthPx =
+                                resources.getDimensionPixelSize(element.mWidthResId);
+                        boundingRects[i] =
+                                calculateBoundingRect(element, elementWidthPx, mCaptionInsetsRect);
+                    }
+                }
+
+                // Add this caption as an inset source.
                 wct.addInsetsSource(mTaskInfo.token,
                         mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect,
-                        null /* boundingRects */);
+                        boundingRects);
                 wct.addInsetsSource(mTaskInfo.token,
                         mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures(),
                         mCaptionInsetsRect, null /* boundingRects */);
@@ -376,6 +402,20 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             }
             mViewHost.relayout(lp);
         }
+    }
+
+    private Rect calculateBoundingRect(@NonNull OccludingCaptionElement element,
+            int elementWidthPx, @NonNull Rect captionRect) {
+        switch (element.mAlignment) {
+            case START -> {
+                return new Rect(0, 0, elementWidthPx, captionRect.height());
+            }
+            case END -> {
+                return new Rect(captionRect.width() - elementWidthPx, 0,
+                        captionRect.width(), captionRect.height());
+            }
+        }
+        throw new IllegalArgumentException("Unexpected alignment " + element.mAlignment);
     }
 
     /**
@@ -555,8 +595,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mLayoutResId;
         int mCaptionHeightId;
         int mCaptionWidthId;
-        int mShadowRadiusId;
+        final List<OccludingCaptionElement> mOccludingCaptionElements = new ArrayList<>();
 
+        int mShadowRadiusId;
         int mCornerRadius;
 
         Configuration mWindowDecorConfig;
@@ -568,13 +609,27 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mLayoutResId = Resources.ID_NULL;
             mCaptionHeightId = Resources.ID_NULL;
             mCaptionWidthId = Resources.ID_NULL;
-            mShadowRadiusId = Resources.ID_NULL;
+            mOccludingCaptionElements.clear();
 
+            mShadowRadiusId = Resources.ID_NULL;
             mCornerRadius = 0;
 
             mApplyStartTransactionOnDraw = false;
             mSetTaskPositionAndCrop = false;
             mWindowDecorConfig = null;
+        }
+
+        /**
+         * Describes elements within the caption bar that could occlude app content, and should be
+         * sent as bounding rectangles to the insets system.
+         */
+        static class OccludingCaptionElement {
+            int mWidthResId;
+            Alignment mAlignment;
+
+            enum Alignment {
+                START, END
+            }
         }
     }
 
