@@ -180,8 +180,7 @@ public class UserControllerTest {
             REPORT_LOCKED_BOOT_COMPLETE_MSG);
 
     @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
-            SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() throws Exception {
