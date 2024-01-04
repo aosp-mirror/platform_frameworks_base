@@ -375,6 +375,19 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * Value for {@link #flags}: true if this application's package is in
      * the stopped state.
+     *
+     * <p>Stopped is the initial state after an app is installed, before it is launched
+     * or otherwise directly interacted with by the user. The system tries not to
+     * start it unless initiated by a user interaction (typically launching its icon
+     * from the launcher, could also include user actions like adding it as an app widget,
+     * selecting it as a live wallpaper, selecting it as a keyboard, etc). Stopped
+     * applications will not receive broadcasts unless the sender specifies
+     * {@link android.content.Intent#FLAG_INCLUDE_STOPPED_PACKAGES}.
+     *
+     * <p>Applications should avoid launching activies, binding to or starting services, or
+     * otherwise causing a stopped application to run unless initiated by the user.
+     *
+     * <p>An app can also return to the stopped state by a "force stop".
      */
     public static final int FLAG_STOPPED = 1<<21;
 
