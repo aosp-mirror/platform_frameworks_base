@@ -1219,7 +1219,7 @@
     <string name="aerr_report" msgid="3095644466849299308">"फ़ीडबैक भेजें"</string>
     <string name="aerr_close" msgid="3398336821267021852">"बंद करें"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"डिवाइस फिर से प्रारंभ होने तक म्यूट करें"</string>
-    <string name="aerr_wait" msgid="3198677780474548217">"प्रतीक्षा करें"</string>
+    <string name="aerr_wait" msgid="3198677780474548217">"इंतज़ार करें"</string>
     <string name="aerr_close_app" msgid="8318883106083050970">"ऐप बंद करें"</string>
     <string name="anr_title" msgid="7290329487067300120"></string>
     <string name="anr_activity_application" msgid="8121716632960340680">"<xliff:g id="APPLICATION">%2$s</xliff:g> प्रतिसाद नहीं दे रहा है"</string>
@@ -1228,7 +1228,7 @@
     <string name="anr_process" msgid="1664277165911816067">"<xliff:g id="PROCESS">%1$s</xliff:g> प्रक्रिया प्रतिसाद नहीं दे रही है"</string>
     <string name="force_close" msgid="9035203496368973803">"ठीक है"</string>
     <string name="report" msgid="2149194372340349521">"रिपोर्ट करें"</string>
-    <string name="wait" msgid="7765985809494033348">"प्रतीक्षा करें"</string>
+    <string name="wait" msgid="7765985809494033348">"इंतज़ार करें"</string>
     <string name="webpage_unresponsive" msgid="7850879412195273433">"पेज प्रतिसाद नहीं दे रहा है.\n\nक्‍या आप इसे बंद करना चाहते हैं?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"ऐप को दूसरे वेबलिंक पर लॉन्च किया गया"</string>
     <string name="launch_warning_replace" msgid="3073392976283203402">"<xliff:g id="APP_NAME">%1$s</xliff:g> अभी चल रहा है."</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"कीबोर्ड का लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… पर सेट कर दिया गया है. इसे बदलने के लिए टैप करें."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"फ़िज़िकल कीबोर्ड कॉन्फ़िगर किए गए"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"कीबोर्ड देखने के लिए टैप करें"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"निजी"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"क्लोन"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"ऑफ़िस"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"ऑफ़िस 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"ऑफ़िस 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"टेस्ट"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"कम्यूनिटी"</string>
 </resources>
