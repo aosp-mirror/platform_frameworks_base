@@ -1331,9 +1331,7 @@ public interface WindowManager extends ViewManager {
      * <p>When users apply the aspect ratio override, the minimum aspect ratio
      * specified in the app manifest is overridden. If users choose a
      * full-screen aspect ratio, the orientation of the activity is forced to
-     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER};
-     * see {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE} to
-     * disable the full-screen option only.
+     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER}.
      *
      * <p>The user override is intended to improve the app experience on devices
      * that have the ignore orientation request display setting enabled by OEMs
@@ -1358,9 +1356,8 @@ public interface WindowManager extends ViewManager {
      *     android:value="false"/&gt;
      * &lt;/application&gt;
      * </pre>
-     * @hide
      */
-    // TODO(b/294227289): Make this public API
+    @FlaggedApi(Flags.FLAG_APP_COMPAT_PROPERTIES_API)
     String PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE";
 
