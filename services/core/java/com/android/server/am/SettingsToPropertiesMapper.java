@@ -163,6 +163,7 @@ public class SettingsToPropertiesMapper {
         "pixel_audio_android",
         "pixel_bluetooth",
         "pixel_system_sw_touch",
+        "pixel_system_sw_video",
         "pixel_watch",
         "platform_security",
         "power",
