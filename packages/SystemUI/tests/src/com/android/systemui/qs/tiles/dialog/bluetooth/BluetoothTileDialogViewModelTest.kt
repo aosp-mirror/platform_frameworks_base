@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
+import android.content.SharedPreferences
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -78,6 +79,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var logger: BluetoothTileDialogLogger
 
+    @Mock private lateinit var sharedPreferences: SharedPreferences
+
     private lateinit var scheduler: TestCoroutineScheduler
     private lateinit var dispatcher: CoroutineDispatcher
     private lateinit var testScope: TestScope
@@ -98,6 +101,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                 logger,
                 testScope.backgroundScope,
                 dispatcher,
+                dispatcher,
+                sharedPreferences,
             )
         `when`(deviceItemInteractor.deviceItemUpdate).thenReturn(MutableSharedFlow())
         `when`(bluetoothStateInteractor.bluetoothStateUpdate)

@@ -23,6 +23,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.filters.SmallTest
@@ -54,6 +56,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
         const val DEVICE_NAME = "device"
         const val DEVICE_CONNECTION_SUMMARY = "active"
         const val ENABLED = true
+        const val CONTENT_HEIGHT = WRAP_CONTENT
     }
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -88,6 +91,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
             BluetoothTileDialog(
                 ENABLED,
                 subtitleResId,
+                CONTENT_HEIGHT,
                 bluetoothTileDialogCallback,
                 dispatcher,
                 fakeSystemClock,
@@ -116,9 +120,9 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
         assertThat(bluetoothTileDialog.isShowing).isTrue()
         assertThat(recyclerView).isNotNull()
-        assertThat(recyclerView?.visibility).isEqualTo(VISIBLE)
-        assertThat(recyclerView?.adapter).isNotNull()
-        assertThat(recyclerView?.layoutManager is LinearLayoutManager).isTrue()
+        assertThat(recyclerView.visibility).isEqualTo(VISIBLE)
+        assertThat(recyclerView.adapter).isNotNull()
+        assertThat(recyclerView.layoutManager is LinearLayoutManager).isTrue()
     }
 
     @Test
@@ -128,6 +132,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                 BluetoothTileDialog(
                     ENABLED,
                     subtitleResId,
+                    CONTENT_HEIGHT,
                     bluetoothTileDialogCallback,
                     dispatcher,
                     fakeSystemClock,
@@ -144,7 +149,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
             )
 
             val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
-            val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
+            val adapter = recyclerView.adapter as BluetoothTileDialog.Adapter
             assertThat(adapter.itemCount).isEqualTo(1)
             assertThat(adapter.getItem(0).deviceName).isEqualTo(DEVICE_NAME)
             assertThat(adapter.getItem(0).connectionSummary).isEqualTo(DEVICE_CONNECTION_SUMMARY)
@@ -162,6 +167,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
             BluetoothTileDialog(
                     ENABLED,
                     subtitleResId,
+                    CONTENT_HEIGHT,
                     bluetoothTileDialogCallback,
                     dispatcher,
                     fakeSystemClock,
@@ -189,6 +195,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
             BluetoothTileDialog(
                     ENABLED,
                     subtitleResId,
+                    CONTENT_HEIGHT,
                     bluetoothTileDialogCallback,
                     dispatcher,
                     fakeSystemClock,
@@ -213,6 +220,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                 BluetoothTileDialog(
                     ENABLED,
                     subtitleResId,
+                    CONTENT_HEIGHT,
                     bluetoothTileDialogCallback,
                     dispatcher,
                     fakeSystemClock,
@@ -232,13 +240,38 @@ class BluetoothTileDialogTest : SysuiTestCase() {
             val pairNewButton =
                 bluetoothTileDialog.requireViewById<View>(R.id.pair_new_device_button)
             val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
-            val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
+            val adapter = recyclerView.adapter as BluetoothTileDialog.Adapter
+            val scrollViewContent = bluetoothTileDialog.requireViewById<View>(R.id.scroll_view)
 
             assertThat(seeAllButton).isNotNull()
             assertThat(seeAllButton.visibility).isEqualTo(GONE)
             assertThat(pairNewButton).isNotNull()
             assertThat(pairNewButton.visibility).isEqualTo(VISIBLE)
             assertThat(adapter.itemCount).isEqualTo(1)
+            assertThat(scrollViewContent.layoutParams.height).isEqualTo(WRAP_CONTENT)
+        }
+    }
+
+    @Test
+    fun testShowDialog_displayFromCachedHeight() {
+        testScope.runTest {
+            bluetoothTileDialog =
+                BluetoothTileDialog(
+                    ENABLED,
+                    subtitleResId,
+                    MATCH_PARENT,
+                    bluetoothTileDialogCallback,
+                    dispatcher,
+                    fakeSystemClock,
+                    uiEventLogger,
+                    logger,
+                    mContext
+                )
+            bluetoothTileDialog.show()
+            assertThat(
+                    bluetoothTileDialog.requireViewById<View>(R.id.scroll_view).layoutParams.height
+                )
+                .isEqualTo(MATCH_PARENT)
         }
     }
 }
