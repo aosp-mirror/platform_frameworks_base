@@ -16,8 +16,11 @@
 
 package android.telecom;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.os.Bundle;
+
+import com.android.server.telecom.flags.Flags;
 
 import java.util.List;
 
@@ -49,6 +52,14 @@ public interface CallEventCallback {
      * @param isMuted The current mute state.
      */
     void onMuteStateChanged(boolean isMuted);
+
+    /**
+     * Called when the video state changes.
+     *
+     * @param videoState The current video state.
+     */
+    @FlaggedApi(Flags.FLAG_TRANSACTIONAL_VIDEO_STATE)
+    default void onVideoStateChanged(@CallAttributes.CallType int videoState) {}
 
     /**
      * Telecom is informing the client user requested call streaming but the stream can't be
