@@ -92,6 +92,7 @@ import com.android.internal.R;
 import libcore.io.IoUtils;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -745,8 +746,14 @@ public class WallpaperManager {
                 Trace.endSection();
 
                 if (pfd != null) {
-                    try (InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
-                        ImageDecoder.Source src = ImageDecoder.createSource(is.readAllBytes());
+                    try (BufferedInputStream bis = new BufferedInputStream(
+                            new ParcelFileDescriptor.AutoCloseInputStream(pfd))) {
+                        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        int data;
+                        while ((data = bis.read()) != -1) {
+                            baos.write(data);
+                        }
+                        ImageDecoder.Source src = ImageDecoder.createSource(baos.toByteArray());
                         return ImageDecoder.decodeBitmap(src, ((decoder, info, source) -> {
                             // Mutable and hardware config can't be set at the same time.
                             decoder.setMutableRequired(!hardware);
