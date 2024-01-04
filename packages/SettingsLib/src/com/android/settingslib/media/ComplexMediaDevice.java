@@ -34,9 +34,8 @@ public class ComplexMediaDevice extends MediaDevice {
     ComplexMediaDevice(
             Context context,
             MediaRoute2Info info,
-            String packageName,
             RouteListingPreference.Item item) {
-        super(context, info, packageName, item);
+        super(context, info, item);
     }
 
     // MediaRoute2Info.getName was made public on API 34, but exists since API 30.
