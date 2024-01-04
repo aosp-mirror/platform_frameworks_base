@@ -341,7 +341,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private JavaAdapter mJavaAdapter;
     @Mock private CastController mCastController;
     @Mock private SharedNotificationContainerInteractor mSharedNotificationContainerInteractor;
-    @Mock private ActiveNotificationsInteractor mActiveNotificationsInteractor;
+    @Mock protected ActiveNotificationsInteractor mActiveNotificationsInteractor;
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
     @Mock private NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
 
