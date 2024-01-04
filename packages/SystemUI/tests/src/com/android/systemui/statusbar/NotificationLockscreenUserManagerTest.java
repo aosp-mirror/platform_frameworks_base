@@ -598,6 +598,17 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS)
+    public void testEarlyUserSwitch() {
+        mLockscreenUserManager =
+                new TestNotificationLockscreenUserManager(mContext);
+        mBackgroundExecutor.runAllReady();
+        mLockscreenUserManager.mUserChangedCallback.onUserChanging(
+                mCurrentUser.id, mContext);
+        // no crash!
+    }
+
+    @Test
+    @EnableFlags(FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS)
     public void testKeyguardManager_noPrivateNotifications() {
         Mockito.clearInvocations(mDevicePolicyManager);
         // User allows notifications
