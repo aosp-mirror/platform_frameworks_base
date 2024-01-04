@@ -3264,9 +3264,9 @@ final class InstallPackageHelper {
                 Slog.e(TAG, "updateAllSharedLibrariesLPw failed: " + e.getMessage());
             }
         }
-        mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
-
         setPackageInstalledForSystemPackage(pkg, allUserHandles, origUserHandles, writeSettings);
+
+        mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
     }
 
     private void setPackageInstalledForSystemPackage(@NonNull AndroidPackage pkg,
