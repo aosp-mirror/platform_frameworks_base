@@ -85,16 +85,16 @@
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Afbrudt"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Afbryder ..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Opretter forbindelse..."</string>
-    <string name="bluetooth_connected" msgid="8065345572198502293">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Parrer..."</string>
-    <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen telefon)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen medier)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen telefon eller medier)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon eller medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktivt, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
+    <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen telefon)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen medier)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (ingen telefon eller medier)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Forbundet med <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon eller medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktiv, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktivt, V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri. Højre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
@@ -125,7 +125,7 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Sluttet til SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Ikke forbundet til filoverførselsserver"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Forbundet til inputenhed"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Tilsluttet enhed for at få internetadgang"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Forbundet med enhed for at få internetadgang"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Deler lokal internetforbindelse med enhed"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Brug til internetadgang"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Brug til kort"</string>
@@ -402,9 +402,9 @@
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivér vinduer i frit format"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivér understøttelse af eksperimentelle vinduer i frit format"</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Computertilstand"</string>
-    <string name="local_backup_password_title" msgid="4631017948933578709">"Kode til lokal backup"</string>
+    <string name="local_backup_password_title" msgid="4631017948933578709">"Kode til lokal sikkerhedskopi"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Lokale komplette backups er i øjeblikket ikke beskyttet"</string>
-    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal backup"</string>
+    <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal sikkerhedskopiering"</string>
     <string name="local_backup_password_toast_success" msgid="4891666204428091604">"Ny adgangskode til sikkerhedskopi er angivet"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="2994718182129097733">"Ny adgangskode og bekræftelse matcher ikke"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="714669442363647122">"Fejl ved angivelse af adgangskode til sikkerhedskopi"</string>
@@ -439,7 +439,7 @@
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Deaktiveret"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monokromasi"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranopi (rød-grøn)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopi (rød-grøn)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (rød-grøn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopi (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farvekorrigering"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Farvekorrigering kan være en nyttig funktion, når du vil:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Se farver mere nøjagtigt&lt;/li&gt; &lt;li&gt;&amp;nbsp;Fjerne farver, så du nemmere kan fokusere&lt;/li&gt; &lt;/ol&gt;"</string>

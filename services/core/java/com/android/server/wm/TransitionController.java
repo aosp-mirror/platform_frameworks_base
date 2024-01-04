@@ -30,6 +30,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.WindowConfiguration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
@@ -139,6 +140,21 @@ class TransitionController {
      * degenerate states.
      */
     final ArrayList<ActivityRecord> mValidateCommitVis = new ArrayList<>();
+
+    /**
+     * List of activity-level participants. ActivityRecord is not expected to change independently,
+     * however, recent compatibility logic can now cause this at arbitrary times determined by
+     * client code. If it happens during an animation, the surface can be left at the wrong spot.
+     * TODO(b/290237710) remove when compat logic is moved.
+     */
+    final ArrayList<ActivityRecord> mValidateActivityCompat = new ArrayList<>();
+
+    /**
+     * List of display areas which were last sent as "closing"-type and haven't yet had a
+     * corresponding "opening"-type transition. A mismatch here is usually related to issues in
+     * keyguard unlock.
+     */
+    final ArrayList<DisplayArea> mValidateDisplayVis = new ArrayList<>();
 
     /**
      * Currently playing transitions (in the order they were started). When finished, records are
@@ -905,6 +921,23 @@ class TransitionController {
             }
         }
         mValidateCommitVis.clear();
+        for (int i = 0; i < mValidateActivityCompat.size(); ++i) {
+            ActivityRecord ar = mValidateActivityCompat.get(i);
+            if (ar.getSurfaceControl() == null) continue;
+            final Point tmpPos = new Point();
+            ar.getRelativePosition(tmpPos);
+            ar.getSyncTransaction().setPosition(ar.getSurfaceControl(), tmpPos.x, tmpPos.y);
+        }
+        mValidateActivityCompat.clear();
+        for (int i = 0; i < mValidateDisplayVis.size(); ++i) {
+            final DisplayArea da = mValidateDisplayVis.get(i);
+            if (!da.isAttached() || da.getSurfaceControl() == null) continue;
+            if (da.isVisibleRequested()) {
+                Slog.e(TAG, "DisplayArea became visible outside of a transition: " + da);
+                da.getSyncTransaction().show(da.getSurfaceControl());
+            }
+        }
+        mValidateDisplayVis.clear();
     }
 
     /**

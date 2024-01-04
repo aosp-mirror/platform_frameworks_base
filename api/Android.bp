@@ -60,14 +60,14 @@ python_test_host {
 metalava_cmd = "$(location metalava)"
 // Silence reflection warnings. See b/168689341
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
-metalava_cmd += " --quiet --no-banner --format=v2 "
+metalava_cmd += " --quiet "
 
 genrule {
     name: "current-api-xml",
     tools: ["metalava"],
     srcs: [":frameworks-base-api-current.txt"],
     out: ["current.api"],
-    cmd: metalava_cmd + "-convert2xmlnostrip $(in) $(out)",
+    cmd: metalava_cmd + "signature-to-jdiff $(in) $(out)",
     visibility: ["//visibility:public"],
 }
 

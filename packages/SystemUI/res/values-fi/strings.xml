@@ -480,7 +480,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"Ääni ja värinä"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Asetukset"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Äänenvoimakkuus laskettu turvalliselle tasolle"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Äänenvoimakkuus on ollut suuri yli suositellun ajan"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Äänenvoimakkuus on ollut suuri suositeltua kauemmin"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Kuulokkeiden äänenvoimakkuus on ylittänyt tämän viikon turvarajan"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Jatka kuuntelua"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Vähennä äänenvoimakkuutta"</string>
@@ -1142,7 +1142,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Vaihda työprofiiliin"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Asenna työpuhelinsovellus"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Peruuta"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"Customize lukitusnäyttöä"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Muokkaa lukitusnäyttöä"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Avaa lukitus muokataksesi lukitusnäyttöä"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi-yhteys ei ole käytettävissä"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera estetty"</string>

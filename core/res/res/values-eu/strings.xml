@@ -476,7 +476,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"atzitu kokapen-hornitzaileen komando gehigarriak"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Kokapen-hornitzailearen agindu gehigarriak erabiltzeko baimena ematen die aplikazioei. Horrela, agian aplikazioek GPSaren edo bestelako kokapenaren iturburuen funtzionamenduan eragina izan dezakete."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"lortu kokapen zehatza aurreko planoan bakarrik"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Abian denean, aplikazioak kokapen zehatza lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan. Bateria-erabilera areagotzen du horrek."</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Abian denean, aplikazioak kokapen zehatza lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan. Agian bateria gehiago erabiliko du."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"atzitu gutxi gorabeherako kokapena aurreko planoan bakarrik"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Abian denean, aplikazioak gutxi gorabeherako kokapena lor dezake kokapen-zerbitzuen bidez. Aplikazioak kokapena lortu ahal izateko, kokapen-zerbitzuek aktibatuta egon behar dute gailuan."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"atzitu kokapena atzeko planoan"</string>
@@ -555,7 +555,7 @@
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"aldatu telefono bidezko konektagarritasuna"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Partekatutako Interneterako konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"ikusi wifi-konexioak"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi sareei buruzko informazioa ikusteko baimena ematen die aplikazioei, adibidez, Wi-Fi konexioa aktibatuta dagoen eta konektatutako Wi-Fi gailuen izenak zein diren."</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi sareei buruzko informazioa ikusteko baimena ematen die aplikazioei, adibidez, wifi-konexioa aktibatuta dagoen eta konektatutako Wi-Fi gailuen izenak zein diren."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"konektatu wifira edo deskonektatu bertatik"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi sarbide-puntuetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei, baita Wi-Fi sareen gailu-konfigurazioari aldaketak egitekoa ere."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"onartu Wi-Fi Multicast harrera"</string>
@@ -670,7 +670,7 @@
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Sakatu hau aurpegi-eredua ezabatzeko eta, gero, gehitu aurpegia berriro"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguratu Aurpegi bidez desblokeatzea"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonoa desblokeatzeko, begira iezaiozu"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aurpegi bidez desblokeatzeko aukera erabiltzeko, aktibatu "<b>"kamera erabiltzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aurpegi bidez desblokeatzeko eginbidea erabiltzeko, aktibatu "<b>"kamera erabiltzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguratu telefonoa desblokeatzeko modu gehiago"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Sakatu hau hatz-marka bat gehitzeko"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Hatz-marka bidez desblokeatzea"</string>
@@ -934,7 +934,7 @@
     <string name="relationTypeAssistant" msgid="4057605157116589315">"Laguntzailea"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"Anaia/Neba"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"Semea/Alaba"</string>
-    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Izatezko bikotea"</string>
+    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Izatezko bikotekidea"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"Aita"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"Laguna"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Kudeatzailea"</string>
@@ -1563,7 +1563,7 @@
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Maius"</string>
     <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Sartu"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"Aukeratu aplikazio bat"</string>
-    <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Ezin izan da <xliff:g id="APPLICATION_NAME">%s</xliff:g> abiarazi"</string>
+    <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Ezin izan da exekutatu <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Partekatu hauekin"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Partekatu <xliff:g id="APPLICATION_NAME">%s</xliff:g> aplikazioarekin"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Lerratze-euskarria. Ukitu eta eutsi."</string>
@@ -1611,7 +1611,7 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Aukeratu jarduera"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Partekatu hauekin:"</string>
     <string name="sending" msgid="206925243621664438">"Bidaltzen…"</string>
-    <string name="launchBrowserDefault" msgid="6328349989932924119">"Arakatzailea abiarazi nahi duzu?"</string>
+    <string name="launchBrowserDefault" msgid="6328349989932924119">"Arakatzailea exekutatu nahi duzu?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Deia onartu nahi duzu?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Beti"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Behin soilik"</string>
@@ -1682,8 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Kendu"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bolumena gomendatutako mailatik gora igo nahi duzu?\n\nMusika bolumen handian eta denbora luzez entzuteak entzumena kalte diezazuke."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Bolumen altuan entzuten jarraitu nahi duzu?\n\nEntzungailuen bolumena gomendatutako denboran baino gehiagoan eduki da ozen, eta baliteke horrek entzumena kaltetzea"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Soinu ozen bat hauteman da\n\nEntzungailuen bolumena gomendatutakoa baino ozenago eduki da, eta baliteke horrek entzumena kaltetzea"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Bolumen altuan entzuten jarraitu nahi duzu?\n\nEntzungailuen bolumena gomendatutako denbora baino luzaroago egon da ozen, eta baliteke horrek entzumena kaltetzea"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Soinua ozenegia dela hauteman da\n\nEntzungailuen bolumena gomendatutakoa baino ozenago eduki da, eta baliteke horrek entzumena kaltetzea"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erabilerraztasun-lasterbidea erabili nahi duzu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Lasterbidea aktibatuta dagoenean, bi bolumen-botoiak hiru segundoz sakatuta abiaraziko da erabilerraztasun-eginbidea."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Erabilerraztasun-eginbideetarako lasterbidea aktibatu nahi duzu?"</string>
@@ -2127,7 +2127,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Aplikazioak ez du grabatzeko baimenik, baina baliteke audioa grabatzea USB bidezko gailu horren bidez."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Pantaila nagusia"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Atzera"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Erabilitako azken aplikazioak"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Azkenaldian erabilitako aplikazioak"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Jakinarazpenak"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Ezarpen bizkorrak"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Piztu edo itzaltzeko leihoa"</string>
@@ -2315,7 +2315,7 @@
     <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> TXARTELA"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Aplikazio osagarrien erloju-profilaren baimena erlojuak kudeatzeko"</string>
     <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Erlojuak kudeatzeko baimena ematen die aplikazio osagarriei."</string>
-    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Begiratu gailu osagarrien presentzia"</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Begiratu gailu osagarrien presentziari"</string>
     <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Gailu osagarrien presentzia begiratzeko baimena ematen die aplikazio osagarriei gailuak inguruan edo urrun daudenean."</string>
     <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Entregatu aplikazio osagarrien mezuak"</string>
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Beste gailuetan mezuak entregatzeko baimena ematen die aplikazio osagarriei."</string>
@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Aurreko planoko zerbitzuak atzeko planotik abiarazteko baimena ematen die aplikazio osagarriei."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Erabilgarri dago mikrofonoa"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Blokeatuta dago mikrofonoa"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Bi pantailako modua"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Bi pantailako modua aktibatuta dago"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen aktibatuta dago"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bi pantailak erabiltzen ari da edukia erakusteko"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Gailua beroegi dago"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Bi pantailako modua ez dago erabilgarri telefonoa berotzen ari delako"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen ez dago erabilgarri telefonoa berotzen ari delako"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ez dago erabilgarri"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen ez dago erabilgarri, bateria-aurreztailea aktibatuta dagoelako. Aukera hori desaktibatzeko, joan ezarpenetara."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Joan Ezarpenak atalera"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Ezarri da <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> eta <xliff:g id="LAYOUT_3">%3$s</xliff:g> gisa teklatuaren diseinua… Diseinu hori aldatzeko, sakatu hau."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Konfiguratu dira teklatu fisikoak"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Sakatu hau teklatuak ikusteko"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Pribatua"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Klona"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Lanekoa"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Lanekoa 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Lanekoa 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Probakoa"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Partekatua"</string>
 </resources>

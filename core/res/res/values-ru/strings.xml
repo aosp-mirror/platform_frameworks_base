@@ -1594,7 +1594,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Нажмите, чтобы отменить ограничение."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"Высокое потребление трафика"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"В ваших приложениях было передано больше трафика, чем обычно."</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"В приложении \"<xliff:g id="APP">%s</xliff:g>\" было передано больше трафика, чем обычно."</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" использовало больше трафика, чем обычно."</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Сертификат безопасности"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"Этот сертификат действителен."</string>
     <string name="issued_to" msgid="5975877665505297662">"Кому выдан:"</string>
@@ -1861,7 +1861,7 @@
     <string name="select_day" msgid="2060371240117403147">"Выберите месяц и число"</string>
     <string name="select_year" msgid="1868350712095595393">"Выберите год"</string>
     <string name="deleted_key" msgid="9130083334943364001">"Цифра <xliff:g id="KEY">%1$s</xliff:g> удалена"</string>
-    <string name="managed_profile_label_badge" msgid="6762559569999499495">"Рабочий <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (рабочий профиль)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"Задача 2: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Задача 3: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Клонировать <xliff:g id="LABEL">%1$s</xliff:g>"</string>
@@ -2325,11 +2325,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Сопутствующее приложение сможет запускать активные службы из фонового режима."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон доступен."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон заблокирован."</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Двойной экран"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Двойной экран включен"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Функция Dual Screen включена"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> использует оба экрана."</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Устройство перегрелось"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Двойной экран недоступен из-за перегрева телефона."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функция Dual Screen недоступна из-за перегрева телефона."</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Функция Dual Screen недоступна"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Функция Dual Screen недоступна, так как включен режим энергосбережения. Вы можете отключить его в настройках."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Открыть настройки"</string>
@@ -2341,4 +2341,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Настроены раскладки клавиатуры для яз.: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> и др. Нажмите, чтобы изменить."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физические клавиатуры настроены"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Нажмите, чтобы посмотреть подключенные клавиатуры."</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Личный"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Клон"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Рабочий"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Рабочий 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Рабочий 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Тестовый"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Совместный"</string>
 </resources>

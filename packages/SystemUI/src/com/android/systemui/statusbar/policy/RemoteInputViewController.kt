@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy
 
+import android.app.ActivityOptions
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.RemoteInput
@@ -275,7 +276,10 @@ class RemoteInputViewControllerImpl @Inject constructor(
                 entry.sbn.instanceId)
 
         try {
-            pendingIntent.send(view.context, 0, intent)
+            val options = ActivityOptions.makeBasic()
+            options.setPendingIntentBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+            pendingIntent.send(view.context, 0, intent, null, null, null, options.toBundle())
         } catch (e: PendingIntent.CanceledException) {
             Log.i(TAG, "Unable to send remote input result", e)
             uiEventLogger.logWithInstanceId(

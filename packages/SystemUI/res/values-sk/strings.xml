@@ -270,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inverzia farieb"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Úprava farieb"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Veľkosť písma"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Spravovať používateľov"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Spravovať použ."</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hotovo"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Zavrieť"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Pripojené"</string>
@@ -291,7 +291,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Upozornenie pri <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Pracovné aplikácie"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nočný režim"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Zapne sa pri západe slnka"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Zap. pri záp. slnka"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Do východu slnka"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Od <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -1090,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Ukážka obrázka"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"upraviť"</string>
     <string name="add" msgid="81036585205287996">"Pridať"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Spravovať používateľov"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Spravovať použ."</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Toto upozornenie nepodporuje presun na rozdelenú obrazovku"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi nie je k dispozícii"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Režim priority"</string>

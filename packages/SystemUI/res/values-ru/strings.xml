@@ -424,7 +424,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Отклонить все беззвучные уведомления"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"В режиме \"Не беспокоить\" уведомления заблокированы"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Начать"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"Нет уведомлений"</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"Нет уведомлений."</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Новых уведомлений нет"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Разблокируйте, чтобы увидеть уведомления"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Устройством управляет один из родителей."</string>
@@ -795,7 +795,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Модуль Wi-Fi отключен"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"Модуль Bluetooth отключен"</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"Модуль Bluetooth отключен."</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Режим \"Не беспокоить\" отключен"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Режим \"Не беспокоить\" включен"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Режим \"Не беспокоить\" был включен специальным правилом (<xliff:g id="ID_1">%s</xliff:g>)."</string>

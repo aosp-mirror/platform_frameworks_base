@@ -1074,6 +1074,13 @@
   <java-symbol type="string" name="managed_profile_label_badge_2" />
   <java-symbol type="string" name="managed_profile_label_badge_3" />
   <java-symbol type="string" name="clone_profile_label_badge" />
+  <java-symbol type="string" name="profile_label_private" />
+  <java-symbol type="string" name="profile_label_clone" />
+  <java-symbol type="string" name="profile_label_work" />
+  <java-symbol type="string" name="profile_label_work_2" />
+  <java-symbol type="string" name="profile_label_work_3" />
+  <java-symbol type="string" name="profile_label_test" />
+  <java-symbol type="string" name="profile_label_communal" />
   <java-symbol type="string" name="mediasize_unknown_portrait" />
   <java-symbol type="string" name="mediasize_unknown_landscape" />
   <java-symbol type="string" name="mediasize_iso_a0" />
@@ -2207,6 +2214,7 @@
   <java-symbol type="array" name="config_supportedDreamComplications" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
   <java-symbol type="bool" name="config_dismissDreamOnActivityStart" />
+  <java-symbol type="bool" name="config_resetScreenTimeoutOnUnexpectedDreamExit" />
   <java-symbol type="integer" name="config_dreamOverlayReconnectTimeoutMs" />
   <java-symbol type="integer" name="config_dreamOverlayMaxReconnectAttempts" />
   <java-symbol type="integer" name="config_minDreamOverlayDurationMs" />
@@ -5131,4 +5139,7 @@
 
   <java-symbol type="drawable" name="focus_event_pressed_key_background" />
   <java-symbol type="string" name="lockscreen_too_many_failed_attempts_countdown" />
+
+  <!-- Whether we order unlocking and waking -->
+  <java-symbol type="bool" name="config_orderUnlockAndWake" />
 </resources>

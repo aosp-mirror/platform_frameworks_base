@@ -2186,7 +2186,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * Processes the activities to be stopped or destroyed. This should be called when the resumed
      * activities are idle or drawn.
      */
-    private void processStoppingAndFinishingActivities(ActivityRecord launchedActivity,
+    void processStoppingAndFinishingActivities(ActivityRecord launchedActivity,
             boolean processPausingActivities, String reason) {
         // Stop any activities that are scheduled to do so but have been waiting for the transition
         // animation to finish.
@@ -2194,7 +2194,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         ArrayList<ActivityRecord> readyToStopActivities = null;
         for (int i = 0; i < mStoppingActivities.size(); i++) {
             final ActivityRecord s = mStoppingActivities.get(i);
-            final boolean animating = s.isInTransition();
+            // Activity in a force hidden task should not be counted as animating, i.e., we want to
+            // send onStop before any configuration change when removing pip transition is ongoing.
+            final boolean animating = s.isInTransition()
+                    && s.getTask() != null && !s.getTask().isForceHidden();
             displaySwapping |= s.isDisplaySleepingAndSwapping();
             ProtoLog.v(WM_DEBUG_STATES, "Stopping %s: nowVisible=%b animating=%b "
                     + "finishing=%s", s, s.nowVisible, animating, s.finishing);

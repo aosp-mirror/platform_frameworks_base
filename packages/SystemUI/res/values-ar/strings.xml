@@ -274,7 +274,7 @@
     <string name="quick_settings_done" msgid="2163641301648855793">"تم"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"إغلاق"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"متصل"</string>
-    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"الجهاز متّصل، ومستوى طاقة البطارية <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"متّصل، ومستوى البطارية <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"جارٍ الاتصال..."</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"نقطة اتصال"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"جارٍ التفعيل…"</string>
@@ -349,7 +349,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"سيؤدي هذا إلى حظر جميع الأصوات والاهتزازات، بما في ذلك ما يرد من التنبيهات والموسيقى والفيديو والألعاب."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"انقر مرة أخرى للفتح"</string>
     <string name="tap_again" msgid="1315420114387908655">"انقر مرة أخرى"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"يمكنك الفتح بالتمرير سريعًا لأعلى."</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"التمرير إلى الأعلى لفتح القفل"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"اضغط على رمز فتح القفل لفتح قفل الشاشة."</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"تم فتح قفل جهازك عند تقريبه من وجهك. مرِّر سريعًا للأعلى لفتح الجهاز."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"تم فتح القفل بالتعرّف على وجهك. لفتح الجهاز، اضغط على رمز فتح القفل."</string>
@@ -424,7 +424,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"محو جميع الإشعارات الصامتة"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"عدم الإزعاج\""</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"البدء الآن"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"ليس هناك أي اشعارات"</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"ما مِن إشعارات."</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ما مِن إشعارات جديدة"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"افتَح قفل الشاشة لعرض الإشعارات الأقدم."</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"يتولّى أحد الوالدين إدارة هذا الجهاز."</string>
@@ -795,7 +795,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>، <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"‏ميزة Wi-Fi غير مفعّلة"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"تم إيقاف البلوتوث."</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"البلوتوث غير مفعّل"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"تم إيقاف وضع \"عدم الإزعاج\""</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"ميزة \"عدم الإزعاج\" مفعَّلة."</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -937,7 +937,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"الإعدادات"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"يتم تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> للفنان <xliff:g id="ARTIST_NAME">%2$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%3$s</xliff:g>."</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> من إجمالي <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"\"<xliff:g id="APP_NAME">%1$s</xliff:g>\" قيد التشغيل"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"‫\"<xliff:g id="APP_NAME">%1$s</xliff:g>\" قيد التشغيل"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"تشغيل"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"إيقاف مؤقت"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"المقطع الصوتي السابق"</string>

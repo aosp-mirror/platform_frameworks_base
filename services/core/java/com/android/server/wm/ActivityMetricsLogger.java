@@ -285,9 +285,9 @@ class ActivityMetricsLogger {
         final LaunchingState mLaunchingState;
 
         /** The type can be cold (new process), warm (new activity), or hot (bring to front). */
-        final int mTransitionType;
+        int mTransitionType;
         /** Whether the process was already running when the transition started. */
-        final boolean mProcessRunning;
+        boolean mProcessRunning;
         /** whether the process of the launching activity didn't have any active activity. */
         final boolean mProcessSwitch;
         /** The process state of the launching activity prior to the launch */
@@ -972,6 +972,19 @@ class ActivityMetricsLogger {
             // App isn't attached to record yet, so match with info.
             if (info.mLastLaunchedActivity.info.applicationInfo == appInfo) {
                 info.mBindApplicationDelayMs = info.calculateCurrentDelay();
+                if (info.mProcessRunning) {
+                    // It was HOT/WARM launch, but the process was died somehow right after the
+                    // launch request.
+                    info.mProcessRunning = false;
+                    info.mTransitionType = TYPE_TRANSITION_COLD_LAUNCH;
+                    final String msg = "Process " + info.mLastLaunchedActivity.info.processName
+                            + " restarted";
+                    Slog.i(TAG, msg);
+                    if (info.mLaunchingState.mTraceName != null) {
+                        Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, msg + "#"
+                                + LaunchingState.sTraceSeqId);
+                    }
+                }
             }
         }
     }

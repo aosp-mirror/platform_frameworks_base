@@ -674,7 +674,7 @@
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Гарын бүдүүвчийг сонгох"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Өгөгдмөл"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Дэлгэцийг асаах"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дэлгэцийг асаахыг зөвшөөрнө үү"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дэлгэцийг асаахыг зөвшөөрөх"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Аппад дэлгэцийг асаахыг зөвшөөрнө үү. Зөвшөөрсөн тохиолдолд тухайн апп таны тодорхой оролцоогүйгээр ямар ч үед дэлгэцийг асааж болно."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g>-г нэвтрүүлэхээ зогсоох уу?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Хэрэв та <xliff:g id="SWITCHAPP">%1$s</xliff:g>-г нэвтрүүлсэн эсвэл гаралтыг өөрчилсөн бол таны одоогийн нэвтрүүлэлтийг зогсооно"</string>

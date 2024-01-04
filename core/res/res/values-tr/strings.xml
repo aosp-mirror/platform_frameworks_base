@@ -815,7 +815,7 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Ekran kilidini değiştirir."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Ekranı kilitleme"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Ekranın nasıl ve ne zaman kilitleneceğini denetler."</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Tüm verileri silme"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Tüm verileri sil"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek tabletteki verileri uyarıda bulunmadan siler."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek Android TV cihazınızdaki verileri uyarıda bulunmadan siler."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek bilgi-eğlence sistemindeki veriler uyarıda bulunmadan silinir."</string>
@@ -1682,7 +1682,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Kaldır"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ses seviyesi önerilen düzeyin üzerine yükseltilsin mi?\n\nUzun süre yüksek ses seviyesinde dinlemek işitme duyunuza zarar verebilir."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Yüksek sesle dinlemeye devam edilsin mi?\n\nKulaklığın sesi önerilenden daha uzun süre yüksek düzeyde kaldı ve bu durum işitme kaybına neden olabilir"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Yüksek sesle dinlemeye devam edilsin mi?\n\nKulaklığın sesinin önerilenden uzun süre yüksek düzeyde kalması işitme kaybına neden olabilir"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Yüksek ses algılandı\n\nKulaklığın ses düzeyi önerilenden yüksek. Bu durum işitme kaybına neden olabilir"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erişilebilirlik Kısayolu Kullanılsın mı?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kısayol açıkken ses düğmelerinin ikisini birden 3 saniyeliğine basılı tutmanız bir erişilebilirlik özelliğini başlatır."</string>
@@ -2163,7 +2163,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Devam ettir"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"İş uygulaması yok"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Kişisel uygulama yok"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"İş uygulaması (<xliff:g id="APP">%s</xliff:g>) açılsın mı?"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> iş uygulaması açılsın mı?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Kişisel uygulamada (<xliff:g id="APP">%s</xliff:g>) açılsın mı?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"İş uygulamasında (<xliff:g id="APP">%s</xliff:g>) açılsın mı?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"İş uygulamasından aransın mı?"</string>
@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tamamlayıcı uygulamanın arka plandan ön plan hizmetlerini başlatmasına izin verir."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon kullanılabilir"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon engellenmiş"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Çift ekran"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Çift ekran açık"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen açık"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, içeriği göstermek için her iki ekranı da kullanıyor"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Cihaz çok ısındı"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Telefonunuz çok ısındığı için Çift Ekran kullanılamıyor"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Telefonunuz çok ısındığı için Dual Screen kullanılamıyor"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen kullanılamıyor"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Pil Tasarrufu açık olduğundan Dual Screen kullanılamıyor. Bu özelliği Ayarlar\'dan kapatabilirsiniz."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ayarlar\'a git"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Klavye düzeni <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> olarak ayarlandı… Değiştirmek için dokunun."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fiziksel klavyeler yapılandırıldı"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klavyeleri görüntülemek için dokunun"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Gizli"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Klon"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"İş"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"İş 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"İş 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Paylaşılan"</string>
 </resources>
