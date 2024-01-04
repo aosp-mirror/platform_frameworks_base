@@ -430,19 +430,17 @@ key 658   MACRO_3
 key 659   MACRO_4
 
 # Keys defined by HID usages
-key usage 0x0c0067 WINDOW
-key usage 0x0c006F BRIGHTNESS_UP
-key usage 0x0c0070 BRIGHTNESS_DOWN
-key usage 0x0c0079 KEYBOARD_BACKLIGHT_UP
-key usage 0x0c007A KEYBOARD_BACKLIGHT_DOWN
-key usage 0x0c007C KEYBOARD_BACKLIGHT_TOGGLE
-key usage 0x0c0173 MEDIA_AUDIO_TRACK
-key usage 0x0c019C PROFILE_SWITCH
-key usage 0x0c01A2 ALL_APPS
-# TODO(b/297094448): Add stylus button mappings as a fallback when we have a way to determine
-#   if a device can actually report it.
-# key usage 0x0d0044 STYLUS_BUTTON_PRIMARY
-# key usage 0x0d005a STYLUS_BUTTON_SECONDARY
+key usage 0x0c0067 WINDOW                    FALLBACK_USAGE_MAPPING
+key usage 0x0c006F BRIGHTNESS_UP             FALLBACK_USAGE_MAPPING
+key usage 0x0c0070 BRIGHTNESS_DOWN           FALLBACK_USAGE_MAPPING
+key usage 0x0c0079 KEYBOARD_BACKLIGHT_UP     FALLBACK_USAGE_MAPPING
+key usage 0x0c007A KEYBOARD_BACKLIGHT_DOWN   FALLBACK_USAGE_MAPPING
+key usage 0x0c007C KEYBOARD_BACKLIGHT_TOGGLE FALLBACK_USAGE_MAPPING
+key usage 0x0c0173 MEDIA_AUDIO_TRACK         FALLBACK_USAGE_MAPPING
+key usage 0x0c019C PROFILE_SWITCH            FALLBACK_USAGE_MAPPING
+key usage 0x0c01A2 ALL_APPS                  FALLBACK_USAGE_MAPPING
+key usage 0x0d0044 STYLUS_BUTTON_PRIMARY     FALLBACK_USAGE_MAPPING
+key usage 0x0d005a STYLUS_BUTTON_SECONDARY   FALLBACK_USAGE_MAPPING
 
 # Joystick and game controller axes.
 # Axes that are not mapped will be assigned generic axis numbers by the input subsystem.
