@@ -502,7 +502,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mDesktopTasksController.ifPresent(c -> c.onDragPositioningMove(taskInfo,
                             decoration.mTaskSurface,
-                            new PointF(e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx)),
+                            e.getRawX(dragPointerIdx),
                             newTaskBounds));
                     mIsDragging = true;
                     mShouldClick = false;
@@ -731,9 +731,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 if (mTransitionDragActive) {
                     mDesktopTasksController.ifPresent(
-                            c -> c.onDragPositioningMoveThroughStatusBar(
+                            c -> c.updateVisualIndicator(
                                     relevantDecor.mTaskInfo,
-                                    relevantDecor.mTaskSurface, ev.getY()));
+                                    relevantDecor.mTaskSurface, ev.getX(), ev.getY()));
                     final int statusBarHeight = getStatusBarHeight(
                             relevantDecor.mTaskInfo.displayId);
                     if (ev.getY() > statusBarHeight) {
