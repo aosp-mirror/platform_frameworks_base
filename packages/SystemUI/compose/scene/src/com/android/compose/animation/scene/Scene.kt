@@ -20,13 +20,10 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.Snapshot
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -45,15 +42,12 @@ internal class Scene(
     actions: Map<UserAction, SceneKey>,
     zIndex: Float,
 ) {
-    private val scope = SceneScopeImpl(layoutImpl, this)
+    internal val scope = SceneScopeImpl(layoutImpl, this)
 
     var content by mutableStateOf(content)
     var userActions by mutableStateOf(actions)
     var zIndex by mutableFloatStateOf(zIndex)
     var targetSize by mutableStateOf(IntSize.Zero)
-
-    /** The shared values in this scene that are not tied to a specific element. */
-    val sharedValues = SnapshotStateMap<ValueKey, Element.SharedValue<*>>()
 
     @Composable
     @OptIn(ExperimentalComposeUiApi::class)
@@ -77,7 +71,7 @@ internal class Scene(
     }
 }
 
-private class SceneScopeImpl(
+internal class SceneScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val scene: Scene,
 ) : SceneScope {
@@ -85,6 +79,42 @@ private class SceneScopeImpl(
 
     override fun Modifier.element(key: ElementKey): Modifier {
         return element(layoutImpl, scene, key)
+    }
+
+    @Composable
+    override fun Element(
+        key: ElementKey,
+        modifier: Modifier,
+        content: @Composable (ElementScope<ElementContentScope>.() -> Unit)
+    ) {
+        Element(layoutImpl, scene, key, modifier, content)
+    }
+
+    @Composable
+    override fun MovableElement(
+        key: ElementKey,
+        modifier: Modifier,
+        content: @Composable (ElementScope<MovableElementContentScope>.() -> Unit)
+    ) {
+        MovableElement(layoutImpl, scene, key, modifier, content)
+    }
+
+    @Composable
+    override fun <T> animateSceneValueAsState(
+        value: T,
+        key: ValueKey,
+        lerp: (T, T, Float) -> T,
+        canOverflow: Boolean
+    ): AnimatedState<T> {
+        return animateSharedValueAsState(
+            layoutImpl = layoutImpl,
+            scene = scene.key,
+            element = null,
+            key = key,
+            value = value,
+            lerp = lerp,
+            canOverflow = canOverflow,
+        )
     }
 
     override fun Modifier.horizontalNestedScrollToScene(
@@ -108,45 +138,6 @@ private class SceneScopeImpl(
             topOrLeftBehavior = topBehavior,
             bottomOrRightBehavior = bottomBehavior,
         )
-
-    @Composable
-    override fun <T> animateSharedValueAsState(
-        value: T,
-        key: ValueKey,
-        element: ElementKey?,
-        lerp: (T, T, Float) -> T,
-        canOverflow: Boolean
-    ): State<T> {
-        val element =
-            element?.let { key ->
-                Snapshot.withoutReadObservation {
-                    layoutImpl.elements[key]
-                        ?: error(
-                            "Element $key is not composed. Make sure to call " +
-                                "animateSharedXAsState *after* Modifier.element(key)."
-                        )
-                }
-            }
-
-        return animateSharedValueAsState(
-            layoutImpl,
-            scene,
-            element,
-            key,
-            value,
-            lerp,
-            canOverflow,
-        )
-    }
-
-    @Composable
-    override fun MovableElement(
-        key: ElementKey,
-        modifier: Modifier,
-        content: @Composable MovableElementScope.() -> Unit,
-    ) {
-        MovableElement(layoutImpl, scene, key, modifier, content)
-    }
 
     override fun Modifier.punchHole(
         element: ElementKey,

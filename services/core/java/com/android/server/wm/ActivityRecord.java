@@ -2492,7 +2492,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Creating SnapshotStartingData");
         mStartingData = new SnapshotStartingData(mWmService, snapshot, typeParams);
-        if (task.forAllLeafTaskFragments(TaskFragment::isEmbedded)) {
+        if ((!mStyleFillsParent && task.getChildCount() > 1)
+                || task.forAllLeafTaskFragments(TaskFragment::isEmbedded)) {
+            // Case 1:
+            // If it is moving a Task{[0]=main activity, [1]=translucent activity} to front, use
+            // shared starting window so that the transition doesn't need to wait for the activity
+            // behind the translucent activity. Also, onFirstWindowDrawn will check all visible
+            // activities are drawn in the task to remove the snapshot starting window.
+            // Case 2:
             // Associate with the task so if this activity is resized by task fragment later, the
             // starting window can keep the same bounds as the task.
             associateStartingDataWithTask();
@@ -4312,7 +4319,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         mTaskSupervisor.mStoppingActivities.remove(this);
         mLetterboxUiController.destroy();
-        waitingToShow = false;
 
         // Defer removal of this activity when either a child is animating, or app transition is on
         // going. App transition animation might be applied on the parent task not on the activity,
@@ -5386,7 +5392,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final DisplayContent displayContent = getDisplayContent();
         displayContent.mOpeningApps.remove(this);
         displayContent.mClosingApps.remove(this);
-        waitingToShow = false;
         setVisibleRequested(visible);
         mLastDeferHidingClient = deferHidingClient;
 
@@ -5411,25 +5416,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // stopped, then we need to set up to wait for its windows to be ready.
             if (!isVisible() || mAppStopped) {
                 clearAllDrawn();
-
-                // If the app was already visible, don't reset the waitingToShow state.
-                if (!isVisible()) {
-                    waitingToShow = true;
-
-                    // If the client isn't hidden, we don't need to reset the drawing state.
-                    if (!isClientVisible()) {
-                        // Let's reset the draw state in order to prevent the starting window to be
-                        // immediately dismissed when the app still has the surface.
-                        forAllWindows(w -> {
-                            if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
-                                w.mWinAnimator.resetDrawState();
-
-                                // Force add to mResizingWindows, so that we are guaranteed to get
-                                // another reportDrawn callback.
-                                w.forceReportingResized();
-                            }
-                        }, true /* traverseTopToBottom */);
-                    }
+                // Reset the draw state in order to prevent the starting window to be immediately
+                // dismissed when the app still has the surface.
+                if (!isVisible() && !isClientVisible()) {
+                    forAllWindows(w -> {
+                        if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
+                            w.mWinAnimator.resetDrawState();
+                            // Force add to mResizingWindows, so the window will report drawn.
+                            w.forceReportingResized();
+                        }
+                    }, true /* traverseTopToBottom */);
                 }
             }
 
@@ -10626,6 +10622,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
+        if (task != null && task.mSharedStartingData != null) {
+            final WindowState startingWin = task.topStartingWindow();
+            if (startingWin != null && startingWin.isSyncFinished(group)) {
+                // The sync is ready if a drawn starting window covered the task.
+                return true;
+            }
+        }
         if (!super.isSyncFinished(group)) return false;
         if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController
                 .isVisibilityUnknown(this)) {

@@ -25,7 +25,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.goneToAodTransitionViewModel by Fixture {
+var Kosmos.goneToAodTransitionViewModel by Fixture {
     GoneToAodTransitionViewModel(
         interactor = keyguardTransitionInteractor,
         deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,

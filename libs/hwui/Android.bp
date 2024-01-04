@@ -38,6 +38,7 @@ aconfig_declarations {
 
 cc_aconfig_library {
     name: "hwui_flags_cc_lib",
+    host_supported: true,
     aconfig_declarations: "hwui_flags",
 }
 
@@ -109,11 +110,14 @@ cc_defaults {
         "libbase",
         "libharfbuzz_ng",
         "libminikin",
+        "server_configurable_flags",
     ],
 
     static_libs: [
         "libui-types",
     ],
+
+    whole_static_libs: ["hwui_flags_cc_lib"],
 
     target: {
         android: {
@@ -146,7 +150,6 @@ cc_defaults {
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
                 "libtonemap",
-                "hwui_flags_cc_lib",
             ],
         },
         host: {

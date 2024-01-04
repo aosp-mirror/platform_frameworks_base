@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.fingerprint.hidl;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -81,19 +82,30 @@ public class LockoutFrameworkImpl implements LockoutTracker {
             @NonNull LockoutResetCallback lockoutResetCallback) {
         this(context, lockoutResetCallback, (userId) -> PendingIntent.getBroadcast(context, userId,
                 new Intent(ACTION_LOCKOUT_RESET).putExtra(KEY_LOCKOUT_RESET_USER, userId),
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE),
+                null /* handler */);
+    }
+
+    public LockoutFrameworkImpl(@NonNull Context context,
+            @NonNull LockoutResetCallback lockoutResetCallback,
+            @NonNull Handler handler) {
+        this(context, lockoutResetCallback, (userId) -> PendingIntent.getBroadcast(context, userId,
+                new Intent(ACTION_LOCKOUT_RESET).putExtra(KEY_LOCKOUT_RESET_USER, userId),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE),
+                handler);
     }
 
     @VisibleForTesting
     LockoutFrameworkImpl(@NonNull Context context,
             @NonNull LockoutResetCallback lockoutResetCallback,
-            @NonNull Function<Integer, PendingIntent> lockoutResetIntent) {
+            @NonNull Function<Integer, PendingIntent> lockoutResetIntent,
+            @Nullable Handler handler) {
         mLockoutResetCallback = lockoutResetCallback;
         mTimedLockoutCleared = new SparseBooleanArray();
         mFailedAttempts = new SparseIntArray();
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mLockoutReceiver = new LockoutReceiver();
-        mHandler = new Handler(Looper.getMainLooper());
+        mHandler = handler == null ? new Handler(Looper.getMainLooper()) : handler;
         mLockoutResetIntent = lockoutResetIntent;
 
         context.registerReceiver(mLockoutReceiver, new IntentFilter(ACTION_LOCKOUT_RESET),

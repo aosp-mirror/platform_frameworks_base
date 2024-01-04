@@ -2285,6 +2285,11 @@ public class UserManagerService extends IUserManager.Stub {
             throw new SecurityException("You need MANAGE_USERS permission to query if u=" + userId
                     + " is a demo user");
         }
+
+        if (SystemProperties.getBoolean("ro.boot.arc_demo_mode", false)) {
+            return true;
+        }
+
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isDemo();

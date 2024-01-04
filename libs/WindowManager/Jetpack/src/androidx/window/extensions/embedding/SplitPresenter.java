@@ -20,6 +20,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.PackageManager.MATCH_ALL;
 
+import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
+
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.WindowConfiguration;
@@ -56,6 +58,7 @@ import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -384,6 +387,13 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         setCompanionTaskFragment(wct, primaryContainer.getTaskFragmentToken(),
                 secondaryContainer.getTaskFragmentToken(), splitRule, isStacked);
 
+        // Sets the dim area when the two TaskFragments are adjacent.
+        final boolean dimOnTask = !isStacked
+                && splitAttributes.getWindowAttributes().getDimArea() == DIM_AREA_ON_TASK
+                && Flags.fullscreenDimFlag();
+        setTaskFragmentDimOnTask(wct, primaryContainer.getTaskFragmentToken(), dimOnTask);
+        setTaskFragmentDimOnTask(wct, secondaryContainer.getTaskFragmentToken(), dimOnTask);
+
         // Setting isolated navigation and clear non-sticky pinned container if needed.
         final SplitPinRule splitPinRule =
                 splitRule instanceof SplitPinRule ? (SplitPinRule) splitRule : null;
@@ -576,6 +586,23 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         resizeTaskFragment(wct, container.getTaskFragmentToken(), bounds);
         updateWindowingMode(wct, container.getTaskFragmentToken(),
                 bounds.isEmpty() ? WINDOWING_MODE_FULLSCREEN : WINDOWING_MODE_MULTI_WINDOW);
+    }
+
+    @Override
+    void setTaskFragmentDimOnTask(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, boolean dimOnTask) {
+        final TaskFragmentContainer container = mController.getContainer(fragmentToken);
+        if (container == null) {
+            throw new IllegalStateException("setTaskFragmentDimOnTask on TaskFragment that is"
+                    + " not registered with controller.");
+        }
+
+        if (container.isLastDimOnTask() == dimOnTask) {
+            return;
+        }
+
+        container.setLastDimOnTask(dimOnTask);
+        super.setTaskFragmentDimOnTask(wct, fragmentToken, dimOnTask);
     }
 
     /**

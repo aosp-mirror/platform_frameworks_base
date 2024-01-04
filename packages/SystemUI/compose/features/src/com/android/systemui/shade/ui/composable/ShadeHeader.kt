@@ -50,7 +50,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.ValueKey
-import com.android.compose.animation.scene.animateSharedFloatAsState
+import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.settingslib.Utils
 import com.android.systemui.battery.BatteryMeterView
@@ -69,7 +69,6 @@ import com.android.systemui.statusbar.policy.Clock
 
 object ShadeHeader {
     object Elements {
-        val FormatPlaceholder = ElementKey("ShadeHeaderFormatPlaceholder")
         val ExpandedContent = ElementKey("ShadeHeaderExpandedContent")
         val CollapsedContent = ElementKey("ShadeHeaderCollapsedContent")
     }
@@ -92,14 +91,7 @@ fun SceneScope.CollapsedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    // TODO(b/298153892): Remove this once animateSharedFloatAsState.element can be null.
-    Spacer(Modifier.element(ShadeHeader.Elements.FormatPlaceholder))
-    val formatProgress =
-        animateSharedFloatAsState(
-            0.0f,
-            ShadeHeader.Keys.transitionProgress,
-            ShadeHeader.Elements.FormatPlaceholder
-        )
+    val formatProgress = animateSceneFloatAsState(0.0f, ShadeHeader.Keys.transitionProgress)
 
     val cutoutWidth = LocalDisplayCutout.current.width()
     val cutoutLocation = LocalDisplayCutout.current.location
@@ -217,14 +209,7 @@ fun SceneScope.ExpandedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    // TODO(b/298153892): Remove this once animateSharedFloatAsState.element can be null.
-    Spacer(Modifier.element(ShadeHeader.Elements.FormatPlaceholder))
-    val formatProgress =
-        animateSharedFloatAsState(
-            1.0f,
-            ShadeHeader.Keys.transitionProgress,
-            ShadeHeader.Elements.FormatPlaceholder
-        )
+    val formatProgress = animateSceneFloatAsState(1.0f, ShadeHeader.Keys.transitionProgress)
     val useExpandedFormat by
         remember(formatProgress) { derivedStateOf { formatProgress.value > 0.5f } }
 

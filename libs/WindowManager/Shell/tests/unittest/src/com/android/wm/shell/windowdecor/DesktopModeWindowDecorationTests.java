@@ -144,7 +144,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         RelayoutParams relayoutParams = new RelayoutParams();
 
         DesktopModeWindowDecoration.updateRelayoutParams(
-                relayoutParams, mContext, taskInfo, /* applyStartTransactionOnDraw= */ true);
+                relayoutParams, mContext, taskInfo, /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
 
         assertThat(relayoutParams.mShadowRadiusId).isNotEqualTo(Resources.ID_NULL);
     }
@@ -159,7 +160,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
-                /* applyStartTransactionOnDraw= */ true);
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false);
 
         assertThat(relayoutParams.mCornerRadius).isGreaterThan(0);
     }

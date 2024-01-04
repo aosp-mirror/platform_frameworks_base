@@ -20,3 +20,10 @@ flag {
     description: "Enables toasts when ASM restrictions are triggered"
     bug: "230590090"
 }
+
+flag {
+    name: "content_uri_permission_apis"
+    namespace: "responsible_apis"
+    description: "Enables the content URI permission APIs"
+    bug: "293467489"
+}

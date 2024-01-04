@@ -18,27 +18,17 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.graphics.Point
-import android.util.MathUtils
 import android.view.View.VISIBLE
-import com.android.app.animation.Interpolators
-import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
-import com.android.systemui.plugins.clocks.ClockController
-import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -49,51 +39,29 @@ import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.toAnimatedValueFlow
 import com.android.systemui.util.ui.zip
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardRootViewModel
 @Inject
 constructor(
-    configurationInteractor: ConfigurationInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val dozeParameters: DozeParameters,
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
-    private val burnInInteractor: BurnInInteractor,
-    private val keyguardClockViewModel: KeyguardClockViewModel,
-    private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
-    private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
-    private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     screenOffAnimationController: ScreenOffAnimationController,
-    // TODO(b/310989341): remove after changing migrate_clocks_to_blueprint to aconfig
-    private val featureFlags: FeatureFlagsClassic,
+    private val aodBurnInViewModel: AodBurnInViewModel,
+    aodAlphaViewModel: AodAlphaViewModel,
 ) {
-    var clockControllerProvider: Provider<ClockController>? = null
-        get() {
-            if (migrateClocksToBlueprint()) {
-                return Provider { keyguardClockViewModel.clock }
-            } else {
-                return field
-            }
-        }
-
-    /** System insets that keyguard needs to stay out of */
-    var topInset: Int = 0
-    /** Status view top, without translation added in */
-    var statusViewTop: Int = 0
 
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardState
@@ -110,96 +78,25 @@ constructor(
         keyguardInteractor.notificationContainerBounds
 
     /** An observable for the alpha level for the entire keyguard root view. */
-    val alpha: Flow<Float> =
-        combine(
-                keyguardTransitionInteractor.transitionValue(GONE).onStart { emit(0f) },
-                merge(
-                    keyguardInteractor.keyguardAlpha,
-                    occludedToLockscreenTransitionViewModel.lockscreenAlpha,
-                )
-            ) { transitionToGone, alpha ->
-                if (transitionToGone == 1f) {
-                    // Ensures content is not visible when in GONE state
-                    0f
-                } else {
-                    alpha
-                }
-            }
-            .distinctUntilChanged()
-
-    private fun burnIn(): Flow<BurnInModel> {
-        val dozingAmount: Flow<Float> =
-            merge(
-                keyguardTransitionInteractor.goneToAodTransition.map { it.value },
-                keyguardTransitionInteractor.dozeAmountTransition.map { it.value },
-            )
-
-        return combine(dozingAmount, burnInInteractor.keyguardBurnIn) { dozeAmount, burnIn ->
-            val interpolation = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(dozeAmount)
-            val useScaleOnly =
-                (clockControllerProvider?.get()?.config?.useAlternateSmartspaceAODTransition
-                    ?: false) && keyguardClockViewModel.clockSize.value == LARGE
-            if (useScaleOnly) {
-                BurnInModel(
-                    translationX = 0,
-                    translationY = 0,
-                    scale = MathUtils.lerp(burnIn.scale, 1f, 1f - interpolation),
-                )
-            } else {
-                // Ensure the desired translation doesn't encroach on the top inset
-                val burnInY = MathUtils.lerp(0, burnIn.translationY, interpolation).toInt()
-                val translationY =
-                    if (migrateClocksToBlueprint()) {
-                        burnInY
-                    } else {
-                        -(statusViewTop - Math.max(topInset, statusViewTop + burnInY))
-                    }
-                BurnInModel(
-                    translationX = MathUtils.lerp(0, burnIn.translationX, interpolation).toInt(),
-                    translationY = translationY,
-                    scale = MathUtils.lerp(burnIn.scale, 1f, 1f - interpolation),
-                    scaleClockOnly = true,
-                )
-            }
-        }
-    }
+    val alpha: Flow<Float> = aodAlphaViewModel.alpha
 
     /** Specific alpha value for elements visible during [KeyguardState.LOCKSCREEN] */
     val lockscreenStateAlpha: Flow<Float> = aodToLockscreenTransitionViewModel.lockscreenAlpha
 
     /** For elements that appear and move during the animation -> AOD */
-    val burnInLayerAlpha: Flow<Float> = goneToAodTransitionViewModel.enterFromTopAnimationAlpha
+    val burnInLayerAlpha: Flow<Float> = aodBurnInViewModel.alpha
 
-    val translationY: Flow<Float> =
-        configurationInteractor
-            .dimensionPixelSize(R.dimen.keyguard_enter_from_top_translation_y)
-            .flatMapLatest { enterFromTopAmount ->
-                combine(
-                    keyguardInteractor.keyguardTranslationY.onStart { emit(0f) },
-                    burnIn().map { it.translationY.toFloat() }.onStart { emit(0f) },
-                    goneToAodTransitionViewModel
-                        .enterFromTopTranslationY(enterFromTopAmount)
-                        .onStart { emit(0f) },
-                    occludedToLockscreenTransitionViewModel.lockscreenTranslationY.onStart {
-                        emit(0f)
-                    },
-                ) {
-                    keyguardTransitionY,
-                    burnInTranslationY,
-                    goneToAodTransitionTranslationY,
-                    occludedToLockscreenTransitionTranslationY ->
-                    // All values need to be combined for a smooth translation
-                    keyguardTransitionY +
-                        burnInTranslationY +
-                        goneToAodTransitionTranslationY +
-                        occludedToLockscreenTransitionTranslationY
-                }
-            }
-            .distinctUntilChanged()
+    fun translationY(params: BurnInParameters): Flow<Float> {
+        return aodBurnInViewModel.translationY(params)
+    }
 
-    val translationX: Flow<Float> = burnIn().map { it.translationX.toFloat() }
+    fun translationX(params: BurnInParameters): Flow<Float> {
+        return aodBurnInViewModel.translationX(params)
+    }
 
-    val scale: Flow<Pair<Float, Boolean>> = burnIn().map { Pair(it.scale, it.scaleClockOnly) }
+    fun scale(params: BurnInParameters): Flow<BurnInScaleViewModel> {
+        return aodBurnInViewModel.scale(params)
+    }
 
     /** Is the notification icon container visible? */
     val isNotifIconContainerVisible: Flow<AnimatedValue<Boolean>> =

@@ -157,7 +157,10 @@ constructor(
         // If the hub is fully visible, send all touch events to it.
         val communalVisible = hubShowing && !hubOccluded
         if (communalVisible) {
-            return communalContainerView.dispatchTouchEvent(ev)
+            communalContainerView.dispatchTouchEvent(ev)
+            // Return true regardless of dispatch result as some touches at the start of a gesture
+            // may return false from dispatchTouchEvent.
+            return true
         }
 
         if (edgeSwipeRegionWidth == 0) {
@@ -172,13 +175,19 @@ constructor(
                 x >= communalContainerView.width - edgeSwipeRegionWidth
             if (inOpeningSwipeRegion && !hubOccluded) {
                 isTrackingOpenGesture = true
-                return communalContainerView.dispatchTouchEvent(ev)
+                communalContainerView.dispatchTouchEvent(ev)
+                // Return true regardless of dispatch result as some touches at the start of a
+                // gesture may return false from dispatchTouchEvent.
+                return true
             }
         } else if (isTrackingOpenGesture) {
             if (isUp || isCancel) {
                 isTrackingOpenGesture = false
             }
-            return communalContainerView.dispatchTouchEvent(ev)
+            communalContainerView.dispatchTouchEvent(ev)
+            // Return true regardless of dispatch result as some touches at the start of a gesture
+            // may return false from dispatchTouchEvent.
+            return true
         }
 
         return false

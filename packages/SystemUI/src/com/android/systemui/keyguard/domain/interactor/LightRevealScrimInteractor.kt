@@ -96,6 +96,7 @@ constructor(
                 KeyguardState.AOD -> false
                 KeyguardState.DREAMING -> true
                 KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> true
+                KeyguardState.GLANCEABLE_HUB -> true
                 KeyguardState.ALTERNATE_BOUNCER -> true
                 KeyguardState.PRIMARY_BOUNCER -> true
                 KeyguardState.LOCKSCREEN -> true

@@ -31,6 +31,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.isVisible
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.keyguard.qualifiers.KeyguardRootView
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.notifications.ui.composable.NotificationStack
 import com.android.systemui.res.R
@@ -47,8 +48,9 @@ import javax.inject.Inject
 class ViewBasedLockscreenContent
 @Inject
 constructor(
-    private val viewModel: LockscreenSceneViewModel,
+    private val lockscreenSceneViewModel: LockscreenSceneViewModel,
     @KeyguardRootView private val viewProvider: () -> @JvmSuppressWildcards View,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
 ) {
     @Composable
     fun SceneScope.Content(
@@ -59,7 +61,7 @@ constructor(
         }
 
         LockscreenLongPress(
-            viewModel = viewModel.longPress,
+            viewModel = lockscreenSceneViewModel.longPress,
             modifier = modifier,
         ) { onSettingsMenuPlaced ->
             AndroidView(
@@ -74,7 +76,7 @@ constructor(
             )
 
             val notificationStackPosition by
-                viewModel.keyguardRoot.notificationBounds.collectAsState()
+                keyguardRootViewModel.notificationBounds.collectAsState()
 
             Layout(
                 modifier =
@@ -92,7 +94,7 @@ constructor(
                     },
                 content = {
                     NotificationStack(
-                        viewModel = viewModel.notifications,
+                        viewModel = lockscreenSceneViewModel.notifications,
                         isScrimVisible = false,
                     )
                 }

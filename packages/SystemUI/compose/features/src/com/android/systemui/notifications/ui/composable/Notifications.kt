@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.ValueKey
-import com.android.compose.animation.scene.animateSharedFloatAsState
+import com.android.compose.animation.scene.animateElementFloatAsState
 import com.android.systemui.notifications.ui.composable.Notifications.Form
 import com.android.systemui.notifications.ui.composable.Notifications.SharedValues.SharedExpansionValue
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
@@ -157,10 +157,10 @@ private fun SceneScope.NotificationPlaceholder(
     modifier: Modifier = Modifier,
 ) {
     val elementKey = Notifications.Elements.NotificationPlaceholder
-    Box(
+    Element(
+        elementKey,
         modifier =
             modifier
-                .element(elementKey)
                 .debugBackground(viewModel)
                 .onSizeChanged { size: IntSize ->
                     debugLog(viewModel) { "STACK onSizeChanged: size=$size" }
@@ -182,19 +182,23 @@ private fun SceneScope.NotificationPlaceholder(
                 }
     ) {
         val animatedExpansion by
-            animateSharedFloatAsState(
+            animateElementFloatAsState(
                 value = if (form == Form.HunFromTop) 0f else 1f,
-                key = SharedExpansionValue,
-                element = elementKey
+                key = SharedExpansionValue
             )
         debugLog(viewModel) { "STACK composed: expansion=$animatedExpansion" }
-        if (viewModel.isPlaceholderTextVisible) {
-            Text(
-                text = "Notifications",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.align(Alignment.Center),
-            )
+
+        content {
+            if (viewModel.isPlaceholderTextVisible) {
+                Box(Modifier.fillMaxSize()) {
+                    Text(
+                        text = "Notifications",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                }
+            }
         }
     }
 }

@@ -70,6 +70,8 @@ public final class AutomaticZenRule implements Parcelable {
     public static final int TYPE_SCHEDULE_CALENDAR = 2;
     /**
      * The type for rules triggered by bedtime/sleeping, like time of day, or snore detection.
+     *
+     * <p>Only the 'Wellbeing' app may own rules of this type.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int TYPE_BEDTIME = 3;
@@ -95,6 +97,8 @@ public final class AutomaticZenRule implements Parcelable {
     /**
      * The type for rules created and managed by a device owner. These rules may not be fully
      * editable by the device user.
+     *
+     * <p>Only a 'Device Owner' app may own rules of this type.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int TYPE_MANAGED = 7;

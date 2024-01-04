@@ -36,6 +36,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
+import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChanged
+import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
@@ -47,11 +51,16 @@ constructor(
     private val lockscreenSmartspaceController: LockscreenSmartspaceController,
     private val keyguardUnlockAnimationController: KeyguardUnlockAnimationController,
     private val keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel,
+    private val aodBurnInViewModel: AodBurnInViewModel,
 ) {
     @Composable
-    fun SceneScope.SmartSpace(modifier: Modifier = Modifier) {
+    fun SceneScope.SmartSpace(
+        burnInParams: BurnInParameters,
+        onTopChanged: (top: Float?) -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
         Column(
-            modifier = modifier.element(SmartSpaceElementKey),
+            modifier = modifier.element(SmartSpaceElementKey).onTopPlacementChanged(onTopChanged),
         ) {
             if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) {
                 return
@@ -71,9 +80,21 @@ constructor(
                                 start = paddingBelowClockStart,
                             ),
                 ) {
-                    Date()
+                    Date(
+                        modifier =
+                            Modifier.burnInAware(
+                                viewModel = aodBurnInViewModel,
+                                params = burnInParams,
+                            ),
+                    )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Weather()
+                    Weather(
+                        modifier =
+                            Modifier.burnInAware(
+                                viewModel = aodBurnInViewModel,
+                                params = burnInParams,
+                            ),
+                    )
                 }
             }
 
@@ -84,6 +105,10 @@ constructor(
                             start = paddingBelowClockStart,
                             end = paddingBelowClockEnd,
                         )
+                        .burnInAware(
+                            viewModel = aodBurnInViewModel,
+                            params = burnInParams,
+                        ),
             )
         }
     }

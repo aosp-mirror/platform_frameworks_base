@@ -243,7 +243,7 @@ final class ActivityManagerConstants extends ContentObserver {
     /**
      * The default value to {@link #KEY_ENABLE_NEW_OOMADJ}.
      */
-    private static final boolean DEFAULT_ENABLE_NEW_OOM_ADJ = Flags.oomadjusterCorrectnessRewrite();
+    private static final boolean DEFAULT_ENABLE_NEW_OOM_ADJ = false;
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}

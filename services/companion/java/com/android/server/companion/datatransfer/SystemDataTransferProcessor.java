@@ -27,6 +27,7 @@ import static com.android.server.companion.Utils.prepareForIpc;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.DeviceNotAssociatedException;
@@ -186,7 +187,11 @@ public class SystemDataTransferProcessor {
         final long token = Binder.clearCallingIdentity();
         try {
             return PendingIntent.getActivityAsUser(mContext, /*requestCode */ associationId, intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE, /* options= */ null,
+                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
+                    ActivityOptions.makeBasic()
+                            .setPendingIntentCreatorBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle(),
                     UserHandle.CURRENT);
         } finally {
             Binder.restoreCallingIdentity(token);

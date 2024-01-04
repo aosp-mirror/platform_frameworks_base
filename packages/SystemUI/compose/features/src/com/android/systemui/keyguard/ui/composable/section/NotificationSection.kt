@@ -22,7 +22,6 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.notifications.ui.composable.NotificationStack
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 
 class NotificationSection
 @Inject
