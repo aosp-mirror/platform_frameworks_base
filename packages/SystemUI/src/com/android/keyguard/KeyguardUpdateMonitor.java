@@ -217,7 +217,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_BIOMETRIC_ENROLLMENT_STATE_CHANGED = 348;
 
     /** Biometric authentication state: Not listening. */
-    private static final int BIOMETRIC_STATE_STOPPED = 0;
+    @VisibleForTesting
+    protected static final int BIOMETRIC_STATE_STOPPED = 0;
 
     /** Biometric authentication state: Listening. */
     private static final int BIOMETRIC_STATE_RUNNING = 1;
@@ -1803,6 +1804,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 public void onFingerprintDetected(int sensorId, int userId,
                         boolean isStrongBiometric) {
                     handleBiometricDetected(userId, FINGERPRINT, isStrongBiometric);
+                    setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
                 }
             };
 
