@@ -70,7 +70,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.res.R;
@@ -83,6 +82,8 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor;
+import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
 import dagger.Lazy;
 
@@ -132,10 +133,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     MediaOutputDialogFactory mMediaOutputDialogFactory;
     @Mock
-    VolumePanelFactory mVolumePanelFactory;
-    @Mock
-    ActivityStarter mActivityStarter;
-    @Mock
     InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private DumpManager mDumpManager;
@@ -144,6 +141,11 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     DevicePostureController mPostureController;
     @Mock
     private Lazy<SecureSettings> mLazySecureSettings;
+    @Mock
+    private VolumePanelNavigationInteractor mVolumePanelNavigationInteractor;
+    @Mock
+    private VolumeNavigator mVolumeNavigator;
+
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
             new CsdWarningDialog.Factory() {
         @Override
@@ -196,9 +198,9 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDeviceProvisionedController,
                 mConfigurationController,
                 mMediaOutputDialogFactory,
-                mVolumePanelFactory,
-                mActivityStarter,
                 mInteractionJankMonitor,
+                mVolumePanelNavigationInteractor,
+                mVolumeNavigator,
                 false,
                 mCsdWarningDialogFactory,
                 mPostureController,

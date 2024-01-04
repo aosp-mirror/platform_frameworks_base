@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.ui.viewmodel
+package com.android.systemui.volume.panel.ui.layout
 
+import com.android.systemui.volume.panel.component.shared.model.VolumePanelComponents
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
-import com.android.systemui.volume.panel.ui.model.ComponentState
-import com.android.systemui.volume.panel.ui.model.ComponentsLayout
-import com.android.systemui.volume.panel.ui.model.VolumePanelState
+import com.android.systemui.volume.panel.ui.viewmodel.ComponentState
+import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelState
 import javax.inject.Inject
 
-/**
- * Default [ComponentsLayoutManager]. It places [VolumePanelComponents.BOTTOM_BAR] to
- * [ComponentsLayout.bottomBarComponent] and everything else to
- * [ComponentsLayout.contentComponents].
- */
 @VolumePanelScope
 class DefaultComponentsLayoutManager @Inject constructor() : ComponentsLayoutManager {
 
     override fun layout(
         volumePanelState: VolumePanelState,
         components: Collection<ComponentState>
-    ): ComponentsLayout = TODO("Unimplemented yet")
+    ): ComponentsLayout {
+        val bottomBarKey = VolumePanelComponents.BOTTOM_BAR
+        return ComponentsLayout(
+            components.filter { it.key != bottomBarKey }.sortedBy { it.key },
+            components.find { it.key == bottomBarKey }
+                ?: error(
+                    "VolumePanelComponents.BOTTOM_BAR must be present in the default " +
+                        "components layout."
+                )
+        )
+    }
 }

@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.ui.model
+package com.android.systemui.volume.panel.ui.composable
 
-import android.content.res.Configuration
 import android.content.res.Configuration.Orientation
+import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelState
 
-/**
- * State of the Volume Panel itself.
- *
- * @property orientation is current Volume Panel orientation.
- */
-data class VolumePanelState(
-    @Orientation val orientation: Int,
-    val isVisible: Boolean,
-) {
-    init {
-        require(
-            orientation == Configuration.ORIENTATION_PORTRAIT ||
-                orientation == Configuration.ORIENTATION_LANDSCAPE ||
-                orientation == Configuration.ORIENTATION_UNDEFINED ||
-                orientation == Configuration.ORIENTATION_SQUARE
-        ) {
-            "Unknown orientation: $orientation"
-        }
-    }
+class VolumePanelComposeScope(private val state: VolumePanelState) {
+
+    /**
+     * Layout orientation of the panel. It doesn't necessarily aligns with the device orientation,
+     * because in some cases we want to show bigger version of a portrait orientation when the
+     * device is in landscape.
+     */
+    @Orientation
+    val orientation: Int
+        get() = state.orientation
 }

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.domain.model
+package com.android.systemui.volume.panel.ui.composable
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.android.systemui.volume.panel.shared.model.VolumePanelUiComponent
 
 /**
- * Represents a current state of the Volume Panel component.
- *
- * @property key identifies the component the entity represents.
- * @property isAvailable is true when the component is supported by the device.
+ * Compose implementation of [VolumePanelUiComponent]. Each new UI component should implement this
+ * interface.
  */
-data class ComponentModel(
-    val key: VolumePanelComponentKey,
-    val isAvailable: Boolean,
-)
+interface ComposeVolumePanelUiComponent : VolumePanelUiComponent {
+
+    @Composable fun VolumePanelComposeScope.Content(modifier: Modifier)
+}
