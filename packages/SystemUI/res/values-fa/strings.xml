@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"برنامه پیش‌فرض یادداشت را در «تنظیمات» تنظیم کنید"</string>
     <string name="install_app" msgid="5066668100199613936">"نصب برنامه"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"روی نمایشگر خارجی قرینه‌سازی شود؟"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"نمایشگر داخلی شما قرینه‌سازی می‌شود. نمایشگر جلو خاموش می‌شود."</string>
     <string name="mirror_display" msgid="2515262008898122928">"قرینه‌سازی نمایشگر"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"بستن"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"نمایشگر متصل شد"</string>

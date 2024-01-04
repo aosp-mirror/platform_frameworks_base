@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Nastavite privzeto aplikacijo za zapiske v nastavitvah."</string>
     <string name="install_app" msgid="5066668100199613936">"Namesti aplikacijo"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Želite zrcaliti na zunanji zaslon?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"Notranji zaslon bo zrcaljen. Sprednji zaslon bo izklopljen."</string>
     <string name="mirror_display" msgid="2515262008898122928">"Zrcali zaslon"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Opusti"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Zaslon je povezan"</string>

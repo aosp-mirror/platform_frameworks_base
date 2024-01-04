@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"सेटिंग में जाकर, नोट लेने की सुविधा देने वाले ऐप्लिकेशन को डिफ़ॉल्ट के तौर पर सेट करें"</string>
     <string name="install_app" msgid="5066668100199613936">"ऐप्लिकेशन इंस्टॉल करें"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"क्या आपको किसी बाहरी डिवाइस पर डिसप्ले करना है?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"आपके फ़ोन के इनर डिसप्ले की स्क्रीन शेयर की जाएगी. फ़्रंट डिसप्ले को बंद कर दिया जाएगा."</string>
     <string name="mirror_display" msgid="2515262008898122928">"डिसप्ले करें"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"खारिज करें"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"डिसप्ले कनेक्ट किया गया"</string>
