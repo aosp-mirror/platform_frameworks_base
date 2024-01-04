@@ -926,7 +926,14 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "",  // activity name
                 BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
                 UNIMPORTANT_UID,
-                UNIMPORTANT_UID2));
+                UNIMPORTANT_UID2,
+                BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
+                true, // opt in
+                false, // but no explicit opt in
+                BackgroundActivityStartController.BAL_BLOCK,
+                true, // opt in
+                false // but no explicit opt in
+            ));
         mockingSession.finishMocking();
     }
 
@@ -957,7 +964,14 @@ public class ActivityStarterTests extends WindowTestsBase {
                 DEFAULT_COMPONENT_PACKAGE_NAME + "/" + DEFAULT_COMPONENT_PACKAGE_NAME,
                 BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT,
                 UNIMPORTANT_UID,
-                Process.SYSTEM_UID));
+                Process.SYSTEM_UID,
+                BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
+                true, // opt in
+                false, // but no explicit opt in
+                BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW,
+                true, // opt in
+                false // but no explicit opt in
+            ));
         mockingSession.finishMocking();
     }
 
