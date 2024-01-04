@@ -53,6 +53,9 @@ constructor(
     private val logger: SideFpsLogger,
 ) {
 
+    private val isProlongedTouchEnabledForDevice =
+        context.resources.getBoolean(R.bool.config_restToUnlockSupported)
+
     private val sensorLocationForCurrentDisplay =
         combine(
                 displayStateInteractor.displayChanges,
@@ -82,7 +85,7 @@ constructor(
             .onEach { logger.authDurationChanged(it) }
 
     val isProlongedTouchRequiredForAuthentication: Flow<Boolean> =
-        if (fingerprintInteractiveToAuthProvider.isEmpty) {
+        if (fingerprintInteractiveToAuthProvider.isEmpty || !isProlongedTouchEnabledForDevice) {
             flowOf(false)
         } else {
             combine(
