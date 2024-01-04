@@ -95,4 +95,6 @@ interface INfcAdapter
     void registerWlcStateListener(in INfcWlcStateListener listener);
     void unregisterWlcStateListener(in INfcWlcStateListener listener);
     WlcLDeviceInfo getWlcLDeviceInfo();
+
+    void updateDiscoveryTechnology(IBinder b, int pollFlags, int listenFlags);
 }
