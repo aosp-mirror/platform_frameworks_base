@@ -3705,7 +3705,8 @@ public class UserManagerService extends IUserManager.Stub {
                     if (type == XmlPullParser.START_TAG) {
                         final String name = parser.getName();
                         if (name.equals(TAG_USER)) {
-                            UserData userData = readUserLP(parser.getAttributeInt(null, ATTR_ID));
+                            UserData userData = readUserLP(parser.getAttributeInt(null, ATTR_ID),
+                                    mUserVersion);
 
                             if (userData != null) {
                                 synchronized (mUsersLock) {
@@ -4386,7 +4387,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @GuardedBy({"mPackagesLock"})
-    private UserData readUserLP(int id) {
+    private UserData readUserLP(int id, int userVersion) {
         try (ResilientAtomicFile file = getUserFile(id)) {
             FileInputStream fis = null;
             try {
@@ -4395,19 +4396,19 @@ public class UserManagerService extends IUserManager.Stub {
                     Slog.e(LOG_TAG, "User info not found, returning null, user id: " + id);
                     return null;
                 }
-                return readUserLP(id, fis);
+                return readUserLP(id, fis, userVersion);
             } catch (Exception e) {
                 // Remove corrupted file and retry.
                 Slog.e(LOG_TAG, "Error reading user info, user id: " + id);
                 file.failRead(fis, e);
-                return readUserLP(id);
+                return readUserLP(id, userVersion);
             }
         }
     }
 
     @GuardedBy({"mPackagesLock"})
     @VisibleForTesting
-    UserData readUserLP(int id, InputStream is) throws IOException,
+    UserData readUserLP(int id, InputStream is, int userVersion) throws IOException,
             XmlPullParserException {
         int flags = 0;
         String userType = null;
@@ -4500,7 +4501,17 @@ public class UserManagerService extends IUserManager.Stub {
                 } else if (TAG_DEVICE_POLICY_RESTRICTIONS.equals(tag)) {
                     legacyLocalRestrictions = UserRestrictionsUtils.readRestrictions(parser);
                 } else if (TAG_DEVICE_POLICY_LOCAL_RESTRICTIONS.equals(tag)) {
-                    localRestrictions = UserRestrictionsUtils.readRestrictions(parser);
+                    if (userVersion < 10) {
+                        // Prior to version 10, the local user restrictions were stored as sub tags
+                        // grouped by the user id of the source user. The source is no longer stored
+                        // on versions 10+ as this is now stored in the DevicePolicyEngine.
+                        RestrictionsSet oldLocalRestrictions =
+                                RestrictionsSet.readRestrictions(
+                                    parser, TAG_DEVICE_POLICY_LOCAL_RESTRICTIONS);
+                        localRestrictions = oldLocalRestrictions.mergeAll();
+                    } else {
+                        localRestrictions = UserRestrictionsUtils.readRestrictions(parser);
+                    }
                 } else if (TAG_DEVICE_POLICY_GLOBAL_RESTRICTIONS.equals(tag)) {
                     globalRestrictions = UserRestrictionsUtils.readRestrictions(parser);
                 } else if (TAG_ACCOUNT.equals(tag)) {
