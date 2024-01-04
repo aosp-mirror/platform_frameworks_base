@@ -49,7 +49,6 @@ internal typealias MovableElementContent =
 @Stable
 internal class SceneTransitionLayoutImpl(
     internal val state: SceneTransitionLayoutStateImpl,
-    internal var onChangeScene: (SceneKey) -> Unit,
     internal var density: Density,
     internal var edgeDetector: EdgeDetector,
     internal var transitionInterceptionThreshold: Float,
@@ -244,7 +243,7 @@ internal class SceneTransitionLayoutImpl(
                 // TODO(b/290184746): Make sure that this works with SystemUI once we use
                 // SceneTransitionLayout in Flexiglass.
                 scene(state.transitionState.currentScene).userActions[Back]?.let { backScene ->
-                    BackHandler { onChangeScene(backScene) }
+                    BackHandler { state.onChangeScene(backScene) }
                 }
 
                 Box {

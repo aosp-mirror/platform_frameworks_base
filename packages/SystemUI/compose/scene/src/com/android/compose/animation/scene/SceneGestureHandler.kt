@@ -312,7 +312,7 @@ internal class SceneGestureHandler(
             // immediately go back B => A.
             if (targetScene != swipeTransition._currentScene) {
                 swipeTransition._currentScene = targetScene
-                layoutImpl.onChangeScene(targetScene.key)
+                layoutImpl.state.onChangeScene(targetScene.key)
             }
 
             animateOffset(

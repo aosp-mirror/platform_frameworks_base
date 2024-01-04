@@ -16,12 +16,21 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.channels.Channel
 
-/** The state of a [SceneTransitionLayout]. */
+/**
+ * The state of a [SceneTransitionLayout].
+ *
+ * @see updateSceneTransitionLayoutState
+ */
 @Stable
 sealed interface SceneTransitionLayoutState {
     /**
@@ -46,9 +55,45 @@ sealed interface SceneTransitionLayoutState {
     fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean
 }
 
-/** Create a new [SceneTransitionLayoutState] that is currently idle at scene [currentScene]. */
-fun SceneTransitionLayoutState(currentScene: SceneKey): SceneTransitionLayoutState {
-    return SceneTransitionLayoutStateImpl(currentScene, SceneTransitions.Empty)
+/**
+ * Sets up a [SceneTransitionLayoutState] and keeps it synced with [currentScene], [onChangeScene]
+ * and [transitions]. New transitions will automatically be started whenever [currentScene] is
+ * changed.
+ *
+ * @param currentScene the current scene
+ * @param onChangeScene a mutator that should set [currentScene] to the given scene when called.
+ *   This is called when the user commits a transition to a new scene because of a [UserAction], for
+ *   instance by triggering back navigation or by swiping to a new scene.
+ * @param transitions the definition of the transitions used to animate a change of scene.
+ */
+@Composable
+fun updateSceneTransitionLayoutState(
+    currentScene: SceneKey,
+    onChangeScene: (SceneKey) -> Unit,
+    transitions: SceneTransitions = transitions {},
+): SceneTransitionLayoutState {
+    val state = remember {
+        SceneTransitionLayoutStateImpl(currentScene, transitions, onChangeScene)
+    }
+
+    val targetSceneChannel = remember { Channel<SceneKey>(Channel.CONFLATED) }
+    SideEffect {
+        state.onChangeScene = onChangeScene
+        state.transitions = transitions
+
+        targetSceneChannel.trySend(currentScene)
+    }
+
+    LaunchedEffect(targetSceneChannel) {
+        for (newKey in targetSceneChannel) {
+            // Inspired by AnimateAsState.kt: let's poll the last value to avoid being one frame
+            // late.
+            val newKey = targetSceneChannel.tryReceive().getOrNull() ?: newKey
+            animateToScene(state, newKey)
+        }
+    }
+
+    return state
 }
 
 @Stable
@@ -112,6 +157,7 @@ sealed interface TransitionState {
 internal class SceneTransitionLayoutStateImpl(
     initialScene: SceneKey,
     internal var transitions: SceneTransitions,
+    internal var onChangeScene: (SceneKey) -> Unit,
 ) : SceneTransitionLayoutState {
     override var transitionState: TransitionState by
         mutableStateOf(TransitionState.Idle(initialScene))
