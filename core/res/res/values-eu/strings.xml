@@ -2331,7 +2331,7 @@
     <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> TXARTELA"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Aplikazio osagarrien erloju-profilaren baimena erlojuak kudeatzeko"</string>
     <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Erlojuak kudeatzeko baimena ematen die aplikazio osagarriei."</string>
-    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Begiratu gailu osagarrien presentzia"</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Begiratu gailu osagarrien presentziari"</string>
     <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Gailu osagarrien presentzia begiratzeko baimena ematen die aplikazio osagarriei gailuak inguruan edo urrun daudenean."</string>
     <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Entregatu aplikazio osagarrien mezuak"</string>
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Beste gailuetan mezuak entregatzeko baimena ematen die aplikazio osagarriei."</string>

@@ -2050,7 +2050,7 @@
     <string name="autofill_save_type_password" msgid="5624528786144539944">"adgangskode"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"adresse"</string>
     <string name="autofill_save_type_credit_card" msgid="3583795235862046693">"kreditkort"</string>
-    <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"betalingskort"</string>
+    <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"debetkort"</string>
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"betalingskort"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"kort"</string>
     <string name="autofill_save_type_username" msgid="1018816929884640882">"brugernavn"</string>
