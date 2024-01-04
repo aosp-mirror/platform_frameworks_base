@@ -1405,7 +1405,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     case AppOpsManager.MODE_ERRORED: {
                         if (permission.equals(Manifest.permission.BLUETOOTH_CONNECT)) {
                             Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as op"
-                                    + " mode is MODE_ERRORED for " + attributionSource);
+                                    + " mode is MODE_ERRORED. Permission check was requested for: "
+                                    + attributionSource + " and op transaction was invoked for "
+                                    + current);
                         }
                         return PermissionChecker.PERMISSION_HARD_DENIED;
                     }
