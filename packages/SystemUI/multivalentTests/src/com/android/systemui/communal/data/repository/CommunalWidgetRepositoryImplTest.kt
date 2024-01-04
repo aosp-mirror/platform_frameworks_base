@@ -42,6 +42,7 @@ import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
@@ -63,6 +64,8 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
+    @Mock private lateinit var appWidgetManagerOptional: Optional<AppWidgetManager>
+
     @Mock private lateinit var appWidgetManager: AppWidgetManager
 
     @Mock private lateinit var appWidgetHost: AppWidgetHost
@@ -113,6 +116,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         whenever(stopwatchProviderInfo.loadLabel(any())).thenReturn("Stopwatch")
         whenever(userTracker.userHandle).thenReturn(userHandle)
         whenever(communalWidgetDao.getWidgets()).thenReturn(flowOf(emptyMap()))
+        whenever(appWidgetManagerOptional.isPresent).thenReturn(true)
+        whenever(appWidgetManagerOptional.get()).thenReturn(appWidgetManager)
     }
 
     @Test
@@ -296,7 +301,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     private fun initCommunalWidgetRepository(): CommunalWidgetRepositoryImpl {
         return CommunalWidgetRepositoryImpl(
-            appWidgetManager,
+            appWidgetManagerOptional,
             appWidgetHost,
             testScope.backgroundScope,
             testDispatcher,
