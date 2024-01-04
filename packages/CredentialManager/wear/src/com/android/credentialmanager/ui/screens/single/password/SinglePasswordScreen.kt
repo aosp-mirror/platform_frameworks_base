@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.credentialmanager.CredentialSelectorUiState.Get.SingleEntry
 import com.android.credentialmanager.R
 import com.android.credentialmanager.TAG
 import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
@@ -44,12 +45,13 @@ import com.google.android.horologist.compose.tools.WearPreview
 
 @Composable
 fun SinglePasswordScreen(
+    state: SingleEntry,
     columnState: ScalingLazyColumnState,
     onCloseApp: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SinglePasswordScreenViewModel = hiltViewModel(),
 ) {
-    viewModel.initialize()
+    viewModel.initialize(state.entry)
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

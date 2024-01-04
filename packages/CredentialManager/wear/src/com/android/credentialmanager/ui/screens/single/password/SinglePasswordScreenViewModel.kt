@@ -19,12 +19,9 @@ package com.android.credentialmanager.ui.screens.single.password
 import android.content.Intent
 import android.credentials.ui.ProviderPendingIntentResponse
 import android.credentials.ui.UserSelectionDialogResult
-import android.util.Log
 import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.android.credentialmanager.TAG
 import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.client.CredentialManagerClient
@@ -33,7 +30,6 @@ import com.android.credentialmanager.ui.model.PasswordUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,32 +47,14 @@ class SinglePasswordScreenViewModel @Inject constructor(
     val uiState: StateFlow<SinglePasswordScreenUiState> = _uiState
 
     @MainThread
-    fun initialize() {
+    fun initialize(entryInfo: CredentialEntryInfo) {
         if (initializeCalled) return
         initializeCalled = true
-
-        viewModelScope.launch {
-            val request = credentialManagerClient.requests.value
-            Log.d(TAG, "request: $request, client instance: $credentialManagerClient")
-
-            if (request !is Request.Get) {
-                _uiState.value = SinglePasswordScreenUiState.Error
-            } else {
-                requestGet = request
-
-                if (requestGet.providerInfos.all { it.credentialEntryList.isEmpty() }) {
-                    Log.d(TAG, "Empty passwordEntries")
-                    _uiState.value = SinglePasswordScreenUiState.Error
-                } else {
-                    entryInfo = requestGet.providerInfos.first().credentialEntryList.first()
-                    _uiState.value = SinglePasswordScreenUiState.Loaded(
-                        PasswordUiModel(
-                            email = entryInfo.userName,
-                        )
-                    )
-                }
-            }
-        }
+        _uiState.value = SinglePasswordScreenUiState.Loaded(
+            PasswordUiModel(
+                email = entryInfo.userName,
+            )
+        )
     }
 
     fun onCancelClick() {
