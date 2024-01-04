@@ -308,6 +308,13 @@ flag {
 }
 
 flag {
+   name: "run_fingerprint_detect_on_dismissible_keyguard"
+   namespace: "systemui"
+   description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."
+   bug: "311145851"
+}
+
+flag {
    name: "bluetooth_qs_tile_dialog_auto_on_toggle"
    namespace: "systemui"
    description: "Displays the auto on toggle in the bluetooth QS tile dialog"
