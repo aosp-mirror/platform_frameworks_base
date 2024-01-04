@@ -120,6 +120,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
@@ -923,8 +924,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void trustAgentHasTrust() {
         // WHEN user has trust
-        mKeyguardUpdateMonitor.onTrustChanged(true, true,
-                mSelectedUserInteractor.getSelectedUserId(), 0, null);
+        givenSelectedUserCanSkipBouncerFromTrustedState();
 
         // THEN user is considered as "having trust" and bouncer can be skipped
         Assert.assertTrue(mKeyguardUpdateMonitor.getUserHasTrust(
@@ -948,8 +948,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void trustAgentHasTrust_fingerprintLockout() {
         // GIVEN user has trust
-        mKeyguardUpdateMonitor.onTrustChanged(true, true,
-                mSelectedUserInteractor.getSelectedUserId(), 0, null);
+        givenSelectedUserCanSkipBouncerFromTrustedState();
         Assert.assertTrue(mKeyguardUpdateMonitor.getUserHasTrust(
                 mSelectedUserInteractor.getSelectedUserId()));
 
@@ -1992,6 +1991,43 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void runFpDetectFlagDisabled_sideFps_keyguardDismissible_fingerprintAuthenticateRuns() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_RUN_FINGERPRINT_DETECT_ON_DISMISSIBLE_KEYGUARD);
+
+        // Clear invocations, since previous setup (e.g. registering BiometricManager callbacks)
+        // will trigger updateBiometricListeningState();
+        clearInvocations(mFingerprintManager);
+        mKeyguardUpdateMonitor.resetBiometricListeningState();
+
+        // GIVEN the user can skip the bouncer
+        givenSelectedUserCanSkipBouncerFromTrustedState();
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+
+        // WHEN verify authenticate runs
+        verifyFingerprintAuthenticateCall();
+    }
+
+    @Test
+    public void sideFps_keyguardDismissible_fingerprintDetectRuns() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_RUN_FINGERPRINT_DETECT_ON_DISMISSIBLE_KEYGUARD);
+        // Clear invocations, since previous setup (e.g. registering BiometricManager callbacks)
+        // will trigger updateBiometricListeningState();
+        clearInvocations(mFingerprintManager);
+        mKeyguardUpdateMonitor.resetBiometricListeningState();
+
+        // GIVEN the user can skip the bouncer
+        givenSelectedUserCanSkipBouncerFromTrustedState();
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+
+        // WHEN verify detect runs
+        verifyFingerprintDetectCall();
+    }
+
+    @Test
     public void testFingerprintSensorProperties() throws RemoteException {
         mFingerprintAuthenticatorsRegisteredCallback.onAllAuthenticatorsRegistered(
                 new ArrayList<>());
@@ -2094,6 +2130,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mFaceAuthenticationListener.getValue().onAuthEnrollmentStateChanged(false);
         mTestableLooper.processAllMessages();
         verify(callback).onBiometricEnrollmentStateChanged(BiometricSourceType.FACE);
+    }
+
+    private void givenSelectedUserCanSkipBouncerFromTrustedState() {
+        mKeyguardUpdateMonitor.onTrustChanged(true, true,
+                mSelectedUserInteractor.getSelectedUserId(), 0, null);
     }
 
     private void verifyFingerprintAuthenticateNeverCalled() {
