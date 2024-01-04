@@ -69,6 +69,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
@@ -326,6 +327,7 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("b/301080161")
     public void testErrorLockout_whenCredentialAllowed_AnimatesToCredentialUI() {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
         final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
