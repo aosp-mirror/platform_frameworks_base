@@ -168,6 +168,7 @@ import static com.android.server.wm.ActivityRecordProto.FILLS_PARENT;
 import static com.android.server.wm.ActivityRecordProto.FRONT_OF_TASK;
 import static com.android.server.wm.ActivityRecordProto.IN_SIZE_COMPAT_MODE;
 import static com.android.server.wm.ActivityRecordProto.IS_ANIMATING;
+import static com.android.server.wm.ActivityRecordProto.IS_USER_FULLSCREEN_OVERRIDE_ENABLED;
 import static com.android.server.wm.ActivityRecordProto.IS_WAITING_FOR_TRANSITION_START;
 import static com.android.server.wm.ActivityRecordProto.LAST_ALL_DRAWN;
 import static com.android.server.wm.ActivityRecordProto.LAST_DROP_INPUT_MODE;
@@ -10366,6 +10367,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mLetterboxUiController.shouldOverrideForceResizeApp());
         proto.write(SHOULD_ENABLE_USER_ASPECT_RATIO_SETTINGS,
                 mLetterboxUiController.shouldEnableUserAspectRatioSettings());
+        proto.write(IS_USER_FULLSCREEN_OVERRIDE_ENABLED,
+                mLetterboxUiController.isUserFullscreenOverrideEnabled());
     }
 
     @Override
