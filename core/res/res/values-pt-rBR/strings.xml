@@ -1358,7 +1358,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Nenhuma permissão necessária"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"isso pode lhe custar dinheiro"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Carregando este dispositivo via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Carregar dispositivo via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Carregando dispositivo conectado via USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transferência de arquivo via USB ativada"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB ativado"</string>
@@ -1683,8 +1683,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Remover"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Aumentar o volume acima do nível recomendado?\n\nOuvir em volume alto por longos períodos pode danificar sua audição."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Continuar ouvindo em volume alto?\n\nO volume dos fones de ouvido está alto há mais tempo que o recomendado. Isso pode causar danos à audição"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Som alto detectado\n\nO volume dos fones de ouvido está mais alto que o recomendado. Isso pode causar danos à audição"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Continuar ouvindo em volume alto?\n\nO volume dos fones de ouvido está alto há mais tempo que o recomendado. Isso pode causar danos à audição."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Som alto detectado\n\nO volume dos fones de ouvido está mais alto que o recomendado. Isso pode causar danos à audição."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usar atalho de Acessibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando o atalho estiver ativado, pressione os dois botões de volume por três segundos para iniciar um recurso de acessibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Ativar atalho para recursos de acessibilidade?"</string>
@@ -2340,4 +2340,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Layout do teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toque para mudar."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclados físicos configurados"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toque para conferir os teclados"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Particular"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Clone"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Trabalho"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Trabalho 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Trabalho 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Teste"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Público"</string>
 </resources>

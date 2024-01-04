@@ -1682,8 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"삭제"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"계속해서 높은 볼륨으로 들으시겠습니까?\n\n헤드폰 볼륨이 권장 시간보다 오랫동안 높은 상태였으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"큰 소리가 감지됨\n\n헤드폰 볼륨이 권장 시간보다 오랫동안 높은 상태였으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"계속해서 높은 볼륨으로 들으시겠습니까?\n\n헤드폰 볼륨이 권장 시간보다 오래 높은 상태였으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"큰 소리가 감지됨\n\n헤드폰 볼륨이 권장 수준보다 높으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"접근성 단축키를 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"단축키가 사용 설정된 경우 볼륨 버튼 두 개를 동시에 3초간 누르면 접근성 기능이 시작됩니다."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"접근성 기능 바로가기를 사용 설정하시겠습니까?"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>로 설정됩니다. 변경하려면 탭하세요."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"실제 키보드에 구성됨"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"키보드를 보려면 탭하세요."</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"비공개"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"복사"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"직장"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"직장 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"직장 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"테스트"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"공동"</string>
 </resources>

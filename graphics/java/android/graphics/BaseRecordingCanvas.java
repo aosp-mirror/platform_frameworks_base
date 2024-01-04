@@ -402,8 +402,8 @@ public class BaseRecordingCanvas extends Canvas {
     }
 
     @Override
-    public final void drawDoubleRoundRect(@NonNull RectF outer, float[] outerRadii,
-            @NonNull RectF inner, float[] innerRadii, @NonNull Paint paint) {
+    public final void drawDoubleRoundRect(@NonNull RectF outer, @NonNull float[] outerRadii,
+            @NonNull RectF inner, @NonNull float[] innerRadii, @NonNull Paint paint) {
         nDrawDoubleRoundRect(mNativeCanvasWrapper,
                 outer.left, outer.top, outer.right, outer.bottom, outerRadii,
                 inner.left, inner.top, inner.right, inner.bottom, innerRadii,

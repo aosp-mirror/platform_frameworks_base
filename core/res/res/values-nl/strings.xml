@@ -1682,8 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Verwijderen"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls je langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Wil je blijven luisteren op hoog volume?\n\nHet hoofdtelefoonvolume is langer dan de aanbevolen tijd hoog geweest, wat je gehoor kan beschadigen"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Hard geluid gedetecteerd\n\nHet hoofdtelefoonvolume is hoger dan aanbevolen, wat je gehoor kan beschadigen"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Wil je blijven luisteren op hoog volume?\n\nHet hoofdtelefoonvolume is langer dan de aanbevolen tijd hoog geweest. Dit kan je gehoor beschadigen."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Hard geluid gedetecteerd\n\nHet hoofdtelefoonvolume is hoger dan aanbevolen. Dit kan je gehoor beschadigen."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Snelkoppeling toegankelijkheid gebruiken?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Als de snelkoppeling aanstaat, houd je beide volumeknoppen 3 seconden ingedrukt om een toegankelijkheidsfunctie te starten."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Snelkoppeling voor toegankelijkheidsfuncties aanzetten?"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Toetsenbordindeling ingesteld op <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Tik om te wijzigen."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fysieke toetsenborden zijn ingesteld"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Tik om toetsenborden te bekijken"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privé"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Kloon"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Werk"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Werk 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Werk 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Gemeenschappelijk"</string>
 </resources>
