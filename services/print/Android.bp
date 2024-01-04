@@ -19,4 +19,7 @@ java_library_static {
     defaults: ["platform_service_defaults"],
     srcs: [":services.print-sources"],
     libs: ["services.core"],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

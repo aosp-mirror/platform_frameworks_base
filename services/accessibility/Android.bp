@@ -21,6 +21,7 @@ java_library_static {
     ],
     lint: {
         error_checks: ["MissingPermissionAnnotation"],
+        baseline_filename: "lint-baseline.xml",
     },
     srcs: [
         ":services.accessibility-sources",
@@ -49,6 +50,9 @@ java_library_static {
     libs: [
         "androidx.annotation_annotation",
     ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 aconfig_declarations {
