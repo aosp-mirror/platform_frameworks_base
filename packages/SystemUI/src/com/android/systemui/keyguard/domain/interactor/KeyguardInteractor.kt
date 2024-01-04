@@ -104,7 +104,7 @@ constructor(
     val dozeTimeTick: Flow<Long> = repository.dozeTimeTick
 
     /** Whether Always-on Display mode is available. */
-    val isAodAvailable: Flow<Boolean> = repository.isAodAvailable
+    val isAodAvailable: StateFlow<Boolean> = repository.isAodAvailable
 
     /** Doze transition information. */
     val dozeTransitionModel: Flow<DozeTransitionModel> = repository.dozeTransitionModel
