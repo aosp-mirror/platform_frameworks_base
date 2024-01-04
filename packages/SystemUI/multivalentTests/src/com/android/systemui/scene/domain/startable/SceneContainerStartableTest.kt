@@ -37,6 +37,7 @@ import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,17 +47,23 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableFlags(AconfigFlags.FLAG_SCENE_CONTAINER)
 class SceneContainerStartableTest : SysuiTestCase() {
+
+    @Mock private lateinit var windowController: NotificationShadeWindowController
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
@@ -77,22 +84,30 @@ class SceneContainerStartableTest : SysuiTestCase() {
     private val falsingCollector: FalsingCollector = mock()
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor
 
-    private val underTest =
-        SceneContainerStartable(
-            applicationScope = testScope.backgroundScope,
-            sceneInteractor = sceneInteractor,
-            deviceEntryInteractor = deviceEntryInteractor,
-            keyguardInteractor = keyguardInteractor,
-            flags = sceneContainerFlags,
-            sysUiState = sysUiState,
-            displayId = Display.DEFAULT_DISPLAY,
-            sceneLogger = mock(),
-            falsingCollector = falsingCollector,
-            powerInteractor = powerInteractor,
-            bouncerInteractor = bouncerInteractor,
-            simBouncerInteractor = dagger.Lazy { utils.simBouncerInteractor },
-            authenticationInteractor = dagger.Lazy { authenticationInteractor },
-        )
+    private lateinit var underTest: SceneContainerStartable
+
+    @Before
+    fun setUp() {
+        MockitoAnnotations.initMocks(this)
+
+        underTest =
+            SceneContainerStartable(
+                applicationScope = testScope.backgroundScope,
+                sceneInteractor = sceneInteractor,
+                deviceEntryInteractor = deviceEntryInteractor,
+                keyguardInteractor = keyguardInteractor,
+                flags = sceneContainerFlags,
+                sysUiState = sysUiState,
+                displayId = Display.DEFAULT_DISPLAY,
+                sceneLogger = mock(),
+                falsingCollector = falsingCollector,
+                powerInteractor = powerInteractor,
+                bouncerInteractor = bouncerInteractor,
+                simBouncerInteractor = dagger.Lazy { utils.simBouncerInteractor },
+                authenticationInteractor = dagger.Lazy { authenticationInteractor },
+                windowController = windowController,
+            )
+    }
 
     @Test
     fun hydrateVisibility() =
@@ -653,6 +668,58 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
+        }
+
+    @Test
+    fun hydrateWindowFocus() =
+        testScope.runTest {
+            val currentDesiredSceneKey by
+                collectLastValue(sceneInteractor.desiredScene.map { it.key })
+            val transitionStateFlow =
+                prepareState(
+                    isDeviceUnlocked = true,
+                    initialSceneKey = SceneKey.Gone,
+                )
+            assertThat(currentDesiredSceneKey).isEqualTo(SceneKey.Gone)
+            verify(windowController, never()).setNotificationShadeFocusable(anyBoolean())
+
+            underTest.start()
+            runCurrent()
+            verify(windowController, times(1)).setNotificationShadeFocusable(false)
+
+            sceneInteractor.changeScene(SceneModel(SceneKey.Shade), "reason")
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Gone,
+                    toScene = SceneKey.Shade,
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+            verify(windowController, times(1)).setNotificationShadeFocusable(false)
+
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
+            transitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Shade)
+            runCurrent()
+            verify(windowController, times(1)).setNotificationShadeFocusable(true)
+
+            sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Shade,
+                    toScene = SceneKey.Gone,
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+            verify(windowController, times(1)).setNotificationShadeFocusable(true)
+
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")
+            transitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
+            runCurrent()
+            verify(windowController, times(2)).setNotificationShadeFocusable(false)
         }
 
     private fun TestScope.prepareState(

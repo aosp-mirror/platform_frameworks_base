@@ -44,6 +44,7 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICA
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printSection
@@ -83,6 +84,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val simBouncerInteractor: Lazy<SimBouncerInteractor>,
     private val authenticationInteractor: Lazy<AuthenticationInteractor>,
+    private val windowController: NotificationShadeWindowController,
 ) : CoreStartable {
 
     override fun start() {
@@ -92,6 +94,7 @@ constructor(
             automaticallySwitchScenes()
             hydrateSystemUiState()
             collectFalsingSignals()
+            hydrateWindowFocus()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -344,6 +347,20 @@ constructor(
                     } else {
                         falsingCollector.onBouncerHidden()
                     }
+                }
+        }
+    }
+
+    /** Keeps the focus state of the window view up-to-date. */
+    private fun hydrateWindowFocus() {
+        applicationScope.launch {
+            sceneInteractor.transitionState
+                .mapNotNull { transitionState ->
+                    (transitionState as? ObservableTransitionState.Idle)?.scene
+                }
+                .distinctUntilChanged()
+                .collect { sceneKey ->
+                    windowController.setNotificationShadeFocusable(sceneKey != SceneKey.Gone)
                 }
         }
     }
