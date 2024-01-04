@@ -188,6 +188,10 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
             /* privacyIndicatorBounds = */ PrivacyIndicatorBounds(),
             /* displayShape = */ DisplayShape.NONE,
             /* compatInsetsTypes = */ 0,
-            /* compatIgnoreVisibility = */ false
+            /* compatIgnoreVisibility = */ false,
+            /* typeBoundingRectsMap = */ arrayOf(),
+            /* typeMaxBoundingRectsMap = */ arrayOf(),
+            /* frameWidth = */ 0,
+            /* frameHeight = */ 0
         )
 }

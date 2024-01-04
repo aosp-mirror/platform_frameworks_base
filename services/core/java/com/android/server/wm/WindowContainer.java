@@ -465,7 +465,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         final InsetsSource source = new InsetsSource(id, provider.getType());
-        source.setFrame(provider.getArbitraryRectangle()).updateSideHint(getBounds());
+        source.setFrame(provider.getArbitraryRectangle())
+                .updateSideHint(getBounds())
+                .setBoundingRects(provider.getBoundingRects());
         mLocalInsetsSources.put(id, source);
         mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
     }
