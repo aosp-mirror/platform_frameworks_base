@@ -55,6 +55,7 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
+import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
@@ -665,17 +666,22 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         // App package name and label length is restricted so that really long strings aren't
         // written to disk.
-        if (params.appPackageName != null
-                && params.appPackageName.length() > SessionParams.MAX_PACKAGE_NAME_LENGTH) {
+        if (params.appPackageName != null && !isValidPackageName(params.appPackageName)) {
             params.appPackageName = null;
         }
 
         params.appLabel = TextUtils.trimToSize(params.appLabel,
                 PackageItemInfo.MAX_SAFE_LABEL_LENGTH);
 
-        String requestedInstallerPackageName = (params.installerPackageName != null
-                && params.installerPackageName.length() < SessionParams.MAX_PACKAGE_NAME_LENGTH)
-                ? params.installerPackageName : installerPackageName;
+        // Validate installer package name.
+        if (params.installerPackageName != null && !isValidPackageName(
+                params.installerPackageName)) {
+            params.installerPackageName = null;
+        }
+
+        var requestedInstallerPackageName =
+                params.installerPackageName != null ? params.installerPackageName
+                        : installerPackageName;
 
         if (PackageManagerServiceUtils.isRootOrShell(callingUid)
                 || PackageInstallerSession.isSystemDataLoaderInstallation(params)
@@ -1086,6 +1092,19 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         String sessionId = tmpSessionDir.substring("vmdl".length(),
                 tmpSessionDir.length() - ".tmp".length());
         return Integer.parseInt(sessionId);
+    }
+
+    private static boolean isValidPackageName(@NonNull String packageName) {
+        if (packageName.length() > SessionParams.MAX_PACKAGE_NAME_LENGTH) {
+            return false;
+        }
+        // "android" is a valid package name
+        var errorMessage = FrameworkParsingPackageUtils.validateName(
+                packageName, /* requireSeparator= */ false, /* requireFilename */ true);
+        if (errorMessage != null) {
+            return false;
+        }
+        return true;
     }
 
     private File getTmpSessionDir(String volumeUuid) {
