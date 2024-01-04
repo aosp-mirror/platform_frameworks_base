@@ -22,3 +22,11 @@ prop {
     scope: Internal
     access: Readonly
 }
+
+prop {
+    api_name: "fold_grace_period_enabled"
+    type: Boolean
+    prop_name: "persist.fold_grace_period_enabled"
+    scope: Internal
+    access: Readonly
+}

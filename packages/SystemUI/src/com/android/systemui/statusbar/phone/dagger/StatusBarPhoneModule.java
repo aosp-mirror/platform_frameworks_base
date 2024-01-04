@@ -16,16 +16,12 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
-import com.android.systemui.statusbar.phone.ConfigurationControllerStartable;
 
 import dagger.Binds;
 import dagger.Module;
-import dagger.multibindings.ClassKey;
-import dagger.multibindings.IntoMap;
 
 /**
  * Dagger Module providing {@link CentralSurfacesImpl}.
@@ -38,12 +34,4 @@ public interface StatusBarPhoneModule {
     @Binds
     @SysUISingleton
     CentralSurfaces bindsCentralSurfaces(CentralSurfacesImpl impl);
-
-    /**
-     * Starts {@link ConfigurationControllerStartable}
-     */
-    @Binds
-    @IntoMap
-    @ClassKey(ConfigurationControllerStartable.class)
-    CoreStartable bindConfigControllerStartable(ConfigurationControllerStartable impl);
 }

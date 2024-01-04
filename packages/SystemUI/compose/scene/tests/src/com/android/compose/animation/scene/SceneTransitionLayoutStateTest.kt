@@ -50,13 +50,4 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.isTransitioning(to = TestScenes.SceneA)).isFalse()
         assertThat(state.isTransitioning(from = TestScenes.SceneA, to = TestScenes.SceneB)).isTrue()
     }
-
-    private fun transition(from: SceneKey, to: SceneKey): TransitionState.Transition {
-        return object : TransitionState.Transition(from, to) {
-            override val currentScene: SceneKey = from
-            override val progress: Float = 0f
-            override val isInitiatedByUserInput: Boolean = false
-            override val isUserInputOngoing: Boolean = false
-        }
-    }
 }

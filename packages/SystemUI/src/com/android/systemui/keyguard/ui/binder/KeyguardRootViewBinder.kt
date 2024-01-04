@@ -42,9 +42,9 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -68,7 +68,10 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Bind occludingAppDeviceEntryMessageViewModel to run whenever the keyguard view is attached. */
@@ -81,7 +84,6 @@ object KeyguardRootViewBinder {
         view: ViewGroup,
         viewModel: KeyguardRootViewModel,
         configuration: ConfigurationState,
-        featureFlags: FeatureFlagsClassic,
         occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
         chipbarCoordinator: ChipbarCoordinator,
         screenOffAnimationController: ScreenOffAnimationController,
@@ -107,6 +109,8 @@ object KeyguardRootViewBinder {
                 false
             }
         }
+
+        val burnInParams = MutableStateFlow(BurnInParameters())
 
         val disposableHandle =
             view.repeatWhenAttached {
@@ -164,35 +168,41 @@ object KeyguardRootViewBinder {
                             // large clock isn't added to burnInLayer due to its scale transition
                             // so we also need to add translation to it here
                             // same as translationX
-                            viewModel.translationY.collect { y ->
-                                childViews[burnInLayerId]?.translationY = y
-                                childViews[largeClockId]?.translationY = y
-                            }
-                        }
-
-                        launch {
-                            viewModel.translationX.collect { x ->
-                                childViews[burnInLayerId]?.translationX = x
-                                childViews[largeClockId]?.translationX = x
-                            }
-                        }
-
-                        launch {
-                            viewModel.scale.collect { (scale, scaleClockOnly) ->
-                                if (scaleClockOnly) {
-                                    // For clocks except weather clock, we have scale transition
-                                    // besides translate
-                                    childViews[largeClockId]?.let {
-                                        it.scaleX = scale
-                                        it.scaleY = scale
-                                    }
-                                } else {
-                                    // For weather clock, large clock should have only scale
-                                    // transition with other parts in burnInLayer
-                                    childViews[burnInLayerId]?.scaleX = scale
-                                    childViews[burnInLayerId]?.scaleY = scale
+                            burnInParams
+                                .flatMapLatest { params -> viewModel.translationY(params) }
+                                .collect { y ->
+                                    childViews[burnInLayerId]?.translationY = y
+                                    childViews[largeClockId]?.translationY = y
                                 }
-                            }
+                        }
+
+                        launch {
+                            burnInParams
+                                .flatMapLatest { params -> viewModel.translationX(params) }
+                                .collect { x ->
+                                    childViews[burnInLayerId]?.translationX = x
+                                    childViews[largeClockId]?.translationX = x
+                                }
+                        }
+
+                        launch {
+                            burnInParams
+                                .flatMapLatest { params -> viewModel.scale(params) }
+                                .collect { scaleViewModel ->
+                                    if (scaleViewModel.scaleClockOnly) {
+                                        // For clocks except weather clock, we have scale transition
+                                        // besides translate
+                                        childViews[largeClockId]?.let {
+                                            it.scaleX = scaleViewModel.scale
+                                            it.scaleY = scaleViewModel.scale
+                                        }
+                                    } else {
+                                        // For weather clock, large clock should have only scale
+                                        // transition with other parts in burnInLayer
+                                        childViews[burnInLayerId]?.scaleX = scaleViewModel.scale
+                                        childViews[burnInLayerId]?.scaleY = scaleViewModel.scale
+                                    }
+                                }
                         }
 
                         if (NotificationIconContainerRefactor.isEnabled) {
@@ -274,10 +284,12 @@ object KeyguardRootViewBinder {
             }
 
         if (!migrateClocksToBlueprint()) {
-            viewModel.clockControllerProvider = clockControllerProvider
+            burnInParams.update { current ->
+                current.copy(clockControllerProvider = clockControllerProvider)
+            }
         }
 
-        onLayoutChangeListener = OnLayoutChange(viewModel)
+        onLayoutChangeListener = OnLayoutChange(viewModel, burnInParams)
         view.addOnLayoutChangeListener(onLayoutChangeListener)
 
         // Views will be added or removed after the call to bind(). This is needed to avoid many
@@ -296,7 +308,9 @@ object KeyguardRootViewBinder {
 
         view.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
             val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-            viewModel.topInset = insets.getInsetsIgnoringVisibility(insetTypes).top
+            burnInParams.update { current ->
+                current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
+            }
             insets
         }
 
@@ -333,8 +347,10 @@ object KeyguardRootViewBinder {
         )
     }
 
-    private class OnLayoutChange(private val viewModel: KeyguardRootViewModel) :
-        OnLayoutChangeListener {
+    private class OnLayoutChange(
+        private val viewModel: KeyguardRootViewModel,
+        private val burnInParams: MutableStateFlow<BurnInParameters>,
+    ) : OnLayoutChangeListener {
         override fun onLayoutChange(
             view: View,
             left: Int,
@@ -355,7 +371,7 @@ object KeyguardRootViewBinder {
             }
 
             view.findViewById<View>(R.id.keyguard_status_view)?.let { statusView ->
-                viewModel.statusViewTop = statusView.top
+                burnInParams.update { current -> current.copy(statusViewTop = statusView.top) }
             }
         }
     }

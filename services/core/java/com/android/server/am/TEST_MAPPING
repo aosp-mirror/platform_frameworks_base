@@ -146,6 +146,15 @@
         { "include-filter": "android.app.cts.ServiceTest" },
         { "include-filter": "android.app.cts.ActivityManagerFgsBgStartTest" }
       ]
+    },
+    {
+      "name": "CtsStatsdAtomHostTestCases",
+      "options": [
+        { "include-filter": "android.cts.statsdatom.appexit.AppExitHostTest" },
+        { "exclude-annotation": "androidx.test.filters.LargeTest" },
+        { "exclude-annotation": "androidx.test.filters.FlakyTest" },
+        { "exclude-annotation": "org.junit.Ignore" }
+      ]
     }
   ]
 }

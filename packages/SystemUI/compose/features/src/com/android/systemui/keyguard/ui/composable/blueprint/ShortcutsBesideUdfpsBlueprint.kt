@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntRect
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
@@ -55,6 +56,7 @@ constructor(
     private val ambientIndicationSection: AmbientIndicationSection,
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
+    private val clockInteractor: KeyguardClockInteractor,
 ) : LockscreenSceneBlueprint {
 
     override val id: String = "shortcuts-besides-udfps"
@@ -62,6 +64,7 @@ constructor(
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
+        val burnIn = rememberBurnIn(clockInteractor)
 
         LockscreenLongPress(
             viewModel = viewModel.longPress,
@@ -74,8 +77,19 @@ constructor(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         with(statusBarSection) { StatusBar(modifier = Modifier.fillMaxWidth()) }
-                        with(clockSection) { SmallClock(modifier = Modifier.fillMaxWidth()) }
-                        with(smartSpaceSection) { SmartSpace(modifier = Modifier.fillMaxWidth()) }
+                        with(clockSection) {
+                            SmallClock(
+                                onTopChanged = burnIn.onSmallClockTopChanged,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                        with(smartSpaceSection) {
+                            SmartSpace(
+                                burnInParams = burnIn.parameters,
+                                onTopChanged = burnIn.onSmartspaceTopChanged,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                         with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
                         with(notificationSection) {
                             Notifications(modifier = Modifier.fillMaxWidth().weight(1f))

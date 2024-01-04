@@ -21,9 +21,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
@@ -51,37 +53,43 @@ constructor(
             key = StatusBarElementKey,
             modifier = modifier,
         ) {
-            AndroidView(
-                factory = {
-                    notificationPanelView.get().findViewById<View>(R.id.keyguard_header)?.let {
-                        (it.parent as ViewGroup).removeView(it)
-                    }
-
-                    val provider =
-                        object : ShadeViewStateProvider {
-                            override val lockscreenShadeDragProgress: Float = 0f
-                            override val panelViewExpandedHeight: Float = 0f
-                            override fun shouldHeadsUpBeVisible(): Boolean {
-                                return false
-                            }
+            content {
+                AndroidView(
+                    factory = {
+                        notificationPanelView.get().findViewById<View>(R.id.keyguard_header)?.let {
+                            (it.parent as ViewGroup).removeView(it)
                         }
 
-                    @SuppressLint("InflateParams")
-                    val view =
-                        LayoutInflater.from(context)
-                            .inflate(
-                                R.layout.keyguard_status_bar,
-                                null,
-                                false,
-                            ) as KeyguardStatusBarView
-                    componentFactory.build(view, provider).keyguardStatusBarViewController.init()
-                    view
-                },
-                modifier =
-                    Modifier.fillMaxWidth().height {
-                        Utils.getStatusBarHeaderHeightKeyguard(context)
+                        val provider =
+                            object : ShadeViewStateProvider {
+                                override val lockscreenShadeDragProgress: Float = 0f
+                                override val panelViewExpandedHeight: Float = 0f
+
+                                override fun shouldHeadsUpBeVisible(): Boolean {
+                                    return false
+                                }
+                            }
+
+                        @SuppressLint("InflateParams")
+                        val view =
+                            LayoutInflater.from(context)
+                                .inflate(
+                                    R.layout.keyguard_status_bar,
+                                    null,
+                                    false,
+                                ) as KeyguardStatusBarView
+                        componentFactory
+                            .build(view, provider)
+                            .keyguardStatusBarViewController
+                            .init()
+                        view
                     },
-            )
+                    modifier =
+                        Modifier.fillMaxWidth().padding(horizontal = 16.dp).height {
+                            Utils.getStatusBarHeaderHeightKeyguard(context)
+                        },
+                )
+            }
         }
     }
 }

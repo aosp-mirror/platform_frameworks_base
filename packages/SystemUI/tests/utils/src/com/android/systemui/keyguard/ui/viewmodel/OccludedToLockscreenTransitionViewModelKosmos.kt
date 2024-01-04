@@ -26,7 +26,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.occludedToLockscreenTransitionViewModel by Fixture {
+var Kosmos.occludedToLockscreenTransitionViewModel by Fixture {
     OccludedToLockscreenTransitionViewModel(
         interactor = keyguardTransitionInteractor,
         deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,

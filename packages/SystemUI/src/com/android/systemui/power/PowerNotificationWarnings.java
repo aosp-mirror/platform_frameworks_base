@@ -87,6 +87,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  */
@@ -149,6 +150,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     public static final String EXTRA_CONFIRM_ONLY = "extra_confirm_only";
 
     private final Context mContext;
+    private final SystemUIDialog.Factory mSystemUIDialogFactory;
     private final NotificationManager mNoMan;
     private final PowerManager mPowerMan;
     private final KeyguardManager mKeyguard;
@@ -186,11 +188,17 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     /**
      */
     @Inject
-    public PowerNotificationWarnings(Context context, ActivityStarter activityStarter,
-            BroadcastSender broadcastSender, Lazy<BatteryController> batteryControllerLazy,
-            DialogLaunchAnimator dialogLaunchAnimator, UiEventLogger uiEventLogger,
-            GlobalSettings globalSettings, UserTracker userTracker) {
+    public PowerNotificationWarnings(
+            Context context,
+            ActivityStarter activityStarter,
+            BroadcastSender broadcastSender,
+            Lazy<BatteryController> batteryControllerLazy,
+            DialogLaunchAnimator dialogLaunchAnimator,
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker,
+            SystemUIDialog.Factory systemUIDialogFactory) {
         mContext = context;
+        mSystemUIDialogFactory = systemUIDialogFactory;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mKeyguard = mContext.getSystemService(KeyguardManager.class);
@@ -444,7 +452,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private void showHighTemperatureDialog() {
         if (mHighTempDialog != null) return;
-        final SystemUIDialog d = new SystemUIDialog(mContext);
+        final SystemUIDialog d = mSystemUIDialogFactory.create();
         d.setIconAttribute(android.R.attr.alertDialogIcon);
         d.setTitle(R.string.high_temp_title);
         d.setMessage(R.string.high_temp_dialog_message);
@@ -479,7 +487,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private void showThermalShutdownDialog() {
         if (mThermalShutdownDialog != null) return;
-        final SystemUIDialog d = new SystemUIDialog(mContext);
+        final SystemUIDialog d = mSystemUIDialogFactory.create();
         d.setIconAttribute(android.R.attr.alertDialogIcon);
         d.setTitle(R.string.thermal_shutdown_title);
         d.setMessage(R.string.thermal_shutdown_dialog_message);
@@ -643,7 +651,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private void showStartSaverConfirmation(Bundle extras) {
         if (mSaverConfirmation != null || mUseExtraSaverConfirmation) return;
-        final SystemUIDialog d = new SystemUIDialog(mContext);
+        final SystemUIDialog d = mSystemUIDialogFactory.create();
         final boolean confirmOnly = extras.getBoolean(BatterySaverUtils.EXTRA_CONFIRM_TEXT_ONLY);
         final int batterySaverTriggerMode =
                 extras.getInt(BatterySaverUtils.EXTRA_POWER_SAVE_MODE_TRIGGER,

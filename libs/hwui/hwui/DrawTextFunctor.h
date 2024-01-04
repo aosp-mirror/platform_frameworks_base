@@ -16,7 +16,9 @@
 
 #include <SkFontMetrics.h>
 #include <SkRRect.h>
+#include <com_android_graphics_hwui_flags.h>
 
+#include "../utils/Color.h"
 #include "Canvas.h"
 #include "FeatureFlags.h"
 #include "MinikinUtils.h"
@@ -26,6 +28,8 @@
 #include "Typeface.h"
 #include "hwui/PaintFilter.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
+
+namespace flags = com::android::graphics::hwui::flags;
 
 namespace android {
 
@@ -73,8 +77,14 @@ public:
         if (CC_UNLIKELY(canvas->isHighContrastText() && paint.getAlpha() != 0)) {
             // high contrast draw path
             int color = paint.getColor();
-            int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
-            bool darken = channelSum < (128 * 3);
+            bool darken;
+            if (flags::high_contrast_text_luminance()) {
+                uirenderer::Lab lab = uirenderer::sRGBToLab(color);
+                darken = lab.L <= 50;
+            } else {
+                int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
+                darken = channelSum < (128 * 3);
+            }
 
             // outline
             gDrawTextBlobMode = DrawTextBlobMode::HctOutline;

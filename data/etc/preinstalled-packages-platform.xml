@@ -128,4 +128,9 @@ to pre-existing users, but cannot uninstall pre-existing system packages from pr
     <install-in-user-type package="com.android.wallpaperbackup">
         <install-in user-type="FULL" />
     </install-in-user-type>
+
+    <!-- AvatarPicker (AvatarPicker app)-->
+    <install-in-user-type package="com.android.avatarpicker">
+        <install-in user-type="FULL" />
+    </install-in-user-type>
 </config>

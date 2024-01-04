@@ -404,7 +404,7 @@ message WindowTokenProto {
     optional WindowContainerProto window_container = 1;
     optional int32 hash_code = 2;
     repeated WindowStateProto windows = 3 [deprecated=true];
-    optional bool waiting_to_show = 5;
+    optional bool waiting_to_show = 5 [deprecated=true];
     optional bool paused = 6;
 }
 

@@ -276,7 +276,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final Context mContext;
     final Resources mRes;
     private final Handler mHandler;
-    final InputMethodSettings mSettings;
+    private final InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
     private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
             new SparseBooleanArray(0);
@@ -316,7 +316,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     // Mapping from deviceId to the device-specific imeId for that device.
     private final SparseArray<String> mVirtualDeviceMethodMap = new SparseArray<>();
 
-    final InputMethodSubtypeSwitchingController mSwitchingController;
+    private final InputMethodSubtypeSwitchingController mSwitchingController;
     final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
             new HardwareKeyboardShortcutController();
 
@@ -4812,7 +4812,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         Slog.e(TAG, "Unknown subtype picker mode = " + msg.arg1);
                         return false;
                 }
-                mMenuController.showInputMethodMenu(showAuxSubtypes, displayId);
+                synchronized (ImfLock.class) {
+                    final boolean isScreenLocked = mWindowManagerInternal.isKeyguardLocked()
+                            && mWindowManagerInternal.isKeyguardSecure(
+                                    mSettings.getCurrentUserId());
+                    final String lastInputMethodId = mSettings.getSelectedInputMethod();
+                    int lastInputMethodSubtypeId =
+                            mSettings.getSelectedInputMethodSubtypeId(lastInputMethodId);
+
+                    final List<ImeSubtypeListItem> imList = mSwitchingController
+                            .getSortedInputMethodAndSubtypeListForImeMenuLocked(
+                                    showAuxSubtypes, isScreenLocked);
+                    mMenuController.showInputMethodMenuLocked(showAuxSubtypes, displayId,
+                            lastInputMethodId, lastInputMethodSubtypeId, imList);
+                }
                 return true;
 
             // ---------------------------------------------------------

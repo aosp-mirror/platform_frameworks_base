@@ -119,14 +119,8 @@ interface TransitionBuilder : PropertyTransformationBuilder {
      *
      * @param enabled whether the matched element(s) should actually be shared in this transition.
      *   Defaults to true.
-     * @param scenePicker the [SharedElementScenePicker] to use when deciding in which scene we
-     *   should draw or compose this shared element.
      */
-    fun sharedElement(
-        matcher: ElementMatcher,
-        enabled: Boolean = true,
-        scenePicker: SharedElementScenePicker = DefaultSharedElementScenePicker,
-    )
+    fun sharedElement(matcher: ElementMatcher, enabled: Boolean = true)
 
     /**
      * Adds the transformations in [builder] but in reversed order. This allows you to partially
@@ -136,43 +130,131 @@ interface TransitionBuilder : PropertyTransformationBuilder {
     fun reversed(builder: TransitionBuilder.() -> Unit)
 }
 
-interface SharedElementScenePicker {
+/**
+ * An interface to decide where we should draw shared Elements or compose MovableElements.
+ *
+ * @see DefaultElementScenePicker
+ * @see HighestZIndexScenePicker
+ * @see LowestZIndexScenePicker
+ * @see MovableElementScenePicker
+ */
+interface ElementScenePicker {
     /**
      * Return the scene in which [element] should be drawn (when using `Modifier.element(key)`) or
-     * composed (when using `MovableElement(key)`) during the transition from [fromScene] to
-     * [toScene].
+     * composed (when using `MovableElement(key)`) during the given [transition].
+     *
+     * Important: For [MovableElements][SceneScope.MovableElement], this scene picker will *always*
+     * be used during transitions to decide whether we should compose that element in a given scene
+     * or not. Therefore, you should make sure that the returned [SceneKey] contains the movable
+     * element, otherwise that element will not be composed in any scene during the transition.
      */
     fun sceneDuringTransition(
         element: ElementKey,
-        fromScene: SceneKey,
-        toScene: SceneKey,
-        progress: () -> Float,
+        transition: TransitionState.Transition,
         fromSceneZIndex: Float,
         toSceneZIndex: Float,
     ): SceneKey
-}
 
-object DefaultSharedElementScenePicker : SharedElementScenePicker {
-    override fun sceneDuringTransition(
+    /**
+     * Return [transition.fromScene] if it is in [scenes] and [transition.toScene] is not, or return
+     * [transition.toScene] if it is in [scenes] and [transition.fromScene] is not, otherwise throw
+     * an exception (i.e. if neither or both of fromScene and toScene are in [scenes]).
+     *
+     * This function can be useful when computing the scene in which a movable element should be
+     * composed.
+     */
+    fun pickSingleSceneIn(
+        scenes: Set<SceneKey>,
+        transition: TransitionState.Transition,
         element: ElementKey,
-        fromScene: SceneKey,
-        toScene: SceneKey,
-        progress: () -> Float,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float
     ): SceneKey {
-        // By default shared elements are drawn in the highest scene possible, unless it is a
-        // background.
-        return if (
-            (fromSceneZIndex > toSceneZIndex && !element.isBackground) ||
-                (fromSceneZIndex < toSceneZIndex && element.isBackground)
-        ) {
+        val fromScene = transition.fromScene
+        val toScene = transition.toScene
+        val fromSceneInScenes = scenes.contains(fromScene)
+        val toSceneInScenes = scenes.contains(toScene)
+        if (fromSceneInScenes && toSceneInScenes) {
+            error(
+                "Element $element can be in both $fromScene and $toScene. You should add a " +
+                    "special case for this transition before calling pickSingleSceneIn()."
+            )
+        }
+
+        if (!fromSceneInScenes && !toSceneInScenes) {
+            error(
+                "Element $element can be neither in $fromScene and $toScene. This either means " +
+                    "that you should add one of them in the scenes set passed to " +
+                    "pickSingleSceneIn(), or there is an internal error and this element was " +
+                    "composed when it shouldn't be."
+            )
+        }
+
+        return if (fromSceneInScenes) {
             fromScene
         } else {
             toScene
         }
     }
 }
+
+/** An [ElementScenePicker] that draws/composes elements in the scene with the highest z-order. */
+object HighestZIndexScenePicker : ElementScenePicker {
+    override fun sceneDuringTransition(
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        fromSceneZIndex: Float,
+        toSceneZIndex: Float
+    ): SceneKey {
+        return if (fromSceneZIndex > toSceneZIndex) {
+            transition.fromScene
+        } else {
+            transition.toScene
+        }
+    }
+}
+
+/** An [ElementScenePicker] that draws/composes elements in the scene with the lowest z-order. */
+object LowestZIndexScenePicker : ElementScenePicker {
+    override fun sceneDuringTransition(
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        fromSceneZIndex: Float,
+        toSceneZIndex: Float
+    ): SceneKey {
+        return if (fromSceneZIndex < toSceneZIndex) {
+            transition.fromScene
+        } else {
+            transition.toScene
+        }
+    }
+}
+
+/**
+ * An [ElementScenePicker] that draws/composes elements in the scene we are transitioning to, iff
+ * that scene is in [scenes].
+ *
+ * This picker can be useful for movable elements whose content size depends on its content (because
+ * it wraps it) in at least one scene. That way, the target size of the MovableElement will be
+ * computed in the scene we are going to and, given that this element was probably already composed
+ * in the scene we are going from before starting the transition, the interpolated size of the
+ * movable element during the transition should be correct.
+ *
+ * The downside of this picker is that the zIndex of the element when going from scene A to scene B
+ * is not the same as when going from scene B to scene A, so it's not usable in situations where
+ * z-ordering during the transition matters.
+ */
+class MovableElementScenePicker(private val scenes: Set<SceneKey>) : ElementScenePicker {
+    override fun sceneDuringTransition(
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        fromSceneZIndex: Float,
+        toSceneZIndex: Float,
+    ): SceneKey {
+        return if (scenes.contains(transition.toScene)) transition.toScene else transition.fromScene
+    }
+}
+
+/** The default [ElementScenePicker]. */
+val DefaultElementScenePicker = HighestZIndexScenePicker
 
 @TransitionDsl
 interface PropertyTransformationBuilder {

@@ -120,7 +120,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
             fontScalingDialogDelegate
         )
 
-        whenever(dialogFactory.create(any())).thenReturn(dialog)
+        whenever(dialogFactory.create(any(), any())).thenReturn(dialog)
     }
 
     @Test

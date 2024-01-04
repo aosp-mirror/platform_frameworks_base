@@ -31,6 +31,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.model.SysUiState
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.phone.DialogDelegate
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -69,7 +70,8 @@ class ContrastDialogDelegateTest : SysuiTestCase() {
         mDependency.injectTestDependency(SysUiState::class.java, sysuiState)
         mDependency.injectMockDependency(DialogLaunchAnimator::class.java)
         whenever(sysuiState.setFlag(any(), any())).thenReturn(sysuiState)
-        whenever(sysuiDialogFactory.create(any())).thenReturn(sysuiDialog)
+        whenever(sysuiDialogFactory.create(any(SystemUIDialog.Delegate::class.java)))
+            .thenReturn(sysuiDialog)
         whenever(sysuiDialog.layoutInflater).thenReturn(LayoutInflater.from(mContext))
 
         whenever(mockUserTracker.userId).thenReturn(context.userId)

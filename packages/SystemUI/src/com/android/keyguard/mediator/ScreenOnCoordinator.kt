@@ -19,6 +19,7 @@ package com.android.keyguard.mediator
 import android.annotation.BinderThread
 import android.os.Handler
 import android.os.Trace
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.unfold.SysUIUnfoldComponent
@@ -59,8 +60,11 @@ class ScreenOnCoordinator @Inject constructor(
         foldAodAnimationController?.onScreenTurningOn(pendingTasks.registerTask("fold-to-aod"))
 
         pendingTasks.onTasksComplete {
-            mainHandler.post {
+            if (Flags.enableBackgroundKeyguardOndrawnCallback()) {
+                // called by whatever thread completes the last task registered.
                 onDrawn.run()
+            } else {
+                mainHandler.post { onDrawn.run() }
             }
         }
         Trace.endSection()

@@ -34,6 +34,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_TOP_OF_TAS
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_DIM_ON_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_OP_TYPE;
 import static android.window.TaskFragmentOrganizer.KEY_ERROR_CALLBACK_THROWABLE;
@@ -870,12 +871,19 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .setAnimationParams(animationParams)
                 .build();
         mTransaction.addTaskFragmentOperation(mFragmentToken, operation);
+        final TaskFragmentOperation dimOperation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_DIM_ON_TASK)
+                .setDimOnTask(true)
+                .build();
+        mTransaction.addTaskFragmentOperation(mFragmentToken, dimOperation);
         mOrganizer.applyTransaction(mTransaction, TASK_FRAGMENT_TRANSIT_CHANGE,
                 false /* shouldApplyIndependently */);
         assertApplyTransactionAllowed(mTransaction);
 
         assertEquals(animationParams, mTaskFragment.getAnimationParams());
         assertEquals(Color.GREEN, mTaskFragment.getAnimationParams().getAnimationBackgroundColor());
+
+        assertTrue(mTaskFragment.isDimmingOnParentTask());
     }
 
     @Test

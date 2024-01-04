@@ -1424,7 +1424,11 @@ public class ClipboardService extends SystemService {
         String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
                 Settings.Secure.DEFAULT_INPUT_METHOD, userId);
         if (!TextUtils.isEmpty(defaultIme)) {
-            final String imePkg = ComponentName.unflattenFromString(defaultIme).getPackageName();
+            final ComponentName imeComponent = ComponentName.unflattenFromString(defaultIme);
+            if (imeComponent == null) {
+                return false;
+            }
+            final String imePkg = imeComponent.getPackageName();
             return imePkg.equals(packageName);
         }
         return false;
