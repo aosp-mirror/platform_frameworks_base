@@ -21,7 +21,7 @@
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"गड़बड़ी की रिपोर्ट <xliff:g id="ID">#%d</xliff:g> तैयार की जा रही है"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"गड़बड़ी की रिपोर्ट <xliff:g id="ID">#%d</xliff:g> कैप्चर की गई"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"गड़बड़ी की रिपोर्ट में पूरी जानकारी जोड़ी जा रही है"</string>
-    <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया प्रतीक्षा करें…"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया इंतज़ार करें…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"गड़बड़ी की रिपोर्ट थोड़ी ही देर में फ़ोन पर दिखाई देगी"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"अपनी गड़बड़ी की रिपोर्ट शेयर करने के लिए टैप करें"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"अपनी गड़बड़ी की रिपोर्ट शेयर करने के लिए टैप करें"</string>

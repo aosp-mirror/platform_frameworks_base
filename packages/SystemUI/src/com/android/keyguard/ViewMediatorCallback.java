@@ -104,4 +104,9 @@ public interface ViewMediatorCallback {
      * Call when cancel button is pressed in bouncer.
      */
     void onCancelClicked();
+
+    /**
+     * Determines if bouncer has swiped down.
+     */
+    void onBouncerSwipeDown();
 }
