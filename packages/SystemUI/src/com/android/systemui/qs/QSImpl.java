@@ -247,6 +247,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
                         mScrollListener.onQsPanelScrollChanged(scrollY);
                     }
                 });
+        mQSPanelScrollView.setScrollingEnabled(!mSceneContainerFlags.isEnabled());
         mHeader = mRootView.findViewById(R.id.header);
         mFooter = qsComponent.getQSFooter();
 
@@ -637,8 +638,13 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     @Override
     public int getHeightDiff() {
-        return mQSPanelScrollView.getBottom() - mHeader.getBottom()
-                + mHeader.getPaddingBottom();
+        if (mSceneContainerFlags.isEnabled()) {
+            return mQSPanelController.getViewBottom() - mHeader.getBottom()
+                    + mHeader.getPaddingBottom();
+        } else {
+            return mQSPanelScrollView.getBottom() - mHeader.getBottom()
+                    + mHeader.getPaddingBottom();
+        }
     }
 
     @Override
@@ -701,19 +707,21 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
         mQuickQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
 
-        float qsScrollViewTranslation =
-                onKeyguard && !mShowCollapsedOnKeyguard ? panelTranslationY : 0;
-        mQSPanelScrollView.setTranslationY(qsScrollViewTranslation);
+        if (!mSceneContainerFlags.isEnabled()) {
+            float qsScrollViewTranslation =
+                    onKeyguard && !mShowCollapsedOnKeyguard ? panelTranslationY : 0;
+            mQSPanelScrollView.setTranslationY(qsScrollViewTranslation);
 
-        if (fullyCollapsed) {
-            mQSPanelScrollView.setScrollY(0);
-        }
+            if (fullyCollapsed) {
+                mQSPanelScrollView.setScrollY(0);
+            }
 
-        if (!fullyExpanded) {
-            // Set bounds on the QS panel so it doesn't run over the header when animating.
-            mQsBounds.top = (int) -mQSPanelScrollView.getTranslationY();
-            mQsBounds.right = mQSPanelScrollView.getWidth();
-            mQsBounds.bottom = mQSPanelScrollView.getHeight();
+            if (!fullyExpanded) {
+                // Set bounds on the QS panel so it doesn't run over the header when animating.
+                mQsBounds.top = (int) -mQSPanelScrollView.getTranslationY();
+                mQsBounds.right = mQSPanelScrollView.getWidth();
+                mQsBounds.bottom = mQSPanelScrollView.getHeight();
+            }
         }
         updateQsBounds();
 
@@ -803,15 +811,17 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
             mQsBounds.set(-sideMargin, 0, mQSPanelScrollView.getWidth() + sideMargin,
                     mQSPanelScrollView.getHeight());
         }
-        mQSPanelScrollView.setClipBounds(mQsBounds);
+        if (!mSceneContainerFlags.isEnabled()) {
+            mQSPanelScrollView.setClipBounds(mQsBounds);
 
-        mQSPanelScrollView.getLocationOnScreen(mLocationTemp);
-        int left = mLocationTemp[0];
-        int top = mLocationTemp[1];
-        mQsMediaHost.getCurrentClipping().set(left, top,
-                left + getView().getMeasuredWidth(),
-                top + mQSPanelScrollView.getMeasuredHeight()
-                        - mQSPanelController.getPaddingBottom());
+            mQSPanelScrollView.getLocationOnScreen(mLocationTemp);
+            int left = mLocationTemp[0];
+            int top = mLocationTemp[1];
+            mQsMediaHost.getCurrentClipping().set(left, top,
+                    left + getView().getMeasuredWidth(),
+                    top + mQSPanelScrollView.getMeasuredHeight()
+                            - mQSPanelController.getPaddingBottom());
+        }
     }
 
     private void updateMediaPositions() {
@@ -884,7 +894,11 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         // The customize state changed, so our height changed.
         mContainer.updateExpansion();
         boolean customizing = isCustomizing();
-        mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        if (mSceneContainerFlags.isEnabled()) {
+            mQSPanelController.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        } else {
+            mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        }
         mFooter.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         if (mFooterActionsView != null) {
             mFooterActionsView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);

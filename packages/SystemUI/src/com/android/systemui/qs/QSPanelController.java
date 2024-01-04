@@ -278,5 +278,9 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     public int getPaddingBottom() {
         return mView.getPaddingBottom();
     }
+
+    int getViewBottom() {
+        return mView.getBottom();
+    }
 }
 

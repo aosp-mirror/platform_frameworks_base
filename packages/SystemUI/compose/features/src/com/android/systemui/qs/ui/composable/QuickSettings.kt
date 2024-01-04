@@ -17,9 +17,11 @@
 package com.android.systemui.qs.ui.composable
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -104,6 +106,7 @@ private fun QuickSettingsContent(
     modifier: Modifier = Modifier,
 ) {
     val qsView by qsSceneAdapter.qsView.collectAsState(null)
+    val isCustomizing by qsSceneAdapter.isCustomizing.collectAsState()
     QuickSettingsTheme {
         val context = LocalContext.current
 
@@ -113,14 +116,27 @@ private fun QuickSettingsContent(
             }
         }
         qsView?.let { view ->
-            AndroidView(
-                modifier = modifier.fillMaxSize().background(colorAttr(R.attr.underSurface)),
-                factory = { _ ->
-                    qsSceneAdapter.setState(state)
-                    view
-                },
-                update = { qsSceneAdapter.setState(state) }
-            )
+            Box(
+                modifier =
+                    modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (isCustomizing) {
+                                Modifier.fillMaxHeight()
+                            } else {
+                                Modifier.wrapContentHeight()
+                            }
+                        )
+            ) {
+                AndroidView(
+                    modifier = Modifier.fillMaxWidth().background(colorAttr(R.attr.underSurface)),
+                    factory = { _ ->
+                        qsSceneAdapter.setState(state)
+                        view
+                    },
+                    update = { qsSceneAdapter.setState(state) }
+                )
+            }
         }
     }
 }

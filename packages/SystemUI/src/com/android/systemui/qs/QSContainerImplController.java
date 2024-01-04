@@ -81,6 +81,9 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
     public void onInit() {
         mQuickStatusBarHeaderController.init();
         mView.setSceneContainerEnabled(mSceneContainerEnabled);
+        if (mSceneContainerEnabled && mQsPanelController != null) {
+            mQSPanelContainer.setOnTouchListener(null);
+        }
     }
 
     public void setListening(boolean listening) {
@@ -91,13 +94,17 @@ public class QSContainerImplController extends ViewController<QSContainerImpl> {
     protected void onViewAttached() {
         mView.updateResources(mQsPanelController, mQuickStatusBarHeaderController);
         mConfigurationController.addCallback(mConfigurationListener);
-        mQSPanelContainer.setOnTouchListener(mContainerTouchHandler);
+        if (!mSceneContainerEnabled && mQSPanelContainer != null) {
+            mQSPanelContainer.setOnTouchListener(mContainerTouchHandler);
+        }
     }
 
     @Override
     protected void onViewDetached() {
         mConfigurationController.removeCallback(mConfigurationListener);
-        mQSPanelContainer.setOnTouchListener(null);
+        if (mQSPanelContainer != null) {
+            mQSPanelContainer.setOnTouchListener(null);
+        }
     }
 
     public QSContainerImpl getView() {
