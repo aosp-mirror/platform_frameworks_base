@@ -109,6 +109,11 @@ public class DisplayManagerFlags {
             Flags.FLAG_FAST_HDR_TRANSITIONS,
             Flags::fastHdrTransitions);
 
+    private final FlagState mRefreshRateVotingTelemetry = new FlagState(
+            Flags.FLAG_REFRESH_RATE_VOTING_TELEMETRY,
+            Flags::refreshRateVotingTelemetry
+    );
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -220,6 +225,10 @@ public class DisplayManagerFlags {
         return mFastHdrTransitions.isEnabled();
     }
 
+    public boolean isRefreshRateVotingTelemetryEnabled() {
+        return mRefreshRateVotingTelemetry.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -242,6 +251,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);
         pw.println(" " + mAutoBrightnessModesFlagState);
         pw.println(" " + mFastHdrTransitions);
+        pw.println(" " + mRefreshRateVotingTelemetry);
     }
 
     private static class FlagState {
