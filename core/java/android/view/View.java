@@ -22856,6 +22856,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Determines whether an unprocessed input event is available on the window.
+     *
+     * This is only a performance hint (a.k.a. the Input Hint) and may return false negative
+     * results.  Callers should not rely on availability of the input event based on the return
+     * value of this method.
+     *
+     * The Input Hint functionality is experimental, and can be removed in the future OS releases.
+     *
+     * This method only returns nontrivial results on a View that is attached to a Window. Such View
+     * can be acquired using `Activity.getWindow().getDecorView()`, and only after the view
+     * hierarchy is attached (via {@link android.app.Activity#setContentView(android.view.View)}).
+     *
+     * In multi-window mode the View can provide the Input Hint only for the window it is attached
+     * to. Therefore, checking input availability for the whole application would require asking
+     * for the hint from more than one View.
+     *
+     * The initial implementation does not return false positives, but callers should not rely on
+     * it: false positives may occur in future OS releases.
+     *
+     * @hide
+     */
+    public boolean probablyHasInput() {
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl == null) {
+            return false;
+        }
+        return viewRootImpl.probablyHasInput();
+    }
+
+    /**
      * Destroys all hardware rendering resources. This method is invoked
      * when the system needs to reclaim resources. Upon execution of this
      * method, you should free any OpenGL resources created by the view.
