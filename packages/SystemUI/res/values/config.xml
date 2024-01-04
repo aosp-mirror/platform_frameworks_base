@@ -962,6 +962,9 @@
     <!-- Whether to show bottom sheets edge to edge -->
     <bool name="config_edgeToEdgeBottomSheetDialog">true</bool>
 
+    <!-- Device specific config that controls whether rest to unlock feature is supported.  -->
+    <bool name="config_restToUnlockSupported">false</bool>
+
     <!--
     Time in milliseconds the user has to touch the side FPS sensor to successfully authenticate when
     the screen is turned off with AOD not enabled.

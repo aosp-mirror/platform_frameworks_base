@@ -24,6 +24,7 @@ import android.view.DisplayInfo
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowMetrics
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
@@ -61,7 +62,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
@@ -69,7 +69,7 @@ import org.mockito.junit.MockitoJUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class SideFpsSensorInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
@@ -104,6 +104,7 @@ class SideFpsSensorInteractorTest : SysuiTestCase() {
         contextDisplayInfo.uniqueId = "current-display"
         whenever(fingerprintInteractiveToAuthProvider.enabledForCurrentUser)
             .thenReturn(isRestToUnlockEnabled)
+        overrideResource(R.bool.config_restToUnlockSupported, true)
         underTest =
             SideFpsSensorInteractor(
                 mContext,
