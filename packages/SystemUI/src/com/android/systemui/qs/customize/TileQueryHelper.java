@@ -259,7 +259,11 @@ public class TileQueryHelper {
     private State getState(Collection<QSTile> tiles, String spec) {
         for (QSTile tile : tiles) {
             if (spec.equals(tile.getTileSpec())) {
-                return tile.getState().copy();
+                if (tile.isTileReady()) {
+                    return tile.getState().copy();
+                } else {
+                    return null;
+                }
             }
         }
         return null;
