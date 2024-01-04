@@ -2332,6 +2332,9 @@ package android.os {
     field public static final int CPU_LOAD_RESET = 2; // 0x2
     field public static final int CPU_LOAD_RESUME = 3; // 0x3
     field public static final int CPU_LOAD_UP = 0; // 0x0
+    field @FlaggedApi("android.os.adpf_gpu_report_actual_work_duration") public static final int GPU_LOAD_DOWN = 6; // 0x6
+    field @FlaggedApi("android.os.adpf_gpu_report_actual_work_duration") public static final int GPU_LOAD_RESET = 7; // 0x7
+    field @FlaggedApi("android.os.adpf_gpu_report_actual_work_duration") public static final int GPU_LOAD_UP = 5; // 0x5
   }
 
   public final class PowerManager {
