@@ -56,28 +56,18 @@
     <string name="permission_nearby_devices" msgid="7530973297737123481">"الأجهزة المجاورة"</string>
     <string name="permission_media_routing_control" msgid="5498639511586715253">"تغيير جهاز إخراج الوسائط"</string>
     <string name="permission_storage" msgid="6831099350839392343">"الصور والوسائط"</string>
-    <!-- no translation found for permission_notifications (4099418516590632909) -->
-    <skip />
+    <string name="permission_notifications" msgid="4099418516590632909">"الإشعارات"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"التطبيقات"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"البثّ"</string>
-    <!-- no translation found for permission_phone_summary (8246321093970051702) -->
-    <skip />
-    <!-- no translation found for permission_call_logs_summary (7545243592757693321) -->
-    <skip />
-    <!-- no translation found for permission_sms_summary (8499509535410068616) -->
-    <skip />
-    <!-- no translation found for permission_contacts_summary (2840800622763086808) -->
-    <skip />
-    <!-- no translation found for permission_calendar_summary (8430353935747336165) -->
-    <skip />
-    <!-- no translation found for permission_microphone_summary (4862628553869973259) -->
-    <skip />
-    <!-- no translation found for permission_nearby_devices_summary (1306752848196464817) -->
-    <skip />
-    <!-- no translation found for permission_notification_listener_access_summary (7856071768185367749) -->
-    <skip />
-    <!-- no translation found for permission_notifications_summary (2272810466047367030) -->
-    <skip />
+    <string name="permission_phone_summary" msgid="8246321093970051702">"إجراء المكالمات الهاتفية وإدارتها"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"قراءة سجلّ المكالمات الهاتفية والكتابة إليه"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"إرسال الرسائل القصيرة وعرضها"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"الوصول إلى جهات اتصالك"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"الوصول إلى تقويمك"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"تسجيل الصوت"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"يمكن العثور على الموضع النسبي للأجهزة المجاورة والربط بها وتحديدها."</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"يمكن لهذا الملف الشخصي قراءة جميع الإشعارات، بما في ذلك المعلومات، مثل جهات الاتصال والرسائل والصور."</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"‏• قراءة كل الإشعارات بما فيها المعلومات، مثل جهات الاتصال والرسائل والصور&lt;br/&gt;• إرسال الإشعارات&lt;br/&gt;&lt;br/&gt;يمكنك إدارة الإذن الممنوح لهذا التطبيق بقراءة الإشعارات وإرسالها في أي وقت من خلال الإعدادات &gt; الإشعارات."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"بث تطبيقات هاتفك"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"بثّ التطبيقات وميزات النظام الأخرى من هاتفك"</string>
