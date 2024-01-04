@@ -57,7 +57,6 @@ public final class MessageQueue {
 
     @UnsupportedAppUsage
     Message mMessages;
-    private Message mLast;
     @UnsupportedAppUsage
     private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
     private SparseArray<FileDescriptorRecord> mFileDescriptorRecords;
@@ -66,10 +65,6 @@ public final class MessageQueue {
 
     // Indicates whether next() is blocked waiting in pollOnce() with a non-zero timeout.
     private boolean mBlocked;
-
-    // Tracks the number of async message. We use this in enqueueMessage() to avoid searching the
-    // queue for async messages when inserting a message at the tail.
-    private int mAsyncMessageCount;
 
     // The next barrier token.
     // Barriers are indicated by messages with a null target whose arg1 field carries the token.
@@ -369,21 +364,12 @@ public final class MessageQueue {
                         mBlocked = false;
                         if (prevMsg != null) {
                             prevMsg.next = msg.next;
-                            if (prevMsg.next == null) {
-                                mLast = prevMsg;
-                            }
                         } else {
                             mMessages = msg.next;
-                            if (msg.next == null) {
-                                mLast = null;
-                            }
                         }
                         msg.next = null;
                         if (DEBUG) Log.v(TAG, "Returning message: " + msg);
                         msg.markInUse();
-                        if (msg.isAsynchronous()) {
-                            mAsyncMessageCount--;
-                        }
                         return msg;
                     }
                 } else {
@@ -506,14 +492,6 @@ public final class MessageQueue {
             msg.when = when;
             msg.arg1 = token;
 
-            if (Flags.messageQueueTailTracking() && mLast != null && mLast.when <= when) {
-                /* Message goes to tail of list */
-                mLast.next = msg;
-                mLast = msg;
-                msg.next = null;
-                return token;
-            }
-
             Message prev = null;
             Message p = mMessages;
             if (when != 0) {
@@ -522,12 +500,6 @@ public final class MessageQueue {
                     p = p.next;
                 }
             }
-
-            if (p == null) {
-                /* We reached the tail of the list, or list is empty. */
-                mLast = msg;
-            }
-
             if (prev != null) { // invariant: p == prev.next
                 msg.next = p;
                 prev.next = msg;
@@ -568,15 +540,9 @@ public final class MessageQueue {
             final boolean needWake;
             if (prev != null) {
                 prev.next = p.next;
-                if (prev.next == null) {
-                    mLast = prev;
-                }
                 needWake = false;
             } else {
                 mMessages = p.next;
-                if (mMessages == null) {
-                    mLast = null;
-                }
                 needWake = mMessages == null || mMessages.target != null;
             }
             p.recycleUnchecked();
@@ -616,77 +582,24 @@ public final class MessageQueue {
                 msg.next = p;
                 mMessages = msg;
                 needWake = mBlocked;
-                if (p == null) {
-                    mLast = mMessages;
-                }
             } else {
-                // Message is to be inserted at tail or middle of queue. Usually we don't have to
-                // wake up the event queue unless there is a barrier at the head of the queue and
-                // the message is the earliest asynchronous message in the queue.
-                //
-                // For readability, we split this portion of the function into two blocks based on
-                // whether tail tracking is enabled. This has a minor implication for the case
-                // where tail tracking is disabled. See the comment below.
-                if (Flags.messageQueueTailTracking()) {
-                    needWake = mBlocked && p.target == null && msg.isAsynchronous()
-                        && mAsyncMessageCount == 0;
-                    if (when >= mLast.when) {
-                        msg.next = null;
-                        mLast.next = msg;
-                        mLast = msg;
-                    } else {
-                        // Inserted within the middle of the queue.
-                        Message prev;
-                        for (;;) {
-                            prev = p;
-                            p = p.next;
-                            if (p == null || when < p.when) {
-                                break;
-                            }
-                        }
-                        if (p == null) {
-                            /* Inserting at tail of queue */
-                            mLast = msg;
-                        }
-                        msg.next = p; // invariant: p == prev.next
-                        prev.next = msg;
+                // Inserted within the middle of the queue.  Usually we don't have to wake
+                // up the event queue unless there is a barrier at the head of the queue
+                // and the message is the earliest asynchronous message in the queue.
+                needWake = mBlocked && p.target == null && msg.isAsynchronous();
+                Message prev;
+                for (;;) {
+                    prev = p;
+                    p = p.next;
+                    if (p == null || when < p.when) {
+                        break;
                     }
-                } else {
-                    needWake = mBlocked && p.target == null && msg.isAsynchronous();
-                    Message prev;
-                    for (;;) {
-                        prev = p;
-                        p = p.next;
-                        if (p == null || when < p.when) {
-                            break;
-                        }
-                        if (needWake && p.isAsynchronous()) {
-                            needWake = false;
-                        }
+                    if (needWake && p.isAsynchronous()) {
+                        needWake = false;
                     }
-                    msg.next = p; // invariant: p == prev.next
-                    prev.next = msg;
-
-                    /*
-                     * If this block is executing then we have a build without tail tracking -
-                     * specifically: Flags.messageQueueTailTracking() == false. This is determined
-                     * at build time so the flag won't change on us during runtime.
-                     *
-                     * Since we don't want to pepper the code with extra checks, we only check
-                     * for tail tracking when we might use mLast. Otherwise, we continue to update
-                     * mLast as the tail of the list.
-                     *
-                     * In this case however we are not maintaining mLast correctly. Since we never
-                     * use it, this is fine. However, we run the risk of leaking a reference.
-                     * So set mLast to null in this case to avoid any Message leaks. The other
-                     * sites will never use the value so we are safe against null pointer derefs.
-                     */
-                    mLast = null;
                 }
-            }
-
-            if (msg.isAsynchronous()) {
-                mAsyncMessageCount++;
+                msg.next = p; // invariant: p == prev.next
+                prev.next = msg;
             }
 
             // We can assume mPtr != 0 because mQuitting is false.
@@ -779,15 +692,8 @@ public final class MessageQueue {
                    && (object == null || p.obj == object)) {
                 Message n = p.next;
                 mMessages = n;
-                if (p.isAsynchronous()) {
-                    mAsyncMessageCount--;
-                }
                 p.recycleUnchecked();
                 p = n;
-            }
-
-            if (p == null) {
-                mLast = mMessages;
             }
 
             // Remove all messages after front.
@@ -797,14 +703,8 @@ public final class MessageQueue {
                     if (n.target == h && n.what == what
                         && (object == null || n.obj == object)) {
                         Message nn = n.next;
-                        if (n.isAsynchronous()) {
-                            mAsyncMessageCount--;
-                        }
                         n.recycleUnchecked();
                         p.next = nn;
-                        if (p.next == null) {
-                            mLast = p;
-                        }
                         continue;
                     }
                 }
@@ -826,15 +726,8 @@ public final class MessageQueue {
                    && (object == null || object.equals(p.obj))) {
                 Message n = p.next;
                 mMessages = n;
-                if (p.isAsynchronous()) {
-                    mAsyncMessageCount--;
-                }
                 p.recycleUnchecked();
                 p = n;
-            }
-
-            if (p == null) {
-                mLast = mMessages;
             }
 
             // Remove all messages after front.
@@ -844,14 +737,8 @@ public final class MessageQueue {
                     if (n.target == h && n.what == what
                         && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
-                        if (n.isAsynchronous()) {
-                            mAsyncMessageCount--;
-                        }
                         n.recycleUnchecked();
                         p.next = nn;
-                        if (p.next == null) {
-                            mLast = p;
-                        }
                         continue;
                     }
                 }
@@ -873,15 +760,8 @@ public final class MessageQueue {
                    && (object == null || p.obj == object)) {
                 Message n = p.next;
                 mMessages = n;
-                if (p.isAsynchronous()) {
-                    mAsyncMessageCount--;
-                }
                 p.recycleUnchecked();
                 p = n;
-            }
-
-            if (p == null) {
-                mLast = mMessages;
             }
 
             // Remove all messages after front.
@@ -891,14 +771,8 @@ public final class MessageQueue {
                     if (n.target == h && n.callback == r
                         && (object == null || n.obj == object)) {
                         Message nn = n.next;
-                        if (n.isAsynchronous()) {
-                            mAsyncMessageCount--;
-                        }
                         n.recycleUnchecked();
                         p.next = nn;
-                        if (p.next == null) {
-                            mLast = p;
-                        }
                         continue;
                     }
                 }
@@ -920,15 +794,8 @@ public final class MessageQueue {
                    && (object == null || object.equals(p.obj))) {
                 Message n = p.next;
                 mMessages = n;
-                if (p.isAsynchronous()) {
-                    mAsyncMessageCount--;
-                }
                 p.recycleUnchecked();
                 p = n;
-            }
-
-            if (p == null) {
-                mLast = mMessages;
             }
 
             // Remove all messages after front.
@@ -938,14 +805,8 @@ public final class MessageQueue {
                     if (n.target == h && n.callback == r
                         && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
-                        if (n.isAsynchronous()) {
-                            mAsyncMessageCount--;
-                        }
                         n.recycleUnchecked();
                         p.next = nn;
-                        if (p.next == null) {
-                            mLast = p;
-                        }
                         continue;
                     }
                 }
@@ -968,15 +829,8 @@ public final class MessageQueue {
                     && (object == null || p.obj == object)) {
                 Message n = p.next;
                 mMessages = n;
-                if (p.isAsynchronous()) {
-                    mAsyncMessageCount--;
-                }
                 p.recycleUnchecked();
                 p = n;
-            }
-
-            if (p == null) {
-                mLast = mMessages;
             }
 
             // Remove all messages after front.
@@ -985,14 +839,8 @@ public final class MessageQueue {
                 if (n != null) {
                     if (n.target == h && (object == null || n.obj == object)) {
                         Message nn = n.next;
-                        if (n.isAsynchronous()) {
-                            mAsyncMessageCount--;
-                        }
                         n.recycleUnchecked();
                         p.next = nn;
-                        if (p.next == null) {
-                            mLast = p;
-                        }
                         continue;
                     }
                 }
@@ -1014,15 +862,8 @@ public final class MessageQueue {
                     && (object == null || object.equals(p.obj))) {
                 Message n = p.next;
                 mMessages = n;
-                if (p.isAsynchronous()) {
-                    mAsyncMessageCount--;
-                }
                 p.recycleUnchecked();
                 p = n;
-            }
-
-            if (p == null) {
-                mLast = mMessages;
             }
 
             // Remove all messages after front.
@@ -1031,14 +872,8 @@ public final class MessageQueue {
                 if (n != null) {
                     if (n.target == h && (object == null || object.equals(n.obj))) {
                         Message nn = n.next;
-                        if (n.isAsynchronous()) {
-                            mAsyncMessageCount--;
-                        }
                         n.recycleUnchecked();
                         p.next = nn;
-                        if (p.next == null) {
-                            mLast = p;
-                        }
                         continue;
                     }
                 }
@@ -1055,8 +890,6 @@ public final class MessageQueue {
             p = n;
         }
         mMessages = null;
-        mLast = null;
-        mAsyncMessageCount = 0;
     }
 
     private void removeAllFutureMessagesLocked() {
@@ -1078,14 +911,9 @@ public final class MessageQueue {
                     p = n;
                 }
                 p.next = null;
-                mLast = p;
-
                 do {
                     p = n;
                     n = p.next;
-                    if (p.isAsynchronous()) {
-                        mAsyncMessageCount--;
-                    }
                     p.recycleUnchecked();
                 } while (n != null);
             }
