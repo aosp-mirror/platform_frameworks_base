@@ -125,6 +125,9 @@
     },
     {
       "name": "vts_treble_vintf_vendor_test"
+    },
+    {
+      "name": "CtsStrictJavaPackagesTestCases"
     }
   ],
   "postsubmit-managedprofile-stress": [
