@@ -76,7 +76,7 @@ public class UnarchiveActivity extends Activity {
         boolean hasRequestInstallPermission = Arrays.asList(getRequestedPermissions(callingPackage))
                 .contains(permission.REQUEST_INSTALL_PACKAGES);
         boolean hasInstallPermission = getBaseContext().checkPermission(permission.INSTALL_PACKAGES,
-                0 /* random value for pid */, callingUid) != PackageManager.PERMISSION_GRANTED;
+                0 /* random value for pid */, callingUid) == PackageManager.PERMISSION_GRANTED;
         if (!hasRequestInstallPermission && !hasInstallPermission) {
             Log.e(TAG, "Uid " + callingUid + " does not have "
                     + permission.REQUEST_INSTALL_PACKAGES + " or "
