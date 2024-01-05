@@ -32,9 +32,9 @@ import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.BouncerViewDelegate
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
@@ -73,7 +73,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Mock private lateinit var dismissCallbackRegistry: DismissCallbackRegistry
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
-    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
+    @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
     private lateinit var mainHandler: FakeHandler
     private lateinit var underTest: PrimaryBouncerInteractor
     private lateinit var resources: TestableResources

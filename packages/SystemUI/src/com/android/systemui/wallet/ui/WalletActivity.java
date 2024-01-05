@@ -43,7 +43,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
@@ -69,7 +69,7 @@ public class WalletActivity extends ComponentActivity implements
     private final Executor mExecutor;
     private final Handler mHandler;
     private final FalsingManager mFalsingManager;
-    private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     private FalsingCollector mFalsingCollector;
     private final UserTracker mUserTracker;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -94,7 +94,7 @@ public class WalletActivity extends ComponentActivity implements
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarKeyguardViewManager keyguardViewManager,
             UiEventLogger uiEventLogger,
-            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor) {
+            DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor) {
         mKeyguardStateController = keyguardStateController;
         mKeyguardDismissUtil = keyguardDismissUtil;
         mActivityStarter = activityStarter;
@@ -106,7 +106,7 @@ public class WalletActivity extends ComponentActivity implements
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardViewManager = keyguardViewManager;
         mUiEventLogger = uiEventLogger;
-        mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
+        mDeviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor;
     }
 
     @Override
@@ -213,7 +213,7 @@ public class WalletActivity extends ComponentActivity implements
                 true,
                 Utils.getColorAttrDefaultColor(
                         this, com.android.internal.R.attr.colorAccentPrimary));
-        mKeyguardFaceAuthInteractor.onWalletLaunched();
+        mDeviceEntryFaceAuthInteractor.onWalletLaunched();
     }
 
     @Override

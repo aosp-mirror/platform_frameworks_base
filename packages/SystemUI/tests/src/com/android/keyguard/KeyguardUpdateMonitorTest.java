@@ -125,12 +125,14 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfig;
+import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfigImpl;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
+import com.android.systemui.deviceentry.domain.interactor.FaceAuthenticationListener;
+import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus;
+import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus;
+import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.domain.interactor.FaceAuthenticationListener;
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
-import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.FaceDetectionStatus;
-import com.android.systemui.keyguard.shared.model.FailedFaceAuthenticationStatus;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
@@ -262,7 +264,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
     @Mock
-    private KeyguardFaceAuthInteractor mFaceAuthInteractor;
+    private DeviceEntryFaceAuthInteractor mFaceAuthInteractor;
     @Captor
     private ArgumentCaptor<FaceAuthenticationListener> mFaceAuthenticationListener;
 
@@ -316,7 +318,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.systemui.res.R.integer.config_face_auth_supported_posture,
                 DEVICE_POSTURE_UNKNOWN);
-        mFaceWakeUpTriggersConfig = new FaceWakeUpTriggersConfig(
+        mFaceWakeUpTriggersConfig = new FaceWakeUpTriggersConfigImpl(
                 mContext.getResources(),
                 mGlobalSettings,
                 mDumpManager

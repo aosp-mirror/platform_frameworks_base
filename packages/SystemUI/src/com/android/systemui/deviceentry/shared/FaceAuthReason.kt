@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,58 +14,55 @@
  * limitations under the License.
  */
 
-package com.android.keyguard
+package com.android.systemui.deviceentry.shared
 
 import android.annotation.StringDef
 import android.os.PowerManager
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.keyguard.FaceAuthApiRequestReason.Companion.ACCESSIBILITY_ACTION
-import com.android.keyguard.FaceAuthApiRequestReason.Companion.NOTIFICATION_PANEL_CLICKED
-import com.android.keyguard.FaceAuthApiRequestReason.Companion.PICK_UP_GESTURE_TRIGGERED
-import com.android.keyguard.FaceAuthApiRequestReason.Companion.QS_EXPANDED
-import com.android.keyguard.FaceAuthApiRequestReason.Companion.SWIPE_UP_ON_BOUNCER
-import com.android.keyguard.FaceAuthApiRequestReason.Companion.UDFPS_POINTER_DOWN
-import com.android.keyguard.InternalFaceAuthReasons.ALL_AUTHENTICATORS_REGISTERED
-import com.android.keyguard.InternalFaceAuthReasons.ALTERNATE_BIOMETRIC_BOUNCER_SHOWN
-import com.android.keyguard.InternalFaceAuthReasons.ASSISTANT_VISIBILITY_CHANGED
-import com.android.keyguard.InternalFaceAuthReasons.AUTH_REQUEST_DURING_CANCELLATION
-import com.android.keyguard.InternalFaceAuthReasons.BIOMETRIC_ENABLED
-import com.android.keyguard.InternalFaceAuthReasons.CAMERA_LAUNCHED
-import com.android.keyguard.InternalFaceAuthReasons.DEVICE_WOKEN_UP_ON_REACH_GESTURE
-import com.android.keyguard.InternalFaceAuthReasons.DISPLAY_OFF
-import com.android.keyguard.InternalFaceAuthReasons.DREAM_STARTED
-import com.android.keyguard.InternalFaceAuthReasons.DREAM_STOPPED
-import com.android.keyguard.InternalFaceAuthReasons.ENROLLMENTS_CHANGED
-import com.android.keyguard.InternalFaceAuthReasons.FACE_AUTHENTICATED
-import com.android.keyguard.InternalFaceAuthReasons.FACE_AUTH_STOPPED_ON_USER_INPUT
-import com.android.keyguard.InternalFaceAuthReasons.FACE_CANCEL_NOT_RECEIVED
-import com.android.keyguard.InternalFaceAuthReasons.FACE_LOCKOUT_RESET
-import com.android.keyguard.InternalFaceAuthReasons.FINISHED_GOING_TO_SLEEP
-import com.android.keyguard.InternalFaceAuthReasons.FP_AUTHENTICATED
-import com.android.keyguard.InternalFaceAuthReasons.FP_LOCKED_OUT
-import com.android.keyguard.InternalFaceAuthReasons.GOING_TO_SLEEP
-import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_GOING_AWAY
-import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_INIT
-import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_OCCLUSION_CHANGED
-import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_RESET
-import com.android.keyguard.InternalFaceAuthReasons.KEYGUARD_VISIBILITY_CHANGED
-import com.android.keyguard.InternalFaceAuthReasons.NON_STRONG_BIOMETRIC_ALLOWED_CHANGED
-import com.android.keyguard.InternalFaceAuthReasons.OCCLUDING_APP_REQUESTED
-import com.android.keyguard.InternalFaceAuthReasons.POSTURE_CHANGED
-import com.android.keyguard.InternalFaceAuthReasons.PRIMARY_BOUNCER_SHOWN
-import com.android.keyguard.InternalFaceAuthReasons.PRIMARY_BOUNCER_SHOWN_OR_WILL_BE_SHOWN
-import com.android.keyguard.InternalFaceAuthReasons.RETRY_AFTER_HW_UNAVAILABLE
-import com.android.keyguard.InternalFaceAuthReasons.STARTED_WAKING_UP
-import com.android.keyguard.InternalFaceAuthReasons.STRONG_AUTH_ALLOWED_CHANGED
-import com.android.keyguard.InternalFaceAuthReasons.TRUST_DISABLED
-import com.android.keyguard.InternalFaceAuthReasons.TRUST_ENABLED
-import com.android.keyguard.InternalFaceAuthReasons.USER_SWITCHING
+import com.android.systemui.deviceentry.shared.FaceAuthApiRequestReason.Companion.ACCESSIBILITY_ACTION
+import com.android.systemui.deviceentry.shared.FaceAuthApiRequestReason.Companion.NOTIFICATION_PANEL_CLICKED
+import com.android.systemui.deviceentry.shared.FaceAuthApiRequestReason.Companion.PICK_UP_GESTURE_TRIGGERED
+import com.android.systemui.deviceentry.shared.FaceAuthApiRequestReason.Companion.QS_EXPANDED
+import com.android.systemui.deviceentry.shared.FaceAuthApiRequestReason.Companion.SWIPE_UP_ON_BOUNCER
+import com.android.systemui.deviceentry.shared.FaceAuthApiRequestReason.Companion.UDFPS_POINTER_DOWN
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.ALL_AUTHENTICATORS_REGISTERED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.ALTERNATE_BIOMETRIC_BOUNCER_SHOWN
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.ASSISTANT_VISIBILITY_CHANGED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.AUTH_REQUEST_DURING_CANCELLATION
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.BIOMETRIC_ENABLED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.CAMERA_LAUNCHED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.DEVICE_WOKEN_UP_ON_REACH_GESTURE
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.DISPLAY_OFF
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.DREAM_STARTED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.DREAM_STOPPED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.ENROLLMENTS_CHANGED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.FACE_AUTHENTICATED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.FACE_AUTH_STOPPED_ON_USER_INPUT
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.FACE_CANCEL_NOT_RECEIVED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.FACE_LOCKOUT_RESET
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.FINISHED_GOING_TO_SLEEP
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.FP_AUTHENTICATED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.FP_LOCKED_OUT
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.GOING_TO_SLEEP
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.KEYGUARD_GOING_AWAY
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.KEYGUARD_INIT
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.KEYGUARD_OCCLUSION_CHANGED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.KEYGUARD_RESET
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.KEYGUARD_VISIBILITY_CHANGED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.NON_STRONG_BIOMETRIC_ALLOWED_CHANGED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.OCCLUDING_APP_REQUESTED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.POSTURE_CHANGED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.PRIMARY_BOUNCER_SHOWN
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.PRIMARY_BOUNCER_SHOWN_OR_WILL_BE_SHOWN
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.RETRY_AFTER_HW_UNAVAILABLE
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.STARTED_WAKING_UP
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.STRONG_AUTH_ALLOWED_CHANGED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.TRUST_DISABLED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.TRUST_ENABLED
+import com.android.systemui.deviceentry.shared.InternalFaceAuthReasons.USER_SWITCHING
 
-/**
- * List of reasons why face auth is requested by clients through
- * [KeyguardUpdateMonitor.requestFaceAuth].
- */
+/** List of reasons why face auth is requested by clients. */
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(
     SWIPE_UP_ON_BOUNCER,

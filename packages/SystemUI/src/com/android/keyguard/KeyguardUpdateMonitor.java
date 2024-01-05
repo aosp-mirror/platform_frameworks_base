@@ -120,18 +120,19 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfig;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
+import com.android.systemui.deviceentry.domain.interactor.FaceAuthenticationListener;
+import com.android.systemui.deviceentry.shared.model.AcquiredFaceAuthenticationStatus;
+import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus;
+import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus;
+import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus;
+import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus;
+import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus;
+import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
-import com.android.systemui.keyguard.domain.interactor.FaceAuthenticationListener;
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.shared.constants.TrustAgentUiEvent;
-import com.android.systemui.keyguard.shared.model.AcquiredFaceAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.FaceDetectionStatus;
-import com.android.systemui.keyguard.shared.model.FailedFaceAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.clocks.WeatherData;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -360,7 +361,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @Nullable
     private final BiometricManager mBiometricManager;
     @Nullable
-    private KeyguardFaceAuthInteractor mFaceAuthInteractor;
+    private DeviceEntryFaceAuthInteractor mFaceAuthInteractor;
     private final DevicePostureController mDevicePostureController;
     private final TaskStackChangeListeners mTaskStackChangeListeners;
     private final IActivityTaskManager mActivityTaskManager;
@@ -1272,14 +1273,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         return getFaceAuthInteractor() != null && getFaceAuthInteractor().isRunning();
     }
 
-    private @Nullable KeyguardFaceAuthInteractor getFaceAuthInteractor() {
+    private @Nullable DeviceEntryFaceAuthInteractor getFaceAuthInteractor() {
         return mFaceAuthInteractor;
     }
 
     /**
      * Set the face auth interactor that should be used for initiating face authentication.
      */
-    public void setFaceAuthInteractor(KeyguardFaceAuthInteractor faceAuthInteractor) {
+    public void setFaceAuthInteractor(DeviceEntryFaceAuthInteractor faceAuthInteractor) {
         if (mFaceAuthInteractor != null) {
             mFaceAuthInteractor.unregisterListener(mFaceAuthenticationListener);
         }
@@ -1362,7 +1363,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * @return whether the current user has been authenticated with face. This may be true
      * on the lockscreen if the user doesn't have bypass enabled.
      *
-     * @deprecated Use {@link KeyguardFaceAuthInteractor#isAuthenticated()}
+     * @deprecated Use {@link DeviceEntryFaceAuthInteractor#isAuthenticated()}
      */
     @Deprecated
     public boolean getIsFaceAuthenticated() {
@@ -1393,7 +1394,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     /**
      * Returns whether the user is unlocked with face.
-     * @deprecated Use {@link KeyguardFaceAuthInteractor#isAuthenticated()} instead
+     * @deprecated Use {@link DeviceEntryFaceAuthInteractor#isAuthenticated()} instead
      */
     @Deprecated
     public boolean isCurrentUserUnlockedWithFace() {
@@ -2464,7 +2465,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     /**
      * @return true if there's at least one face enrolled
-     * @deprecated Use {@link KeyguardFaceAuthInteractor#isFaceAuthEnabledAndEnrolled()}
+     * @deprecated Use {@link DeviceEntryFaceAuthInteractor#isFaceAuthEnabledAndEnrolled()}
      */
     @Deprecated
     public boolean isFaceEnabledAndEnrolled() {
@@ -2844,7 +2845,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     /**
      * If face auth is allows to scan on this exact moment.
      *
-     * @deprecated Use {@link KeyguardFaceAuthInteractor#canFaceAuthRun()}
+     * @deprecated Use {@link DeviceEntryFaceAuthInteractor#canFaceAuthRun()}
      */
     @Deprecated
     public boolean shouldListenForFace() {
@@ -2915,7 +2916,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * @deprecated Use {@link KeyguardFaceAuthInteractor#isLockedOut()}
+     * @deprecated Use {@link DeviceEntryFaceAuthInteractor#isLockedOut()}
      */
     @Deprecated
     public boolean isFaceLockedOut() {
@@ -2956,7 +2957,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * @deprecated Use {@link KeyguardFaceAuthInteractor#isFaceAuthEnabledAndEnrolled()}
+     * @deprecated Use {@link DeviceEntryFaceAuthInteractor#isFaceAuthEnabledAndEnrolled()}
      */
     @VisibleForTesting
     @Deprecated

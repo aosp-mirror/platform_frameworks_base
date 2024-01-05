@@ -29,7 +29,7 @@ import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -52,7 +52,7 @@ constructor(
     @Application private val applicationContext: Context,
     private val repository: BouncerRepository,
     private val authenticationInteractor: AuthenticationInteractor,
-    private val keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor,
+    private val deviceEntryFaceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
     private val simBouncerInteractor: SimBouncerInteractor,
@@ -100,7 +100,7 @@ constructor(
      * user's pocket or by the user's face while holding their device up to their ear.
      */
     fun onIntentionalUserInput() {
-        keyguardFaceAuthInteractor.onPrimaryBouncerUserInput()
+        deviceEntryFaceAuthInteractor.onPrimaryBouncerUserInput()
         powerInteractor.onUserTouch()
         falsingInteractor.updateFalseConfidence(FalsingClassifier.Result.passed(0.6))
     }

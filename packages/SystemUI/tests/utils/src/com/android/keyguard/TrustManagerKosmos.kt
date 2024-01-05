@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.keyguard
 
-import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
+import android.app.trust.TrustManager
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
 
-var Kosmos.deviceEntryFaceAuthRepository: DeviceEntryFaceAuthRepository by
-    Kosmos.Fixture { fakeDeviceEntryFaceAuthRepository }
-val Kosmos.fakeDeviceEntryFaceAuthRepository by
-    Kosmos.Fixture { FakeDeviceEntryFaceAuthRepository() }
+val Kosmos.trustManager by Kosmos.Fixture { mock<TrustManager>() }
