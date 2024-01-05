@@ -326,7 +326,7 @@ private fun CommunalContent(
     elevation: Dp = 0.dp,
 ) {
     when (model) {
-        is CommunalContentModel.Widget -> WidgetContent(model, size, elevation, modifier)
+        is CommunalContentModel.Widget -> WidgetContent(viewModel, model, size, elevation, modifier)
         is CommunalContentModel.WidgetPlaceholder -> WidgetPlaceholderContent(size)
         is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
@@ -347,6 +347,7 @@ fun WidgetPlaceholderContent(size: SizeF) {
 
 @Composable
 private fun WidgetContent(
+    viewModel: BaseCommunalViewModel,
     model: CommunalContentModel.Widget,
     size: SizeF,
     elevation: Dp,
@@ -359,9 +360,18 @@ private fun WidgetContent(
         AndroidView(
             modifier = modifier,
             factory = { context ->
-                model.appWidgetHost
-                    .createView(context, model.appWidgetId, model.providerInfo)
-                    .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
+                // The AppWidgetHostView will inherit the interaction handler from the
+                // AppWidgetHost. So set the interaction handler here before creating the view, and
+                // then clear it after the view is created. This is a workaround due to the fact
+                // that the interaction handler cannot be specified when creating the view,
+                // and there are race conditions if it is set after the view is created.
+                model.appWidgetHost.setInteractionHandler(viewModel.getInteractionHandler())
+                val view =
+                    model.appWidgetHost
+                        .createView(context, model.appWidgetId, model.providerInfo)
+                        .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
+                model.appWidgetHost.setInteractionHandler(null)
+                view
             },
             // For reusing composition in lazy lists.
             onReset = {},
