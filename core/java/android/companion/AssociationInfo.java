@@ -458,6 +458,29 @@ public final class AssociationInfo implements Parcelable {
             mSystemDataSyncFlags = info.mSystemDataSyncFlags;
         }
 
+        /**
+         * This builder is used specifically to create a new association to be restored to a device
+         * that is potentially using a different user ID from the backed-up device.
+         *
+         * @hide
+         */
+        public Builder(int id, int userId, @NonNull String packageName, AssociationInfo info) {
+            mId = id;
+            mUserId = userId;
+            mPackageName = packageName;
+            mTag = info.mTag;
+            mDeviceMacAddress = info.mDeviceMacAddress;
+            mDisplayName = info.mDisplayName;
+            mDeviceProfile = info.mDeviceProfile;
+            mAssociatedDevice = info.mAssociatedDevice;
+            mSelfManaged = info.mSelfManaged;
+            mNotifyOnDeviceNearby = info.mNotifyOnDeviceNearby;
+            mRevoked = info.mRevoked;
+            mTimeApprovedMs = info.mTimeApprovedMs;
+            mLastTimeConnectedMs = info.mLastTimeConnectedMs;
+            mSystemDataSyncFlags = info.mSystemDataSyncFlags;
+        }
+
         /** @hide */
         @FlaggedApi(Flags.FLAG_ASSOCIATION_TAG)
         @TestApi

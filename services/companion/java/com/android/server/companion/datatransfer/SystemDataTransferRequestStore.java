@@ -23,6 +23,7 @@ import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.server.companion.DataStoreUtils.createStorageFileForUser;
+import static com.android.server.companion.DataStoreUtils.fileToByteArray;
 import static com.android.server.companion.DataStoreUtils.isEndOfTag;
 import static com.android.server.companion.DataStoreUtils.isStartOfTag;
 import static com.android.server.companion.DataStoreUtils.writeToFileSafely;
@@ -44,6 +45,7 @@ import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -150,6 +152,33 @@ public class SystemDataTransferRequestStore {
         }
         // Remove requests from store
         mExecutor.execute(() -> writeRequestsToStore(userId, cachedRequests));
+    }
+
+    /**
+     * Return the byte contents of the XML file storing current system data transfer requests.
+     */
+    public byte[] getBackupPayload(@UserIdInt int userId) {
+        final AtomicFile file = getStorageFileForUser(userId);
+
+        synchronized (file) {
+            return fileToByteArray(file);
+        }
+    }
+
+    /**
+     * Parse the byte array containing XML information of system data transfer requests into
+     * an array list of requests.
+     */
+    public List<SystemDataTransferRequest> readRequestsFromPayload(byte[] payload) {
+        try (ByteArrayInputStream in = new ByteArrayInputStream(payload)) {
+            final TypedXmlPullParser parser = Xml.resolvePullParser(in);
+            XmlUtils.beginDocument(parser, XML_TAG_REQUESTS);
+
+            return readRequestsFromXml(parser);
+        } catch (XmlPullParserException | IOException e) {
+            Slog.e(LOG_TAG, "Error while reading requests file", e);
+            return new ArrayList<>();
+        }
     }
 
     @GuardedBy("mLock")
