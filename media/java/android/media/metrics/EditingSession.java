@@ -16,6 +16,9 @@
 
 package android.media.metrics;
 
+import static com.android.media.editing.flags.Flags.FLAG_ADD_MEDIA_METRICS_EDITING;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
@@ -24,7 +27,8 @@ import com.android.internal.util.AnnotationValidations;
 import java.util.Objects;
 
 /**
- * An instances of this class represents a session of media editing.
+ * Represents a session of media editing, for example, transcoding between formats, transmuxing or
+ * applying trimming or audio/video effects to a stream.
  */
 public final class EditingSession implements AutoCloseable {
     private final @NonNull String mId;
@@ -40,6 +44,13 @@ public final class EditingSession implements AutoCloseable {
         mLogSessionId = new LogSessionId(mId);
     }
 
+    /** Reports that an editing operation ended. */
+    @FlaggedApi(FLAG_ADD_MEDIA_METRICS_EDITING)
+    public void reportEditingEndedEvent(@NonNull EditingEndedEvent editingEndedEvent) {
+        mManager.reportEditingEndedEvent(mId, editingEndedEvent);
+    }
+
+    /** Returns the identifier for logging this session. */
     public @NonNull LogSessionId getSessionId() {
         return mLogSessionId;
     }
