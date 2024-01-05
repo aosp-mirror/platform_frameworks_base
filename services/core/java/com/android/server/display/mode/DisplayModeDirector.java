@@ -970,9 +970,14 @@ public class DisplayModeDirector {
 
                 if (!mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled) {
                     // The flag had been turned off, we need to restore the original value
-                    Settings.System.putFloatForUser(cr,
-                            Settings.System.MIN_REFRESH_RATE, minRefreshRate, cr.getUserId());
+                    Settings.System.putFloatForUser(cr, Settings.System.MIN_REFRESH_RATE,
+                            highestRefreshRate, cr.getUserId());
                 }
+            } else if (mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled
+                    && Math.round(minRefreshRate) == Math.round(highestRefreshRate)) {
+                // The flag has been turned on, we need to upgrade the setting
+                Settings.System.putFloatForUser(cr, Settings.System.MIN_REFRESH_RATE,
+                        Float.POSITIVE_INFINITY, cr.getUserId());
             }
 
             float peakRefreshRate = Settings.System.getFloatForUser(cr,
@@ -983,9 +988,14 @@ public class DisplayModeDirector {
 
                 if (!mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled) {
                     // The flag had been turned off, we need to restore the original value
-                    Settings.System.putFloatForUser(cr,
-                            Settings.System.PEAK_REFRESH_RATE, peakRefreshRate, cr.getUserId());
+                    Settings.System.putFloatForUser(cr, Settings.System.PEAK_REFRESH_RATE,
+                            highestRefreshRate, cr.getUserId());
                 }
+            } else if (mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled
+                    && Math.round(peakRefreshRate) == Math.round(highestRefreshRate)) {
+                // The flag has been turned on, we need to upgrade the setting
+                Settings.System.putFloatForUser(cr, Settings.System.PEAK_REFRESH_RATE,
+                        Float.POSITIVE_INFINITY, cr.getUserId());
             }
 
             updateRefreshRateSettingLocked(minRefreshRate, peakRefreshRate, mDefaultRefreshRate);

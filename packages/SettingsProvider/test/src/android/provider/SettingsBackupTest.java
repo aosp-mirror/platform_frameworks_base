@@ -33,6 +33,8 @@ import android.provider.settings.backup.SystemSettings;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.display.feature.flags.Flags;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,59 +54,6 @@ public class SettingsBackupTest {
      */
     public static final String HYBRID_SYSUI_BATTERY_WARNING_FLAGS =
             "hybrid_sysui_battery_warning_flags";
-
-    /**
-     * The following denylists contain settings that should *not* be backed up and restored to
-     * another device.  As a general rule, anything that is not user configurable should be
-     * denied (and conversely, things that *are* user configurable *should* be backed up)
-     */
-    private static final Set<String> BACKUP_DENY_LIST_SYSTEM_SETTINGS =
-            newHashSet(
-                    Settings.System.ADVANCED_SETTINGS, // candidate for backup?
-                    Settings.System.ALARM_ALERT_CACHE, // internal cache
-                    Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
-                    Settings.System.EGG_MODE, // I am the lolrus
-                    Settings.System.END_BUTTON_BEHAVIOR, // bug?
-                    Settings.System
-                            .HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, // candidate for backup?
-                    Settings.System.LOCKSCREEN_DISABLED, // ?
-                    Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?
-                    Settings.System.MUTE_STREAMS_AFFECTED, //  candidate for backup?
-                    Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
-                    Settings.System.POINTER_LOCATION, // backup candidate?
-                    Settings.System.DEBUG_ENABLE_ENHANCED_CALL_BLOCKING, // used for testing only
-                    Settings.System.RINGTONE_CACHE, // internal cache
-                    Settings.System.SCREEN_BRIGHTNESS, // removed in P
-                    Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
-                    Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
-                    Settings.System.SHOW_TOUCHES,
-                    Settings.System.SHOW_KEY_PRESSES,
-                    Settings.System.SHOW_ROTARY_INPUT,
-                    Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
-                    Settings.System.SIP_ALWAYS, // value, not a setting
-                    Settings.System.SYSTEM_LOCALES, // bug?
-                    Settings.System.USER_ROTATION, // backup candidate?
-                    Settings.System.VIBRATE_IN_SILENT, // deprecated?
-                    Settings.System.VOLUME_ACCESSIBILITY, // used internally, changing value will
-                                                          // not change volume
-                    Settings.System.VOLUME_ALARM, // deprecated since API 2?
-                    Settings.System.VOLUME_ASSISTANT, // candidate for backup?
-                    Settings.System.VOLUME_BLUETOOTH_SCO, // deprecated since API 2?
-                    Settings.System.VOLUME_MASTER, // candidate for backup?
-                    Settings.System.VOLUME_MUSIC, // deprecated since API 2?
-                    Settings.System.VOLUME_NOTIFICATION, // deprecated since API 2?
-                    Settings.System.VOLUME_RING, // deprecated since API 2?
-                    Settings.System.VOLUME_SYSTEM, // deprecated since API 2?
-                    Settings.System.VOLUME_VOICE, // deprecated since API 2?
-                    Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
-                    Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
-                    Settings.System.SCREEN_BRIGHTNESS_FLOAT,
-                    Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
-                    Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
-                    Settings.System.WEAR_TTS_PREWARM_ENABLED,
-                    Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
-                    Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
-                    );
 
     private static final Set<String> BACKUP_DENY_LIST_GLOBAL_SETTINGS =
             newHashSet(
@@ -862,7 +811,7 @@ public class SettingsBackupTest {
         checkSettingsBackedUpOrDenied(
                 getCandidateSettings(Settings.System.class),
                 newHashSet(SystemSettings.SETTINGS_TO_BACKUP),
-                BACKUP_DENY_LIST_SYSTEM_SETTINGS);
+                getBackUpDenyListSystemSettings());
     }
 
     @Test
@@ -935,6 +884,69 @@ public class SettingsBackupTest {
         allSettings.removeAll(settingsNotBackedUpOrDeniedTemporaryAllowList);
 
         checkSettingsBackedUpOrDenied(allSettings, keys, BACKUP_DENY_LIST_SECURE_SETTINGS);
+    }
+
+    /**
+     * The following denylists contain settings that should *not* be backed up and restored to
+     * another device.  As a general rule, anything that is not user configurable should be
+     * denied (and conversely, things that *are* user configurable *should* be backed up)
+     */
+    private static Set<String> getBackUpDenyListSystemSettings() {
+        Set<String> settings =
+                newHashSet(
+                        Settings.System.ADVANCED_SETTINGS, // candidate for backup?
+                        Settings.System.ALARM_ALERT_CACHE, // internal cache
+                        Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
+                        Settings.System.EGG_MODE, // I am the lolrus
+                        Settings.System.END_BUTTON_BEHAVIOR, // bug?
+                        Settings.System
+                                .HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                        // candidate for backup?
+                        Settings.System.LOCKSCREEN_DISABLED, // ?
+                        Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?
+                        Settings.System.MUTE_STREAMS_AFFECTED, //  candidate for backup?
+                        Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
+                        Settings.System.POINTER_LOCATION, // backup candidate?
+                        Settings.System.DEBUG_ENABLE_ENHANCED_CALL_BLOCKING,
+                        // used for testing only
+                        Settings.System.RINGTONE_CACHE, // internal cache
+                        Settings.System.SCREEN_BRIGHTNESS, // removed in P
+                        Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
+                        Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
+                        Settings.System.SHOW_TOUCHES,
+                        Settings.System.SHOW_KEY_PRESSES,
+                        Settings.System.SHOW_ROTARY_INPUT,
+                        Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
+                        Settings.System.SIP_ALWAYS, // value, not a setting
+                        Settings.System.SYSTEM_LOCALES, // bug?
+                        Settings.System.USER_ROTATION, // backup candidate?
+                        Settings.System.VIBRATE_IN_SILENT, // deprecated?
+                        Settings.System.VOLUME_ACCESSIBILITY,
+                        // used internally, changing value will
+                        // not change volume
+                        Settings.System.VOLUME_ALARM, // deprecated since API 2?
+                        Settings.System.VOLUME_ASSISTANT, // candidate for backup?
+                        Settings.System.VOLUME_BLUETOOTH_SCO, // deprecated since API 2?
+                        Settings.System.VOLUME_MASTER, // candidate for backup?
+                        Settings.System.VOLUME_MUSIC, // deprecated since API 2?
+                        Settings.System.VOLUME_NOTIFICATION, // deprecated since API 2?
+                        Settings.System.VOLUME_RING, // deprecated since API 2?
+                        Settings.System.VOLUME_SYSTEM, // deprecated since API 2?
+                        Settings.System.VOLUME_VOICE, // deprecated since API 2?
+                        Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
+                        Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
+                        Settings.System.SCREEN_BRIGHTNESS_FLOAT,
+                        Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
+                        Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
+                        Settings.System.WEAR_TTS_PREWARM_ENABLED,
+                        Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
+                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
+                );
+        if (!Flags.backUpSmoothDisplayAndForcePeakRefreshRate()) {
+            settings.add(Settings.System.MIN_REFRESH_RATE);
+            settings.add(Settings.System.PEAK_REFRESH_RATE);
+        }
+        return settings;
     }
 
     private static void checkSettingsBackedUpOrDenied(
