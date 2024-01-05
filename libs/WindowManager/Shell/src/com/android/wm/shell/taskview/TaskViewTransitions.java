@@ -330,7 +330,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                     continue;
                 }
                 if (isHide) {
-                    if (pending.mType == TRANSIT_TO_BACK) {
+                    if (pending != null && pending.mType == TRANSIT_TO_BACK) {
                         // TO_BACK is only used when setting the task view visibility immediately,
                         // so in that case we can also hide the surface immediately
                         startTransaction.hide(chg.getLeash());
