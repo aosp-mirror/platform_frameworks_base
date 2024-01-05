@@ -822,11 +822,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // Checks if container should be updated before apply new parentInfo.
         final boolean shouldUpdateContainer = taskContainer.shouldUpdateContainer(parentInfo);
         taskContainer.updateTaskFragmentParentInfo(parentInfo);
-        if (!taskContainer.isVisible()) {
-            // Don't update containers if the task is not visible. We only update containers when
-            // parentInfo#isVisibleRequested is true.
-            return;
-        }
 
         // If the last direct activity of the host task is dismissed and the overlay container is
         // the only taskFragment, the overlay container should also be dismissed.
