@@ -3215,7 +3215,7 @@ class StorageManagerService extends IStorageManager.Stub
         super.createUserStorageKeys_enforcePermission();
 
         try {
-            mVold.createUserStorageKeys(userId, serialNumber, ephemeral);
+            mVold.createUserStorageKeys(userId, ephemeral);
             // Since the user's CE key was just created, the user's CE storage is now unlocked.
             synchronized (mLock) {
                 mCeUnlockedUsers.append(userId);
@@ -3260,7 +3260,7 @@ class StorageManagerService extends IStorageManager.Stub
         super.unlockCeStorage_enforcePermission();
 
         if (StorageManager.isFileEncrypted()) {
-            mVold.unlockCeStorage(userId, serialNumber, HexDump.toHexString(secret));
+            mVold.unlockCeStorage(userId, HexDump.toHexString(secret));
         }
         synchronized (mLock) {
             mCeUnlockedUsers.append(userId);
@@ -3347,7 +3347,7 @@ class StorageManagerService extends IStorageManager.Stub
     private void prepareUserStorageInternal(String volumeUuid, int userId, int serialNumber,
             int flags) throws Exception {
         try {
-            mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+            mVold.prepareUserStorage(volumeUuid, userId, flags);
             // After preparing user storage, we should check if we should mount data mirror again,
             // and we do it for user 0 only as we only need to do once for all users.
             if (volumeUuid != null) {
