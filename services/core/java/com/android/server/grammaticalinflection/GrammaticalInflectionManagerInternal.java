@@ -17,6 +17,7 @@
 package com.android.server.grammaticalinflection;
 
 import android.annotation.Nullable;
+import android.content.res.Configuration;
 
 /**
  * System-server internal interface to the {@link android.app.GrammaticalInflectionManager}.
@@ -37,5 +38,14 @@ public abstract class GrammaticalInflectionManagerInternal {
      * at the time this is called, to be referenced later when the app is installed.
      */
     public abstract void stageAndApplyRestoredPayload(byte[] payload, int userId);
+
+    /**
+     * Get the current system grammatical gender of privileged application.
+     *
+     * @return the value of grammatical gender
+     *
+     * @see Configuration#getGrammaticalGender
+     */
+    public abstract @Configuration.GrammaticalGender int getSystemGrammaticalGender(int userId);
 }
 
