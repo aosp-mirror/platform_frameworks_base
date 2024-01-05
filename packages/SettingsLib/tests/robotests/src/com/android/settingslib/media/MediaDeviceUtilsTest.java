@@ -16,38 +16,16 @@
 
 package com.android.settingslib.media;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import static org.mockito.Mockito.when;
-
-import android.bluetooth.BluetoothDevice;
-
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
 public class MediaDeviceUtilsTest {
 
-    private static final String TEST_ADDRESS = "11:22:33:44:55:66";
-
-    @Mock
-    private BluetoothDevice mBluetoothDevice;
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-    }
-
-    @Test
-    public void getId_returnBluetoothDeviceAddress() {
-        when(mBluetoothDevice.getAddress()).thenReturn(TEST_ADDRESS);
-
-        final String id = MediaDeviceUtils.getId(mBluetoothDevice);
-
-        assertThat(id).isEqualTo(TEST_ADDRESS);
     }
 }

@@ -15,21 +15,9 @@
  */
 package com.android.settingslib.media;
 
-import android.bluetooth.BluetoothDevice;
-
 /**
  * MediaDeviceUtils provides utility function for MediaDevice
  */
 public class MediaDeviceUtils {
-
-    /**
-     * Use BluetoothDevice address to represent unique id
-     *
-     * @param bluetoothDevice the BluetoothDevice
-     * @return BluetoothDevice address
-     */
-    public static String getId(BluetoothDevice bluetoothDevice) {
-        return bluetoothDevice.getAddress();
-    }
 
 }
