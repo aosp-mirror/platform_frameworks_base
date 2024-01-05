@@ -104,9 +104,6 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_RE
 import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTypeToString;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
@@ -131,6 +128,8 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
+import com.android.server.wm.utils.OptPropFactory;
+import com.android.server.wm.utils.OptPropFactory.OptProp;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -183,50 +182,26 @@ final class LetterboxUiController {
     private final boolean mIsOverrideToReverseLandscapeOrientationEnabled;
     // Corresponds to OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA
     private final boolean mIsOverrideOrientationOnlyForCameraEnabled;
-    // Corresponds to OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION
-    private final boolean mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled;
     // Corresponds to OVERRIDE_RESPECT_REQUESTED_ORIENTATION
     private final boolean mIsOverrideRespectRequestedOrientationEnabled;
-
-    // Corresponds to OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION
-    private final boolean mIsOverrideCameraCompatDisableForceRotationEnabled;
-    // Corresponds to OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH
-    private final boolean mIsOverrideCameraCompatDisableRefreshEnabled;
-    // Corresponds to OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE
-    private final boolean mIsOverrideCameraCompatEnableRefreshViaPauseEnabled;
-
-    // Corresponds to OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION
-    private final boolean mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled;
-    // Corresponds to OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED
-    private final boolean mIsOverrideEnableCompatIgnoreOrientationRequestWhenLoopDetectedEnabled;
-
-    // Corresponds to OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS
-    private final boolean mIsOverrideEnableCompatFakeFocusEnabled;
 
     // The list of observers for the destroy event of candidate opaque activities
     // when dealing with translucent activities.
     private final List<LetterboxUiController> mDestroyListeners = new ArrayList<>();
 
-    // Corresponds to OVERRIDE_MIN_ASPECT_RATIO
-    private final boolean mIsOverrideMinAspectRatio;
-    // Corresponds to FORCE_RESIZE_APP
-    private final boolean mIsOverrideForceResizeApp;
-    // Corresponds to FORCE_NON_RESIZE_APP
-    private final boolean mIsOverrideForceNonResizeApp;
+    @NonNull
+    private final OptProp mAllowOrientationOverrideOptProp;
+    @NonNull
+    private final OptProp mAllowDisplayOrientationOverrideOptProp;
+    @NonNull
+    private final OptProp mAllowMinAspectRatioOverrideOptProp;
+    @NonNull
+    private final OptProp mAllowForceResizeOverrideOptProp;
 
-    @Nullable
-    private final Boolean mBooleanPropertyAllowOrientationOverride;
-    @Nullable
-    private final Boolean mBooleanPropertyAllowDisplayOrientationOverride;
-    @Nullable
-    private final Boolean mBooleanPropertyAllowMinAspectRatioOverride;
-    @Nullable
-    private final Boolean mBooleanPropertyAllowForceResizeOverride;
-
-    @Nullable
-    private final Boolean mBooleanPropertyAllowUserAspectRatioOverride;
-    @Nullable
-    private final Boolean mBooleanPropertyAllowUserAspectRatioFullscreenOverride;
+    @NonNull
+    private final OptProp mAllowUserAspectRatioOverrideOptProp;
+    @NonNull
+    private final OptProp mAllowUserAspectRatioFullscreenOverrideOptProp;
 
     /*
      * WindowContainerListener responsible to make translucent activities inherit
@@ -270,28 +245,28 @@ final class LetterboxUiController {
     @Nullable
     private Letterbox mLetterbox;
 
-    @Nullable
-    private final Boolean mBooleanPropertyCameraCompatAllowForceRotation;
+    @NonNull
+    private final OptProp mCameraCompatAllowForceRotationOptProp;
 
-    @Nullable
-    private final Boolean mBooleanPropertyCameraCompatAllowRefresh;
+    @NonNull
+    private final OptProp mCameraCompatAllowRefreshOptProp;
 
-    @Nullable
-    private final Boolean mBooleanPropertyCameraCompatEnableRefreshViaPause;
+    @NonNull
+    private final OptProp mCameraCompatEnableRefreshViaPauseOptProp;
 
     // Whether activity "refresh" was requested but not finished in
     // ActivityRecord#activityResumedLocked following the camera compat force rotation in
     // DisplayRotationCompatPolicy.
     private boolean mIsRefreshAfterRotationRequested;
 
-    @Nullable
-    private final Boolean mBooleanPropertyIgnoreRequestedOrientation;
+    @NonNull
+    private final OptProp mIgnoreRequestedOrientationOptProp;
 
-    @Nullable
-    private final Boolean mBooleanPropertyAllowIgnoringOrientationRequestWhenLoopDetected;
+    @NonNull
+    private final OptProp mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp;
 
-    @Nullable
-    private final Boolean mBooleanPropertyFakeFocus;
+    @NonNull
+    private final OptProp mFakeFocusOptProp;
 
     private boolean mIsRelaunchingAfterRequestedOrientationChanged;
 
@@ -307,56 +282,60 @@ final class LetterboxUiController {
         mActivityRecord = activityRecord;
 
         PackageManager packageManager = wmService.mContext.getPackageManager();
-        mBooleanPropertyIgnoreRequestedOrientation =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
-                        PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
-        mBooleanPropertyAllowIgnoringOrientationRequestWhenLoopDetected =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
-                        PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED);
-        mBooleanPropertyFakeFocus =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        mLetterboxConfiguration::isCompatFakeFocusEnabled,
-                        PROPERTY_COMPAT_ENABLE_FAKE_FOCUS);
-        mBooleanPropertyCameraCompatAllowForceRotation =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(),
-                        PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION);
-        mBooleanPropertyCameraCompatAllowRefresh =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(),
-                        PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH);
-        mBooleanPropertyCameraCompatEnableRefreshViaPause =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(),
-                        PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE);
 
-        mBooleanPropertyAllowOrientationOverride =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        /* gatingCondition */ null,
-                        PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
-        mBooleanPropertyAllowDisplayOrientationOverride =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        /* gatingCondition */ null,
-                        PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE);
-        mBooleanPropertyAllowMinAspectRatioOverride =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        /* gatingCondition */ null,
-                        PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
-        mBooleanPropertyAllowForceResizeOverride =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        /* gatingCondition */ null,
-                        PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES);
+        final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
+                activityRecord.packageName);
 
-        mBooleanPropertyAllowUserAspectRatioOverride =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        () -> mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled(),
-                        PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE);
-        mBooleanPropertyAllowUserAspectRatioFullscreenOverride =
-                readComponentProperty(packageManager, mActivityRecord.packageName,
-                        () -> mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled(),
-                        PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE);
+        final BooleanSupplier isPolicyForIgnoringRequestedOrientationEnabled = asLazy(
+                mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled);
+        mIgnoreRequestedOrientationOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION,
+                isPolicyForIgnoringRequestedOrientationEnabled);
+        mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED,
+                isPolicyForIgnoringRequestedOrientationEnabled);
+
+        mFakeFocusOptProp = optPropBuilder.create(PROPERTY_COMPAT_ENABLE_FAKE_FOCUS,
+                mLetterboxConfiguration::isCompatFakeFocusEnabled);
+
+        final BooleanSupplier isCameraCompatTreatmentEnabled = asLazy(
+                mLetterboxConfiguration::isCameraCompatTreatmentEnabled);
+        mCameraCompatAllowForceRotationOptProp = optPropBuilder.create(
+                PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION,
+                isCameraCompatTreatmentEnabled);
+        mCameraCompatAllowRefreshOptProp = optPropBuilder.create(
+                PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH,
+                isCameraCompatTreatmentEnabled);
+        mCameraCompatEnableRefreshViaPauseOptProp = optPropBuilder.create(
+                PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE,
+                isCameraCompatTreatmentEnabled);
+
+        mAllowOrientationOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE);
+
+        mAllowDisplayOrientationOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE,
+                () -> mActivityRecord.mDisplayContent != null
+                        && mActivityRecord.getTask() != null
+                        && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()
+                        && !mActivityRecord.getTask().inMultiWindowMode()
+                        && mActivityRecord.mDisplayContent.getNaturalOrientation()
+                            == ORIENTATION_LANDSCAPE
+        );
+
+        mAllowMinAspectRatioOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
+
+        mAllowForceResizeOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES);
+
+        mAllowUserAspectRatioOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE,
+                mLetterboxConfiguration::isUserAppAspectRatioSettingsEnabled);
+
+        mAllowUserAspectRatioFullscreenOverrideOptProp = optPropBuilder.create(
+                PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
+                mLetterboxConfiguration::isUserAppAspectRatioFullscreenEnabled);
 
         mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
         mIsSystemOverrideToFullscreenEnabled =
@@ -369,53 +348,9 @@ final class LetterboxUiController {
                 isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR);
         mIsOverrideOrientationOnlyForCameraEnabled =
                 isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
-        mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION);
         mIsOverrideRespectRequestedOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
 
-        mIsOverrideCameraCompatDisableForceRotationEnabled =
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION);
-        mIsOverrideCameraCompatDisableRefreshEnabled =
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH);
-        mIsOverrideCameraCompatEnableRefreshViaPauseEnabled =
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE);
-
-        mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled =
-                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION);
-        mIsOverrideEnableCompatIgnoreOrientationRequestWhenLoopDetectedEnabled =
-                isCompatChangeEnabled(
-                        OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED);
-
-        mIsOverrideEnableCompatFakeFocusEnabled =
-                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS);
-        mIsOverrideMinAspectRatio = isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO);
-        mIsOverrideForceResizeApp = isCompatChangeEnabled(FORCE_RESIZE_APP);
-        mIsOverrideForceNonResizeApp = isCompatChangeEnabled(FORCE_NON_RESIZE_APP);
-    }
-
-    /**
-     * Reads a {@link Boolean} component property fot a given {@code packageName} and a {@code
-     * propertyName}. Returns {@code null} if {@code gatingCondition} is {@code false} or if the
-     * property isn't specified for the package.
-     *
-     * <p>Return value is {@link Boolean} rather than {@code boolean} so we can know when the
-     * property is unset. Particularly, when this returns {@code null}, {@link
-     * #shouldEnableWithOverrideAndProperty} will check the value of override for the final
-     * decision.
-     */
-    @Nullable
-    private static Boolean readComponentProperty(PackageManager packageManager, String packageName,
-            @Nullable BooleanSupplier gatingCondition, String propertyName) {
-        if (gatingCondition != null && !gatingCondition.getAsBoolean()) {
-            return null;
-        }
-        try {
-            return packageManager.getProperty(propertyName, packageName).getBoolean();
-        } catch (PackageManager.NameNotFoundException e) {
-            // No such property name.
-        }
-        return null;
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -467,11 +402,8 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldIgnoreRequestedOrientation(@ScreenOrientation int requestedOrientation) {
-        if (shouldEnableWithOverrideAndProperty(
-                /* gatingCondition */ mLetterboxConfiguration
-                        ::isPolicyForIgnoringRequestedOrientationEnabled,
-                mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled,
-                mBooleanPropertyIgnoreRequestedOrientation)) {
+        if (mIgnoreRequestedOrientationOptProp.shouldEnableWithOverrideAndProperty(
+                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION))) {
             if (mIsRelaunchingAfterRequestedOrientationChanged) {
                 Slog.w(TAG, "Ignoring orientation update to "
                         + screenOrientationToString(requestedOrientation)
@@ -515,11 +447,10 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldIgnoreOrientationRequestLoop() {
-        if (!shouldEnableWithOptInOverrideAndOptOutProperty(
-                /* gatingCondition */ mLetterboxConfiguration
-                    ::isPolicyForIgnoringRequestedOrientationEnabled,
-                mIsOverrideEnableCompatIgnoreOrientationRequestWhenLoopDetectedEnabled,
-                mBooleanPropertyAllowIgnoringOrientationRequestWhenLoopDetected)) {
+        final boolean loopDetectionEnabled = isCompatChangeEnabled(
+                OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED);
+        if (!mAllowIgnoringOrientationRequestWhenLoopDetectedOptProp
+                .shouldEnableWithOptInOverrideAndOptOutProperty(loopDetectionEnabled)) {
             return false;
         }
 
@@ -556,10 +487,8 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldSendFakeFocus() {
-        return shouldEnableWithOverrideAndProperty(
-                /* gatingCondition */ mLetterboxConfiguration::isCompatFakeFocusEnabled,
-                mIsOverrideEnableCompatFakeFocusEnabled,
-                mBooleanPropertyFakeFocus);
+        return mFakeFocusOptProp.shouldEnableWithOverrideAndProperty(
+                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS));
     }
 
     /**
@@ -575,10 +504,8 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideMinAspectRatio() {
-        return shouldEnableWithOptInOverrideAndOptOutProperty(
-                /* gatingCondition */ () -> true,
-                mIsOverrideMinAspectRatio,
-                mBooleanPropertyAllowMinAspectRatioOverride);
+        return mAllowMinAspectRatioOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
+                isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO));
     }
 
     /**
@@ -594,10 +521,8 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideForceResizeApp() {
-        return shouldEnableWithOptInOverrideAndOptOutProperty(
-                /* gatingCondition */ () -> true,
-                mIsOverrideForceResizeApp,
-                mBooleanPropertyAllowForceResizeOverride);
+        return mAllowForceResizeOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
+                isCompatChangeEnabled(FORCE_RESIZE_APP));
     }
 
     /**
@@ -611,10 +536,8 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldOverrideForceNonResizeApp() {
-        return shouldEnableWithOptInOverrideAndOptOutProperty(
-                /* gatingCondition */ () -> true,
-                mIsOverrideForceNonResizeApp,
-                mBooleanPropertyAllowForceResizeOverride);
+        return mAllowForceResizeOverrideOptProp.shouldEnableWithOptInOverrideAndOptOutProperty(
+                isCompatChangeEnabled(FORCE_NON_RESIZE_APP));
     }
 
     /**
@@ -655,15 +578,9 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldUseDisplayLandscapeNaturalOrientation() {
-        return shouldEnableWithOptInOverrideAndOptOutProperty(
-                /* gatingCondition */ () -> mActivityRecord.mDisplayContent != null
-                        && mActivityRecord.getTask() != null
-                        && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()
-                        && !mActivityRecord.getTask().inMultiWindowMode()
-                        && mActivityRecord.mDisplayContent.getNaturalOrientation()
-                                == ORIENTATION_LANDSCAPE,
-                mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled,
-                mBooleanPropertyAllowDisplayOrientationOverride);
+        return mAllowDisplayOrientationOverrideOptProp
+                .shouldEnableWithOptInOverrideAndOptOutProperty(
+                        isCompatChangeEnabled(OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION));
     }
 
     @ScreenOrientation
@@ -692,7 +609,7 @@ final class LetterboxUiController {
             return SCREEN_ORIENTATION_PORTRAIT;
         }
 
-        if (FALSE.equals(mBooleanPropertyAllowOrientationOverride)) {
+        if (mAllowOrientationOverrideOptProp.isFalse()) {
             return candidate;
         }
 
@@ -758,11 +675,8 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldRefreshActivityForCameraCompat() {
-        return shouldEnableWithOptOutOverrideAndProperty(
-                /* gatingCondition */ () -> mLetterboxConfiguration
-                        .isCameraCompatTreatmentEnabled(),
-                mIsOverrideCameraCompatDisableRefreshEnabled,
-                mBooleanPropertyCameraCompatAllowRefresh);
+        return mCameraCompatAllowRefreshOptProp.shouldEnableWithOptOutOverrideAndProperty(
+                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH));
     }
 
     /**
@@ -780,11 +694,8 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldRefreshActivityViaPauseForCameraCompat() {
-        return shouldEnableWithOverrideAndProperty(
-                /* gatingCondition */ () -> mLetterboxConfiguration
-                        .isCameraCompatTreatmentEnabled(),
-                mIsOverrideCameraCompatEnableRefreshViaPauseEnabled,
-                mBooleanPropertyCameraCompatEnableRefreshViaPause);
+        return mCameraCompatEnableRefreshViaPauseOptProp.shouldEnableWithOverrideAndProperty(
+                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE));
     }
 
     /**
@@ -799,11 +710,8 @@ final class LetterboxUiController {
      * </ul>
      */
     boolean shouldForceRotateForCameraCompat() {
-        return shouldEnableWithOptOutOverrideAndProperty(
-                /* gatingCondition */ () -> mLetterboxConfiguration
-                        .isCameraCompatTreatmentEnabled(),
-                mIsOverrideCameraCompatDisableForceRotationEnabled,
-                mBooleanPropertyCameraCompatAllowForceRotation);
+        return mCameraCompatAllowForceRotationOptProp.shouldEnableWithOptOutOverrideAndProperty(
+                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION));
     }
 
     private boolean isCameraCompatTreatmentActive() {
@@ -818,66 +726,6 @@ final class LetterboxUiController {
 
     private boolean isCompatChangeEnabled(long overrideChangeId) {
         return mActivityRecord.info.isChangeEnabled(overrideChangeId);
-    }
-
-    /**
-     * Returns {@code true} when the following conditions are met:
-     * <ul>
-     *     <li>{@code gatingCondition} isn't {@code false}
-     *     <li>OEM didn't opt out with a per-app override
-     *     <li>App developers didn't opt out with a component {@code property}
-     * </ul>
-     *
-     * <p>This is used for the treatments that are enabled based with the heuristic but can be
-     * disabled on per-app basis by OEMs or app developers.
-     */
-    private boolean shouldEnableWithOptOutOverrideAndProperty(BooleanSupplier gatingCondition,
-            boolean isOverrideChangeEnabled, Boolean property) {
-        if (!gatingCondition.getAsBoolean()) {
-            return false;
-        }
-        return !FALSE.equals(property) && !isOverrideChangeEnabled;
-    }
-
-    /**
-     * Returns {@code true} when the following conditions are met:
-     * <ul>
-     *     <li>{@code gatingCondition} isn't {@code false}
-     *     <li>OEM did opt in with a per-app override
-     *     <li>App developers didn't opt out with a component {@code property}
-     * </ul>
-     *
-     * <p>This is used for the treatments that are enabled based with the heuristic but can be
-     * disabled on per-app basis by OEMs or app developers.
-     */
-    private boolean shouldEnableWithOptInOverrideAndOptOutProperty(BooleanSupplier gatingCondition,
-            boolean isOverrideChangeEnabled, Boolean property) {
-        if (!gatingCondition.getAsBoolean()) {
-            return false;
-        }
-        return !FALSE.equals(property) && isOverrideChangeEnabled;
-    }
-
-    /**
-     * Returns {@code true} when the following conditions are met:
-     * <ul>
-     *     <li>{@code gatingCondition} isn't {@code false}
-     *     <li>App developers didn't opt out with a component {@code property}
-     *     <li>App developers opted in with a component {@code property} or an OEM opted in with a
-     *     per-app override
-     * </ul>
-     *
-     * <p>This is used for the treatments that are enabled only on per-app basis.
-     */
-    private boolean shouldEnableWithOverrideAndProperty(BooleanSupplier gatingCondition,
-            boolean isOverrideChangeEnabled, Boolean property) {
-        if (!gatingCondition.getAsBoolean()) {
-            return false;
-        }
-        if (FALSE.equals(property)) {
-            return false;
-        }
-        return TRUE.equals(property) || isOverrideChangeEnabled;
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {
@@ -1168,7 +1016,7 @@ final class LetterboxUiController {
         // We use mBooleanPropertyAllowUserAspectRatioOverride to allow apps to opt-out which has
         // effect only if explicitly false. If mBooleanPropertyAllowUserAspectRatioOverride is null,
         // the current app doesn't opt-out so the first part of the predicate is true.
-        return !FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
+        return !mAllowUserAspectRatioOverrideOptProp.isFalse()
                 && mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
                 && mActivityRecord.mDisplayContent != null
                 && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest();
@@ -1191,8 +1039,8 @@ final class LetterboxUiController {
     }
 
     boolean isUserFullscreenOverrideEnabled() {
-        if (FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
-                || FALSE.equals(mBooleanPropertyAllowUserAspectRatioFullscreenOverride)
+        if (mAllowUserAspectRatioOverrideOptProp.isFalse()
+                || mAllowUserAspectRatioFullscreenOverrideOptProp.isFalse()
                 || !mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled()) {
             return false;
         }
@@ -1211,7 +1059,7 @@ final class LetterboxUiController {
 
     boolean isSystemOverrideToFullscreenEnabled() {
         return mIsSystemOverrideToFullscreenEnabled
-                && !FALSE.equals(mBooleanPropertyAllowOrientationOverride)
+                && !mAllowOrientationOverrideOptProp.isFalse()
                 && (mUserAspectRatio == USER_MIN_ASPECT_RATIO_UNSET
                     || mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
     }
@@ -1996,5 +1844,22 @@ final class LetterboxUiController {
         mInheritedOrientation = ORIENTATION_UNDEFINED;
         mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
         mInheritedCompatDisplayInsets = null;
+    }
+
+    @NonNull
+    private static BooleanSupplier asLazy(@NonNull BooleanSupplier supplier) {
+        return new BooleanSupplier() {
+            private boolean mRead;
+            private boolean mValue;
+
+            @Override
+            public boolean getAsBoolean() {
+                if (!mRead) {
+                    mRead = true;
+                    mValue = supplier.getAsBoolean();
+                }
+                return mValue;
+            }
+        };
     }
 }
