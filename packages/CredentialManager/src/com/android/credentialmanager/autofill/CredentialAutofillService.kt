@@ -69,7 +69,8 @@ class CredentialAutofillService : AutofillService() {
     companion object {
         private const val TAG = "CredAutofill"
 
-        private const val SESSION_ID_KEY = "session_id"
+        private const val SESSION_ID_KEY = "autofill_session_id"
+        private const val REQUEST_ID_KEY = "autofill_request_id"
         private const val CRED_HINT_PREFIX = "credential="
         private const val REQUEST_DATA_KEY = "requestData"
         private const val CANDIDATE_DATA_KEY = "candidateQueryData"
@@ -97,16 +98,23 @@ class CredentialAutofillService : AutofillService() {
         val callingPackage = structure.activityComponent.packageName
         Log.i(TAG, "onFillCredentialRequest called for $callingPackage")
 
-        var sessionId = request.clientState?.getInt(SESSION_ID_KEY)
-
-        Log.i(TAG, "Autofill sessionId: " + sessionId)
-        if (sessionId == null) {
-            Log.i(TAG, "Session Id not found")
-            callback.onFailure("Session Id not found")
+        val clientState = request.clientState
+        if (clientState == null) {
+            Log.i(TAG, "Client state not found")
+            callback.onFailure("Client state not found")
+            return
+        }
+        val sessionId = clientState.getInt(SESSION_ID_KEY)
+        val requestId = clientState.getInt(REQUEST_ID_KEY)
+        Log.i(TAG, "Autofill sessionId: $sessionId, autofill requestId: $requestId")
+        if (sessionId == 0 || requestId == 0) {
+            Log.i(TAG, "Session Id or request Id not found")
+            callback.onFailure("Session Id or request Id not found")
             return
         }
 
-        val getCredRequest: GetCredentialRequest? = getCredManRequest(structure)
+        val getCredRequest: GetCredentialRequest? = getCredManRequest(structure, sessionId,
+            requestId)
         if (getCredRequest == null) {
             Log.i(TAG, "No credential manager request found")
             callback.onFailure("No credential manager request found")
@@ -503,12 +511,19 @@ class CredentialAutofillService : AutofillService() {
         TODO("Not yet implemented")
     }
 
-    private fun getCredManRequest(structure: AssistStructure): GetCredentialRequest? {
+    private fun getCredManRequest(
+        structure: AssistStructure,
+        sessionId: Int,
+        requestId: Int
+    ): GetCredentialRequest? {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
         traverseStructure(structure, credentialOptions)
 
         if (credentialOptions.isNotEmpty()) {
-            return GetCredentialRequest.Builder(Bundle.EMPTY)
+            val dataBundle = Bundle()
+            dataBundle.putInt(SESSION_ID_KEY, sessionId)
+            dataBundle.putInt(REQUEST_ID_KEY, requestId)
+            return GetCredentialRequest.Builder(dataBundle)
                     .setCredentialOptions(credentialOptions)
                     .build()
         }
