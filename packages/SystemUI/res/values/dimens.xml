@@ -608,6 +608,11 @@
     <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
     <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
 
+    <dimen name="volume_panel_corner_radius">52dp</dimen>
+    <dimen name="volume_panel_content_padding">24dp</dimen>
+    <dimen name="volume_panel_bottom_bar_horizontal_padding">24dp</dimen>
+    <dimen name="volume_panel_bottom_bar_bottom_padding">20dp</dimen>
+
     <!-- Size of each item in the ringer selector drawer. -->
     <dimen name="volume_ringer_drawer_item_size">42dp</dimen>
     <dimen name="volume_ringer_drawer_item_size_half">21dp</dimen>

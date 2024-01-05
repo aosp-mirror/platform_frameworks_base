@@ -16,17 +16,27 @@
 
 package com.android.systemui.qs.tiles.impl.custom.data.repository
 
+import android.content.ComponentName
 import android.content.pm.ServiceInfo
 import android.os.Bundle
 import com.android.systemui.qs.external.PackageManagerAdapter
-import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 
+/**
+ * Facade for [PackageManagerAdapter] to provide a fake-like behaviour. You can create this class
+ * and then get [packageManagerAdapter] to use in your test code.
+ *
+ * This allows to mock [PackageManagerAdapter] to provide a custom behaviour for
+ * [CustomTileRepository.isTileActive], [CustomTileRepository.isTileToggleable],
+ * [com.android.systemui.qs.external.TileServiceManager.isToggleableTile] or
+ * [com.android.systemui.qs.external.TileServiceManager.isActiveTile] when the real objects are
+ * used.
+ */
 class FakePackageManagerAdapterFacade(
-    val tileSpec: TileSpec.CustomTileSpec,
+    val componentName: ComponentName,
     val packageManagerAdapter: PackageManagerAdapter = mock {},
 ) {
 
@@ -34,22 +44,21 @@ class FakePackageManagerAdapterFacade(
     private var isActive: Boolean = false
 
     init {
-        whenever(packageManagerAdapter.getServiceInfo(eq(tileSpec.componentName), any()))
-            .thenAnswer {
-                ServiceInfo().apply {
-                    metaData =
-                        Bundle().apply {
-                            putBoolean(
-                                android.service.quicksettings.TileService.META_DATA_TOGGLEABLE_TILE,
-                                isToggleable
-                            )
-                            putBoolean(
-                                android.service.quicksettings.TileService.META_DATA_ACTIVE_TILE,
-                                isActive
-                            )
-                        }
-                }
+        whenever(packageManagerAdapter.getServiceInfo(eq(componentName), any())).thenAnswer {
+            ServiceInfo().apply {
+                metaData =
+                    Bundle().apply {
+                        putBoolean(
+                            android.service.quicksettings.TileService.META_DATA_TOGGLEABLE_TILE,
+                            isToggleable
+                        )
+                        putBoolean(
+                            android.service.quicksettings.TileService.META_DATA_ACTIVE_TILE,
+                            isActive
+                        )
+                    }
             }
+        }
     }
 
     fun setIsActive(isActive: Boolean) {

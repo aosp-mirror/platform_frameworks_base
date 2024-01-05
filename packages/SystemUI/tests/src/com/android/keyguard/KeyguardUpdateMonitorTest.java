@@ -30,6 +30,7 @@ import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_STATE_CANCELLING_RESTARTING;
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_STATE_STOPPED;
 import static com.android.keyguard.KeyguardUpdateMonitor.DEFAULT_CANCEL_SIGNAL_TIMEOUT;
 import static com.android.keyguard.KeyguardUpdateMonitor.HAL_POWER_PRESS_TIMEOUT;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED;
@@ -1970,6 +1971,24 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // THEN fingerprint detect state should cancel & then restart (for authenticate call)
         assertThat(mKeyguardUpdateMonitor.mFingerprintRunningState)
                 .isEqualTo(BIOMETRIC_STATE_CANCELLING_RESTARTING);
+    }
+
+    @Test
+    public void detectFingerprint_onSuccess_biometricStateStopped() {
+        // GIVEN FP detection is running
+        givenDetectFingerprintWithClearingFingerprintManagerInvocations();
+
+        // WHEN detection is successful
+        ArgumentCaptor<FingerprintManager.FingerprintDetectionCallback> fpDetectCallbackCaptor =
+                ArgumentCaptor.forClass(FingerprintManager.FingerprintDetectionCallback.class);
+        verify(mFingerprintManager).detectFingerprint(
+                any(), fpDetectCallbackCaptor.capture(), any());
+        fpDetectCallbackCaptor.getValue().onFingerprintDetected(0, 0, true);
+        mTestableLooper.processAllMessages();
+
+        // THEN fingerprint detect state should immediately update to STOPPED
+        assertThat(mKeyguardUpdateMonitor.mFingerprintRunningState)
+                .isEqualTo(BIOMETRIC_STATE_STOPPED);
     }
 
     @Test

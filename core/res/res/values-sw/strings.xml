@@ -575,7 +575,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Inaruhusu programu kuunganisha kompyuta kibao,  na kukata kompyuta kibao kutoka mitandao ya WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="5373274458799425276">"Huruhusu programu iunganishe na kutenganisha kifaa chako cha Android TV na mitandao ya WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Inaruhusu programu kuunganisha simu kwenye, na kukata simu kutoka mitandao ya WiMAX."</string>
-    <string name="permlab_bluetooth" msgid="586333280736937209">"oanisha na vifaa vya Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="586333280736937209">"unganisha na vifaa vya Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Huruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Huruhusu programu iangalie mipangilio iliyowekwa ya Bluetooth kwenye kifaa chako cha Android TV na kufanya na kukubali miunganisho na vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Huruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>

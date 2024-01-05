@@ -32,6 +32,7 @@ import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_H
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH_ERROR_CODE;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
@@ -953,6 +954,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Ignore an optimization that skips unnecessary EXACTLY layout passes.
      */
     private static boolean sAlwaysRemeasureExactly = false;
+
+    /**
+     * When true makes it possible to use onMeasure caches also when the force layout flag is
+     * enabled. This helps avoiding multiple measures in the same frame with the same dimensions.
+     */
+    private static boolean sUseMeasureCacheDuringForceLayoutFlagValue;
 
     /**
      * Allow setForeground/setBackground to be called (and ignored) on a textureview,
@@ -2396,6 +2403,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
         sToolkitMetricsForFrameRateDecisionFlagValue = toolkitMetricsForFrameRateDecision();
+        sUseMeasureCacheDuringForceLayoutFlagValue = enableUseMeasureCacheDuringForceLayout();
     }
 
     /**
@@ -22848,6 +22856,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Determines whether an unprocessed input event is available on the window.
+     *
+     * This is only a performance hint (a.k.a. the Input Hint) and may return false negative
+     * results.  Callers should not rely on availability of the input event based on the return
+     * value of this method.
+     *
+     * The Input Hint functionality is experimental, and can be removed in the future OS releases.
+     *
+     * This method only returns nontrivial results on a View that is attached to a Window. Such View
+     * can be acquired using `Activity.getWindow().getDecorView()`, and only after the view
+     * hierarchy is attached (via {@link android.app.Activity#setContentView(android.view.View)}).
+     *
+     * In multi-window mode the View can provide the Input Hint only for the window it is attached
+     * to. Therefore, checking input availability for the whole application would require asking
+     * for the hint from more than one View.
+     *
+     * The initial implementation does not return false positives, but callers should not rely on
+     * it: false positives may occur in future OS releases.
+     *
+     * @hide
+     */
+    public boolean probablyHasInput() {
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl == null) {
+            return false;
+        }
+        return viewRootImpl.probablyHasInput();
+    }
+
+    /**
      * Destroys all hardware rendering resources. This method is invoked
      * when the system needs to reclaim resources. Upon execution of this
      * method, you should free any OpenGL resources created by the view.
@@ -27417,7 +27455,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             resolveRtlPropertiesIfNeeded();
 
-            int cacheIndex = forceLayout ? -1 : mMeasureCache.indexOfKey(key);
+            int cacheIndex;
+            if (sUseMeasureCacheDuringForceLayoutFlagValue) {
+                cacheIndex =  mMeasureCache.indexOfKey(key);
+            } else {
+                cacheIndex = forceLayout ? -1 : mMeasureCache.indexOfKey(key);
+            }
+
             if (cacheIndex < 0 || sIgnoreMeasureCache) {
                 if (isTraversalTracingEnabled()) {
                     Trace.beginSection(mTracingStrings.onMeasure);

@@ -118,8 +118,13 @@ public class DisplayBrightnessMappingConfig {
                             "The first lux value in the display brightness mapping must be 0");
                 }
 
-                String key = (mapping.getMode() == null ? "default" : mapping.getMode()) + "_"
-                        + (mapping.getSetting() == null ? "normal" : mapping.getSetting());
+                String key = (mapping.getMode() == null
+                        ? AutoBrightnessModeName._default.getRawName()
+                        : mapping.getMode().getRawName())
+                        + "_"
+                        + (mapping.getSetting() == null
+                        ? AutoBrightnessSettingName.normal.getRawName()
+                        : mapping.getSetting().getRawName());
                 if (mBrightnessLevelsMap.containsKey(key)
                         || mBrightnessLevelsLuxMap.containsKey(key)) {
                     throw new IllegalArgumentException(

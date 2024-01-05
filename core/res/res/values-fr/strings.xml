@@ -1724,7 +1724,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversion des couleurs"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correction des couleurs"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode une main"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Encore moins lumineux"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Luminosité ultra-réduite"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Appareils auditifs"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume appuyées de manière prolongée. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume appuyées de manière prolongée. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>

@@ -108,4 +108,13 @@ class SideFpsLogger @Inject constructor(@BouncerLog private val buffer: LogBuffe
             }
         )
     }
+
+    fun authDurationChanged(duration: Long) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { long1 = duration },
+            { "SideFpsSensor auth duration changed: $long1" }
+        )
+    }
 }

@@ -91,12 +91,19 @@ fun SceneScope.CollapsedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    val formatProgress = animateSceneFloatAsState(0.0f, ShadeHeader.Keys.transitionProgress)
+    val formatProgress =
+        animateSceneFloatAsState(0f, ShadeHeader.Keys.transitionProgress)
+            .unsafeCompositionState(initialValue = 0f)
 
     val cutoutWidth = LocalDisplayCutout.current.width()
     val cutoutLocation = LocalDisplayCutout.current.location
 
-    val useExpandedFormat = formatProgress.value > 0.5f || cutoutLocation != CutoutLocation.CENTER
+    val useExpandedFormat by
+        remember(formatProgress) {
+            derivedStateOf {
+                cutoutLocation != CutoutLocation.CENTER || formatProgress.value > 0.5f
+            }
+        }
 
     // This layout assumes it is globally positioned at (0, 0) and is the
     // same size as the screen.
@@ -209,7 +216,9 @@ fun SceneScope.ExpandedShadeHeader(
     statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
-    val formatProgress = animateSceneFloatAsState(1.0f, ShadeHeader.Keys.transitionProgress)
+    val formatProgress =
+        animateSceneFloatAsState(1f, ShadeHeader.Keys.transitionProgress)
+            .unsafeCompositionState(initialValue = 1f)
     val useExpandedFormat by
         remember(formatProgress) { derivedStateOf { formatProgress.value > 0.5f } }
 

@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"සැකසීම් තුළ පෙරනිමි සටහන් යෙදුම සකසන්න"</string>
     <string name="install_app" msgid="5066668100199613936">"යෙදුම ස්ථාපනය කරන්න"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"බාහිර සංදර්ශකයට දර්පණය කරන්න ද?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"ඔබේ අභ්‍යන්තර සංදර්ශකය පිළිබිඹු වනු ඇත. ඔබේ ඉදිරිපස සංදර්ශකය ක්‍රියාවිරහිත වනු ඇත."</string>
     <string name="mirror_display" msgid="2515262008898122928">"සංදර්ශකය දර්පණය කරන්න"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"අස් කරන්න"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"සංදර්ශකය සම්බන්ධ කර ඇත"</string>

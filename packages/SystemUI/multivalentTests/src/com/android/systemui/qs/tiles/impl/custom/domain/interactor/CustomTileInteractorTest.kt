@@ -55,6 +55,7 @@ class CustomTileInteractorTest : SysuiTestCase() {
     private val underTest: CustomTileInteractor =
         with(kosmos) {
             CustomTileInteractor(
+                tileSpec,
                 customTileDefaultsRepository,
                 customTileRepository,
                 testScope.backgroundScope,

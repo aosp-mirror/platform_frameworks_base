@@ -64,8 +64,6 @@ class HandleMenu {
     private final View.OnTouchListener mOnTouchListener;
     private final RunningTaskInfo mTaskInfo;
     private final int mLayoutResId;
-    private final int mCaptionX;
-    private final int mCaptionY;
     private int mMarginMenuTop;
     private int mMarginMenuStart;
     private int mMenuHeight;
@@ -74,16 +72,13 @@ class HandleMenu {
     private HandleMenuAnimator mHandleMenuAnimator;
 
 
-    HandleMenu(WindowDecoration parentDecor, int layoutResId, int captionX, int captionY,
-            View.OnClickListener onClickListener, View.OnTouchListener onTouchListener,
-            Bitmap appIcon, CharSequence appName, boolean shouldShowWindowingPill,
-            int captionHeight) {
+    HandleMenu(WindowDecoration parentDecor, int layoutResId, View.OnClickListener onClickListener,
+            View.OnTouchListener onTouchListener, Bitmap appIcon, CharSequence appName,
+            boolean shouldShowWindowingPill, int captionHeight) {
         mParentDecor = parentDecor;
         mContext = mParentDecor.mDecorWindowContext;
         mTaskInfo = mParentDecor.mTaskInfo;
         mLayoutResId = layoutResId;
-        mCaptionX = captionX;
-        mCaptionY = captionY;
         mOnClickListener = onClickListener;
         mOnTouchListener = onTouchListener;
         mAppIconBitmap = appIcon;
@@ -225,12 +220,12 @@ class HandleMenu {
         if (mLayoutResId
                 == R.layout.desktop_mode_app_controls_window_decor) {
             // Align the handle menu to the left of the caption.
-            menuX = mCaptionX + mMarginMenuStart;
-            menuY = mCaptionY + mMarginMenuTop;
+            menuX = mMarginMenuStart;
+            menuY = mMarginMenuTop;
         } else {
             // Position the handle menu at the center of the caption.
-            menuX = mCaptionX + (captionWidth / 2) - (mMenuWidth / 2);
-            menuY = mCaptionY + mMarginMenuStart;
+            menuX = (captionWidth / 2) - (mMenuWidth / 2);
+            menuY = mMarginMenuStart;
         }
 
         // Handle Menu position setup.
@@ -346,8 +341,6 @@ class HandleMenu {
         private View.OnClickListener mOnClickListener;
         private View.OnTouchListener mOnTouchListener;
         private int mLayoutId;
-        private int mCaptionX;
-        private int mCaptionY;
         private boolean mShowWindowingPill;
         private int mCaptionHeight;
 
@@ -381,12 +374,6 @@ class HandleMenu {
             return this;
         }
 
-        Builder setCaptionPosition(int captionX, int captionY) {
-            mCaptionX = captionX;
-            mCaptionY = captionY;
-            return this;
-        }
-
         Builder setWindowingButtonsVisible(boolean windowingButtonsVisible) {
             mShowWindowingPill = windowingButtonsVisible;
             return this;
@@ -398,8 +385,8 @@ class HandleMenu {
         }
 
         HandleMenu build() {
-            return new HandleMenu(mParent, mLayoutId, mCaptionX, mCaptionY, mOnClickListener,
-                    mOnTouchListener, mAppIcon, mName, mShowWindowingPill, mCaptionHeight);
+            return new HandleMenu(mParent, mLayoutId, mOnClickListener, mOnTouchListener,
+                    mAppIcon, mName, mShowWindowingPill, mCaptionHeight);
         }
     }
 }

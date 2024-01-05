@@ -38,6 +38,8 @@ import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogImpl;
 import com.android.systemui.volume.VolumePanelFactory;
 import com.android.systemui.volume.VolumeUI;
+import com.android.systemui.volume.panel.dagger.VolumePanelComponent;
+import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -48,9 +50,13 @@ import dagger.multibindings.IntoMap;
 import dagger.multibindings.IntoSet;
 
 /** Dagger Module for code in the volume package. */
-@Module
+@Module(
+        subcomponents = {
+                VolumePanelComponent.class
+        }
+)
 public interface VolumeModule {
-    /** Starts VolumeUI.  */
+    /** Starts VolumeUI. */
     @Binds
     @IntoMap
     @ClassKey(VolumeUI.class)
@@ -61,11 +67,15 @@ public interface VolumeModule {
     @IntoSet
     ConfigurationController.ConfigurationListener bindVolumeUIConfigChanges(VolumeUI impl);
 
-    /** */
+    /**  */
     @Binds
     VolumeComponent provideVolumeComponent(VolumeDialogComponent volumeDialogComponent);
 
-    /** */
+    /**  */
+    @Binds
+    VolumePanelComponentFactory bindVolumePanelComponentFactory(VolumePanelComponent.Factory impl);
+
+    /**  */
     @Provides
     static VolumeDialog provideVolumeDialog(
             Context context,

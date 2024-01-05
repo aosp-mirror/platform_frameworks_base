@@ -319,7 +319,7 @@ constructor(
 
     override fun dumpProto(systemUIProtoDump: SystemUIProtoDump, args: Array<String>) {
         val data =
-            currentTiles.value.map { it.tile.state }.mapNotNull { it.toProto() }.toTypedArray()
+            currentTiles.value.map { it.tile.state }.mapNotNull { it?.toProto() }.toTypedArray()
         systemUIProtoDump.tiles = data
     }
 

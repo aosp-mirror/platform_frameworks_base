@@ -115,7 +115,7 @@ class QSTileViewModelImplTest : SysuiTestCase() {
                 .isEqualTo(
                     "test_spec:\n" +
                         "    QSTileState(" +
-                        "icon=() -> com.android.systemui.common.shared.model.Icon, " +
+                        "icon=() -> com.android.systemui.common.shared.model.Icon?, " +
                         "label=test_data, " +
                         "activationState=INACTIVE, " +
                         "secondaryLabel=null, " +

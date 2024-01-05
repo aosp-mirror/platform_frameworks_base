@@ -51,7 +51,10 @@ enum class WakeSleepReason(
     BIOMETRIC(isTouch = false, PowerManager.WAKE_REASON_BIOMETRIC),
 
     /** Something else happened to wake up or sleep the device. */
-    OTHER(isTouch = false, PowerManager.WAKE_REASON_UNKNOWN);
+    OTHER(isTouch = false, PowerManager.WAKE_REASON_UNKNOWN),
+
+    /** Device goes to sleep due to folding of a foldable device. */
+    FOLD(isTouch = false, PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD);
 
     companion object {
         fun fromPowerManagerWakeReason(reason: Int): WakeSleepReason {
@@ -72,6 +75,7 @@ enum class WakeSleepReason(
         fun fromPowerManagerSleepReason(reason: Int): WakeSleepReason {
             return when (reason) {
                 PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON -> POWER_BUTTON
+                PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD -> FOLD
                 else -> OTHER
             }
         }

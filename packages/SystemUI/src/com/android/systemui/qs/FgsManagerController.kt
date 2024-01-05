@@ -148,7 +148,8 @@ class FgsManagerControllerImpl @Inject constructor(
     private val deviceConfigProxy: DeviceConfigProxy,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val broadcastDispatcher: BroadcastDispatcher,
-    private val dumpManager: DumpManager
+    private val dumpManager: DumpManager,
+    private val systemUIDialogFactory: SystemUIDialog.Factory,
 ) : Dumpable, FgsManagerController {
 
     companion object {
@@ -375,7 +376,7 @@ class FgsManagerControllerImpl @Inject constructor(
     override fun showDialog(expandable: Expandable?) {
         synchronized(lock) {
             if (dialog == null) {
-                val dialog = SystemUIDialog(context)
+                val dialog = systemUIDialogFactory.create()
                 dialog.setTitle(R.string.fgs_manager_dialog_title)
                 dialog.setMessage(R.string.fgs_manager_dialog_message)
 

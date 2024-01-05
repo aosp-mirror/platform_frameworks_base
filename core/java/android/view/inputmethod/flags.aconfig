@@ -38,3 +38,12 @@ flag {
     description: "Feature flag for supporting stylus handwriting delegation from RemoteViews on the home screen"
     bug: "279959705"
 }
+
+flag {
+    name: "use_handwriting_listener_for_tooltype"
+    namespace: "input_method"
+    description: "Feature flag for using handwriting spy for determining pointer toolType."
+    bug: "309554999"
+    is_fixed_read_only: true
+}
+

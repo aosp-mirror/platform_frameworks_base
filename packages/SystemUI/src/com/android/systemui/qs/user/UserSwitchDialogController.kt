@@ -23,7 +23,6 @@ import android.content.DialogInterface.BUTTON_NEUTRAL
 import android.content.Intent
 import android.provider.Settings
 import android.view.LayoutInflater
-import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.res.R
@@ -44,30 +43,14 @@ import javax.inject.Provider
  * Controller for [UserDialog].
  */
 @SysUISingleton
-class UserSwitchDialogController @VisibleForTesting constructor(
-    private val userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>,
-    private val activityStarter: ActivityStarter,
-    private val falsingManager: FalsingManager,
-    private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val uiEventLogger: UiEventLogger,
-    private val dialogFactory: (Context) -> SystemUIDialog
+class UserSwitchDialogController @Inject constructor(
+        private val userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>,
+        private val activityStarter: ActivityStarter,
+        private val falsingManager: FalsingManager,
+        private val dialogLaunchAnimator: DialogLaunchAnimator,
+        private val uiEventLogger: UiEventLogger,
+        private val dialogFactory: SystemUIDialog.Factory
 ) {
-
-    @Inject
-    constructor(
-        userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>,
-        activityStarter: ActivityStarter,
-        falsingManager: FalsingManager,
-        dialogLaunchAnimator: DialogLaunchAnimator,
-        uiEventLogger: UiEventLogger
-    ) : this(
-        userDetailViewAdapterProvider,
-        activityStarter,
-        falsingManager,
-        dialogLaunchAnimator,
-        uiEventLogger,
-        { SystemUIDialog(it) }
-    )
 
     companion object {
         private const val INTERACTION_JANK_TAG = "switch_user"
@@ -81,7 +64,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
      * [userDetailViewAdapterProvider] and show it as launched from [expandable].
      */
     fun showDialog(context: Context, expandable: Expandable) {
-        with(dialogFactory(context)) {
+        with(dialogFactory.create()) {
             setShowForAllUsers(true)
             setCanceledOnTouchOutside(true)
 

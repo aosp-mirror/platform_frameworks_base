@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Đặt ứng dụng ghi chú mặc định trong phần Cài đặt"</string>
     <string name="install_app" msgid="5066668100199613936">"Cài đặt ứng dụng"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Phản chiếu sang màn hình ngoài?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"Màn hình trong của bạn sẽ được phản chiếu. Màn hình ngoài của bạn sẽ tắt."</string>
     <string name="mirror_display" msgid="2515262008898122928">"Phản chiếu màn hình"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Đóng"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Đã kết nối màn hình"</string>

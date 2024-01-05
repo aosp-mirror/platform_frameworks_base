@@ -69,7 +69,7 @@ open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
         setup {
             standardAppHelper.launchViaIntent(
                 wmHelper,
-                NetflixAppHelper.getNetflixWatchVideoIntent("70184207"),
+                NetflixAppHelper.getNetflixWatchVideoIntent("81605060"),
                 ComponentNameMatcher(NetflixAppHelper.PACKAGE_NAME, NetflixAppHelper.WATCH_ACTIVITY)
             )
             standardAppHelper.waitForVideoPlaying()

@@ -2373,13 +2373,29 @@ public final class StrictMode {
     /** Assume locked until we hear otherwise */
     private static volatile boolean sCeStorageUnlocked = false;
 
+    /**
+     * Avoid (potentially) costly and repeated lookups to the same mount service.
+     * Note that we don't use the Singleton wrapper as lookup may fail early during boot.
+     */
+    private static volatile IStorageManager sStorageManager;
+
     private static boolean isCeStorageUnlocked(int userId) {
-        final IStorageManager storage = IStorageManager.Stub
+        IStorageManager storage = sStorageManager;
+        if (storage == null) {
+            storage = IStorageManager.Stub
                 .asInterface(ServiceManager.getService("mount"));
+            // As the queried handle may be null early during boot, only stash valid handles,
+            // avoiding races with concurrent service queries.
+            if (storage != null) {
+                sStorageManager = storage;
+            }
+        }
         if (storage != null) {
             try {
                 return storage.isCeStorageUnlocked(userId);
             } catch (RemoteException ignored) {
+                // Conservatively clear the ref, allowing refresh if the remote process restarts.
+                sStorageManager = null;
             }
         }
         return false;

@@ -1207,10 +1207,9 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"S\'ha detectat la presència d\'usuaris"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Defineix l\'aplicació de notes predeterminada a Configuració"</string>
     <string name="install_app" msgid="5066668100199613936">"Instal·la l\'aplicació"</string>
-    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Replicar a la pantalla externa?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
-    <string name="mirror_display" msgid="2515262008898122928">"Replica la pantalla"</string>
+    <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Duplicar a la pantalla externa?"</string>
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"La pantalla interior es duplicarà. La pantalla frontal es desactivarà."</string>
+    <string name="mirror_display" msgid="2515262008898122928">"Duplica la pantalla"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Ignora"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Pantalla connectada"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Micròfon i càmera"</string>

@@ -124,6 +124,7 @@ import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -206,6 +207,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntConsumer;
 
 /**
  * This class provides a system service that manages input methods.
@@ -1713,8 +1715,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
         mNonPreemptibleInputMethods = mRes.getStringArray(
                 com.android.internal.R.array.config_nonPreemptibleInputMethods);
+        IntConsumer toolTypeConsumer =
+                Flags.useHandwritingListenerForTooltype()
+                        ? toolType -> onUpdateEditorToolType(toolType) : null;
         mHwController = new HandwritingModeController(mContext, thread.getLooper(),
-                new InkWindowInitializer());
+                new InkWindowInitializer(), toolTypeConsumer);
         registerDeviceListenerAndCheckStylusSupport();
     }
 
@@ -1731,6 +1736,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (curMethod != null) {
                     curMethod.initInkWindow();
                 }
+            }
+        }
+    }
+
+    private void onUpdateEditorToolType(int toolType) {
+        synchronized (ImfLock.class) {
+            IInputMethodInvoker curMethod = getCurMethodLocked();
+            if (curMethod != null) {
+                curMethod.updateEditorToolType(toolType);
             }
         }
     }
@@ -3525,7 +3539,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_HAS_IME);
             mCurStatsToken = null;
 
-            if (lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
+            if (!Flags.useHandwritingListenerForTooltype()
+                    && lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
                 curMethod.updateEditorToolType(lastClickToolType);
             }
             mVisibilityApplier.performShowIme(windowToken, statsToken,

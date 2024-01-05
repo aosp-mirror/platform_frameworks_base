@@ -26,6 +26,8 @@ import static android.graphics.Matrix.MSKEW_Y;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import static com.android.window.flags.Flags.noConsecutiveVisibilityEvents;
+
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -1431,27 +1433,36 @@ public abstract class WallpaperService extends Service {
                         }
 
                         if (didSurface && !mReportedVisible) {
-                            // This wallpaper is currently invisible, but its
-                            // surface has changed.  At this point let's tell it
-                            // again that it is invisible in case the report about
-                            // the surface caused it to start running.  We really
-                            // don't want wallpapers running when not visible.
                             if (mIsCreating) {
-                                // Some wallpapers will ignore this call if they
-                                // had previously been told they were invisble,
-                                // so if we are creating a new surface then toggle
-                                // the state to get them to notice.
-                                if (DEBUG) Log.v(TAG, "onVisibilityChanged(true) at surface: "
-                                        + this);
-                                Trace.beginSection("WPMS.Engine.onVisibilityChanged-true");
-                                onVisibilityChanged(true);
+                                // The surface has been created, but the wallpaper isn't visible.
+                                // Trigger onVisibilityChanged(true) then onVisibilityChanged(false)
+                                // to make sure the wallpaper is stopped even after the events
+                                // onSurfaceCreated() and onSurfaceChanged().
+                                if (noConsecutiveVisibilityEvents()) {
+                                    if (DEBUG) Log.v(TAG, "toggling doVisibilityChanged");
+                                    Trace.beginSection("WPMS.Engine.doVisibilityChanged-true");
+                                    doVisibilityChanged(true);
+                                    Trace.endSection();
+                                    Trace.beginSection("WPMS.Engine.doVisibilityChanged-false");
+                                    doVisibilityChanged(false);
+                                    Trace.endSection();
+                                } else {
+                                    if (DEBUG) {
+                                        Log.v(TAG, "onVisibilityChanged(true) at surface: " + this);
+                                    }
+                                    Trace.beginSection("WPMS.Engine.onVisibilityChanged-true");
+                                    onVisibilityChanged(true);
+                                    Trace.endSection();
+                                }
+                            }
+                            if (!noConsecutiveVisibilityEvents()) {
+                                if (DEBUG) {
+                                    Log.v(TAG, "onVisibilityChanged(false) at surface: " + this);
+                                }
+                                Trace.beginSection("WPMS.Engine.onVisibilityChanged-false");
+                                onVisibilityChanged(false);
                                 Trace.endSection();
                             }
-                            if (DEBUG) Log.v(TAG, "onVisibilityChanged(false) at surface: "
-                                        + this);
-                            Trace.beginSection("WPMS.Engine.onVisibilityChanged-false");
-                            onVisibilityChanged(false);
-                            Trace.endSection();
                         }
                     } finally {
                         mIsCreating = false;

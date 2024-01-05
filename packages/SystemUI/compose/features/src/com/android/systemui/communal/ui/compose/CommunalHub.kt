@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.compose
 
+import android.appwidget.AppWidgetHostView
 import android.os.Bundle
 import android.util.SizeF
 import android.widget.FrameLayout
@@ -376,7 +377,7 @@ private fun SmartspaceContent(
     AndroidView(
         modifier = modifier,
         factory = { context ->
-            FrameLayout(context).apply { addView(model.remoteViews.apply(context, this)) }
+            AppWidgetHostView(context).apply { updateAppWidget(model.remoteViews) }
         },
         // For reusing composition in lazy lists.
         onReset = {},

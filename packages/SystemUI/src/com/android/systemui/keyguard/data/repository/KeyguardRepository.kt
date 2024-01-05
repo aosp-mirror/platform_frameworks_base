@@ -110,7 +110,7 @@ interface KeyguardRepository {
     val isKeyguardGoingAway: Flow<Boolean>
 
     /** Is the always-on display available to be used? */
-    val isAodAvailable: Flow<Boolean>
+    val isAodAvailable: StateFlow<Boolean>
 
     fun setAodAvailable(value: Boolean)
 
@@ -338,7 +338,7 @@ constructor(
             .distinctUntilChanged()
 
     private val _isAodAvailable = MutableStateFlow(false)
-    override val isAodAvailable: Flow<Boolean> = _isAodAvailable.asStateFlow()
+    override val isAodAvailable: StateFlow<Boolean> = _isAodAvailable.asStateFlow()
 
     override fun setAodAvailable(value: Boolean) {
         _isAodAvailable.value = value

@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"સેટિંગમાં નોંધની ડિફૉલ્ટ ઍપ સેટ કરો"</string>
     <string name="install_app" msgid="5066668100199613936">"ઍપ ઇન્સ્ટૉલ કરો"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"શું બાહ્ય ડિસ્પ્લે પર મિરર કરીએ?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"તમારું ઇનર ડિસ્પ્લે મિરર કરવામાં આવશે. તમારું ફ્રન્ટ ડિસ્પ્લે બંધ કરવામાં આવશે."</string>
     <string name="mirror_display" msgid="2515262008898122928">"મિરર ડિસ્પ્લે"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"છોડી દો"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Display કનેક્ટેડ છે"</string>

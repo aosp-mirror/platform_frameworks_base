@@ -10554,6 +10554,18 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Checks the input event receiver for input availability.
+     * May return false negatives.
+     * @hide
+     */
+    public boolean probablyHasInput() {
+        if (mInputEventReceiver == null) {
+            return false;
+        }
+        return mInputEventReceiver.probablyHasInput();
+    }
+
+    /**
      * Adds a scroll capture callback to this window.
      *
      * @param callback the callback to add

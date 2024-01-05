@@ -28,8 +28,6 @@ import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -95,7 +93,7 @@ public class BroadcastDialogDelegateTest extends SysuiTestCase {
 
         mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM, true);
         when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
-        when(mSystemUIDialogFactory.create(any())).thenReturn(mDialog);
+        when(mSystemUIDialogFactory.create(any(), any())).thenReturn(mDialog);
 
         mBroadcastDialogDelegate = new BroadcastDialogDelegate(
                 mContext,

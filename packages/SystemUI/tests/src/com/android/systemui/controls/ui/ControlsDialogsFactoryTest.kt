@@ -17,17 +17,23 @@
 
 package com.android.systemui.controls.ui
 
+import android.content.Context
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.FakeSystemUIDialogController
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.any
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -37,18 +43,24 @@ class ControlsDialogsFactoryTest : SysuiTestCase() {
         const val APP_NAME = "Test App"
     }
 
-    private val fakeDialogController = FakeSystemUIDialogController()
+    @Mock
+    private lateinit var mockDialogFactory : SystemUIDialog.Factory
+
+    private val fakeDialogController = FakeSystemUIDialogController(mContext)
 
     private lateinit var underTest: ControlsDialogsFactory
 
     @Before
     fun setup() {
-        underTest = ControlsDialogsFactory { fakeDialogController.dialog }
+        MockitoAnnotations.initMocks(this)
+        whenever(mockDialogFactory.create(any(Context::class.java)))
+            .thenReturn(fakeDialogController.dialog)
+        underTest = ControlsDialogsFactory(mockDialogFactory)
     }
 
     @Test
     fun testCreatesRemoveAppDialog() {
-        val dialog = underTest.createRemoveAppDialog(context, APP_NAME) {}
+        val dialog = underTest.createRemoveAppDialog(mContext, APP_NAME) {}
 
         verify(dialog)
             .setTitle(
@@ -60,7 +72,7 @@ class ControlsDialogsFactoryTest : SysuiTestCase() {
     @Test
     fun testPositiveClickRemoveAppDialogWorks() {
         var dialogResult: Boolean? = null
-        underTest.createRemoveAppDialog(context, APP_NAME) { dialogResult = it }
+        underTest.createRemoveAppDialog(mContext, APP_NAME) { dialogResult = it }
 
         fakeDialogController.clickPositive()
 
@@ -70,7 +82,7 @@ class ControlsDialogsFactoryTest : SysuiTestCase() {
     @Test
     fun testNeutralClickRemoveAppDialogWorks() {
         var dialogResult: Boolean? = null
-        underTest.createRemoveAppDialog(context, APP_NAME) { dialogResult = it }
+        underTest.createRemoveAppDialog(mContext, APP_NAME) { dialogResult = it }
 
         fakeDialogController.clickNeutral()
 
@@ -80,7 +92,7 @@ class ControlsDialogsFactoryTest : SysuiTestCase() {
     @Test
     fun testCancelRemoveAppDialogWorks() {
         var dialogResult: Boolean? = null
-        underTest.createRemoveAppDialog(context, APP_NAME) { dialogResult = it }
+        underTest.createRemoveAppDialog(mContext, APP_NAME) { dialogResult = it }
 
         fakeDialogController.cancel()
 

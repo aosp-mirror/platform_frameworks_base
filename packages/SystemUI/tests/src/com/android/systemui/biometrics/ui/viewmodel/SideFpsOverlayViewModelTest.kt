@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -238,15 +239,18 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 windowManager,
                 displayStateInteractor,
                 Optional.of(fingerprintInteractiveToAuthProvider),
+                mock(),
                 SideFpsLogger(logcatLogBuffer("SfpsLogger"))
             )
 
         sideFpsProgressBarViewModel =
             SideFpsProgressBarViewModel(
                 mContext,
-                deviceEntryFingerprintAuthRepository,
+                mock(),
                 sfpsSensorInteractor,
+                mock(),
                 displayStateInteractor,
+                StandardTestDispatcher(),
                 testScope.backgroundScope,
             )
 

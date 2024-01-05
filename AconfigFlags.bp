@@ -180,6 +180,12 @@ aconfig_declarations {
     ],
 }
 
+cc_aconfig_library {
+    name: "android_location_flags_c_lib",
+    vendor_available: true,
+    aconfig_declarations: "android.location.flags-aconfig",
+}
+
 java_aconfig_library {
     name: "android.location.flags-aconfig-java",
     aconfig_declarations: "android.location.flags-aconfig",
@@ -246,6 +252,13 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.app.usage.flags-aconfig-java",
     aconfig_declarations: "android.app.usage.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.app.usage.flags-aconfig-java-host",
+    aconfig_declarations: "android.app.usage.flags-aconfig",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

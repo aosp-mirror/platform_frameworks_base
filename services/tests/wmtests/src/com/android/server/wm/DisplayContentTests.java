@@ -115,6 +115,9 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -146,6 +149,7 @@ import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -171,6 +175,10 @@ import java.util.concurrent.TimeoutException;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class DisplayContentTests extends WindowTestsBase {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @SetupWindows(addAllCommonWindows = true)
     @Test
@@ -508,6 +516,7 @@ public class DisplayContentTests extends WindowTestsBase {
      * Tests tapping on a root task in different display results in window gaining focus.
      */
     @Test
+    @RequiresFlagsDisabled(com.android.input.flags.Flags.FLAG_REMOVE_POINTER_EVENT_TRACKING_IN_WM)
     public void testInputEventBringsCorrectDisplayInFocus() {
         DisplayContent dc0 = mWm.getDefaultDisplayContentLocked();
         // Create a second display

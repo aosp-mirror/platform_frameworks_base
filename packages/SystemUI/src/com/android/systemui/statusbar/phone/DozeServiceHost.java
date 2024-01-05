@@ -55,11 +55,12 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Assert;
 
+import dagger.Lazy;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
@@ -172,6 +173,16 @@ public final class DozeServiceHost implements DozeHost {
         Assert.isMainThread();
         for (Callback callback : mCallbacks) {
             callback.onPowerSaveChanged(active);
+        }
+    }
+
+    /**
+     * Notify the registered callback about SPFS fingerprint acquisition started event.
+     */
+    public void fireSideFpsAcquisitionStarted() {
+        Assert.isMainThread();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onSideFingerprintAcquisitionStarted();
         }
     }
 

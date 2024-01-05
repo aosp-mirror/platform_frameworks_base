@@ -759,6 +759,15 @@ public final class DisplayDeviceConfigTest {
                         AUTO_BRIGHTNESS_MODE_DEFAULT,
                         Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_DIM), SMALL_DELTA);
 
+        assertArrayEquals(new float[]{0.0f, 80},
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
+                        AUTO_BRIGHTNESS_MODE_DEFAULT,
+                        Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_BRIGHT), ZERO_DELTA);
+        assertArrayEquals(new float[]{0.6f, 0.7f},
+                mDisplayDeviceConfig.getAutoBrightnessBrighteningLevels(
+                        AUTO_BRIGHTNESS_MODE_DEFAULT,
+                        Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_BRIGHT), SMALL_DELTA);
+
         assertArrayEquals(new float[]{0.0f, 95},
                 mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
                         AUTO_BRIGHTNESS_MODE_DOZE,
@@ -1193,6 +1202,20 @@ public final class DisplayDeviceConfigTest {
                 +               "<point>\n"
                 +                   "<first>90</first>\n"
                 +                   "<second>0.4</second>\n"
+                +               "</point>\n"
+                +           "</map>\n"
+                +       "</luxToBrightnessMapping>\n"
+                +       "<luxToBrightnessMapping>\n"
+                +           "<mode>default</mode>\n"
+                +           "<setting>bright</setting>\n"
+                +           "<map>\n"
+                +               "<point>\n"
+                +                   "<first>0</first>\n"
+                +                   "<second>0.6</second>\n"
+                +               "</point>\n"
+                +               "<point>\n"
+                +                   "<first>80</first>\n"
+                +                   "<second>0.7</second>\n"
                 +               "</point>\n"
                 +           "</map>\n"
                 +       "</luxToBrightnessMapping>\n"

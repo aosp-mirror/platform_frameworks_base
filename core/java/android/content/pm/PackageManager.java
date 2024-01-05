@@ -11024,7 +11024,7 @@ public abstract class PackageManager {
     }
 
     /**
-     * Returns the property defined in the given package's &lt;appliction&gt; tag.
+     * Returns the property defined in the given package's &lt;application&gt; tag.
      *
      * @throws NameNotFoundException if either the given package is not installed or if the
      * given property is not defined within the &lt;application&gt; tag.

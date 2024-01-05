@@ -40,6 +40,7 @@ import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Companion.Collaps
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Expanding
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.composable.Gone
+import com.android.systemui.scene.ui.composable.Lockscreen
 import com.android.systemui.scene.ui.composable.QuickSettings as QuickSettingsSceneKey
 import com.android.systemui.scene.ui.composable.Shade
 
@@ -77,7 +78,12 @@ private fun SceneScope.stateForQuickSettingsContent(): QSSceneAdapter.State {
                     toScene == Shade -> QSSceneAdapter.State.QQS
                     toScene == QuickSettingsSceneKey -> QSSceneAdapter.State.QS
                     toScene == Gone -> QSSceneAdapter.State.CLOSED
-                    else -> error("Bad transition for QuickSettings: $transitionState")
+                    toScene == Lockscreen -> QSSceneAdapter.State.CLOSED
+                    else ->
+                        error(
+                            "Bad transition for QuickSettings: fromScene=$fromScene," +
+                                " toScene=$toScene"
+                        )
                 }
             }
     }

@@ -1297,6 +1297,42 @@ public final class InputManager {
     }
 
     /**
+     * Registers a Sticky modifier state change listener to be notified about {@link
+     * StickyModifierState} changes.
+     *
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link StickyModifierStateListener}
+     * @throws IllegalArgumentException if {@code listener} has already been registered previously.
+     * @throws NullPointerException     if {@code listener} or {@code executor} is null.
+     * @hide
+     * @see #unregisterStickyModifierStateListener(StickyModifierStateListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void registerStickyModifierStateListener(@NonNull Executor executor,
+            @NonNull StickyModifierStateListener listener) throws IllegalArgumentException {
+        if (!InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
+            return;
+        }
+        mGlobal.registerStickyModifierStateListener(executor, listener);
+    }
+
+    /**
+     * Unregisters a previously added Sticky modifier state change listener.
+     *
+     * @param listener the {@link StickyModifierStateListener}
+     * @hide
+     * @see #registerStickyModifierStateListener(Executor, StickyModifierStateListener)
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)
+    public void unregisterStickyModifierStateListener(
+            @NonNull StickyModifierStateListener listener) {
+        if (!InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
+            return;
+        }
+        mGlobal.unregisterStickyModifierStateListener(listener);
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
@@ -1377,5 +1413,24 @@ public final class InputManager {
          */
         void onKeyboardBacklightChanged(
                 int deviceId, @NonNull KeyboardBacklightState state, boolean isTriggeredByKeyPress);
+    }
+
+    /**
+     * A callback used to be notified about sticky modifier state changes when A11y Sticky keys
+     * feature is enabled.
+     *
+     * @see #registerStickyModifierStateListener(Executor, StickyModifierStateListener)
+     * @see #unregisterStickyModifierStateListener(StickyModifierStateListener)
+     * @hide
+     */
+    public interface StickyModifierStateListener {
+        /**
+         * Called when the sticky modifier state changes.
+         * This method will be called once after the listener is successfully registered to provide
+         * the initial modifier state.
+         *
+         * @param state the new sticky modifier state, never null.
+         */
+        void onStickyModifierStateChanged(@NonNull StickyModifierState state);
     }
 }
