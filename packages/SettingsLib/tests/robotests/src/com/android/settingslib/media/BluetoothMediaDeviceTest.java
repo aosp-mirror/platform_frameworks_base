@@ -39,6 +39,8 @@ import org.robolectric.RuntimeEnvironment;
 @RunWith(RobolectricTestRunner.class)
 public class BluetoothMediaDeviceTest {
 
+    private static final String TEST_ADDRESS = "11:22:33:44:55:66";
+
     @Mock
     private CachedBluetoothDevice mDevice;
 
@@ -110,5 +112,11 @@ public class BluetoothMediaDeviceTest {
                 .thenReturn(bytes);
 
         assertThat(mBluetoothMediaDevice.getIcon() instanceof BitmapDrawable).isFalse();
+    }
+
+    @Test
+    public void getId_returnsCachedBluetoothDeviceAddress() {
+        when(mDevice.getAddress()).thenReturn(TEST_ADDRESS);
+        assertThat(mBluetoothMediaDevice.getId()).isEqualTo(TEST_ADDRESS);
     }
 }

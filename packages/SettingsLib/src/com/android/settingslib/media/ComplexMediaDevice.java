@@ -63,7 +63,7 @@ public class ComplexMediaDevice extends MediaDevice {
 
     @Override
     public String getId() {
-        return MediaDeviceUtils.getId(mRouteInfo);
+        return mRouteInfo.getId();
     }
 
     public boolean isConnected() {

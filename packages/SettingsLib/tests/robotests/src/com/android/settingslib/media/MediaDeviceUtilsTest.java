@@ -21,9 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothDevice;
-import android.media.MediaRoute2Info;
-
-import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,27 +33,13 @@ import org.robolectric.RobolectricTestRunner;
 public class MediaDeviceUtilsTest {
 
     private static final String TEST_ADDRESS = "11:22:33:44:55:66";
-    private static final String TEST_ROUTE_ID = "test_route_id";
 
     @Mock
-    private CachedBluetoothDevice mCachedDevice;
-    @Mock
     private BluetoothDevice mBluetoothDevice;
-    @Mock
-    private MediaRoute2Info mRouteInfo;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-    }
-
-    @Test
-    public void getId_returnCachedBluetoothDeviceAddress() {
-        when(mCachedDevice.getAddress()).thenReturn(TEST_ADDRESS);
-
-        final String id = MediaDeviceUtils.getId(mCachedDevice);
-
-        assertThat(id).isEqualTo(TEST_ADDRESS);
     }
 
     @Test
@@ -66,14 +49,5 @@ public class MediaDeviceUtilsTest {
         final String id = MediaDeviceUtils.getId(mBluetoothDevice);
 
         assertThat(id).isEqualTo(TEST_ADDRESS);
-    }
-
-    @Test
-    public void getId_returnRouteInfoId() {
-        when(mRouteInfo.getId()).thenReturn(TEST_ROUTE_ID);
-
-        final String id = MediaDeviceUtils.getId(mRouteInfo);
-
-        assertThat(id).isEqualTo(TEST_ROUTE_ID);
     }
 }
