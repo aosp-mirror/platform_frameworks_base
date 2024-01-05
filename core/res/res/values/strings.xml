@@ -396,6 +396,27 @@
     <!-- Displayed when the call forwarding query was set but forwarding is not enabled. -->
     <string name="cfTemplateRegisteredTime"><xliff:g id="bearer_service_code">{0}</xliff:g>: Not forwarded</string>
 
+    <!-- Title of the cellular network security safety center source's status. -->
+    <string name="scCellularNetworkSecurityTitle">Cellular network security</string>
+    <!-- Summary of the cellular network security safety center source's status. -->
+    <string name="scCellularNetworkSecuritySummary">Review settings</string>
+    <!-- Title of the safety center issue and notification when the phone's identifier is shared over the network. -->
+    <string name="scIdentifierDisclosureIssueTitle">Device identifier accessed</string>
+    <!-- Summary of the safety center issue and notification when the phone's identifier is shared over the network. -->
+    <string name="scIdentifierDisclosureIssueSummary">A network on the <xliff:g id="disclosure_network">%4$s</xliff:g> connection recorded your device\'s unique identifier (IMSI) <xliff:g id="disclosure_count">%1$d</xliff:g> times in the period between <xliff:g id="disclosure_window_start_time">%2$tr</xliff:g> and <xliff:g id="disclosure_window_end_time">%3$tr</xliff:g>.</string>
+    <!-- Title of the safety center issue and notification when the phone restores an encrypted connection to the network. -->
+    <string name="scNullCipherIssueEncryptedTitle">Encrypted connection to <xliff:g id="network_name">%1$s</xliff:g></string>
+    <!-- Summary of the safety center issue and notification when the phone restores an encrypted connection to the network. -->
+    <string name="scNullCipherIssueEncryptedSummary">You\'re now connected to a more secure cellular network.</string>
+    <!-- Title of the safety center issue and notification when a connected network is not using encryption. -->
+    <string name="scNullCipherIssueNonEncryptedTitle">Non-encrypted connection to <xliff:g id="network_name">%1$s</xliff:g></string>
+    <!-- Summary of the safety center issue and notification when a connected network is not using encryption.  -->
+    <string name="scNullCipherIssueNonEncryptedSummary">You\'re connected to a non-encrypted cellular network. Your calls, messages, and data are vulnerable to interception.</string>
+    <!-- Label for the button that links to the cellular network security settings. -->
+    <string name="scNullCipherIssueActionSettings">Cellular security settings</string>
+    <!-- Label for the button that link to education resourcess about cellular network security settings. -->
+    <string name="scNullCipherIssueActionLearnMore">Learn more</string>
+
     <!-- android.net.http Error strings --> <skip />
     <!-- Displayed when a feature code (non-phone number) is dialed and completes successfully. -->
     <string name="fcComplete">Feature code complete.</string>
