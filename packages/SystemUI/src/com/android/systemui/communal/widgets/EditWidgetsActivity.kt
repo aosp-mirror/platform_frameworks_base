@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.os.RemoteException
 import android.util.Log
 import android.view.IWindowManager
+import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -78,6 +79,10 @@ constructor(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val windowInsetsController = window.decorView.windowInsetsController
+        windowInsetsController?.hide(WindowInsets.Type.systemBars())
+        window.setDecorFitsSystemWindows(false)
 
         setCommunalEditWidgetActivityContent(
             activity = this,
