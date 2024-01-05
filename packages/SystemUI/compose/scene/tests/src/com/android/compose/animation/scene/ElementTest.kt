@@ -263,8 +263,11 @@ class ElementTest {
 
         rule.setContent {
             SceneTransitionLayoutForTesting(
-                currentScene = currentScene,
-                onChangeScene = { currentScene = it },
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene = currentScene,
+                        onChangeScene = { currentScene = it }
+                    ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(TestScenes.SceneA) { /* Nothing */}
@@ -428,8 +431,11 @@ class ElementTest {
 
         rule.setContent {
             SceneTransitionLayoutForTesting(
-                currentScene = TestScenes.SceneA,
-                onChangeScene = {},
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene = TestScenes.SceneA,
+                        onChangeScene = {}
+                    ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(TestScenes.SceneA) { Box(Modifier.element(key)) }
@@ -478,8 +484,11 @@ class ElementTest {
             scrollScope = rememberCoroutineScope()
 
             SceneTransitionLayoutForTesting(
-                currentScene = TestScenes.SceneA,
-                onChangeScene = {},
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene = TestScenes.SceneA,
+                        onChangeScene = {}
+                    ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(TestScenes.SceneA) {
@@ -594,15 +603,18 @@ class ElementTest {
                 density = LocalDensity.current
 
                 SceneTransitionLayoutForTesting(
-                    currentScene = currentScene,
-                    onChangeScene = onChangeScene,
+                    state =
+                        updateSceneTransitionLayoutState(
+                            currentScene = currentScene,
+                            onChangeScene = onChangeScene,
+                            transitions =
+                                transitions {
+                                    from(TestScenes.SceneA, to = TestScenes.SceneB) {
+                                        spec = tween(durationMillis = 4 * 16, easing = LinearEasing)
+                                    }
+                                }
+                        ),
                     onLayoutImpl = { nullableLayoutImpl = it },
-                    transitions =
-                        transitions {
-                            from(TestScenes.SceneA, to = TestScenes.SceneB) {
-                                spec = tween(durationMillis = 4 * 16, easing = LinearEasing)
-                            }
-                        }
                 ) {
                     scene(TestScenes.SceneA) { Box(Modifier.element(TestElements.Foo)) }
                     scene(TestScenes.SceneB) {

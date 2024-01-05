@@ -63,7 +63,7 @@ class SceneTransitionLayoutTest {
     }
 
     private var currentScene by mutableStateOf(TestScenes.SceneA)
-    private val layoutState = SceneTransitionLayoutState(currentScene)
+    private lateinit var layoutState: SceneTransitionLayoutState
 
     // We use createAndroidComposeRule() here and not createComposeRule() because we need an
     // activity for testBack().
@@ -72,10 +72,14 @@ class SceneTransitionLayoutTest {
     /** The content under test. */
     @Composable
     private fun TestContent() {
+        layoutState =
+            updateSceneTransitionLayoutState(
+                currentScene,
+                { currentScene = it },
+                EmptyTestTransitions
+            )
+
         SceneTransitionLayout(
-            currentScene,
-            { currentScene = it },
-            EmptyTestTransitions,
             state = layoutState,
             modifier = Modifier.size(LayoutSize),
         ) {

@@ -304,7 +304,7 @@ internal fun shouldDrawOrComposeSharedElement(
 }
 
 private fun isSharedElementEnabled(
-    layoutState: SceneTransitionLayoutStateImpl,
+    layoutState: BaseSceneTransitionLayoutState,
     transition: TransitionState.Transition,
     element: ElementKey,
 ): Boolean {
@@ -312,7 +312,7 @@ private fun isSharedElementEnabled(
 }
 
 internal fun sharedElementTransformation(
-    layoutState: SceneTransitionLayoutStateImpl,
+    layoutState: BaseSceneTransitionLayoutState,
     transition: TransitionState.Transition,
     element: ElementKey,
 ): SharedElementTransformation? {

@@ -384,7 +384,7 @@ internal fun SceneTransitionLayoutForTesting(
     val coroutineScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
-                state = state as SceneTransitionLayoutStateImpl,
+                state = state as BaseSceneTransitionLayoutState,
                 density = density,
                 edgeDetector = edgeDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,

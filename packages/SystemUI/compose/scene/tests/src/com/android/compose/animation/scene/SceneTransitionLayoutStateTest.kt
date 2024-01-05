@@ -18,7 +18,11 @@ package com.android.compose.animation.scene
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,7 +33,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun isTransitioningTo_idle() {
-        val state = SceneTransitionLayoutState(TestScenes.SceneA)
+        val state = MutableSceneTransitionLayoutStateImpl(TestScenes.SceneA, SceneTransitions.Empty)
 
         assertThat(state.isTransitioning()).isFalse()
         assertThat(state.isTransitioning(from = TestScenes.SceneA)).isFalse()
@@ -40,7 +44,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun isTransitioningTo_transition() {
-        val state = SceneTransitionLayoutStateImpl(TestScenes.SceneA, SceneTransitions.Empty)
+        val state = MutableSceneTransitionLayoutStateImpl(TestScenes.SceneA, SceneTransitions.Empty)
         state.startTransition(transition(from = TestScenes.SceneA, to = TestScenes.SceneB))
 
         assertThat(state.isTransitioning()).isTrue()
@@ -49,5 +53,57 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.isTransitioning(to = TestScenes.SceneB)).isTrue()
         assertThat(state.isTransitioning(to = TestScenes.SceneA)).isFalse()
         assertThat(state.isTransitioning(from = TestScenes.SceneA, to = TestScenes.SceneB)).isTrue()
+    }
+
+    @Test
+    fun setTargetScene_idleToSameScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(TestScenes.SceneA)
+        assertThat(state.setTargetScene(TestScenes.SceneA, coroutineScope = this)).isNull()
+    }
+
+    @Test
+    fun setTargetScene_idleToDifferentScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(TestScenes.SceneA)
+        val transition = state.setTargetScene(TestScenes.SceneB, coroutineScope = this)
+        assertThat(transition).isNotNull()
+        assertThat(state.transitionState).isEqualTo(transition)
+
+        testScheduler.advanceUntilIdle()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(TestScenes.SceneB))
+    }
+
+    @Test
+    fun setTargetScene_transitionToSameScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(TestScenes.SceneA)
+        assertThat(state.setTargetScene(TestScenes.SceneB, coroutineScope = this)).isNotNull()
+        assertThat(state.setTargetScene(TestScenes.SceneB, coroutineScope = this)).isNull()
+        testScheduler.advanceUntilIdle()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(TestScenes.SceneB))
+    }
+
+    @Test
+    fun setTargetScene_transitionToDifferentScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(TestScenes.SceneA)
+        assertThat(state.setTargetScene(TestScenes.SceneB, coroutineScope = this)).isNotNull()
+        assertThat(state.setTargetScene(TestScenes.SceneC, coroutineScope = this)).isNotNull()
+        testScheduler.advanceUntilIdle()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(TestScenes.SceneC))
+    }
+
+    @Test
+    fun setTargetScene_coroutineScopeCancelled() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(TestScenes.SceneA)
+
+        lateinit var transition: TransitionState.Transition
+        val job =
+            launch(start = CoroutineStart.UNDISPATCHED) {
+                transition = state.setTargetScene(TestScenes.SceneB, coroutineScope = this)!!
+            }
+        assertThat(state.transitionState).isEqualTo(transition)
+
+        // Cancelling the scope/job still sets the state to Idle(targetScene).
+        job.cancel()
+        testScheduler.advanceUntilIdle()
+        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(TestScenes.SceneB))
     }
 }

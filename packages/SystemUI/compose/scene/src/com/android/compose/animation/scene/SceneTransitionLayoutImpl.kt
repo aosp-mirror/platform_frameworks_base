@@ -48,12 +48,12 @@ internal typealias MovableElementContent =
 
 @Stable
 internal class SceneTransitionLayoutImpl(
-    internal val state: SceneTransitionLayoutStateImpl,
+    internal val state: BaseSceneTransitionLayoutState,
     internal var density: Density,
     internal var edgeDetector: EdgeDetector,
     internal var transitionInterceptionThreshold: Float,
     builder: SceneTransitionLayoutScope.() -> Unit,
-    coroutineScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope,
 ) {
     /**
      * The map of [Scene]s.
@@ -243,7 +243,7 @@ internal class SceneTransitionLayoutImpl(
                 // TODO(b/290184746): Make sure that this works with SystemUI once we use
                 // SceneTransitionLayout in Flexiglass.
                 scene(state.transitionState.currentScene).userActions[Back]?.let { backScene ->
-                    BackHandler { state.onChangeScene(backScene) }
+                    BackHandler { with(state) { coroutineScope.onChangeScene(backScene) } }
                 }
 
                 Box {
