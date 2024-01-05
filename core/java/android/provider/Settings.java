@@ -7428,6 +7428,20 @@ public final class Settings {
         public static final String DEFAULT_INPUT_METHOD = "default_input_method";
 
         /**
+         * Used only by {@link com.android.server.inputmethod.InputMethodManagerService} as a
+         * temporary data store of {@link #DEFAULT_INPUT_METHOD} while a virtual-device-specific
+         * input method is set as default.</p>
+         *
+         * <p>This should be considered to be an implementation detail of
+         * {@link com.android.server.inputmethod.InputMethodManagerService}.  Other system
+         * components should never rely on this value.</p>
+         *
+         * @see #DEFAULT_INPUT_METHOD
+         * @hide
+         */
+        public static final String DEFAULT_DEVICE_INPUT_METHOD = "default_device_input_method";
+
+        /**
          * Setting to record the input method subtype used by default, holding the ID
          * of the desired method.
          */

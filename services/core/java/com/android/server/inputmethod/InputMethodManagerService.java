@@ -16,6 +16,7 @@
 
 package com.android.server.inputmethod;
 
+import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
@@ -315,7 +316,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     // All known input methods.
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
     private final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
+
     // Mapping from deviceId to the device-specific imeId for that device.
+    @GuardedBy("ImfLock.class")
     private final SparseArray<String> mVirtualDeviceMethodMap = new SparseArray<>();
 
     private final InputMethodSubtypeSwitchingController mSwitchingController;
@@ -338,6 +341,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private int mDisplayIdToShowIme = INVALID_DISPLAY;
+
+    @GuardedBy("ImfLock.class")
+    private int mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
 
     @Nullable private StatusBarManagerInternal mStatusBarManagerInternal;
     private boolean mShowOngoingImeSwitcherForPhones;
@@ -2464,11 +2470,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason int startInputReason,
             int unverifiedTargetSdkVersion,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-        // If no method is currently selected, do nothing.
-        final String selectedMethodId = getSelectedMethodIdLocked();
-        if (selectedMethodId == null) {
-            return InputBindResult.NO_IME;
-        }
+        String selectedMethodId = getSelectedMethodIdLocked();
 
         if (!mSystemReady) {
             // If the system is not yet ready, we shouldn't be running third
@@ -2493,12 +2495,30 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.NOT_IME_TARGET_WINDOW;
         }
         final int csDisplayId = cs.mSelfReportedDisplayId;
+        final int oldDisplayIdToShowIme = mDisplayIdToShowIme;
         mDisplayIdToShowIme = mVisibilityStateComputer.computeImeDisplayId(winState, csDisplayId);
+
+        // Potentially override the selected input method if the new display belongs to a virtual
+        // device with a custom IME.
+        if (oldDisplayIdToShowIme != mDisplayIdToShowIme) {
+            final String deviceMethodId = computeCurrentDeviceMethodIdLocked(selectedMethodId);
+            if (deviceMethodId == null) {
+                mVisibilityStateComputer.getImePolicy().setImeHiddenByDisplayPolicy(true);
+            } else if (!Objects.equals(deviceMethodId, selectedMethodId)) {
+                setInputMethodLocked(deviceMethodId, NOT_A_SUBTYPE_ID, mDeviceIdToShowIme);
+                selectedMethodId = deviceMethodId;
+            }
+        }
 
         if (mVisibilityStateComputer.getImePolicy().isImeHiddenByDisplayPolicy()) {
             hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */, 0 /* flags */,
                     null /* resultReceiver */,
                     SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE);
+            return InputBindResult.NO_IME;
+        }
+
+        // If no method is currently selected, do nothing.
+        if (selectedMethodId == null) {
             return InputBindResult.NO_IME;
         }
 
@@ -2566,6 +2586,62 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController.unbindCurrentMethod();
 
         return mBindingController.bindCurrentMethod();
+    }
+
+    /**
+     * Update the current deviceId and return the relevant imeId for this device.
+     *   1. If the device changes to virtual and its custom IME is not available, then disable IME.
+     *   2. If the device changes to virtual with valid custom IME, then return the custom IME. If
+     *      the old device was default, then store the current imeId so it can be restored.
+     *   3. If the device changes to default, restore the default device IME.
+     *   4. Otherwise keep the current imeId.
+     */
+    @GuardedBy("ImfLock.class")
+    private String computeCurrentDeviceMethodIdLocked(String currentMethodId) {
+        if (mVdmInternal == null) {
+            mVdmInternal = LocalServices.getService(VirtualDeviceManagerInternal.class);
+        }
+        if (mVdmInternal == null || !android.companion.virtual.flags.Flags.vdmCustomIme()) {
+            return currentMethodId;
+        }
+
+        final int oldDeviceId = mDeviceIdToShowIme;
+        mDeviceIdToShowIme = mVdmInternal.getDeviceIdForDisplayId(mDisplayIdToShowIme);
+        if (mDeviceIdToShowIme == oldDeviceId) {
+            return currentMethodId;
+        }
+        if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+            final String defaultDeviceMethodId = mSettings.getSelectedDefaultDeviceInputMethod();
+            if (DEBUG) {
+                Slog.v(TAG, "Restoring default device input method: " + defaultDeviceMethodId);
+            }
+            return defaultDeviceMethodId;
+        }
+
+        final String deviceMethodId =
+                mVirtualDeviceMethodMap.get(mDeviceIdToShowIme, currentMethodId);
+        if (Objects.equals(deviceMethodId, currentMethodId)) {
+            return currentMethodId;
+        } else if (!mMethodMap.containsKey(deviceMethodId)) {
+            if (DEBUG) {
+                Slog.v(TAG, "Disabling IME on virtual device with id " + mDeviceIdToShowIme
+                        + " because its custom input method is not available: " + deviceMethodId);
+            }
+            return null;
+        }
+
+        if (oldDeviceId == DEVICE_ID_DEFAULT) {
+            if (DEBUG) {
+                Slog.v(TAG, "Storing default device input method " + currentMethodId);
+            }
+            mSettings.putSelectedDefaultDeviceInputMethod(currentMethodId);
+        }
+        if (DEBUG) {
+            Slog.v(TAG, "Switching current input method from " + currentMethodId
+                    + " to device-specific one " + deviceMethodId + " because the current display "
+                    + mDisplayIdToShowIme + " belongs to device with id " + mDeviceIdToShowIme);
+        }
+        return deviceMethodId;
     }
 
     @GuardedBy("ImfLock.class")
@@ -3242,6 +3318,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     void setInputMethodLocked(String id, int subtypeId) {
+        setInputMethodLocked(id, subtypeId, DEVICE_ID_DEFAULT);
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setInputMethodLocked(String id, int subtypeId, int deviceId) {
         InputMethodInfo info = mMethodMap.get(id);
         if (info == null) {
             throw getExceptionForUnknownImeId(id);
@@ -3285,6 +3366,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         // Changing to a different IME.
+        if (mDeviceIdToShowIme != DEVICE_ID_DEFAULT && deviceId == DEVICE_ID_DEFAULT) {
+            // This change should only be applicable to the default device but the current input
+            // method is a custom one specific to a virtual device. So only update the settings
+            // entry used to restore the default device input method once we want to show the IME
+            // back on the default device.
+            mSettings.putSelectedDefaultDeviceInputMethod(id);
+            return;
+        }
         IInputMethodInvoker curMethod = getCurMethodLocked();
         if (curMethod != null) {
             curMethod.removeStylusHandwritingWindow();
@@ -5308,11 +5397,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             StringBuilder builder = new StringBuilder();
             if (mSettings.buildAndPutEnabledInputMethodsStrRemovingIdLocked(
                     builder, enabledInputMethodsList, id)) {
-                // Disabled input method is currently selected, switch to another one.
-                final String selId = mSettings.getSelectedInputMethod();
-                if (id.equals(selId) && !chooseNewDefaultIMELocked()) {
-                    Slog.i(TAG, "Can't find new IME, unsetting the current input method.");
-                    resetSelectedInputMethodAndSubtypeLocked("");
+                if (mDeviceIdToShowIme == DEVICE_ID_DEFAULT) {
+                    // Disabled input method is currently selected, switch to another one.
+                    final String selId = mSettings.getSelectedInputMethod();
+                    if (id.equals(selId) && !chooseNewDefaultIMELocked()) {
+                        Slog.i(TAG, "Can't find new IME, unsetting the current input method.");
+                        resetSelectedInputMethodAndSubtypeLocked("");
+                    }
+                } else if (id.equals(mSettings.getSelectedDefaultDeviceInputMethod())) {
+                    // Disabled default device IME while using a virtual device one, choose a
+                    // new default one but only update the settings.
+                    InputMethodInfo newDefaultIme =
+                            InputMethodInfoUtils.getMostApplicableDefaultIME(
+                                        mSettings.getEnabledInputMethodListLocked());
+                    mSettings.putSelectedDefaultDeviceInputMethod(
+                            newDefaultIme == null ? "" : newDefaultIme.getId());
                 }
                 // Previous state was enabled.
                 return true;
@@ -5652,9 +5751,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void setVirtualDeviceInputMethodForAllUsers(int deviceId, @Nullable String imeId) {
-            // TODO(b/287269288): validate that id belongs to a valid virtual device instead.
-            Preconditions.checkArgument(deviceId != Context.DEVICE_ID_DEFAULT,
-                    "DeviceId " + deviceId + " does not belong to a virtual device.");
+            Preconditions.checkArgument(deviceId != DEVICE_ID_DEFAULT,
+                    TextUtils.formatSimple("DeviceId %d is not a virtual device id.", deviceId));
             synchronized (ImfLock.class) {
                 if (imeId == null) {
                     mVirtualDeviceMethodMap.remove(deviceId);
