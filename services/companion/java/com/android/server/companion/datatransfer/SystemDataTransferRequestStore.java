@@ -67,6 +67,7 @@ import java.util.concurrent.TimeoutException;
  *   <request
  *     association_id="1"
  *     data_type="1"
+ *     user_id="12"
  *     is_user_consented="true"
  *   </request>
  * </requests>
@@ -83,6 +84,7 @@ public class SystemDataTransferRequestStore {
 
     private static final String XML_ATTR_ASSOCIATION_ID = "association_id";
     private static final String XML_ATTR_DATA_TYPE = "data_type";
+    private static final String XML_ATTR_USER_ID = "user_id";
     private static final String XML_ATTR_IS_USER_CONSENTED = "is_user_consented";
 
     private static final int READ_FROM_DISK_TIMEOUT = 5; // in seconds
@@ -195,7 +197,7 @@ public class SystemDataTransferRequestStore {
                 final TypedXmlPullParser parser = Xml.resolvePullParser(in);
                 XmlUtils.beginDocument(parser, XML_TAG_REQUESTS);
 
-                return readRequestsFromXml(userId, parser);
+                return readRequestsFromXml(parser);
             } catch (XmlPullParserException | IOException e) {
                 Slog.e(LOG_TAG, "Error while reading requests file", e);
                 return new ArrayList<>();
@@ -204,7 +206,7 @@ public class SystemDataTransferRequestStore {
     }
 
     @NonNull
-    private ArrayList<SystemDataTransferRequest> readRequestsFromXml(int userId,
+    private ArrayList<SystemDataTransferRequest> readRequestsFromXml(
             @NonNull TypedXmlPullParser parser) throws XmlPullParserException, IOException {
         if (!isStartOfTag(parser, XML_TAG_REQUESTS)) {
             throw new XmlPullParserException("The XML doesn't have start tag: " + XML_TAG_REQUESTS);
@@ -218,15 +220,14 @@ public class SystemDataTransferRequestStore {
                 break;
             }
             if (isStartOfTag(parser, XML_TAG_REQUEST)) {
-                requests.add(readRequestFromXml(userId, parser));
+                requests.add(readRequestFromXml(parser));
             }
         }
 
         return requests;
     }
 
-    private SystemDataTransferRequest readRequestFromXml(int userId,
-            @NonNull TypedXmlPullParser parser)
+    private SystemDataTransferRequest readRequestFromXml(@NonNull TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         if (!isStartOfTag(parser, XML_TAG_REQUEST)) {
             throw new XmlPullParserException("XML doesn't have start tag: " + XML_TAG_REQUEST);
@@ -234,6 +235,7 @@ public class SystemDataTransferRequestStore {
 
         final int associationId = readIntAttribute(parser, XML_ATTR_ASSOCIATION_ID);
         final int dataType = readIntAttribute(parser, XML_ATTR_DATA_TYPE);
+        final int userId = readIntAttribute(parser, XML_ATTR_USER_ID);
         final boolean isUserConsented = readBooleanAttribute(parser, XML_ATTR_IS_USER_CONSENTED);
 
         switch (dataType) {
@@ -290,6 +292,7 @@ public class SystemDataTransferRequestStore {
 
         writeIntAttribute(serializer, XML_ATTR_ASSOCIATION_ID, request.getAssociationId());
         writeIntAttribute(serializer, XML_ATTR_DATA_TYPE, request.getDataType());
+        writeIntAttribute(serializer, XML_ATTR_USER_ID, request.getUserId());
         writeBooleanAttribute(serializer, XML_ATTR_IS_USER_CONSENTED, request.isUserConsented());
 
         serializer.endTag(null, XML_TAG_REQUEST);
