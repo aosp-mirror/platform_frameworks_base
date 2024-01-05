@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.adaptiveauth.Flags.FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 
 import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
@@ -448,6 +449,29 @@ public class FingerprintAuthenticationClientTest {
 
         verify(mUdfpsOverlayController).hideUdfpsOverlay(anyInt());
         verify(mAuthenticationStateListeners).onAuthenticationStopped();
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onAuthenticationSucceeded()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS);
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
+                2 /* deviceId */), true /* authenticated */, new ArrayList<>());
+
+        verify(mAuthenticationStateListeners).onAuthenticationSucceeded(anyInt(), anyInt());
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onAuthenticationFailed() throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS);
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
+                2 /* deviceId */), false /* authenticated */, new ArrayList<>());
+
+        verify(mAuthenticationStateListeners).onAuthenticationFailed(anyInt(), anyInt());
     }
 
     @Test

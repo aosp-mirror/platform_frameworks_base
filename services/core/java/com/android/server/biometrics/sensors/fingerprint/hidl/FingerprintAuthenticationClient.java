@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.hidl;
 
+import static android.adaptiveauth.Flags.reportBiometricAuthAttempts;
+
 import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
 
 import android.annotation.NonNull;
@@ -142,6 +144,10 @@ class FingerprintAuthenticationClient
             if (sidefpsControllerRefactor()) {
                 mAuthenticationStateListeners.onAuthenticationStopped();
             }
+            if (reportBiometricAuthAttempts()) {
+                mAuthenticationStateListeners.onAuthenticationSucceeded(getRequestReason(),
+                        getTargetUserId());
+            }
         } else {
             mState = STATE_STARTED_PAUSED_ATTEMPTED;
             final @LockoutTracker.LockoutMode int lockoutMode =
@@ -160,6 +166,10 @@ class FingerprintAuthenticationClient
                 }
                 onErrorInternal(errorCode, 0 /* vendorCode */, false /* finish */);
                 cancel();
+            }
+            if (reportBiometricAuthAttempts()) {
+                mAuthenticationStateListeners.onAuthenticationFailed(getRequestReason(),
+                        getTargetUserId());
             }
         }
     }

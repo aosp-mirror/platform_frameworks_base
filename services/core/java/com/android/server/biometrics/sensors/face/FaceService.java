@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
@@ -63,6 +64,7 @@ import com.android.server.SystemService;
 import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -98,6 +100,8 @@ public class FaceService extends SystemService {
     @NonNull
     private final BiometricStateCallback<ServiceProvider, FaceSensorPropertiesInternal>
             mBiometricStateCallback;
+    @NonNull
+    private final AuthenticationStateListeners mAuthenticationStateListeners;
     @NonNull
     private final FaceProviderFunction mFaceProviderFunction;
     @NonNull private final Function<String, FaceProvider> mFaceProvider;
@@ -664,7 +668,8 @@ public class FaceService extends SystemService {
             for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
                 providers.add(
                         Face10.newInstance(getContext(), mBiometricStateCallback,
-                                hidlSensor, mLockoutResetDispatcher));
+                                mAuthenticationStateListeners, hidlSensor,
+                                mLockoutResetDispatcher));
             }
 
             return providers;
@@ -799,6 +804,24 @@ public class FaceService extends SystemService {
         public void registerBiometricStateListener(@NonNull IBiometricStateListener listener) {
             mBiometricStateCallback.registerBiometricStateListener(listener);
         }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override
+        public void registerAuthenticationStateListener(
+                @NonNull AuthenticationStateListener listener) {
+            super.registerAuthenticationStateListener_enforcePermission();
+
+            mAuthenticationStateListeners.registerAuthenticationStateListener(listener);
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override
+        public void unregisterAuthenticationStateListener(
+                @NonNull AuthenticationStateListener listener) {
+            super.unregisterAuthenticationStateListener_enforcePermission();
+
+            mAuthenticationStateListeners.unregisterAuthenticationStateListener(listener);
+        }
     }
 
     public FaceService(Context context) {
@@ -817,6 +840,7 @@ public class FaceService extends SystemService {
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mBiometricStateCallback = new BiometricStateCallback<>(UserManager.get(context));
+        mAuthenticationStateListeners = new AuthenticationStateListeners();
         mRegistry = new FaceServiceRegistry(mServiceWrapper, biometricServiceSupplier);
         mRegistry.addAllRegisteredCallback(new IFaceAuthenticatorsRegisteredCallback.Stub() {
             @Override
@@ -837,8 +861,8 @@ public class FaceService extends SystemService {
             try {
                 final SensorProps[] props = face.getSensorProps();
                 return new FaceProvider(getContext(),
-                        mBiometricStateCallback, props, name, mLockoutResetDispatcher,
-                        BiometricContext.getInstance(getContext()),
+                        mBiometricStateCallback, mAuthenticationStateListeners, props, name,
+                        mLockoutResetDispatcher, BiometricContext.getInstance(getContext()),
                         false /* resetLockoutRequiresChallenge */);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
@@ -850,7 +874,7 @@ public class FaceService extends SystemService {
         if (Flags.deHidl()) {
             mFaceProviderFunction = faceProviderFunction != null ? faceProviderFunction :
                     ((filteredSensorProps, resetLockoutRequiresChallenge) -> new FaceProvider(
-                            getContext(), mBiometricStateCallback,
+                            getContext(), mBiometricStateCallback, mAuthenticationStateListeners,
                             filteredSensorProps.second,
                             filteredSensorProps.first, mLockoutResetDispatcher,
                             BiometricContext.getInstance(getContext()),
