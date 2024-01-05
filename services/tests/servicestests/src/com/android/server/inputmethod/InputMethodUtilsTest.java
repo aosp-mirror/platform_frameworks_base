@@ -25,10 +25,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
@@ -1221,35 +1219,6 @@ public class InputMethodUtilsTest {
         assertTrue(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                 Build.VERSION_CODES.P,
                 StartInputFlags.VIEW_HAS_FOCUS | StartInputFlags.IS_TEXT_EDITOR));
-    }
-
-    @Test
-    public void testInputMethodSettings_SwitchCurrentUser() {
-        TestContext ownerUserContext = createMockContext(0 /* userId */);
-        final InputMethodInfo systemIme = createFakeInputMethodInfo(
-                "SystemIme", "fake.latin", true /* isSystem */);
-        final InputMethodInfo nonSystemIme = createFakeInputMethodInfo("NonSystemIme",
-                "fake.voice0", false /* isSystem */);
-        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
-        methodMap.put(systemIme.getId(), systemIme);
-
-        // Init InputMethodSettings for the owner user (userId=0), verify calls can get the
-        // corresponding user's context, contentResolver and the resources configuration.
-        InputMethodUtils.InputMethodSettings settings = new InputMethodUtils.InputMethodSettings(
-                methodMap, 0 /* userId */);
-        assertEquals(0, settings.getCurrentUserId());
-
-        settings.getEnabledInputMethodSubtypeListLocked(nonSystemIme, true);
-        verify(ownerUserContext.getResources(), atLeastOnce()).getConfiguration();
-
-        // Calling switchCurrentUser to the secondary user (userId=10), verify calls can get the
-        // corresponding user's context, contentResolver and the resources configuration.
-        settings.switchCurrentUser(10 /* userId */);
-        assertEquals(10, settings.getCurrentUserId());
-
-        settings.getEnabledInputMethodSubtypeListLocked(nonSystemIme, true);
-        verify(TestContext.getSecondaryUserContext().getResources(),
-                atLeastOnce()).getConfiguration();
     }
 
     private static IntArray createSubtypeHashCodeArrayFromStr(String subtypeHashCodesStr) {

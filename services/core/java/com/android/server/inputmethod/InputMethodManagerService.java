@@ -276,7 +276,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final Context mContext;
     final Resources mRes;
     private final Handler mHandler;
-    private final InputMethodSettings mSettings;
+    @NonNull
+    private InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
     private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
             new SparseBooleanArray(0);
@@ -1622,7 +1623,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (userId != currentUserId) {
                 return;
             }
-            mSettings.switchCurrentUser(currentUserId);
+            mSettings = new InputMethodSettings(mMethodMap, userId);
             if (mSystemReady) {
                 // We need to rebuild IMEs.
                 buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
@@ -1812,11 +1813,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // ContentObserver should be registered again when the user is changed
         mSettingsObserver.registerContentObserverLocked(newUserId);
 
-        // If the system is not ready or the device is not yed unlocked by the user, then we use
-        // copy-on-write settings.
-        final boolean useCopyOnWriteSettings =
-                !mSystemReady || !mUserManagerInternal.isUserUnlockingOrUnlocked(newUserId);
-        mSettings.switchCurrentUser(newUserId);
+        mSettings = new InputMethodSettings(mMethodMap, newUserId);
         // Additional subtypes should be reset when the user is changed
         AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, newUserId);
         final String defaultImiId = mSettings.getSelectedInputMethod();
@@ -1878,7 +1875,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!mSystemReady) {
                 mSystemReady = true;
                 final int currentUserId = mSettings.getCurrentUserId();
-                mSettings.switchCurrentUser(currentUserId);
                 mStatusBarManagerInternal =
                         LocalServices.getService(StatusBarManagerInternal.class);
                 hideStatusBarIconLocked();
