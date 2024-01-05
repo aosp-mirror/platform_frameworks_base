@@ -3938,7 +3938,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Nullable
     BLASTSyncEngine.SyncGroup getSyncGroup() {
         if (mSyncGroup != null) return mSyncGroup;
-        if (mParent != null) return mParent.getSyncGroup();
+        WindowContainer<?> parent = mParent;
+        while (parent != null) {
+            if (parent.mSyncGroup != null) {
+                return parent.mSyncGroup;
+            }
+            parent = parent.mParent;
+        }
         return null;
     }
 
@@ -3972,7 +3978,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param cancel If true, this is being finished because it is leaving the sync group rather
      *               than due to the sync group completing.
      */
-    void finishSync(Transaction outMergedTransaction, BLASTSyncEngine.SyncGroup group,
+    void finishSync(Transaction outMergedTransaction, @Nullable BLASTSyncEngine.SyncGroup group,
             boolean cancel) {
         if (mSyncState == SYNC_STATE_NONE) return;
         final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
@@ -4000,7 +4006,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (!isVisibleRequested()) {
             return true;
         }
-        if (mSyncState == SYNC_STATE_NONE) {
+        if (mSyncState == SYNC_STATE_NONE && getSyncGroup() != null) {
+            Slog.i(TAG, "prepareSync in isSyncFinished: " + this);
             prepareSync();
         }
         if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW) {
@@ -4059,16 +4066,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             if (newParent == null) {
                 // This is getting removed.
+                final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
                 if (oldParent.mSyncState != SYNC_STATE_NONE) {
                     // In order to keep the transaction in sync, merge it into the parent.
-                    finishSync(oldParent.mSyncTransaction, getSyncGroup(), true /* cancel */);
-                } else if (mSyncGroup != null) {
-                    // This is watched directly by the sync-group, so merge this transaction into
-                    // into the sync-group so it isn't lost
-                    finishSync(mSyncGroup.getOrphanTransaction(), mSyncGroup, true /* cancel */);
+                    finishSync(oldParent.mSyncTransaction, syncGroup, true /* cancel */);
+                } else if (syncGroup != null) {
+                    // This is watched by the sync-group, so merge this transaction into the
+                    // sync-group for not losing the operations in the transaction.
+                    finishSync(syncGroup.getOrphanTransaction(), syncGroup, true /* cancel */);
                 } else {
-                    throw new IllegalStateException("This container is in sync mode without a sync"
-                            + " group: " + this);
+                    Slog.wtf(TAG, this + " is in sync mode without a sync group");
+                    // Make sure the removal transaction take effect.
+                    finishSync(getPendingTransaction(), null /* group */, true /* cancel */);
                 }
                 return;
             } else if (mSyncGroup == null) {
