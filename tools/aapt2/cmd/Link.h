@@ -330,7 +330,11 @@ class LinkCommand : public Command {
             "should only be used together with the --static-lib flag.",
         &options_.merge_only);
     AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
-    AddOptionalFlagList("--feature-flags", "Placeholder, to be implemented.", &feature_flags_args_);
+    AddOptionalFlagList("--feature-flags",
+                        "Specify the values of feature flags. The pairs in the argument\n"
+                        "are separated by ',' and the name is separated from the value by '='.\n"
+                        "Example: \"flag1=true,flag2=false,flag3=\" (flag3 has no given value).",
+                        &feature_flags_args_);
   }
 
   int Action(const std::vector<std::string>& args) override;
