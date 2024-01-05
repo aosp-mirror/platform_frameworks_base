@@ -37,6 +37,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -85,6 +86,7 @@ import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInsets;
@@ -949,6 +951,57 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         verify(mTransaction).setInputWindowInfo(
                 eq(surfaceControl),
                 argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
+    }
+
+    @Test
+    public void testDrawMagnifiedViewport() {
+        final int displayId = mDisplayContent.mDisplayId;
+        // Use real surface, so ViewportWindow's BlastBufferQueue can be created.
+        final ArrayList<SurfaceControl> surfaceControls = new ArrayList<>();
+        mWm.mSurfaceControlFactory = s -> new SurfaceControl.Builder() {
+            @Override
+            public SurfaceControl build() {
+                final SurfaceControl sc = super.build();
+                surfaceControls.add(sc);
+                return sc;
+            }
+        };
+        mWm.mAccessibilityController.setMagnificationCallbacks(displayId,
+                mock(WindowManagerInternal.MagnificationCallbacks.class));
+        final boolean[] lockCanvasInWmLock = { false };
+        final Surface surface = mWm.mAccessibilityController.forceShowMagnifierSurface(displayId);
+        spyOn(surface);
+        doAnswer(invocationOnMock -> {
+            lockCanvasInWmLock[0] |= Thread.holdsLock(mWm.mGlobalLock);
+            invocationOnMock.callRealMethod();
+            return null;
+        }).when(surface).lockCanvas(any());
+        mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId, mTransaction);
+        waitUntilHandlersIdle();
+        try {
+            verify(surface).lockCanvas(any());
+
+            clearInvocations(surface);
+            // Invalidate and redraw.
+            mWm.mAccessibilityController.onDisplaySizeChanged(mDisplayContent);
+            mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId, mTransaction);
+            // Turn off magnification to release surface.
+            mWm.mAccessibilityController.setMagnificationCallbacks(displayId, null);
+            if (!com.android.window.flags.Flags.drawMagnifierBorderOutsideWmlock()) {
+                verify(surface).release();
+                assertTrue(lockCanvasInWmLock[0]);
+                return;
+            }
+            waitUntilHandlersIdle();
+            // lockCanvas must not be called after releasing.
+            verify(surface, never()).lockCanvas(any());
+            verify(surface).release();
+            assertFalse(lockCanvasInWmLock[0]);
+        } finally {
+            for (int i = surfaceControls.size() - 1; i >= 0; --i) {
+                surfaceControls.get(i).release();
+            }
+        }
     }
 
     @Test
