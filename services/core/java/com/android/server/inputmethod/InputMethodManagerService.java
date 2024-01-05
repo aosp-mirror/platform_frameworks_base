@@ -321,7 +321,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     private final SparseArray<String> mVirtualDeviceMethodMap = new SparseArray<>();
 
-    private final InputMethodSubtypeSwitchingController mSwitchingController;
+    // TODO: Instantiate mSwitchingController for each user.
+    @NonNull
+    private InputMethodSubtypeSwitchingController mSwitchingController;
     final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
             new HardwareKeyboardShortcutController();
 
@@ -1705,7 +1707,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, userId);
         mSwitchingController =
-                InputMethodSubtypeSwitchingController.createInstanceLocked(mSettings, context);
+                InputMethodSubtypeSwitchingController.createInstanceLocked(context, mMethodMap,
+                        userId);
         mHardwareKeyboardShortcutController.reset(mSettings);
         mMenuController = new InputMethodMenuController(this);
         mBindingController =
@@ -3294,13 +3297,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // There is no longer an input method set, so stop any current one.
             resetCurrentMethodAndClientLocked(UnbindReason.NO_IME);
         }
-        // Here is not the perfect place to reset the switching controller. Ideally
-        // mSwitchingController and mSettings should be able to share the same state.
-        // TODO: Make sure that mSwitchingController and mSettings are sharing the
-        // the same enabled IMEs list.
-        mSwitchingController.resetCircularListLocked(mContext);
-        mHardwareKeyboardShortcutController.reset(mSettings);
 
+        // TODO: Instantiate mSwitchingController for each user.
+        if (mSettings.getCurrentUserId() == mSwitchingController.getUserId()) {
+            mSwitchingController.resetCircularListLocked(mMethodMap);
+        } else {
+            mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
+                    mContext, mMethodMap, mSettings.getCurrentUserId());
+        }
+
+        mHardwareKeyboardShortcutController.reset(mSettings);
         sendOnNavButtonFlagsChangedLocked();
     }
 
@@ -4687,6 +4693,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 return;
             }
+            if (mSettings.getCurrentUserId() != mSwitchingController.getUserId()) {
+                return;
+            }
             final InputMethodInfo imi = mMethodMap.get(getSelectedMethodIdLocked());
             if (imi != null) {
                 mSwitchingController.onUserActionLocked(imi, mCurrentSubtype);
@@ -4924,9 +4933,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     int lastInputMethodSubtypeId =
                             mSettings.getSelectedInputMethodSubtypeId(lastInputMethodId);
 
-                    final List<ImeSubtypeListItem> imList = mSwitchingController
-                            .getSortedInputMethodAndSubtypeListForImeMenuLocked(
-                                    showAuxSubtypes, isScreenLocked);
+                    final List<ImeSubtypeListItem> imList = InputMethodSubtypeSwitchingController
+                            .getSortedInputMethodAndSubtypeList(
+                                    showAuxSubtypes, isScreenLocked, false, mContext,
+                                    mMethodMap, mSettings.getCurrentUserId());
                     mMenuController.showInputMethodMenuLocked(showAuxSubtypes, displayId,
                             lastInputMethodId, lastInputMethodSubtypeId, imList);
                 }
@@ -5311,11 +5321,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         updateDefaultVoiceImeIfNeededLocked();
 
-        // Here is not the perfect place to reset the switching controller. Ideally
-        // mSwitchingController and mSettings should be able to share the same state.
-        // TODO: Make sure that mSwitchingController and mSettings are sharing the
-        // the same enabled IMEs list.
-        mSwitchingController.resetCircularListLocked(mContext);
+        // TODO: Instantiate mSwitchingController for each user.
+        if (mSettings.getCurrentUserId() == mSwitchingController.getUserId()) {
+            mSwitchingController.resetCircularListLocked(mMethodMap);
+        } else {
+            mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
+                    mContext, mMethodMap, mSettings.getCurrentUserId());
+        }
         mHardwareKeyboardShortcutController.reset(mSettings);
 
         sendOnNavButtonFlagsChangedLocked();
