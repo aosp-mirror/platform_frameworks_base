@@ -382,10 +382,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * start it unless initiated by a user interaction (typically launching its icon
      * from the launcher, could also include user actions like adding it as an app widget,
      * selecting it as a live wallpaper, selecting it as a keyboard, etc). Stopped
-     * applications will not receive broadcasts unless the sender specifies
+     * applications will not receive implicit broadcasts unless the sender specifies
      * {@link android.content.Intent#FLAG_INCLUDE_STOPPED_PACKAGES}.
      *
-     * <p>Applications should avoid launching activies, binding to or starting services, or
+     * <p>Applications should avoid launching activities, binding to or starting services, or
      * otherwise causing a stopped application to run unless initiated by the user.
      *
      * <p>An app can also return to the stopped state by a "force stop".
