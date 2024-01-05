@@ -50,7 +50,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 
-// atest PackageManagerServiceTest:com.android.server.pm.UserDataPreparerTest
+// atest PackageManagerServiceServerTests:com.android.server.pm.UserDataPreparerTest
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 @SmallTest
@@ -99,7 +99,7 @@ public class UserDataPreparerTest {
         systemDeDir.mkdirs();
         mUserDataPreparer.prepareUserData(TEST_USER, StorageManager.FLAG_STORAGE_DE);
         verify(mStorageManagerMock).prepareUserStorage(isNull(String.class), eq(TEST_USER_ID),
-                eq(TEST_USER_SERIAL), eq(StorageManager.FLAG_STORAGE_DE));
+                eq(StorageManager.FLAG_STORAGE_DE));
         verify(mInstaller).createUserData(isNull(String.class), eq(TEST_USER_ID),
                 eq(TEST_USER_SERIAL), eq(StorageManager.FLAG_STORAGE_DE));
         int serialNumber = UserDataPreparer.getSerialNumber(userDeDir);
@@ -116,7 +116,7 @@ public class UserDataPreparerTest {
         systemCeDir.mkdirs();
         mUserDataPreparer.prepareUserData(TEST_USER, StorageManager.FLAG_STORAGE_CE);
         verify(mStorageManagerMock).prepareUserStorage(isNull(String.class), eq(TEST_USER_ID),
-                eq(TEST_USER_SERIAL), eq(StorageManager.FLAG_STORAGE_CE));
+                eq(StorageManager.FLAG_STORAGE_CE));
         verify(mInstaller).createUserData(isNull(String.class), eq(TEST_USER_ID),
                 eq(TEST_USER_SERIAL), eq(StorageManager.FLAG_STORAGE_CE));
         int serialNumber = UserDataPreparer.getSerialNumber(userCeDir);
@@ -129,7 +129,7 @@ public class UserDataPreparerTest {
     public void testPrepareUserData_forNewUser_destroysOnFailure() throws Exception {
         TEST_USER.lastLoggedInTime = 0;
         doThrow(new IllegalStateException("expected exception for test")).when(mStorageManagerMock)
-                .prepareUserStorage(isNull(String.class), eq(TEST_USER_ID), eq(TEST_USER_SERIAL),
+                .prepareUserStorage(isNull(String.class), eq(TEST_USER_ID),
                         eq(StorageManager.FLAG_STORAGE_CE));
         mUserDataPreparer.prepareUserData(TEST_USER, StorageManager.FLAG_STORAGE_CE);
         verify(mStorageManagerMock).destroyUserStorage(isNull(String.class), eq(TEST_USER_ID),
@@ -140,7 +140,7 @@ public class UserDataPreparerTest {
     public void testPrepareUserData_forExistingUser_doesNotDestroyOnFailure() throws Exception {
         TEST_USER.lastLoggedInTime = System.currentTimeMillis();
         doThrow(new IllegalStateException("expected exception for test")).when(mStorageManagerMock)
-                .prepareUserStorage(isNull(String.class), eq(TEST_USER_ID), eq(TEST_USER_SERIAL),
+                .prepareUserStorage(isNull(String.class), eq(TEST_USER_ID),
                         eq(StorageManager.FLAG_STORAGE_CE));
         mUserDataPreparer.prepareUserData(TEST_USER, StorageManager.FLAG_STORAGE_CE);
         verify(mStorageManagerMock, never()).destroyUserStorage(isNull(String.class),

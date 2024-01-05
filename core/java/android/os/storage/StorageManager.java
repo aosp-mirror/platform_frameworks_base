@@ -1652,9 +1652,9 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
+    public void prepareUserStorage(String volumeUuid, int userId, int flags) {
         try {
-            mStorageManager.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+            mStorageManager.prepareUserStorage(volumeUuid, userId, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

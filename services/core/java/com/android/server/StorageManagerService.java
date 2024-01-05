@@ -1341,8 +1341,8 @@ class StorageManagerService extends IStorageManager.Stub
 
         final int flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
         for (UserInfo user : users) {
-            prepareUserStorageInternal(fromVolumeUuid, user.id, user.serialNumber, flags);
-            prepareUserStorageInternal(toVolumeUuid, user.id, user.serialNumber, flags);
+            prepareUserStorageInternal(fromVolumeUuid, user.id, flags);
+            prepareUserStorageInternal(toVolumeUuid, user.id, flags);
         }
     }
 
@@ -3326,25 +3326,25 @@ class StorageManagerService extends IStorageManager.Stub
                 continue;
             }
 
-            prepareUserStorageInternal(vol.fsUuid, user.id, user.serialNumber, flags);
+            prepareUserStorageInternal(vol.fsUuid, user.id, flags);
         }
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
+    public void prepareUserStorage(String volumeUuid, int userId, int flags) {
 
         super.prepareUserStorage_enforcePermission();
 
         try {
-            prepareUserStorageInternal(volumeUuid, userId, serialNumber, flags);
+            prepareUserStorageInternal(volumeUuid, userId, flags);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void prepareUserStorageInternal(String volumeUuid, int userId, int serialNumber,
-            int flags) throws Exception {
+    private void prepareUserStorageInternal(String volumeUuid, int userId, int flags)
+            throws Exception {
         try {
             mVold.prepareUserStorage(volumeUuid, userId, flags);
             // After preparing user storage, we should check if we should mount data mirror again,
