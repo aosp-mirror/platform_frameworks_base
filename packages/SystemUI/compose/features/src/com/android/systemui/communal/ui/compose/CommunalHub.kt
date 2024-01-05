@@ -20,7 +20,6 @@ import android.appwidget.AppWidgetHostView
 import android.os.Bundle
 import android.util.SizeF
 import android.widget.FrameLayout
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -100,7 +99,8 @@ fun CommunalHub(
     var isDraggingToRemove by remember { mutableStateOf(false) }
 
     Box(
-        modifier = modifier.fillMaxSize().background(Color.White),
+        modifier =
+            modifier.fillMaxSize().background(LocalAndroidColorScheme.current.outlineVariant),
     ) {
         CommunalHubLazyGrid(
             communalContent = communalContent,
@@ -210,11 +210,9 @@ private fun BoxScope.CommunalHubLazyGrid(
                     enabled = true,
                     index = index,
                     size = size
-                ) { isDragging ->
-                    val elevation by animateDpAsState(if (isDragging) 4.dp else 1.dp)
+                ) { _ ->
                     CommunalContent(
                         modifier = cardModifier,
-                        elevation = elevation,
                         model = list[index],
                         viewModel = viewModel,
                         size = size,
@@ -266,7 +264,7 @@ private fun Toolbar(
         val spacerModifier = Modifier.width(Dimensions.ToolbarButtonSpaceBetween)
         Button(
             onClick = onOpenWidgetPicker,
-            colors = filledSecondaryButtonColors(),
+            colors = filledButtonColors(),
             contentPadding = buttonContentPadding
         ) {
             Icon(Icons.Default.Add, stringResource(R.string.button_to_open_widget_editor))
@@ -276,19 +274,34 @@ private fun Toolbar(
             )
         }
 
-        val buttonColors =
-            if (isDraggingToRemove) filledButtonColors() else ButtonDefaults.outlinedButtonColors()
-        OutlinedButton(
-            onClick = {},
-            colors = buttonColors,
-            contentPadding = buttonContentPadding,
-            modifier = Modifier.onGloballyPositioned { setRemoveButtonCoordinates(it) },
-        ) {
-            Icon(Icons.Outlined.Delete, stringResource(R.string.button_to_open_widget_editor))
-            Spacer(spacerModifier)
-            Text(
-                text = stringResource(R.string.button_to_remove_widget),
-            )
+        val colors = LocalAndroidColorScheme.current
+        if (isDraggingToRemove) {
+            Button(
+                // Button is disabled to make it non-clickable
+                enabled = false,
+                onClick = {},
+                colors =
+                    ButtonDefaults.buttonColors(
+                        disabledContainerColor = colors.primary,
+                        disabledContentColor = colors.onPrimary,
+                    ),
+                contentPadding = buttonContentPadding,
+                modifier = Modifier.onGloballyPositioned { setRemoveButtonCoordinates(it) }
+            ) {
+                RemoveButtonContent(spacerModifier)
+            }
+        } else {
+            OutlinedButton(
+                // Button is disabled to make it non-clickable
+                enabled = false,
+                onClick = {},
+                colors = ButtonDefaults.outlinedButtonColors(disabledContentColor = colors.primary),
+                border = BorderStroke(width = 1.0.dp, color = colors.primary),
+                contentPadding = buttonContentPadding,
+                modifier = Modifier.onGloballyPositioned { setRemoveButtonCoordinates(it) }
+            ) {
+                RemoveButtonContent(spacerModifier)
+            }
         }
 
         Button(
@@ -304,6 +317,15 @@ private fun Toolbar(
 }
 
 @Composable
+private fun RemoveButtonContent(spacerModifier: Modifier) {
+    Icon(Icons.Outlined.Delete, stringResource(R.string.button_to_open_widget_editor))
+    Spacer(spacerModifier)
+    Text(
+        text = stringResource(R.string.button_to_remove_widget),
+    )
+}
+
+@Composable
 private fun filledButtonColors(): ButtonColors {
     val colors = LocalAndroidColorScheme.current
     return ButtonDefaults.buttonColors(
@@ -313,24 +335,14 @@ private fun filledButtonColors(): ButtonColors {
 }
 
 @Composable
-private fun filledSecondaryButtonColors(): ButtonColors {
-    val colors = LocalAndroidColorScheme.current
-    return ButtonDefaults.buttonColors(
-        containerColor = colors.secondary,
-        contentColor = colors.onSecondary,
-    )
-}
-
-@Composable
 private fun CommunalContent(
     model: CommunalContentModel,
     viewModel: BaseCommunalViewModel,
     size: SizeF,
     modifier: Modifier = Modifier,
-    elevation: Dp = 0.dp,
 ) {
     when (model) {
-        is CommunalContentModel.Widget -> WidgetContent(viewModel, model, size, elevation, modifier)
+        is CommunalContentModel.Widget -> WidgetContent(viewModel, model, size, modifier)
         is CommunalContentModel.WidgetPlaceholder -> WidgetPlaceholderContent(size)
         is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
@@ -354,12 +366,11 @@ private fun WidgetContent(
     viewModel: BaseCommunalViewModel,
     model: CommunalContentModel.Widget,
     size: SizeF,
-    elevation: Dp,
     modifier: Modifier = Modifier,
 ) {
-    Card(
+    Box(
         modifier = modifier.height(size.height.dp),
-        elevation = CardDefaults.cardElevation(draggedElevation = elevation),
+        contentAlignment = Alignment.Center,
     ) {
         AndroidView(
             modifier = modifier,
