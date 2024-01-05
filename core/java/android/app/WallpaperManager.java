@@ -744,20 +744,21 @@ public class WallpaperManager {
                         params, userId, /* getCropped = */ true);
                 Trace.endSection();
 
-                if (pfd != null) {
-                    try (InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
-                        ImageDecoder.Source src = ImageDecoder.createSource(is.readAllBytes());
-                        return ImageDecoder.decodeBitmap(src, ((decoder, info, source) -> {
-                            // Mutable and hardware config can't be set at the same time.
-                            decoder.setMutableRequired(!hardware);
-                            // Let's do color management
-                            if (cmProxy != null) {
-                                cmProxy.doColorManagement(decoder, info);
-                            }
-                        }));
-                    } catch (OutOfMemoryError | IOException e) {
-                        Log.w(TAG, "Can't decode file", e);
-                    }
+                if (pfd == null) {
+                    return null;
+                }
+                try (InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+                    ImageDecoder.Source src = ImageDecoder.createSource(context.getResources(), is);
+                    return ImageDecoder.decodeBitmap(src, ((decoder, info, source) -> {
+                        // Mutable and hardware config can't be set at the same time.
+                        decoder.setMutableRequired(!hardware);
+                        // Let's do color management
+                        if (cmProxy != null) {
+                            cmProxy.doColorManagement(decoder, info);
+                        }
+                    }));
+                } catch (OutOfMemoryError | IOException e) {
+                    Log.w(TAG, "Can't decode file", e);
                 }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
