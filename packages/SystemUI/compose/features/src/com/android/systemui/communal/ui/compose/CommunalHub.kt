@@ -205,8 +205,12 @@ private fun BoxScope.CommunalHubLazyGrid(
                     list[index].size.dp().value,
                 )
             if (viewModel.isEditMode && dragDropState != null) {
-                DraggableItem(dragDropState = dragDropState, enabled = true, index = index) {
-                    isDragging ->
+                DraggableItem(
+                    dragDropState = dragDropState,
+                    enabled = true,
+                    index = index,
+                    size = size
+                ) { isDragging ->
                     val elevation by animateDpAsState(if (isDragging) 4.dp else 1.dp)
                     CommunalContent(
                         modifier = cardModifier,
