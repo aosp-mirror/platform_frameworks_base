@@ -3210,7 +3210,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void createUserStorageKeys(int userId, int serialNumber, boolean ephemeral) {
+    public void createUserStorageKeys(int userId, boolean ephemeral) {
 
         super.createUserStorageKeys_enforcePermission();
 

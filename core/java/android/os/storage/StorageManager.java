@@ -1602,14 +1602,13 @@ public class StorageManager {
      * This is only intended to be called by UserManagerService, as part of creating a user.
      *
      * @param userId ID of the user
-     * @param serialNumber serial number of the user
      * @param ephemeral whether the user is ephemeral
      * @throws RuntimeException on error.  The user's keys already existing is considered an error.
      * @hide
      */
-    public void createUserStorageKeys(int userId, int serialNumber, boolean ephemeral) {
+    public void createUserStorageKeys(int userId, boolean ephemeral) {
         try {
-            mStorageManager.createUserStorageKeys(userId, serialNumber, ephemeral);
+            mStorageManager.createUserStorageKeys(userId, ephemeral);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
