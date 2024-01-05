@@ -154,6 +154,9 @@ public class DisplayModeDirector {
 
     private final VotesStorage mVotesStorage;
 
+    @Nullable
+    private final VotesStatsReporter mVotesStatsReporter;
+
     /**
      * The allowed refresh rate switching type. This is used by SurfaceFlinger.
      */
@@ -204,6 +207,8 @@ public class DisplayModeDirector {
         mContext = context;
         mHandler = new DisplayModeDirectorHandler(handler.getLooper());
         mInjector = injector;
+        mVotesStatsReporter = injector.getVotesStatsReporter(
+                displayManagerFlags.isRefreshRateVotingTelemetryEnabled());
         mSupportedModesByDisplay = new SparseArray<>();
         mDefaultModeByDisplay = new SparseArray<>();
         mAppRequestObserver = new AppRequestObserver();
@@ -214,7 +219,8 @@ public class DisplayModeDirector {
         mBrightnessObserver = new BrightnessObserver(context, handler, injector);
         mDefaultDisplayDeviceConfig = null;
         mUdfpsObserver = new UdfpsObserver();
-        mVotesStorage = new VotesStorage(this::notifyDesiredDisplayModeSpecsChangedLocked);
+        mVotesStorage = new VotesStorage(this::notifyDesiredDisplayModeSpecsChangedLocked,
+                mVotesStatsReporter);
         mDisplayObserver = new DisplayObserver(context, handler, mVotesStorage);
         mSensorObserver = new SensorObserver(context, mVotesStorage, injector);
         mSkinThermalStatusObserver = new SkinThermalStatusObserver(injector, mVotesStorage);
@@ -341,6 +347,11 @@ public class DisplayModeDirector {
             appRequestSummary.limitRefreshRanges(primarySummary);
 
             Display.Mode baseMode = primarySummary.selectBaseMode(availableModes, defaultMode);
+            if (mVotesStatsReporter != null) {
+                mVotesStatsReporter.reportVotesActivated(displayId, lowestConsideredPriority,
+                        baseMode, votes);
+            }
+
             if (baseMode == null) {
                 Slog.w(TAG, "Can't find a set of allowed modes which satisfies the votes. Falling"
                         + " back to the default mode. Display = " + displayId + ", votes = " + votes
@@ -2821,6 +2832,9 @@ public class DisplayModeDirector {
         StatusBarManagerInternal getStatusBarManagerInternal();
 
         SensorManagerInternal getSensorManagerInternal();
+
+        @Nullable
+        VotesStatsReporter getVotesStatsReporter(boolean refreshRateVotingTelemetryEnabled);
     }
 
     @VisibleForTesting
@@ -2951,6 +2965,13 @@ public class DisplayModeDirector {
         @Override
         public SensorManagerInternal getSensorManagerInternal() {
             return LocalServices.getService(SensorManagerInternal.class);
+        }
+
+        @Override
+        public VotesStatsReporter getVotesStatsReporter(boolean refreshRateVotingTelemetryEnabled) {
+            // if frame rate override supported, renderRates will be ignored in mode selection
+            return new VotesStatsReporter(supportsFrameRateOverride(),
+                    refreshRateVotingTelemetryEnabled);
         }
 
         private DisplayManager getDisplayManager() {

@@ -3434,6 +3434,11 @@ public class DisplayModeDirectorTest {
             return mSensorManagerInternal;
         }
 
+        @Override
+        public VotesStatsReporter getVotesStatsReporter(boolean refreshRateVotingTelemetryEnabled) {
+            return null;
+        }
+
         protected Display createDisplay(int id) {
             return new Display(DisplayManagerGlobal.getInstance(), id, mDisplayInfo,
                     ApplicationProvider.getApplicationContext().getResources());

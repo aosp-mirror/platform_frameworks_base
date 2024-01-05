@@ -18,7 +18,6 @@ package com.android.server.display.mode;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -38,6 +37,9 @@ class VotesStorage {
 
     private final Listener mListener;
 
+    @Nullable
+    private final VotesStatsReporter mVotesStatsReporter;
+
     private final Object mStorageLock = new Object();
     // A map from the display ID to the collection of votes and their priority. The latter takes
     // the form of another map from the priority to the vote itself so that each priority is
@@ -45,8 +47,9 @@ class VotesStorage {
     @GuardedBy("mStorageLock")
     private final SparseArray<SparseArray<Vote>> mVotesByDisplay = new SparseArray<>();
 
-    VotesStorage(@NonNull Listener listener) {
+    VotesStorage(@NonNull Listener listener, @Nullable VotesStatsReporter votesStatsReporter) {
         mListener = listener;
+        mVotesStatsReporter = votesStatsReporter;
     }
     /** sets logging enabled/disabled for this class */
     void setLoggingEnabled(boolean loggingEnabled) {
@@ -110,14 +113,23 @@ class VotesStorage {
                 changed = true;
             }
         }
-        Trace.traceCounter(Trace.TRACE_TAG_POWER,
-                TAG + "." + displayId + ":" + Vote.priorityToString(priority),
-                getMaxPhysicalRefreshRate(vote));
         if (mLoggingEnabled) {
             Slog.i(TAG, "Updated votes for display=" + displayId + " votes=" + votes);
         }
         if (changed) {
+            reportVoteStats(displayId, priority, vote);
             mListener.onChanged();
+        }
+    }
+
+    private void reportVoteStats(int displayId, int priority, @Nullable Vote vote) {
+        if (mVotesStatsReporter == null) {
+            return;
+        }
+        if (vote == null) {
+            mVotesStatsReporter.reportVoteRemoved(displayId, priority);
+        } else {
+            mVotesStatsReporter.reportVoteAdded(displayId, priority, vote);
         }
     }
 
@@ -155,21 +167,6 @@ class VotesStorage {
                 mVotesByDisplay.put(votesByDisplay.keyAt(i), votesByDisplay.valueAt(i));
             }
         }
-    }
-
-    private static int getMaxPhysicalRefreshRate(@Nullable Vote vote) {
-        if (vote == null) {
-            return -1;
-        } else if (vote instanceof RefreshRateVote.PhysicalVote physicalVote) {
-            return (int) physicalVote.mMaxRefreshRate;
-        } else if (vote instanceof CombinedVote combinedVote) {
-            return combinedVote.mVotes.stream()
-                    .filter(v -> v instanceof RefreshRateVote.PhysicalVote)
-                    .map(pv -> (int) (((RefreshRateVote.PhysicalVote) pv).mMaxRefreshRate))
-                    .min(Integer::compare)
-                    .orElse(1000); // for visualisation
-        }
-        return 1000; // for visualisation, otherwise e.g. -1 -> 60 will be unnoticeable
     }
 
     interface Listener {
