@@ -138,7 +138,7 @@ interface IStorageManager {
     @EnforcePermission("STORAGE_INTERNAL")
     void destroyUserStorageKeys(int userId) = 62;
     @EnforcePermission("STORAGE_INTERNAL")
-    void unlockCeStorage(int userId, int serialNumber, in byte[] secret) = 63;
+    void unlockCeStorage(int userId, in byte[] secret) = 63;
     @EnforcePermission("STORAGE_INTERNAL")
     void lockCeStorage(int userId) = 64;
     boolean isCeStorageUnlocked(int userId) = 65;

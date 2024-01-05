@@ -305,9 +305,9 @@ public abstract class BaseLockSettingsServiceTests {
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             mStorageManager.unlockCeStorage(/* userId= */ (int) args[0],
-                    /* secret= */ (byte[]) args[2]);
+                    /* secret= */ (byte[]) args[1]);
             return null;
-        }).when(sm).unlockCeStorage(anyInt(), anyInt(), any());
+        }).when(sm).unlockCeStorage(anyInt(), any());
 
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();

@@ -3255,8 +3255,7 @@ class StorageManagerService extends IStorageManager.Stub
     /* Only for use by LockSettingsService */
     @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
-    public void unlockCeStorage(@UserIdInt int userId, int serialNumber, byte[] secret)
-            throws RemoteException {
+    public void unlockCeStorage(@UserIdInt int userId, byte[] secret) throws RemoteException {
         super.unlockCeStorage_enforcePermission();
 
         if (StorageManager.isFileEncrypted()) {

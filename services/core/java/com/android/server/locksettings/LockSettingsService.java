@@ -2118,11 +2118,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slogf.d(TAG, "CE storage for user %d is already unlocked", userId);
             return;
         }
-        final UserInfo userInfo = mUserManager.getUserInfo(userId);
         final String userType = isUserSecure(userId) ? "secured" : "unsecured";
         final byte[] secret = sp.deriveFileBasedEncryptionKey();
         try {
-            mStorageManager.unlockCeStorage(userId, userInfo.serialNumber, secret);
+            mStorageManager.unlockCeStorage(userId, secret);
             Slogf.i(TAG, "Unlocked CE storage for %s user %d", userType, userId);
         } catch (RemoteException e) {
             Slogf.wtf(TAG, e, "Failed to unlock CE storage for %s user %d", userType, userId);
