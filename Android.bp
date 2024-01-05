@@ -132,6 +132,7 @@ filegroup {
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
+        ":libupdate_engine_stable-V2-java-source",
         ":logd_aidl",
         ":resourcemanager_aidl",
         ":storaged_aidl",
