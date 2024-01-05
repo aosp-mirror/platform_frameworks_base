@@ -63,18 +63,30 @@ class DeviceStateToLayoutMap {
     private static final String CONFIG_FILE_PATH =
             "etc/displayconfig/display_layout_configuration.xml";
 
+    private static final String DATA_CONFIG_FILE_PATH =
+            "system/displayconfig/display_layout_configuration.xml";
+
     private final SparseArray<Layout> mLayoutMap = new SparseArray<>();
     private final DisplayIdProducer mIdProducer;
 
     DeviceStateToLayoutMap(DisplayIdProducer idProducer) {
-        this(idProducer, Environment.buildPath(
-                Environment.getVendorDirectory(), CONFIG_FILE_PATH));
+        this(idProducer, getConfigFile());
     }
 
     DeviceStateToLayoutMap(DisplayIdProducer idProducer, File configFile) {
         mIdProducer = idProducer;
         loadLayoutsFromConfig(configFile);
         createLayout(STATE_DEFAULT);
+    }
+
+    static private File getConfigFile() {
+        final File configFileFromDataDir = Environment.buildPath(Environment.getDataDirectory(),
+                DATA_CONFIG_FILE_PATH);
+        if (configFileFromDataDir.exists()) {
+            return configFileFromDataDir;
+        } else {
+            return Environment.buildPath(Environment.getVendorDirectory(), CONFIG_FILE_PATH);
+        }
     }
 
     public void dumpLocked(IndentingPrintWriter ipw) {
