@@ -141,7 +141,7 @@ class UserDataPreparer {
                 // If internal storage of the system user fails to prepare on first boot, then
                 // things are *really* broken, so we might as well reboot to recovery right away.
                 try {
-                    Log.wtf(TAG, "prepareUserData failed for user " + userId, e);
+                    Log.e(TAG, "prepareUserData failed for user " + userId, e);
                     if (isNewUser && userId == UserHandle.USER_SYSTEM && volumeUuid == null) {
                         RecoverySystem.rebootPromptAndWipeUserData(mContext,
                                 "failed to prepare internal storage for system user");
