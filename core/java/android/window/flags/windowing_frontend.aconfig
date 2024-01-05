@@ -83,11 +83,3 @@ flag {
     bug: "259497289"
     is_fixed_read_only: true
 }
-
-flag {
-    name: "supports_multi_instance_system_ui"
-    namespace: "multitasking"
-    description: "Feature flag to enable a multi-instance system ui component property."
-    bug: "262864589"
-    is_fixed_read_only: true
-}
