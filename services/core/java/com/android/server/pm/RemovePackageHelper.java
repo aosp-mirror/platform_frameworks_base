@@ -487,6 +487,8 @@ final class RemovePackageHelper {
         synchronized (mPm.mInstallLock) {
             cleanUpResourcesLI(codeFile, instructionSets);
         }
+        // TODO: open logging to help debug, will delete or add debug flag
+        Slog.d(TAG, "cleanUpResources for " + codeFile);
         if (packageName == null) {
             return;
         }
