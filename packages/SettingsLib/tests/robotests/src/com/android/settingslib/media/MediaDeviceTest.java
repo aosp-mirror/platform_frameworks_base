@@ -171,17 +171,17 @@ public class MediaDeviceTest {
 
         mBluetoothMediaDevice1 =
                 new BluetoothMediaDevice(
-                        mContext, mCachedDevice1, mBluetoothRouteInfo1, TEST_PACKAGE_NAME);
+                        mContext, mCachedDevice1, mBluetoothRouteInfo1);
         mBluetoothMediaDevice2 =
                 new BluetoothMediaDevice(
-                        mContext, mCachedDevice2, mBluetoothRouteInfo2, TEST_PACKAGE_NAME);
+                        mContext, mCachedDevice2, mBluetoothRouteInfo2);
         mBluetoothMediaDevice3 =
                 new BluetoothMediaDevice(
-                        mContext, mCachedDevice3, mBluetoothRouteInfo3, TEST_PACKAGE_NAME);
-        mInfoMediaDevice1 = new InfoMediaDevice(mContext, mRouteInfo1, TEST_PACKAGE_NAME);
-        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2, TEST_PACKAGE_NAME);
-        mInfoMediaDevice3 = new InfoMediaDevice(mContext, mRouteInfo3, TEST_PACKAGE_NAME);
-        mPhoneMediaDevice = new PhoneMediaDevice(mContext, mPhoneRouteInfo, TEST_PACKAGE_NAME);
+                        mContext, mCachedDevice3, mBluetoothRouteInfo3);
+        mInfoMediaDevice1 = new InfoMediaDevice(mContext, mRouteInfo1);
+        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2);
+        mInfoMediaDevice3 = new InfoMediaDevice(mContext, mRouteInfo3);
+        mPhoneMediaDevice = new PhoneMediaDevice(mContext, mPhoneRouteInfo);
     }
 
     @Test
@@ -316,7 +316,7 @@ public class MediaDeviceTest {
         when(phoneRouteInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
 
         final PhoneMediaDevice phoneMediaDevice =
-                new PhoneMediaDevice(mContext, phoneRouteInfo, TEST_PACKAGE_NAME);
+                new PhoneMediaDevice(mContext, phoneRouteInfo);
 
         mMediaDevices.add(mBluetoothMediaDevice1);
         mMediaDevices.add(phoneMediaDevice);
@@ -332,7 +332,7 @@ public class MediaDeviceTest {
         when(phoneRouteInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
 
         final PhoneMediaDevice phoneMediaDevice =
-                new PhoneMediaDevice(mContext, phoneRouteInfo, TEST_PACKAGE_NAME);
+                new PhoneMediaDevice(mContext, phoneRouteInfo);
 
         mMediaDevices.add(mInfoMediaDevice1);
         mMediaDevices.add(phoneMediaDevice);
@@ -483,7 +483,7 @@ public class MediaDeviceTest {
     public void getFeatures_noRouteInfo_returnEmptyList() {
         mBluetoothMediaDevice1 =
                 new BluetoothMediaDevice(
-                        mContext, mCachedDevice1, null /* MediaRoute2Info */, TEST_PACKAGE_NAME);
+                        mContext, mCachedDevice1, /* MediaRoute2Info */ null);
 
         assertThat(mBluetoothMediaDevice1.getFeatures().size()).isEqualTo(0);
     }
@@ -498,10 +498,9 @@ public class MediaDeviceTest {
                         mContext,
                         mCachedDevice1,
                         null /* MediaRoute2Info */,
-                        TEST_PACKAGE_NAME,
                         mItem);
         mPhoneMediaDevice =
-                new PhoneMediaDevice(mContext, mPhoneRouteInfo, TEST_PACKAGE_NAME, mItem);
+                new PhoneMediaDevice(mContext, mPhoneRouteInfo, mItem);
 
         assertThat(mBluetoothMediaDevice1.getSelectionBehavior()).isEqualTo(
                 SELECTION_BEHAVIOR_TRANSFER);

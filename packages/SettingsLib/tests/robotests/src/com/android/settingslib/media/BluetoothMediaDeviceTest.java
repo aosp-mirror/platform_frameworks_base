@@ -54,7 +54,7 @@ public class BluetoothMediaDeviceTest {
         when(mDevice.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(true);
         when(mDevice.isActiveDevice(BluetoothProfile.LE_AUDIO)).thenReturn(true);
 
-        mBluetoothMediaDevice = new BluetoothMediaDevice(mContext, mDevice, null, null, null);
+        mBluetoothMediaDevice = new BluetoothMediaDevice(mContext, mDevice, null, null);
     }
 
     @Test
