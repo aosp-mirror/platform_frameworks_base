@@ -394,6 +394,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     public void setTiles_differentTiles_extraTileRemoved() {
         when(mQSHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
         mController.setTiles();
+        assertEquals(2, mController.mRecords.size());
 
         clearInvocations(mQSPanel);
 
@@ -402,6 +403,7 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         verify(mQSPanel, times(1)).removeTile(any());
         verify(mQSPanel, never()).addTile(any());
+        assertEquals(1, mController.mRecords.size());
     }
 
     @Test
