@@ -33,6 +33,7 @@ val Kosmos.customTileStatePersister: FakeCustomTileStatePersister by
 val Kosmos.customTileRepository: FakeCustomTileRepository by
     Kosmos.Fixture {
         FakeCustomTileRepository(
+            tileSpec,
             customTileStatePersister,
             packageManagerAdapterFacade,
             testScope.testScheduler,
@@ -46,4 +47,4 @@ val Kosmos.customTilePackagesUpdatesRepository: FakeCustomTilePackageUpdatesRepo
     Kosmos.Fixture { FakeCustomTilePackageUpdatesRepository() }
 
 val Kosmos.packageManagerAdapterFacade: FakePackageManagerAdapterFacade by
-    Kosmos.Fixture { FakePackageManagerAdapterFacade(tileSpec) }
+    Kosmos.Fixture { FakePackageManagerAdapterFacade(tileSpec.componentName) }

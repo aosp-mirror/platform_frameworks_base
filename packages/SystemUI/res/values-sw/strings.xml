@@ -252,7 +252,7 @@
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Hakuna vifaa vilivyooanishwa vinavyopatikana"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Gusa ili uunganishe au utenganishe kifaa"</string>
-    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Oanisha kifaa kipya"</string>
+    <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Unganisha kifaa kipya"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Angalia vyote"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Tumia Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Imeunganishwa"</string>
@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Teua programu chaguomsingi ya madokezo katika Mipangilio"</string>
     <string name="install_app" msgid="5066668100199613936">"Sakinisha programu"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Ungependa kuonyesha kwenye skrini ya nje?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"Mwonekano wa ndani wa kifaa chako utaakisiwa. Mwonekano wa mbele wa kifaa chako utazimwa."</string>
     <string name="mirror_display" msgid="2515262008898122928">"Akisi skrini"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"Ondoa"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Skrini imeunganishwa"</string>

@@ -33,6 +33,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.customization.R
 import com.android.systemui.dagger.qualifiers.Background
@@ -325,6 +326,10 @@ constructor(
                     }
                 }
 
+                if (visible) {
+                    refreshTime()
+                }
+
                 smallTimeListener?.update(shouldTimeListenerRun)
                 largeTimeListener?.update(shouldTimeListenerRun)
             }
@@ -345,6 +350,19 @@ constructor(
             override fun onWeatherDataChanged(data: WeatherData) {
                 weatherData = data
                 clock?.run { events.onWeatherDataChanged(data) }
+            }
+
+            override fun onTimeChanged() {
+                refreshTime()
+            }
+
+            private fun refreshTime() {
+                if (!migrateClocksToBlueprint()) {
+                    return
+                }
+
+                clock?.smallClock?.events?.onTimeTick()
+                clock?.largeClock?.events?.onTimeTick()
             }
         }
 
@@ -558,7 +576,8 @@ constructor(
             isRunning = true
             when (clockFace.config.tickRate) {
                 ClockTickRate.PER_MINUTE -> {
-                    /* Handled by KeyguardClockSwitchController */
+                    // Handled by KeyguardClockSwitchController and
+                    // by KeyguardUpdateMonitorCallback#onTimeChanged.
                 }
                 ClockTickRate.PER_SECOND -> executor.execute(secondsRunnable)
                 ClockTickRate.PER_FRAME -> {

@@ -4455,9 +4455,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         mSectionsManager.setHeaderForegroundColors(onSurface, onSurfaceVariant);
 
-        mFooterView.updateColors();
+        if (mFooterView != null) {
+            mFooterView.updateColors();
+        }
 
-        mEmptyShadeView.setTextColors(onSurface, onSurfaceVariant);
+        if (mEmptyShadeView != null) {
+            mEmptyShadeView.setTextColors(onSurface, onSurfaceVariant);
+        }
     }
 
     void goToFullShade(long delay) {

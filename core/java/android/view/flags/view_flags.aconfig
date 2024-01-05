@@ -1,0 +1,10 @@
+package: "android.view.flags"
+
+flag {
+    name: "enable_use_measure_cache_during_force_layout"
+    namespace: "toolkit"
+    description: "Enables using the measure cache during a view force layout from the second "
+      "onMeasure call onwards during the same traversal."
+    bug: "316170253"
+    is_fixed_read_only: true
+}

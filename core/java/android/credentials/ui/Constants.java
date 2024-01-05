@@ -29,6 +29,13 @@ public class Constants {
     public static final String EXTRA_RESULT_RECEIVER =
             "android.credentials.ui.extra.RESULT_RECEIVER";
 
+    /**
+     * The intent extra key for indicating whether the bottom sheet should be started directly
+     * on the 'All Options' screen.
+     */
+    public static final String EXTRA_REQ_FOR_ALL_OPTIONS =
+            "android.credentials.ui.extra.REQ_FOR_ALL_OPTIONS";
+
     /** The intent action for when the enabled Credential Manager providers has been updated. */
     public static final String CREDMAN_ENABLED_PROVIDERS_UPDATED =
             "android.credentials.ui.action.CREDMAN_ENABLED_PROVIDERS_UPDATED";

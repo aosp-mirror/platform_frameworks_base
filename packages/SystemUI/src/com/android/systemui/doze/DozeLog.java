@@ -514,6 +514,7 @@ public class DozeLog implements Dumpable {
             case REASON_SENSOR_TAP: return "tap";
             case REASON_SENSOR_UDFPS_LONG_PRESS: return "udfps";
             case REASON_SENSOR_QUICK_PICKUP: return "quickPickup";
+            case PULSE_REASON_FINGERPRINT_ACTIVATED: return "fingerprint-triggered";
             default: throw new IllegalArgumentException("invalid reason: " + pulseReason);
         }
     }
@@ -542,7 +543,9 @@ public class DozeLog implements Dumpable {
             PULSE_REASON_SENSOR_SIGMOTION, REASON_SENSOR_PICKUP, REASON_SENSOR_DOUBLE_TAP,
             PULSE_REASON_SENSOR_LONG_PRESS, PULSE_REASON_DOCKING, REASON_SENSOR_WAKE_UP_PRESENCE,
             PULSE_REASON_SENSOR_WAKE_REACH, REASON_SENSOR_TAP,
-            REASON_SENSOR_UDFPS_LONG_PRESS, REASON_SENSOR_QUICK_PICKUP})
+            REASON_SENSOR_UDFPS_LONG_PRESS, REASON_SENSOR_QUICK_PICKUP,
+            PULSE_REASON_FINGERPRINT_ACTIVATED
+    })
     public @interface Reason {}
     public static final int PULSE_REASON_NONE = -1;
     public static final int PULSE_REASON_INTENT = 0;
@@ -557,6 +560,7 @@ public class DozeLog implements Dumpable {
     public static final int REASON_SENSOR_TAP = 9;
     public static final int REASON_SENSOR_UDFPS_LONG_PRESS = 10;
     public static final int REASON_SENSOR_QUICK_PICKUP = 11;
+    public static final int PULSE_REASON_FINGERPRINT_ACTIVATED = 12;
 
-    public static final int TOTAL_REASONS = 12;
+    public static final int TOTAL_REASONS = 13;
 }

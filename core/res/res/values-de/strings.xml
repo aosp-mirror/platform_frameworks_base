@@ -355,7 +355,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Benachrichtigungen auf einem gesperrten Gerät als Vollbildaktivitäten anzeigen"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Ermöglicht der App, Benachrichtigungen auf einem gesperrten Gerät als Vollbildaktivitäten anzuzeigen"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Verknüpfungen installieren"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ohne Zutun des Nutzers Verknüpfungen zum Startbildschirm hinzufügen."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Ermöglicht einer App, dem Startbildschirm ohne Zutun des Nutzers Verknüpfungen hinzuzufügen."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"Verknüpfungen deinstallieren"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Ermöglicht einer App das Entfernen von Verknüpfungen vom Startbildschirm ohne Eingriff des Nutzers"</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"Ausgehende Anrufe umleiten"</string>

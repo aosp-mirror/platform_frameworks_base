@@ -2906,7 +2906,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                 // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
                 if (code == OP_BLUETOOTH_CONNECT) {
                     Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
-                            + " #getOpsLocked returned null");
+                            + " #getOpsLocked returned null for"
+                            + " uid: " + uid
+                            + " packageName: " + packageName
+                            + " attributionTag: " + attributionTag
+                            + " pvr.isAttributionTagValid: " + pvr.isAttributionTagValid
+                            + " pvr.bypass: " + pvr.bypass);
+                    Slog.e(TAG, "mUidStates.get(" + uid + "): " + mUidStates.get(uid));
                 }
                 return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                         packageName);

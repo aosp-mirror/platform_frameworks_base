@@ -962,11 +962,20 @@
     <!-- Whether to show bottom sheets edge to edge -->
     <bool name="config_edgeToEdgeBottomSheetDialog">true</bool>
 
+    <!-- Device specific config that controls whether rest to unlock feature is supported.  -->
+    <bool name="config_restToUnlockSupported">false</bool>
+
+    <!--
+    Time in milliseconds the user has to touch the side FPS sensor to successfully authenticate when
+    the screen is turned off with AOD not enabled.
+    TODO(b/302332976) Get this value from the HAL if they can provide an API for it.
+    -->
+    <integer name="config_restToUnlockDurationScreenOff">500</integer>
     <!--
     Time in milliseconds the user has to touch the side FPS sensor to successfully authenticate
     TODO(b/302332976) Get this value from the HAL if they can provide an API for it.
     -->
-    <integer name="config_restToUnlockDuration">300</integer>
+    <integer name="config_restToUnlockDurationDefault">300</integer>
 
     <!--
     Width in pixels of the Side FPS sensor.

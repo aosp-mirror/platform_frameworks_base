@@ -78,6 +78,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.ComponentInfo;
+import android.content.pm.Flags;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.InstantAppResolveInfo;
@@ -1511,6 +1512,13 @@ public class ComputerEngine implements Computer {
             packageInfo.packageName = packageInfo.applicationInfo.packageName =
                     resolveExternalPackageName(p);
 
+            if (Flags.provideInfoOfApkInApex()) {
+                final String apexModuleName =  ps.getApexModuleName();
+                if (apexModuleName != null) {
+                    packageInfo.setApexPackageName(
+                            mApexManager.getActivePackageNameForApexModuleName(apexModuleName));
+                }
+            }
             return packageInfo;
         } else if ((flags & (MATCH_UNINSTALLED_PACKAGES | MATCH_ARCHIVED_PACKAGES)) != 0
                 && PackageUserStateUtils.isAvailable(state, flags)) {

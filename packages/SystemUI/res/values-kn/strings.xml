@@ -93,7 +93,7 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ಕೆಳಗಿನ ಬೌಂಡರಿ ಶೇಕಡಾ <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ಎಡಭಾಗದ ಬೌಂಡರಿ ಶೇಕಡಾ <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ಬಲಭಾಗದ ಬೌಂಡರಿ ಶೇಕಡಾ <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
-    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿನ <xliff:g id="APP">%1$s</xliff:g> ನಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿನ <xliff:g id="APP">%1$s</xliff:g> ನಲ್ಲಿ ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ಫೈಲ್‌ಗಳು"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"ಈ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು <xliff:g id="APPNAME">%1$s</xliff:g> ಪತ್ತೆಹಚ್ಚಿದೆ."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ಹಾಗೂ ತೆರೆದಿರುವ ಇತರ ಆ್ಯಪ್‌ಗಳು ಈ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪತ್ತೆಹಚ್ಚಿವೆ."</string>
@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಅನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="install_app" msgid="5066668100199613936">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ಬಾಹ್ಯ ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಬೇಕೆ?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"ನಿಮ್ಮ ಒಳಗಿನ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಪ್ರತಿಬಿಂಬಿಸಲಾಗುತ್ತದೆ. ನಿಮ್ಮ ಫ್ರಂಟ್ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಆಫ್ ಮಾಡಲಾಗುತ್ತದೆ."</string>
     <string name="mirror_display" msgid="2515262008898122928">"ಮಿರರ್ ಡಿಸ್‌ಪ್ಲೇ"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"ಡಿಸ್‌ಪ್ಲೇ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>

@@ -7692,6 +7692,13 @@
     <permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT"
                 android:protectionLevel="signature" />
 
+    <!-- Allows low-level access to monitor sticky modifier state changes when A11Y Sticky keys
+         feature is enabled.
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.MONITOR_STICKY_MODIFIER_STATE"
+                android:protectionLevel="signature" />
+
     <uses-permission android:name="android.permission.HANDLE_QUERY_PACKAGE_RESTART" />
 
     <!-- Allows financed device kiosk apps to perform actions on the Device Lock service

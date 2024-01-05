@@ -456,11 +456,13 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mNotificationPanelViewController.updateResources();
         assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
                 .isEqualTo(R.id.qs_edge_guideline);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         mNotificationPanelViewController.updateResources();
         assertThat(getConstraintSetLayout(R.id.keyguard_status_view).endToEnd)
                 .isEqualTo(ConstraintSet.PARENT_ID);
@@ -469,6 +471,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_dozing_alwaysDozingOn_isCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -480,6 +483,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_dozing_alwaysDozingOff_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -491,6 +495,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_notDozing_alwaysDozingOn_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -502,6 +507,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_pulsing_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -514,6 +520,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_splitShade_notPulsing_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -529,6 +536,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         // The conditions below would make the clock NOT be centered on split shade.
         // On single shade it should always be centered though.
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         when(mNotificationListContainer.hasPulsingNotifications()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
         setDozing(/* dozing= */ false, /* dozingAlwaysOn= */ false);
@@ -539,6 +547,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenNot() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -553,6 +562,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_willPlayDelayedDoze_notifiesKeyguardMediaController() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -564,6 +574,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     @Test
     public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenStillCenteredIfNoNotifs() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
 
@@ -700,10 +711,12 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mStatusBarStateController.setState(KEYGUARD);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate */ true);
     }
@@ -715,10 +728,12 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         clearInvocations(mKeyguardStatusViewController);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController).displayClock(LARGE, /* animate */ true);
 
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController, times(2))
                 .displayClock(LARGE, /* animate */ true);
@@ -730,6 +745,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     public void testHasNotifications_switchesToLargeClockWhenEnteringSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
 
         enableSplitShade(/* enabled= */ true);
 
@@ -740,6 +756,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     public void testNoNotifications_switchesToLargeClockWhenEnteringSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
 
         enableSplitShade(/* enabled= */ true);
 
@@ -752,6 +769,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
         clearInvocations(mKeyguardStatusViewController);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
 
         enableSplitShade(/* enabled= */ false);
 
@@ -764,6 +782,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
         clearInvocations(mKeyguardStatusViewController);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
 
         enableSplitShade(/* enabled= */ false);
 
@@ -777,6 +796,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
         when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         clearInvocations(mKeyguardStatusViewController);
 
         mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false);
@@ -791,6 +811,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         enableSplitShade(/* enabled= */ true);
         when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         clearInvocations(mKeyguardStatusViewController);
 
         mNotificationPanelViewController.setDozing(/* dozing= */ true, /* animate= */ false);
@@ -847,6 +868,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         clearInvocations(mKeyguardStatusViewController);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
 
         mNotificationPanelViewController.setDozing(true, false);
 
@@ -863,6 +885,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mResources.getBoolean(R.bool.force_small_clock_on_lockscreen)).thenReturn(true);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         clearInvocations(mKeyguardStatusViewController);
 
         enableSplitShade(/* enabled= */ true);
@@ -881,6 +904,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mResources.getBoolean(R.bool.force_small_clock_on_lockscreen)).thenReturn(true);
         when(mMediaDataManager.hasActiveMedia()).thenReturn(false);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         clearInvocations(mKeyguardStatusViewController);
 
         enableSplitShade(/* enabled= */ true);
@@ -898,11 +922,13 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
         // one notification + media player visible
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController).displayClock(SMALL, /* animate */ true);
 
         // only media player visible
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
+        when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
         triggerPositionClockAndNotifications();
         verify(mKeyguardStatusViewController, times(2)).displayClock(SMALL, true);
         verify(mKeyguardStatusViewController, never()).displayClock(LARGE, /* animate */ true);

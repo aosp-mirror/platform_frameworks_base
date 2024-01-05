@@ -34,6 +34,7 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.shared.clocks.ClockRegistry
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
@@ -66,6 +67,8 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
     @Mock private lateinit var largeClock: ClockFaceController
     @Mock private lateinit var clockFaceConfig: ClockFaceConfig
     @Mock private lateinit var eventController: ClockEventController
+    @Mock private lateinit var splitShadeStateController: SplitShadeStateController
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -92,6 +95,7 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
                 keyguardInteractor,
                 keyguardClockInteractor,
                 scope.backgroundScope,
+                splitShadeStateController,
             )
     }
 

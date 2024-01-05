@@ -44,8 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"يتعذر على هذا المستخدم تثبيت التطبيقات غير المعروفة"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"غير مسموح لهذا المستخدم بتثبيت التطبيقات"</string>
     <string name="ok" msgid="7871959885003339302">"حسنًا"</string>
-    <!-- no translation found for archive (4447791830199354721) -->
-    <skip />
+    <string name="archive" msgid="4447791830199354721">"أرشفة"</string>
     <string name="update_anyway" msgid="8792432341346261969">"التحديث على أي حال"</string>
     <string name="manage_applications" msgid="5400164782453975580">"إدارة التطبيقات"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"نفدت مساحة التخزين"</string>
@@ -60,16 +59,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"إزالة التحديث"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> هو جزء من التطبيق التالي:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"هل تريد إزالة هذا التطبيق؟"</string>
-    <!-- no translation found for archive_application_text (8482325710714386348) -->
-    <skip />
-    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
-    <skip />
-    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
-    <skip />
-    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
-    <skip />
+    <string name="archive_application_text" msgid="8482325710714386348">"سيتم حفظ بياناتك الشخصية."</string>
+    <string name="archive_application_text_all_users" msgid="3151229641681672580">"هل تريد أرشفة هذا التطبيق لجميع المستخدمين؟ سيتم حفظ بياناتك الشخصية."</string>
+    <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"هل تريد أرشفة هذا التطبيق في ملف العمل؟ سيتم حفظ بياناتك الشخصية."</string>
+    <string name="archive_application_text_user" msgid="2586558895535581451">"هل تريد أرشفة هذا التطبيق لـ \"<xliff:g id="USERNAME">%1$s</xliff:g>\"؟ سيتم حفظ بياناتك الشخصية."</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"هل تريد أرشفة هذا التطبيق المحفوظ في المساحة الخاصّة؟ سيتم حفظ بياناتك الشخصية."</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"هل تريد إزالة هذا التطبيق "<b>"لكل"</b>" المستخدمين؟ ستتم إزالة التطبيق وبياناته من "<b>"كل"</b>" المستخدمين على هذا الجهاز."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"هل تريد إزالة هذا التطبيق للمستخدم <xliff:g id="USERNAME">%1$s</xliff:g>؟"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"هل تريد إزالة تثبيت هذا التطبيق من ملفك الشخصي للعمل؟"</string>
@@ -108,8 +102,7 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"يعتبر الجهاز اللوحي والبيانات الشخصية أكثر عرضة لهجوم التطبيقات غير المعروفة. من خلال تثبيت هذا التطبيق، توافق على تحمل مسؤولية أي ضرر يحدث للجهاز اللوحي أو فقدان البيانات الذي قد ينتج عن استخدامه."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"يعتبر جهاز التلفزيون والبيانات الشخصية أكثر عرضة لهجوم التطبيقات غير المعروفة. من خلال تثبيت هذا التطبيق، توافق على تحمل مسؤولية أي ضرر يحدث لجهاز التلفزيون أو فقدان البيانات الذي قد ينتج عن استخدامه."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"نسخة طبق الأصل من \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\""</string>
-    <!-- no translation found for archiving_app_label (1127085259724124725) -->
-    <skip />
+    <string name="archiving_app_label" msgid="1127085259724124725">"هل تريد أرشفة <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>؟"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"متابعة"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"الإعدادات"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"‏تثبيت / إلغاء تثبيت تطبيقات Android Wear"</string>

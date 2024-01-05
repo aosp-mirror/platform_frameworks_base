@@ -88,6 +88,7 @@ import static org.mockito.ArgumentMatchers.notNull;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
+import android.app.ComponentOptions.BackgroundActivityStartMode;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
@@ -914,24 +915,78 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .mockStatic(FrameworkStatsLog.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
-        doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
-                eq(START_ACTIVITIES_FROM_BACKGROUND),
-                anyInt(), anyInt()));
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "allowed_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, true, false, false, false, false, false, false);
-        verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
-                "",  // activity name
-                BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
-                UNIMPORTANT_UID,
-                UNIMPORTANT_UID2));
-        mockingSession.finishMocking();
+        try {
+            doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
+                    eq(START_ACTIVITIES_FROM_BACKGROUND),
+                    anyInt(), anyInt()));
+            runAndVerifyBackgroundActivityStartsSubtest(
+                    "allowed_notAborted", false,
+                    UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                    UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                    false, true, false, false, false, false, false, false);
+            verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                    "",  // activity name
+                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
+                    UNIMPORTANT_UID,
+                    UNIMPORTANT_UID2,
+                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
+                    true, // opt in
+                    false, // but no explicit opt in
+                    BackgroundActivityStartController.BAL_BLOCK,
+                    true, // opt in
+                    false // but no explicit opt in
+            ));
+        } finally {
+            mockingSession.finishMocking();
+        }
     }
 
     /**
-     * This test ensures proper logging for BAL_ALLOW_PENDING_INTENT.
+     * This test ensures proper logging for BAL_ALLOW_PENDING_INTENT, when the PendingIntent sender
+     * is the only reason BAL is allowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsAllowed_loggingOnlyPendingIntentAllowed() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        MockitoSession mockingSession = mockitoSession()
+                .mockStatic(ActivityTaskManagerService.class)
+                .mockStatic(FrameworkStatsLog.class)
+                .mockStatic(PendingIntentRecord.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
+        try {
+            doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
+                    eq(START_ACTIVITIES_FROM_BACKGROUND),
+                    anyInt(), anyInt()));
+            doReturn(BackgroundStartPrivileges.allowBackgroundActivityStarts(null)).when(
+                    () -> PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
+                            anyObject(), anyInt(), anyObject()));
+            runAndVerifyBackgroundActivityStartsSubtest(
+                    "allowed_notAborted", false,
+                    UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                    Process.SYSTEM_UID, true, PROCESS_STATE_BOUND_TOP,
+                    false, true, false, false, false, false, false, false,
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
+            verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                    DEFAULT_COMPONENT_PACKAGE_NAME + "/" + DEFAULT_COMPONENT_PACKAGE_NAME,
+                    BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT,
+                    UNIMPORTANT_UID,
+                    Process.SYSTEM_UID,
+                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
+                    false, // opt in
+                    true, // explicit opt out
+                    BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW,
+                    true, // opt in
+                    false // but no explicit opt in
+            ));
+        } finally {
+            mockingSession.finishMocking();
+        }
+    }
+
+    /**
+     * This test ensures proper logging for BAL_ALLOW_PENDING_INTENT, when the PendingIntent sender
+     * is not the primary reason to allow BAL (but the creator).
      */
     @Test
     public void testBackgroundActivityStartsAllowed_loggingPendingIntentAllowed() {
@@ -942,23 +997,34 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .mockStatic(PendingIntentRecord.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
-        doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
-                eq(START_ACTIVITIES_FROM_BACKGROUND),
-                anyInt(), anyInt()));
-        doReturn(BackgroundStartPrivileges.allowBackgroundActivityStarts(null)).when(
-                () -> PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
-                anyObject(), anyInt(), anyObject()));
-        runAndVerifyBackgroundActivityStartsSubtest(
-                "allowed_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
-                Process.SYSTEM_UID, true, PROCESS_STATE_BOUND_TOP,
-                false, true, false, false, false, false, false, false);
-        verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
-                DEFAULT_COMPONENT_PACKAGE_NAME + "/" + DEFAULT_COMPONENT_PACKAGE_NAME,
-                BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT,
-                UNIMPORTANT_UID,
-                Process.SYSTEM_UID));
-        mockingSession.finishMocking();
+        try {
+            doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
+                    eq(START_ACTIVITIES_FROM_BACKGROUND),
+                    anyInt(), anyInt()));
+            doReturn(BackgroundStartPrivileges.allowBackgroundActivityStarts(null)).when(
+                    () -> PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
+                            anyObject(), anyInt(), anyObject()));
+            runAndVerifyBackgroundActivityStartsSubtest(
+                    "allowed_notAborted", false,
+                    UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                    Process.SYSTEM_UID, true, PROCESS_STATE_BOUND_TOP,
+                    false, true, false, false, false, false, false, false,
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+            verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                    "",
+                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
+                    UNIMPORTANT_UID,
+                    Process.SYSTEM_UID,
+                    BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
+                    true, // opt in
+                    true, // explicit opt in
+                    BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW,
+                    true, // opt in
+                    false // but no explicit opt in
+            ));
+        } finally {
+            mockingSession.finishMocking();
+        }
     }
 
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
@@ -971,6 +1037,27 @@ public class ActivityStarterTests extends WindowTestsBase {
             boolean isCallingUidAffiliatedProfileOwner,
             boolean isPinnedSingleInstance,
             boolean hasSystemExemptAppOp) {
+        runAndVerifyBackgroundActivityStartsSubtest(name, shouldHaveAborted, callingUid,
+                callingUidHasVisibleWindow, callingUidProcState, realCallingUid,
+                realCallingUidHasVisibleWindow,  realCallingUidProcState, hasForegroundActivities,
+                callerIsRecents, callerIsTempAllowed,
+                callerIsInstrumentingWithBackgroundActivityStartPrivileges,
+                isCallingUidDeviceOwner, isCallingUidAffiliatedProfileOwner, isPinnedSingleInstance,
+                hasSystemExemptAppOp,
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
+    }
+
+    private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
+            int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
+            int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
+            boolean hasForegroundActivities, boolean callerIsRecents,
+            boolean callerIsTempAllowed,
+            boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
+            boolean isCallingUidDeviceOwner,
+            boolean isCallingUidAffiliatedProfileOwner,
+            boolean isPinnedSingleInstance,
+            boolean hasSystemExemptAppOp,
+            @BackgroundActivityStartMode int pendingIntentCreatorBackgroundActivityStartMode) {
         // window visibility
         doReturn(callingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(callingUid);
         doReturn(realCallingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(realCallingUid);
@@ -1022,7 +1109,10 @@ public class ActivityStarterTests extends WindowTestsBase {
             launchMode = LAUNCH_SINGLE_INSTANCE;
         }
 
-        final ActivityOptions options = spy(ActivityOptions.makeBasic());
+        ActivityOptions rawOptions = ActivityOptions.makeBasic()
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                        pendingIntentCreatorBackgroundActivityStartMode);
+        final ActivityOptions options = spy(rawOptions);
         ActivityRecord[] outActivity = new ActivityRecord[1];
         ActivityStarter starter = prepareStarter(
                 FLAG_ACTIVITY_NEW_TASK, true, launchMode)

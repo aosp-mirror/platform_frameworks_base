@@ -1208,8 +1208,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ছেটিঙত টোকাৰ ডিফ’ল্ট এপ্ ছেট কৰক"</string>
     <string name="install_app" msgid="5066668100199613936">"এপ্‌টো ইনষ্টল কৰক"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"বাহ্যিক ডিছপ্লে’লৈ মিৰ’ৰ কৰিবনে?"</string>
-    <!-- no translation found for connected_display_dialog_dual_display_stop_warning (4174707498892447947) -->
-    <skip />
+    <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"আপোনাৰ ইনাৰ ডিছপ্লে’ প্ৰতিবিম্বিত কৰা হ’ব। আপোনাৰ ফ্ৰণ্ট ডিছপ্লে’ অফ কৰা হ’ব।"</string>
     <string name="mirror_display" msgid="2515262008898122928">"ডিছপ্লে’ মিৰ’ৰ কৰক"</string>
     <string name="dismiss_dialog" msgid="2195508495854675882">"অগ্ৰাহ্য কৰক"</string>
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"ডিছপ্লে’ সংযোগ কৰা হৈছে"</string>

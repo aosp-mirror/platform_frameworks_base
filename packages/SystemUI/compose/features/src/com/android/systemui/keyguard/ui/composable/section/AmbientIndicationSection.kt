@@ -16,38 +16,11 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import javax.inject.Inject
 
-class AmbientIndicationSection @Inject constructor() {
-    @Composable
-    fun SceneScope.AmbientIndication(modifier: Modifier = Modifier) {
-        MovableElement(
-            key = AmbientIndicationElementKey,
-            modifier = modifier,
-        ) {
-            content {
-                Box(
-                    modifier = Modifier.fillMaxWidth().background(Color.Green),
-                ) {
-                    Text(
-                        text = "TODO(b/316211368): Ambient indication",
-                        color = Color.White,
-                        modifier = Modifier.align(Alignment.Center),
-                    )
-                }
-            }
-        }
-    }
+/** Defines interface for classes that can render the ambient indication area. */
+interface AmbientIndicationSection {
+    @Composable fun SceneScope.AmbientIndication(modifier: Modifier)
 }
-
-private val AmbientIndicationElementKey = ElementKey("AmbientIndication")

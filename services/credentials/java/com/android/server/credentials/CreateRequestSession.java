@@ -109,7 +109,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                     Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
                             /*defaultProviderId=*/flattenedPrimaryProviders),
-                    providerDataList);
+                    providerDataList, /*isRequestForAllOptions=*/ false);
             mClientCallback.onPendingIntent(mPendingIntent);
         } catch (RemoteException e) {
             mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);

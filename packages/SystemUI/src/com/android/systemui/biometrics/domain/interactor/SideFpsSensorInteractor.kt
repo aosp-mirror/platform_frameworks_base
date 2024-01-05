@@ -26,6 +26,8 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.SideFpsLogger
 import com.android.systemui.res.R
 import java.util.Optional
@@ -47,8 +49,12 @@ constructor(
     windowManager: WindowManager,
     displayStateInteractor: DisplayStateInteractor,
     fingerprintInteractiveToAuthProvider: Optional<FingerprintInteractiveToAuthProvider>,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val logger: SideFpsLogger,
 ) {
+
+    private val isProlongedTouchEnabledForDevice =
+        context.resources.getBoolean(R.bool.config_restToUnlockSupported)
 
     private val sensorLocationForCurrentDisplay =
         combine(
@@ -62,11 +68,24 @@ constructor(
     val isAvailable: Flow<Boolean> =
         fingerprintPropertyRepository.sensorType.map { it == FingerprintSensorType.POWER_BUTTON }
 
-    val authenticationDuration: Long =
-        context.resources?.getInteger(R.integer.config_restToUnlockDuration)?.toLong() ?: 0L
+    val authenticationDuration: Flow<Long> =
+        keyguardTransitionInteractor
+            .isFinishedInStateWhere { it == KeyguardState.OFF || it == KeyguardState.DOZING }
+            .map {
+                if (it)
+                    context.resources
+                        ?.getInteger(R.integer.config_restToUnlockDurationScreenOff)
+                        ?.toLong()
+                else
+                    context.resources
+                        ?.getInteger(R.integer.config_restToUnlockDurationDefault)
+                        ?.toLong()
+            }
+            .map { it ?: 0L }
+            .onEach { logger.authDurationChanged(it) }
 
     val isProlongedTouchRequiredForAuthentication: Flow<Boolean> =
-        if (fingerprintInteractiveToAuthProvider.isEmpty) {
+        if (fingerprintInteractiveToAuthProvider.isEmpty || !isProlongedTouchEnabledForDevice) {
             flowOf(false)
         } else {
             combine(

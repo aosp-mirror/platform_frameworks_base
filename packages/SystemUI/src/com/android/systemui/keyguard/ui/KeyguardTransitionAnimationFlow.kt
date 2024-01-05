@@ -32,6 +32,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
@@ -89,7 +90,6 @@ constructor(
             val start = (startTime / transitionDuration).toFloat()
             val chunks = (transitionDuration / duration).toFloat()
             logger.logCreate(name, start)
-            var isComplete = true
 
             fun stepToValue(step: TransitionStep): Float? {
                 val value = (step.value - start) * chunks
@@ -98,17 +98,13 @@ constructor(
                     // middle, it is possible this animation is being skipped but we need to inform
                     // the ViewModels of the last update
                     STARTED -> {
-                        isComplete = false
                         onStart?.invoke()
                         max(0f, min(1f, value))
                     }
                     // Always send a final value of 1. Because of rounding, [value] may never be
                     // exactly 1.
                     RUNNING ->
-                        if (isComplete) {
-                            null
-                        } else if (value >= 1f) {
-                            isComplete = true
+                        if (value >= 1f) {
                             1f
                         } else if (value >= 0f) {
                             value
@@ -132,6 +128,7 @@ constructor(
                     value
                 }
                 .filterNotNull()
+                .distinctUntilChanged()
         }
 
         /**

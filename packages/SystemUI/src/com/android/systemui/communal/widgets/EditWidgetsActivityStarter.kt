@@ -19,17 +19,26 @@ package com.android.systemui.communal.widgets
 import android.content.Context
 import android.content.Intent
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.plugins.ActivityStarter
+import javax.inject.Inject
 
 interface EditWidgetsActivityStarter {
     fun startActivity()
 }
 
-class EditWidgetsActivityStarterImpl(@Application private val applicationContext: Context) :
-    EditWidgetsActivityStarter {
+class EditWidgetsActivityStarterImpl
+@Inject
+constructor(
+    @Application private val applicationContext: Context,
+    private val activityStarter: ActivityStarter,
+) : EditWidgetsActivityStarter {
+
     override fun startActivity() {
-        applicationContext.startActivity(
+        activityStarter.startActivityDismissingKeyguard(
             Intent(applicationContext, EditWidgetsActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
+            /* onlyProvisioned = */ true,
+            /* dismissShade = */ true,
         )
     }
 }

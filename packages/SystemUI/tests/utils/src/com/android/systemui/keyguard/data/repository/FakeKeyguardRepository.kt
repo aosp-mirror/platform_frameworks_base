@@ -80,7 +80,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val lastDozeTapToWakePosition = _lastDozeTapToWakePosition.asStateFlow()
 
     private val _isAodAvailable = MutableStateFlow(false)
-    override val isAodAvailable: Flow<Boolean> = _isAodAvailable
+    override val isAodAvailable: StateFlow<Boolean> = _isAodAvailable
 
     private val _isDreaming = MutableStateFlow(false)
     override val isDreaming: Flow<Boolean> = _isDreaming

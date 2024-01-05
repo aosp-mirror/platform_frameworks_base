@@ -882,22 +882,10 @@ public class TouchExplorer extends BaseEventStreamTransformation
         final int pointerIndex = event.findPointerIndex(pointerId);
         switch (event.getPointerCount()) {
             case 1:
-                // Touch exploration.
+            // Touch exploration.
                 sendTouchExplorationGestureStartAndHoverEnterIfNeeded(policyFlags);
-                if (Flags.reduceTouchExplorationSensitivity()
-                        && mState.getLastInjectedHoverEvent() != null) {
-                    final MotionEvent lastEvent = mState.getLastInjectedHoverEvent();
-                    final float deltaX = lastEvent.getX() - rawEvent.getX();
-                    final float deltaY = lastEvent.getY() - rawEvent.getY();
-                    final double moveDelta = Math.hypot(deltaX, deltaY);
-                    if (moveDelta > mTouchSlop) {
-                        mDispatcher.sendMotionEvent(
-                                event, ACTION_HOVER_MOVE, rawEvent, pointerIdBits, policyFlags);
-                    }
-                } else {
-                    mDispatcher.sendMotionEvent(
-                            event, ACTION_HOVER_MOVE, rawEvent, pointerIdBits, policyFlags);
-                }
+                mDispatcher.sendMotionEvent(
+                        event, ACTION_HOVER_MOVE, rawEvent, pointerIdBits, policyFlags);
                 break;
             case 2:
                 if (mGestureDetector.isMultiFingerGesturesEnabled()

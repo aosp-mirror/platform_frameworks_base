@@ -60,20 +60,29 @@ public class InstallConfirmationFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         View dialogView = getLayoutInflater().inflate(R.layout.install_content_view, null);
 
+        int positiveBtnTextRes;
+        if (mDialogData.isAppUpdating()) {
+            if (mDialogData.getDialogMessage() != null) {
+                positiveBtnTextRes = R.string.update_anyway;
+            } else {
+                positiveBtnTextRes = R.string.update;
+            }
+        } else {
+            positiveBtnTextRes = R.string.install;
+        }
+
         mDialog = new AlertDialog.Builder(requireContext())
             .setIcon(mDialogData.getAppIcon())
             .setTitle(mDialogData.getAppLabel())
             .setView(dialogView)
-            .setPositiveButton(mDialogData.isAppUpdating() ? R.string.update : R.string.install,
+            .setPositiveButton(positiveBtnTextRes,
                 (dialogInt, which) -> mInstallActionListener.onPositiveResponse(
                     InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION))
             .setNegativeButton(R.string.cancel,
                 (dialogInt, which) -> mInstallActionListener.onNegativeResponse(
                     mDialogData.getStageCode()))
-
             .create();
 
-        // TODO: Dynamically change positive button text to update anyway
         TextView viewToEnable;
         if (mDialogData.isAppUpdating()) {
             viewToEnable = dialogView.requireViewById(R.id.install_confirm_question_update);
