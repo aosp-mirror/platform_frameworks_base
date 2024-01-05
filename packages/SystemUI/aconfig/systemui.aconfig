@@ -165,7 +165,7 @@ flag {
    name: "qs_new_tiles"
    namespace: "systemui"
    description: "Use the new tiles in the Quick Settings. Should have no behavior changes."
-   bug: "241772429"
+   bug: "311147395"
 }
 
 flag {
