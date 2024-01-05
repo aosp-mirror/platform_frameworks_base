@@ -16,7 +16,6 @@
 
 package android.content.pm;
 
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
@@ -122,18 +121,15 @@ public final class ModuleInfo implements Parcelable {
         return mApexModuleName;
     }
 
-    /** @hide Sets the list of the package name of APK-in-APEX apps in this module. */
+    /** @hide Set the list of the package names of all APK-in-APEX apps in this module. */
     public ModuleInfo setApkInApexPackageNames(@NonNull Collection<String> apkInApexPackageNames) {
         Objects.requireNonNull(apkInApexPackageNames);
         mApkInApexPackageNames = List.copyOf(apkInApexPackageNames);
         return this;
     }
 
-    /**
-     * Gets the list of the package name of all APK-in-APEX apps in the module.
-     */
+    /** @hide Get the list of the package names of all APK-in-APEX apps in the module. */
     @NonNull
-    @FlaggedApi(android.content.pm.Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
     public Collection<String> getApkInApexPackageNames() {
         if (mApkInApexPackageNames == null) {
             return Collections.emptyList();
