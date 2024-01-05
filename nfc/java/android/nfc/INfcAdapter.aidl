@@ -99,4 +99,5 @@ interface INfcAdapter
     void updateDiscoveryTechnology(IBinder b, int pollFlags, int listenFlags);
 
     void notifyPollingLoop(in Bundle frame);
+    void notifyHceDeactivated();
 }

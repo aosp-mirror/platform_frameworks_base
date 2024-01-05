@@ -32,6 +32,7 @@ interface INfcCardEmulation
     boolean setDefaultForNextTap(int userHandle, in ComponentName service);
     boolean setServiceObserveModeDefault(int userId, in android.content.ComponentName service, boolean enable);
     boolean registerAidGroupForService(int userHandle, in ComponentName service, in AidGroup aidGroup);
+    boolean registerPollingLoopFilterForService(int userHandle, in ComponentName service, in String pollingLoopFilter);
     boolean setOffHostForService(int userHandle, in ComponentName service, in String offHostSecureElement);
     boolean unsetOffHostForService(int userHandle, in ComponentName service);
     AidGroup getAidGroupForService(int userHandle, in ComponentName service, String category);
