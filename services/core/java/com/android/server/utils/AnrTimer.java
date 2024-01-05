@@ -36,8 +36,6 @@ import com.android.internal.annotations.Keep;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.RingBuffer;
 
-import libcore.util.NativeAllocationRegistry;
-
 import java.lang.ref.WeakReference;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -419,14 +417,6 @@ public class AnrTimer<V> implements AutoCloseable {
         new LongSparseArray<>();
 
     /**
-     * The manager of native pointers.
-     */
-    private static final NativeAllocationRegistry sNativeRegistry =
-            NativeAllocationRegistry.createMalloced(
-                AnrTimer.FeatureEnabled.class.getClassLoader(),
-                nativeAnrTimerGetFinalizer());
-
-    /**
      * The FeatureEnabled class enables the AnrTimer logic.  It is used when the AnrTimer service
      * is enabled via Flags.anrTimerServiceEnabled.
      */
@@ -438,14 +428,10 @@ public class AnrTimer<V> implements AutoCloseable {
          */
         private long mNative = 0;
 
-        /** The Runnable that frees the native pointer. */
-        private final Runnable mFreeNative;
-
         /** Fetch the native tag (an integer) for the given label. */
         FeatureEnabled() {
             mNative = nativeAnrTimerCreate(mLabel);
             if (mNative == 0) throw new IllegalArgumentException("unable to create native timer");
-            mFreeNative = sNativeRegistry.registerNativeAllocation(this, mNative);
             synchronized (sAnrTimerList) {
                 sAnrTimerList.put(mNative, new WeakReference(AnrTimer.this));
             }
@@ -556,7 +542,7 @@ public class AnrTimer<V> implements AutoCloseable {
                 sAnrTimerList.remove(mNative);
             }
             synchronized (mLock) {
-                if (mNative != 0) mFreeNative.run();
+                if (mNative != 0) nativeAnrTimerClose(mNative);
                 mNative = 0;
             }
         }
@@ -670,6 +656,17 @@ public class AnrTimer<V> implements AutoCloseable {
      */
     public void close() {
         mFeature.close();
+    }
+
+    /**
+     * Ensure any native resources are freed when the object is GC'ed.  Best practice is to close
+     * the object explicitly, but overriding finalize() avoids accidental leaks.
+     */
+    @SuppressWarnings("Finalize")
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
     }
 
     /**
@@ -797,8 +794,8 @@ public class AnrTimer<V> implements AutoCloseable {
      */
     private native long nativeAnrTimerCreate(String name);
 
-    /** Return the finalizer for the native resources. */
-    private static native long nativeAnrTimerGetFinalizer();
+    /** Release the native resources.  No further operations are premitted. */
+    private static native int nativeAnrTimerClose(long service);
 
     /** Start a timer and return its ID.  Zero is returned on error. */
     private static native int nativeAnrTimerStart(long service, int pid, int uid, long timeoutMs,
