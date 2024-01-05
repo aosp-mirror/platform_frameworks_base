@@ -14347,6 +14347,19 @@ public final class Settings {
                 "mute_alarm_stream_with_ringer_mode";
 
         /**
+         * The user's choice for whether or not Alarm stream should always be muted with Ringer.
+         *
+         * <p>Note that this is different from {@link #MUTE_ALARM_STREAM_WITH_RINGER_MODE}, which
+         * controls the real state of whether or not the Alarm stream and Ringer association occurs.
+         * The two Settings are not necessarily equal, if the final decision for the association
+         * depends on factors beyond the user's preference.
+         *
+         * @hide
+         */
+        public static final String MUTE_ALARM_STREAM_WITH_RINGER_MODE_USER_PREFERENCE =
+                "mute_alarm_stream_with_ringer_mode_user_preference";
+
+        /**
          * Overlay display devices setting.
          * The associated value is a specially formatted string that describes the
          * size and density of simulated secondary display devices.
