@@ -37,6 +37,9 @@ import static org.mockito.Mockito.when;
 
 import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.service.trust.TrustAgentService;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -98,6 +101,7 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.google.common.truth.Truth;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -165,6 +169,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallback;
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {
@@ -175,7 +181,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mBouncerView.getDelegate()).thenReturn(mBouncerViewDelegate);
         when(mBouncerViewDelegate.getBackCallback()).thenReturn(mBouncerViewDelegateBackCallback);
         mFeatureFlags = new FakeFeatureFlags();
-        mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM, true);
         mFeatureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false);
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
         mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
@@ -584,6 +589,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_ANIMATE_BOUNCER)
     public void testPredictiveBackCallback_registration() {
         /* verify that a predictive back callback is registered when the bouncer becomes visible */
         mBouncerExpansionCallback.onVisibilityChanged(true);
@@ -598,6 +604,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_ANIMATE_BOUNCER)
     public void testPredictiveBackCallback_invocationHidesBouncer() {
         mBouncerExpansionCallback.onVisibilityChanged(true);
         /* capture the predictive back callback during registration */
@@ -615,6 +622,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_ANIMATE_BOUNCER)
     public void testPredictiveBackCallback_noBackAnimationForFullScreenBouncer() {
         when(mKeyguardSecurityModel.getSecurityMode(anyInt()))
                 .thenReturn(KeyguardSecurityModel.SecurityMode.SimPin);
@@ -634,6 +642,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_ANIMATE_BOUNCER)
     public void testPredictiveBackCallback_forwardsBackDispatches() {
         mBouncerExpansionCallback.onVisibilityChanged(true);
         /* capture the predictive back callback during registration */

@@ -66,6 +66,7 @@ android_library {
         "kotlinx_coroutines",
         "dagger2",
         "jsr330",
+        "com_android_systemui_shared_flags_lib",
     ],
     resource_dirs: [
         "res",

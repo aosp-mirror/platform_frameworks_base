@@ -22,10 +22,9 @@ import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import android.window.WindowOnBackInvokedDispatcher
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.predictiveBackAnimateShade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.shade.QuickSettingsController
@@ -48,14 +47,13 @@ constructor(
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     private val shadeController: ShadeController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
-    private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor,
-    featureFlags: FeatureFlags,
+    private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor
 ) : CoreStartable {
 
     private var isCallbackRegistered = false
 
     private val callback =
-        if (featureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE)) {
+        if (predictiveBackAnimateShade()) {
             /**
              * New callback that handles back gesture invoked, cancel, progress and provides
              * feedback via Shade animation.
