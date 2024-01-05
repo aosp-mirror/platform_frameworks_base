@@ -902,10 +902,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                                 + " andResume=" + andResume);
                 EventLogTags.writeWmRestartActivity(r.mUserId, System.identityHashCode(r),
                         task.mTaskId, r.shortComponentName);
-                if (r.isActivityTypeHome()) {
-                    // Home process is the root process of the task.
-                    updateHomeProcess(task.getBottomMostActivity().app);
-                }
+                updateHomeProcessIfNeeded(r);
                 mService.getPackageManagerInternalLocked().notifyPackageUse(
                         r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
                 mService.getAppWarningsLocked().onStartActivity(r);
@@ -1048,6 +1045,16 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
 
         return true;
+    }
+
+    void updateHomeProcessIfNeeded(@NonNull ActivityRecord r) {
+        if (!r.isActivityTypeHome()) return;
+        // Make sure that we use the bottom most activity from the same package, because the home
+        // task can also embed third-party -1 activities.
+        final ActivityRecord bottom = r.getTask().getBottomMostActivityInSamePackage();
+        if (bottom != null) {
+            updateHomeProcess(bottom.app);
+        }
     }
 
     void updateHomeProcess(WindowProcessController app) {
