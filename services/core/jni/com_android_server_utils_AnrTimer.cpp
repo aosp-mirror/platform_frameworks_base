@@ -486,9 +486,11 @@ class AnrTimerService::Ticker {
     void remove(AnrTimerService const* service) {
         AutoMutex _l(lock_);
         timer_id_t front = headTimerId();
-        for (auto i = running_.begin(); i != running_.end(); i++) {
+        for (auto i = running_.begin(); i != running_.end(); ) {
             if (i->service == service) {
-                running_.erase(i);
+                i = running_.erase(i);
+            } else {
+                i++;
             }
         }
         if (front != headTimerId()) restartLocked();
@@ -808,7 +810,7 @@ static bool anrNotify(AnrTimerService::timer_id_t timerId, int pid, int uid,
     AnrArgs* target = reinterpret_cast<AnrArgs* >(cookie);
     JNIEnv *env;
     if (target->vm->AttachCurrentThread(&env, 0) != JNI_OK) {
-        ALOGE("failed to attach thread to JavaVM");
+        ALOGE("anrNotify failed to attach thread to JavaVM");
         return false;
     }
     jboolean r = false;
@@ -844,18 +846,29 @@ AnrTimerService *toService(jlong pointer) {
     return reinterpret_cast<AnrTimerService*>(pointer);
 }
 
-jint anrTimerClose(JNIEnv* env, jclass, jlong ptr) {
-    if (!nativeSupportEnabled) return -1;
-    if (ptr == 0) return -1;
+AnrTimerService *toService(void* pointer) {
+    return reinterpret_cast<AnrTimerService*>(pointer);
+}
+
+void anrTimerDelete(void *ptr) {
+    if (ptr == 0) return;
     AutoMutex _l(gAnrLock);
-    AnrTimerService *s = toService(ptr);
-    env->DeleteWeakGlobalRef(s->jtimer());
+    AnrTimerService* s = toService(ptr);
+    JNIEnv *env;
+    if (gAnrArgs.vm->AttachCurrentThread(&env, 0) == JNI_OK) {
+        env->DeleteWeakGlobalRef(s->jtimer());
+    } else {
+        ALOGE("anrTimerDelete failed to attach thread to JavaVM");
+    }
     delete s;
     if (--gAnrArgs.tickerUseCount <= 0) {
         delete gAnrArgs.ticker;
         gAnrArgs.ticker = nullptr;
     }
-    return 0;
+}
+
+jlong anrTimerGetFinalizer(JNIEnv*, jclass) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&anrTimerDelete));
 }
 
 jint anrTimerStart(JNIEnv* env, jclass, jlong ptr,
@@ -890,7 +903,7 @@ jint anrTimerDump(JNIEnv *env, jclass, jlong ptr, jboolean verbose) {
 static const JNINativeMethod methods[] = {
     {"nativeAnrTimerSupported", "()Z",  (void*) anrTimerSupported},
     {"nativeAnrTimerCreate", "(Ljava/lang/String;)J", (void*) anrTimerCreate},
-    {"nativeAnrTimerClose", "(J)I",     (void*) anrTimerClose},
+    {"nativeAnrTimerGetFinalizer", "()J", (void*) anrTimerGetFinalizer},
     {"nativeAnrTimerStart", "(JIIJZ)I", (void*) anrTimerStart},
     {"nativeAnrTimerCancel", "(JI)Z",   (void*) anrTimerCancel},
     {"nativeAnrTimerAccept", "(JI)Z",   (void*) anrTimerAccept},
