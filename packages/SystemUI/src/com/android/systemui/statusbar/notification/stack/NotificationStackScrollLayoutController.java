@@ -366,8 +366,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
                 @Override
                 public void onStatePostChange() {
-                    mView.updateSensitiveness(mStatusBarStateController.goingToFullShade(),
-                            mLockscreenUserManager.isAnyProfilePublicMode());
+                    updateSensitivenessWithAnimation(mStatusBarStateController.goingToFullShade());
                     mView.onStatePostChange(mStatusBarStateController.fromShadeLocked());
                     if (!FooterViewRefactor.isEnabled()) {
                         updateImportantForAccessibility();
@@ -378,7 +377,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final UserChangedListener mLockscreenUserChangeListener = new UserChangedListener() {
         @Override
         public void onUserChanged(int userId) {
-            mView.updateSensitiveness(false, mLockscreenUserManager.isAnyProfilePublicMode());
+            updateSensitivenessWithAnimation(false);
             mHistoryEnabled = null;
             updateFooter();
         }
@@ -388,7 +387,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * Recalculate sensitiveness without animation; called when waking up while keyguard occluded.
      */
     public void updateSensitivenessForOccludedWakeup() {
-        mView.updateSensitiveness(false, mLockscreenUserManager.isAnyProfilePublicMode());
+        updateSensitivenessWithAnimation(false);
+    }
+
+    private void updateSensitivenessWithAnimation(boolean animate) {
+        mView.updateSensitiveness(animate, mLockscreenUserManager.isAnyProfilePublicMode());
     }
 
     /**
