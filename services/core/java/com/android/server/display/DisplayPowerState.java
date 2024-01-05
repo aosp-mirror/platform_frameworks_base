@@ -333,6 +333,8 @@ final class DisplayPowerState {
     public void stop() {
         mStopped = true;
         mPhotonicModulator.interrupt();
+        mColorFadePrepared = false;
+        mColorFadeReady = true;
         if (mColorFade != null) {
             mAsyncDestroyExecutor.execute(mColorFade::destroy);
         }
@@ -419,7 +421,8 @@ final class DisplayPowerState {
         }
     };
 
-    private final Runnable mColorFadeDrawRunnable = new Runnable() {
+    @VisibleForTesting
+    final Runnable mColorFadeDrawRunnable = new Runnable() {
         @Override
         public void run() {
             mColorFadeDrawPending = false;
