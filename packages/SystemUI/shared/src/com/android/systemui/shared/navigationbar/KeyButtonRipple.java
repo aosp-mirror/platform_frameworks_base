@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.navigationbar.buttons;
+package com.android.systemui.shared.navigationbar;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -125,7 +125,7 @@ public class KeyButtonRipple extends Drawable {
     /**
      *  @param onInvisibleRunnable run after we are next drawn invisibly. Only used once.
      */
-    void setOnInvisibleRunnable(Runnable onInvisibleRunnable) {
+    public void setOnInvisibleRunnable(Runnable onInvisibleRunnable) {
         mOnInvisibleRunnable = onInvisibleRunnable;
     }
 

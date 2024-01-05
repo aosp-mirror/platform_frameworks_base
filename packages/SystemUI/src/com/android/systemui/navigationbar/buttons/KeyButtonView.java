@@ -61,6 +61,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.res.R;
+import com.android.systemui.shared.navigationbar.KeyButtonRipple;
 import com.android.systemui.shared.system.QuickStepContract;
 
 public class KeyButtonView extends ImageView implements ButtonInterface {
