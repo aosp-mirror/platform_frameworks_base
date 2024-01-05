@@ -493,5 +493,10 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         public void onEnabledTrustAgentsChanged(int userId) {
             update(false /* updateAlways */);
         }
+
+        @Override
+        public void onForceIsDismissibleChanged(boolean keepUnlockedOnFold) {
+            update(false /* updateAlways */);
+        }
     }
 }

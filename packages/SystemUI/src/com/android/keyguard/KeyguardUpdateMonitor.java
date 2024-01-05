@@ -102,6 +102,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
@@ -308,6 +309,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mKeyguardOccluded;
     private boolean mCredentialAttempted;
     private boolean mKeyguardGoingAway;
+    /**
+     * Whether the keyguard is forced into a dismissible state.
+     */
+    private boolean mForceIsDismissible;
     private boolean mGoingToSleep;
     private boolean mPrimaryBouncerFullyShown;
     private boolean mPrimaryBouncerIsOrWillBeShowing;
@@ -362,6 +367,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final BiometricManager mBiometricManager;
     @Nullable
     private DeviceEntryFaceAuthInteractor mFaceAuthInteractor;
+    @VisibleForTesting
+    protected FoldGracePeriodProvider mFoldGracePeriodProvider =
+            new FoldGracePeriodProvider();
     private final DevicePostureController mDevicePostureController;
     private final TaskStackChangeListeners mTaskStackChangeListeners;
     private final IActivityTaskManager mActivityTaskManager;
@@ -725,6 +733,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mCredentialAttempted = true;
         // Do not update face listening state in case of false authentication attempts.
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
+    }
+
+    /**
+     * Updates KeyguardUpdateMonitor's internal state to know the device should remain unlocked
+     * until the next signal to lock. Does nothing if the keyguard is already showing.
+     */
+    public void tryForceIsDismissibleKeyguard() {
+        setForceIsDismissibleKeyguard(true);
     }
 
     /**
@@ -1371,7 +1387,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     public boolean getUserCanSkipBouncer(int userId) {
-        return getUserHasTrust(userId) || getUserUnlockedWithBiometric(userId);
+        return getUserHasTrust(userId) || getUserUnlockedWithBiometric(userId)
+                || forceIsDismissibleIsKeepingDeviceUnlocked();
+    }
+
+    /**
+     * Whether the keyguard should be kept unlocked for the folding grace period.
+     */
+    public boolean forceIsDismissibleIsKeepingDeviceUnlocked() {
+        if (mFoldGracePeriodProvider.isEnabled()) {
+            return mForceIsDismissible && isUnlockingWithForceKeyguardDismissibleAllowed();
+        }
+        return false;
     }
 
     public boolean getUserHasTrust(int userId) {
@@ -1473,6 +1500,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private boolean isUnlockingWithTrustAgentAllowed() {
         return isUnlockingWithBiometricAllowed(true);
+    }
+
+    private boolean isUnlockingWithForceKeyguardDismissibleAllowed() {
+        return isUnlockingWithBiometricAllowed(false);
     }
 
     public boolean isUnlockingWithBiometricAllowed(boolean isStrongBiometric) {
@@ -1986,6 +2017,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     protected void handleStartedGoingToSleep(int arg1) {
         Assert.isMainThread();
+        setForceIsDismissibleKeyguard(false);
         clearFingerprintRecognized();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -3058,6 +3090,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     void handleUserSwitching(int userId, Runnable resultCallback) {
         mLogger.logUserSwitching(userId, "from UserTracker");
         Assert.isMainThread();
+        setForceIsDismissibleKeyguard(false);
         clearFingerprintRecognized();
         boolean trustUsuallyManaged = mTrustManager.isTrustUsuallyManaged(userId);
         mLogger.logTrustUsuallyManagedUpdated(userId, mUserTrustIsUsuallyManaged.get(userId),
@@ -3636,6 +3669,31 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+    private void setForceIsDismissibleKeyguard(boolean forceIsDismissible) {
+        Assert.isMainThread();
+        if (!mFoldGracePeriodProvider.isEnabled()) {
+            // never send updates if the feature isn't enabled
+            return;
+        }
+        if (mKeyguardShowing && forceIsDismissible) {
+            // never keep the device unlocked if the keyguard was already showing
+            mLogger.d("Skip setting forceIsDismissibleKeyguard to true. "
+                    + "Keyguard already showing.");
+            return;
+        }
+        if (mForceIsDismissible != forceIsDismissible) {
+            mForceIsDismissible = forceIsDismissible;
+            mLogger.logForceIsDismissibleKeyguard(mForceIsDismissible);
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onForceIsDismissibleChanged(forceIsDismissibleIsKeepingDeviceUnlocked());
+                }
+            }
+        }
+
+    }
+
     public boolean isSimPinVoiceSecure() {
         // TODO: only count SIMs that handle voice
         return isSimPinSecure();
@@ -3897,6 +3955,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("KeyguardUpdateMonitor state:");
+        pw.println("  forceIsDismissible=" + mForceIsDismissible);
+        pw.println("  forceIsDismissibleIsKeepingDeviceUnlocked="
+                + forceIsDismissibleIsKeepingDeviceUnlocked());
         pw.println("  getUserHasTrust()=" + getUserHasTrust(
                 mSelectedUserInteractor.getSelectedUserId()));
         pw.println("  getUserUnlockedWithBiometric()="

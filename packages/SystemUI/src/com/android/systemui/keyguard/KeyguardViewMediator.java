@@ -107,6 +107,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
+import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
@@ -311,6 +312,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      */
     public static final String OPTION_FORCE_SHOW = "force_show";
     public static final String SYS_BOOT_REASON_PROP = "sys.boot.reason.last";
+    /**
+     * Boolean option for showKeyguard, when set to true, can show the keyguard without immediately
+     * locking.
+     */
+    public static final String OPTION_SHOW_DISMISSIBLE = "show_dismissible";
     public static final String REBOOT_MAINLINE_UPDATE = "reboot,mainline_update";
     private final DreamOverlayStateController mDreamOverlayStateController;
     private final JavaAdapter mJavaAdapter;
@@ -1321,7 +1327,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private DozeParameters mDozeParameters;
     private SelectedUserInteractor mSelectedUserInteractor;
     private KeyguardInteractor mKeyguardInteractor;
-
+    @VisibleForTesting
+    protected FoldGracePeriodProvider mFoldGracePeriodProvider =
+            new FoldGracePeriodProvider();
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
             new KeyguardStateController.Callback() {
@@ -1995,7 +2003,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 mNeedToReshowWhenReenabled = false;
                 updateInputRestrictedLocked();
 
-                showLocked(null);
+                showKeyguard(null);
 
                 // block until we know the keyguard is done drawing (and post a message
                 // to unblock us after a timeout, so we don't risk blocking too long
@@ -2170,6 +2178,24 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     /**
+     * Only available if the fold grace period feature is enabled.
+     * Used by PhoneWindowManager to show the keyguard immediately without locking the device.
+     * This method shows the keyguard whether there's a screen lock configured or not (including
+     * screen lock SWIPE or NONE).
+     * This must be safe to call from any thread and with any window manager locks held.
+     */
+    public void showDismissibleKeyguard() {
+        if (mFoldGracePeriodProvider.isEnabled()) {
+            Bundle showKeyguardUnlocked = new Bundle();
+            showKeyguardUnlocked.putBoolean(OPTION_SHOW_DISMISSIBLE, true);
+            showKeyguard(showKeyguardUnlocked);
+        } else {
+            Log.e(TAG, "fold grace period feature isn't enabled, but showKeyguard() method is"
+                    + " being called", new Throwable());
+        }
+    }
+
+    /**
      * Given the state of the keyguard, is the input restricted?
      * Input is restricted when the keyguard is showing, or when the keyguard
      * was suppressed by an app that disabled the keyguard or we haven't been provisioned yet.
@@ -2273,7 +2299,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
-        showLocked(options);
+        showKeyguard(options);
     }
 
     private void lockProfile(int userId) {
@@ -2335,18 +2361,18 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     /**
-     * Send message to keyguard telling it to show itself
+     * Send message to keyguard telling it to show itself.
      * @see #handleShow
      */
-    private void showLocked(Bundle options) {
-        Trace.beginSection("KeyguardViewMediator#showLocked acquiring mShowKeyguardWakeLock");
-        if (DEBUG) Log.d(TAG, "showLocked");
+    private void showKeyguard(Bundle options) {
+        Trace.beginSection("KeyguardViewMediator#showKeyguard acquiring mShowKeyguardWakeLock");
+        if (DEBUG) Log.d(TAG, "showKeyguard");
         // ensure we stay awake until we are finished displaying the keyguard
         mShowKeyguardWakeLock.acquire();
         Message msg = mHandler.obtainMessage(SHOW, options);
         // Treat these messages with priority - This call can originate from #doKeyguardTimeout,
-        // meaning the device should lock as soon as possible and not wait for other messages on
-        // the thread to process first.
+        // meaning the device may lock, so it shouldn't wait for other messages on the thread to
+        // process first.
         mHandler.sendMessageAtFrontOfQueue(msg);
         Trace.endSection();
     }
@@ -2724,13 +2750,18 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     /**
-     * Handle message sent by {@link #showLocked}.
+     * Handle message sent by {@link #showKeyguard}.
      * @see #SHOW
      */
     private void handleShow(Bundle options) {
         Trace.beginSection("KeyguardViewMediator#handleShow");
+        final boolean showUnlocked = options != null
+                && options.getBoolean(OPTION_SHOW_DISMISSIBLE, false);
         final int currentUser = mSelectedUserInteractor.getSelectedUserId();
-        if (mLockPatternUtils.isSecure(currentUser)) {
+        if (showUnlocked) {
+            // tell KeyguardUpdateMonitor to keep the device unlocked until the next lock signal
+            mUpdateMonitor.tryForceIsDismissibleKeyguard();
+        } else if (mLockPatternUtils.isSecure(currentUser)) {
             mLockPatternUtils.getDevicePolicyManager().reportKeyguardSecured(currentUser);
         }
         synchronized (KeyguardViewMediator.this) {
@@ -2755,7 +2786,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         + ", which means we're showing in the middle of hiding.");
             }
 
-            // Force if we we're showing in the middle of unlocking, to ensure we end up in the
+            // Force if we're showing in the middle of unlocking, to ensure we end up in the
             // correct state.
             setShowingLocked(true, hidingOrGoingAway /* force */);
             mHiding = false;

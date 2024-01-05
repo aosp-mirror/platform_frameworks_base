@@ -72,6 +72,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
@@ -320,6 +321,54 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // THEN keyguard is shown
         TestableLooper.get(this).processAllMessages();
         assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void showKeyguardAfterKeyguardNotEnabled() {
+        // GIVEN feature is enabled
+        final FoldGracePeriodProvider mockedFoldGracePeriodProvider =
+                mock(FoldGracePeriodProvider.class);
+        mViewMediator.mFoldGracePeriodProvider = mockedFoldGracePeriodProvider;
+        when(mockedFoldGracePeriodProvider.isEnabled()).thenReturn(true);
+
+        // GIVEN keyguard is not enabled and isn't showing
+        mViewMediator.onSystemReady();
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+        captureKeyguardUpdateMonitorCallback();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+
+        // WHEN showKeyguard is requested
+        mViewMediator.showDismissibleKeyguard();
+
+        // THEN keyguard is shown
+        TestableLooper.get(this).processAllMessages();
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void showKeyguardAfterKeyguardNotEnabled_featureNotEnabled() {
+        // GIVEN feature is NOT enabled
+        final FoldGracePeriodProvider mockedFoldGracePeriodProvider =
+                mock(FoldGracePeriodProvider.class);
+        mViewMediator.mFoldGracePeriodProvider = mockedFoldGracePeriodProvider;
+        when(mockedFoldGracePeriodProvider.isEnabled()).thenReturn(false);
+
+        // GIVEN keyguard is not enabled and isn't showing
+        mViewMediator.onSystemReady();
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+        captureKeyguardUpdateMonitorCallback();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+
+        // WHEN showKeyguard is requested
+        mViewMediator.showDismissibleKeyguard();
+
+        // THEN keyguard is still NOT shown
+        TestableLooper.get(this).processAllMessages();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
     }
 
     @Test
