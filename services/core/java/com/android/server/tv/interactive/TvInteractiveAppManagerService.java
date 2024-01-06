@@ -38,7 +38,14 @@ import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.ad.ITvAdClient;
 import android.media.tv.ad.ITvAdManager;
+import android.media.tv.ad.ITvAdService;
+import android.media.tv.ad.ITvAdServiceCallback;
+import android.media.tv.ad.ITvAdSession;
+import android.media.tv.ad.ITvAdSessionCallback;
+import android.media.tv.ad.TvAdService;
+import android.media.tv.ad.TvAdServiceInfo;
 import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManager;
@@ -619,7 +626,19 @@ public class TvInteractiveAppManagerService extends SystemService {
                 Slog.e(TAG, "error in onSessionReleased", e);
             }
         }
-        removeSessionStateLocked(state.mSessionToken, state.mUserId);
+        removeAdSessionStateLocked(state.mSessionToken, state.mUserId);
+    }
+
+    @GuardedBy("mLock")
+    private void clearAdSessionAndNotifyClientLocked(AdSessionState state) {
+        if (state.mClient != null) {
+            try {
+                state.mClient.onSessionReleased(state.mSeq);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "error in onSessionReleased", e);
+            }
+        }
+        removeAdSessionStateLocked(state.mSessionToken, state.mUserId);
     }
 
     private int resolveCallingUserId(int callingPid, int callingUid, int requestedUserId,
@@ -652,6 +671,28 @@ public class TvInteractiveAppManagerService extends SystemService {
                     + userId + ")");
         }
         return serviceState;
+    }
+
+    @GuardedBy("mLock")
+    private AdSessionState getAdSessionStateLocked(
+            IBinder sessionToken, int callingUid, int userId) {
+        UserState userState = getOrCreateUserStateLocked(userId);
+        return getAdSessionStateLocked(sessionToken, callingUid, userState);
+    }
+
+    @GuardedBy("mLock")
+    private AdSessionState getAdSessionStateLocked(IBinder sessionToken, int callingUid,
+            UserState userState) {
+        AdSessionState sessionState = userState.mAdSessionStateMap.get(sessionToken);
+        if (sessionState == null) {
+            throw new SessionNotFoundException("Session state not found for token " + sessionToken);
+        }
+        // Only the application that requested this session or the system can access it.
+        if (callingUid != Process.SYSTEM_UID && callingUid != sessionState.mCallingUid) {
+            throw new SecurityException("Illegal access to the session with token " + sessionToken
+                    + " from uid " + callingUid);
+        }
+        return sessionState;
     }
 
     @GuardedBy("mLock")
@@ -691,6 +732,89 @@ public class TvInteractiveAppManagerService extends SystemService {
         return session;
     }
     private final class TvAdBinderService extends ITvAdManager.Stub {
+
+        @Override
+        public void createSession(final ITvAdClient client, final String serviceId, String type,
+                int seq, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
+                    userId, "createSession");
+            final long identity = Binder.clearCallingIdentity();
+
+            try {
+                synchronized (mLock) {
+                    if (userId != mCurrentUserId && !mRunningProfiles.contains(userId)) {
+                        // Only current user and its running profiles can create sessions.
+                        // Let the client get onConnectionFailed callback for this case.
+                        sendAdSessionTokenToClientLocked(client, serviceId, null, null, seq);
+                        return;
+                    }
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    TvAdState adState = userState.mAdMap.get(serviceId);
+                    if (adState == null) {
+                        Slogf.w(TAG, "Failed to find state for serviceId=" + serviceId);
+                        sendAdSessionTokenToClientLocked(client, serviceId, null, null, seq);
+                        return;
+                    }
+                    AdServiceState serviceState =
+                            userState.mAdServiceStateMap.get(adState.mComponentName);
+                    if (serviceState == null) {
+                        int tasUid = PackageManager.getApplicationInfoAsUserCached(
+                                adState.mComponentName.getPackageName(), 0, resolvedUserId).uid;
+                        serviceState = new AdServiceState(
+                                adState.mComponentName, serviceId, resolvedUserId);
+                        userState.mAdServiceStateMap.put(adState.mComponentName, serviceState);
+                    }
+                    // Send a null token immediately while reconnecting.
+                    if (serviceState.mReconnecting) {
+                        sendAdSessionTokenToClientLocked(client, serviceId, null, null, seq);
+                        return;
+                    }
+
+                    // Create a new session token and a session state.
+                    IBinder sessionToken = new Binder();
+                    AdSessionState sessionState = new AdSessionState(sessionToken, serviceId, type,
+                            adState.mComponentName, client, seq, callingUid,
+                            callingPid, resolvedUserId);
+
+                    // Add them to the global session state map of the current user.
+                    userState.mAdSessionStateMap.put(sessionToken, sessionState);
+
+                    // Also, add them to the session state map of the current service.
+                    serviceState.mSessionTokens.add(sessionToken);
+
+                    if (serviceState.mService != null) {
+                        if (!createAdSessionInternalLocked(serviceState.mService, sessionToken,
+                                resolvedUserId)) {
+                            removeAdSessionStateLocked(sessionToken, resolvedUserId);
+                        }
+                    } else {
+                        updateAdServiceConnectionLocked(adState.mComponentName, resolvedUserId);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void releaseSession(IBinder sessionToken, int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "releaseSession(sessionToken=" + sessionToken + ")");
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "releaseSession");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    releaseSessionLocked(sessionToken, callingUid, resolvedUserId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
         @Override
         public void startAdService(IBinder sessionToken, int userId) {
         }
@@ -927,7 +1051,7 @@ public class TvInteractiveAppManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    releaseSessionLocked(sessionToken, callingUid, resolvedUserId);
+                    releaseAdSessionLocked(sessionToken, callingUid, resolvedUserId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -2134,6 +2258,17 @@ public class TvInteractiveAppManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
+    private void sendAdSessionTokenToClientLocked(
+            ITvAdClient client, String serviceId, IBinder sessionToken,
+            InputChannel channel, int seq) {
+        try {
+            client.onSessionCreated(serviceId, sessionToken, channel, seq);
+        } catch (RemoteException e) {
+            Slogf.e(TAG, "error in onSessionCreated", e);
+        }
+    }
+
+    @GuardedBy("mLock")
     private boolean createSessionInternalLocked(
             ITvInteractiveAppService service, IBinder sessionToken, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
@@ -2160,6 +2295,58 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
         channels[1].dispose();
         return created;
+    }
+
+    @GuardedBy("mLock")
+    private boolean createAdSessionInternalLocked(
+            ITvAdService service, IBinder sessionToken, int userId) {
+        UserState userState = getOrCreateUserStateLocked(userId);
+        AdSessionState sessionState = userState.mAdSessionStateMap.get(sessionToken);
+        if (DEBUG) {
+            Slogf.d(TAG, "createAdSessionInternalLocked(iAppServiceId="
+                    + sessionState.mAdServiceId + ")");
+        }
+        InputChannel[] channels = InputChannel.openInputChannelPair(sessionToken.toString());
+
+        // Set up a callback to send the session token.
+        ITvAdSessionCallback callback = new AdSessionCallback(sessionState, channels);
+
+        boolean created = true;
+        // Create a session. When failed, send a null token immediately.
+        try {
+            service.createSession(
+                    channels[1], callback, sessionState.mAdServiceId, sessionState.mType);
+        } catch (RemoteException e) {
+            Slogf.e(TAG, "error in createSession", e);
+            sendAdSessionTokenToClientLocked(sessionState.mClient, sessionState.mAdServiceId, null,
+                    null, sessionState.mSeq);
+            created = false;
+        }
+        channels[1].dispose();
+        return created;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private AdSessionState releaseAdSessionLocked(
+            IBinder sessionToken, int callingUid, int userId) {
+        AdSessionState sessionState = null;
+        try {
+            sessionState = getAdSessionStateLocked(sessionToken, callingUid, userId);
+            UserState userState = getOrCreateUserStateLocked(userId);
+            if (sessionState.mSession != null) {
+                sessionState.mSession.asBinder().unlinkToDeath(sessionState, 0);
+                sessionState.mSession.release();
+            }
+        } catch (RemoteException | SessionNotFoundException e) {
+            Slogf.e(TAG, "error in releaseSession", e);
+        } finally {
+            if (sessionState != null) {
+                sessionState.mSession = null;
+            }
+        }
+        removeAdSessionStateLocked(sessionToken, userId);
+        return sessionState;
     }
 
     @GuardedBy("mLock")
@@ -2215,6 +2402,36 @@ public class TvInteractiveAppManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
+    private void removeAdSessionStateLocked(IBinder sessionToken, int userId) {
+        UserState userState = getOrCreateUserStateLocked(userId);
+
+        // Remove the session state from the global session state map of the current user.
+        AdSessionState sessionState = userState.mAdSessionStateMap.remove(sessionToken);
+
+        if (sessionState == null) {
+            Slogf.e(TAG, "sessionState null, no more remove session action!");
+            return;
+        }
+
+        // Also remove the session token from the session token list of the current client and
+        // service.
+        ClientState clientState = userState.mClientStateMap.get(sessionState.mClient.asBinder());
+        if (clientState != null) {
+            clientState.mSessionTokens.remove(sessionToken);
+            if (clientState.isEmpty()) {
+                userState.mClientStateMap.remove(sessionState.mClient.asBinder());
+                sessionState.mClient.asBinder().unlinkToDeath(clientState, 0);
+            }
+        }
+
+        AdServiceState serviceState = userState.mAdServiceStateMap.get(sessionState.mComponent);
+        if (serviceState != null) {
+            serviceState.mSessionTokens.remove(sessionToken);
+        }
+        updateAdServiceConnectionLocked(sessionState.mComponent, userId);
+    }
+
+    @GuardedBy("mLock")
     private void abortPendingCreateSessionRequestsLocked(ServiceState serviceState,
             String iAppServiceId, int userId) {
         // Let clients know the create session requests are failed.
@@ -2234,6 +2451,28 @@ public class TvInteractiveAppManagerService extends SystemService {
                     sessionState.mIAppServiceId, null, null, sessionState.mSeq);
         }
         updateServiceConnectionLocked(serviceState.mComponent, userId);
+    }
+
+    @GuardedBy("mLock")
+    private void abortPendingCreateAdSessionRequestsLocked(AdServiceState serviceState,
+            String serviceId, int userId) {
+        // Let clients know the create session requests are failed.
+        UserState userState = getOrCreateUserStateLocked(userId);
+        List<AdSessionState> sessionsToAbort = new ArrayList<>();
+        for (IBinder sessionToken : serviceState.mSessionTokens) {
+            AdSessionState sessionState = userState.mAdSessionStateMap.get(sessionToken);
+            if (sessionState.mSession == null
+                    && (serviceState == null
+                    || sessionState.mAdServiceId.equals(serviceId))) {
+                sessionsToAbort.add(sessionState);
+            }
+        }
+        for (AdSessionState sessionState : sessionsToAbort) {
+            removeAdSessionStateLocked(sessionState.mSessionToken, sessionState.mUserId);
+            sendAdSessionTokenToClientLocked(sessionState.mClient,
+                    sessionState.mAdServiceId, null, null, sessionState.mSeq);
+        }
+        updateAdServiceConnectionLocked(serviceState.mComponent, userId);
     }
 
     @GuardedBy("mLock")
@@ -2284,8 +2523,60 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mLock")
+    private void updateAdServiceConnectionLocked(ComponentName component, int userId) {
+        UserState userState = getOrCreateUserStateLocked(userId);
+        AdServiceState serviceState = userState.mAdServiceStateMap.get(component);
+        if (serviceState == null) {
+            return;
+        }
+        if (serviceState.mReconnecting) {
+            if (!serviceState.mSessionTokens.isEmpty()) {
+                // wait until all the sessions are removed.
+                return;
+            }
+            serviceState.mReconnecting = false;
+        }
+
+        boolean shouldBind = (!serviceState.mSessionTokens.isEmpty())
+                || (!serviceState.mPendingAppLinkCommand.isEmpty());
+
+        if (serviceState.mService == null && shouldBind) {
+            // This means that the service is not yet connected but its state indicates that we
+            // have pending requests. Then, connect the service.
+            if (serviceState.mBound) {
+                // We have already bound to the service so we don't try to bind again until after we
+                // unbind later on.
+                return;
+            }
+            if (DEBUG) {
+                Slogf.d(TAG, "bindServiceAsUser(service=" + component + ", userId=" + userId + ")");
+            }
+
+            Intent i = new Intent(TvAdService.SERVICE_INTERFACE).setComponent(component);
+            serviceState.mBound = mContext.bindServiceAsUser(
+                    i, serviceState.mConnection,
+                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                    new UserHandle(userId));
+        } else if (serviceState.mService != null && !shouldBind) {
+            // This means that the service is already connected but its state indicates that we have
+            // nothing to do with it. Then, disconnect the service.
+            if (DEBUG) {
+                Slogf.d(TAG, "unbindService(service=" + component + ")");
+            }
+            mContext.unbindService(serviceState.mConnection);
+            userState.mAdServiceStateMap.remove(component);
+        }
+    }
+
     private static final class UserState {
         private final int mUserId;
+        // A mapping from the TV AD service ID to its TvAdState.
+        private Map<String, TvAdState> mAdMap = new HashMap<>();
+        // A mapping from the name of a TV Interactive App service to its state.
+        private final Map<ComponentName, AdServiceState> mAdServiceStateMap = new HashMap<>();
+        // A mapping from the token of a TV Interactive App session to its state.
+        private final Map<IBinder, AdSessionState> mAdSessionStateMap = new HashMap<>();
         // A mapping from the TV Interactive App ID to its TvInteractiveAppState.
         private Map<String, TvInteractiveAppState> mIAppMap = new HashMap<>();
         // A mapping from the token of a client to its state.
@@ -2317,7 +2608,16 @@ public class TvInteractiveAppManagerService extends SystemService {
         private int mIAppNumber;
     }
 
+    private static final class TvAdState {
+        private String mAdServiceId;
+        private ComponentName mComponentName;
+        private TvAdServiceInfo mInfo;
+        private int mUid;
+        private int mAdNumber;
+    }
+
     private final class SessionState implements IBinder.DeathRecipient {
+        // TODO: rename SessionState and reorganize classes / methods of this file
         private final IBinder mSessionToken;
         private ITvInteractiveAppSession mSession;
         private final String mIAppServiceId;
@@ -2355,6 +2655,49 @@ public class TvInteractiveAppManagerService extends SystemService {
             synchronized (mLock) {
                 mSession = null;
                 clearSessionAndNotifyClientLocked(this);
+            }
+        }
+    }
+
+    private final class AdSessionState implements IBinder.DeathRecipient {
+        private final IBinder mSessionToken;
+        private ITvAdSession mSession;
+        private final String mAdServiceId;
+
+        private final String mType;
+        private final ITvAdClient mClient;
+        private final int mSeq;
+        private final ComponentName mComponent;
+
+        // The UID of the application that created the session.
+        // The application is usually the TV app.
+        private final int mCallingUid;
+
+        // The PID of the application that created the session.
+        // The application is usually the TV app.
+        private final int mCallingPid;
+
+        private final int mUserId;
+
+        private AdSessionState(IBinder sessionToken, String serviceId, String type,
+                ComponentName componentName, ITvAdClient client, int seq,
+                int callingUid, int callingPid, int userId) {
+            mSessionToken = sessionToken;
+            mAdServiceId = serviceId;
+            mType = type;
+            mComponent = componentName;
+            mClient = client;
+            mSeq = seq;
+            mCallingUid = callingUid;
+            mCallingPid = callingPid;
+            mUserId = userId;
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                mSession = null;
+                clearAdSessionAndNotifyClientLocked(this);
             }
         }
     }
@@ -2422,6 +2765,29 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         private void addPendingAppLink(AppLinkInfo info, boolean register) {
             mPendingAppLinkInfo.add(Pair.create(info, register));
+        }
+
+        private void addPendingAppLinkCommand(Bundle command) {
+            mPendingAppLinkCommand.add(command);
+        }
+    }
+
+    private final class AdServiceState {
+        private final List<IBinder> mSessionTokens = new ArrayList<>();
+        private final ServiceConnection mConnection;
+        private final ComponentName mComponent;
+        private final String mAdServiceId;
+        private final List<Bundle> mPendingAppLinkCommand = new ArrayList<>();
+
+        private ITvAdService mService;
+        private AdServiceCallback mCallback;
+        private boolean mBound;
+        private boolean mReconnecting;
+
+        private AdServiceState(ComponentName component, String tasId, int userId) {
+            mComponent = component;
+            mConnection = new AdServiceConnection(component, userId);
+            mAdServiceId = tasId;
         }
 
         private void addPendingAppLinkCommand(Bundle command) {
@@ -2542,6 +2908,98 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
     }
 
+    private final class AdServiceConnection implements ServiceConnection {
+        private final ComponentName mComponent;
+        private final int mUserId;
+
+        private AdServiceConnection(ComponentName component, int userId) {
+            mComponent = component;
+            mUserId = userId;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName component, IBinder service) {
+            if (DEBUG) {
+                Slogf.d(TAG, "onServiceConnected(component=" + component + ")");
+            }
+            synchronized (mLock) {
+                UserState userState = getUserStateLocked(mUserId);
+                if (userState == null) {
+                    // The user was removed while connecting.
+                    mContext.unbindService(this);
+                    return;
+                }
+                AdServiceState serviceState = userState.mAdServiceStateMap.get(mComponent);
+                serviceState.mService = ITvAdService.Stub.asInterface(service);
+
+                // Register a callback, if we need to.
+                if (serviceState.mCallback == null) {
+                    serviceState.mCallback = new AdServiceCallback(mComponent, mUserId);
+                    try {
+                        serviceState.mService.registerCallback(serviceState.mCallback);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in registerCallback", e);
+                    }
+                }
+
+                if (!serviceState.mPendingAppLinkCommand.isEmpty()) {
+                    for (Iterator<Bundle> it = serviceState.mPendingAppLinkCommand.iterator();
+                            it.hasNext(); ) {
+                        Bundle command = it.next();
+                        final long identity = Binder.clearCallingIdentity();
+                        try {
+                            serviceState.mService.sendAppLinkCommand(command);
+                            it.remove();
+                        } catch (RemoteException e) {
+                            Slogf.e(TAG, "error in sendAppLinkCommand(" + command
+                                    + ") when onServiceConnected", e);
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
+                    }
+                }
+
+                List<IBinder> tokensToBeRemoved = new ArrayList<>();
+
+                // And create sessions, if any.
+                for (IBinder sessionToken : serviceState.mSessionTokens) {
+                    if (!createAdSessionInternalLocked(
+                            serviceState.mService, sessionToken, mUserId)) {
+                        tokensToBeRemoved.add(sessionToken);
+                    }
+                }
+
+                for (IBinder sessionToken : tokensToBeRemoved) {
+                    removeAdSessionStateLocked(sessionToken, mUserId);
+                }
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName component) {
+            if (DEBUG) {
+                Slogf.d(TAG, "onServiceDisconnected(component=" + component + ")");
+            }
+            if (!mComponent.equals(component)) {
+                throw new IllegalArgumentException("Mismatched ComponentName: "
+                        + mComponent + " (expected), " + component + " (actual).");
+            }
+            synchronized (mLock) {
+                UserState userState = getOrCreateUserStateLocked(mUserId);
+                AdServiceState serviceState = userState.mAdServiceStateMap.get(mComponent);
+                if (serviceState != null) {
+                    serviceState.mReconnecting = true;
+                    serviceState.mBound = false;
+                    serviceState.mService = null;
+                    serviceState.mCallback = null;
+
+                    abortPendingCreateAdSessionRequestsLocked(serviceState, null, mUserId);
+                }
+            }
+        }
+    }
+
+
     private final class ServiceCallback extends ITvInteractiveAppServiceCallback.Stub {
         private final ComponentName mComponent;
         private final int mUserId;
@@ -2564,6 +3022,17 @@ public class TvInteractiveAppManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+    }
+
+
+    private final class AdServiceCallback extends ITvAdServiceCallback.Stub {
+        private final ComponentName mComponent;
+        private final int mUserId;
+
+        AdServiceCallback(ComponentName component, int userId) {
+            mComponent = component;
+            mUserId = userId;
         }
     }
 
@@ -3085,6 +3554,66 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         @GuardedBy("mLock")
         private boolean addSessionTokenToClientStateLocked(ITvInteractiveAppSession session) {
+            try {
+                session.asBinder().linkToDeath(mSessionState, 0);
+            } catch (RemoteException e) {
+                Slogf.e(TAG, "session process has already died", e);
+                return false;
+            }
+
+            IBinder clientToken = mSessionState.mClient.asBinder();
+            UserState userState = getOrCreateUserStateLocked(mSessionState.mUserId);
+            ClientState clientState = userState.mClientStateMap.get(clientToken);
+            if (clientState == null) {
+                clientState = new ClientState(clientToken, mSessionState.mUserId);
+                try {
+                    clientToken.linkToDeath(clientState, 0);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "client process has already died", e);
+                    return false;
+                }
+                userState.mClientStateMap.put(clientToken, clientState);
+            }
+            clientState.mSessionTokens.add(mSessionState.mSessionToken);
+            return true;
+        }
+    }
+
+    private final class AdSessionCallback extends ITvAdSessionCallback.Stub {
+        private final AdSessionState mSessionState;
+        private final InputChannel[] mInputChannels;
+
+        AdSessionCallback(AdSessionState sessionState, InputChannel[] channels) {
+            mSessionState = sessionState;
+            mInputChannels = channels;
+        }
+
+        @Override
+        public void onSessionCreated(ITvAdSession session) {
+            if (DEBUG) {
+                Slogf.d(TAG, "onSessionCreated(adServiceId="
+                        + mSessionState.mAdServiceId + ")");
+            }
+            synchronized (mLock) {
+                mSessionState.mSession = session;
+                if (session != null && addAdSessionTokenToClientStateLocked(session)) {
+                    sendAdSessionTokenToClientLocked(
+                            mSessionState.mClient,
+                            mSessionState.mAdServiceId,
+                            mSessionState.mSessionToken,
+                            mInputChannels[0],
+                            mSessionState.mSeq);
+                } else {
+                    removeAdSessionStateLocked(mSessionState.mSessionToken, mSessionState.mUserId);
+                    sendAdSessionTokenToClientLocked(mSessionState.mClient,
+                            mSessionState.mAdServiceId, null, null, mSessionState.mSeq);
+                }
+                mInputChannels[0].dispose();
+            }
+        }
+
+        @GuardedBy("mLock")
+        private boolean addAdSessionTokenToClientStateLocked(ITvAdSession session) {
             try {
                 session.asBinder().linkToDeath(mSessionState, 0);
             } catch (RemoteException e) {

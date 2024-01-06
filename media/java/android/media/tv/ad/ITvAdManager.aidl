@@ -16,10 +16,15 @@
 
 package android.media.tv.ad;
 
+import android.media.tv.ad.ITvAdClient;
+
 /**
  * Interface to the TV AD service.
  * @hide
  */
 interface ITvAdManager {
+    void createSession(
+            in ITvAdClient client, in String serviceId, in String type, int seq, int userId);
+    void releaseSession(in IBinder sessionToken, int userId);
     void startAdService(in IBinder sessionToken, int userId);
 }

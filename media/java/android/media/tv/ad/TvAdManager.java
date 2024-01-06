@@ -17,12 +17,29 @@
 package android.media.tv.ad;
 
 import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.media.tv.TvInputManager;
 import android.media.tv.flags.Flags;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Pools;
+import android.util.SparseArray;
+import android.view.InputChannel;
+import android.view.InputEvent;
+import android.view.InputEventSender;
+
+import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Central system API to the overall client-side TV AD architecture, which arbitrates interaction
@@ -37,10 +54,98 @@ public class TvAdManager {
     private final ITvAdManager mService;
     private final int mUserId;
 
+    // A mapping from the sequence number of a session to its SessionCallbackRecord.
+    private final SparseArray<SessionCallbackRecord> mSessionCallbackRecordMap =
+            new SparseArray<>();
+
+    // @GuardedBy("mLock")
+    private final List<TvAdServiceCallbackRecord> mCallbackRecords = new ArrayList<>();
+
+    // A sequence number for the next session to be created. Should be protected by a lock
+    // {@code mSessionCallbackRecordMap}.
+    private int mNextSeq;
+
+    private final Object mLock = new Object();
+    private final ITvAdClient mClient;
+
     /** @hide */
     public TvAdManager(ITvAdManager service, int userId) {
         mService = service;
         mUserId = userId;
+        mClient = new ITvAdClient.Stub() {
+            @Override
+            public void onSessionCreated(String serviceId, IBinder token, InputChannel channel,
+                    int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for " + token);
+                        return;
+                    }
+                    Session session = null;
+                    if (token != null) {
+                        session = new Session(token, channel, mService, mUserId, seq,
+                                mSessionCallbackRecordMap);
+                    } else {
+                        mSessionCallbackRecordMap.delete(seq);
+                    }
+                    record.postSessionCreated(session);
+                }
+            }
+
+            @Override
+            public void onSessionReleased(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    mSessionCallbackRecordMap.delete(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq:" + seq);
+                        return;
+                    }
+                    record.mSession.releaseInternal();
+                    record.postSessionReleased();
+                }
+            }
+
+        };
+    }
+
+    /**
+     * Creates a {@link Session} for a given TV AD service.
+     *
+     * <p>The number of sessions that can be created at the same time is limited by the capability
+     * of the given AD service.
+     *
+     * @param serviceId The ID of the AD service.
+     * @param callback A callback used to receive the created session.
+     * @param handler A {@link Handler} that the session creation will be delivered to.
+     * @hide
+     */
+    public void createSession(
+            @NonNull String serviceId,
+            @NonNull String type,
+            @NonNull final TvAdManager.SessionCallback callback,
+            @NonNull Handler handler) {
+        createSessionInternal(serviceId, type, callback, handler);
+    }
+
+    private void createSessionInternal(String serviceId, String type,
+            TvAdManager.SessionCallback callback, Handler handler) {
+        Preconditions.checkNotNull(serviceId);
+        Preconditions.checkNotNull(type);
+        Preconditions.checkNotNull(callback);
+        Preconditions.checkNotNull(handler);
+        TvAdManager.SessionCallbackRecord
+                record = new TvAdManager.SessionCallbackRecord(callback, handler);
+        synchronized (mSessionCallbackRecordMap) {
+            int seq = mNextSeq++;
+            mSessionCallbackRecordMap.put(seq, record);
+            try {
+                mService.createSession(mClient, serviceId, type, seq, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -48,14 +153,83 @@ public class TvAdManager {
      * @hide
      */
     public static final class Session {
-        private final IBinder mToken;
+        static final int DISPATCH_IN_PROGRESS = -1;
+        static final int DISPATCH_NOT_HANDLED = 0;
+        static final int DISPATCH_HANDLED = 1;
+
+        private static final long INPUT_SESSION_NOT_RESPONDING_TIMEOUT = 2500;
         private final ITvAdManager mService;
         private final int mUserId;
+        private final int mSeq;
+        private final SparseArray<SessionCallbackRecord> mSessionCallbackRecordMap;
 
-        private Session(IBinder token, ITvAdManager service, int userId) {
+        // For scheduling input event handling on the main thread. This also serves as a lock to
+        // protect pending input events and the input channel.
+        private final InputEventHandler mHandler = new InputEventHandler(Looper.getMainLooper());
+
+        private TvInputManager.Session mInputSession;
+        private final Pools.Pool<PendingEvent> mPendingEventPool = new Pools.SimplePool<>(20);
+        private final SparseArray<PendingEvent> mPendingEvents = new SparseArray<>(20);
+        private TvInputEventSender mSender;
+        private InputChannel mInputChannel;
+        private IBinder mToken;
+
+        private Session(IBinder token, InputChannel channel, ITvAdManager service, int userId,
+                int seq, SparseArray<SessionCallbackRecord> sessionCallbackRecordMap) {
             mToken = token;
+            mInputChannel = channel;
             mService = service;
             mUserId = userId;
+            mSeq = seq;
+            mSessionCallbackRecordMap = sessionCallbackRecordMap;
+        }
+
+        /**
+         * Releases this session.
+         */
+        public void release() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.releaseSession(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+
+            releaseInternal();
+        }
+
+        private void flushPendingEventsLocked() {
+            mHandler.removeMessages(InputEventHandler.MSG_FLUSH_INPUT_EVENT);
+
+            final int count = mPendingEvents.size();
+            for (int i = 0; i < count; i++) {
+                int seq = mPendingEvents.keyAt(i);
+                Message msg = mHandler.obtainMessage(
+                        InputEventHandler.MSG_FLUSH_INPUT_EVENT, seq, 0);
+                msg.setAsynchronous(true);
+                msg.sendToTarget();
+            }
+        }
+
+        private void releaseInternal() {
+            mToken = null;
+            synchronized (mHandler) {
+                if (mInputChannel != null) {
+                    if (mSender != null) {
+                        flushPendingEventsLocked();
+                        mSender.dispose();
+                        mSender = null;
+                    }
+                    mInputChannel.dispose();
+                    mInputChannel = null;
+                }
+            }
+            synchronized (mSessionCallbackRecordMap) {
+                mSessionCallbackRecordMap.delete(mSeq);
+            }
         }
 
         void startAdService() {
@@ -68,6 +242,239 @@ public class TvAdManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+
+        private final class InputEventHandler extends Handler {
+            public static final int MSG_SEND_INPUT_EVENT = 1;
+            public static final int MSG_TIMEOUT_INPUT_EVENT = 2;
+            public static final int MSG_FLUSH_INPUT_EVENT = 3;
+
+            InputEventHandler(Looper looper) {
+                super(looper, null, true);
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_SEND_INPUT_EVENT: {
+                        sendInputEventAndReportResultOnMainLooper((PendingEvent) msg.obj);
+                        return;
+                    }
+                    case MSG_TIMEOUT_INPUT_EVENT: {
+                        finishedInputEvent(msg.arg1, false, true);
+                        return;
+                    }
+                    case MSG_FLUSH_INPUT_EVENT: {
+                        finishedInputEvent(msg.arg1, false, false);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Assumes the event has already been removed from the queue.
+        void invokeFinishedInputEventCallback(PendingEvent p, boolean handled) {
+            p.mHandled = handled;
+            if (p.mEventHandler.getLooper().isCurrentThread()) {
+                // Already running on the callback handler thread so we can send the callback
+                // immediately.
+                p.run();
+            } else {
+                // Post the event to the callback handler thread.
+                // In this case, the callback will be responsible for recycling the event.
+                Message msg = Message.obtain(p.mEventHandler, p);
+                msg.setAsynchronous(true);
+                msg.sendToTarget();
+            }
+        }
+
+        // Must be called on the main looper
+        private void sendInputEventAndReportResultOnMainLooper(PendingEvent p) {
+            synchronized (mHandler) {
+                int result = sendInputEventOnMainLooperLocked(p);
+                if (result == DISPATCH_IN_PROGRESS) {
+                    return;
+                }
+            }
+
+            invokeFinishedInputEventCallback(p, false);
+        }
+
+        private int sendInputEventOnMainLooperLocked(PendingEvent p) {
+            if (mInputChannel != null) {
+                if (mSender == null) {
+                    mSender = new TvInputEventSender(mInputChannel, mHandler.getLooper());
+                }
+
+                final InputEvent event = p.mEvent;
+                final int seq = event.getSequenceNumber();
+                if (mSender.sendInputEvent(seq, event)) {
+                    mPendingEvents.put(seq, p);
+                    Message msg = mHandler.obtainMessage(
+                            InputEventHandler.MSG_TIMEOUT_INPUT_EVENT, p);
+                    msg.setAsynchronous(true);
+                    mHandler.sendMessageDelayed(msg, INPUT_SESSION_NOT_RESPONDING_TIMEOUT);
+                    return DISPATCH_IN_PROGRESS;
+                }
+
+                Log.w(TAG, "Unable to send input event to session: " + mToken + " dropping:"
+                        + event);
+            }
+            return DISPATCH_NOT_HANDLED;
+        }
+
+        void finishedInputEvent(int seq, boolean handled, boolean timeout) {
+            final PendingEvent p;
+            synchronized (mHandler) {
+                int index = mPendingEvents.indexOfKey(seq);
+                if (index < 0) {
+                    return; // spurious, event already finished or timed out
+                }
+
+                p = mPendingEvents.valueAt(index);
+                mPendingEvents.removeAt(index);
+
+                if (timeout) {
+                    Log.w(TAG, "Timeout waiting for session to handle input event after "
+                            + INPUT_SESSION_NOT_RESPONDING_TIMEOUT + " ms: " + mToken);
+                } else {
+                    mHandler.removeMessages(InputEventHandler.MSG_TIMEOUT_INPUT_EVENT, p);
+                }
+            }
+
+            invokeFinishedInputEventCallback(p, handled);
+        }
+
+        private void recyclePendingEventLocked(PendingEvent p) {
+            p.recycle();
+            mPendingEventPool.release(p);
+        }
+
+        /**
+         * Callback that is invoked when an input event that was dispatched to this session has been
+         * finished.
+         *
+         * @hide
+         */
+        public interface FinishedInputEventCallback {
+            /**
+             * Called when the dispatched input event is finished.
+             *
+             * @param token A token passed to {@link #dispatchInputEvent}.
+             * @param handled {@code true} if the dispatched input event was handled properly.
+             *            {@code false} otherwise.
+             */
+            void onFinishedInputEvent(Object token, boolean handled);
+        }
+
+        private final class TvInputEventSender extends InputEventSender {
+            TvInputEventSender(InputChannel inputChannel, Looper looper) {
+                super(inputChannel, looper);
+            }
+
+            @Override
+            public void onInputEventFinished(int seq, boolean handled) {
+                finishedInputEvent(seq, handled, false);
+            }
+        }
+
+        private final class PendingEvent implements Runnable {
+            public InputEvent mEvent;
+            public Object mEventToken;
+            public Session.FinishedInputEventCallback mCallback;
+            public Handler mEventHandler;
+            public boolean mHandled;
+
+            public void recycle() {
+                mEvent = null;
+                mEventToken = null;
+                mCallback = null;
+                mEventHandler = null;
+                mHandled = false;
+            }
+
+            @Override
+            public void run() {
+                mCallback.onFinishedInputEvent(mEventToken, mHandled);
+
+                synchronized (mEventHandler) {
+                    recyclePendingEventLocked(this);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Interface used to receive the created session.
+     * @hide
+     */
+    public abstract static class SessionCallback {
+        /**
+         * This is called after {@link TvAdManager#createSession} has been processed.
+         *
+         * @param session A {@link TvAdManager.Session} instance created. This can be
+         *                {@code null} if the creation request failed.
+         */
+        public void onSessionCreated(@Nullable Session session) {
+        }
+
+        /**
+         * This is called when {@link TvAdManager.Session} is released.
+         * This typically happens when the process hosting the session has crashed or been killed.
+         *
+         * @param session the {@link TvAdManager.Session} instance released.
+         */
+        public void onSessionReleased(@NonNull Session session) {
+        }
+
+    }
+
+    /**
+     * Callback used to monitor status of the TV AD service.
+     * @hide
+     */
+    public abstract static class TvAdServiceCallback {
+
+    }
+
+    private static final class SessionCallbackRecord {
+        private final SessionCallback mSessionCallback;
+        private final Handler mHandler;
+        private Session mSession;
+
+        SessionCallbackRecord(SessionCallback sessionCallback, Handler handler) {
+            mSessionCallback = sessionCallback;
+            mHandler = handler;
+        }
+
+        void postSessionCreated(final Session session) {
+            mSession = session;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSessionCreated(session);
+                }
+            });
+        }
+
+        void postSessionReleased() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onSessionReleased(mSession);
+                }
+            });
+        }
+    }
+
+    private static final class TvAdServiceCallbackRecord {
+        private final TvAdServiceCallback mCallback;
+        private final Executor mExecutor;
+
+        TvAdServiceCallbackRecord(TvAdServiceCallback callback, Executor executor) {
+            mCallback = callback;
+            mExecutor = executor;
         }
     }
 }

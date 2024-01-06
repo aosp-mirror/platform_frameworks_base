@@ -17,10 +17,8 @@
 package android.media.tv.ad;
 
 /**
- * Sub-interface of ITvAdService.aidl which is created per session and has its own context.
+ * Interface to receive callbacks from ITvAdManager regardless of sessions.
  * @hide
  */
-oneway interface ITvAdSession {
-    void release();
-    void startAdService();
+oneway interface ITvAdManagerCallback {
 }
