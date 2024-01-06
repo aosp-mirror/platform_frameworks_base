@@ -324,8 +324,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     // TODO: Instantiate mSwitchingController for each user.
     @NonNull
     private InputMethodSubtypeSwitchingController mSwitchingController;
-    final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
-            new HardwareKeyboardShortcutController();
+    // TODO: Instantiate mHardwareKeyboardShortcutController for each user.
+    @NonNull
+    private HardwareKeyboardShortcutController mHardwareKeyboardShortcutController;
 
     /**
      * Tracks how many times {@link #mMethodMap} was updated.
@@ -1709,7 +1710,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mSwitchingController =
                 InputMethodSubtypeSwitchingController.createInstanceLocked(context, mMethodMap,
                         userId);
-        mHardwareKeyboardShortcutController.reset(mSettings);
+        mHardwareKeyboardShortcutController =
+                new HardwareKeyboardShortcutController(mMethodMap, userId);
         mMenuController = new InputMethodMenuController(this);
         mBindingController =
                 bindingControllerForTesting != null
@@ -3305,8 +3307,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                     mContext, mMethodMap, mSettings.getCurrentUserId());
         }
-
-        mHardwareKeyboardShortcutController.reset(mSettings);
+        // TODO: Instantiate mHardwareKeyboardShortcutController for each user.
+        if (mSettings.getCurrentUserId() == mHardwareKeyboardShortcutController.getUserId()) {
+            mHardwareKeyboardShortcutController.reset(mMethodMap);
+        } else {
+            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController(
+                    mMethodMap, mSettings.getCurrentUserId());
+        }
         sendOnNavButtonFlagsChangedLocked();
     }
 
@@ -5328,7 +5335,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                     mContext, mMethodMap, mSettings.getCurrentUserId());
         }
-        mHardwareKeyboardShortcutController.reset(mSettings);
+        // TODO: Instantiate mHardwareKeyboardShortcutController for each user.
+        if (mSettings.getCurrentUserId() == mHardwareKeyboardShortcutController.getUserId()) {
+            mHardwareKeyboardShortcutController.reset(mMethodMap);
+        } else {
+            mHardwareKeyboardShortcutController = new HardwareKeyboardShortcutController(
+                    mMethodMap, mSettings.getCurrentUserId());
+        }
 
         sendOnNavButtonFlagsChangedLocked();
 
