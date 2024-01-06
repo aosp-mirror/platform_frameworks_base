@@ -48,6 +48,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 
+import static com.android.server.inputmethod.ClientController.ClientState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
@@ -127,7 +128,6 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
-import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceFileProto;
@@ -273,6 +273,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private final String[] mNonPreemptibleInputMethods;
 
+    // TODO(b/314150112): Move this to ClientController.
     @UserIdInt
     private int mLastSwitchUserId;
 
@@ -393,7 +394,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * Record session state for an accessibility service.
      */
-    private static class AccessibilitySessionState {
+    static class AccessibilitySessionState {
         final ClientState mClient;
         // Id of the accessibility service.
         final int mId;
@@ -417,58 +418,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    private static final class ClientDeathRecipient implements IBinder.DeathRecipient {
-        private final InputMethodManagerService mImms;
-        private final IInputMethodClient mClient;
-
-        ClientDeathRecipient(InputMethodManagerService imms, IInputMethodClient client) {
-            mImms = imms;
-            mClient = client;
-        }
-
-        @Override
-        public void binderDied() {
-            mImms.removeClient(mClient);
-        }
-    }
-
-    static final class ClientState {
-        final IInputMethodClientInvoker mClient;
-        final IRemoteInputConnection mFallbackInputConnection;
-        final int mUid;
-        final int mPid;
-        final int mSelfReportedDisplayId;
-        final InputBinding mBinding;
-        final ClientDeathRecipient mClientDeathRecipient;
-
-        boolean mSessionRequested;
-        boolean mSessionRequestedForAccessibility;
-        SessionState mCurSession;
-        SparseArray<AccessibilitySessionState> mAccessibilitySessions = new SparseArray<>();
-
-        @Override
-        public String toString() {
-            return "ClientState{" + Integer.toHexString(
-                    System.identityHashCode(this)) + " mUid=" + mUid
-                    + " mPid=" + mPid + " mSelfReportedDisplayId=" + mSelfReportedDisplayId + "}";
-        }
-
-        ClientState(IInputMethodClientInvoker client,
-                IRemoteInputConnection fallbackInputConnection,
-                int uid, int pid, int selfReportedDisplayId,
-                ClientDeathRecipient clientDeathRecipient) {
-            mClient = client;
-            mFallbackInputConnection = fallbackInputConnection;
-            mUid = uid;
-            mPid = pid;
-            mSelfReportedDisplayId = selfReportedDisplayId;
-            mBinding = new InputBinding(null, mFallbackInputConnection.asBinder(), mUid, mPid);
-            mClientDeathRecipient = clientDeathRecipient;
-        }
-    }
-
-    @GuardedBy("ImfLock.class")
-    final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
+    /**
+     * Manages the IME clients.
+     */
+    private final ClientController mClientController;
 
     /**
      * Set once the system is ready to run third party code.
@@ -526,6 +479,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * The client that is currently bound to an input method.
      */
+    // TODO(b/314150112): Move this to ClientController.
     @Nullable
     private ClientState mCurClient;
 
@@ -866,8 +820,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @Nullable
             final String mImeSurfaceParentName;
 
-            Entry(ClientState client, EditorInfo editorInfo, String focusedWindowName,
-                    @SoftInputModeFlags int softInputMode, @SoftInputShowHideReason int reason,
+            Entry(ClientState client, EditorInfo editorInfo,
+                    String focusedWindowName, @SoftInputModeFlags int softInputMode,
+                    @SoftInputShowHideReason int reason,
                     boolean inFullscreenMode, String requestWindowName,
                     @Nullable String imeControlTargetName, @Nullable String imeTargetName,
                     @Nullable String imeSurfaceParentName) {
@@ -1722,6 +1677,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         mVisibilityStateComputer = new ImeVisibilityStateComputer(this);
         mVisibilityApplier = new DefaultImeVisibilityApplier(this);
+        mClientController = new ClientController(mPackageManagerInternal);
 
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
@@ -1875,7 +1831,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mLastSwitchUserId = newUserId;
 
         if (mIsInteractive && clientToBeReset != null) {
-            final ClientState cs = mClients.get(clientToBeReset.asBinder());
+            final ClientState cs =
+                    mClientController.mClients.get(clientToBeReset.asBinder());
             if (cs == null) {
                 // The client is already gone.
                 return;
@@ -2212,43 +2169,22 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // actually running.
         final int callerUid = Binder.getCallingUid();
         final int callerPid = Binder.getCallingPid();
+
+        // TODO(b/314150112): Move the death recipient logic to ClientController when moving
+        //     removeClient method.
+        final IBinder.DeathRecipient deathRecipient = () -> removeClient(client);
+        final IInputMethodClientInvoker clientInvoker =
+                IInputMethodClientInvoker.create(client, mHandler);
         synchronized (ImfLock.class) {
-            // TODO: Optimize this linear search.
-            final int numClients = mClients.size();
-            for (int i = 0; i < numClients; ++i) {
-                final ClientState state = mClients.valueAt(i);
-                if (state.mUid == callerUid && state.mPid == callerPid
-                        && state.mSelfReportedDisplayId == selfReportedDisplayId) {
-                    throw new SecurityException("uid=" + callerUid + "/pid=" + callerPid
-                            + "/displayId=" + selfReportedDisplayId + " is already registered.");
-                }
-            }
-            final ClientDeathRecipient deathRecipient = new ClientDeathRecipient(this, client);
-            try {
-                client.asBinder().linkToDeath(deathRecipient, 0 /* flags */);
-            } catch (RemoteException e) {
-                throw new IllegalStateException(e);
-            }
-            // We cannot fully avoid race conditions where the client UID already lost the access to
-            // the given self-reported display ID, even if the client is not maliciously reporting
-            // a fake display ID. Unconditionally returning SecurityException just because the
-            // client doesn't pass display ID verification can cause many test failures hence not an
-            // option right now.  At the same time
-            //    context.getSystemService(InputMethodManager.class)
-            // is expected to return a valid non-null instance at any time if we do not choose to
-            // have the client crash.  Thus we do not verify the display ID at all here.  Instead we
-            // later check the display ID every time the client needs to interact with the specified
-            // display.
-            final IInputMethodClientInvoker clientInvoker =
-                    IInputMethodClientInvoker.create(client, mHandler);
-            mClients.put(client.asBinder(), new ClientState(clientInvoker, inputConnection,
-                    callerUid, callerPid, selfReportedDisplayId, deathRecipient));
+            mClientController.addClient(clientInvoker, inputConnection, selfReportedDisplayId,
+                    deathRecipient, callerUid, callerPid);
         }
     }
 
+    // TODO(b/314150112): Move this to ClientController.
     void removeClient(IInputMethodClient client) {
         synchronized (ImfLock.class) {
-            ClientState cs = mClients.remove(client.asBinder());
+            ClientState cs = mClientController.mClients.remove(client.asBinder());
             if (cs != null) {
                 client.asBinder().unlinkToDeath(cs.mClientDeathRecipient, 0 /* flags */);
                 clearClientSessionLocked(cs);
@@ -2278,6 +2214,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    // TODO(b/314150112): Move this to ClientController.
     @GuardedBy("ImfLock.class")
     void unbindCurrentClientLocked(@UnbindReason int unbindClientReason) {
         if (mCurClient != null) {
@@ -2330,7 +2267,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    /** {@code true} when a {@link ClientState} has attached from starting the input connection. */
+    /**
+     * {@code true} when a {@link ClientState} has attached from starting the
+     * input connection.
+     */
     @GuardedBy("ImfLock.class")
     boolean hasAttachedClient() {
         return mCurClient != null;
@@ -2974,10 +2914,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     void clearClientSessionsLocked() {
         if (getCurMethodLocked() != null) {
-            final int numClients = mClients.size();
+            final int numClients = mClientController.mClients.size();
             for (int i = 0; i < numClients; ++i) {
-                clearClientSessionLocked(mClients.valueAt(i));
-                clearClientSessionForAccessibilityLocked(mClients.valueAt(i));
+                clearClientSessionLocked(mClientController.mClients.valueAt(i));
+                clearClientSessionForAccessibilityLocked(mClientController.mClients.valueAt(i));
             }
 
             finishSessionLocked(mEnabledSession);
@@ -3512,9 +3452,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " pref is disabled for user: " + userId);
             return;
         }
-        if (!verifyClientAndPackageMatch(client, delegatorPackageName)) {
-            Slog.w(TAG, "prepareStylusHandwritingDelegation() fail");
-            throw new IllegalArgumentException("Delegator doesn't match Uid");
+        synchronized (ImfLock.class) {
+            if (!mClientController.verifyClientAndPackageMatch(client,
+                    delegatorPackageName)) {
+                Slog.w(TAG, "prepareStylusHandwritingDelegation() fail");
+                throw new IllegalArgumentException("Delegator doesn't match Uid");
+            }
         }
         schedulePrepareStylusHandwritingDelegation(
                 userId, delegatePackageName, delegatorPackageName);
@@ -3540,30 +3483,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         return true;
     }
 
-    private boolean verifyClientAndPackageMatch(
-            @NonNull IInputMethodClient client, @NonNull String packageName) {
-        ClientState cs;
-        synchronized (ImfLock.class) {
-            cs = mClients.get(client.asBinder());
-        }
-        if (cs == null) {
-            throw new IllegalArgumentException("unknown client " + client.asBinder());
-        }
-        return InputMethodUtils.checkIfPackageBelongsToUid(
-                mPackageManagerInternal, cs.mUid, packageName);
-    }
-
     private boolean verifyDelegator(
             @NonNull IInputMethodClient client,
             @NonNull String delegatePackageName,
             @NonNull String delegatorPackageName,
             @InputMethodManager.HandwritingDelegateFlags int flags) {
-        if (!verifyClientAndPackageMatch(client, delegatePackageName)) {
-            Slog.w(TAG, "Delegate package does not belong to the same user. Ignoring"
-                    + " startStylusHandwriting");
-            return false;
-        }
         synchronized (ImfLock.class) {
+            if (!mClientController.verifyClientAndPackageMatch(client, delegatePackageName)) {
+                Slog.w(TAG, "Delegate package does not belong to the same user. Ignoring"
+                        + " startStylusHandwriting");
+                return false;
+            }
             boolean homeDelegatorAllowed =
                     (flags & InputMethodManager.HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED)
                             != 0;
@@ -3826,7 +3756,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.INVALID_USER;
         }
 
-        final ClientState cs = mClients.get(client.asBinder());
+        final ClientState cs = mClientController.mClients.get(client.asBinder());
         if (cs == null) {
             throw new IllegalArgumentException("unknown client " + client.asBinder());
         }
@@ -4000,7 +3930,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // We need to check if this is the current client with
             // focus in the window manager, to allow this call to
             // be made before input is started in it.
-            final ClientState cs = mClients.get(client.asBinder());
+            final ClientState cs =
+                    mClientController.mClients.get(client.asBinder());
             if (cs == null) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_SERVER_CLIENT_KNOWN);
                 throw new IllegalArgumentException("unknown client " + client.asBinder());
@@ -4624,7 +4555,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         ImeTracing.getInstance().startTrace(null /* printwriter */);
         ArrayMap<IBinder, ClientState> clients;
         synchronized (ImfLock.class) {
-            clients = new ArrayMap<>(mClients);
+            clients = new ArrayMap<>(mClientController.mClients);
         }
         for (ClientState state : clients.values()) {
             if (state != null) {
@@ -4642,7 +4573,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         ImeTracing.getInstance().stopTrace(null /* printwriter */);
         ArrayMap<IBinder, ClientState> clients;
         synchronized (ImfLock.class) {
-            clients = new ArrayMap<>(mClients);
+            clients = new ArrayMap<>(mClientController.mClients);
         }
         for (ClientState state : clients.values()) {
             if (state != null) {
@@ -5887,10 +5818,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // We only have sessions when we bound to an input method. Remove this session
                 // from all clients.
                 if (getCurMethodLocked() != null) {
-                    final int numClients = mClients.size();
+                    final int numClients = mClientController.mClients.size();
                     for (int i = 0; i < numClients; ++i) {
-                        clearClientSessionForAccessibilityLocked(mClients.valueAt(i),
-                                accessibilityConnectionId);
+                        clearClientSessionForAccessibilityLocked(
+                                mClientController.mClients.valueAt(i), accessibilityConnectionId);
                     }
                     AccessibilitySessionState session = mEnabledAccessibilitySessions.get(
                             accessibilityConnectionId);
@@ -6075,9 +6006,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 info.dump(p, "    ");
             }
             p.println("  ClientStates:");
-            final int numClients = mClients.size();
+            // TODO(b/314150112): move client related dump info to ClientController#dump
+            final int numClients = mClientController.mClients.size();
             for (int i = 0; i < numClients; ++i) {
-                final ClientState ci = mClients.valueAt(i);
+                final ClientState ci = mClientController.mClients.valueAt(i);
                 p.println("  " + ci + ":");
                 p.println("    client=" + ci.mClient);
                 p.println("    fallbackInputConnection=" + ci.mFallbackInputConnection);
@@ -6696,7 +6628,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         boolean isImeTraceEnabled = ImeTracing.getInstance().isEnabled();
         ArrayMap<IBinder, ClientState> clients;
         synchronized (ImfLock.class) {
-            clients = new ArrayMap<>(mClients);
+            clients = new ArrayMap<>(mClientController.mClients);
         }
         for (ClientState state : clients.values()) {
             if (state != null) {
