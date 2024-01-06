@@ -724,24 +724,13 @@ public class OomAdjusterModernImpl extends OomAdjuster {
 
         if (fullUpdate) {
             assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
-            postUpdateOomAdjInnerLSP(oomAdjReason, activeUids, now, nowElapsed, oldTime);
         } else {
             activeProcesses.clear();
             activeProcesses.addAll(targetProcesses);
             assignCachedAdjIfNecessary(activeProcesses);
-
-            for (int  i = activeUids.size() - 1; i >= 0; i--) {
-                final UidRecord uidRec = activeUids.valueAt(i);
-                uidRec.forEachProcess(this::updateAppUidRecIfNecessaryLSP);
-            }
-            updateUidsLSP(activeUids, nowElapsed);
-
-            for (int i = 0, size = targetProcesses.size(); i < size; i++) {
-                applyOomAdjLSP(targetProcesses.valueAt(i), false, now, nowElapsed, oomAdjReason);
-            }
-
             activeProcesses.clear();
         }
+        postUpdateOomAdjInnerLSP(oomAdjReason, activeUids, now, nowElapsed, oldTime);
         targetProcesses.clear();
 
         if (startProfiling) {
