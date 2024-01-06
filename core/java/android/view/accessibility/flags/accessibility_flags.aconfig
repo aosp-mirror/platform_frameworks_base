@@ -24,6 +24,13 @@ flag {
 }
 
 flag {
+    namespace: "accessibility"
+    name: "braille_display_hid"
+    description: "Enables new APIs for an AccessibilityService to communicate with a HID Braille display"
+    bug: "303522222"
+}
+
+flag {
     name: "cleanup_accessibility_warning_dialog"
     namespace: "accessibility"
     description: "Cleans up duplicated or broken logic surrounding the accessibility warning dialog."

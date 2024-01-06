@@ -20,8 +20,8 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.scene.domain.interactor.SceneInteractor

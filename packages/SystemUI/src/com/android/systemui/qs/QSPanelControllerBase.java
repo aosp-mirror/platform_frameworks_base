@@ -49,6 +49,7 @@ import kotlin.jvm.functions.Function1;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -231,32 +232,39 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         if (!collapsedView && mQsTileRevealController != null) {
             mQsTileRevealController.updateRevealedTiles(tiles);
         }
-        boolean shouldChange = false;
+        boolean shouldChangeAll = false;
+        // If the new tiles are a prefix of the old tiles, we delete the extra tiles (from the old).
+        // If not (even if they share a prefix) we remove all and add all the new ones.
         if (tiles.size() <= mRecords.size()) {
             int i = 0;
+            // Iterate through the requested tiles and check if they are the same as the existing
+            // tiles.
             for (QSTile tile : tiles) {
                 if (tile != mRecords.get(i).tile) {
-                    shouldChange = true;
+                    shouldChangeAll = true;
                     break;
                 }
                 i++;
             }
 
-            // If the first tiles are the same as the new ones, remove any extras.
-            if (!shouldChange) {
-                while (i < mRecords.size()) {
-                    QSPanelControllerBase.TileRecord record = mRecords.get(i);
+            // If the first tiles are the same as the new ones, we reuse them and remove any extra
+            // tiles.
+            if (!shouldChangeAll && i < mRecords.size()) {
+                List<TileRecord> extraRecords = mRecords.subList(i, mRecords.size());
+                for (QSPanelControllerBase.TileRecord record : extraRecords) {
                     mView.removeTile(record);
                     record.tile.removeCallback(record.callback);
-                    i++;
                 }
+                extraRecords.clear();
                 mCachedSpecs = getTilesSpecs();
             }
         } else {
-            shouldChange = true;
+            shouldChangeAll = true;
         }
 
-        if (shouldChange) {
+        // If we detected that the existing tiles are different than the requested tiles, clear them
+        // and add the new tiles.
+        if (shouldChangeAll) {
             for (QSPanelControllerBase.TileRecord record : mRecords) {
                 mView.removeTile(record);
                 record.tile.removeCallback(record.callback);

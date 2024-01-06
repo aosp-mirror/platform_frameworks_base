@@ -62,7 +62,7 @@ import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsReposi
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -257,7 +257,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                             FakeTrustRepository(),
                             testScope.backgroundScope,
                             mSelectedUserInteractor,
-                            mock(KeyguardFaceAuthInteractor::class.java)
+                            mock(DeviceEntryFaceAuthInteractor::class.java)
                         ),
                     facePropertyRepository = FakeFacePropertyRepository(),
                     deviceEntryFingerprintAuthRepository =

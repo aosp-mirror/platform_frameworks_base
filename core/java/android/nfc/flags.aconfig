@@ -62,3 +62,10 @@ flag {
     description: "Flag for NFC charging changes"
     bug: "292143899"
 }
+
+flag {
+    name: "enable_nfc_set_discovery_tech"
+    namespace: "nfc"
+    description: "Flag for NFC set discovery tech API"
+    bug: "300351519"
+}

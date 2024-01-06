@@ -3481,24 +3481,13 @@ class ContextImpl extends Context {
         }
         mResources = r;
 
-        // only do this if the user already has more than one preferred locale
-        if (android.content.res.Flags.defaultLocale()
-                && r.getConfiguration().getLocales().size() > 1) {
-            LocaleConfig lc;
-            if (getUserId() < 0) {
-                lc = LocaleConfig.fromContextIgnoringOverride(this);
-            } else {
-                // This is needed because the app might have locale config overrides that need to
-                // be read from disk in order for resources to correctly choose which values to
-                // load.
-                StrictMode.ThreadPolicy policy = StrictMode.allowThreadDiskReads();
-                try {
-                    lc = new LocaleConfig(this);
-                } finally {
-                    StrictMode.setThreadPolicy(policy);
-                }
+        if (r != null) {
+            // only do this if the user already has more than one preferred locale
+            if (android.content.res.Flags.defaultLocale()
+                    && r.getConfiguration().getLocales().size() > 1) {
+                LocaleConfig lc = LocaleConfig.fromContextIgnoringOverride(this);
+                mResourcesManager.setLocaleConfig(lc);
             }
-            mResourcesManager.setLocaleConfig(lc);
         }
     }
 

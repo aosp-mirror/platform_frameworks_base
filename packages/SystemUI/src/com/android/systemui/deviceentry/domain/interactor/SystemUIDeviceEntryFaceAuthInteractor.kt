@@ -14,14 +14,12 @@
  *   limitations under the License.
  */
 
-package com.android.systemui.keyguard.domain.interactor
+package com.android.systemui.deviceentry.domain.interactor
 
 import android.app.trust.TrustManager
 import android.content.Context
 import android.hardware.biometrics.BiometricFaceConstants
 import android.hardware.biometrics.BiometricSourceType
-import com.android.keyguard.FaceAuthUiEvent
-import com.android.keyguard.FaceWakeUpTriggersConfig
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
@@ -32,11 +30,14 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
+import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfig
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
+import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -65,7 +66,7 @@ import kotlinx.coroutines.yield
  * SystemUI Keyguard.
  */
 @SysUISingleton
-class SystemUIKeyguardFaceAuthInteractor
+class SystemUIDeviceEntryFaceAuthInteractor
 @Inject
 constructor(
     private val context: Context,
@@ -84,7 +85,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val trustManager: TrustManager,
-) : CoreStartable, KeyguardFaceAuthInteractor {
+) : CoreStartable, DeviceEntryFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
 
@@ -310,7 +311,7 @@ constructor(
     }
 
     companion object {
-        const val TAG = "KeyguardFaceAuthInteractor"
+        const val TAG = "DeviceEntryFaceAuthInteractor"
     }
 }
 

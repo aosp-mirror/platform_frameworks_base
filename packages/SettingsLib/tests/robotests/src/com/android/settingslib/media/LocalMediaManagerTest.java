@@ -116,8 +116,8 @@ public class LocalMediaManagerTest {
         when(mLocalProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
         when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
 
-        mInfoMediaDevice1 = spy(new InfoMediaDevice(mContext, mRouteInfo1, TEST_PACKAGE_NAME));
-        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2, TEST_PACKAGE_NAME);
+        mInfoMediaDevice1 = spy(new InfoMediaDevice(mContext, mRouteInfo1));
+        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2);
         mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
                 mInfoMediaManager, "com.test.packagename");
         mLocalMediaManager.mAudioManager = mAudioManager;

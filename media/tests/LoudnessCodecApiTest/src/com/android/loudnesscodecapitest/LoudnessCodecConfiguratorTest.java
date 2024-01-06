@@ -19,6 +19,7 @@ package com.android.loudnesscodecapitest;
 import static android.media.audio.Flags.FLAG_LOUDNESS_CONFIGURATOR_API;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -184,6 +185,18 @@ public class LoudnessCodecConfiguratorTest {
             mLcc.addMediaCodec(mediaCodec);
 
             assertThrows(IllegalArgumentException.class, () -> mLcc.addMediaCodec(mediaCodec));
+        } finally {
+            mediaCodec.release();
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_LOUDNESS_CONFIGURATOR_API)
+    public void addUnconfiguredMediaCodec_returnsFalse() throws Exception {
+        final MediaCodec mediaCodec = MediaCodec.createDecoderByType("audio/mpeg");
+
+        try {
+            assertFalse(mLcc.addMediaCodec(mediaCodec));
         } finally {
             mediaCodec.release();
         }

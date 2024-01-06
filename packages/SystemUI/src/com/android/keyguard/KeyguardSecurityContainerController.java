@@ -21,6 +21,7 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
+import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISSIBLE_KEYGUARD;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_NONE_SECURITY;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_PASSWORD;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_SIM;
@@ -78,10 +79,10 @@ import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
@@ -135,7 +136,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final SessionTracker mSessionTracker;
     private final Optional<SideFpsController> mSideFpsController;
     private final FalsingA11yDelegate mFalsingA11yDelegate;
-    private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     private final BouncerMessageInteractor mBouncerMessageInteractor;
     private int mTranslationY;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -216,7 +217,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         @Override
         public void onUserInput() {
             mBouncerMessageInteractor.onPrimaryBouncerUserInput();
-            mKeyguardFaceAuthInteractor.onPrimaryBouncerUserInput();
+            mDeviceEntryFaceAuthInteractor.onPrimaryBouncerUserInput();
         }
 
         @Override
@@ -347,11 +348,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final SwipeListener mSwipeListener = new SwipeListener() {
         @Override
         public void onSwipeUp() {
-            if (mKeyguardFaceAuthInteractor.canFaceAuthRun()) {
+            if (mDeviceEntryFaceAuthInteractor.canFaceAuthRun()) {
                 mKeyguardSecurityCallback.userActivity();
             }
-            mKeyguardFaceAuthInteractor.onSwipeUpOnBouncer();
-            if (mKeyguardFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()) {
+            mDeviceEntryFaceAuthInteractor.onSwipeUpOnBouncer();
+            if (mDeviceEntryFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()) {
                 mUpdateMonitor.requestActiveUnlock(
                         ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
                         "swipeUpOnBouncer");
@@ -456,7 +457,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             TelephonyManager telephonyManager,
             ViewMediatorCallback viewMediatorCallback,
             AudioManager audioManager,
-            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
+            DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor,
             BouncerMessageInteractor bouncerMessageInteractor,
             Provider<JavaAdapter> javaAdapter,
             SelectedUserInteractor selectedUserInteractor,
@@ -495,7 +496,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mTelephonyManager = telephonyManager;
         mViewMediatorCallback = viewMediatorCallback;
         mAudioManager = audioManager;
-        mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
+        mDeviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor;
         mBouncerMessageInteractor = bouncerMessageInteractor;
         mSelectedUserInteractor = selectedUserInteractor;
         mDeviceEntryInteractor = deviceEntryInteractor;
@@ -862,7 +863,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         boolean finish = false;
         int eventSubtype = -1;
         BouncerUiEvent uiEvent = BouncerUiEvent.UNKNOWN;
-        if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
+        if (mUpdateMonitor.forceIsDismissibleIsKeepingDeviceUnlocked()) {
+            finish = true;
+            eventSubtype = BOUNCER_DISMISSIBLE_KEYGUARD;
+            // TODO: b/308417021 add UI event
+        } else if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
             finish = true;
             eventSubtype = BOUNCER_DISMISS_EXTENDED_ACCESS;
             uiEvent = BouncerUiEvent.BOUNCER_DISMISS_EXTENDED_ACCESS;

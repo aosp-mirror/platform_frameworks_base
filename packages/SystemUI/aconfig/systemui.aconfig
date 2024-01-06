@@ -165,7 +165,7 @@ flag {
    name: "qs_new_tiles"
    namespace: "systemui"
    description: "Use the new tiles in the Quick Settings. Should have no behavior changes."
-   bug: "241772429"
+   bug: "311147395"
 }
 
 flag {
@@ -305,6 +305,13 @@ flag {
     namespace: "systemui"
     description: "Enable hiding of notifications during screenshare"
     bug: "312784809"
+}
+
+flag {
+   name: "run_fingerprint_detect_on_dismissible_keyguard"
+   namespace: "systemui"
+   description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."
+   bug: "311145851"
 }
 
 flag {

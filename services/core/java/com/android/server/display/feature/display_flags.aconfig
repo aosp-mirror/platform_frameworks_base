@@ -161,3 +161,10 @@ flag {
     is_fixed_read_only: true
 }
 
+flag {
+    name: "refresh_rate_voting_telemetry"
+    namespace: "display_manager"
+    description: "Feature flag for enabling telemetry for refresh rate voting in DisplayManager"
+    bug: "310029108"
+    is_fixed_read_only: true
+}

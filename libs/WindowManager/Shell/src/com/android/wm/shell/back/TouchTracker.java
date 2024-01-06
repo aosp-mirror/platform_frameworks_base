@@ -63,6 +63,10 @@ class TouchTracker {
         if ((touchX < mStartThresholdX && mSwipeEdge == BackEvent.EDGE_LEFT)
                 || (touchX > mStartThresholdX && mSwipeEdge == BackEvent.EDGE_RIGHT)) {
             mStartThresholdX = touchX;
+            if ((mSwipeEdge == BackEvent.EDGE_LEFT && mStartThresholdX < mInitTouchX)
+                    || (mSwipeEdge == BackEvent.EDGE_RIGHT && mStartThresholdX > mInitTouchX)) {
+                mInitTouchX = mStartThresholdX;
+            }
         }
         mLatestTouchX = touchX;
         mLatestTouchY = touchY;

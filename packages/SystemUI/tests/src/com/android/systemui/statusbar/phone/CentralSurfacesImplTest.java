@@ -334,15 +334,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        // CentralSurfacesImpl's runtime flag check fails if the flag is absent.
-        // This value is unused, because test manifest is opted in.
-        mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI, false);
         // Set default value to avoid IllegalStateException.
         mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, false);
-        // For the Shade to respond to Back gesture, we must enable the event routing
-        mFeatureFlags.set(Flags.WM_SHADE_ALLOW_BACK_GESTURE, true);
-        // For the Shade to animate during the Back gesture, we must enable the animation flag.
-        mFeatureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true);
         mSetFlagsRule.enableFlags(FLAG_LIGHT_REVEAL_MIGRATION);
         // Turn AOD on and toggle feature flag for jank fixes
         mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);

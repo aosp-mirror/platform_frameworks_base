@@ -147,7 +147,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     trustRepository,
                     testScope.backgroundScope,
                     mSelectedUserInteractor,
-                    keyguardFaceAuthInteractor = mock(),
+                    deviceEntryFaceAuthInteractor = mock(),
                 ),
                 AlternateBouncerInteractor(
                     statusBarStateController = mock(),

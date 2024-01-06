@@ -26,6 +26,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.android.settingslib.widget.LottieColorUtils
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
+import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
@@ -45,8 +46,9 @@ object PromptIconViewBinder {
         iconView: LottieAnimationView,
         iconOverlayView: LottieAnimationView,
         iconViewLayoutParamSizeOverride: Pair<Int, Int>?,
-        viewModel: PromptIconViewModel
+        promptViewModel: PromptViewModel
     ) {
+        val viewModel = promptViewModel.iconViewModel
         iconView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.onConfigurationChanged(iconView.context.resources.configuration)
@@ -71,25 +73,45 @@ object PromptIconViewBinder {
                     }
 
                 launch {
+                    var width: Int
+                    var height: Int
                     viewModel.activeAuthType.collect { activeAuthType ->
-                        if (iconViewLayoutParamSizeOverride == null) {
-                            val width: Int
-                            val height: Int
-                            when (activeAuthType) {
-                                AuthType.Fingerprint,
-                                AuthType.Coex -> {
-                                    width = viewModel.fingerprintIconWidth
-                                    height = viewModel.fingerprintIconHeight
-                                }
-                                AuthType.Face -> {
-                                    width = viewModel.faceIconWidth
-                                    height = viewModel.faceIconHeight
+                        when (activeAuthType) {
+                            AuthType.Fingerprint,
+                            AuthType.Coex -> {
+                                width = viewModel.fingerprintIconWidth
+                                height = viewModel.fingerprintIconHeight
+
+                                /**
+                                 * View is only set visible in BiometricViewSizeBinder once
+                                 * PromptSize is determined that accounts for iconView size, to
+                                 * prevent prompt resizing being visible to the user.
+                                 *
+                                 * TODO(b/288175072): May be able to remove this once constraint
+                                 *   layout is implemented
+                                 */
+                                iconView.removeAllLottieOnCompositionLoadedListener()
+                                iconView.addLottieOnCompositionLoadedListener {
+                                    promptViewModel.setIsIconViewLoaded(true)
                                 }
                             }
+                            AuthType.Face -> {
+                                width = viewModel.faceIconWidth
+                                height = viewModel.faceIconHeight
+                                /**
+                                 * Set to true by default since face icon is a drawable, which
+                                 * doesn't have a LottieOnCompositionLoadedListener equivalent.
+                                 *
+                                 * TODO(b/318569643): To be updated once face assets are updated
+                                 *   from drawables
+                                 */
+                                promptViewModel.setIsIconViewLoaded(true)
+                            }
+                        }
 
+                        if (iconViewLayoutParamSizeOverride == null) {
                             iconView.layoutParams.width = width
                             iconView.layoutParams.height = height
-
                             iconOverlayView.layoutParams.width = width
                             iconOverlayView.layoutParams.height = height
                         }

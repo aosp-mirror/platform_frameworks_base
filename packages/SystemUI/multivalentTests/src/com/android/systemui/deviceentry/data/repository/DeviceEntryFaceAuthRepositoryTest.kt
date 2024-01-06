@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.deviceentry.data.repository
 
 import android.app.StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
 import android.app.StatusBarManager.SESSION_KEYGUARD
@@ -37,10 +37,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId.fakeInstanceId
 import com.android.internal.logging.UiEventLogger
-import com.android.keyguard.FaceAuthUiEvent
-import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN
-import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED
-import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
@@ -53,21 +49,32 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER
+import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
+import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.display.data.repository.display
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.KEYGUARD_WM_STATE_REFACTOR
+import com.android.systemui.keyguard.data.repository.BiometricType
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeCommandQueue
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
-import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
-import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.FaceAuthenticationLogger

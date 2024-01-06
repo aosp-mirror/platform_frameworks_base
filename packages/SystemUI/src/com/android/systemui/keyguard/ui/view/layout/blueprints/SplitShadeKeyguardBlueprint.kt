@@ -30,11 +30,11 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSec
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule
-import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeMediaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeNotificationStackScrollLayoutSection
+import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeSmartspaceSection
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
 import javax.inject.Inject
@@ -62,7 +62,7 @@ constructor(
     aodNotificationIconsSection: AodNotificationIconsSection,
     aodBurnInSection: AodBurnInSection,
     communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
-    smartspaceSection: SmartspaceSection,
+    smartspaceSection: SplitShadeSmartspaceSection,
     clockSection: SplitShadeClockSection,
     mediaSection: SplitShadeMediaSection,
 ) : KeyguardBlueprint {

@@ -52,20 +52,20 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.doze.DozeLogger
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.kosmos.Kosmos
@@ -266,14 +266,14 @@ class SceneTestUtils(
 
     fun bouncerInteractor(
         authenticationInteractor: AuthenticationInteractor,
-        keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor = mock(),
+        deviceEntryFaceAuthInteractor: DeviceEntryFaceAuthInteractor = mock(),
     ): BouncerInteractor {
         return BouncerInteractor(
             applicationScope = applicationScope(),
             applicationContext = context,
             repository = bouncerRepository,
             authenticationInteractor = authenticationInteractor,
-            keyguardFaceAuthInteractor = keyguardFaceAuthInteractor,
+            deviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor,
             falsingInteractor = falsingInteractor(),
             powerInteractor = powerInteractor(),
             simBouncerInteractor = simBouncerInteractor,

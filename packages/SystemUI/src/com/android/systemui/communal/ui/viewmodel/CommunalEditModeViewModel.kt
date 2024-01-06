@@ -17,6 +17,7 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import android.os.PowerManager
+import android.widget.RemoteViews
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.dagger.SysUISingleton
@@ -49,4 +50,9 @@ constructor(
 
     override fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) =
         communalInteractor.updateWidgetOrder(widgetIdToPriorityMap)
+
+    override fun getInteractionHandler(): RemoteViews.InteractionHandler {
+        // Ignore all interactions in edit mode.
+        return RemoteViews.InteractionHandler { _, _, _ -> false }
+    }
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.ui.compose
 
+import android.util.SizeF
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
@@ -233,6 +234,7 @@ fun LazyGridItemScope.DraggableItem(
     dragDropState: GridDragDropState,
     index: Int,
     enabled: Boolean,
+    size: SizeF,
     modifier: Modifier = Modifier,
     content: @Composable (isDragging: Boolean) -> Unit
 ) {
@@ -250,7 +252,11 @@ fun LazyGridItemScope.DraggableItem(
         } else {
             Modifier.animateItemPlacement()
         }
-    Box(modifier = modifier.then(draggingModifier), propagateMinConstraints = true) {
-        content(dragging)
+
+    Box(modifier) {
+        if (dragging) {
+            WidgetPlaceholderContent(size)
+        }
+        Box(modifier = draggingModifier, propagateMinConstraints = true) { content(dragging) }
     }
 }

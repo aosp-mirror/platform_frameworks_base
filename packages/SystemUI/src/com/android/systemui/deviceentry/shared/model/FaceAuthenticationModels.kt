@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.shared.model
+package com.android.systemui.deviceentry.shared.model
 
 import android.hardware.face.FaceManager
 import android.os.SystemClock.elapsedRealtime
 
 /**
  * Authentication status provided by
- * [com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository]
+ * [com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository]
  */
 sealed class FaceAuthenticationStatus
 

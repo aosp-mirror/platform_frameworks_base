@@ -28,10 +28,10 @@ import com.android.settingslib.spa.widget.dialog.rememberAlertDialogPresenter
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 
-private const val TITLE = "AlertDialogPage"
+private const val TITLE = "Category: Dialog"
 
-object AlertDialogPageProvider : SettingsPageProvider {
-    override val name = "AlertDialogPage"
+object DialogMainPageProvider : SettingsPageProvider {
+    override val name = "DialogMain"
     private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> = listOf(
@@ -45,6 +45,12 @@ object AlertDialogPageProvider : SettingsPageProvider {
             Preference(object : PreferenceModel {
                 override val title = "Show AlertDialog"
                 override val onClick = alertDialogPresenter::open
+            })
+        }.build(),
+        SettingsEntryBuilder.create("NavDialog", owner).setUiLayoutFn {
+            Preference(object : PreferenceModel {
+                override val title = "Navigate to Dialog"
+                override val onClick = navigator(route = NavDialogProvider.name)
             })
         }.build(),
     )

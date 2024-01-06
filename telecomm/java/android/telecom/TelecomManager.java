@@ -422,8 +422,8 @@ public class TelecomManager {
             "android.telecom.extra.CALL_CREATED_TIME_MILLIS";
 
     /**
-     * The extra for call log uri that was used to mark missed calls as read when dialer gets the
-     * notification on reboot.
+     * Extra URI that is used by a dialer to query the {@link android.provider.CallLog} content
+     * provider and associate a missed call notification with a call log entry.
      */
     @FlaggedApi(Flags.FLAG_ADD_CALL_URI_FOR_MISSED_CALLS)
     public static final String EXTRA_CALL_LOG_URI =
