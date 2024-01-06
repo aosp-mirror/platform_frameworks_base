@@ -4207,7 +4207,9 @@ public class Intent implements Parcelable, Cloneable {
      * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
      *
      * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_AVAILABLE} but functions as a
-     * generic broadcast for all profile users.
+     * generic broadcast for all users of type {@link android.os.UserManager#isProfile()}}. In
+     * case of a managed profile, both {@link #ACTION_MANAGED_PROFILE_AVAILABLE} and
+     * {@link #ACTION_PROFILE_AVAILABLE} broadcasts are sent.
      */
     @FlaggedApi(FLAG_ALLOW_PRIVATE_PROFILE)
     public static final String ACTION_PROFILE_AVAILABLE =
@@ -4221,7 +4223,9 @@ public class Intent implements Parcelable, Cloneable {
      * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
      *
      * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_UNAVAILABLE} but functions as
-     * a generic broadcast for all profile users.
+     * a generic broadcast for all users of type {@link android.os.UserManager#isProfile()}}. In
+     * case of a managed profile, both {@link #ACTION_MANAGED_PROFILE_UNAVAILABLE} and
+     * {@link #ACTION_PROFILE_UNAVAILABLE} broadcasts are sent.
      */
     @FlaggedApi(FLAG_ALLOW_PRIVATE_PROFILE)
     public static final String ACTION_PROFILE_UNAVAILABLE =
@@ -6971,16 +6975,21 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_DEBUG_LOG_RESOLUTION = 0x00000008;
     /**
      * If set, this intent will not match any components in packages that
-     * are currently stopped.  If this is not set, then the default behavior
-     * is to include such applications in the result.
+     * are currently
+     * {@linkplain android.content.pm.ApplicationInfo#FLAG_STOPPED stopped}.
+     * If this is not set, then the default behavior is to include such
+     * applications in the result.
      */
     public static final int FLAG_EXCLUDE_STOPPED_PACKAGES = 0x00000010;
     /**
      * If set, this intent will always match any components in packages that
-     * are currently stopped.  This is the default behavior when
+     * are currently
+     * {@linkplain android.content.pm.ApplicationInfo#FLAG_STOPPED stopped}.
+     * This is the default behavior when
      * {@link #FLAG_EXCLUDE_STOPPED_PACKAGES} is not set.  If both of these
      * flags are set, this one wins (it allows overriding of exclude for
-     * places where the framework may automatically set the exclude flag).
+     * places where the framework may automatically set the exclude flag,
+     * such as broadcasts).
      */
     public static final int FLAG_INCLUDE_STOPPED_PACKAGES = 0x00000020;
 

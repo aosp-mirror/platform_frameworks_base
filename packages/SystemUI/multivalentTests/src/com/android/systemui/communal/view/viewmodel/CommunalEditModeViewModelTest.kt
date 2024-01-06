@@ -33,14 +33,15 @@ import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import javax.inject.Provider
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -56,7 +57,8 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var powerManager: PowerManager
 
-    private lateinit var testScope: TestScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var communalRepository: FakeCommunalRepository
@@ -70,8 +72,6 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        testScope = TestScope()
 
         val withDeps = CommunalInteractorFactory.create()
         keyguardRepository = withDeps.keyguardRepository
@@ -130,4 +130,17 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             assertThat(communalContent?.get(1))
                 .isInstanceOf(CommunalContentModel.Widget::class.java)
         }
+
+    @Test
+    fun interactionHandlerIgnoresClicks() {
+        val interactionHandler = underTest.getInteractionHandler()
+        assertThat(
+                interactionHandler.onInteraction(
+                    /* view = */ mock(),
+                    /* pendingIntent = */ mock(),
+                    /* response = */ mock()
+                )
+            )
+            .isEqualTo(false)
+    }
 }

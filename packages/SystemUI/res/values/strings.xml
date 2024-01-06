@@ -3262,6 +3262,9 @@
     <!-- Label for a button that, when clicked, sends the user to the app store to install an app. [CHAR LIMIT=64]. -->
     <string name="install_app">Install app</string>
 
+    <!-- Instructions informing the user they can swipe up on the lockscreen to dismiss [CHAR LIMIT=48]-->
+    <string name="dismissible_keyguard_swipe">Swipe to continue</string>
+
     <!--- Title of the dialog appearing when an external display is connected, asking whether to start mirroring [CHAR LIMIT=NONE]-->
     <string name="connected_display_dialog_start_mirroring">Mirror to external display?</string>
     <!--- Body of the mirroring dialog, shown when dual display is enabled. This signals that enabling mirroring will stop concurrent displays on a foldable device. [CHAR LIMIT=NONE]-->

@@ -616,6 +616,9 @@ class TaskFragmentContainer {
      * Removes all activities that belong to this process and finishes other containers/activities
      * configured to finish together.
      */
+    // Suppress GuardedBy warning because lint ask to mark this method as
+    // @GuardedBy(container.mController.mLock), which is mLock itself
+    @SuppressWarnings("GuardedBy")
     @GuardedBy("mController.mLock")
     void finish(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {

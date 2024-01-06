@@ -22,6 +22,7 @@ import android.content.ComponentName
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
+import java.util.Optional
 import javax.inject.Inject
 
 /**
@@ -31,7 +32,7 @@ import javax.inject.Inject
 class CommunalWidgetHost
 @Inject
 constructor(
-    private val appWidgetManager: AppWidgetManager,
+    private val appWidgetManager: Optional<AppWidgetManager>,
     private val appWidgetHost: AppWidgetHost,
     @CommunalLog logBuffer: LogBuffer,
 ) {
@@ -56,6 +57,10 @@ constructor(
         return null
     }
 
-    private fun bindWidget(widgetId: Int, provider: ComponentName): Boolean =
-        appWidgetManager.bindAppWidgetIdIfAllowed(widgetId, provider)
+    private fun bindWidget(widgetId: Int, provider: ComponentName): Boolean {
+        if (appWidgetManager.isPresent) {
+            return appWidgetManager.get().bindAppWidgetIdIfAllowed(widgetId, provider)
+        }
+        return false
+    }
 }

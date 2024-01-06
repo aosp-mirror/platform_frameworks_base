@@ -1439,12 +1439,12 @@ public abstract class WallpaperService extends Service {
                                 // to make sure the wallpaper is stopped even after the events
                                 // onSurfaceCreated() and onSurfaceChanged().
                                 if (noConsecutiveVisibilityEvents()) {
-                                    if (DEBUG) Log.v(TAG, "toggling doVisibilityChanged");
-                                    Trace.beginSection("WPMS.Engine.doVisibilityChanged-true");
-                                    doVisibilityChanged(true);
+                                    if (DEBUG) Log.v(TAG, "toggling onVisibilityChanged");
+                                    Trace.beginSection("WPMS.Engine.onVisibilityChanged-true");
+                                    onVisibilityChanged(true);
                                     Trace.endSection();
-                                    Trace.beginSection("WPMS.Engine.doVisibilityChanged-false");
-                                    doVisibilityChanged(false);
+                                    Trace.beginSection("WPMS.Engine.onVisibilityChanged-false");
+                                    onVisibilityChanged(false);
                                     Trace.endSection();
                                 } else {
                                     if (DEBUG) {

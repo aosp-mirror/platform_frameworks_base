@@ -4211,6 +4211,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return redoLayout;
     }
 
+    /**
+     * Shows the keyguard without immediately locking the device.
+     */
+    @Override
+    public void showDismissibleKeyguard() {
+        mKeyguardDelegate.showDismissibleKeyguard();
+    }
+
     // There are several different flavors of "assistant" that can be launched from
     // various parts of the UI.
 

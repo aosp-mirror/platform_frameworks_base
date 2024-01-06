@@ -31,6 +31,7 @@ import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPR
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.IMPORTANT_MSG_MIN_DURATION;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_IS_DISMISSIBLE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
@@ -178,6 +179,7 @@ public class KeyguardIndicationController {
     private KeyguardInteractor mKeyguardInteractor;
     private String mPersistentUnlockMessage;
     private String mAlignmentIndication;
+    private boolean mForceIsDismissible;
     private CharSequence mTrustGrantedIndication;
     private CharSequence mTransientIndication;
     private CharSequence mBiometricMessage;
@@ -442,6 +444,7 @@ public class KeyguardIndicationController {
 
         // Update persistent messages. The following methods should only be called if we're on the
         // lock screen:
+        updateForceIsDimissibileChanged();
         updateLockScreenDisclosureMsg();
         updateLockScreenOwnerInfo();
         updateLockScreenBatteryMsg(animate);
@@ -456,6 +459,22 @@ public class KeyguardIndicationController {
         // avoid calling this method since it has an IPC
         mOrganizationOwnedDevice = whitelistIpcs(this::isOrganizationOwnedDevice);
         updateDeviceEntryIndication(false);
+    }
+
+    private void updateForceIsDimissibileChanged() {
+        if (mForceIsDismissible) {
+            mRotateTextViewController.updateIndication(
+                    INDICATION_IS_DISMISSIBLE,
+                    new KeyguardIndication.Builder()
+                            .setMessage(mContext.getResources().getString(
+                                    com.android.systemui.res.R.string.dismissible_keyguard_swipe)
+                            )
+                            .setTextColor(mInitialTextColorState)
+                            .build(),
+                    /* updateImmediately */ true);
+        } else {
+            mRotateTextViewController.hideIndication(INDICATION_IS_DISMISSIBLE);
+        }
     }
 
     private void updateLockScreenDisclosureMsg() {
@@ -1307,6 +1326,12 @@ public class KeyguardIndicationController {
         @Override
         public void onTrustChanged(int userId) {
             if (!isCurrentUser(userId)) return;
+            updateDeviceEntryIndication(false);
+        }
+
+        @Override
+        public void onForceIsDismissibleChanged(boolean forceIsDismissible) {
+            mForceIsDismissible = forceIsDismissible;
             updateDeviceEntryIndication(false);
         }
 

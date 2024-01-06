@@ -36,13 +36,13 @@ import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import com.android.systemui.res.R.string.kg_too_many_failed_attempts_countdown
 import com.android.systemui.res.R.string.kg_trust_agent_disabled
@@ -122,7 +122,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 fakeTrustRepository,
                 testScope.backgroundScope,
                 mSelectedUserInteractor,
-                mock(KeyguardFaceAuthInteractor::class.java),
+                mock(DeviceEntryFaceAuthInteractor::class.java),
             )
         underTest =
             BouncerMessageInteractor(

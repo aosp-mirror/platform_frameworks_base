@@ -444,28 +444,9 @@ object Flags {
     // TODO(b/254512728): Tracking Bug
     @JvmField val NEW_BACK_AFFORDANCE = releasedFlag("new_back_affordance")
 
-    // TODO(b/255854141): Tracking Bug
-    @JvmField
-    val WM_ENABLE_PREDICTIVE_BACK_SYSUI =
-        unreleasedFlag("persist.wm.debug.predictive_back_sysui_enable", teamfood = true)
 
     // TODO(b/270987164): Tracking Bug
     @JvmField val TRACKPAD_GESTURE_FEATURES = releasedFlag("trackpad_gesture_features")
-
-    // TODO(b/263826204): Tracking Bug
-    @JvmField
-    val WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM =
-        unreleasedFlag("persist.wm.debug.predictive_back_bouncer_anim", teamfood = true)
-
-    // TODO(b/238475428): Tracking Bug
-    @JvmField
-    val WM_SHADE_ALLOW_BACK_GESTURE =
-        sysPropBooleanFlag("persist.wm.debug.shade_allow_back_gesture", default = false)
-
-    // TODO(b/238475428): Tracking Bug
-    @JvmField
-    val WM_SHADE_ANIMATE_BACK_GESTURE =
-        unreleasedFlag("persist.wm.debug.shade_animate_back_gesture", teamfood = false)
 
     // TODO(b/265639042): Tracking Bug
     @JvmField

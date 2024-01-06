@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,35 @@
  * limitations under the License.
  */
 
-package com.android.keyguard
+package com.android.systemui.deviceentry.data.repository
 
 import android.content.res.Resources
 import android.os.Build
 import android.os.PowerManager
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.res.R
 import com.android.systemui.util.settings.GlobalSettings
+import dagger.Binds
+import dagger.Module
 import java.io.PrintWriter
 import java.util.stream.Collectors
 import javax.inject.Inject
 
 /** Determines which device wake-ups should trigger passive authentication. */
+interface FaceWakeUpTriggersConfig {
+    fun shouldTriggerFaceAuthOnWakeUpFrom(@PowerManager.WakeReason pmWakeReason: Int): Boolean
+    fun shouldTriggerFaceAuthOnWakeUpFrom(wakeReason: WakeSleepReason): Boolean
+}
+
 @SysUISingleton
-class FaceWakeUpTriggersConfig
+class FaceWakeUpTriggersConfigImpl
 @Inject
 constructor(@Main resources: Resources, globalSettings: GlobalSettings, dumpManager: DumpManager) :
-    Dumpable {
+    Dumpable, FaceWakeUpTriggersConfig {
     private val defaultTriggerFaceAuthOnWakeUpFrom: Set<Int> =
         resources.getIntArray(R.array.config_face_auth_wake_up_triggers).toSet()
     private val triggerFaceAuthOnWakeUpFrom: Set<Int>
@@ -65,11 +72,13 @@ constructor(@Main resources: Resources, globalSettings: GlobalSettings, dumpMana
         dumpManager.registerDumpable(this)
     }
 
-    fun shouldTriggerFaceAuthOnWakeUpFrom(@PowerManager.WakeReason pmWakeReason: Int): Boolean {
+    override fun shouldTriggerFaceAuthOnWakeUpFrom(
+        @PowerManager.WakeReason pmWakeReason: Int
+    ): Boolean {
         return triggerFaceAuthOnWakeUpFrom.contains(pmWakeReason)
     }
 
-    fun shouldTriggerFaceAuthOnWakeUpFrom(wakeReason: WakeSleepReason): Boolean =
+    override fun shouldTriggerFaceAuthOnWakeUpFrom(wakeReason: WakeSleepReason): Boolean =
         wakeSleepReasonsToTriggerFaceAuth.contains(wakeReason)
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
@@ -86,4 +95,9 @@ constructor(@Main resources: Resources, globalSettings: GlobalSettings, dumpMana
         }
             ?: default
     }
+}
+
+@Module
+interface FaceWakeUpTriggersConfigModule {
+    @Binds fun repository(impl: FaceWakeUpTriggersConfigImpl): FaceWakeUpTriggersConfig
 }

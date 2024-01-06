@@ -138,6 +138,21 @@ class TaskContainer {
     }
 
     /**
+     * Returns {@code true} if the container should be updated with {@code info}.
+     */
+    boolean shouldUpdateContainer(@NonNull TaskFragmentParentInfo info) {
+        final Configuration configuration = info.getConfiguration();
+
+        return info.isVisible()
+                // No need to update presentation in PIP until the Task exit PIP.
+                && !isInPictureInPicture(configuration)
+                // If the task properties equals regardless of starting position, don't need to
+                // update the container.
+                && (mConfiguration.diffPublicOnly(configuration) != 0
+                || mDisplayId != info.getDisplayId());
+    }
+
+    /**
      * Returns the windowing mode for the TaskFragments below this Task, which should be split with
      * other TaskFragments.
      *
@@ -161,7 +176,11 @@ class TaskContainer {
     }
 
     boolean isInPictureInPicture() {
-        return getWindowingMode() == WINDOWING_MODE_PINNED;
+        return isInPictureInPicture(mConfiguration);
+    }
+
+    private static boolean isInPictureInPicture(@NonNull Configuration configuration) {
+        return configuration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED;
     }
 
     boolean isInMultiWindow() {

@@ -32,13 +32,13 @@ import com.android.keyguard.logging.KeyguardLogger
 import com.android.settingslib.Utils
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.lightRevealMigration
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LiftReveal
 import com.android.systemui.statusbar.LightRevealEffect
@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ViewController
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
@@ -62,6 +63,7 @@ import javax.inject.Provider
  *
  * The ripple uses the accent color of the current theme.
  */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class AuthRippleController @Inject constructor(
     private val sysuiContext: Context,
@@ -75,7 +77,6 @@ class AuthRippleController @Inject constructor(
     private val udfpsControllerProvider: Provider<UdfpsController>,
     private val statusBarStateController: StatusBarStateController,
     private val displayMetrics: DisplayMetrics,
-    private val featureFlags: FeatureFlags,
     private val logger: KeyguardLogger,
     private val biometricUnlockController: BiometricUnlockController,
     private val lightRevealScrim: LightRevealScrim,
@@ -311,6 +312,18 @@ class AuthRippleController @Inject constructor(
         override fun onKeyguardBouncerStateChanged(bouncerIsOrWillBeShowing: Boolean) {
             if (bouncerIsOrWillBeShowing) {
                 mView.fadeDwellRipple()
+            }
+        }
+
+        override fun onBiometricDetected(
+                userId: Int,
+                biometricSourceType: BiometricSourceType,
+                isStrongBiometric: Boolean
+        ) {
+            // TODO (b/309804148): add support detect auth ripple for deviceEntryUdfpsRefactor
+            if (!DeviceEntryUdfpsRefactor.isEnabled &&
+                    keyguardUpdateMonitor.getUserCanSkipBouncer(userId)) {
+                showUnlockRipple(biometricSourceType)
             }
         }
     }

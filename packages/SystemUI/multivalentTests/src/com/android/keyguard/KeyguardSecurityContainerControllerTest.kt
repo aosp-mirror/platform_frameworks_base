@@ -45,10 +45,10 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.classifier.FalsingA11yDelegate
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.log.SessionTracker
@@ -140,7 +140,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var viewMediatorCallback: ViewMediatorCallback
     @Mock private lateinit var audioManager: AudioManager
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
-    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
+    @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
     @Mock private lateinit var faceAuthAccessibilityDelegate: FaceAuthAccessibilityDelegate
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var postureController: DevicePostureController

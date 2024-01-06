@@ -65,6 +65,7 @@ systemui_compose_java_defaults {
 
                 "androidx.compose.runtime_runtime",
                 "androidx.compose.material3_material3",
+                "androidx.compose.material_material-icons-extended",
                 "androidx.activity_activity-compose",
                 "androidx.compose.animation_animation-graphics",
             ],

@@ -1,21 +1,20 @@
 /*
- *  Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package com.android.systemui.keyguard.domain.interactor
+package com.android.systemui.deviceentry.domain.interactor
 
 import android.app.trust.TrustManager
 import android.content.pm.UserInfo
@@ -25,8 +24,6 @@ import android.os.Handler
 import android.os.PowerManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.FaceAuthUiEvent
-import com.android.keyguard.FaceWakeUpTriggersConfig
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
@@ -42,6 +39,9 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfig
+import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
+import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
@@ -49,7 +49,8 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -87,9 +88,9 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
+class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
 
-    private lateinit var underTest: SystemUIKeyguardFaceAuthInteractor
+    private lateinit var underTest: SystemUIDeviceEntryFaceAuthInteractor
     private lateinit var testScope: TestScope
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
@@ -133,7 +134,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         fakeBiometricSettingsRepository = FakeBiometricSettingsRepository()
 
         underTest =
-            SystemUIKeyguardFaceAuthInteractor(
+            SystemUIDeviceEntryFaceAuthInteractor(
                 mContext,
                 testScope.backgroundScope,
                 dispatcher,

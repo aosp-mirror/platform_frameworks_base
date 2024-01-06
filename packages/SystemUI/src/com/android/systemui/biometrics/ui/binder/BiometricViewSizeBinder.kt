@@ -30,7 +30,6 @@ import androidx.core.animation.addListener
 import androidx.core.view.doOnLayout
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.ui.BiometricPromptLayout
@@ -41,6 +40,8 @@ import com.android.systemui.biometrics.ui.viewmodel.isMedium
 import com.android.systemui.biometrics.ui.viewmodel.isNullOrNotSmall
 import com.android.systemui.biometrics.ui.viewmodel.isSmall
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /** Helper for [BiometricViewBinder] to handle resize transitions. */
@@ -93,7 +94,20 @@ object BiometricViewSizeBinder {
             view.repeatWhenAttached {
                 var currentSize: PromptSize? = null
                 lifecycleScope.launch {
-                    viewModel.size.collect { size ->
+                    /**
+                     * View is only set visible in BiometricViewSizeBinder once PromptSize is
+                     * determined that accounts for iconView size, to prevent prompt resizing being
+                     * visible to the user.
+                     *
+                     * TODO(b/288175072): May be able to remove isIconViewLoaded once constraint
+                     *   layout is implemented
+                     */
+                    combine(viewModel.isIconViewLoaded, viewModel.size, ::Pair).collect {
+                        (isIconViewLoaded, size) ->
+                        if (!isIconViewLoaded) {
+                            return@collect
+                        }
+
                         // prepare for animated size transitions
                         for (v in viewsToHideWhenSmall) {
                             v.showTextOrHide(forceHide = size.isSmall)
@@ -198,6 +212,8 @@ object BiometricViewSizeBinder {
                             }
 
                             currentSize = size
+                            view.visibility = View.VISIBLE
+                            viewModel.setIsIconViewLoaded(false)
                             notifyAccessibilityChanged()
                         }
                     }

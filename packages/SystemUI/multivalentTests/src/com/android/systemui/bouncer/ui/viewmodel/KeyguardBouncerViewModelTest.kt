@@ -30,9 +30,9 @@ import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.TrustRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -63,7 +63,7 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
     @Mock private lateinit var dismissCallbackRegistry: DismissCallbackRegistry
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
+    @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
 
     lateinit var bouncerInteractor: PrimaryBouncerInteractor
     private val mainHandler = FakeHandler(Looper.getMainLooper())

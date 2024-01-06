@@ -333,6 +333,19 @@ public final class NfcAdapter {
      */
     public static final int FLAG_READER_NFC_BARCODE = 0x10;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = {"FLAG_READER_"}, value = {
+        FLAG_READER_KEEP,
+        FLAG_READER_DISABLE,
+        FLAG_READER_NFC_A,
+        FLAG_READER_NFC_B,
+        FLAG_READER_NFC_F,
+        FLAG_READER_NFC_V,
+        FLAG_READER_NFC_BARCODE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PollTechnology {}
+
     /**
      * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
      * <p>
@@ -358,6 +371,76 @@ public final class NfcAdapter {
      * on any discovered tag.
      */
     public static final String EXTRA_READER_PRESENCE_CHECK_DELAY = "presence";
+
+    /**
+     * Flag for use with {@link #setDiscoveryTechnology(Activity, int, int)}.
+     * <p>
+     * Setting this flag enables listening for Nfc-A technology.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
+    public static final int FLAG_LISTEN_NFC_PASSIVE_A = 0x1;
+
+    /**
+     * Flag for use with {@link #setDiscoveryTechnology(Activity, int, int)}.
+     * <p>
+     * Setting this flag enables listening for Nfc-B technology.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
+    public static final int FLAG_LISTEN_NFC_PASSIVE_B = 1 << 1;
+
+    /**
+     * Flag for use with {@link #setDiscoveryTechnology(Activity, int, int)}.
+     * <p>
+     * Setting this flag enables listening for Nfc-F technology.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
+    public static final int FLAG_LISTEN_NFC_PASSIVE_F = 1 << 2;
+
+    /**
+     * Flags for use with {@link #setDiscoveryTechnology(Activity, int, int)}.
+     * <p>
+     * Setting this flag disables listening.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
+    public static final int FLAG_LISTEN_DISABLE = 0x0;
+
+    /**
+     * Flags for use with {@link #setDiscoveryTechnology(Activity, int, int)}.
+     * <p>
+     * Setting this flag disables polling.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
+    public static final int FLAG_READER_DISABLE = 0x0;
+
+    /**
+     * Flags for use with {@link #setDiscoveryTechnology(Activity, int, int)}.
+     * <p>
+     * Setting this flag makes listening to use current flags.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
+    public static final int FLAG_LISTEN_KEEP = -1;
+
+    /**
+     * Flags for use with {@link #setDiscoveryTechnology(Activity, int, int)}.
+     * <p>
+     * Setting this flag makes polling to use current flags.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
+    public static final int FLAG_READER_KEEP = -1;
+
+    /** @hide */
+    public static final int FLAG_USE_ALL_TECH = 0xff;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = {"FLAG_LISTEN_"}, value = {
+        FLAG_LISTEN_KEEP,
+        FLAG_LISTEN_DISABLE,
+        FLAG_LISTEN_NFC_PASSIVE_A,
+        FLAG_LISTEN_NFC_PASSIVE_B,
+        FLAG_LISTEN_NFC_PASSIVE_F
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ListenTechnology {}
 
     /**
      * @hide
@@ -437,11 +520,13 @@ public final class NfcAdapter {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TagIntentAppPreferenceResult {}
 
-    // Guarded by NfcAdapter.class
+    // Guarded by sLock
     static boolean sIsInitialized = false;
     static boolean sHasNfcFeature;
     static boolean sHasCeFeature;
     static boolean sHasNfcWlcFeature;
+
+    static Object sLock = new Object();
 
     // Final after first constructor, except for
     // attemptDeadServiceRecovery() when NFC crashes - we accept a best effort
@@ -1235,7 +1320,7 @@ public final class NfcAdapter {
     @java.lang.Deprecated
     @UnsupportedAppUsage
     public void setBeamPushUris(Uri[] uris, Activity activity) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1305,7 +1390,7 @@ public final class NfcAdapter {
     @java.lang.Deprecated
     @UnsupportedAppUsage
     public void setBeamPushUrisCallback(CreateBeamUrisCallback callback, Activity activity) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1390,7 +1475,7 @@ public final class NfcAdapter {
     @UnsupportedAppUsage
     public void setNdefPushMessage(NdefMessage message, Activity activity,
             Activity ... activities) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1404,7 +1489,7 @@ public final class NfcAdapter {
     @SystemApi
     @UnsupportedAppUsage
     public void setNdefPushMessage(NdefMessage message, Activity activity, int flags) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1483,7 +1568,7 @@ public final class NfcAdapter {
     @UnsupportedAppUsage
     public void setNdefPushMessageCallback(CreateNdefMessageCallback callback, Activity activity,
             Activity ... activities) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1534,7 +1619,7 @@ public final class NfcAdapter {
     @UnsupportedAppUsage
     public void setOnNdefPushCompleteCallback(OnNdefPushCompleteCallback callback,
             Activity activity, Activity ... activities) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1577,7 +1662,7 @@ public final class NfcAdapter {
      */
     public void enableForegroundDispatch(Activity activity, PendingIntent intent,
             IntentFilter[] filters, String[][] techLists) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1612,7 +1697,7 @@ public final class NfcAdapter {
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
      */
     public void disableForegroundDispatch(Activity activity) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1648,7 +1733,7 @@ public final class NfcAdapter {
      */
     public void enableReaderMode(Activity activity, ReaderCallback callback, int flags,
             Bundle extras) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1665,7 +1750,7 @@ public final class NfcAdapter {
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
      */
     public void disableReaderMode(Activity activity) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1693,7 +1778,7 @@ public final class NfcAdapter {
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @SuppressLint("VisiblySynchronized")
     public void setReaderMode(boolean enablePolling) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1705,6 +1790,80 @@ public final class NfcAdapter {
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
+    }
+
+    /**
+     * Set the NFC controller to enable specific poll/listen technologies,
+     * as specified in parameters, while this Activity is in the foreground.
+     *
+     * Use {@link #FLAG_READER_KEEP} to keep current polling technology.
+     * Use {@link #FLAG_LISTEN_KEEP} to keep current listenig technology.
+     * Use {@link #FLAG_READER_DISABLE} to disable polling.
+     * Use {@link #FLAG_LISTEN_DISABLE} to disable listening.
+     * Also refer to {@link #resetDiscoveryTechnology(Activity)} to restore these changes.
+     * </p>
+     * The pollTech, listenTech parameters can be one or several of below list.
+     * <pre>
+     *                    Poll                    Listen
+     *  Passive A         0x01   (NFC_A)           0x01  (NFC_PASSIVE_A)
+     *  Passive B         0x02   (NFC_B)           0x02  (NFC_PASSIVE_B)
+     *  Passive F         0x04   (NFC_F)           0x04  (NFC_PASSIVE_F)
+     *  ISO 15693         0x08   (NFC_V)             -
+     *  Kovio             0x10   (NFC_BARCODE)       -
+     * </pre>
+     * <p>Example usage in an Activity that requires to disable poll,
+     * keep current listen technologies:
+     * <pre>
+     * protected void onResume() {
+     *     mNfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
+     *     mNfcAdapter.setDiscoveryTechnology(this,
+     *         NfcAdapter.FLAG_READER_DISABLE, NfcAdapter.FLAG_LISTEN_KEEP);
+     * }</pre></p>
+     * @param activity The Activity that requests NFC controller to enable specific technologies.
+     * @param pollTech Flags indicating poll technologies.
+     * @param listenTech Flags indicating listen technologies.
+     * @throws UnsupportedOperationException if FEATURE_NFC,
+     * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF are unavailable.
+     */
+
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
+    public void setDiscoveryTechnology(@NonNull Activity activity,
+            @PollTechnology int pollTech, @ListenTechnology int listenTech) {
+        if (listenTech == FLAG_LISTEN_DISABLE) {
+            synchronized (sLock) {
+                if (!sHasNfcFeature) {
+                    throw new UnsupportedOperationException();
+                }
+            }
+            mNfcActivityManager.enableReaderMode(activity, null, pollTech, null);
+            return;
+        }
+        if (pollTech == FLAG_READER_DISABLE) {
+            synchronized (sLock) {
+                if (!sHasCeFeature) {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        } else {
+            synchronized (sLock) {
+                if (!sHasNfcFeature || !sHasCeFeature) {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        }
+        mNfcActivityManager.setDiscoveryTech(activity, pollTech, listenTech);
+    }
+
+    /**
+     * Restore the poll/listen technologies of NFC controller,
+     * which were changed by {@link #setDiscoveryTechnology(Activity , int , int)}
+     *
+     * @param activity The Activity that requests to changed technologies.
+     */
+
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
+    public void resetDiscoveryTechnology(@NonNull Activity activity) {
+        mNfcActivityManager.resetDiscoveryTech(activity);
     }
 
     /**
@@ -1737,7 +1896,7 @@ public final class NfcAdapter {
     @java.lang.Deprecated
     @UnsupportedAppUsage
     public boolean invokeBeam(Activity activity) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1775,7 +1934,7 @@ public final class NfcAdapter {
     @Deprecated
     @UnsupportedAppUsage
     public void enableForegroundNdefPush(Activity activity, NdefMessage message) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -1805,7 +1964,7 @@ public final class NfcAdapter {
     @Deprecated
     @UnsupportedAppUsage
     public void disableForegroundNdefPush(Activity activity) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -2085,7 +2244,7 @@ public final class NfcAdapter {
     @java.lang.Deprecated
     @UnsupportedAppUsage
     public boolean isNdefPushEnabled() {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -2199,7 +2358,7 @@ public final class NfcAdapter {
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean addNfcUnlockHandler(final NfcUnlockHandler unlockHandler,
                                        String[] tagTechnologies) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }
@@ -2248,7 +2407,7 @@ public final class NfcAdapter {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean removeNfcUnlockHandler(NfcUnlockHandler unlockHandler) {
-        synchronized (NfcAdapter.class) {
+        synchronized (sLock) {
             if (!sHasNfcFeature) {
                 throw new UnsupportedOperationException();
             }

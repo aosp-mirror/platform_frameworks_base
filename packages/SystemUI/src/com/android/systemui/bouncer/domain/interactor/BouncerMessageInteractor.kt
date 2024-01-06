@@ -30,9 +30,9 @@ import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.res.R.string.bouncer_face_not_recognized

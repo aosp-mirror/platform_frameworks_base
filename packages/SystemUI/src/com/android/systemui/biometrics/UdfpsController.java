@@ -80,11 +80,11 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
@@ -149,7 +149,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final DumpManager mDumpManager;
     @NonNull private final SystemUIDialogManager mDialogManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @NonNull private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    @NonNull private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     @NonNull private final VibratorHelper mVibrator;
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final PowerManager mPowerManager;
@@ -664,7 +664,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull SessionTracker sessionTracker,
             @NonNull AlternateBouncerInteractor alternateBouncerInteractor,
             @NonNull InputManager inputManager,
-            @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
+            @NonNull DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor,
             @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
             @NonNull SelectedUserInteractor selectedUserInteractor,
             @NonNull FpsUnlockTracker fpsUnlockTracker,
@@ -736,7 +736,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     }
                     return Unit.INSTANCE;
                 });
-        mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
+        mDeviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor;
 
         final UdfpsOverlayController mUdfpsOverlayController = new UdfpsOverlayController();
         mFingerprintManager.setUdfpsOverlayController(mUdfpsOverlayController);
@@ -1027,7 +1027,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (!mOnFingerDown) {
             playStartHaptic();
 
-            mKeyguardFaceAuthInteractor.onUdfpsSensorTouched();
+            mDeviceEntryFaceAuthInteractor.onUdfpsSensorTouched();
         }
         mOnFingerDown = true;
         mFingerprintManager.onPointerDown(requestId, mSensorProps.sensorId, pointerId, x, y,
