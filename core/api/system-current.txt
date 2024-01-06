@@ -10571,7 +10571,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static int rebootAndApply(@NonNull android.content.Context, @NonNull String, boolean) throws java.io.IOException;
     method @RequiresPermission(allOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void rebootWipeAb(android.content.Context, java.io.File, String) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void scheduleUpdateOnBoot(android.content.Context, java.io.File) throws java.io.IOException;
-    method public static boolean verifyPackageCompatibility(java.io.File) throws java.io.IOException;
+    method @Deprecated public static boolean verifyPackageCompatibility(java.io.File) throws java.io.IOException;
     field public static final int RESUME_ON_REBOOT_REBOOT_ERROR_INVALID_PACKAGE_NAME = 2000; // 0x7d0
     field public static final int RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED = 3000; // 0xbb8
     field public static final int RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE = 5000; // 0x1388

@@ -18,8 +18,6 @@ package android.os;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,11 +45,8 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Display;
 
-import libcore.io.Streams;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -75,7 +70,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.SignerInfo;
@@ -426,72 +420,43 @@ public class RecoverySystem {
         } finally {
             raf.close();
         }
-
-        // Additionally verify the package compatibility.
-        if (!readAndVerifyPackageCompatibilityEntry(packageFile)) {
-            throw new SignatureException("package compatibility verification failed");
-        }
     }
 
     /**
      * Verifies the compatibility entry from an {@link InputStream}.
      *
-     * @return the verification result.
+     * @param inputStream The stream that contains the package compatibility info.
+     * @throws IOException Never.
+     * @return {@code true}.
+     * @deprecated This function no longer checks {@code inputStream} and
+     *   unconditionally returns true. Instead, check compatibility when the
+     *   OTA package is generated.
      */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(
+            publicAlternatives = "Use {@code true} directly",
+            maxTargetSdk = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     private static boolean verifyPackageCompatibility(InputStream inputStream) throws IOException {
-        ArrayList<String> list = new ArrayList<>();
-        ZipInputStream zis = new ZipInputStream(inputStream);
-        ZipEntry entry;
-        while ((entry = zis.getNextEntry()) != null) {
-            long entrySize = entry.getSize();
-            if (entrySize > Integer.MAX_VALUE || entrySize < 0) {
-                throw new IOException(
-                        "invalid entry size (" + entrySize + ") in the compatibility file");
-            }
-            byte[] bytes = new byte[(int) entrySize];
-            Streams.readFully(zis, bytes);
-            list.add(new String(bytes, UTF_8));
-        }
-        if (list.isEmpty()) {
-            throw new IOException("no entries found in the compatibility file");
-        }
-        return (VintfObject.verify(list.toArray(new String[list.size()])) == 0);
-    }
-
-    /**
-     * Reads and verifies the compatibility entry in an OTA zip package. The compatibility entry is
-     * a zip file (inside the OTA package zip).
-     *
-     * @return {@code true} if the entry doesn't exist or verification passes.
-     */
-    private static boolean readAndVerifyPackageCompatibilityEntry(File packageFile)
-            throws IOException {
-        try (ZipFile zip = new ZipFile(packageFile)) {
-            ZipEntry entry = zip.getEntry("compatibility.zip");
-            if (entry == null) {
-                return true;
-            }
-            InputStream inputStream = zip.getInputStream(entry);
-            return verifyPackageCompatibility(inputStream);
-        }
+        return true;
     }
 
     /**
      * Verifies the package compatibility info against the current system.
      *
      * @param compatibilityFile the {@link File} that contains the package compatibility info.
-     * @throws IOException if there were any errors reading the compatibility file.
-     * @return the compatibility verification result.
+     * @throws IOException Never.
+     * @return {@code true}
+     * @deprecated This function no longer checks {@code compatibilityFile} and
+     *   unconditionally returns true. Instead, check compatibility when the
+     *   OTA package is generated.
      *
      * {@hide}
      */
+    @Deprecated
     @SystemApi
     @SuppressLint("RequiresPermission")
     public static boolean verifyPackageCompatibility(File compatibilityFile) throws IOException {
-        try (InputStream inputStream = new FileInputStream(compatibilityFile)) {
-            return verifyPackageCompatibility(inputStream);
-        }
+        return true;
     }
 
     /**
