@@ -13354,6 +13354,23 @@ package android.service.voice {
     field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
   }
 
+  @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final class VisualQueryAttentionResult implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=1, to=100) public int getEngagementLevel();
+    method public int getInteractionIntention();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.VisualQueryAttentionResult> CREATOR;
+    field public static final int INTERACTION_INTENTION_AUDIO_VISUAL = 0; // 0x0
+    field public static final int INTERACTION_INTENTION_VISUAL_ACCESSIBILITY = 1; // 0x1
+  }
+
+  public static final class VisualQueryAttentionResult.Builder {
+    ctor public VisualQueryAttentionResult.Builder();
+    method @NonNull public android.service.voice.VisualQueryAttentionResult build();
+    method @NonNull public android.service.voice.VisualQueryAttentionResult.Builder setEngagementLevel(@IntRange(from=1, to=100) int);
+    method @NonNull public android.service.voice.VisualQueryAttentionResult.Builder setInteractionIntention(int);
+  }
+
   @FlaggedApi("android.service.voice.flags.allow_complex_results_egress_from_vqds") public final class VisualQueryDetectedResult implements android.os.Parcelable {
     method public int describeContents();
     method public static int getMaxSpeakerId();
@@ -13374,7 +13391,9 @@ package android.service.voice {
     ctor public VisualQueryDetectionService();
     method public final void finishQuery() throws java.lang.IllegalStateException;
     method public final void gainedAttention();
+    method @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final void gainedAttention(@NonNull android.service.voice.VisualQueryAttentionResult);
     method public final void lostAttention();
+    method @FlaggedApi("android.service.voice.flags.allow_various_attention_types") public final void lostAttention(int);
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onStartDetection();
     method public void onStopDetection();

@@ -33,6 +33,7 @@ import android.service.voice.IDetectorSessionVisualQueryDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
+import android.service.voice.VisualQueryAttentionResult;
 import android.service.voice.VisualQueryDetectedResult;
 import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.util.Slog;
@@ -105,7 +106,7 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 new IDetectorSessionVisualQueryDetectionCallback.Stub(){
 
             @Override
-            public void onAttentionGained() {
+            public void onAttentionGained(VisualQueryAttentionResult attentionResult) {
                 Slog.v(TAG, "BinderCallback#onAttentionGained");
                 synchronized (mLock) {
                     mEgressingData = true;
@@ -113,7 +114,7 @@ final class VisualQueryDetectorSession extends DetectorSession {
                         return;
                     }
                     try {
-                        mAttentionListener.onAttentionGained();
+                        mAttentionListener.onAttentionGained(attentionResult);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Error delivering attention gained event.", e);
                         try {
@@ -129,7 +130,7 @@ final class VisualQueryDetectorSession extends DetectorSession {
             }
 
             @Override
-            public void onAttentionLost() {
+            public void onAttentionLost(int interactionIntention) {
                 Slog.v(TAG, "BinderCallback#onAttentionLost");
                 synchronized (mLock) {
                     mEgressingData = false;
@@ -137,7 +138,7 @@ final class VisualQueryDetectorSession extends DetectorSession {
                         return;
                     }
                     try {
-                        mAttentionListener.onAttentionLost();
+                        mAttentionListener.onAttentionLost(interactionIntention);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Error delivering attention lost event.", e);
                         try {

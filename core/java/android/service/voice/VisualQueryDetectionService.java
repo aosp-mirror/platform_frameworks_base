@@ -262,23 +262,82 @@ public abstract class VisualQueryDetectionService extends Service
     public void onStopDetection() {
     }
 
+    // TODO(b/324341724): Properly deprecate this API.
     /**
-     * Informs the system that the user attention is gained so queries can be streamed.
+     * Informs the system that the attention is gained for the interaction intention
+     * {@link VisualQueryAttentionResult#INTERACTION_INTENTION_AUDIO_VISUAL} with
+     * engagement level equals to the maximum value possible so queries can be streamed.
+     *
+     * Usage of this method is not recommended, please use
+     * {@link VisualQueryDetectionService#gainedAttention(VisualQueryAttentionResult)} instead.
+     *
      */
     public final void gainedAttention() {
+        if (Flags.allowVariousAttentionTypes()) {
+            gainedAttention(new VisualQueryAttentionResult.Builder().build());
+        } else {
+            try {
+                mRemoteCallback.onAttentionGained(null);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Puts the device into an attention state that will listen to certain interaction intention
+     * based on the {@link VisualQueryAttentionResult} provided.
+     *
+     * Different type and levels of engagement will lead to corresponding UI icons showing. See
+     * {@link VisualQueryAttentionResult#setInteractionIntention(int)} for details.
+     *
+     * Exactly one {@link VisualQueryAttentionResult} can be set at a time with this method at
+     * the moment. Multiple attention results will be supported to set the device into with this
+     * API before {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} is finalized.
+     *
+     * Latest call will override the {@link VisualQueryAttentionResult} of previous calls. Queries
+     * streamed are independent of the attention interactionIntention.
+     *
+     * @param attentionResult Attention result of type {@link VisualQueryAttentionResult}.
+     */
+    @FlaggedApi(Flags.FLAG_ALLOW_VARIOUS_ATTENTION_TYPES)
+    public final void gainedAttention(@NonNull VisualQueryAttentionResult attentionResult) {
         try {
-            mRemoteCallback.onAttentionGained();
+            mRemoteCallback.onAttentionGained(attentionResult);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Informs the system that the user attention is lost to stop streaming.
+     * Informs the system that all attention has lost to stop streaming.
      */
     public final void lostAttention() {
+        if (Flags.allowVariousAttentionTypes()) {
+            lostAttention(VisualQueryAttentionResult.INTERACTION_INTENTION_AUDIO_VISUAL);
+            lostAttention(VisualQueryAttentionResult.INTERACTION_INTENTION_VISUAL_ACCESSIBILITY);
+        } else {
+            try {
+                mRemoteCallback.onAttentionLost(0); // placeholder
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * This will cancel the corresponding attention if the provided interaction intention is the
+     * same as which of the object called with
+     * {@link VisualQueryDetectionService#gainedAttention(VisualQueryAttentionResult)}.
+     *
+     * @param interactionIntention Interaction intention, one of
+     *        {@link VisualQueryAttentionResult#InteractionIntention}.
+     */
+    @FlaggedApi(Flags.FLAG_ALLOW_VARIOUS_ATTENTION_TYPES)
+    public final void lostAttention(
+            @VisualQueryAttentionResult.InteractionIntention int interactionIntention) {
         try {
-            mRemoteCallback.onAttentionLost();
+            mRemoteCallback.onAttentionLost(interactionIntention);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

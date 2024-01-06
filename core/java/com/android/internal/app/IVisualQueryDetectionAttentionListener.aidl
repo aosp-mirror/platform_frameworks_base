@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import android.service.voice.VisualQueryAttentionResult;
+
 /**
  * Allows sysui to notify users the assistant is ready to take a query without notifying the
  * assistant app.
@@ -24,10 +26,10 @@ oneway interface IVisualQueryDetectionAttentionListener {
    /**
     * Called when attention signal is sent.
     */
-   void onAttentionGained();
+   void onAttentionGained(in VisualQueryAttentionResult attentionResult);
 
    /**
-    * Called when a attention signal is lost.
+    * Called when a attention signal is lost for a certain interaction intention.
     */
-   void onAttentionLost();
+   void onAttentionLost(int interactionIntention);
 }
