@@ -23,6 +23,8 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,6 +55,7 @@ public final class ClientControllerTest {
     private static final int ANY_DISPLAY_ID = Display.DEFAULT_DISPLAY;
     private static final int ANY_CALLER_UID = 1;
     private static final int ANY_CALLER_PID = 1;
+    private static final String SOME_PACKAGE_NAME = "some.package";
 
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
@@ -81,7 +84,8 @@ public final class ClientControllerTest {
     }
 
     @Test
-    // TODO(b/314150112): Enable host side mode for this test once b/315544364 is fixed.
+    // TODO(b/314150112): Enable host side mode for this test once Ravenwood is enabled for
+    //  inputmethod server classes.
     @IgnoreUnderRavenwood(blockedBy = {InputBinding.class, IInputMethodClientInvoker.class})
     public void testAddClient_cannotAddTheSameClientTwice() {
         var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
@@ -103,7 +107,8 @@ public final class ClientControllerTest {
     }
 
     @Test
-    // TODO(b/314150112): Enable host side mode for this test once b/315544364 is fixed.
+    // TODO(b/314150112): Enable host side mode for this test once Ravenwood is enabled for
+    //  inputmethod server classes.
     @IgnoreUnderRavenwood(blockedBy = {InputBinding.class, IInputMethodClientInvoker.class})
     public void testAddClient() throws Exception {
         synchronized (ImfLock.class) {
@@ -117,7 +122,8 @@ public final class ClientControllerTest {
     }
 
     @Test
-    // TODO(b/314150112): Enable host side mode for this test once b/315544364 is fixed.
+    // TODO(b/314150112): Enable host side mode for this test once Ravenwood is enabled for
+    //  inputmethod server classes.
     @IgnoreUnderRavenwood(blockedBy = {InputBinding.class, IInputMethodClientInvoker.class})
     public void testRemoveClient() {
         var callback = new TestClientControllerCallback();
@@ -135,6 +141,36 @@ public final class ClientControllerTest {
         // Test callback
         var removed = callback.waitForRemovedClient(5, TimeUnit.SECONDS);
         assertThat(removed).isSameInstanceAs(added);
+    }
+
+    @Test
+    // TODO(b/314150112): Enable host side mode for this test once Ravenwood is enabled for
+    //  inputmethod server classes and updated to newer Mockito with static mock support (mock
+    //  InputMethodUtils#checkIfPackageBelongsToUid instead of PackageManagerInternal#isSameApp)
+    @IgnoreUnderRavenwood(blockedBy = {InputMethodUtils.class})
+    public void testVerifyClientAndPackageMatch() {
+        when(mMockPackageManagerInternal.isSameApp(eq(SOME_PACKAGE_NAME),  /* flags= */
+                anyLong(), eq(ANY_CALLER_UID), /* userId= */ anyInt())).thenReturn(true);
+
+        synchronized (ImfLock.class) {
+            var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
+            mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, ANY_CALLER_UID,
+                    ANY_CALLER_PID);
+            assertThat(
+                    mController.verifyClientAndPackageMatch(mClient, SOME_PACKAGE_NAME)).isTrue();
+        }
+    }
+
+    @Test
+    public void testVerifyClientAndPackageMatch_unknownClient() {
+        synchronized (ImfLock.class) {
+            assertThrows(IllegalArgumentException.class,
+                    () -> {
+                        synchronized (ImfLock.class) {
+                            mController.verifyClientAndPackageMatch(mClient, SOME_PACKAGE_NAME);
+                        }
+                    });
+        }
     }
 
     private static class TestClientControllerCallback implements ClientControllerCallback {
