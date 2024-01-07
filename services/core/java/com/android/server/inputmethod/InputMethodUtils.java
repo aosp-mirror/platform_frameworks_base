@@ -215,7 +215,7 @@ final class InputMethodUtils {
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
 
         @UserIdInt
-        private int mCurrentUserId;
+        private final int mCurrentUserId;
 
         private static void buildEnabledInputMethodsSettingString(
                 StringBuilder builder, Pair<String, ArrayList<String>> ime) {
@@ -229,18 +229,6 @@ final class InputMethodUtils {
 
         InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId) {
             mMethodMap = methodMap;
-            switchCurrentUser(userId);
-        }
-
-        /**
-         * Must be called when the current user is changed.
-         *
-         * @param userId The user ID.
-         */
-        void switchCurrentUser(@UserIdInt int userId) {
-            if (DEBUG) {
-                Slog.d(TAG, "--- Switch the current user from " + mCurrentUserId + " to " + userId);
-            }
             mCurrentUserId = userId;
             String ime = getSelectedInputMethod();
             String defaultDeviceIme = getSelectedDefaultDeviceInputMethod();
