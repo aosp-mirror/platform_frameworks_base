@@ -76,7 +76,6 @@ import android.graphics.Rect;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
-import android.util.MergedConfiguration;
 import android.util.Pair;
 
 import androidx.test.filters.MediumTest;
@@ -545,8 +544,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertNotEquals(activity.getConfiguration().orientation, rotatedConfig.orientation);
         // Assume the activity was shown in different orientation. For example, the top activity is
         // landscape and the portrait lockscreen is shown.
-        activity.setLastReportedConfiguration(
-                new MergedConfiguration(mAtm.getGlobalConfiguration(), rotatedConfig));
+        activity.setLastReportedConfiguration(mAtm.getGlobalConfiguration(), rotatedConfig);
         activity.setState(STOPPED, "sleep");
 
         display.setIsSleeping(true);

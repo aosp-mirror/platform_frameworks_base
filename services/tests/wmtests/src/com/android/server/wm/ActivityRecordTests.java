@@ -143,7 +143,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
-import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
 import android.view.DisplayInfo;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -395,8 +394,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setState(RESUMED, "Testing");
 
         task.onRequestedOverrideConfigurationChanged(task.getConfiguration());
-        activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
-                activity.getConfiguration()));
+        activity.setLastReportedConfiguration(new Configuration(), activity.getConfiguration());
 
         activity.info.configChanges &= ~CONFIG_ORIENTATION;
         final Configuration newConfig = new Configuration(task.getConfiguration());
@@ -420,8 +418,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setState(RESUMED, "Testing");
 
         task.onRequestedOverrideConfigurationChanged(task.getConfiguration());
-        activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
-                activity.getConfiguration()));
+        activity.setLastReportedConfiguration(new Configuration(), activity.getConfiguration());
 
         activity.info.configChanges &= ~CONFIG_ORIENTATION;
         final Configuration newConfig = new Configuration(task.getConfiguration());
@@ -447,8 +444,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setState(RESUMED, "Testing");
 
         task.onRequestedOverrideConfigurationChanged(task.getConfiguration());
-        activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
-                activity.getConfiguration()));
+        activity.setLastReportedConfiguration(new Configuration(), activity.getConfiguration());
 
         activity.info.configChanges &= ~CONFIG_ORIENTATION;
         final Configuration newConfig = new Configuration(task.getConfiguration());
@@ -468,8 +464,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setState(RESUMED, "Testing");
 
         task.onRequestedOverrideConfigurationChanged(task.getConfiguration());
-        activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
-                activity.getConfiguration()));
+        activity.setLastReportedConfiguration(new Configuration(), activity.getConfiguration());
 
         activity.info.configChanges &= ~ActivityInfo.CONFIG_FONT_SCALE;
         final Configuration newConfig = new Configuration(task.getConfiguration());
@@ -571,8 +566,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .build();
         activity.setState(RESUMED, "Testing");
 
-        activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
-                activity.getConfiguration()));
+        activity.setLastReportedConfiguration(new Configuration(), activity.getConfiguration());
 
         clearInvocations(mClientLifecycleManager);
 
@@ -799,8 +793,7 @@ public class ActivityRecordTests extends WindowTestsBase {
             doReturn(false).when(stack).isTranslucent(any());
             assertTrue(task.shouldBeVisible(null /* starting */));
 
-            activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
-                    activity.getConfiguration()));
+            activity.setLastReportedConfiguration(new Configuration(), activity.getConfiguration());
 
             final Configuration newConfig = new Configuration(activity.getConfiguration());
             final int shortSide = newConfig.screenWidthDp == newConfig.screenHeightDp

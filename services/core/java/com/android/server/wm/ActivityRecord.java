@@ -6611,10 +6611,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return hasProcess() && !app.isCrashing() && !app.isNotResponding();
     }
 
-    void startFreezingScreenLocked(int configChanges) {
-        startFreezingScreenLocked(app, configChanges);
-    }
-
     void startFreezingScreenLocked(WindowProcessController app, int configChanges) {
         if (mayFreezeScreenLocked(app)) {
             if (getParent() == null) {
@@ -8098,12 +8094,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Set the last reported configuration to the client. Should be called whenever
      * a new merged configuration is sent to the client for this activity.
      */
-    void setLastReportedConfiguration(@NonNull MergedConfiguration config) {
-        setLastReportedConfiguration(config.getGlobalConfiguration(),
-            config.getOverrideConfiguration());
-    }
-
-    private void setLastReportedConfiguration(Configuration global, Configuration override) {
+    void setLastReportedConfiguration(@NonNull Configuration global,
+            @NonNull Configuration override) {
         mLastReportedConfiguration.setConfiguration(global, override);
     }
 
@@ -9637,7 +9629,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             configChangeFlags |= changes;
             if (mVisible && mAtmService.mTmpUpdateConfigurationResult.mIsUpdating
                     && !mTransitionController.isShellTransitionsEnabled()) {
-                startFreezingScreenLocked(mAtmService.mTmpUpdateConfigurationResult.changes);
+                startFreezingScreenLocked(app, mAtmService.mTmpUpdateConfigurationResult.changes);
             }
             final boolean displayMayChange = mTmpConfig.windowConfiguration.getDisplayRotation()
                     != getWindowConfiguration().getDisplayRotation()
