@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.view.View
 import android.view.View.OnLongClickListener
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS
+import android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -79,6 +81,9 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
 
     @ColorInt
     private fun getCaptionBackgroundColor(taskInfo: RunningTaskInfo): Int {
+        if (isTransparentBackgroundRequested(taskInfo)) {
+            return Color.TRANSPARENT
+        }
         val materialColorAttr: Int =
             if (isDarkMode()) {
                 if (!taskInfo.isFocused) {
@@ -102,6 +107,10 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
     @ColorInt
     private fun getAppNameAndButtonColor(taskInfo: RunningTaskInfo): Int {
         val materialColorAttr = when {
+            isTransparentBackgroundRequested(taskInfo) &&
+                    isLightCaptionBar(taskInfo) -> materialColorOnSecondaryContainer
+            isTransparentBackgroundRequested(taskInfo) &&
+                    !isLightCaptionBar(taskInfo) -> materialColorOnSurface
             isDarkMode() -> materialColorOnSurface
             else -> materialColorOnSecondaryContainer
         }
@@ -130,6 +139,16 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         return context.resources.configuration.uiMode and
                 Configuration.UI_MODE_NIGHT_MASK ==
                 Configuration.UI_MODE_NIGHT_YES
+    }
+
+    private fun isTransparentBackgroundRequested(taskInfo: RunningTaskInfo): Boolean {
+        val appearance = taskInfo.taskDescription?.statusBarAppearance ?: 0
+        return (appearance and APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND) != 0
+    }
+
+    private fun isLightCaptionBar(taskInfo: RunningTaskInfo): Boolean {
+        val appearance = taskInfo.taskDescription?.statusBarAppearance ?: 0
+        return (appearance and APPEARANCE_LIGHT_CAPTION_BARS) != 0
     }
 
     companion object {
