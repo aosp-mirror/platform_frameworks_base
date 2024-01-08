@@ -21,6 +21,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.HandlerExecutor;
+import android.os.HandlerThread;
 import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
@@ -51,6 +53,7 @@ public class NextAlarmControllerImpl extends BroadcastReceiver
     private final UserTracker mUserTracker;
     private AlarmManager mAlarmManager;
     private AlarmManager.AlarmClockInfo mNextAlarm;
+    private HandlerThread mHandlerThread;
 
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
@@ -75,7 +78,10 @@ public class NextAlarmControllerImpl extends BroadcastReceiver
         IntentFilter filter = new IntentFilter();
         filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
         broadcastDispatcher.registerReceiver(this, filter, null, UserHandle.ALL);
-        mUserTracker.addCallback(mUserChangedCallback, mainExecutor);
+        mHandlerThread = new HandlerThread("NextAlarmControllerImpl");
+        mHandlerThread.start();
+        mUserTracker.addCallback(mUserChangedCallback,
+                    new HandlerExecutor(mHandlerThread.getThreadHandler()));
         updateNextAlarm();
     }
 
