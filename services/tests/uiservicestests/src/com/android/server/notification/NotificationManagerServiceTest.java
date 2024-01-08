@@ -958,22 +958,24 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mTestNotificationChannel.setAllowBubbles(channelEnabled);
     }
 
-    private void setUpPrefsForHistory(int uid, boolean globalEnabled) throws Exception {
+    private void setUpPrefsForHistory(@UserIdInt int userId, boolean globalEnabled)
+            throws Exception {
         initNMS(SystemService.PHASE_ACTIVITY_MANAGER_READY);
 
         // Sets NOTIFICATION_HISTORY_ENABLED setting for calling process uid
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, globalEnabled ? 1 : 0, uid);
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, globalEnabled ? 1 : 0, userId);
         // Sets NOTIFICATION_HISTORY_ENABLED setting for uid 0
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, globalEnabled ? 1 : 0);
+        setUsers(new int[] {0, userId});
 
         // Forces an update by calling observe on mSettingsObserver, which picks up the settings
         // changes above.
         mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START, mMainLooper);
 
         assertEquals(globalEnabled, Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0 /* =def */, uid) != 0);
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0 /* =def */, userId) != 0);
     }
 
     private StatusBarNotification generateSbn(String pkg, int uid, long postTime, int userId) {
@@ -10443,7 +10445,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testHandleOnPackageRemoved_ClearsHistory() throws Exception {
         // Enables Notification History setting
-        setUpPrefsForHistory(mUid, true /* =enabled */);
+        setUpPrefsForHistory(mUserId, true /* =enabled */);
 
         // Posts a notification to the mTestNotificationChannel.
         final NotificationRecord notif = generateNotificationRecord(
