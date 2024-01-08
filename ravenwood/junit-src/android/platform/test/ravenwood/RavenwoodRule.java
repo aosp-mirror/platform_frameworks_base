@@ -142,6 +142,11 @@ public class RavenwoodRule implements TestRule {
                     Assume.assumeFalse(IS_UNDER_RAVENWOOD);
                 }
 
+                // Stopgap for http://g/ravenwood/EPAD-N5ntxM
+                if (description.getMethodName().endsWith("$noRavenwood")) {
+                    Assume.assumeFalse(IS_UNDER_RAVENWOOD);
+                }
+
                 RavenwoodRuleImpl.init(RavenwoodRule.this);
                 try {
                     base.evaluate();
