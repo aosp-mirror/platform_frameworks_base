@@ -1112,6 +1112,29 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return changed;
     }
 
+    void restoreComponentSettings(int userId) {
+        PackageUserStateImpl state = modifyUserStateComponents(userId, true, true);
+        WatchedArraySet<String> enabledComponents = state.getEnabledComponentsNoCopy();
+        WatchedArraySet<String> disabledComponents = state.getDisabledComponentsNoCopy();
+
+        boolean changed = false;
+        for (int i = enabledComponents.size() - 1; i >= 0; i--) {
+            if (!AndroidPackageUtils.hasComponentClassName(pkg, enabledComponents.valueAt(i))) {
+                enabledComponents.removeAt(i);
+                changed = true;
+            }
+        }
+        for (int i = disabledComponents.size() - 1; i >= 0; i--) {
+            if (!AndroidPackageUtils.hasComponentClassName(pkg, disabledComponents.valueAt(i))) {
+                disabledComponents.removeAt(i);
+                changed = true;
+            }
+        }
+        if (changed) {
+            onChanged();
+        }
+    }
+
     int getCurrentEnabledStateLPr(String componentName, int userId) {
         PackageUserStateInternal state = readUserState(userId);
         if (state.getEnabledComponentsNoCopy() != null
