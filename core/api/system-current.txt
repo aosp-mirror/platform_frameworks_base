@@ -8450,11 +8450,14 @@ package android.media.tv.tuner.filter {
     method public long getAudioHandle();
     method @NonNull public java.util.List<android.media.AudioPresentation> getAudioPresentations();
     method public long getAvDataId();
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") public int getDataGroupId();
     method public long getDataLength();
     method public long getDts();
     method @Nullable public android.media.tv.tuner.filter.AudioDescriptor getExtraMetaData();
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @IntRange(from=0) public int getIndexInDataGroup();
     method @Nullable public android.media.MediaCodec.LinearBlock getLinearBlock();
     method @IntRange(from=0) public int getMpuSequenceNumber();
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @IntRange(from=0) public int getNumDataPieces();
     method public long getOffset();
     method public long getPts();
     method public int getScIndexMask();
