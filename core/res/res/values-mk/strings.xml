@@ -1906,6 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Викенд"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Настан"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Спиење"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Управувано од <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Вклучено"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Исклучено"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> исклучи некои звуци"</string>
@@ -1960,7 +1961,7 @@
     <string name="locale_search_menu" msgid="6258090710176422934">"Пребарај"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"Апликацијата не е достапна"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
-    <string name="app_suspended_more_details" msgid="211260942831587014">"Дознај повеќе"</string>
+    <string name="app_suspended_more_details" msgid="211260942831587014">"Дознајте повеќе"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Прекини ја паузата"</string>
     <string name="work_mode_off_title" msgid="6367463960165135829">"Да се актив. работните аплик.?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Прекини ја паузата"</string>
@@ -2338,11 +2339,9 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Дозволува придружна апликација да започне услуги во преден план од заднината."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофонот е достапен"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофонот е блокиран"</string>
-    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Не може да се отсликува за прикажување"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Не може да се отслика екранот"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Користете друг кабел и обидете се повторно"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Вашиот уред е премногу топол и не може да се отсликува на екранот додека не се излади"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Кабелот можеби не поддржува екрани"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Кабелот USB-C можеби нема да се поврзе правилно со екраните"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Вклучен е Dual Screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ги користи двата екрани за да прикажува содржини"</string>
