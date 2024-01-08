@@ -15,59 +15,16 @@
  */
 package com.android.systemui.statusbar.notification.data.repository
 
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
-import dagger.Binds
-import dagger.Module
 import javax.inject.Inject
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /** View-states pertaining to notifications on the keyguard. */
-interface NotificationsKeyguardViewStateRepository {
+@SysUISingleton
+class NotificationsKeyguardViewStateRepository @Inject constructor() {
     /** Are notifications fully hidden from view? */
-    val areNotificationsFullyHidden: Flow<Boolean>
+    val areNotificationsFullyHidden = MutableStateFlow(false)
 
     /** Is a pulse expansion occurring? */
-    val isPulseExpanding: Flow<Boolean>
-}
-
-@Module
-interface NotificationsKeyguardStateRepositoryModule {
-    @Binds
-    fun bindImpl(
-        impl: NotificationsKeyguardViewStateRepositoryImpl
-    ): NotificationsKeyguardViewStateRepository
-}
-
-@SysUISingleton
-class NotificationsKeyguardViewStateRepositoryImpl
-@Inject
-constructor(
-    wakeUpCoordinator: NotificationWakeUpCoordinator,
-) : NotificationsKeyguardViewStateRepository {
-    override val areNotificationsFullyHidden: Flow<Boolean> = conflatedCallbackFlow {
-        val listener =
-            object : NotificationWakeUpCoordinator.WakeUpListener {
-                override fun onFullyHiddenChanged(isFullyHidden: Boolean) {
-                    trySend(isFullyHidden)
-                }
-            }
-        trySend(wakeUpCoordinator.notificationsFullyHidden)
-        wakeUpCoordinator.addListener(listener)
-        awaitClose { wakeUpCoordinator.removeListener(listener) }
-    }
-
-    override val isPulseExpanding: Flow<Boolean> = conflatedCallbackFlow {
-        val listener =
-            object : NotificationWakeUpCoordinator.WakeUpListener {
-                override fun onPulseExpandingChanged(isPulseExpanding: Boolean) {
-                    trySend(isPulseExpanding)
-                }
-            }
-        trySend(wakeUpCoordinator.isPulseExpanding())
-        wakeUpCoordinator.addListener(listener)
-        awaitClose { wakeUpCoordinator.removeListener(listener) }
-    }
+    val isPulseExpanding = MutableStateFlow(false)
 }

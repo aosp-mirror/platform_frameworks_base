@@ -31,6 +31,7 @@ import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
@@ -58,6 +59,7 @@ constructor(
     private val dozeParameters: DozeParameters,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val logger: NotificationWakeUpCoordinatorLogger,
+    private val notifsKeyguardInteractor: NotificationsKeyguardInteractor,
 ) :
     OnHeadsUpChangedListener,
     StatusBarStateController.StateListener,
@@ -144,6 +146,7 @@ constructor(
                 for (listener in wakeUpListeners) {
                     listener.onFullyHiddenChanged(value)
                 }
+                notifsKeyguardInteractor.setNotificationsFullyHidden(value)
             }
         }
 
@@ -216,6 +219,7 @@ constructor(
                 for (listener in wakeUpListeners) {
                     listener.onPulseExpandingChanged(pulseExpanding)
                 }
+                notifsKeyguardInteractor.setPulseExpanding(pulseExpanding)
             }
         }
     }
