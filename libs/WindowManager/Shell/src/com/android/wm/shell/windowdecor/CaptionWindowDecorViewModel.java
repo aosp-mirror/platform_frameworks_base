@@ -23,13 +23,11 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.SparseArray;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
-import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -78,16 +76,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
         }
     }
-
-    @Override
-    public void onTransitionReady(IBinder transition, TransitionInfo info,
-            TransitionInfo.Change change) {}
-
-    @Override
-    public void onTransitionMerged(IBinder merged, IBinder playing) {}
-
-    @Override
-    public void onTransitionFinished(IBinder transition) {}
 
     @Override
     public void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter) {
