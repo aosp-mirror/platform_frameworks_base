@@ -115,6 +115,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.ThreadLocalWorkSource;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -228,6 +229,9 @@ public class AlarmManagerService extends SystemService {
     static final int NEVER_INDEX = 4;
 
     private static final long TEMPORARY_QUOTA_DURATION = INTERVAL_DAY;
+
+    // System property read on some device configurations to initialize time properly.
+    private static final String TIMEOFFSET_PROPERTY = "persist.sys.time.offset";
 
     private final Intent mBackgroundIntent
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
@@ -2142,6 +2146,9 @@ public class AlarmManagerService extends SystemService {
             // "GMT" if the ID is unrecognized). The parameter ID is used here rather than
             // newZone.getId(). It will be rejected if it is invalid.
             timeZoneWasChanged = SystemTimeZone.setTimeZoneId(tzId, confidence, logInfo);
+
+            final int gmtOffset = newZone.getOffset(mInjector.getCurrentTimeMillis());
+            SystemProperties.set(TIMEOFFSET_PROPERTY, String.valueOf(gmtOffset));
         }
 
         // Clear the default time zone in the system server process. This forces the next call
