@@ -938,7 +938,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         mergedConfiguration.getOverrideConfiguration(), deviceId,
                         r.getFilteredReferrer(r.launchedFromPackage), task.voiceInteractor,
                         proc.getReportedProcState(), r.getSavedState(), r.getPersistentSavedState(),
-                        results, newIntents, r.takeOptions(), isTransitionForward,
+                        results, newIntents, r.takeSceneTransitionInfo(), isTransitionForward,
                         proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
                         r.shareableActivityToken, r.getLaunchedFromBubble(), fragmentToken);
 

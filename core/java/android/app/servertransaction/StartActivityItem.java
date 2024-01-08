@@ -20,7 +20,7 @@ import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityOptions;
+import android.app.ActivityOptions.SceneTransitionInfo;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
@@ -35,13 +35,13 @@ public class StartActivityItem extends ActivityLifecycleItem {
 
     private static final String TAG = "StartActivityItem";
 
-    private ActivityOptions mActivityOptions;
+    private SceneTransitionInfo mSceneTransitionInfo;
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "startActivityItem");
-        client.handleStartActivity(r, pendingActions, mActivityOptions);
+        client.handleStartActivity(r, pendingActions, mSceneTransitionInfo);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -57,13 +57,13 @@ public class StartActivityItem extends ActivityLifecycleItem {
     /** Obtain an instance initialized with provided params. */
     @NonNull
     public static StartActivityItem obtain(@NonNull IBinder activityToken,
-            @Nullable ActivityOptions activityOptions) {
+            @Nullable SceneTransitionInfo sceneTransitionInfo) {
         StartActivityItem instance = ObjectPool.obtain(StartActivityItem.class);
         if (instance == null) {
             instance = new StartActivityItem();
         }
         instance.setActivityToken(activityToken);
-        instance.mActivityOptions = activityOptions;
+        instance.mSceneTransitionInfo = sceneTransitionInfo;
 
         return instance;
     }
@@ -71,7 +71,7 @@ public class StartActivityItem extends ActivityLifecycleItem {
     @Override
     public void recycle() {
         super.recycle();
-        mActivityOptions = null;
+        mSceneTransitionInfo = null;
         ObjectPool.recycle(this);
     }
 
@@ -81,13 +81,13 @@ public class StartActivityItem extends ActivityLifecycleItem {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeBundle(mActivityOptions != null ? mActivityOptions.toBundle() : null);
+        dest.writeTypedObject(mSceneTransitionInfo, flags);
     }
 
     /** Read from Parcel. */
     private StartActivityItem(@NonNull Parcel in) {
         super(in);
-        mActivityOptions = ActivityOptions.fromBundle(in.readBundle());
+        mSceneTransitionInfo = in.readTypedObject(SceneTransitionInfo.CREATOR);
     }
 
     public static final @NonNull Creator<StartActivityItem> CREATOR = new Creator<>() {
@@ -109,21 +109,21 @@ public class StartActivityItem extends ActivityLifecycleItem {
             return false;
         }
         final StartActivityItem other = (StartActivityItem) o;
-        return (mActivityOptions == null) == (other.mActivityOptions == null);
+        return (mSceneTransitionInfo == null) == (other.mSceneTransitionInfo == null);
     }
 
     @Override
     public int hashCode() {
         int result = 17;
         result = 31 * result + super.hashCode();
-        result = 31 * result + (mActivityOptions != null ? 1 : 0);
+        result = 31 * result + (mSceneTransitionInfo != null ? 1 : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "StartActivityItem{" + super.toString()
-                + ",options=" + mActivityOptions + "}";
+                + ",sceneTransitionInfo=" + mSceneTransitionInfo + "}";
     }
 }
 

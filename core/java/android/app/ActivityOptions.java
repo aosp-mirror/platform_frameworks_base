@@ -357,22 +357,7 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_APPLY_NO_USER_ACTION_FLAG_FOR_SHORTCUT =
             "android:activity.applyNoUserActionFlagForShortcut";
 
-    /**
-     * For Activity transitions, the calling Activity's TransitionListener used to
-     * notify the called Activity when the shared element and the exit transitions
-     * complete.
-     */
-    private static final String KEY_TRANSITION_COMPLETE_LISTENER
-            = "android:activity.transitionCompleteListener";
-
-    private static final String KEY_TRANSITION_IS_RETURNING
-            = "android:activity.transitionIsReturning";
-    private static final String KEY_TRANSITION_SHARED_ELEMENTS
-            = "android:activity.sharedElementNames";
-    private static final String KEY_RESULT_DATA = "android:activity.resultData";
-    private static final String KEY_RESULT_CODE = "android:activity.resultCode";
-    private static final String KEY_EXIT_COORDINATOR_INDEX
-            = "android:activity.exitCoordinatorIndex";
+    private static final String KEY_SCENE_TRANSITION_INFO = "android:activity.sceneTransitionInfo";
 
     /** See {@link SourceInfo}. */
     private static final String KEY_SOURCE_INFO = "android.activity.sourceInfo";
@@ -472,12 +457,7 @@ public class ActivityOptions extends ComponentOptions {
     private int mHeight;
     private IRemoteCallback mAnimationStartedListener;
     private IRemoteCallback mAnimationFinishedListener;
-    private ResultReceiver mTransitionReceiver;
-    private boolean mIsReturning;
-    private ArrayList<String> mSharedElementNames;
-    private Intent mResultData;
-    private int mResultCode;
-    private int mExitCoordinatorIndex;
+    private SceneTransitionInfo mSceneTransitionInfo;
     private PendingIntent mUsageTimeReport;
     private int mLaunchDisplayId = INVALID_DISPLAY;
     private int mCallerDisplayId = INVALID_DISPLAY;
@@ -1006,8 +986,11 @@ public class ActivityOptions extends ComponentOptions {
         ExitTransitionCoordinator exit = makeSceneTransitionAnimation(
                 new ActivityExitTransitionCallbacks(activity), activity.mExitTransitionListener,
                 activity.getWindow(), opts, sharedElements);
-        opts.mExitCoordinatorIndex =
-                activity.mActivityTransitionState.addExitTransitionCoordinator(exit);
+        final SceneTransitionInfo info = opts.getSceneTransitionInfo();
+        if (info != null) {
+            info.setExitCoordinatorKey(
+                    activity.mActivityTransitionState.addExitTransitionCoordinator(exit));
+        }
         return opts;
     }
 
@@ -1029,13 +1012,16 @@ public class ActivityOptions extends ComponentOptions {
         ActivityOptions opts = new ActivityOptions();
         ExitTransitionCoordinator exit = makeSceneTransitionAnimation(
                 exitCallbacks, callback, window, opts, sharedElements);
-        opts.mExitCoordinatorIndex = -1;
+        final SceneTransitionInfo info = opts.getSceneTransitionInfo();
+        if (info != null) {
+            info.setExitCoordinatorKey(-1);
+        }
         return Pair.create(opts, exit);
     }
 
     /**
-     * This method should be called when the
-     * {@link #startSharedElementAnimation(Window, ExitTransitionCallbacks, Pair[])}
+     * This method should be called when the {@link #startSharedElementAnimation(Window,
+     * ExitTransitionCallbacks, SharedElementCallback, Pair[])}
      * animation must be stopped and the Views reset. This can happen if there was an error
      * from startActivity or a springboard activity and the animation should stop and reset.
      *
@@ -1088,9 +1074,11 @@ public class ActivityOptions extends ComponentOptions {
 
         ExitTransitionCoordinator exit = new ExitTransitionCoordinator(exitCallbacks, window,
                 callback, names, names, views, false);
-        opts.mTransitionReceiver = exit;
-        opts.mSharedElementNames = names;
-        opts.mIsReturning = false;
+        final SceneTransitionInfo info = new SceneTransitionInfo();
+        info.setResultReceiver(exit);
+        info.setSharedElementNames(names);
+        info.setReturning(false);
+        opts.setSceneTransitionInfo(info);
         return exit;
     }
 
@@ -1111,17 +1099,20 @@ public class ActivityOptions extends ComponentOptions {
             int resultCode, Intent resultData) {
         ActivityOptions opts = new ActivityOptions();
         opts.mAnimationType = ANIM_SCENE_TRANSITION;
-        opts.mSharedElementNames = sharedElementNames;
-        opts.mTransitionReceiver = exitCoordinator;
-        opts.mIsReturning = true;
-        opts.mResultCode = resultCode;
-        opts.mResultData = resultData;
+        final SceneTransitionInfo info = new SceneTransitionInfo();
+        info.setSharedElementNames(sharedElementNames);
+        info.setResultReceiver(exitCoordinator);
+        info.setReturning(true);
+        info.setResultCode(resultCode);
+        info.setResultData(resultData);
         if (activity == null) {
-            opts.mExitCoordinatorIndex = -1;
+            info.setExitCoordinatorKey(-1);
         } else {
-            opts.mExitCoordinatorIndex =
-                    activity.mActivityTransitionState.addExitTransitionCoordinator(exitCoordinator);
+            info.setExitCoordinatorKey(
+                    activity.mActivityTransitionState.addExitTransitionCoordinator(
+                            exitCoordinator));
         }
+        opts.setSceneTransitionInfo(info);
         return opts;
     }
 
@@ -1269,12 +1260,8 @@ public class ActivityOptions extends ComponentOptions {
                 break;
 
             case ANIM_SCENE_TRANSITION:
-                mTransitionReceiver = opts.getParcelable(KEY_TRANSITION_COMPLETE_LISTENER, android.os.ResultReceiver.class);
-                mIsReturning = opts.getBoolean(KEY_TRANSITION_IS_RETURNING, false);
-                mSharedElementNames = opts.getStringArrayList(KEY_TRANSITION_SHARED_ELEMENTS);
-                mResultData = opts.getParcelable(KEY_RESULT_DATA, android.content.Intent.class);
-                mResultCode = opts.getInt(KEY_RESULT_CODE);
-                mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
+                mSceneTransitionInfo = opts.getParcelable(KEY_SCENE_TRANSITION_INFO,
+                        SceneTransitionInfo.class);
                 break;
         }
         mLockTaskMode = opts.getBoolean(KEY_LOCK_TASK_MODE, false);
@@ -1437,9 +1424,6 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /** @hide */
-    public int getExitCoordinatorKey() { return mExitCoordinatorIndex; }
-
-    /** @hide */
     public void abort() {
         if (mAnimationStartedListener != null) {
             try {
@@ -1450,33 +1434,15 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /** @hide */
-    public boolean isReturning() {
-        return mIsReturning;
-    }
-
-    /**
-     * Returns whether or not the ActivityOptions was created with
-     * {@link #startSharedElementAnimation(Window, Pair[])}.
-     *
-     * @hide
-     */
-    boolean isCrossTask() {
-        return mExitCoordinatorIndex < 0;
+    public ActivityOptions setSceneTransitionInfo(SceneTransitionInfo info) {
+        mSceneTransitionInfo = info;
+        return this;
     }
 
     /** @hide */
-    public ArrayList<String> getSharedElementNames() {
-        return mSharedElementNames;
+    public SceneTransitionInfo getSceneTransitionInfo() {
+        return mSceneTransitionInfo;
     }
-
-    /** @hide */
-    public ResultReceiver getResultReceiver() { return mTransitionReceiver; }
-
-    /** @hide */
-    public int getResultCode() { return mResultCode; }
-
-    /** @hide */
-    public Intent getResultData() { return mResultData; }
 
     /** @hide */
     public PendingIntent getUsageTimeReport() {
@@ -2102,12 +2068,7 @@ public class ActivityOptions extends ComponentOptions {
             mPackageName = otherOptions.mPackageName;
         }
         mUsageTimeReport = otherOptions.mUsageTimeReport;
-        mTransitionReceiver = null;
-        mSharedElementNames = null;
-        mIsReturning = false;
-        mResultData = null;
-        mResultCode = 0;
-        mExitCoordinatorIndex = 0;
+        mSceneTransitionInfo = null;
         mAnimationType = otherOptions.mAnimationType;
         switch (otherOptions.mAnimationType) {
             case ANIM_CUSTOM:
@@ -2157,14 +2118,9 @@ public class ActivityOptions extends ComponentOptions {
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 break;
             case ANIM_SCENE_TRANSITION:
-                mTransitionReceiver = otherOptions.mTransitionReceiver;
-                mSharedElementNames = otherOptions.mSharedElementNames;
-                mIsReturning = otherOptions.mIsReturning;
+                mSceneTransitionInfo = otherOptions.mSceneTransitionInfo;
                 mThumbnail = null;
                 mAnimationStartedListener = null;
-                mResultData = otherOptions.mResultData;
-                mResultCode = otherOptions.mResultCode;
-                mExitCoordinatorIndex = otherOptions.mExitCoordinatorIndex;
                 break;
         }
         mLockTaskMode = otherOptions.mLockTaskMode;
@@ -2240,14 +2196,9 @@ public class ActivityOptions extends ComponentOptions {
                         != null ? mAnimationStartedListener.asBinder() : null);
                 break;
             case ANIM_SCENE_TRANSITION:
-                if (mTransitionReceiver != null) {
-                    b.putParcelable(KEY_TRANSITION_COMPLETE_LISTENER, mTransitionReceiver);
+                if (mSceneTransitionInfo != null) {
+                    b.putParcelable(KEY_SCENE_TRANSITION_INFO, mSceneTransitionInfo);
                 }
-                b.putBoolean(KEY_TRANSITION_IS_RETURNING, mIsReturning);
-                b.putStringArrayList(KEY_TRANSITION_SHARED_ELEMENTS, mSharedElementNames);
-                b.putParcelable(KEY_RESULT_DATA, mResultData);
-                b.putInt(KEY_RESULT_CODE, mResultCode);
-                b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
         if (mLockTaskMode) {
@@ -2606,5 +2557,125 @@ public class ActivityOptions extends ComponentOptions {
                 return new SourceInfo[size];
             }
         };
+    }
+
+    /**
+     * This class contains necessary information for Activity Scene Transition.
+     *
+     * @hide
+     */
+    public static class SceneTransitionInfo implements Parcelable {
+        private boolean mIsReturning;
+        private int mResultCode;
+        @Nullable
+        private Intent mResultData;
+        @Nullable
+        private ArrayList<String> mSharedElementNames;
+        @Nullable
+        private ResultReceiver mResultReceiver;
+        private int mExitCoordinatorIndex;
+
+        public SceneTransitionInfo() {
+        }
+
+        SceneTransitionInfo(Parcel in) {
+            mIsReturning = in.readBoolean();
+            mResultCode = in.readInt();
+            mResultData = in.readTypedObject(Intent.CREATOR);
+            mSharedElementNames = in.createStringArrayList();
+            mResultReceiver = in.readTypedObject(ResultReceiver.CREATOR);
+            mExitCoordinatorIndex = in.readInt();
+        }
+
+        public static final Creator<SceneTransitionInfo> CREATOR = new Creator<>() {
+            @Override
+            public SceneTransitionInfo createFromParcel(Parcel in) {
+                return new SceneTransitionInfo(in);
+            }
+
+            @Override
+            public SceneTransitionInfo[] newArray(int size) {
+                return new SceneTransitionInfo[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeBoolean(mIsReturning);
+            dest.writeInt(mResultCode);
+            dest.writeTypedObject(mResultData, flags);
+            dest.writeStringList(mSharedElementNames);
+            dest.writeTypedObject(mResultReceiver, flags);
+            dest.writeInt(mExitCoordinatorIndex);
+        }
+
+        public void setReturning(boolean isReturning) {
+            mIsReturning = isReturning;
+        }
+
+        public boolean isReturning() {
+            return mIsReturning;
+        }
+
+        public void setResultCode(int resultCode) {
+            mResultCode = resultCode;
+        }
+
+        public int getResultCode() {
+            return mResultCode;
+        }
+
+        public void setResultData(Intent resultData) {
+            mResultData = resultData;
+        }
+
+        @Nullable
+        public Intent getResultData() {
+            return mResultData;
+        }
+
+        public void setSharedElementNames(ArrayList<String> sharedElementNames) {
+            mSharedElementNames = sharedElementNames;
+        }
+
+        @Nullable
+        public ArrayList<String> getSharedElementNames() {
+            return mSharedElementNames;
+        }
+
+        public void setResultReceiver(ResultReceiver resultReceiver) {
+            mResultReceiver = resultReceiver;
+        }
+
+        @Nullable
+        public ResultReceiver getResultReceiver() {
+            return mResultReceiver;
+        }
+
+        public void setExitCoordinatorKey(int exitCoordinatorKey) {
+            mExitCoordinatorIndex = exitCoordinatorKey;
+        }
+
+        public int getExitCoordinatorKey() {
+            return mExitCoordinatorIndex;
+        }
+
+        boolean isCrossTask() {
+            return mExitCoordinatorIndex < 0;
+        }
+
+        @Override
+        public String toString() {
+            return "SceneTransitionInfo, mIsReturning=" + mIsReturning
+                    + ", mResultCode=" + mResultCode + ", mResultData=" + mResultData
+                    + ", mSharedElementNames=" + mSharedElementNames
+                    + ", mTransitionReceiver=" + mResultReceiver
+                    + ", mExitCoordinatorIndex=" + mExitCoordinatorIndex;
+        }
     }
 }
