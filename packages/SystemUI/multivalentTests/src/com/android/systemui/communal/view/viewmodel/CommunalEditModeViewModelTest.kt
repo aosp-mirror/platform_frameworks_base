@@ -119,7 +119,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             smartspaceRepository.setCommunalSmartspaceTargets(listOf(target))
 
             // Media playing.
-            mediaRepository.mediaPlaying.value = true
+            mediaRepository.mediaActive()
 
             val communalContent by collectLastValue(underTest.communalContent)
 

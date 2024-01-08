@@ -54,11 +54,10 @@ constructor(
                 return@flatMapLatest flowOf(communalInteractor.tutorialContent)
             }
             combine(
-                communalInteractor.smartspaceContent,
-                communalInteractor.umoContent,
+                communalInteractor.ongoingContent,
                 communalInteractor.widgetContent,
-            ) { smartspace, umo, widgets ->
-                smartspace + umo + widgets
+            ) { ongoing, widgets ->
+                ongoing + widgets
             }
         }
 
