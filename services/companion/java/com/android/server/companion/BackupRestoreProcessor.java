@@ -124,7 +124,7 @@ class BackupRestoreProcessor {
         byte[] requestsPayload = new byte[buffer.getInt()];
         buffer.get(requestsPayload);
         List<SystemDataTransferRequest> restoredRequestsForUser =
-                mSystemDataTransferRequestStore.readRequestsFromPayload(requestsPayload);
+                mSystemDataTransferRequestStore.readRequestsFromPayload(requestsPayload, userId);
 
         // Get a list of installed packages ahead of time.
         List<ApplicationInfo> installedApps = mPackageManager.getInstalledApplications(
