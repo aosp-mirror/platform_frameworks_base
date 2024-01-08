@@ -62,6 +62,7 @@ import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
+import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
 import com.android.internal.R;
@@ -174,6 +175,10 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     private final boolean mIsWatch;
 
+    @Nullable private VelocityTracker mVelocityTracker;
+    private final int mMinimumVelocity;
+    private final int mMaximumVelocity;
+
     public FullScreenMagnificationGestureHandler(@UiContext Context context,
             FullScreenMagnificationController fullScreenMagnificationController,
             AccessibilityTraceManager trace,
@@ -184,15 +189,25 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             @NonNull WindowMagnificationPromptController promptController,
             int displayId,
             FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper) {
-        this(context, fullScreenMagnificationController, trace, callback,
-                detectSingleFingerTripleTap, detectTwoFingerTripleTap,
-                detectShortcutTrigger, promptController, displayId,
-                fullScreenMagnificationVibrationHelper, /* magnificationLogger= */ null);
+        this(
+                context,
+                fullScreenMagnificationController,
+                trace,
+                callback,
+                detectSingleFingerTripleTap,
+                detectTwoFingerTripleTap,
+                detectShortcutTrigger,
+                promptController,
+                displayId,
+                fullScreenMagnificationVibrationHelper,
+                /* magnificationLogger= */ null,
+                ViewConfiguration.get(context));
     }
 
     /** Constructor for tests. */
     @VisibleForTesting
-    FullScreenMagnificationGestureHandler(@UiContext Context context,
+    FullScreenMagnificationGestureHandler(
+            @UiContext Context context,
             FullScreenMagnificationController fullScreenMagnificationController,
             AccessibilityTraceManager trace,
             Callback callback,
@@ -202,7 +217,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             @NonNull WindowMagnificationPromptController promptController,
             int displayId,
             FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper,
-            MagnificationLogger magnificationLogger) {
+            MagnificationLogger magnificationLogger,
+            ViewConfiguration viewConfiguration) {
         super(displayId, detectSingleFingerTripleTap, detectTwoFingerTripleTap,
                 detectShortcutTrigger, trace, callback);
         if (DEBUG_ALL) {
@@ -212,6 +228,15 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                             + ", detectTwoFingerTripleTap = " + detectTwoFingerTripleTap
                             + ", detectShortcutTrigger = " + detectShortcutTrigger + ")");
         }
+
+        if (Flags.fullscreenFlingGesture()) {
+            mMinimumVelocity = viewConfiguration.getScaledMinimumFlingVelocity();
+            mMaximumVelocity = viewConfiguration.getScaledMaximumFlingVelocity();
+        } else {
+            mMinimumVelocity = 0;
+            mMaximumVelocity = 0;
+        }
+
         mFullScreenMagnificationController = fullScreenMagnificationController;
         mMagnificationInfoChangedCallback =
                 new FullScreenMagnificationController.MagnificationInfoChangedCallback() {
@@ -501,6 +526,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 }
                 persistScaleAndTransitionTo(mViewportDraggingState);
             } else if (action == ACTION_UP || action == ACTION_CANCEL) {
+                onPanningFinished(event);
                 // if feature flag is enabled, currently only true on watches
                 if (mIsSinglePanningEnabled) {
                     mOverscrollHandler.setScaleAndCenterToEdgeIfNeeded();
@@ -578,6 +604,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 Slog.i(mLogTag, "Panned content by scrollX: " + distanceX
                         + " scrollY: " + distanceY);
             }
+            onPan(second);
             mFullScreenMagnificationController.offsetMagnifiedRegion(mDisplayId, distanceX,
                     distanceY, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             if (mIsSinglePanningEnabled) {
@@ -973,7 +1000,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                                     && overscrollState(event, mFirstPointerDownLocation)
                                     == OVERSCROLL_VERTICAL_EDGE) {
                                 transitionToDelegatingStateAndClear();
-                            }
+                            } // TODO(b/319537921): should there be an else here?
                             //Primary pointer is swiping, so transit to PanningScalingState
                             transitToPanningScalingStateAndClear();
                         } else if (mIsSinglePanningEnabled
@@ -982,7 +1009,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                             if (overscrollState(event, mFirstPointerDownLocation)
                                     == OVERSCROLL_VERTICAL_EDGE) {
                                 transitionToDelegatingStateAndClear();
-                            }
+                            } // TODO(b/319537921): should there be an else here?
                             transitToSinglePanningStateAndClear();
                         } else if (!mIsTwoFingerCountReached) {
                             // If it is a two-finger gesture, do not transition to the
@@ -1742,6 +1769,61 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         }
     }
 
+    /** Call during MOVE events for a panning gesture. */
+    private void onPan(MotionEvent event) {
+        if (!Flags.fullscreenFlingGesture()) {
+            return;
+        }
+
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(event);
+    }
+
+    /**
+     * Call during UP events for a panning gesture, so we can detect a fling and play a physics-
+     * based fling animation.
+     */
+    private void onPanningFinished(MotionEvent event) {
+        if (!Flags.fullscreenFlingGesture()) {
+            return;
+        }
+
+        if (mVelocityTracker == null) {
+            Log.e(mLogTag, "onPanningFinished: mVelocityTracker is null");
+            return;
+        }
+        mVelocityTracker.addMovement(event);
+        mVelocityTracker.computeCurrentVelocity(/* units= */ 1000, mMaximumVelocity);
+
+        float xPixelsPerSecond = mVelocityTracker.getXVelocity();
+        float yPixelsPerSecond = mVelocityTracker.getYVelocity();
+
+        mVelocityTracker.recycle();
+        mVelocityTracker = null;
+
+        if (DEBUG_PANNING_SCALING) {
+            Slog.v(
+                    mLogTag,
+                    "onPanningFinished: pixelsPerSecond: "
+                            + xPixelsPerSecond
+                            + ", "
+                            + yPixelsPerSecond
+                            + " mMinimumVelocity: "
+                            + mMinimumVelocity);
+        }
+
+        if ((Math.abs(yPixelsPerSecond) > mMinimumVelocity)
+                || (Math.abs(xPixelsPerSecond) > mMinimumVelocity)) {
+            mFullScreenMagnificationController.startFling(
+                    mDisplayId,
+                    xPixelsPerSecond,
+                    yPixelsPerSecond,
+                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+        }
+    }
+
     final class SinglePanningState extends SimpleOnGestureListener implements State {
 
 
@@ -1756,6 +1838,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             int action = event.getActionMasked();
             switch (action) {
                 case ACTION_UP:
+                    onPanningFinished(event);
+                    // fall-through!
                 case ACTION_CANCEL:
                     mOverscrollHandler.setScaleAndCenterToEdgeIfNeeded();
                     mOverscrollHandler.clearEdgeState();
@@ -1770,6 +1854,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (mCurrentState != mSinglePanningState) {
                 return true;
             }
+            onPan(second);
             mFullScreenMagnificationController.offsetMagnifiedRegion(
                     mDisplayId,
                     distanceX,

@@ -57,6 +57,7 @@ import android.test.mock.MockContentResolver;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.accessibility.MagnificationAnimationCallback;
+import android.widget.Scroller;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -134,7 +135,8 @@ public class FullScreenMagnificationControllerTest {
 
     @Before
     public void setUp() {
-        Looper looper = InstrumentationRegistry.getContext().getMainLooper();
+        Context realContext = InstrumentationRegistry.getContext();
+        Looper looper = realContext.getMainLooper();
         // Pretending ID of the Thread associated with looper as main thread ID in controller
         when(mMockContext.getMainLooper()).thenReturn(looper);
         when(mMockControllerCtx.getContext()).thenReturn(mMockContext);
@@ -168,7 +170,8 @@ public class FullScreenMagnificationControllerTest {
                         mRequestObserver,
                         mScaleProvider,
                         () -> mMockThumbnail,
-                        ConcurrentUtils.DIRECT_EXECUTOR);
+                        ConcurrentUtils.DIRECT_EXECUTOR,
+                        () -> new Scroller(realContext));
     }
 
     @After
@@ -428,7 +431,7 @@ public class FullScreenMagnificationControllerTest {
         mTargetAnimationListener.onAnimationUpdate(mMockValueAnimator);
         mStateListener.onAnimationEnd(mMockValueAnimator);
         verify(mMockWindowManager).setMagnificationSpec(eq(displayId), argThat(closeTo(endSpec)));
-        verify(mAnimationCallback).onResult(true);
+        verify(mAnimationCallback).onResult(eq(true), any());
     }
 
     @Test
@@ -451,7 +454,7 @@ public class FullScreenMagnificationControllerTest {
         mMessageCapturingHandler.sendAllMessages();
 
         verify(mMockValueAnimator, never()).start();
-        verify(mAnimationCallback).onResult(true);
+        verify(mAnimationCallback).onResult(eq(true), any());
     }
 
     @Test
@@ -736,7 +739,7 @@ public class FullScreenMagnificationControllerTest {
 
         verify(mRequestObserver, never()).onFullScreenMagnificationChanged(eq(displayId),
                 any(Region.class), any(MagnificationConfig.class));
-        verify(mAnimationCallback).onResult(true);
+        verify(mAnimationCallback).onResult(eq(true), any());
     }
 
     @Test
@@ -772,7 +775,7 @@ public class FullScreenMagnificationControllerTest {
         mMessageCapturingHandler.sendAllMessages();
 
         // Verify expected actions.
-        verify(mAnimationCallback).onResult(false);
+        verify(mAnimationCallback).onResult(eq(false), any());
         verify(mMockValueAnimator).start();
         verify(mMockValueAnimator).cancel();
 
@@ -782,7 +785,7 @@ public class FullScreenMagnificationControllerTest {
         mStateListener.onAnimationEnd(mMockValueAnimator);
 
         checkActivatedAndMagnifying(/* activated= */ false, /* magnifying= */ false, displayId);
-        verify(lastAnimationCallback).onResult(true);
+        verify(lastAnimationCallback).onResult(eq(true), any());
     }
 
     @Test

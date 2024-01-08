@@ -59,6 +59,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
+import android.widget.Scroller;
 
 import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
@@ -195,14 +196,16 @@ public class MagnificationControllerTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternal);
 
-        mScreenMagnificationController = spy(new FullScreenMagnificationController(
-                mControllerCtx,
-                new Object(),
-                mScreenMagnificationInfoChangedCallbackDelegate,
-                mScaleProvider,
-                () -> null,
-                ConcurrentUtils.DIRECT_EXECUTOR
-        ));
+        mScreenMagnificationController =
+                spy(
+                        new FullScreenMagnificationController(
+                                mControllerCtx,
+                                new Object(),
+                                mScreenMagnificationInfoChangedCallbackDelegate,
+                                mScaleProvider,
+                                () -> null,
+                                ConcurrentUtils.DIRECT_EXECUTOR,
+                                () -> new Scroller(mContext)));
         mScreenMagnificationController.register(TEST_DISPLAY);
 
         mMagnificationConnectionManager = spy(

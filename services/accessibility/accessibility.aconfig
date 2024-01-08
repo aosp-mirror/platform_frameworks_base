@@ -52,6 +52,13 @@ flag {
 }
 
 flag {
+    name: "fullscreen_fling_gesture"
+    namespace: "accessibility"
+    description: "When true, adds a fling gesture animation for fullscreen magnification"
+    bug: "319175022"
+}
+
+flag {
     name: "pinch_zoom_zero_min_span"
     namespace: "accessibility"
     description: "Whether to set min span of ScaleGestureDetector to zero."
