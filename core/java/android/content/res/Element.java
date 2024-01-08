@@ -26,6 +26,8 @@ import androidx.annotation.StyleableRes;
 
 import com.android.internal.R;
 
+import java.util.Set;
+
 /**
  * Defines the string attribute length and child tag count restrictions for a xml element.
  *
@@ -37,7 +39,11 @@ public class Element {
     private static final int MAX_ATTR_LEN_URL_COMPONENT = 256;
     private static final int MAX_ATTR_LEN_PERMISSION_GROUP = 256;
     private static final int MAX_ATTR_LEN_PACKAGE = 256;
-    private static final int MAX_ATTR_LEN_MIMETYPE = 512;
+    /**
+     * The mime type max length restriction here should match the restriction that is also
+     * placed in {@link android.content.pm.PackageManager#setMimeGroup(String, Set)}
+     */
+    private static final int MAX_ATTR_LEN_MIMETYPE = 255;
     private static final int MAX_ATTR_LEN_NAME = 1024;
     private static final int MAX_ATTR_LEN_PATH = 4000;
     private static final int MAX_ATTR_LEN_VALUE = 32_768;
@@ -103,6 +109,7 @@ public class Element {
     protected static final String TAG_ATTR_HOST = "host";
     protected static final String TAG_ATTR_MANAGE_SPACE_ACTIVITY = "manageSpaceActivity";
     protected static final String TAG_ATTR_MIMETYPE = "mimeType";
+    protected static final String TAG_ATTR_MIMEGROUP = "mimeGroup";
     protected static final String TAG_ATTR_NAME = "name";
     protected static final String TAG_ATTR_PACKAGE = "package";
     protected static final String TAG_ATTR_PATH = "path";
@@ -367,6 +374,7 @@ public class Element {
             case TAG_ATTR_BACKUP_AGENT:
             case TAG_ATTR_CATEGORY:
             case TAG_ATTR_MANAGE_SPACE_ACTIVITY:
+            case TAG_ATTR_MIMEGROUP:
             case TAG_ATTR_NAME:
             case TAG_ATTR_PARENT_ACTIVITY_NAME:
             case TAG_ATTR_PERMISSION:
@@ -520,6 +528,8 @@ public class Element {
                 return MAX_ATTR_LEN_URL_COMPONENT;
             case R.styleable.AndroidManifestData_mimeType:
                 return MAX_ATTR_LEN_MIMETYPE;
+            case R.styleable.AndroidManifestData_mimeGroup:
+                return MAX_ATTR_LEN_NAME;
             case R.styleable.AndroidManifestData_path:
             case R.styleable.AndroidManifestData_pathPattern:
             case R.styleable.AndroidManifestData_pathPrefix:
