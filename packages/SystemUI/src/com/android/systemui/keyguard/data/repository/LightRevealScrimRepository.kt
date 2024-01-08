@@ -140,8 +140,9 @@ constructor(
     override val revealAmount: Flow<Float> = callbackFlow {
         val updateListener =
             Animator.AnimatorUpdateListener {
-                val value = (it as ValueAnimator).animatedValue
-                trySend(value as Float)
+                val value = (it as ValueAnimator).animatedValue as Float
+                trySend(value)
+
                 if (value <= 0.0f || value >= 1.0f) {
                     scrimLogger.d(TAG, "revealAmount", value)
                 }
