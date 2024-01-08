@@ -1262,7 +1262,7 @@ public interface WindowManager extends ViewManager {
      * <p>When this compat override is enabled the min aspect ratio given in the app's manifest can
      * be overridden by the device manufacturer using their discretion to improve display
      * compatibility unless the app's manifest value is higher. This treatment will also apply if
-     * no min aspect ratio value is provided in the manifest. These treatments can apply only in
+     * no min aspect ratio value is provided in the manifest. These treatments can apply either in
      * specific cases (e.g. device is in portrait) or each time the app is displayed on screen.
      *
      * <p>Setting this property to {@code false} informs the system that the app must be
