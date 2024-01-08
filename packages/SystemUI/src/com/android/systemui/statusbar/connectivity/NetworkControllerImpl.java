@@ -348,7 +348,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true /* force callback */);
         mUserTracker = userTracker;
-        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mMainHandler));
+        mUserTracker.addCallback(mUserChangedCallback, mBgExecutor);
 
         deviceProvisionedController.addCallback(new DeviceProvisionedListener() {
             @Override
