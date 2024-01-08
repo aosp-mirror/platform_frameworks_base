@@ -134,7 +134,7 @@ public interface SysUIComponent {
         getSysUIUnfoldComponent()
                 .ifPresent(
                         c -> {
-                            c.getUnfoldLightRevealOverlayAnimation().init();
+                            c.getFullScreenLightRevealAnimations().forEach(it -> it.init());
                             c.getUnfoldTransitionWallpaperController().init();
                             c.getUnfoldHapticsPlayer();
                             c.getNaturalRotationUnfoldProgressProvider().init();

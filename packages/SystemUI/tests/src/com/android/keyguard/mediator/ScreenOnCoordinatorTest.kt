@@ -24,8 +24,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.FoldAodAnimationController
+import com.android.systemui.unfold.FullscreenLightRevealAnimation
 import com.android.systemui.unfold.SysUIUnfoldComponent
-import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.utils.os.FakeHandler
 import com.android.systemui.utils.os.FakeHandler.Mode.QUEUEING
@@ -53,7 +53,9 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
     @Mock
     private lateinit var foldAodAnimationController: FoldAodAnimationController
     @Mock
-    private lateinit var unfoldAnimation: UnfoldLightRevealOverlayAnimation
+    private lateinit var fullscreenLightRevealAnimation: FullscreenLightRevealAnimation
+    @Mock
+    private lateinit var fullScreenLightRevealAnimations: Set<FullscreenLightRevealAnimation>
     @Captor
     private lateinit var readyCaptor: ArgumentCaptor<Runnable>
 
@@ -67,9 +69,9 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        `when`(unfoldComponent.getUnfoldLightRevealOverlayAnimation())
-                .thenReturn(unfoldAnimation)
+        fullScreenLightRevealAnimations = setOf(fullscreenLightRevealAnimation)
+        `when`(unfoldComponent.getFullScreenLightRevealAnimations())
+                .thenReturn(fullScreenLightRevealAnimations)
         `when`(unfoldComponent.getFoldAodAnimationController())
                 .thenReturn(foldAodAnimationController)
 
@@ -164,7 +166,7 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
     }
 
     private fun onUnfoldOverlayReady() {
-        verify(unfoldAnimation).onScreenTurningOn(capture(readyCaptor))
+        verify(fullscreenLightRevealAnimation).onScreenTurningOn(capture(readyCaptor))
         readyCaptor.value.run()
     }
 

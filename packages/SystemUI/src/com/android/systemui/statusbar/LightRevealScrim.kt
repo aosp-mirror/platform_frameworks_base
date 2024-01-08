@@ -156,6 +156,54 @@ data class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevea
     }
 }
 
+data class LinearSideLightRevealEffect(private val isVertical: Boolean) : LightRevealEffect {
+
+    override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
+        scrim.interpolatedRevealAmount = amount
+        scrim.startColorAlpha =
+            getPercentPastThreshold(1 - amount, threshold = 1 - START_COLOR_REVEAL_PERCENTAGE)
+        scrim.revealGradientEndColorAlpha =
+            1f -
+                getPercentPastThreshold(
+                    amount,
+                    threshold = REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE
+                )
+
+        val gradientBoundsAmount = lerp(GRADIENT_START_BOUNDS_PERCENTAGE, 1f, amount)
+        if (isVertical) {
+            scrim.setRevealGradientBounds(
+                left = -(scrim.viewWidth) * gradientBoundsAmount,
+                top = -(scrim.viewHeight) * gradientBoundsAmount,
+                right = (scrim.viewWidth) * gradientBoundsAmount,
+                bottom = (scrim.viewHeight) + (scrim.viewHeight) * gradientBoundsAmount
+            )
+        } else {
+            scrim.setRevealGradientBounds(
+                left = -(scrim.viewWidth) * gradientBoundsAmount,
+                top = -(scrim.viewHeight) * gradientBoundsAmount,
+                right = (scrim.viewWidth) + (scrim.viewWidth) * gradientBoundsAmount,
+                bottom = (scrim.viewHeight) * gradientBoundsAmount
+            )
+        }
+    }
+
+    private companion object {
+        // From which percentage we should start the gradient reveal width
+        // E.g. if 0 - starts with 0px width, 0.6f - starts with 60% width
+        private const val GRADIENT_START_BOUNDS_PERCENTAGE: Float = 1f
+
+        // When to start changing alpha color of the gradient scrim
+        // E.g. if 0.6f - starts fading the gradient away at 60% and becomes completely
+        // transparent at 100%
+        private const val REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE: Float = 1f
+
+        // When to finish displaying start color fill that reveals the content
+        // E.g. if 0.6f - the content won't be visible at 0% and it will gradually
+        // reduce the alpha until 60% (at this point the color fill is invisible)
+        private const val START_COLOR_REVEAL_PERCENTAGE: Float = 1f
+    }
+}
+
 data class CircleReveal(
     /** X-value of the circle center of the reveal. */
     val centerX: Int,
