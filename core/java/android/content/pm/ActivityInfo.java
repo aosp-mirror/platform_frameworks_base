@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.Activity;
-import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
@@ -36,7 +35,6 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Printer;
 import android.window.OnBackInvokedCallback;
@@ -1786,8 +1784,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @hide
      */
     public boolean isChangeEnabled(long changeId) {
-        return CompatChanges.isChangeEnabled(changeId, applicationInfo.packageName,
-                UserHandle.getUserHandleForUid(applicationInfo.uid));
+        return applicationInfo.isChangeEnabled(changeId);
     }
 
     /** @hide */

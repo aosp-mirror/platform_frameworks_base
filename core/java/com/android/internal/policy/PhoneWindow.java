@@ -46,6 +46,7 @@ import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
@@ -388,10 +389,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(context);
         mAllowFloatingWindowsFillScreen = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowFloatingWindowsFillScreen);
-        mEdgeToEdgeEnforced =
-                context.getApplicationInfo().targetSdkVersion >= ENFORCE_EDGE_TO_EDGE_SDK_VERSION
-                        || (CompatChanges.isChangeEnabled(ENFORCE_EDGE_TO_EDGE)
-                                && Flags.enforceEdgeToEdge());
+        mEdgeToEdgeEnforced = isEdgeToEdgeEnforced(context.getApplicationInfo(), true /* local */);
         if (mEdgeToEdgeEnforced) {
             mDecorFitsSystemWindows = false;
         }
@@ -429,6 +427,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mSupportsPictureInPicture = forceResizable || context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_PICTURE_IN_PICTURE);
         mActivityConfigCallback = activityConfigCallback;
+    }
+
+    /**
+     * Returns whether the given application is enforced to go edge-to-edge.
+     *
+     * @param info The application to query.
+     * @param local Whether this is called from the process of the given application.
+     * @return {@code true} if edge-to-edge is enforced. Otherwise, {@code false}.
+     */
+    public static boolean isEdgeToEdgeEnforced(ApplicationInfo info, boolean local) {
+        return info.targetSdkVersion >= ENFORCE_EDGE_TO_EDGE_SDK_VERSION
+                || (Flags.enforceEdgeToEdge() && (local
+                        // Calling this doesn't require a permission.
+                        ? CompatChanges.isChangeEnabled(ENFORCE_EDGE_TO_EDGE)
+                        // Calling this requires permissions.
+                        : info.isChangeEnabled(ENFORCE_EDGE_TO_EDGE)));
     }
 
     @Override
