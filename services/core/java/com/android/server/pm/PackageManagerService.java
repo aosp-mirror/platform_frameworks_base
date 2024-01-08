@@ -13237,6 +13237,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (pkgSetting == null) {
                     return PackageManager.INSTALL_FAILED_INVALID_URI;
                 }
+                if (instantApp && (pkgSetting.isSystem() || isUpdatedSystemApp(pkgSetting))) {
+                    return PackageManager.INSTALL_FAILED_INVALID_URI;
+                }
                 if (!canViewInstantApps(callingUid, UserHandle.getUserId(callingUid))) {
                     // only allow the existing package to be used if it's installed as a full
                     // application for at least one user
