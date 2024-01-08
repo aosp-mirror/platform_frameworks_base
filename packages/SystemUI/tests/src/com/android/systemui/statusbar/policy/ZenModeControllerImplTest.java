@@ -47,6 +47,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SmallTest
@@ -173,5 +174,27 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
             assertEquals(state.intValue(), currentState.get());
         }
 
+    }
+
+    @Test
+    public void testCallbackRemovedWhileDispatching_doesntCrash() {
+        final AtomicBoolean remove = new AtomicBoolean(false);
+        mGlobalSettings.putInt(Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
+        TestableLooper.get(this).processAllMessages();
+        final ZenModeController.Callback callback = new ZenModeController.Callback() {
+            @Override
+            public void onZenChanged(int zen) {
+                if (remove.get()) {
+                    mController.removeCallback(this);
+                }
+            }
+        };
+        mController.addCallback(callback);
+        mController.addCallback(new ZenModeController.Callback() {});
+
+        remove.set(true);
+
+        mGlobalSettings.putInt(Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_NO_INTERRUPTIONS);
+        TestableLooper.get(this).processAllMessages();
     }
 }
