@@ -4193,6 +4193,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
+        public boolean hasRunBackupJobsPermission(@NonNull String packageName, int packageUid) {
+            return JobSchedulerService.this.hasRunBackupJobsPermission(packageName, packageUid);
+        }
+
+        @Override
         public JobStorePersistStats getPersistStats() {
             synchronized (mLock) {
                 return new JobStorePersistStats(mJobs.getPersistStats());
@@ -4352,6 +4357,22 @@ public class JobSchedulerService extends com.android.server.SystemService
             pidPermissions.add(pid, permission, permissionGranted);
             return permissionGranted;
         }
+    }
+
+    /**
+     * Returns whether the app holds the {@link Manifest.permission.RUN_BACKUP_JOBS} permission.
+     */
+    private boolean hasRunBackupJobsPermission(@NonNull String packageName, int packageUid) {
+        if (packageName == null) {
+            Slog.wtfStack(TAG,
+                    "Expected a non-null package name when calling hasRunBackupJobsPermission");
+            return false;
+        }
+
+        return PermissionChecker.checkPermissionForPreflight(getTestableContext(),
+                android.Manifest.permission.RUN_BACKUP_JOBS,
+                PermissionChecker.PID_UNKNOWN, packageUid, packageName)
+                    == PermissionChecker.PERMISSION_GRANTED;
     }
 
     /**
