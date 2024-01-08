@@ -292,7 +292,7 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Activa el còdec d\'àudio per Bluetooth\nSelecció: mode de canal"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Còdec LDAC d\'àudio de Bluetooth: qualitat de reproducció"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Activa l\'LDAC d\'àudio de Bluetooth\nSelecció de còdec: qualitat de reproducció"</string>
-    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Reproducció en continu: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Reproducció en línia: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS privat"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Selecciona el mode de DNS privat"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Desactivat"</string>
@@ -306,7 +306,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quan aquest mode està activat, és possible que l’adreça MAC d\'aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la memòria intermèdia del registrador"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la memòria intermèdia del registre"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona la mida de la memòria intermèdia del registre"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Vols esborrar l\'emmagatzematge persistent del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Quan deixem de supervisar amb el registrador persistent, hem d\'esborrar les dades del registrador que hi ha al teu dispositiu."</string>

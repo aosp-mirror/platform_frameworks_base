@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB-ის ჩართვა"</string>
     <string name="learn_more" msgid="4690632085667273811">"შეიტყვეთ მეტი"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ეკრანის ანაბეჭდი"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"გაფართოებული განბლოკვა გაითიშა"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"ხანგრძლივი განბლოკვა გაითიშა"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"გაიგზავნა სურათი"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ეკრანის სურათის შენახვა…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"მიმდინარეობს ეკრანის ანაბეჭდის შენახვა სამუშაო პროფილში…"</string>
@@ -270,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ფერთა ინვერსია"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"ფერთა კორექცია"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"შრიფტის ზომა"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"მომხმარებლების მართვა"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"მართვა"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"დასრულდა"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"დახურვა"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"დაკავშირებულია"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ჩართვის მენიუ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"გვერდი <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>-დან"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ჩაკეტილი ეკრანი"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"ტელეფონი გამოირთო გაცხელების გამო"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"თქვენი ტელეფონი უკვე ნორმალურად მუშაობს.\nშეეხეთ დამატებითი ინფორმაციის მისაღებად"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"თქვენი ტელეფონი გამოირთო გასაგრილებლად, რადგან ის მეტისმეტად გაცხელდა. ახლა ის ჩვეულებრივად მუშაობს.\n\nტელეფონის გაცხელების მიზეზებია:\n	• რესურსტევადი აპების გამოყენება (მაგ. სათამაშო, ვიდეო ან ნავიგაციის აპების)\n	• დიდი ფაილების ჩამოტვირთვა ან ატვირთვა\n	• ტელეფონის გამოყენება მაღალი ტემპერატურისას"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"მისაღები ზომების გაცნობა"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"ტელეფონი ცხელდება"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"ზოგიერთი ფუნქცია შეზღუდული იქნება, სანამ ტელეფონი გაგრილდება.\nშეეხეთ დამატებითი ინფორმაციის მისაღებად"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"თქვენი ტელეფონი გაგრილებას ავტომატურად შეეცდება. შეგიძლიათ გააგრძელოთ მისით სარგებლობა, თუმცა ტელეფონმა შეიძლება უფრო ნელა იმუშაოს.\n\nგაგრილების შემდგომ ის ჩვეულებრივად იმუშავებს."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"მისაღები ზომების გაცნობა"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"გამოაერᲗეᲗ Თქვენი მოწყობილობა"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"თქვენი მოწყობილობა ხურდება დამტენის პორტთან ახლოს. თუ ის დაკავშირებულია დამტენთან ან USB აქსესუართან, გამორთეთ იგი და იზრუნეთ, რადგან შესაძლოა კაბელიც გახურებული იყოს."</string>
@@ -1096,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"სურათის წინასწარი ხედი"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"რედაქტირება"</string>
     <string name="add" msgid="81036585205287996">"დამატება"</string>
-    <string name="manage_users" msgid="1823875311934643849">"მომხმარებლების მართვა"</string>
+    <string name="manage_users" msgid="1823875311934643849">"მართვა"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"ამ შეტყობინების გადათრევა გაყოფილ ეკრანებს შორის არ არის მხარდაჭერილი."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi მიუწვდომელია"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"პრიორიტეტული რეჟიმი"</string>

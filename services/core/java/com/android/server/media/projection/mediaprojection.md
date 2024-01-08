@@ -11,6 +11,11 @@ Calls must follow the below invocation order while holding locks:
 
 `WindowManagerService -> MediaProjectionManagerService -> DisplayManagerService`
 
+`MediaProjectionManagerService` should never lock when calling into a service that may acquire
+the `WindowManagerService` global lock (for example,
+`MediaProjectionManagerService -> ActivityManagerService` may result in deadlock, since
+`ActivityManagerService -> WindowManagerService`).
+
 ### Justification
 
 `MediaProjectionManagerService` calls into `WindowManagerService` in the below cases. While handling

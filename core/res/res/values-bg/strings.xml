@@ -2327,7 +2327,7 @@
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Функцията Dual Screen е включена"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> използва и двата екрана, за да показва съдържание"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Устройството е твърде топло"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функцията за двоен екран не е налице, защото телефонът ви е твърде топъл"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функцията Dual Screen не е налице, защото телефонът ви е твърде топъл"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Функцията Dual Screen не е налице"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Функцията Dual Screen не е налице, защото режимът за запазване на батерията е включен. Можете да го изключите от настройките."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Към настройките"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"За клавиатурната подредба са зададени <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> и <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Докоснете за промяна."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физическите клавиатури са конфигурирани"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Докоснете за преглед на клавиатурите"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Частни"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Клониране"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Служебни"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Служебни 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Служебни 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Тестване"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Общи"</string>
 </resources>

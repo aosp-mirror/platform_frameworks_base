@@ -85,4 +85,17 @@ public class WallpaperServiceTest {
         assertEquals("onAmbientModeChanged should have been called", 2, zoomChangedCount[0]);
     }
 
+    @Test
+    public void testNotifyColorsOfDestroyedEngine_doesntCrash() {
+        WallpaperService service = new WallpaperService() {
+            @Override
+            public Engine onCreateEngine() {
+                return new Engine();
+            }
+        };
+        WallpaperService.Engine engine = service.onCreateEngine();
+        engine.detach();
+
+        engine.notifyColorsChanged();
+    }
 }

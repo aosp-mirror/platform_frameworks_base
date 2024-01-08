@@ -3074,6 +3074,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Enforces that the uid of the caller matches the uid of the package.
+     *
+     * @param packageName the name of the package to match uid against.
+     * @param callingUid the uid of the caller.
+     * @throws SecurityException if the calling uid doesn't match uid of the package.
+     */
+    private void enforceCallingPackage(String packageName, int callingUid) {
+        final int userId = UserHandle.getUserId(callingUid);
+        final int packageUid = getPackageManagerInternal().getPackageUid(packageName,
+                /*flags=*/ 0, userId);
+        if (packageUid != callingUid) {
+            throw new SecurityException(packageName + " does not belong to uid " + callingUid);
+        }
+    }
+
     @Override
     public void setPackageScreenCompatMode(String packageName, int mode) {
         mActivityTaskManager.setPackageScreenCompatMode(packageName, mode);
@@ -5358,7 +5374,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent = new Intent(Intent.ACTION_MAIN);
             }
             try {
-                target.send(code, intent, resolvedType, allowlistToken, null,
+                if (allowlistToken != null) {
+                    final int callingUid = Binder.getCallingUid();
+                    final String packageName;
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        packageName = AppGlobals.getPackageManager().getNameForUid(callingUid);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                    Slog.wtf(TAG, "Send a non-null allowlistToken to a non-PI target."
+                            + " Calling package: " + packageName + "; intent: " + intent
+                            + "; options: " + options);
+                }
+                target.send(code, intent, resolvedType, null, null,
                         requiredPermission, options);
             } catch (RemoteException e) {
             }
@@ -9678,6 +9707,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != ROOT_UID && callingUid != Process.SHELL_UID) {
+            if (resultReceiver != null) {
+                resultReceiver.send(-1, null);
+            }
+            throw new SecurityException("Shell commands are only callable by root or shell");
+        }
         (new ActivityManagerShellCommand(this, false)).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }
@@ -13618,13 +13654,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     // A backup agent has just come up
     @Override
     public void backupAgentCreated(String agentPackageName, IBinder agent, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        enforceCallingPackage(agentPackageName, callingUid);
+
         // Resolve the target user id and enforce permissions.
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid,
                 userId, /* allowAll */ false, ALLOW_FULL_ONLY, "backupAgentCreated", null);
         if (DEBUG_BACKUP) {
             Slog.v(TAG_BACKUP, "backupAgentCreated: " + agentPackageName + " = " + agent
                     + " callingUserId = " + UserHandle.getCallingUserId() + " userId = " + userId
-                    + " callingUid = " + Binder.getCallingUid() + " uid = " + Process.myUid());
+                    + " callingUid = " + callingUid + " uid = " + Process.myUid());
         }
 
         synchronized(this) {

@@ -35,6 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.service.trust.TrustAgentService;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
@@ -57,6 +58,8 @@ import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
@@ -84,7 +87,6 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 
 import com.google.common.truth.Truth;
@@ -153,7 +155,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<OnBackInvokedCallback> mBackCallbackCaptor;
     @Captor
-    private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallback;
+    private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallback;
 
 
     @Before
@@ -925,18 +927,24 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onDeviceUnlocked_hideAlternateBouncerAndClearMessageArea() {
+    public void onTrustChanged_hideAlternateBouncerAndClearMessageArea() {
+        // GIVEN keyguard update monitor callback is registered
+        verify(mKeyguardUpdateMonitor).registerCallback(mKeyguardUpdateMonitorCallback.capture());
+
         reset(mKeyguardUpdateMonitor);
         reset(mKeyguardMessageAreaController);
-
-        // GIVEN keyguard state controller callback is registered
-        verify(mKeyguardStateController).addCallback(mKeyguardStateControllerCallback.capture());
 
         // GIVEN alternate bouncer state = not visible
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(false);
 
-        // WHEN the device is unlocked
-        mKeyguardStateControllerCallback.getValue().onUnlockedChanged();
+        // WHEN the device is trusted by active unlock
+        mKeyguardUpdateMonitorCallback.getValue().onTrustGrantedForCurrentUser(
+                true,
+                true,
+                new TrustGrantFlags(TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD
+                        | TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE),
+                null
+        );
 
         // THEN the false visibility state is propagated to the keyguardUpdateMonitor
         verify(mKeyguardUpdateMonitor).setAlternateBouncerShowing(eq(false));

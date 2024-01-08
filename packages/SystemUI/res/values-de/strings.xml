@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB aktivieren"</string>
     <string name="learn_more" msgid="4690632085667273811">"Weitere Informationen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"„Extend Unlock“ deaktiviert"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"„Erweitertes Entsperren“ deaktiviert"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"Bild gesendet"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Screenshot wird gespeichert..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Screenshot wird in Arbeitsprofil gespeichert…"</string>
@@ -479,7 +479,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktivieren"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Ton &amp; Vibration"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Einstellungen"</string>
-    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Auf sicherere Lautstärke gesenkt"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Auf verträglichere Lautstärke eingestellt"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Die Kopfhörerlautstärke war länger als empfohlen hoch eingestellt"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Die Kopfhörerlautstärke hat für diese Woche das Sicherheitslimit überschritten"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Weiterhören"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Ein-/Aus-Menü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Seite <xliff:g id="ID_1">%1$d</xliff:g> von <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Sperrbildschirm"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Ausgeschaltet, da zu heiß"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Dein Smartphone funktioniert jetzt wieder normal.\nFür mehr Informationen tippen."</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Dein Smartphone war zu heiß und wurde zum Abkühlen ausgeschaltet. Nun funktioniert es wieder normal.\n\nMögliche Ursachen:\n	• Verwendung ressourcenintensiver Apps (z. B. Spiele-, Video- oder Navigations-Apps)\n	• Download oder Upload großer Dateien \n	• Verwendung des Smartphones bei hohen Temperaturen"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Schritte zur Abkühlung des Geräts ansehen"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Smartphone wird warm"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Einige Funktionen sind während der Abkühlphase des Smartphones eingeschränkt.\nFür mehr Informationen tippen."</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Dein Smartphone kühlt sich automatisch ab. Du kannst dein Smartphone weiterhin nutzen, aber es reagiert möglicherweise langsamer.\n\nSobald dein Smartphone abgekühlt ist, funktioniert es wieder normal."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Schritte zur Abkühlung des Geräts ansehen"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Gerät vom Stromnetz trennen"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Dein Gerät erwärmt sich am Ladeanschluss. Trenne das Gerät vom Stromnetz, wenn es an ein Ladegerät oder USB-Zubehör angeschlossen ist. Sei vorsichtig, denn das Kabel könnte ebenfalls heiß sein."</string>

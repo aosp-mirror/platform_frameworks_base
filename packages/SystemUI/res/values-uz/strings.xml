@@ -20,8 +20,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"Tizim interfeysi"</string>
-    <string name="battery_low_title" msgid="5319680173344341779">"Quvvat tejash funksiyasi yoqilsinmi?"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"<xliff:g id="PERCENTAGE">%s</xliff:g> batareya quvvati qoldi. Quvvat tejash funksiyasi Tungi mavzuni yoqadi va fondagi faollikni cheklaydi. Buning natijasida bildirishnomalar kechikishi mumkin."</string>
+    <string name="battery_low_title" msgid="5319680173344341779">"Quvvat tejash yoqilsinmi?"</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"Batareya quvvati <xliff:g id="PERCENTAGE">%s</xliff:g> qoldi. Quvvat tejash funksiyasi Tungi mavzuni yoqadi va fondagi faollikni cheklaydi. Buning natijasida bildirishnomalar kechikishi mumkin."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"Quvvat tejash funksiyasi Tungi mavzuni yoqadi va fondagi faollikni cheklaydi. Buning natijasida bildirishnomalar kechikishi mumkin."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB orqali quvvatlash imkonsiz"</string>
@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB xususiyatini yoqish"</string>
     <string name="learn_more" msgid="4690632085667273811">"Batafsil"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skrinshot"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Kengaytirilgan ochish yoniq emas"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock yoniq emas"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"rasm yuborildi"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinshot saqlanmoqda…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Skrinshot ish profiliga saqlanmoqda…"</string>
@@ -270,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Ranglarni akslantirish"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Ranglarni tuzatish"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Shrift hajmi"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Foydalanuvchilarni boshqarish"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Foyd-ni boshqarish"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Tayyor"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Yopish"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Ulangan"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Quvvat menyusi"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>-sahifa, jami: <xliff:g id="ID_2">%2$d</xliff:g> ta sahifa"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ekran qulfi"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Qizigani uchun o‘chirildi"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Endi telefoningiz normal holatda ishlayapti.\nBatafsil axborot uchun bosing"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon qizib ketganligi sababli sovitish uchun o‘chirib qo‘yilgan. Endi telefoningiz normal holatda ishlayapti.\n\nTelefon bu hollarda qizib ketishi mumkin:\n	• Resurstalab ilovalar ishlatilganda (masalan, o‘yin, video yoki navigatsiya ilovalari)\n	• Katta faylni yuklab olishda yoki yuklashda\n	• Telefondan yuqori haroratda foydalanganda"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Batafsil axborot"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Telefon qizib ketdi"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Telefon sovib qolganda ayrim funksiyalari ishlamasligi mumkin.\nBatafsil axborot uchun bosing"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon avtomatik ravishda o‘zini sovitadi. Telefoningizdan foydalanishda davom etishingiz mumkin, lekin u sekinroq ishlashi mumkin.\n\nTelefon sovishi bilan normal holatda ishlashni boshlaydi."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Batafsil axborot"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Qurilmani uzing"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Qurilmangiz quvvatlash porti yaqinida qizib ketmoqda. Agar quvvatlagich yoki USB aksessuarga ulangan boʻlsa, kabel qizib ketmasidan uni darhol uzing."</string>
@@ -1096,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Rasmga razm solish"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"tahrir"</string>
     <string name="add" msgid="81036585205287996">"Kiritish"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Foydalanuvchilarni boshqarish"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Foyd-ni boshqarish"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Bu bildirishnoma ikkiga ajratilgan ekranda ishlamaydi."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi ishlamayapti"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Imtiyozli rejim"</string>

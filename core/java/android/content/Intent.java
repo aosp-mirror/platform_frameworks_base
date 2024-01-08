@@ -4154,6 +4154,32 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGED_PROFILE_UNAVAILABLE";
 
     /**
+     * Broadcast sent to the primary user when an associated profile has become available.
+     * This is sent when a user disables quiet mode for the profile. Carries an extra
+     * {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile. When quiet mode is
+     * changed, this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the
+     * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
+     *
+     * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_AVAILABLE} but functions as a
+     * generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     */
+    public static final String ACTION_PROFILE_AVAILABLE =
+            "android.intent.action.PROFILE_AVAILABLE";
+
+    /**
+     * Broadcast sent to the primary user when an associated profile has become unavailable.
+     * This is sent when a user enables quiet mode for the profile. Carries an extra
+     * {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile. When quiet mode is
+     * changed, this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the
+     * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
+     *
+     * <p>This broadcast is similar to {@link #ACTION_MANAGED_PROFILE_UNAVAILABLE} but functions as
+     * a generic broadcast for all users of type {@link android.content.pm.UserInfo#isProfile()}}.
+     */
+    public static final String ACTION_PROFILE_UNAVAILABLE =
+            "android.intent.action.PROFILE_UNAVAILABLE";
+
+    /**
      * Broadcast sent to the parent user when an associated profile has been started and unlocked.
      * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile.
      * This is only sent to registered receivers, not manifest receivers.

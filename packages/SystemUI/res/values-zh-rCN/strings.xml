@@ -278,7 +278,7 @@
     <string name="quick_settings_connecting" msgid="2381969772953268809">"正在连接…"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"热点"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"正在开启…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"流量节省程序已开启"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"省流模式已开启"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# 部设备}other{# 部设备}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"手电筒"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"相机正在使用中"</string>
@@ -479,8 +479,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
     <string name="sound_settings" msgid="8874581353127418308">"声音和振动"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"设置"</string>
-    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"音量已降到更安全的水平"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"耳机音量保持较高的时间超过了建议时长"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"音量已降至较安全的水平"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"您以高音量使用耳机的时长超过了建议值"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"耳机音量已超出这周的安全上限"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"继续聆听"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"调低音量"</string>
@@ -568,7 +568,7 @@
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"不发出提示音，也不振动"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不发出提示音，也不振动；显示在对话部分的靠下位置"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"可能会响铃或振动，取决于设备设置"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"可能会响铃或振动，取决于设备设置。默认情况下，来自<xliff:g id="APP_NAME">%1$s</xliff:g>的对话会以对话泡的形式显示。"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"可能会响铃或振动，取决于设备设置。默认情况下，来自<xliff:g id="APP_NAME">%1$s</xliff:g>的对话会以消息气泡的形式显示。"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"让系统决定是否应让设备在收到此通知时发出提示音或振动"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;状态&lt;/b&gt;：已提升为“默认”"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;状态&lt;/b&gt;：已降低为“静音”"</string>
@@ -596,7 +596,7 @@
     <string name="notification_more_settings" msgid="4936228656989201793">"更多设置"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"自定义"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"显示气泡"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除对话泡"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"移除消息气泡"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g><xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"通知设置"</string>
     <string name="notification_menu_snooze_description" msgid="4740133348901973244">"通知延后选项"</string>
@@ -689,8 +689,8 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"打开“设置”"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"已连接到耳机"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"已连接到耳机"</string>
-    <string name="data_saver" msgid="3484013368530820763">"流量节省程序"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"流量节省程序已开启"</string>
+    <string name="data_saver" msgid="3484013368530820763">"省流模式"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"省流模式已开启"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"开启"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"关闭"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"不可用"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"电源菜单"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"第 <xliff:g id="ID_1">%1$d</xliff:g> 页，共 <xliff:g id="ID_2">%2$d</xliff:g> 页"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"锁定屏幕"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"手机因严重发热而自动关机"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"现在，您的手机已恢复正常运行。\n点按即可了解详情"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"由于发热严重，因此您的手机执行了自动关机以降温。现在，您的手机已恢复正常运行。\n\n以下情况可能会导致您的手机严重发热：\n • 使用占用大量资源的应用（例如游戏、视频或导航应用）\n • 下载或上传大型文件\n • 在高温环境下使用手机"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"查看处理步骤"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"手机温度上升中"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"手机降温时，部分功能的使用会受限制。\n点按即可了解详情"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"您的手机将自动尝试降温。您依然可以使用您的手机，但是手机运行速度可能会更慢。\n\n手机降温后，就会恢复正常的运行速度。"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"查看处理步骤"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"拔出设备"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"设备的充电接口附近在发热。如果该设备已连接到充电器或 USB 配件，请立即拔掉，并注意充电线也可能会发热。"</string>
@@ -1116,7 +1110,7 @@
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"未知"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <string name="log_access_confirmation_title" msgid="4843557604739943395">"允许“<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>”访问所有设备日志吗？"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"要允许“<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>”访问所有设备日志吗？"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"允许访问一次"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"不允许"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，它仍然可以访问自己的日志。您的设备制造商可能仍然能够访问设备上的部分日志或信息。"</string>

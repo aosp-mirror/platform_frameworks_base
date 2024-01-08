@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB’ни иштетүү"</string>
     <string name="learn_more" msgid="4690632085667273811">"Кененирээк"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Скриншот"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"\"Кулпуну ачуу\" функциясы өчүрүлдү"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Кулпуланбаган режим өчүрүлдү"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"сүрөт жөнөттү"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Скриншот сакталууда..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Скриншот жумуш профилине сакталууда…"</string>
@@ -480,7 +480,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"Үн жана дирилдөө"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Параметрлер"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Үндүн катуулугу коопсуз деңгээлге чейин акырындатылды"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Гарнитуранын үнүн катуу чыгарып, сунушталган убакыттан узагыраак угуп жатасыз"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Гарнитуранын үнүн катуу чыгарып, сунушталгандан узагыраак угуп жатасыз"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Гарнитуранын үнүнүн катуулугу бул аптада коопсуз деңгээлден жогору болду"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Уга берем"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Үнүн акырындатуу"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Кубат баскычынын менюсу"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ичинен <xliff:g id="ID_1">%1$d</xliff:g>-бет"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Кулпуланган экран"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон ысыгандыктан өчүрүлдү"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефонуңуз кадимкидей иштеп жатат.\nКеңири маалымат алуу үчүн таптап коюңуз"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефонуңуз өтө ысып кеткендиктен, аны муздатуу үчүн өчүрүлдү. Эми телефонуңуз кадимкидей иштеп жатат.\n\nТелефонуңуз төмөнкү шарттарда ысып кетиши мүмкүн:\n	• Ашыкча ресурс короткон колдонмолорду (оюндар, видео же чабыттоо колдонмолору) пайдалансаңыз \n	• Ири көлөмдөгү файлдарды жүктөп алсаңыз же берсеңиз\n	• Телефонуңузду жогорку температураларда пайдалансаңыз"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Тейлөө кадамдарын көрүңүз"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Телефонуңуз ысып баратат"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Телефон сууганча айрым элементтердин иши чектелген.\nКеңири маалымат алуу үчүн таптап коюңуз"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефонуңуз автоматтык түрдө сууйт. Аны колдоно берсеңиз болот, бирок ал жайыраак иштеп калат.\n\nТелефонуңуз суугандан кийин адаттагыдай эле иштеп баштайт."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Тейлөө кадамдарын көрүңүз"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Түзмөктү сууруп коюңуз"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Түзмөгүңүздүн кубаттоо порту жылып баратат. Эгер түзмөгүңүз кубаттагычка же USB кабелине туташып турса, аны сууруп коюңуз. Абайлаңыз, кабель да жылуу болушу мүмкүн."</string>
@@ -896,7 +890,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# көзөмөл кошулду.}other{# көзөмөл кошулду.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Өчүрүлдү"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> кошулсунбу?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> бул жерде көрсөтүлө турган башкаруу элементтерин жана контентти тандай алат."</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> бул жерде көрүнө турган нерселерди тандайт."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"<xliff:g id="APPNAME">%s</xliff:g> башкаруу элементтери өчүрүлсүнбү?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Сүйүктүүлөргө кошулду"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Сүйүктүүлөргө <xliff:g id="NUMBER">%d</xliff:g>-позицияга кошулду"</string>
@@ -1119,7 +1113,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> колдонмосуна түзмөктөгү бардык таржымалдарды жеткиликтүү кыласызбы?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Бир жолу жеткиликтүү кылуу"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Тыюу салуу"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Түзмөктө аткарылган бардык аракеттер түзмөктүн таржымалдарында сакталып калат. Колдонмолор бул таржымалдарды колдонуп, маселелерди оңдошот.\n\nАйрым таржымалдарда купуя маалымат болушу мүмкүн, андыктан ишенимдүү колдонмолорго гана түзмөктөгү бардык таржымалдарды пайдаланууга уруксат бериңиз. \n\nЭгер бул колдонмого түзмөктөгү бардык таржымалдарга кирүүгө тыюу салсаңыз, ал өзүнүн таржымалдарын пайдалана берет. Түзмөктү өндүрүүчү түзмөгүңүздөгү айрым таржымалдарды же маалыматты көрө берет."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Түзмөктө жасалган аракеттердин баары таржымалдарда сакталат. Колдонмолор алардын жардамы менен мүмкүн болгон мүчүлүштүктөрдү таап, оңдоп турат.\n\nАйрым таржымалдарда купуя маалымат камтылышы мүмкүн болгондуктан, түзмөктөгү бардык таржымалдарды ишенимдүү колдонмолорго гана жеткиликтүү кылыңыз. \n\nЭгер бул колдонмого түзмөктөгү айрым таржымалдарды гана жеткиликтүү кылсаңыз, ал мурункудай эле өзүнүн таржымалдарын көрө берет. Түзмөгүңүздөгү айрым таржымалдар же нерселер анын өндүрүүчүсүнө көрүнүшү мүмкүн."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Кеңири маалымат"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Кеңири маалымат: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ачуу"</string>

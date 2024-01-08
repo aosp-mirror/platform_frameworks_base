@@ -712,6 +712,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mFlags |= WindowManager.TRANSIT_FLAG_INVISIBLE;
             return;
         }
+        // Activity doesn't need to capture snapshot if the starting window has associated to task.
+        if (wc.asActivityRecord() != null) {
+            final ActivityRecord activityRecord = wc.asActivityRecord();
+            if (activityRecord.mStartingData != null
+                    && activityRecord.mStartingData.mAssociatedTask != null) {
+                return;
+            }
+        }
 
         if (mContainerFreezer == null) {
             mContainerFreezer = new ScreenshotFreezer();
@@ -1458,6 +1466,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayContent dc = mController.mAtm.mRootWindowContainer.getDisplayContent(
                     info.getRoot(i).getDisplayId());
             mTargetDisplays.add(dc);
+        }
+
+        for (int i = 0; i < mTargets.size(); ++i) {
+            final DisplayArea da = mTargets.get(i).mContainer.asDisplayArea();
+            if (da == null) continue;
+            if (da.isVisibleRequested()) {
+                mController.mValidateDisplayVis.remove(da);
+            } else {
+                // In case something accidentally hides a displayarea and nothing shows it again.
+                mController.mValidateDisplayVis.add(da);
+            }
         }
 
         if (mOverrideOptions != null) {

@@ -483,7 +483,7 @@
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Нивото на силата на звука на слушалките е било високо по-дълго, отколкото е препоръчително"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Нивото на силата на звука на слушалките е надвишило безопасния лимит за тази седмица"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Продължете да слушате"</string>
-    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Намаляване на силата на звука"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Намаляване на звука"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Приложението е фиксирано"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Екранът ще се показва, докато не го освободите с докосване и задържане на бутона за връщане назад и този за общ преглед."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Екранът ще се показва, докато не го освободите с докосване и задържане на бутона за връщане назад и „Начало“."</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню за включване/изключване"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> от <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заключен екран"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Тел. се изкл. поради загряване"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефонът ви вече работи нормално.\nДокоснете за още информация"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефонът ви бе твърде горещ, затова се изключи с цел охлаждане. Вече работи нормално.\n\nТелефонът ви може да стане твърде горещ, ако:\n	• използвате приложения, които ползват голям обем ресурси (като например игри, видеосъдържание или приложения за навигация);\n	• изтегляте или качвате големи файлове;\n	• използвате устройството си при високи температури."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Вижте стъпките, които да предприемете"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Телефонът загрява"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Някои функции са ограничени, докато телефонът се охлажда.\nДокоснете за още информация"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефонът ви автоматично ще направи опит за охлаждане. Пак можете да го използвате, но той може да работи по-бавно.\n\nСлед като се охлади, ще работи нормално."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Вижте стъпките, които да предприемете"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Изключете устройството си"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Устройството ви се загрява до порта за зареждане. Ако е свързано със зарядно устройство или аксесоар за USB, изключете го и внимавайте, тъй като и кабелът може да е топъл."</string>
@@ -1096,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Визуализация на изображението"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"редактиране"</string>
     <string name="add" msgid="81036585205287996">"Добавяне"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Управление на потребителите"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Потребители"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Това известие не поддържа плъзгане за разделяне на екрана"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi не е налице"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Приоритетен режим"</string>

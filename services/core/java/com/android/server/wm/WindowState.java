@@ -5128,7 +5128,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void applyDims() {
         if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || shouldDrawBlurBehind())
-                   && isVisibleNow() && !mHidden && mTransitionController.canApplyDim(getTask())) {
+                && mToken.isVisibleRequested() && isVisibleNow() && !mHidden
+                && mTransitionController.canApplyDim(getTask())) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or blur behind is requested
             // 2. The WindowToken is not hidden so dims aren't shown when the window is exiting.
@@ -5138,7 +5139,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mIsDimming = true;
             final float dimAmount = (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? mAttrs.dimAmount : 0;
             final int blurRadius = shouldDrawBlurBehind() ? mAttrs.getBlurBehindRadius() : 0;
-            getDimmer().dimBelow(getSyncTransaction(), this, dimAmount, blurRadius);
+            getDimmer().dimBelow(this, dimAmount, blurRadius);
         }
     }
 
@@ -5661,6 +5662,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (mIsWallpaper) {
             // TODO(b/233286785): Add sync support to wallpaper.
+            return false;
+        }
+        if (mActivityRecord != null && mViewVisibility != View.VISIBLE
+                && mWinAnimator.mAttrType != TYPE_BASE_APPLICATION
+                && mWinAnimator.mAttrType != TYPE_APPLICATION_STARTING) {
+            // Skip sync for invisible app windows which are not managed by activity lifecycle.
             return false;
         }
         // In the WindowContainer implementation we immediately mark ready

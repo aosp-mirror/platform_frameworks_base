@@ -808,7 +808,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Сачыць за колькасцю няправільных набраных пароляў падчас разблакоўкі экрана і блакаваць планшэт або сціраць усе дадзеныя на ім, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і заблакіраваць прыладу Android TV або сцерці ўсе даныя на прыладзе, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Падчас разблакіроўкі экрана сачыць за колькасцю няправільна набраных пароляў і, калі няправільны пароль набраны занадта шмат разоў, заблакіраваць інфармацыйна-забаўляльную сістэму ці сцерці ў ёй усе даныя."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Сачыць за колькасцю няправільных набраных пароляў падчас разблакоўкі экрана і блакаваць тяэлефон або сціраць усе дадзеныя на ім, калі набрана занадта шмат няправільных пароляў."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і блакіраваць тэлефон або сціраць усе даныя на ім, калі набрана занадта шмат няправільных пароляў."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і блакіраваць планшэт або сцерці ўсе даныя гэтага карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і заблакіраваць прыладу Android TV або сцерці ўсе даныя карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Падчас разблакіроўкі экрана сачыць за колькасцю няправільна набраных пароляў і, калі няправільны пароль набраны занадта шмат разоў, заблакіраваць інфармацыйна-забаўляльную сістэму ці сцерці ўсе даныя гэтага профілю."</string>
@@ -1258,7 +1258,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск прыкладанняў."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Завяршэнне загрузкі."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Вы націснулі кнопку сілкавання. Звычайна ў выніку гэтага дзеяння выключаецца экран.\n\nПадчас наладжвання адбітка пальца злёгку дакраніцеся да кнопкі."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Каб завяршыць наладку, выключыце экран"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Каб скончыць наладку, выключыце экран"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Выключыць"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Працягнуць спраўджанне адбітка пальца?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Вы націснулі кнопку сілкавання. Звычайна ў выніку гэтага дзеяння выключаецца экран.\n\nКаб спраўдзіць адбітак пальца, злёгку дакраніцеся да кнопкі."</string>
@@ -2325,11 +2325,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Спадарожная праграма зможа запускаць актыўныя сэрвісы з фонавага рэжыму."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Мікрафон даступны"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Мікрафон заблакіраваны"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Двайны экран"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Уключана функцыя \"Двайны экран\""</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Уключана функцыя Dual Screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" выкарыстоўвае абодва экраны для паказу змесціва"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Прылада моцна нагрэлася"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функцыя \"Двайны экран\" недаступная, бо тэлефон моцна награваецца"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функцыя Dual Screen недаступная, бо тэлефон моцна награваецца"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Функцыя Dual Screen недаступная"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Функцыя Dual Screen недаступная, бо ўключаны рэжым энергазберажэння. Вы можаце выключыць яго ў Наладах."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Перайсці ў Налады."</string>
@@ -2341,4 +2341,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Раскладка клавіятуры наладжана для наступных моў: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Націсніце, каб змяніць."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Фізічныя клавіятуры наладжаны"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Націсніце, каб праглядзець клавіятуры"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Прыватны"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Клон"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Працоўны"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Працоўны 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Працоўны 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Тэставы"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Супольны"</string>
 </resources>
