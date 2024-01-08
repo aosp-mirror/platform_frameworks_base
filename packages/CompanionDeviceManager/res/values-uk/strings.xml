@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Мікрофон"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Журнали викликів"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Пристрої поблизу"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Змін. пристр. для відтв. медіа"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Фотографії та медіафайли"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Сповіщення"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Сповіщення"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Додатки"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Потокове передавання"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Може здійснювати телефонні виклики й керувати ними"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Може переглядати й редагувати журнал викликів телефона"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Може надсилати й переглядати SMS-повідомлення"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Має доступ до ваших контактів"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Має доступ до вашого календаря"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Може записувати аудіо"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Може знаходити пристрої поблизу, підключатися до них і визначати їх відносне розташування"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Може читати всі сповіщення, зокрема таку інформацію, як контакти, повідомлення та фотографії"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Телефонувати й керувати дзвінками"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Переглядати й записувати дані в журналі викликів телефона"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Надсилати й переглядати SMS-повідомлення"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Отримувати доступ до контактів"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Отримувати доступ до календаря"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Записувати аудіо"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Знаходити пристрої поблизу, підключатися до них і визначати їх відносне розташування"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Читати всі сповіщення, зокрема таку інформацію, як контакти, повідомлення й фотографії"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Читати всі сповіщення, зокрема таку інформацію, як контакти, повідомлення й фотографії&lt;br/&gt;• Надсилати сповіщення&lt;br/&gt;&lt;br/&gt;Ви можете будь-коли змінити дозвіл цього додатка на перегляд і надсилання сповіщень, вибравши \"Налаштування\" &gt; \"Сповіщення\"."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Транслювати додатки телефона"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Транслюйте додатки й інші системні функції зі свого телефона"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Отримувати доступ до списку доступних пристроїв і вибирати, з якого з них транслюватиметься аудіо або відео з інших додатків"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"телефоні"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"планшеті"</string>
 </resources>

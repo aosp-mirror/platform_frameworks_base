@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Microfono"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Registri chiamate"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Dispositivi nelle vicinanze"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Cambia uscita conten. multim."</string>
     <string name="permission_storage" msgid="6831099350839392343">"Foto e contenuti multimediali"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Notifiche"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Notifiche"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"App"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streaming"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Consente di effettuare e gestire telefonate"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Consente di leggere e modificare il registro chiamate del telefono"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Consente di inviare e visualizzare SMS"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Consente di accedere ai tuoi contatti"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Consente di accedere al tuo calendario"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Consente di registrare audio"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Consente di trovare e connettersi a dispositivi nelle vicinanze, nonché di stabilirne la posizione relativa"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Puoi leggere tutte le notifiche, incluse le informazioni come contatti, messaggi e foto"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Esegue e gestisce le telefonate"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Legge e modifica il registro chiamate dello smartphone"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Invia e visualizza SMS"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Accede ai tuoi contatti"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Accede al tuo calendario"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Registra l\'audio"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Trova e si connette ai dispositivi nelle vicinanze, oltre a stabilire la loro posizione relativa"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Legge tutte le notifiche, incluse informazioni come contatti, messaggi e foto"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Legge tutte le notifiche, incluse informazioni come contatti, messaggi e foto&lt;br/&gt;• Invia notifiche&lt;br/&gt;&lt;br/&gt;Puoi gestire la capacità dell\'app di leggere e inviare notifiche in qualsiasi momento in Impostazioni &gt; Notifiche."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Trasmetti in streaming le app del tuo telefono"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Trasmettere in streaming app e altre funzionalità di sistema dal telefono"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Accedi a un elenco di dispositivi disponibili e controlla quale di questi riproduce in streaming o trasmette audio o video da altre app"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefono"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

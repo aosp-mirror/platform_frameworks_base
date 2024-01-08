@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"ไมโครโฟน"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"บันทึกการโทร"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"อุปกรณ์ที่อยู่ใกล้เคียง"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"เปลี่ยนเอาต์พุตสื่อ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"รูปภาพและสื่อ"</string>
-    <string name="permission_notification" msgid="693762568127741203">"การแจ้งเตือน"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"การแจ้งเตือน"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"แอป"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"สตรีมมิง"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"สามารถโทรออกและจัดการการโทร"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"สามารถอ่านและเขียนบันทึกการโทรของโทรศัพท์"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"สามารถส่งและดูข้อความ SMS"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"สามารถเข้าถึงรายชื่อติดต่อของคุณ"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"สามารถเข้าถึงปฏิทินของคุณ"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"บันทึกเสียงได้"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"สามารถค้นหา เชื่อมต่อ และระบุตำแหน่งซึ่งสัมพันธ์กับอุปกรณ์ที่อยู่ใกล้เคียง"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"สามารถอ่านการแจ้งเตือนทั้งหมด รวมถึงข้อมูลอย่างรายชื่อติดต่อ ข้อความ และรูปภาพ"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"โทรและจัดการการโทร"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"อ่านและเขียนบันทึกการโทรของโทรศัพท์"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"ส่งและดูข้อความ SMS"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"เข้าถึงรายชื่อติดต่อ"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"เข้าถึงปฏิทิน"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"บันทึกเสียง"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"ค้นหา เชื่อมต่อ และระบุตำแหน่งซึ่งสัมพันธ์กับอุปกรณ์ที่อยู่ใกล้เคียง"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"อ่านการแจ้งเตือนทั้งหมด รวมถึงข้อมูลอย่างรายชื่อติดต่อ ข้อความ และรูปภาพ"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• อ่านการแจ้งเตือนทั้งหมด รวมถึงข้อมูลอย่างรายชื่อติดต่อ ข้อความ และรูปภาพ&lt;br/&gt;• ส่งการแจ้งเตือน&lt;br/&gt;&lt;br/&gt;คุณจัดการความสามารถในการอ่านและส่งการแจ้งเตือนของแอปนี้ได้ทุกเมื่อในการตั้งค่า &gt; การแจ้งเตือน"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"สตรีมแอปของโทรศัพท์คุณ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"สตรีมแอปและฟีเจอร์อื่นๆ ของระบบจากโทรศัพท์"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"เข้าถึงรายการอุปกรณ์ที่มีและควบคุมอุปกรณ์ที่จะสตรีมหรือแคสต์เสียงหรือวิดีโอจากแอปอื่นๆ"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"โทรศัพท์"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"แท็บเล็ต"</string>
 </resources>

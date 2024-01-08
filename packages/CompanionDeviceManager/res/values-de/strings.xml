@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Anrufliste"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Geräte in der Nähe"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Medienausgabe ändern"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotos und Medien"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Benachrichtigungen"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Benachrichtigungen"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Apps"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streaming"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Kann Anrufe tätigen und verwalten"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Kann auf die Anrufliste zugreifen und sie bearbeiten"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Kann SMS senden und abrufen"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Kann auf deine Kontakte zugreifen"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Kann auf deinen Kalender zugreifen"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Darf Audio aufnehmen"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Kann Geräte in der Nähe finden, eine Verbindung zu ihnen herstellen und ihren relativen Standort ermitteln"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Kann alle Benachrichtigungen lesen, einschließlich Informationen wie Kontakten, Nachrichten und Fotos"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Anrufe starten und verwalten"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Auf die Anrufliste zugreifen und sie bearbeiten"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS senden und ansehen"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Auf deine Kontakte zugreifen"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Auf deinen Kalender zugreifen"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Audio aufnehmen"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Geräte in der Nähe finden, eine Verbindung zu ihnen herstellen und ihren relativen Standort ermitteln"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Alle Benachrichtigungen sehen, einschließlich Informationen wie Kontakten, Nachrichten und Fotos"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Alle Benachrichtigungen sehen, einschließlich Informationen wie Kontakte, Nachrichten und Fotos&lt;br/&gt;• Benachrichtigungen senden&lt;br/&gt;&lt;br/&gt;Du kannst die Berechtigungen dieser App zum Sehen und Senden von Benachrichtigungen jederzeit unter „Einstellungen &gt; Benachrichtigungen“ ändern."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Smartphone-Apps streamen"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Apps und andere Systemfunktionen von deinem Smartphone streamen"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Auf eine Liste mit verfügbaren Geräten zugreifen und festlegen, welches Gerät Audio- oder Videoinhalte aus anderen Apps streamt oder überträgt"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"Smartphone"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"Tablet"</string>
 </resources>

@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"မိုက်ခရိုဖုန်း"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"ခေါ်ဆိုမှတ်တမ်း"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"အနီးတစ်ဝိုက်ရှိ စက်များ"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"မီဒီယာအထွက် ပြောင်းခြင်း"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ဓာတ်ပုံနှင့် မီဒီယာများ"</string>
-    <string name="permission_notification" msgid="693762568127741203">"အကြောင်းကြားချက်များ"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"အကြောင်းကြားချက်များ"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"အက်ပ်များ"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"တိုက်ရိုက်ဖွင့်ခြင်း"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"ဖုန်းခေါ်ဆိုမှုများကို ပြုလုပ်ခြင်းနှင့် စီမံခြင်းတို့ လုပ်နိုင်သည်"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ဖုန်းခေါ်ဆိုမှတ်တမ်းကို ဖတ်ခြင်းနှင့် ရေးခြင်းတို့ လုပ်နိုင်သည်"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS မက်ဆေ့ဂျ်များကို ပို့ခြင်းနှင့် ကြည့်ရှုခြင်းတို့ လုပ်နိုင်သည်"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"သင့်အဆက်အသွယ်များကို ဝင်ကြည့်နိုင်သည်"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"သင့်ပြက္ခဒိန်ကို သုံးနိုင်သည်"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"အသံဖမ်းနိုင်သည်"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"အနီးတစ်ဝိုက်ရှိ စက်များ၏ ဆက်စပ်နေရာကို ရှာခြင်း၊ ချိတ်ဆက်ခြင်းနှင့် သတ်မှတ်ခြင်းတို့ လုပ်နိုင်သည်"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"အဆက်အသွယ်၊ မက်ဆေ့ဂျ်နှင့် ဓာတ်ပုံကဲ့သို့ အချက်အလက်များအပါအဝင် အကြောင်းကြားချက်အားလုံးကို ဖတ်နိုင်သည်"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်နိုင်၊ စီမံနိုင်သည်"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"ဖုန်းခေါ်ဆိုမှတ်တမ်းကို ဖတ်နိုင်၊ ရေးနိုင်သည်"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS မက်ဆေ့ဂျ်များ ပို့နိုင်၊ ကြည့်နိုင်သည်"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"သင့်အဆက်အသွယ်များကို ဝင်ကြည့်နိုင်သည်"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"သင့်ပြက္ခဒိန်ကို ဝင်ကြည့်နိုင်သည်"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"အသံသွင်းနိုင်သည်"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"အနီးတစ်ဝိုက်ရှိ စက်များ၏ ဆက်စပ်နေရာကို ရှာခြင်း၊ ချိတ်ဆက်ခြင်းနှင့် သတ်မှတ်ခြင်းတို့ လုပ်နိုင်သည်"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"အဆက်အသွယ်၊ မက်ဆေ့ဂျ်နှင့် ဓာတ်ပုံများကဲ့သို့ အချက်အလက်များအပါအဝင် အကြောင်းကြားချက်အားလုံးကို ဖတ်နိုင်သည်"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• အဆက်အသွယ်၊ မက်ဆေ့ဂျ်နှင့် ဓာတ်ပုံများကဲ့သို့ အချက်အလက်များအပါအဝင် အကြောင်းကြားချက်အားလုံးကို ဖတ်ခြင်း&lt;br/&gt;• အကြောင်းကြားချက်များ ပို့ခြင်း&lt;br/&gt;&lt;br/&gt;ဆက်တင်များ &gt; အကြောင်းကြားချက်များ တွင် အကြောင်းကြားချက်များအား ဤအက်ပ်၏ ဖတ်ခွင့်နှင့် ပို့ခွင့်ကို အချိန်မရွေး စီမံနိုင်သည်။"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"သင့်ဖုန်းရှိအက်ပ်များကို တိုက်ရိုက်ဖွင့်နိုင်သည်"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"သင့်ဖုန်းမှ အက်ပ်များနှင့် အခြားစနစ်အင်္ဂါရပ်များကို တိုက်ရိုက်ဖွင့်သည်"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"အခြားအက်ပ်များတွင် အသံ (သို့) ဗီဒီယို တိုက်ရိုက်ဖွင့်၍ (သို့) ကာစ်လုပ်၍ ရနိုင်သော စက်ပစ္စည်းစာရင်းကို ဝင်ကြည့်ပြီး ရွေးလိုက်သည့်တစ်ခုကို ထိန်းချုပ်နိုင်သည်"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"ဖုန်း"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"တက်ဘလက်"</string>
 </resources>

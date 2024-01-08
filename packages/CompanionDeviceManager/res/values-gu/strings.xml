@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"માઇક્રોફોન"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"કૉલ લૉગ"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"નજીકના ડિવાઇસ"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"મીડિયા આઉટપુટ બદલો"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ફોટા અને મીડિયા"</string>
-    <string name="permission_notification" msgid="693762568127741203">"નોટિફિકેશન"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"નોટિફિકેશન"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ઍપ"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"સ્ટ્રીમિંગ"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"ફોન કૉલ કરી શકે છે અને તેને મેનેજ કરી શકે છે"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ફોન કૉલ લૉગ વાંચી અને લખી શકે છે"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS મેસેજ મોકલી શકે છે અને જોઈ શકે છે"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"તમારા સંપર્કો ઍક્સેસ કરી શકે છે"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"તમારા કૅલેન્ડરનો ઍક્સેસ કરી શકે છે"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"ઑડિયો રેકોર્ડ કરી શકે છે"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"નજીકના ડિવાઇસ શોધી શકે છે, તેમની સાથે કનેક્ટ કરી શકે છે અને તેમની સંબંધિત સ્થિતિ નિર્ધારિત કરી શકે છે"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"સંપર્કો, મેસેજ અને ફોટા જેવી માહિતી સહિતના બધા નોટિફિકેશન વાંચી શકે છે"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"ફોન કૉલ કરવાની અને મેનેજ કરવાની"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"ફોન કૉલ લૉગ વાંચવાની અને લખવાની"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS મેસેજ મોકલવાની અને જોવાની"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"તમારા સંપર્કોને ઍક્સેસ કરવાની"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"ઑડિયો રેકોર્ડ કરવાની"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"નજીકના ડિવાઇસ શોધવાની, તેમની સાથે કનેક્ટ કરવાની અને તેમની સંબંધિત સ્થિતિ નિર્ધારિત કરવાની"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"સંપર્કો, મેસેજ અને ફોટા જેવી માહિતી સહિતના બધા નોટિફિકેશન વાંચવાની"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• સંપર્કો, મેસેજ અને ફોટા જેવી માહિતી સહિતના બધા નોટિફિકેશન વાંચવાની&lt;br/&gt;• નોટિફિકેશન મોકલવાની&lt;br/&gt;&lt;br/&gt;તમે કોઈપણ સમયે સેટિંગમાં &gt; નોટિફિકેશનમાં જઈને આ ઍપની નોટિફિકેશન વાંચવાની અને મોકલવાની ક્ષમતાને મેનેજ કરી શકો છો."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"તમારા ફોનની ઍપ સ્ટ્રીમ કરો"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"તમારા ફોન પરથી ઍપ અને સિસ્ટમની અન્ય સુવિધાઓ સ્ટ્રીમ કરો"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"ઉપલબ્ધ ડિવાઇસની સૂચિ ઍક્સેસ કરો અને અન્ય ઍપમાંથી ઑડિયો કે વીડિયો ક્યા ડિવાઇસ દ્વારા સ્ટ્રીમ કે કાસ્ટ કરવામાં આવે તેનું નિયંત્રણ કરો"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"ફોન"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"ટૅબ્લેટ"</string>
 </resources>

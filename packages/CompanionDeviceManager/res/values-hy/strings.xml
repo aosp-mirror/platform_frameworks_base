@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Խոսափող"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Կանչերի ցուցակ"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Մոտակա սարքեր"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Փոխել մեդիա արտածումը"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Լուսանկարներ և մուլտիմեդիա"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Ծանուցումներ"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Ծանուցումներ"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Հավելվածներ"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Հեռարձակում"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Կարող է կատարել հեռախոսազանգեր և կառավարել դրանք"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Կարող է դիտել և գրանցել կանչերը"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Կարող է ուղարկել SMS հաղորդագրություններ և դիտել դրանք"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Կարող է օգտագործել ձեր կոնտակտները"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Կարող է օգտագործել ձեր օրացույցը"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Կարող է ձայնագրել"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Կարող է գտնել և որոշել մոտակա սարքերի մոտավոր դիրքը և միանալ դրանց"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Կարող է կարդալ բոլոր ծանուցումները, ներառյալ տեղեկությունները, օրինակ՝ կոնտակտները, հաղորդագրությունները և լուսանկարները"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Կատարել զանգեր և կառավարել զանգերը"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Դիտել հեռախոսի զանգերի մատյանը և կատարել գրանցում"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Ուղարկել և կարդալ SMS հաղորդագրություններ"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Օգտագործել ձեր կոնտակտները"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Օգտագործել ձեր օրացույցը"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Ձայնագրել"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Գտնել և որոշել մոտակա սարքերի մոտավոր դիրքը և միանալ դրանց"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Կարդալ բոլոր ծանուցումները, ներառյալ տեղեկությունները, օրինակ՝ կոնտակտները, հաղորդագրությունները և լուսանկարները"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Կարդալ բոլոր ծանուցումները, այդ թվում՝ կոնտակտները, հաղորդագրությունները և լուսանկարները&lt;br/&gt;• Ուղարկել ծանուցումներ&lt;br/&gt;&lt;br/&gt;Դուք ցանկացած պահի կարող եք կառավարել այս հավելվածի՝ ծանուցումներ կարդալու հնարավորությունը՝ անցնելով Կարգավորումներ &gt; Ծանուցումներ։"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Հեռարձակել հեռախոսի հավելվածները"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Հեռարձակել հավելվածներ և համակարգի այլ գործառույթներ հեռախոսում"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Բացել հասանելի սարքերի ցանկը և կառավարել, թե որ սարքը աուդիո կամ վիդեո հեռարձակի այլ հավելվածներից"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"հեռախոս"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"պլանշետ"</string>
 </resources>

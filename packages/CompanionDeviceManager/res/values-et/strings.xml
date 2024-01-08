@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Kõnelogid"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Läheduses olevad seadmed"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Muutke meediaväljundit"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotod ja meedia"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Märguanded"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Märguanded"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Rakendused"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Voogesitus"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Saab teha ja hallata telefonikõnesid"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Saab telefoni kõnelogi lugeda ja sinna kirjutada"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Saab saata ja vaadata SMS-sõnumeid"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Pääseb juurde teie kontaktidele"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Pääseb juurde teie kalendrile"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Saab salvestada heli"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Leiab läheduses olevaid seadmeid, saab nendega ühenduse luua ja määrata nende suhtelise asendi"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Kõikide märguannete, sealhulgas teabe, nagu kontaktid, sõnumid ja fotod, lugemine"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Helistamine ja telefonikõnede haldamine"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Telefoni kõnelogi lugemine ja kirjutamine"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS-sõnumite saatmine ja vaatamine"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Juurdepääs kontaktidele"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Juurdepääs kalendrile"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Heli salvestamine"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Läheduses olevate seadmete leidmine, nendega ühenduse loomine ja nende suhtelise asendi määramine"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Kõikide märguannete, sh sellise teabe nagu kontaktid, sõnumid ja fotod lugemine"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Kõikide märguannete, sh sellise teabe nagu kontaktid, sõnumid ja fotod lugemine&lt;br/&gt;• Märguannete saatmine&lt;br/&gt;&lt;br/&gt;Saate selle rakenduse võimalusi märguannete lugemiseks ja saatmiseks igal ajal hallata jaotises Seaded &gt; Märguanded."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Telefoni rakenduste voogesitamine"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Rakenduste ja muude süsteemi funktsioonide voogesitamine teie telefonist"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Juurdepääs saadaolevate seadmete loendile ja juhtida, milline neist voogesitab või edastab heli või videot teistest rakendustest"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tahvelarvuti"</string>
 </resources>

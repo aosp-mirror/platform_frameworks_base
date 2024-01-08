@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"മൈക്രോഫോൺ"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"കോൾ ചരിത്രം"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"സമീപമുള്ള ഉപകരണങ്ങൾ"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"മീഡിയ ഔട്ട്പുട്ട് മാറ്റുക"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ഫോട്ടോകളും മീഡിയയും"</string>
-    <string name="permission_notification" msgid="693762568127741203">"അറിയിപ്പുകൾ"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"അറിയിപ്പുകൾ"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ആപ്പുകൾ"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"സ്ട്രീമിംഗ്"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ മാനേജ് ചെയ്യാനും കഴിയും"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ഫോൺ കോൾ ചരിത്രം റീഡ് ചെയ്യാനും റൈറ്റ് ചെയ്യാനും കഴിയും"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കാനും കാണാനും കഴിയും"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"നിങ്ങളുടെ കോൺടാക്‌റ്റുകൾ ആക്‌സസ് ചെയ്യാൻ കഴിയും"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ് ചെയ്യാൻ കഴിയും"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"ഓഡിയോ റെക്കോർഡ് ചെയ്യാം"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"സമീപമുള്ള ഉപകരണങ്ങൾ കണ്ടെത്താനും അവയിലേക്ക് കണക്റ്റ് ചെയ്യാനും അവയുടെ ആപേക്ഷിക സ്ഥാനം നിർണ്ണയിക്കാനും കഴിയും"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"കോൺടാക്‌റ്റുകൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ മുതലായ വിവരങ്ങൾ ഉൾപ്പെടെയുള്ള എല്ലാ അറിയിപ്പുകളും വായിക്കാനാകും"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"ഫോൺ കോളുകൾ വിളിക്കുക, മാനേജ് ചെയ്യുക"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"ഫോൺ കോൾ ചരിത്രം എഴുതുകയും വായിക്കുകയും ചെയ്യുക"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS സന്ദേശങ്ങൾ അയയ്ക്കുക, കാണുക"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ് ചെയ്യുക"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ് ചെയ്യുക"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"സമീപമുള്ള ഉപകരണങ്ങൾ കണ്ടെത്താനും അവയിലേക്ക് കണക്റ്റ് ചെയ്യാനും അവയുടെ ആപേക്ഷിക സ്ഥാനം നിർണ്ണയിക്കാനും കഴിയും"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"കോൺടാക്‌റ്റുകൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഉൾപ്പെടെ എല്ലാ അറിയിപ്പുകളും വായിക്കുക"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• കോൺടാക്‌റ്റുകൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഉൾപ്പെടെ എല്ലാ അറിയിപ്പുകളും വായിക്കുക&lt;br/&gt;• അറിയിപ്പുകൾ അയയ്ക്കുക&lt;br/&gt;&lt;br/&gt;അറിയിപ്പുകൾ വായിക്കാനും അയയ്ക്കാനുമുള്ള ഈ ആപ്പിന്റെ ശേഷി ക്രമീകരണവും അറിയിപ്പുകളും എന്നതിൽ ഏതുസമയത്തും മാനേജ് ചെയ്യാം."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"നിങ്ങളുടെ ഫോണിലെ ആപ്പുകൾ സ്‌ട്രീം ചെയ്യുക"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"നിങ്ങളുടെ ഫോണിൽ നിന്ന് ആപ്പുകളും മറ്റ് സിസ്റ്റം ഫീച്ചറുകളും സ്ട്രീം ചെയ്യാം"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"ലഭ്യമായ ഉപകരണങ്ങളുടെ ലിസ്റ്റ് ആക്സസ് ചെയ്ത്, അവയിൽ ഏതാണ് മറ്റ് ആപ്പുകളിൽ നിന്ന് ഓഡിയോ അല്ലെങ്കിൽ വീഡിയോ സ്‌ട്രീം ചെയ്യേണ്ടത് അല്ലെങ്കിൽ കാസ്റ്റ് ചെയ്യേണ്ടത് എന്ന് നിയന്ത്രിക്കുക"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"ഫോൺ"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"ടാബ്‌ലെറ്റ്"</string>
 </resources>
