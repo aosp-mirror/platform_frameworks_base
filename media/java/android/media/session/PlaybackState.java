@@ -524,28 +524,6 @@ public final class PlaybackState implements Parcelable {
         return false;
     }
 
-    /**
-     * Returns whether the service holding the media session should run in the foreground when the
-     * media session has this playback state or not.
-     *
-     * @hide
-     */
-    public boolean shouldAllowServiceToRunInForeground() {
-        switch (mState) {
-            case PlaybackState.STATE_PLAYING:
-            case PlaybackState.STATE_FAST_FORWARDING:
-            case PlaybackState.STATE_REWINDING:
-            case PlaybackState.STATE_BUFFERING:
-            case PlaybackState.STATE_CONNECTING:
-            case PlaybackState.STATE_SKIPPING_TO_PREVIOUS:
-            case PlaybackState.STATE_SKIPPING_TO_NEXT:
-            case PlaybackState.STATE_SKIPPING_TO_QUEUE_ITEM:
-                return true;
-            default:
-                return false;
-        }
-    }
-
     public static final @android.annotation.NonNull Parcelable.Creator<PlaybackState> CREATOR =
             new Parcelable.Creator<PlaybackState>() {
         @Override

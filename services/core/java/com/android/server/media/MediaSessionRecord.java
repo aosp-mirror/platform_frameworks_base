@@ -1144,7 +1144,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             mIsActive = active;
             long token = Binder.clearCallingIdentity();
             try {
-                mService.onSessionActiveStateChanged(MediaSessionRecord.this);
+                mService.onSessionActiveStateChanged(MediaSessionRecord.this, mPlaybackState);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
