@@ -39,7 +39,7 @@ import android.app.PendingIntent;
 import android.app.RemoteServiceException.CannotPostForegroundServiceNotificationException;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -49,6 +49,7 @@ import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
 import android.os.PowerExemptionManager;
 import android.os.SystemClock;
@@ -94,16 +95,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      * (See also android.app.ForegroundServiceTypePolicy)
      */
     @ChangeId
-    // @EnabledAfter(targetSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
-    @Disabled
+    @EnabledAfter(targetSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long USE_NEW_WIU_LOGIC_FOR_START = 311208629L;
 
     /**
      * Compat ID to enable the new FGS start logic, for capability calculation.
      */
     @ChangeId
-    // Always enabled
-    @Disabled
+    @EnabledAfter(targetSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long USE_NEW_WIU_LOGIC_FOR_CAPABILITIES = 313677553L;
 
     /**
@@ -111,8 +110,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      * the background.
      */
     @ChangeId
-    // @EnabledAfter(targetSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
-    @Disabled
+    @EnabledAfter(targetSdkVersion = VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long USE_NEW_BFSL_LOGIC = 311208749L;
 
     final ActivityManagerService ams;
