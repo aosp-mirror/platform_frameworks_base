@@ -105,7 +105,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
             spy(
                 SystemUIDialog.Factory(
                     context,
-                    flags,
                     systemUIDialogManager,
                     sysuiState,
                     broadcastDispatcher,
