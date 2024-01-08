@@ -1982,8 +1982,8 @@ public class VirtualDeviceManagerServiceTest {
         return new AssociationInfo(associationId, /* userId= */ 0, /* packageName=*/ null,
                 /* tag= */ null, MacAddress.BROADCAST_ADDRESS, /* displayName= */ "", deviceProfile,
                 /* associatedDevice= */ null, /* selfManaged= */ true,
-                /* notifyOnDeviceNearby= */ false, /* revoked= */false,  /* timeApprovedMs= */0,
-                /* lastTimeConnectedMs= */0, /* systemDataSyncFlags= */ -1);
+                /* notifyOnDeviceNearby= */ false, /* revoked= */ false, /* pending= */ false,
+                /* timeApprovedMs= */0, /* lastTimeConnectedMs= */0, /* systemDataSyncFlags= */ -1);
     }
 
     /** Helper class to drop permissions temporarily and restore them at the end of a test. */
