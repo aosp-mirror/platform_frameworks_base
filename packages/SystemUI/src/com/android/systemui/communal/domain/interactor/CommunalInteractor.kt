@@ -99,9 +99,17 @@ constructor(
     /** Dismiss the CTA tile from the hub in view mode. */
     fun dismissCtaTile() = communalRepository.setCtaTileInViewModeVisibility(isVisible = false)
 
-    /** Add a widget at the specified position. */
-    fun addWidget(componentName: ComponentName, priority: Int) =
-        widgetRepository.addWidget(componentName, priority)
+    /**
+     * Add a widget at the specified position.
+     *
+     * @param configureWidget The callback to trigger if widget configuration is needed. Should
+     *   return whether configuration was successful.
+     */
+    fun addWidget(
+        componentName: ComponentName,
+        priority: Int,
+        configureWidget: suspend (id: Int) -> Boolean
+    ) = widgetRepository.addWidget(componentName, priority, configureWidget)
 
     /** Delete a widget by id. */
     fun deleteWidget(id: Int) = widgetRepository.deleteWidget(id)

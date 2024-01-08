@@ -2,6 +2,7 @@ package com.android.systemui.util
 
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -45,6 +46,28 @@ fun <T> softReference(obj: T? = null): ReadWriteProperty<Any?, T?> {
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
             softRef = SoftReference(value)
+        }
+    }
+}
+
+/**
+ * Creates a nullable Kotlin idiomatic [AtomicReference].
+ *
+ * Usage:
+ * ```
+ * var atomicReferenceObj: Object? by nullableAtomicReference(null)
+ * atomicReferenceObj = Object()
+ * ```
+ */
+fun <T> nullableAtomicReference(obj: T? = null): ReadWriteProperty<Any?, T?> {
+    return object : ReadWriteProperty<Any?, T?> {
+        val t = AtomicReference(obj)
+        override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
+            return t.get()
+        }
+
+        override fun setValue(thisRef: Any?, property: KProperty<*>, value: T?) {
+            t.set(value)
         }
     }
 }

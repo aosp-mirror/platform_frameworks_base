@@ -16,6 +16,13 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.app.Activity
+import android.app.Activity.RESULT_CANCELED
+import android.app.Activity.RESULT_OK
+import android.app.ActivityOptions
+import android.appwidget.AppWidgetHost
+import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.os.PowerManager
 import android.widget.RemoteViews
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -24,10 +31,13 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.util.nullableAtomicReference
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.map
 
 /** The view model for communal hub in edit mode. */
@@ -36,10 +46,26 @@ class CommunalEditModeViewModel
 @Inject
 constructor(
     private val communalInteractor: CommunalInteractor,
+    private val appWidgetHost: AppWidgetHost,
     shadeViewController: Provider<ShadeViewController>,
     powerManager: PowerManager,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
 ) : BaseCommunalViewModel(communalInteractor, shadeViewController, powerManager, mediaHost) {
+
+    private companion object {
+        private const val KEY_SPLASH_SCREEN_STYLE = "android.activity.splashScreenStyle"
+        private const val SPLASH_SCREEN_STYLE_EMPTY = 0
+    }
+
+    private val _widgetsToConfigure = MutableSharedFlow<Int>()
+
+    /**
+     * Flow emitting ids of widgets which need to be configured. The consumer of this flow should
+     * trigger [startConfigurationActivity] to initiate configuration.
+     */
+    val widgetsToConfigure: Flow<Int> = _widgetsToConfigure
+
+    private var pendingConfiguration: CompletableDeferred<Int>? by nullableAtomicReference()
 
     override val isEditMode = true
 
@@ -57,5 +83,56 @@ constructor(
     override fun getInteractionHandler(): RemoteViews.InteractionHandler {
         // Ignore all interactions in edit mode.
         return RemoteViews.InteractionHandler { _, _, _ -> false }
+    }
+
+    override fun onAddWidget(componentName: ComponentName, priority: Int) {
+        if (pendingConfiguration != null) {
+            throw IllegalStateException(
+                "Cannot add $componentName widget while widget configuration is pending"
+            )
+        }
+        super.onAddWidget(componentName, priority)
+    }
+
+    fun startConfigurationActivity(activity: Activity, widgetId: Int, requestCode: Int) {
+        val options =
+            ActivityOptions.makeBasic().apply {
+                setPendingIntentBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                )
+            }
+        val bundle = options.toBundle()
+        bundle.putInt(KEY_SPLASH_SCREEN_STYLE, SPLASH_SCREEN_STYLE_EMPTY)
+        try {
+            appWidgetHost.startAppWidgetConfigureActivityForResult(
+                activity,
+                widgetId,
+                0,
+                // Use the widget id as the request code.
+                requestCode,
+                bundle
+            )
+        } catch (e: ActivityNotFoundException) {
+            setConfigurationResult(RESULT_CANCELED)
+        }
+    }
+
+    override suspend fun configureWidget(widgetId: Int): Boolean {
+        if (pendingConfiguration != null) {
+            throw IllegalStateException(
+                "Attempting to configure $widgetId while another configuration is already active"
+            )
+        }
+        pendingConfiguration = CompletableDeferred()
+        _widgetsToConfigure.emit(widgetId)
+        val resultCode = pendingConfiguration?.await() ?: RESULT_CANCELED
+        pendingConfiguration = null
+        return resultCode == RESULT_OK
+    }
+
+    /** Sets the result of widget configuration. */
+    fun setConfigurationResult(resultCode: Int) {
+        pendingConfiguration?.complete(resultCode)
+            ?: throw IllegalStateException("No widget pending configuration")
     }
 }
