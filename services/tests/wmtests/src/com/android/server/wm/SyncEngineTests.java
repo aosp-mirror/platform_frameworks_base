@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -142,6 +143,25 @@ public class SyncEngineTests extends WindowTestsBase {
         assertEquals(SYNC_STATE_NONE, r.mSyncState);
         assertTrue(r.isSyncFinished(syncGroup));
         assertEquals(SYNC_STATE_NONE, r.mSyncState);
+    }
+
+    @Test
+    public void testFinishSyncByStartingWindow() {
+        final ActivityRecord taskRoot = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = taskRoot.getTask();
+        final ActivityRecord translucentTop = new ActivityBuilder(mAtm).setTask(task)
+                .setActivityTheme(android.R.style.Theme_Translucent).build();
+        createWindow(null, TYPE_BASE_APPLICATION, taskRoot, "win");
+        final WindowState startingWindow = createWindow(null, TYPE_APPLICATION_STARTING,
+                translucentTop, "starting");
+        startingWindow.mStartingData = new SnapshotStartingData(mWm, null, 0);
+        task.mSharedStartingData = startingWindow.mStartingData;
+        task.prepareSync();
+
+        final BLASTSyncEngine.SyncGroup group = mock(BLASTSyncEngine.SyncGroup.class);
+        assertFalse(task.isSyncFinished(group));
+        startingWindow.onSyncFinishedDrawing();
+        assertTrue(task.isSyncFinished(group));
     }
 
     @Test
