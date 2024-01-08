@@ -106,7 +106,13 @@ sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(const SkBitmap& bitmap) {
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     return uirenderer::HardwareBitmapUploader::allocateHardwareBitmap(bitmap);
 #else
-    return Bitmap::allocateHeapBitmap(bitmap.info());
+    sk_sp<Bitmap> dest = Bitmap::allocateHeapBitmap(bitmap.info());
+
+    // Per header description, factories that accept const SkBitmap& should copy
+    // the contents of the provided bitmap into the newly allocated buffer.
+    memcpy(dest->mPixelStorage.heap.address, bitmap.getPixels(), bitmap.computeByteSize());
+
+    return dest;
 #endif
 }
 
