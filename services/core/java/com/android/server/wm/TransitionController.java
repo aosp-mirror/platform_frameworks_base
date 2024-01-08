@@ -634,8 +634,8 @@ class TransitionController {
     }
 
     /** Sets the sync method for the display change. */
-    private void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
-            @NonNull Transition displayTransition, @NonNull DisplayContent displayContent) {
+    void setDisplaySyncMethod(@NonNull TransitionRequestInfo.DisplayChange displayChange,
+            @NonNull DisplayContent displayContent) {
         final Rect startBounds = displayChange.getStartAbsBounds();
         final Rect endBounds = displayChange.getEndAbsBounds();
         if (startBounds == null || endBounds == null) return;
@@ -686,7 +686,7 @@ class TransitionController {
                     trigger != null ? trigger.asTask() : null, remoteTransition, displayChange);
             if (newTransition != null && displayChange != null && trigger != null
                     && trigger.asDisplayContent() != null) {
-                setDisplaySyncMethod(displayChange, newTransition, trigger.asDisplayContent());
+                setDisplaySyncMethod(displayChange, trigger.asDisplayContent());
             }
         }
         if (trigger != null) {
