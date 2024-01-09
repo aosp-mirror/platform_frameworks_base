@@ -15,6 +15,7 @@
 -->
 <configuration description="fs-verity end-to-end test">
     <option name="test-suite-tag" value="apct" />
+    <option name="config-descriptor:metadata" key="parameter" value="secondary_user"/>
 
     <object type="module_controller" class="com.android.tradefed.testtype.suite.module.ShippingApiLevelModuleController">
         <!-- fs-verity is required since R/30 -->
