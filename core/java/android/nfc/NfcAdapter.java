@@ -1802,7 +1802,7 @@ public final class NfcAdapter {
      * Use {@link #FLAG_LISTEN_DISABLE} to disable listening.
      * Also refer to {@link #resetDiscoveryTechnology(Activity)} to restore these changes.
      * </p>
-     * The pollTech, listenTech parameters can be one or several of below list.
+     * The pollTechnology, listenTechnology parameters can be one or several of below list.
      * <pre>
      *                    Poll                    Listen
      *  Passive A         0x01   (NFC_A)           0x01  (NFC_PASSIVE_A)
@@ -1820,25 +1820,25 @@ public final class NfcAdapter {
      *         NfcAdapter.FLAG_READER_DISABLE, NfcAdapter.FLAG_LISTEN_KEEP);
      * }</pre></p>
      * @param activity The Activity that requests NFC controller to enable specific technologies.
-     * @param pollTech Flags indicating poll technologies.
-     * @param listenTech Flags indicating listen technologies.
+     * @param pollTechnology Flags indicating poll technologies.
+     * @param listenTechnology Flags indicating listen technologies.
      * @throws UnsupportedOperationException if FEATURE_NFC,
      * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF are unavailable.
      */
 
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
     public void setDiscoveryTechnology(@NonNull Activity activity,
-            @PollTechnology int pollTech, @ListenTechnology int listenTech) {
-        if (listenTech == FLAG_LISTEN_DISABLE) {
+            @PollTechnology int pollTechnology, @ListenTechnology int listenTechnology) {
+        if (listenTechnology == FLAG_LISTEN_DISABLE) {
             synchronized (sLock) {
                 if (!sHasNfcFeature) {
                     throw new UnsupportedOperationException();
                 }
             }
-            mNfcActivityManager.enableReaderMode(activity, null, pollTech, null);
+            mNfcActivityManager.enableReaderMode(activity, null, pollTechnology, null);
             return;
         }
-        if (pollTech == FLAG_READER_DISABLE) {
+        if (pollTechnology == FLAG_READER_DISABLE) {
             synchronized (sLock) {
                 if (!sHasCeFeature) {
                     throw new UnsupportedOperationException();
@@ -1851,7 +1851,7 @@ public final class NfcAdapter {
                 }
             }
         }
-        mNfcActivityManager.setDiscoveryTech(activity, pollTech, listenTech);
+        mNfcActivityManager.setDiscoveryTech(activity, pollTechnology, listenTechnology);
     }
 
     /**
