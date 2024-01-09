@@ -525,6 +525,8 @@ public class SipDelegateManager {
      * @param callback The callback instance being registered.
      * @throws ImsException in the case that the callback can not be registered.
      * See {@link ImsException#getCode} for more information on when this is called.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION}.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerSipDialogStateCallback(@NonNull Executor executor,
@@ -557,6 +559,9 @@ public class SipDelegateManager {
      * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
      *
      * @param callback The callback instance to be unregistered.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION}.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterSipDialogStateCallback(@NonNull SipDialogStateCallback callback)
