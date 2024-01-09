@@ -4362,8 +4362,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         @Override
         public void onHeadsUpPinned(NotificationEntry entry) {
             if (!isKeyguardShowing()) {
-                mNotificationStackScrollLayoutController.generateHeadsUpAnimation(
-                        entry.getHeadsUpAnimationView(), true);
+                mNotificationStackScrollLayoutController.generateHeadsUpAnimation(entry, true);
             }
         }
 
@@ -4375,8 +4374,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             // notification
             // will stick to the top without any interaction.
             if (isFullyCollapsed() && entry.isRowHeadsUp() && !isKeyguardShowing()) {
-                mNotificationStackScrollLayoutController.generateHeadsUpAnimation(
-                        entry.getHeadsUpAnimationView(), false);
+                mNotificationStackScrollLayoutController.generateHeadsUpAnimation(entry, false);
                 entry.setHeadsUpIsVisible();
             }
         }

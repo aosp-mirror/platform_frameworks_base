@@ -1495,12 +1495,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         return mView.getFirstChildNotGone();
     }
 
-    private void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
+    public void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
         mView.generateHeadsUpAnimation(entry, isHeadsUp);
-    }
-
-    public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
-        mView.generateHeadsUpAnimation(row, isHeadsUp);
     }
 
     public void setMaxTopPadding(int padding) {
