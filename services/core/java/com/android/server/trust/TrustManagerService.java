@@ -1940,7 +1940,8 @@ public class TrustManagerService extends SystemService {
         };
     }
 
-    private final PackageMonitor mPackageMonitor = new PackageMonitor() {
+    @VisibleForTesting
+    final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override
         public void onSomePackagesChanged() {
             refreshAgentList(UserHandle.USER_ALL);
