@@ -21,7 +21,7 @@ import static android.media.MediaFormat.KEY_AAC_DRC_HEAVY_COMPRESSION;
 import static android.media.MediaFormat.KEY_AAC_DRC_TARGET_REFERENCE_LEVEL;
 
 import android.annotation.CallbackExecutor;
-import android.media.LoudnessCodecConfigurator.OnLoudnessCodecUpdateListener;
+import android.media.LoudnessCodecController.OnLoudnessCodecUpdateListener;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -32,7 +32,6 @@ import androidx.annotation.NonNull;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -59,7 +58,7 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
-        private final HashMap<OnLoudnessCodecUpdateListener, LoudnessCodecConfigurator>
+        private final HashMap<OnLoudnessCodecUpdateListener, LoudnessCodecController>
                 mConfiguratorListener = new HashMap<>();
 
         public static synchronized LoudnessCodecUpdatesDispatcherStub getInstance() {
@@ -72,16 +71,16 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
         private LoudnessCodecUpdatesDispatcherStub() {}
 
         @Override
-        public void dispatchLoudnessCodecParameterChange(int piid, PersistableBundle params) {
+        public void dispatchLoudnessCodecParameterChange(int sessionId, PersistableBundle params) {
             if (DEBUG) {
-                Log.d(TAG, "dispatchLoudnessCodecParameterChange for piid " + piid
+                Log.d(TAG, "dispatchLoudnessCodecParameterChange for sessionId " + sessionId
                         + " persistable bundle: " + params);
             }
             mLoudnessListenerMgr.callListeners(listener -> {
                 synchronized (mLock) {
                     mConfiguratorListener.computeIfPresent(listener, (l, lcConfig) -> {
                         // send the appropriate bundle for the user to update
-                        if (lcConfig.getAssignedTrackPiid() == piid) {
+                        if (lcConfig.getSessionId() == sessionId) {
                             final Map<LoudnessCodecInfo, Set<MediaCodec>> mediaCodecsMap =
                                     lcConfig.getRegisteredMediaCodecs();
                             for (LoudnessCodecInfo codecInfo : mediaCodecsMap.keySet()) {
@@ -111,7 +110,12 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
                                                             bundle));
 
                                     if (!bundle.isDefinitelyEmpty()) {
-                                        mediaCodec.setParameters(bundle);
+                                        try {
+                                            mediaCodec.setParameters(bundle);
+                                        } catch (IllegalStateException e) {
+                                            Log.w(TAG, "Cannot set loudness bundle on media codec "
+                                                    + mediaCodec);
+                                        }
                                     }
                                     if (canBreak) {
                                         break;
@@ -145,7 +149,7 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
         }
 
         void addLoudnessCodecListener(@NonNull CallbackUtil.DispatcherStub dispatcher,
-                @NonNull LoudnessCodecConfigurator configurator,
+                @NonNull LoudnessCodecController configurator,
                 @NonNull @CallbackExecutor Executor executor,
                 @NonNull OnLoudnessCodecUpdateListener listener) {
             Objects.requireNonNull(configurator);
@@ -160,15 +164,15 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
             }
         }
 
-        void removeLoudnessCodecListener(@NonNull LoudnessCodecConfigurator configurator) {
+        void removeLoudnessCodecListener(@NonNull LoudnessCodecController configurator) {
             Objects.requireNonNull(configurator);
 
             OnLoudnessCodecUpdateListener listenerToRemove = null;
             synchronized (mLock) {
-                Iterator<Entry<OnLoudnessCodecUpdateListener, LoudnessCodecConfigurator>> iterator =
+                Iterator<Entry<OnLoudnessCodecUpdateListener, LoudnessCodecController>> iterator =
                         mConfiguratorListener.entrySet().iterator();
                 while (iterator.hasNext()) {
-                    Entry<OnLoudnessCodecUpdateListener, LoudnessCodecConfigurator> e =
+                    Entry<OnLoudnessCodecUpdateListener, LoudnessCodecController> e =
                             iterator.next();
                     if (e.getValue() == configurator) {
                         final OnLoudnessCodecUpdateListener listener = e.getKey();
@@ -208,7 +212,7 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
     }
 
     /** @hide */
-    public void addLoudnessCodecListener(@NonNull LoudnessCodecConfigurator configurator,
+    public void addLoudnessCodecListener(@NonNull LoudnessCodecController configurator,
                                          @NonNull @CallbackExecutor Executor executor,
                                          @NonNull OnLoudnessCodecUpdateListener listener) {
         LoudnessCodecUpdatesDispatcherStub.getInstance().addLoudnessCodecListener(this,
@@ -216,52 +220,52 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
     }
 
     /** @hide */
-    public void removeLoudnessCodecListener(@NonNull LoudnessCodecConfigurator configurator) {
+    public void removeLoudnessCodecListener(@NonNull LoudnessCodecController configurator) {
         LoudnessCodecUpdatesDispatcherStub.getInstance().removeLoudnessCodecListener(configurator);
     }
 
     /** @hide */
-    public void startLoudnessCodecUpdates(int piid, List<LoudnessCodecInfo> codecInfoList) {
+    public void startLoudnessCodecUpdates(int sessionId) {
         try {
-            mAudioService.startLoudnessCodecUpdates(piid, codecInfoList);
+            mAudioService.startLoudnessCodecUpdates(sessionId);
         }  catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
     }
 
     /** @hide */
-    public void stopLoudnessCodecUpdates(int piid) {
+    public void stopLoudnessCodecUpdates(int sessionId) {
         try {
-            mAudioService.stopLoudnessCodecUpdates(piid);
+            mAudioService.stopLoudnessCodecUpdates(sessionId);
         }  catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
     }
 
     /** @hide */
-    public void addLoudnessCodecInfo(int piid, int mediaCodecHash,
+    public void addLoudnessCodecInfo(int sessionId, int mediaCodecHash,
             @NonNull LoudnessCodecInfo mcInfo) {
         try {
-            mAudioService.addLoudnessCodecInfo(piid, mediaCodecHash, mcInfo);
+            mAudioService.addLoudnessCodecInfo(sessionId, mediaCodecHash, mcInfo);
         }  catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
     }
 
     /** @hide */
-    public void removeLoudnessCodecInfo(int piid, @NonNull LoudnessCodecInfo mcInfo) {
+    public void removeLoudnessCodecInfo(int sessionId, @NonNull LoudnessCodecInfo mcInfo) {
         try {
-            mAudioService.removeLoudnessCodecInfo(piid, mcInfo);
+            mAudioService.removeLoudnessCodecInfo(sessionId, mcInfo);
         }  catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
     }
 
     /** @hide */
-    public Bundle getLoudnessCodecParams(int piid, @NonNull LoudnessCodecInfo mcInfo) {
+    public Bundle getLoudnessCodecParams(@NonNull LoudnessCodecInfo mcInfo) {
         Bundle loudnessParams = null;
         try {
-            loudnessParams = new Bundle(mAudioService.getLoudnessParams(piid, mcInfo));
+            loudnessParams = new Bundle(mAudioService.getLoudnessParams(mcInfo));
         }  catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
