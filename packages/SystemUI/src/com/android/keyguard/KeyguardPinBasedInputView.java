@@ -25,6 +25,7 @@ import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART_FO
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
+import static com.android.systemui.Flags.pinInputFieldStyledFocusState;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -168,7 +169,9 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
 
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
-        mPasswordEntry.setDefaultFocusHighlightEnabled(false);
+        if (!pinInputFieldStyledFocusState()) {
+            mPasswordEntry.setDefaultFocusHighlightEnabled(false);
+        }
 
         mOkButton = findViewById(R.id.key_enter);
 

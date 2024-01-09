@@ -25,6 +25,12 @@
     <!-- Maximum width of the sliding KeyguardSecurityContainer -->
     <dimen name="keyguard_security_width">420dp</dimen>
 
+    <!-- Width for the keyguard pin input field -->
+    <dimen name="keyguard_pin_field_width">292dp</dimen>
+
+    <!-- Width for the keyguard pin input field -->
+    <dimen name="keyguard_pin_field_height">48dp</dimen>
+
     <!-- Height of the sliding KeyguardSecurityContainer
          (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_height">420dp</dimen>
