@@ -100,9 +100,12 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
                 mSelectedUserInteractor
             )
         underTest.init()
+        underTest.onViewAttached()
         underTest.onResume(0)
         verify(keyguardUpdateMonitor)
             .registerCallback(updateMonitorCallbackArgumentCaptor.capture())
+        reset(keyguardMessageAreaController)
+        reset(keyguardUpdateMonitor)
     }
 
     @Test
@@ -110,25 +113,24 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
         underTest.onViewAttached()
         verify(keyguardMessageAreaController)
             .setMessage(context.resources.getString(R.string.keyguard_enter_your_pin), false)
-    }
-
-    @Test
-    fun onViewDetached() {
-        underTest.onViewDetached()
-    }
-
-    @Test
-    fun onResume() {
-        reset(keyguardUpdateMonitor)
-        underTest.onResume(KeyguardSecurityView.VIEW_REVEALED)
         verify(keyguardUpdateMonitor)
             .registerCallback(any(KeyguardUpdateMonitorCallback::class.java))
     }
 
     @Test
+    fun onViewDetached() {
+        underTest.onViewDetached()
+        verify(keyguardUpdateMonitor).removeCallback(any(KeyguardUpdateMonitorCallback::class.java))
+    }
+
+    @Test
+    fun onResume() {
+        underTest.onResume(KeyguardSecurityView.VIEW_REVEALED)
+    }
+
+    @Test
     fun onPause() {
         underTest.onPause()
-        verify(keyguardUpdateMonitor).removeCallback(any(KeyguardUpdateMonitorCallback::class.java))
     }
 
     @Test
