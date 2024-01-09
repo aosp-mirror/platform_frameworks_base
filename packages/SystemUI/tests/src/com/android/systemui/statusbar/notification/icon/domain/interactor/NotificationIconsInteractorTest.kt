@@ -29,8 +29,8 @@ import com.android.systemui.statusbar.data.repository.NotificationListenerSettin
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
-import com.android.systemui.statusbar.notification.data.repository.FakeNotificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.notification.shared.byIsAmbient
 import com.android.systemui.statusbar.notification.shared.byIsLastMessageFromReply
 import com.android.systemui.statusbar.notification.shared.byIsPulsing
@@ -61,7 +61,7 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
     interface TestComponent : SysUITestComponent<NotificationIconsInteractor> {
 
         val activeNotificationListRepository: ActiveNotificationListRepository
-        val keyguardViewStateRepository: FakeNotificationsKeyguardViewStateRepository
+        val notificationsKeyguardInteractor: NotificationsKeyguardInteractor
 
         @Component.Factory
         interface Factory {
@@ -136,7 +136,7 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
     fun filteredEntrySet_noPulsing_notifsNotFullyHidden() =
         testComponent.runTest {
             val filteredSet by collectLastValue(underTest.filteredNotifSet(showPulsing = false))
-            keyguardViewStateRepository.setNotificationsFullyHidden(false)
+            notificationsKeyguardInteractor.setNotificationsFullyHidden(false)
             assertThat(filteredSet).comparingElementsUsing(byIsPulsing).doesNotContain(true)
         }
 
@@ -144,7 +144,7 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
     fun filteredEntrySet_noPulsing_notifsFullyHidden() =
         testComponent.runTest {
             val filteredSet by collectLastValue(underTest.filteredNotifSet(showPulsing = false))
-            keyguardViewStateRepository.setNotificationsFullyHidden(true)
+            notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
             assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
         }
 }
@@ -161,7 +161,7 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
 
         val activeNotificationListRepository: ActiveNotificationListRepository
         val deviceEntryRepository: FakeDeviceEntryRepository
-        val keyguardViewStateRepository: FakeNotificationsKeyguardViewStateRepository
+        val notificationsKeyguardInteractor: NotificationsKeyguardInteractor
 
         @Component.Factory
         interface Factory {
@@ -222,7 +222,7 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
         testComponent.runTest {
             val filteredSet by collectLastValue(underTest.aodNotifs)
             deviceEntryRepository.setBypassEnabled(false)
-            keyguardViewStateRepository.setNotificationsFullyHidden(false)
+            notificationsKeyguardInteractor.setNotificationsFullyHidden(false)
             assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
         }
 
@@ -231,7 +231,7 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
         testComponent.runTest {
             val filteredSet by collectLastValue(underTest.aodNotifs)
             deviceEntryRepository.setBypassEnabled(false)
-            keyguardViewStateRepository.setNotificationsFullyHidden(true)
+            notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
             assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
         }
 
@@ -240,7 +240,7 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
         testComponent.runTest {
             val filteredSet by collectLastValue(underTest.aodNotifs)
             deviceEntryRepository.setBypassEnabled(true)
-            keyguardViewStateRepository.setNotificationsFullyHidden(false)
+            notificationsKeyguardInteractor.setNotificationsFullyHidden(false)
             assertThat(filteredSet).comparingElementsUsing(byIsPulsing).doesNotContain(true)
         }
 
@@ -249,7 +249,7 @@ class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {
         testComponent.runTest {
             val filteredSet by collectLastValue(underTest.aodNotifs)
             deviceEntryRepository.setBypassEnabled(true)
-            keyguardViewStateRepository.setNotificationsFullyHidden(true)
+            notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
             assertThat(filteredSet).comparingElementsUsing(byIsPulsing).contains(true)
         }
 }
@@ -266,7 +266,7 @@ class StatusBarNotificationIconsInteractorTest : SysuiTestCase() {
 
         val activeNotificationListRepository: ActiveNotificationListRepository
         val headsUpIconsInteractor: HeadsUpNotificationIconInteractor
-        val keyguardViewStateRepository: FakeNotificationsKeyguardViewStateRepository
+        val notificationsKeyguardInteractor: NotificationsKeyguardInteractor
         val notificationListenerSettingsRepository: NotificationListenerSettingsRepository
 
         @Component.Factory
