@@ -36,7 +36,8 @@ object CommunalInteractorFactory {
     fun create(
         testScope: TestScope = TestScope(),
         communalRepository: FakeCommunalRepository = FakeCommunalRepository(),
-        widgetRepository: FakeCommunalWidgetRepository = FakeCommunalWidgetRepository(),
+        widgetRepository: FakeCommunalWidgetRepository =
+            FakeCommunalWidgetRepository(testScope.backgroundScope),
         mediaRepository: FakeCommunalMediaRepository = FakeCommunalMediaRepository(),
         smartspaceRepository: FakeSmartspaceRepository = FakeSmartspaceRepository(),
         tutorialRepository: FakeCommunalTutorialRepository = FakeCommunalTutorialRepository(),
