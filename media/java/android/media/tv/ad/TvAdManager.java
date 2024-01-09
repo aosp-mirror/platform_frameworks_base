@@ -34,6 +34,7 @@ import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventSender;
+import android.view.Surface;
 
 import com.android.internal.util.Preconditions;
 
@@ -104,6 +105,18 @@ public class TvAdManager {
                     }
                     record.mSession.releaseInternal();
                     record.postSessionReleased();
+                }
+            }
+
+            @Override
+            public void onLayoutSurface(int left, int top, int right, int bottom, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postLayoutSurface(left, top, right, bottom);
                 }
             }
 
@@ -199,6 +212,44 @@ public class TvAdManager {
             }
 
             releaseInternal();
+        }
+
+        /**
+         * Sets the {@link android.view.Surface} for this session.
+         *
+         * @param surface A {@link android.view.Surface} used to render AD.
+         */
+        public void setSurface(Surface surface) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            // surface can be null.
+            try {
+                mService.setSurface(mToken, surface, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies of any structural changes (format or size) of the surface passed in
+         * {@link #setSurface}.
+         *
+         * @param format The new PixelFormat of the surface.
+         * @param width The new width of the surface.
+         * @param height The new height of the surface.
+         */
+        public void dispatchSurfaceChanged(int format, int width, int height) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.dispatchSurfaceChanged(mToken, format, width, height, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         private void flushPendingEventsLocked() {
@@ -428,6 +479,19 @@ public class TvAdManager {
         public void onSessionReleased(@NonNull Session session) {
         }
 
+        /**
+         * This is called when {@link TvAdService.Session#layoutSurface} is called to
+         * change the layout of surface.
+         *
+         * @param session A {@link TvAdManager.Session} associated with this callback.
+         * @param left Left position.
+         * @param top Top position.
+         * @param right Right position.
+         * @param bottom Bottom position.
+         */
+        public void onLayoutSurface(Session session, int left, int top, int right, int bottom) {
+        }
+
     }
 
     /**
@@ -463,6 +527,16 @@ public class TvAdManager {
                 @Override
                 public void run() {
                     mSessionCallback.onSessionReleased(mSession);
+                }
+            });
+        }
+
+        void postLayoutSurface(final int left, final int top, final int right,
+                final int bottom) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onLayoutSurface(mSession, left, top, right, bottom);
                 }
             });
         }

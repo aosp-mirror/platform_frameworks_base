@@ -25,4 +25,5 @@ import android.media.tv.ad.ITvAdSession;
  */
 oneway interface ITvAdSessionCallback {
     void onSessionCreated(in ITvAdSession session);
+    void onLayoutSurface(int left, int top, int right, int bottom);
 }

@@ -24,8 +24,10 @@ import android.util.Log;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
+import android.view.Surface;
 
 import com.android.internal.os.HandlerCaller;
+import com.android.internal.os.SomeArgs;
 
 /**
  * Implements the internal ITvAdSession interface.
@@ -39,6 +41,8 @@ public class ITvAdSessionWrapper
     private static final int EXECUTE_MESSAGE_TIMEOUT_SHORT_MILLIS = 1000;
     private static final int EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS = 5 * 1000;
     private static final int DO_RELEASE = 1;
+    private static final int DO_SET_SURFACE = 2;
+    private static final int DO_DISPATCH_SURFACE_CHANGED = 3;
 
     private final HandlerCaller mCaller;
     private TvAdService.Session mSessionImpl;
@@ -82,6 +86,17 @@ public class ITvAdSessionWrapper
                 }
                 break;
             }
+            case DO_SET_SURFACE: {
+                mSessionImpl.setSurface((Surface) msg.obj);
+                break;
+            }
+            case DO_DISPATCH_SURFACE_CHANGED: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.dispatchSurfaceChanged(
+                        (Integer) args.argi1, (Integer) args.argi2, (Integer) args.argi3);
+                args.recycle();
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -101,6 +116,17 @@ public class ITvAdSessionWrapper
     @Override
     public void startAdService() throws RemoteException {
 
+    }
+
+    @Override
+    public void setSurface(Surface surface) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_SURFACE, surface));
+    }
+
+    @Override
+    public void dispatchSurfaceChanged(int format, int width, int height) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageIIII(DO_DISPATCH_SURFACE_CHANGED, format, width, height, 0));
     }
 
     private final class TvAdEventReceiver extends InputEventReceiver {

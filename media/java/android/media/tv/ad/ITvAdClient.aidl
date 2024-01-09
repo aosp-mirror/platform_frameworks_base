@@ -26,4 +26,5 @@ import android.view.InputChannel;
 oneway interface ITvAdClient {
     void onSessionCreated(in String serviceId, IBinder token, in InputChannel channel, int seq);
     void onSessionReleased(int seq);
+    void onLayoutSurface(int left, int top, int right, int bottom, int seq);
 }

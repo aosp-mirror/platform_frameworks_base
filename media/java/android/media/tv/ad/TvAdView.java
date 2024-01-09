@@ -29,6 +29,7 @@ import android.util.Xml;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 
 /**
@@ -121,11 +122,34 @@ public class TvAdView extends ViewGroup {
     }
 
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    public void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (DEBUG) {
-            Log.d(TAG,
-                    "onLayout (left=" + l + ", top=" + t + ", right=" + r + ", bottom=" + b + ",)");
+            Log.d(TAG, "onLayout (left=" + left + ", top=" + top + ", right=" + right
+                    + ", bottom=" + bottom + ",)");
         }
+        if (mUseRequestedSurfaceLayout) {
+            mSurfaceView.layout(mSurfaceViewLeft, mSurfaceViewTop, mSurfaceViewRight,
+                    mSurfaceViewBottom);
+        } else {
+            mSurfaceView.layout(0, 0, right - left, bottom - top);
+        }
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        mSurfaceView.measure(widthMeasureSpec, heightMeasureSpec);
+        int width = mSurfaceView.getMeasuredWidth();
+        int height = mSurfaceView.getMeasuredHeight();
+        int childState = mSurfaceView.getMeasuredState();
+        setMeasuredDimension(resolveSizeAndState(width, widthMeasureSpec, childState),
+                resolveSizeAndState(height, heightMeasureSpec,
+                        childState << MEASURED_HEIGHT_STATE_SHIFT));
+    }
+
+    @Override
+    public void onVisibilityChanged(@NonNull View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        mSurfaceView.setVisibility(visibility);
     }
 
     private void resetSurfaceView() {
@@ -154,7 +178,7 @@ public class TvAdView extends ViewGroup {
         if (mSession == null) {
             return;
         }
-        //mSession.setSurface(surface);
+        mSession.setSurface(surface);
     }
 
     private void dispatchSurfaceChanged(int format, int width, int height) {
@@ -240,6 +264,25 @@ public class TvAdView extends ViewGroup {
             }
             mSessionCallback = null;
             mSession = null;
+        }
+
+        @Override
+        public void onLayoutSurface(
+                TvAdManager.Session session, int left, int top, int right, int bottom) {
+            if (DEBUG) {
+                Log.d(TAG, "onLayoutSurface (left=" + left + ", top=" + top + ", right="
+                        + right + ", bottom=" + bottom + ",)");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onLayoutSurface - session not created");
+                return;
+            }
+            mSurfaceViewLeft = left;
+            mSurfaceViewTop = top;
+            mSurfaceViewRight = right;
+            mSurfaceViewBottom = bottom;
+            mUseRequestedSurfaceLayout = true;
+            requestLayout();
         }
     }
 }

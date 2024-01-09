@@ -16,6 +16,8 @@
 
 package android.media.tv.ad;
 
+import android.view.Surface;
+
 /**
  * Sub-interface of ITvAdService.aidl which is created per session and has its own context.
  * @hide
@@ -23,4 +25,6 @@ package android.media.tv.ad;
 oneway interface ITvAdSession {
     void release();
     void startAdService();
+    void setSurface(in Surface surface);
+    void dispatchSurfaceChanged(int format, int width, int height);
 }
