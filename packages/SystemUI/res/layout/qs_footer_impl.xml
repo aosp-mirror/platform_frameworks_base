@@ -44,6 +44,8 @@
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:gravity="center_vertical"
+                android:textDirection="locale"
+                android:textAlignment="viewStart"
                 android:singleLine="true"
                 android:textAppearance="@style/TextAppearance.QS.Status.Build"
                 android:visibility="gone" />
