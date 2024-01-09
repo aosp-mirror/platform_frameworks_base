@@ -49,7 +49,12 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetCandidateRequestSession";
 
+    private static final String SESSION_ID_KEY = "autofill_session_id";
+    private static final String REQUEST_ID_KEY = "autofill_request_id";
+
     private final IAutoFillManagerClient mAutoFillCallback;
+    private final int mAutofillSessionId;
+    private final int mAutofillRequestId;
 
     public GetCandidateRequestSession(
             Context context, SessionLifetime sessionCallback,
@@ -62,6 +67,8 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
                 RequestInfo.TYPE_GET, callingAppInfo, enabledProviders,
                 cancellationSignal, 0L);
         mAutoFillCallback = autoFillCallback;
+        mAutofillSessionId = request.getData().getInt(SESSION_ID_KEY, -1);
+        mAutofillRequestId = request.getData().getInt(REQUEST_ID_KEY, -1);
     }
 
     /**
@@ -176,5 +183,20 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
             GetCredentialResponse response) {
         Slog.d(TAG, "onFinalResponseReceived");
         respondToClientWithResponseAndFinish(new GetCandidateCredentialsResponse(response));
+    }
+
+    /**
+     * Returns autofill session id. Returns -1 if unavailable.
+     */
+    public int getAutofillSessionId() {
+        return mAutofillSessionId;
+    }
+
+    /**
+     * Returns autofill request id. Returns -1 if unavailable.
+     */
+    public int getAutofillRequestId() {
+        return mAutofillRequestId;
+
     }
 }
