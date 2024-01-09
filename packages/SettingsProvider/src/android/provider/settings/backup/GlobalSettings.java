@@ -93,6 +93,7 @@ public class GlobalSettings {
         Settings.Global.Wearable.CLOCKWORK_AUTO_TIME,
         Settings.Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,
         Settings.Global.Wearable.CLOCKWORK_24HR_TIME,
+        Settings.Global.Wearable.CONSISTENT_NOTIFICATION_BLOCKING_ENABLED,
         Settings.Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED,
         Settings.Global.Wearable.AMBIENT_ENABLED,
         Settings.Global.Wearable.AMBIENT_TILT_TO_WAKE,
