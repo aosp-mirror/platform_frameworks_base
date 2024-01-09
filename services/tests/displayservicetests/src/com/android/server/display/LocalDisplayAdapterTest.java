@@ -176,6 +176,10 @@ public class LocalDisplayAdapterTest {
         when(mockArray.length()).thenReturn(0);
         when(mMockedResources.obtainTypedArray(R.array.config_maskBuiltInDisplayCutoutArray))
                 .thenReturn(mockArray);
+        when(mMockedResources.obtainTypedArray(R.array.config_displayCutoutSideOverrideArray))
+                .thenReturn(mockArray);
+        when(mMockedResources.getStringArray(R.array.config_mainBuiltInDisplayCutoutSideOverride))
+                .thenReturn(new String[]{});
         when(mMockedResources.obtainTypedArray(R.array.config_waterfallCutoutArray))
                 .thenReturn(mockArray);
         when(mMockedResources.obtainTypedArray(R.array.config_roundedCornerRadiusArray))
