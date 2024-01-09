@@ -68,6 +68,8 @@ class FakeMobileIconsInteractor(
 
     override val isSingleCarrier = MutableStateFlow(true)
 
+    override val icons: MutableStateFlow<List<MobileIconInteractor>> = MutableStateFlow(emptyList())
+
     private val _defaultMobileIconMapping = MutableStateFlow(TEST_MAPPING)
     override val defaultMobileIconMapping = _defaultMobileIconMapping
 
@@ -80,8 +82,12 @@ class FakeMobileIconsInteractor(
     override val isForceHidden = MutableStateFlow(false)
 
     /** Always returns a new fake interactor */
-    override fun getMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor {
-        return FakeMobileIconInteractor(tableLogBuffer).also { interactorCache[subId] = it }
+    override fun getMobileConnectionInteractorForSubId(subId: Int): FakeMobileIconInteractor {
+        return FakeMobileIconInteractor(tableLogBuffer).also {
+            interactorCache[subId] = it
+            // Also update the icons
+            icons.value = interactorCache.values.toList()
+        }
     }
 
     /**

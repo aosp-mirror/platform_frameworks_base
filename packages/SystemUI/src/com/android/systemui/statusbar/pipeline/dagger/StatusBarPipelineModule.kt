@@ -29,6 +29,8 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.Airplane
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
+import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry
+import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigCoreStartable
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileRepositorySwitcher
@@ -42,6 +44,8 @@ import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxyImpl
 import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxyImpl
+import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
+import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder
@@ -76,7 +80,15 @@ abstract class StatusBarPipelineModule {
     abstract fun airplaneModeViewModel(impl: AirplaneModeViewModelImpl): AirplaneModeViewModel
 
     @Binds
+    abstract fun bindableIconsRepository(impl: BindableIconsRegistryImpl): BindableIconsRegistry
+
+    @Binds
     abstract fun connectivityRepository(impl: ConnectivityRepositoryImpl): ConnectivityRepository
+
+    @Binds
+    abstract fun deviceBasedSatelliteRepository(
+        impl: DeviceBasedSatelliteRepositoryImpl
+    ): DeviceBasedSatelliteRepository
 
     @Binds abstract fun wifiRepository(impl: WifiRepositorySwitcher): WifiRepository
 
