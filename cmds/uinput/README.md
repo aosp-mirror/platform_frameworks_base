@@ -7,11 +7,23 @@ There are two ways to use the `uinput` command:
   or app (such as the CTS tests via [`UinputDevice`][UinputDevice]).
 * `uinput <filename>` reads commands from a file instead of standard input.
 
+There are also two supported input formats, described in the sections below. The tool will
+automatically detect which format is being used.
+
 [UinputDevice]: https://cs.android.com/android/platform/superproject/main/+/main:cts/libs/input/src/com/android/cts/input/UinputDevice.java
 
-## Command format
+## evemu recording format (recommended)
 
-Input commands should be in JSON format, though the parser is in [lenient mode] to allow comments,
+`uinput` supports the evemu format, as used by the [FreeDesktop project's evemu suite][FreeDesktop].
+This is a simple text-based format compatible with recording and replay tools on other platforms.
+However, it only supports playback of events from one device from a single recording. Recordings can
+be made using the `evemu-record` command on Android or other Linux-based OSes.
+
+[FreeDesktop]: https://gitlab.freedesktop.org/libevdev/evemu
+
+## JSON-like format
+
+The other supported format is JSON-based, though the parser is in [lenient mode] to allow comments,
 and integers can be specified in hexadecimal (e.g. `0xABCD`). The input file (or standard input) can
 contain multiple commands, which will be executed in sequence. Simply add multiple JSON objects to
 the file, one after the other without separators:
@@ -34,9 +46,9 @@ Many examples of command files can be found [in the CTS tests][cts-example-jsons
 [lenient mode]: https://developer.android.com/reference/android/util/JsonReader#setLenient(boolean)
 [cts-example-jsons]: https://cs.android.com/android/platform/superproject/main/+/main:cts/tests/tests/hardware/res/raw/
 
-## Command reference
+### Command reference
 
-### `register`
+#### `register`
 
 Register a new uinput device
 
@@ -122,7 +134,7 @@ Example:
 
 [struct input_absinfo]: https://cs.android.com/android/platform/superproject/main/+/main:bionic/libc/kernel/uapi/linux/input.h?q=%22struct%20input_absinfo%22
 
-#### Waiting for registration
+##### Waiting for registration
 
 After the command is sent, there will be a delay before the device is set up by the Android input
 stack, and `uinput` does not wait for that process to finish. Any commands sent to the device during
@@ -135,12 +147,12 @@ finished processing.
 
 [onInputDeviceAdded]: https://developer.android.com/reference/android/hardware/input/InputManager.InputDeviceListener.html
 
-#### Unregistering the device
+##### Unregistering the device
 
 As soon as EOF is reached (either in interactive mode, or in file mode), the device that was created
 will be unregistered. There is no explicit command for unregistering a device.
 
-### `delay`
+#### `delay`
 
 Add a delay to command processing
 
@@ -160,7 +172,7 @@ Example:
 }
 ```
 
-### `inject`
+#### `inject`
 
 Send an array of uinput event packets to the uinput device
 
@@ -190,7 +202,7 @@ keys would look like this:
 }
 ```
 
-### `sync`
+#### `sync`
 
 A command used to get a response once the command is processed. When several `inject` and `delay`
 commands are used in a row, the `sync` command can be used to track the progress of the command
