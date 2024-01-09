@@ -130,6 +130,28 @@ class WallpaperData {
      */
     final Rect cropHint = new Rect(0, 0, 0, 0);
 
+    // Describes the context of a call to WallpaperManagerService#bindWallpaperComponentLocked
+    enum BindSource {
+        UNKNOWN,
+        CONNECT_LOCKED,
+        CONNECTION_TRY_TO_REBIND,
+        INITIALIZE_FALLBACK,
+        PACKAGE_UPDATE_FINISHED,
+        RESTORE_SETTINGS_LIVE_FAILURE,
+        RESTORE_SETTINGS_LIVE_SUCCESS,
+        RESTORE_SETTINGS_STATIC,
+        SET_LIVE,
+        SET_LIVE_TO_CLEAR,
+        SET_STATIC,
+        SWITCH_WALLPAPER_FAILURE,
+        SWITCH_WALLPAPER_SWITCH_USER,
+        SWITCH_WALLPAPER_UNLOCK_USER,
+    }
+
+    // Context in which this wallpaper was bound. Intended for use in resolving b/301073479 but may
+    // be useful after the issue is resolved as well.
+    BindSource mBindSource = BindSource.UNKNOWN;
+
     // map of which -> File
     private final SparseArray<File> mWallpaperFiles = new SparseArray<>();
     private final SparseArray<File> mCropFiles = new SparseArray<>();
