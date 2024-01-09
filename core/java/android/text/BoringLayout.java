@@ -454,7 +454,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             line.set(paint, source, 0, source.length(), Layout.DIR_LEFT_TO_RIGHT,
                     Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null,
                     mEllipsizedStart, mEllipsizedStart + mEllipsizedCount, useFallbackLineSpacing);
-            mMax = (int) Math.ceil(line.metrics(null, null, false));
+            mMax = (int) Math.ceil(line.metrics(null, null, false, null));
             TextLine.recycle(line);
         }
 
@@ -603,7 +603,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 0 /* ellipsisStart, 0 since text has not been ellipsized at this point */,
                 0 /* ellipsisEnd, 0 since text has not been ellipsized at this point */,
                 useFallbackLineSpacing);
-        fm.width = (int) Math.ceil(line.metrics(fm, fm.mDrawingBounds, false));
+        fm.width = (int) Math.ceil(line.metrics(fm, fm.mDrawingBounds, false, null));
         TextLine.recycle(line);
 
         return fm;

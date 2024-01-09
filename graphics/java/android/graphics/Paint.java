@@ -2474,6 +2474,19 @@ public class Paint {
         nGetFontMetricsInt(mNativePaint, metrics, true);
     }
 
+    /** @hide */
+    public static final class RunInfo {
+        private int mClusterCount = 0;
+
+        public int getClusterCount() {
+            return mClusterCount;
+        }
+
+        public void setClusterCount(int clusterCount) {
+            mClusterCount = clusterCount;
+        }
+    }
+
     /**
      * Return the recommend line spacing based on the current typeface and
      * text size.
@@ -3320,7 +3333,7 @@ public class Paint {
             int contextEnd, boolean isRtl, int offset,
             @Nullable float[] advances, int advancesIndex) {
         return getRunCharacterAdvance(text, start, end, contextStart, contextEnd, isRtl, offset,
-                advances, advancesIndex, null);
+                advances, advancesIndex, null, null);
     }
 
     /**
@@ -3339,12 +3352,14 @@ public class Paint {
      * @param advances the array that receives the computed character advances
      * @param advancesIndex the start index from which the advances array is filled
      * @param drawBounds the output parameter for the bounding box of drawing text, optional
+     * @param runInfo the output parameter for storing run information.
      * @return width measurement between start and offset
-     * @hide
+     * @hide TODO: Reorganize APIs
      */
     public float getRunCharacterAdvance(@NonNull char[] text, int start, int end, int contextStart,
             int contextEnd, boolean isRtl, int offset,
-            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds) {
+            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds,
+            @Nullable RunInfo runInfo) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -3370,11 +3385,14 @@ public class Paint {
         }
 
         if (end == start) {
+            if (runInfo != null) {
+                runInfo.setClusterCount(0);
+            }
             return 0.0f;
         }
 
         return nGetRunCharacterAdvance(mNativePaint, text, start, end, contextStart, contextEnd,
-                isRtl, offset, advances, advancesIndex, drawBounds);
+                isRtl, offset, advances, advancesIndex, drawBounds, runInfo);
     }
 
     /**
@@ -3402,7 +3420,7 @@ public class Paint {
             int contextStart, int contextEnd, boolean isRtl, int offset,
             @Nullable float[] advances, int advancesIndex) {
         return getRunCharacterAdvance(text, start, end, contextStart, contextEnd, isRtl, offset,
-                advances, advancesIndex, null);
+                advances, advancesIndex, null, null);
     }
 
     /**
@@ -3418,12 +3436,14 @@ public class Paint {
      * @param advances the array that receives the computed character advances
      * @param advancesIndex the start index from which the advances array is filled
      * @param drawBounds the output parameter for the bounding box of drawing text, optional
+     * @param runInfo an optional output parameter for filling run information.
      * @return width measurement between start and offset
-     * @hide
+     * @hide  TODO: Reorganize APIs
      */
     public float getRunCharacterAdvance(@NonNull CharSequence text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, int offset,
-            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds) {
+            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds,
+            @Nullable RunInfo runInfo) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -3456,7 +3476,7 @@ public class Paint {
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
         final float result = getRunCharacterAdvance(buf, start - contextStart, end - contextStart,
                 0, contextEnd - contextStart, isRtl, offset - contextStart,
-                advances, advancesIndex, drawBounds);
+                advances, advancesIndex, drawBounds, runInfo);
         TemporaryBuffer.recycle(buf);
         return result;
     }
@@ -3574,7 +3594,7 @@ public class Paint {
             int contextStart, int contextEnd, boolean isRtl, int offset);
     private static native float nGetRunCharacterAdvance(long paintPtr, char[] text, int start,
             int end, int contextStart, int contextEnd, boolean isRtl, int offset, float[] advances,
-            int advancesIndex, RectF drawingBounds);
+            int advancesIndex, RectF drawingBounds, RunInfo runInfo);
     private static native int nGetOffsetForAdvance(long paintPtr, char[] text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, float advance);
     private static native void nGetFontMetricsIntForText(long paintPtr, char[] text,
