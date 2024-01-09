@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.policy;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 
 import android.annotation.Nullable;
 import android.app.admin.DeviceAdminInfo;
@@ -80,7 +81,10 @@ public class SecurityControllerImpl implements SecurityController {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final NetworkRequest REQUEST =
-            new NetworkRequest.Builder().clearCapabilities().build();
+            new NetworkRequest.Builder()
+                    .clearCapabilities()
+                    .addTransportType(TRANSPORT_VPN)
+                    .build();
     private static final int NO_NETWORK = -1;
 
     private static final String VPN_BRANDED_META_DATA = "com.android.systemui.IS_BRANDED";
