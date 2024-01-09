@@ -341,7 +341,8 @@ public class VirtualDeviceManagerServiceTest {
         mSetFlagsRule.initAllFlagsToReleaseConfigDefault();
 
         doReturn(true).when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
-        doNothing().when(mInputManagerInternalMock).setPointerAcceleration(anyFloat(), anyInt());
+        doNothing().when(mInputManagerInternalMock)
+                .setMousePointerAccelerationEnabled(anyBoolean(), anyInt());
         doNothing().when(mInputManagerInternalMock).setPointerIconVisible(anyBoolean(), anyInt());
         LocalServices.removeServiceForTest(InputManagerInternal.class);
         LocalServices.addService(InputManagerInternal.class, mInputManagerInternalMock);

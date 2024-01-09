@@ -104,10 +104,13 @@ public abstract class InputManagerInternal {
     public abstract PointF getCursorPosition();
 
     /**
-     * Sets the pointer acceleration.
-     * See {@code frameworks/native/include/input/VelocityControl.h#VelocityControlParameters}.
+     * Enables or disables pointer acceleration for mouse movements.
+     *
+     * Note that this only affects pointer movements from mice (that is, pointing devices which send
+     * relative motions, including trackballs and pointing sticks), not from other pointer devices
+     * such as touchpads and styluses.
      */
-    public abstract void setPointerAcceleration(float acceleration, int displayId);
+    public abstract void setMousePointerAccelerationEnabled(boolean enabled, int displayId);
 
     /**
      * Sets the eligibility of windows on a given display for pointer capture. If a display is

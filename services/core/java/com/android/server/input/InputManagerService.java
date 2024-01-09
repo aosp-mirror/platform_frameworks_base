@@ -63,7 +63,6 @@ import android.os.CombinedVibration;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IInputConstants;
 import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionResult;
 import android.os.InputEventInjectionSync;
@@ -1367,9 +1366,9 @@ public class InputManagerService extends IInputManager.Stub
         mNative.setPointerSpeed(speed);
     }
 
-    private void setPointerAcceleration(float acceleration, int displayId) {
+    private void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
         updateAdditionalDisplayInputProperties(displayId,
-                properties -> properties.pointerAcceleration = acceleration);
+                properties -> properties.mousePointerAccelerationEnabled = enabled);
     }
 
     private void setPointerIconVisible(boolean visible, int displayId) {
@@ -2256,7 +2255,8 @@ public class InputManagerService extends IInputManager.Stub
                             + mAdditionalDisplayInputProperties.keyAt(i));
                     final AdditionalDisplayInputProperties properties =
                             mAdditionalDisplayInputProperties.valueAt(i);
-                    pw.println("pointerAcceleration: " + properties.pointerAcceleration);
+                    pw.println("mousePointerAccelerationEnabled: "
+                            + properties.mousePointerAccelerationEnabled);
                     pw.println("pointerIconVisible: " + properties.pointerIconVisible);
                 }
                 pw.decreaseIndent();
@@ -3257,8 +3257,8 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public void setPointerAcceleration(float acceleration, int displayId) {
-            InputManagerService.this.setPointerAcceleration(acceleration, displayId);
+        public void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
+            InputManagerService.this.setMousePointerAccelerationEnabled(enabled, displayId);
         }
 
         @Override
@@ -3350,11 +3350,15 @@ public class InputManagerService extends IInputManager.Stub
     private static class AdditionalDisplayInputProperties {
 
         static final boolean DEFAULT_POINTER_ICON_VISIBLE = true;
-        static final float DEFAULT_POINTER_ACCELERATION =
-                (float) IInputConstants.DEFAULT_POINTER_ACCELERATION;
+        static final boolean DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED = true;
 
-        // The pointer acceleration for this display.
-        public float pointerAcceleration;
+        /**
+         * Whether to enable mouse pointer acceleration on this display. Note that this only affects
+         * pointer movements from mice (that is, pointing devices which send relative motions,
+         * including trackballs and pointing sticks), not from other pointer devices such as
+         * touchpads and styluses.
+         */
+        public boolean mousePointerAccelerationEnabled;
 
         // Whether the pointer icon should be visible or hidden on this display.
         public boolean pointerIconVisible;
@@ -3364,12 +3368,12 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         public boolean allDefaults() {
-            return Float.compare(pointerAcceleration, DEFAULT_POINTER_ACCELERATION) == 0
+            return mousePointerAccelerationEnabled == DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED
                     && pointerIconVisible == DEFAULT_POINTER_ICON_VISIBLE;
         }
 
         public void reset() {
-            pointerAcceleration = DEFAULT_POINTER_ACCELERATION;
+            mousePointerAccelerationEnabled = DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED;
             pointerIconVisible = DEFAULT_POINTER_ICON_VISIBLE;
         }
     }
@@ -3401,9 +3405,11 @@ public class InputManagerService extends IInputManager.Stub
             }
         }
 
-        if (properties.pointerAcceleration != mCurrentDisplayProperties.pointerAcceleration) {
-            mCurrentDisplayProperties.pointerAcceleration = properties.pointerAcceleration;
-            mNative.setPointerAcceleration(properties.pointerAcceleration);
+        if (properties.mousePointerAccelerationEnabled
+                != mCurrentDisplayProperties.mousePointerAccelerationEnabled) {
+            mCurrentDisplayProperties.mousePointerAccelerationEnabled =
+                    properties.mousePointerAccelerationEnabled;
+            mNative.setMousePointerAccelerationEnabled(properties.mousePointerAccelerationEnabled);
         }
     }
 
