@@ -868,7 +868,8 @@ public class AuthController implements
                     mCachedDisplayInfo.getNaturalWidth(),
                     mCachedDisplayInfo.getNaturalHeight(),
                     mScaleFactor,
-                    mCachedDisplayInfo.rotation);
+                    mCachedDisplayInfo.rotation,
+                    udfpsProp.sensorType);
 
             mUdfpsController.updateOverlayParams(udfpsProp, mUdfpsOverlayParams);
             if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds) || !Objects.equals(

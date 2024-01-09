@@ -17,6 +17,8 @@
 package com.android.systemui.biometrics.shared.model
 
 import android.graphics.Rect
+import android.hardware.fingerprint.FingerprintSensorProperties.SensorType
+import android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
 import android.view.Surface
 import android.view.Surface.Rotation
 
@@ -39,6 +41,8 @@ import android.view.Surface.Rotation
  * the native resolution.
  *
  * [rotation] current rotation of the display.
+ *
+ * [sensorType] fingerprint sensor type
  */
 data class UdfpsOverlayParams(
     val sensorBounds: Rect = Rect(),
@@ -46,7 +50,8 @@ data class UdfpsOverlayParams(
     val naturalDisplayWidth: Int = 0,
     val naturalDisplayHeight: Int = 0,
     val scaleFactor: Float = 1f,
-    @Rotation val rotation: Int = Surface.ROTATION_0
+    @Rotation val rotation: Int = Surface.ROTATION_0,
+    @SensorType val sensorType: Int = TYPE_UDFPS_OPTICAL
 ) {
 
     /** Same as [sensorBounds], but in native resolution. */
