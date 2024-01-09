@@ -55,6 +55,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.notification.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_WAITING_FOR_DRAW;
@@ -90,6 +91,7 @@ import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.Gravity;
@@ -109,7 +111,9 @@ import android.window.TaskFragmentOrganizer;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.StubTransaction;
+import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -129,6 +133,11 @@ import java.util.List;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class WindowStateTests extends WindowTestsBase {
+
+    @After
+    public void tearDown() {
+        mWm.mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(Collections.emptySet());
+    }
 
     @Test
     public void testIsParentWindowHidden() {
@@ -1371,6 +1380,28 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());
         assertThat(listener.mIsRemoved).isTrue();
         assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION)
+    public void testIsSecureLocked_sensitiveContentProtectionManagerEnabled() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        final WindowState window1 = createWindow(null, TYPE_APPLICATION, "window1", ownerId1);
+        final WindowState window2 = createWindow(null, TYPE_APPLICATION, "window2", ownerId2);
+
+        // Setting packagename for targeted feature
+        window1.mAttrs.packageName = testPackage;
+        window2.mAttrs.packageName = testPackage;
+
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+        mWm.mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(blockedPackages);
+
+        assertTrue(window1.isSecureLocked());
+        assertFalse(window2.isSecureLocked());
     }
 
     private static class TestImeTargetChangeListener implements ImeTargetChangeListener {
