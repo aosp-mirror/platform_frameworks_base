@@ -7,3 +7,11 @@ flag {
      description: "SQLite APIs held back for Android 15"
      bug: "279043253"
 }
+
+flag {
+     name: "sqlite_allow_temp_tables"
+     namespace: "system_performance"
+     is_fixed_read_only: true
+     description: "Permit updates to TEMP tables in read-only transactions"
+     bug: "317993835"
+}
