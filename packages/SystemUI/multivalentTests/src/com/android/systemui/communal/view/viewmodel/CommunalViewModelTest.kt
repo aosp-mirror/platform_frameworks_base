@@ -112,7 +112,7 @@ class CommunalViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun ordering_smartspaceBeforeUmoBeforeWidgets() =
+    fun ordering_smartspaceBeforeUmoBeforeWidgetsBeforeCtaTile() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
 
@@ -142,10 +142,13 @@ class CommunalViewModelTest : SysuiTestCase() {
             // Media playing.
             mediaRepository.mediaActive()
 
+            // CTA Tile not dismissed.
+            communalRepository.setCtaTileInViewModeVisibility(true)
+
             val communalContent by collectLastValue(underTest.communalContent)
 
-            // Order is smart space, then UMO, then widget content.
-            assertThat(communalContent?.size).isEqualTo(4)
+            // Order is smart space, then UMO, widget content and cta tile.
+            assertThat(communalContent?.size).isEqualTo(5)
             assertThat(communalContent?.get(0))
                 .isInstanceOf(CommunalContentModel.Smartspace::class.java)
             assertThat(communalContent?.get(1)).isInstanceOf(CommunalContentModel.Umo::class.java)
@@ -153,5 +156,7 @@ class CommunalViewModelTest : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.Widget::class.java)
             assertThat(communalContent?.get(3))
                 .isInstanceOf(CommunalContentModel.Widget::class.java)
+            assertThat(communalContent?.get(4))
+                .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
         }
 }

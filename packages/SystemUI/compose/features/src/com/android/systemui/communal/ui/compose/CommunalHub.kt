@@ -26,6 +26,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,6 +45,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -51,6 +53,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,6 +74,7 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -111,7 +115,8 @@ fun CommunalHub(
                 isDraggingToRemove =
                     checkForDraggingToRemove(it, removeButtonCoordinates, gridCoordinates)
                 isDraggingToRemove
-            }
+            },
+            onOpenWidgetPicker = onOpenWidgetPicker,
         )
 
         if (viewModel.isEditMode && onOpenWidgetPicker != null && onEditDone != null) {
@@ -148,13 +153,14 @@ private fun BoxScope.CommunalHubLazyGrid(
     contentPadding: PaddingValues,
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
+    onOpenWidgetPicker: (() -> Unit)? = null,
 ) {
     var gridModifier = Modifier.align(Alignment.CenterStart)
     val gridState = rememberLazyGridState()
     var list = communalContent
     var dragDropState: GridDragDropState? = null
     if (viewModel.isEditMode && viewModel is CommunalEditModeViewModel) {
-        val contentListState = rememberContentListState(communalContent, viewModel)
+        val contentListState = rememberContentListState(list, viewModel)
         list = contentListState.list
         // for drag & drop operations within the communal hub grid
         dragDropState =
@@ -207,7 +213,7 @@ private fun BoxScope.CommunalHubLazyGrid(
             if (viewModel.isEditMode && dragDropState != null) {
                 DraggableItem(
                     dragDropState = dragDropState,
-                    enabled = true,
+                    enabled = list[index] is CommunalContentModel.Widget,
                     index = index,
                     size = size
                 ) { _ ->
@@ -216,6 +222,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                         model = list[index],
                         viewModel = viewModel,
                         size = size,
+                        onOpenWidgetPicker = onOpenWidgetPicker,
                     )
                 }
             } else {
@@ -256,16 +263,11 @@ private fun Toolbar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val buttonContentPadding =
-            PaddingValues(
-                vertical = Dimensions.ToolbarButtonPaddingVertical,
-                horizontal = Dimensions.ToolbarButtonPaddingHorizontal,
-            )
         val spacerModifier = Modifier.width(Dimensions.ToolbarButtonSpaceBetween)
         Button(
             onClick = onOpenWidgetPicker,
             colors = filledButtonColors(),
-            contentPadding = buttonContentPadding
+            contentPadding = Dimensions.ButtonPadding
         ) {
             Icon(Icons.Default.Add, stringResource(R.string.button_to_open_widget_editor))
             Spacer(spacerModifier)
@@ -285,7 +287,7 @@ private fun Toolbar(
                         disabledContainerColor = colors.primary,
                         disabledContentColor = colors.onPrimary,
                     ),
-                contentPadding = buttonContentPadding,
+                contentPadding = Dimensions.ButtonPadding,
                 modifier = Modifier.onGloballyPositioned { setRemoveButtonCoordinates(it) }
             ) {
                 RemoveButtonContent(spacerModifier)
@@ -297,7 +299,7 @@ private fun Toolbar(
                 onClick = {},
                 colors = ButtonDefaults.outlinedButtonColors(disabledContentColor = colors.primary),
                 border = BorderStroke(width = 1.0.dp, color = colors.primary),
-                contentPadding = buttonContentPadding,
+                contentPadding = Dimensions.ButtonPadding,
                 modifier = Modifier.onGloballyPositioned { setRemoveButtonCoordinates(it) }
             ) {
                 RemoveButtonContent(spacerModifier)
@@ -307,7 +309,7 @@ private fun Toolbar(
         Button(
             onClick = onEditDone,
             colors = filledButtonColors(),
-            contentPadding = buttonContentPadding
+            contentPadding = Dimensions.ButtonPadding
         ) {
             Text(
                 text = stringResource(R.string.hub_mode_editing_exit_button_text),
@@ -340,10 +342,15 @@ private fun CommunalContent(
     viewModel: BaseCommunalViewModel,
     size: SizeF,
     modifier: Modifier = Modifier,
+    onOpenWidgetPicker: (() -> Unit)? = null,
 ) {
     when (model) {
         is CommunalContentModel.Widget -> WidgetContent(viewModel, model, size, modifier)
         is CommunalContentModel.WidgetPlaceholder -> WidgetPlaceholderContent(size)
+        is CommunalContentModel.CtaTileInViewMode ->
+            CtaTileInViewModeContent(viewModel, size, modifier)
+        is CommunalContentModel.CtaTileInEditMode ->
+            CtaTileInEditModeContent(size, modifier, onOpenWidgetPicker)
         is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, modifier)
@@ -359,6 +366,115 @@ fun WidgetPlaceholderContent(size: SizeF) {
         border = BorderStroke(3.dp, LocalAndroidColorScheme.current.tertiaryFixed),
         shape = RoundedCornerShape(16.dp)
     ) {}
+}
+
+/** Presents a CTA tile at the end of the grid, to customize the hub. */
+@Composable
+private fun CtaTileInViewModeContent(
+    viewModel: BaseCommunalViewModel,
+    size: SizeF,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalAndroidColorScheme.current
+    Card(
+        modifier = modifier.height(size.height.dp),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = colors.primary,
+                contentColor = colors.onPrimary,
+            ),
+        shape = RoundedCornerShape(80.dp, 40.dp, 80.dp, 40.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 82.dp),
+            verticalArrangement =
+                Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Widgets,
+                contentDescription = stringResource(R.string.cta_label_to_open_widget_picker),
+                modifier = Modifier.size(Dimensions.IconSize),
+            )
+            Text(
+                text = stringResource(R.string.cta_label_to_edit_widget),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                OutlinedButton(
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            contentColor = colors.onPrimary,
+                        ),
+                    border = BorderStroke(width = 1.0.dp, color = colors.primaryContainer),
+                    contentPadding = Dimensions.ButtonPadding,
+                    onClick = viewModel::onDismissCtaTile,
+                ) {
+                    Text(
+                        text = stringResource(R.string.cta_tile_button_to_dismiss),
+                    )
+                }
+                Spacer(modifier = Modifier.size(Dimensions.Spacing))
+                Button(
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = colors.primaryContainer,
+                            contentColor = colors.onPrimaryContainer,
+                        ),
+                    contentPadding = Dimensions.ButtonPadding,
+                    onClick = viewModel::onOpenWidgetEditor
+                ) {
+                    Text(
+                        text = stringResource(R.string.cta_tile_button_to_open_widget_editor),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Presents a CTA tile at the end of the hub in edit mode, to add more widgets. */
+@Composable
+private fun CtaTileInEditModeContent(
+    size: SizeF,
+    modifier: Modifier = Modifier,
+    onOpenWidgetPicker: (() -> Unit)? = null,
+) {
+    if (onOpenWidgetPicker == null) {
+        throw IllegalArgumentException("onOpenWidgetPicker should not be null.")
+    }
+    val colors = LocalAndroidColorScheme.current
+    Card(
+        modifier = modifier.height(size.height.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(1.dp, colors.primary),
+        shape = RoundedCornerShape(200.dp),
+        onClick = onOpenWidgetPicker,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement =
+                Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Widgets,
+                contentDescription = stringResource(R.string.cta_label_to_open_widget_picker),
+                tint = colors.primary,
+                modifier = Modifier.size(Dimensions.IconSize),
+            )
+            Text(
+                text = stringResource(R.string.cta_label_to_open_widget_picker),
+                style = MaterialTheme.typography.titleLarge,
+                color = colors.primary,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
 }
 
 @Composable
@@ -513,4 +629,10 @@ object Dimensions {
     val ToolbarButtonPaddingHorizontal = 24.dp
     val ToolbarButtonPaddingVertical = 16.dp
     val ToolbarButtonSpaceBetween = 8.dp
+    val ButtonPadding =
+        PaddingValues(
+            vertical = ToolbarButtonPaddingVertical,
+            horizontal = ToolbarButtonPaddingHorizontal,
+        )
+    val IconSize = 48.dp
 }

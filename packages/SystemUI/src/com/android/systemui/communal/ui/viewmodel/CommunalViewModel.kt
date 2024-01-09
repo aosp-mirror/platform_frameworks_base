@@ -56,12 +56,16 @@ constructor(
             combine(
                 communalInteractor.ongoingContent,
                 communalInteractor.widgetContent,
-            ) { ongoing, widgets ->
-                ongoing + widgets
+                communalInteractor.ctaTileContent,
+            ) { ongoing, widgets, ctaTile,
+                ->
+                ongoing + widgets + ctaTile
             }
         }
 
     override fun onOpenWidgetEditor() = communalInteractor.showWidgetEditor()
+
+    override fun onDismissCtaTile() = communalInteractor.dismissCtaTile()
 
     override fun getInteractionHandler(): RemoteViews.InteractionHandler = interactionHandler
 }
