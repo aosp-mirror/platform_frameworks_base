@@ -148,10 +148,6 @@ public class AuthController implements
 
     private final Display mDisplay;
     private float mScaleFactor = 1f;
-    // sensor locations without any resolution scaling nor rotation adjustments:
-    @Nullable private final Point mFaceSensorLocationDefault;
-    // cached sensor locations:
-    @Nullable private Point mFaceSensorLocation;
     @Nullable private Point mFingerprintSensorLocation;
     @Nullable private Rect mUdfpsBounds;
     private final Set<Callback> mCallbacks = new HashSet<>();
@@ -622,7 +618,6 @@ public class AuthController implements
         mScaleFactor = mUdfpsUtils.getScaleFactor(mCachedDisplayInfo);
         updateUdfpsLocation();
         updateFingerprintLocation();
-        updateFaceLocation();
     }
     /**
      * @return where the fingerprint sensor exists in pixels in its natural orientation.
@@ -679,31 +674,6 @@ public class AuthController implements
     /** Get FP sensor properties */
     public @Nullable List<FingerprintSensorPropertiesInternal> getFingerprintProperties() {
         return mFpProps;
-    }
-
-    /**
-     * @return where the face sensor exists in pixels in the current device orientation. Returns
-     * null if no face sensor exists.
-     */
-    @Nullable public Point getFaceSensorLocation() {
-        return mFaceSensorLocation;
-    }
-
-    private void updateFaceLocation() {
-        if (mFaceProps == null || mFaceSensorLocationDefault == null) {
-            mFaceSensorLocation = null;
-        } else {
-            mFaceSensorLocation = rotateToCurrentOrientation(
-                    new Point(
-                            (int) (mFaceSensorLocationDefault.x * mScaleFactor),
-                            (int) (mFaceSensorLocationDefault.y * mScaleFactor)),
-                    mCachedDisplayInfo
-            );
-        }
-
-        for (final Callback cb : mCallbacks) {
-            cb.onFaceSensorLocationChanged();
-        }
     }
 
     /**
@@ -821,17 +791,7 @@ public class AuthController implements
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mPanelInteractionDetector = panelInteractionDetector;
 
-
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
-        int[] faceAuthLocation = context.getResources().getIntArray(
-                com.android.systemui.res.R.array.config_face_auth_props);
-        if (faceAuthLocation == null || faceAuthLocation.length < 2) {
-            mFaceSensorLocationDefault = null;
-        } else {
-            mFaceSensorLocationDefault = new Point(
-                    faceAuthLocation[0],
-                    faceAuthLocation[1]);
-        }
 
         mDisplay = mContext.getDisplay();
         updateSensorLocations();
@@ -1359,8 +1319,6 @@ public class AuthController implements
         final AuthDialog dialog = mCurrentDialog;
         pw.println("  mCachedDisplayInfo=" + mCachedDisplayInfo);
         pw.println("  mScaleFactor=" + mScaleFactor);
-        pw.println("  faceAuthSensorLocationDefault=" + mFaceSensorLocationDefault);
-        pw.println("  faceAuthSensorLocation=" + getFaceSensorLocation());
         pw.println("  fingerprintSensorLocationInNaturalOrientation="
                 + getFingerprintSensorLocationInNaturalOrientation());
         pw.println("  fingerprintSensorLocation=" + getFingerprintSensorLocation());
@@ -1434,11 +1392,5 @@ public class AuthController implements
          * {@link #onFingerprintLocationChanged}.
          */
         default void onUdfpsLocationChanged(UdfpsOverlayParams udfpsOverlayParams) {}
-
-        /**
-         * Called when the location of the face unlock sensor (typically the front facing camera)
-         * changes. The location in pixels can change due to resolution changes.
-         */
-        default void onFaceSensorLocationChanged() {}
     }
 }
