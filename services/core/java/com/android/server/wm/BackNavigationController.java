@@ -1311,7 +1311,7 @@ class BackNavigationController {
                 Rect insets;
                 if (mainWindow != null) {
                     insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
-                            mBounds, WindowInsets.Type.systemBars(),
+                            mBounds, WindowInsets.Type.tappableElement(),
                             false /* ignoreVisibility */).toRect();
                     InsetUtils.addInsets(insets, mainWindow.mActivityRecord.getLetterboxInsets());
                 } else {
