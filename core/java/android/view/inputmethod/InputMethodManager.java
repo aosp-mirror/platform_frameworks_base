@@ -354,7 +354,11 @@ public final class InputMethodManager {
      * @hide
      */
     public static void ensureDefaultInstanceForDefaultDisplayIfNecessary() {
-        forContextInternal(Display.DEFAULT_DISPLAY, Looper.getMainLooper());
+        // Skip this call if we are in system_server, as the system code should not use this
+        // deprecated instance.
+        if (!ActivityThread.isSystem()) {
+            forContextInternal(Display.DEFAULT_DISPLAY, Looper.getMainLooper());
+        }
     }
 
     private static final Object sLock = new Object();
