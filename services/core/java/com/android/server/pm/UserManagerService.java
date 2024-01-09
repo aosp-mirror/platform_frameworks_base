@@ -5136,7 +5136,7 @@ public class UserManagerService extends IUserManager.Stub {
 
             t.traceBegin("createUserStorageKeys");
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
-            storage.createUserStorageKeys(userId, userInfo.serialNumber, userInfo.isEphemeral());
+            storage.createUserStorageKeys(userId, userInfo.isEphemeral());
             t.traceEnd();
 
             // Only prepare DE storage here.  CE storage will be prepared later, when the user is
