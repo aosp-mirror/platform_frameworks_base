@@ -40,9 +40,10 @@ abstract class BaseTest
 constructor(
     protected val flicker: LegacyFlickerTest,
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
+    protected val tapl: LauncherInstrumentation = LauncherInstrumentation()
 ) {
-    protected val tapl: LauncherInstrumentation by lazy {
-        LauncherInstrumentation().also { it.expectedRotationCheckEnabled = true }
+    init {
+        tapl.setExpectedRotationCheckEnabled(true)
     }
 
     private val logTag = this::class.java.simpleName
