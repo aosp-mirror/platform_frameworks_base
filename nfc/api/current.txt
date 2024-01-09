@@ -72,7 +72,7 @@ package android.nfc {
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
-    method @FlaggedApi("android.nfc.enable_nfc_charging") @Nullable public android.nfc.WlcLDeviceInfo getWlcLDeviceInfo();
+    method @FlaggedApi("android.nfc.enable_nfc_charging") @Nullable public android.nfc.WlcListenerDeviceInfo getWlcListenerDeviceInfo();
     method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
     method public boolean isEnabled();
     method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean isObserveModeSupported();
@@ -175,18 +175,18 @@ package android.nfc {
     ctor public TagLostException(String);
   }
 
-  @FlaggedApi("android.nfc.enable_nfc_charging") public final class WlcLDeviceInfo implements android.os.Parcelable {
-    ctor public WlcLDeviceInfo(double, double, double, int);
+  @FlaggedApi("android.nfc.enable_nfc_charging") public final class WlcListenerDeviceInfo implements android.os.Parcelable {
+    ctor public WlcListenerDeviceInfo(int, double, double, int);
     method public int describeContents();
-    method public double getBatteryLevel();
-    method public double getProductId();
+    method @FloatRange(from=0.0, to=100.0) public double getBatteryLevel();
+    method public int getProductId();
     method public int getState();
     method public double getTemperature();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CONNECTED_CHARGING = 2; // 0x2
-    field public static final int CONNECTED_DISCHARGING = 3; // 0x3
-    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.WlcLDeviceInfo> CREATOR;
-    field public static final int DISCONNECTED = 1; // 0x1
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.WlcListenerDeviceInfo> CREATOR;
+    field public static final int STATE_CONNECTED_CHARGING = 2; // 0x2
+    field public static final int STATE_CONNECTED_DISCHARGING = 3; // 0x3
+    field public static final int STATE_DISCONNECTED = 1; // 0x1
   }
 
 }

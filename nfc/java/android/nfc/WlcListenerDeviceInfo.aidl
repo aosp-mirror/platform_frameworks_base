@@ -16,4 +16,4 @@
 
 package android.nfc;
 
-parcelable WlcLDeviceInfo;
+parcelable WlcListenerDeviceInfo;
