@@ -810,6 +810,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_FILE_MANAGEMENT" />
 
     <!-- Permission required for CTS test - CtsAppFgsTestCases -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
+
+    <!-- Permission required for CTS test - CtsAppFgsTestCases -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!-- Permissions required for CTS test - CtsAppFgsTestCases -->
