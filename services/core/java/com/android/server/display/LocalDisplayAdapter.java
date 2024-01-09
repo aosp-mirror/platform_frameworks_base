@@ -19,6 +19,8 @@ package com.android.server.display;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.Mode.INVALID_MODE_ID;
 
+import static com.android.server.display.BrightnessMappingStrategy.INVALID_NITS;
+
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
@@ -956,8 +958,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                     void handleHdrSdrNitsChanged(float displayNits, float sdrNits) {
                         final float newHdrSdrRatio;
-                        if (displayNits != DisplayDeviceConfig.NITS_INVALID
-                                && sdrNits != DisplayDeviceConfig.NITS_INVALID) {
+                        if (displayNits != INVALID_NITS && sdrNits != INVALID_NITS) {
                             // Ensure the ratio stays >= 1.0f as values below that are nonsensical
                             newHdrSdrRatio = Math.max(1.f, displayNits / sdrNits);
                         } else {
