@@ -46,15 +46,6 @@ import kotlinx.coroutines.launch
 /** An element on screen, that can be composed in one or more scenes. */
 @Stable
 internal class Element(val key: ElementKey) {
-    /**
-     * The last state of this element, coming from any scene. Note that this state will be unstable
-     * if this element is present in multiple scenes but the shared element animation is disabled,
-     * given that multiple instances of the element with different states will write to this state.
-     * You should prefer using [SceneState.lastState] in the current scene when it is defined.
-     */
-    // TODO(b/316901148): Remove this.
-    val lastSharedState = State()
-
     /** The mapping between a scene and the state this element has in that scene, if any. */
     // TODO(b/316901148): Make this a normal map instead once we can make sure that new transitions
     // are first seen by composition then layout/drawing code. See 316901148#comment2 for details.
@@ -64,24 +55,9 @@ internal class Element(val key: ElementKey) {
         return "Element(key=$key)"
     }
 
-    /** The state of this element, either in a specific scene or in a shared context. */
-    class State {
-        /** The offset of the element, relative to the SceneTransitionLayout containing it. */
-        var offset = Offset.Unspecified
-
-        /** The size of this element. */
-        var size = SizeUnspecified
-
-        /** The alpha of this element. */
-        var alpha = AlphaUnspecified
-    }
-
     /** The last and target state of this element in a given scene. */
     @Stable
     class SceneState(val scene: SceneKey) {
-        // TODO(b/316901148): Remove this.
-        val lastState = State()
-
         var targetSize by mutableStateOf(SizeUnspecified)
         var targetOffset by mutableStateOf(Offset.Unspecified)
 
@@ -95,7 +71,6 @@ internal class Element(val key: ElementKey) {
 
     companion object {
         val SizeUnspecified = IntSize(Int.MAX_VALUE, Int.MAX_VALUE)
-        val AlphaUnspecified = Float.MIN_VALUE
     }
 }
 
@@ -425,19 +400,13 @@ private fun IntermediateMeasureScope.measure(
             ::lerp,
         )
 
-    val placeable =
-        maybePlaceable
-            ?: measurable.measure(
-                Constraints.fixed(
-                    targetSize.width.coerceAtLeast(0),
-                    targetSize.height.coerceAtLeast(0),
-                )
+    return maybePlaceable
+        ?: measurable.measure(
+            Constraints.fixed(
+                targetSize.width.coerceAtLeast(0),
+                targetSize.height.coerceAtLeast(0),
             )
-
-    val size = placeable.size()
-    element.lastSharedState.size = size
-    sceneState.lastState.size = size
-    return placeable
+        )
 }
 
 private fun getDrawScale(
@@ -477,9 +446,12 @@ private fun IntermediateMeasureScope.place(
             sceneState.targetOffset = targetOffsetInScene
         }
 
+        // No need to place the element in this scene if we don't want to draw it anyways.
+        if (!shouldDrawElement(layoutImpl, scene, element)) {
+            return
+        }
+
         val currentOffset = lookaheadScopeCoordinates.localPositionOf(coords, Offset.Zero)
-        val lastSharedState = element.lastSharedState
-        val lastSceneState = sceneState.lastState
         val targetOffset =
             computeValue(
                 layoutImpl,
@@ -493,30 +465,15 @@ private fun IntermediateMeasureScope.place(
                 ::lerp,
             )
 
-        lastSharedState.offset = targetOffset
-        lastSceneState.offset = targetOffset
-
-        // No need to place the element in this scene if we don't want to draw it anyways. Note that
-        // it's still important to compute the target offset and update last(Shared|Scene)State,
-        // otherwise they will be out of date.
-        if (!shouldDrawElement(layoutImpl, scene, element)) {
-            return
-        }
-
         val offset = (targetOffset - currentOffset).round()
         if (isElementOpaque(layoutImpl, element, scene)) {
             // TODO(b/291071158): Call placeWithLayer() if offset != IntOffset.Zero and size is not
             // animated once b/305195729 is fixed. Test that drawing is not invalidated in that
             // case.
             placeable.place(offset)
-            lastSharedState.alpha = 1f
-            lastSceneState.alpha = 1f
         } else {
             placeable.placeWithLayer(offset) {
-                val alpha = elementAlpha(layoutImpl, element, scene)
-                this.alpha = alpha
-                lastSharedState.alpha = alpha
-                lastSceneState.alpha = alpha
+                this.alpha = elementAlpha(layoutImpl, element, scene)
             }
         }
     }
