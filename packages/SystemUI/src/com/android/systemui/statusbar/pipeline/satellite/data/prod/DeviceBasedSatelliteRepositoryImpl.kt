@@ -25,6 +25,11 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.MessageInitializer
+import com.android.systemui.log.core.MessagePrinter
+import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.Companion.whenSupported
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.NotSupported
@@ -124,6 +129,7 @@ constructor(
     satelliteManagerOpt: Optional<SatelliteManager>,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
+    @OemSatelliteInputLog private val logBuffer: LogBuffer,
     private val systemClock: SystemClock,
 ) : DeviceBasedSatelliteRepository {
 
@@ -146,6 +152,11 @@ constructor(
                 ensureMinUptime(systemClock, MIN_UPTIME)
                 satelliteSupport.value = satelliteManager.checkSatelliteSupported()
 
+                logBuffer.i(
+                    { str1 = satelliteSupport.value.toString() },
+                    { "Checked for system support. support=$str1" },
+                )
+
                 // We only need to check location availability if this mode is supported
                 if (satelliteSupport.value is Supported) {
                     isSatelliteAllowedForCurrentLocation.subscriptionCount
@@ -160,6 +171,9 @@ constructor(
                                  * connection might cause more frequent checks.
                                  */
                                 while (true) {
+                                    logBuffer.i {
+                                        "requestIsSatelliteCommunicationAllowedForCurrentLocation"
+                                    }
                                     checkIsSatelliteAllowed()
                                     delay(POLLING_INTERVAL_MS)
                                 }
@@ -168,6 +182,8 @@ constructor(
                 }
             }
         } else {
+            logBuffer.i { "Satellite manager is null" }
+
             satelliteSupport.value = NotSupported
         }
     }
@@ -182,6 +198,7 @@ constructor(
     private fun connectionStateFlow(sm: SupportedSatelliteManager): Flow<SatelliteConnectionState> =
         conflatedCallbackFlow {
                 val cb = SatelliteModemStateCallback { state ->
+                    logBuffer.i({ int1 = state }) { "onSatelliteModemStateChanged: state=$int1" }
                     trySend(SatelliteConnectionState.fromModemState(state))
                 }
 
@@ -192,7 +209,7 @@ constructor(
                         sm.registerForSatelliteModemStateChanged(bgDispatcher.asExecutor(), cb)
                     registered = res == SATELLITE_RESULT_SUCCESS
                 } catch (e: Exception) {
-                    // Logging is in next commit
+                    logBuffer.e("error registering for modem state", e)
                 }
 
                 awaitClose { if (registered) sm.unregisterForSatelliteModemStateChanged(cb) }
@@ -206,6 +223,9 @@ constructor(
     private fun signalStrengthFlow(sm: SupportedSatelliteManager) =
         conflatedCallbackFlow {
                 val cb = NtnSignalStrengthCallback { signalStrength ->
+                    logBuffer.i({ int1 = signalStrength.level }) {
+                        "onNtnSignalStrengthChanged: level=$int1"
+                    }
                     trySend(signalStrength.level)
                 }
 
@@ -214,7 +234,7 @@ constructor(
                     sm.registerForNtnSignalStrengthChanged(bgDispatcher.asExecutor(), cb)
                     registered = true
                 } catch (e: Exception) {
-                    // Logging is in next commit
+                    logBuffer.e("error registering for signal strength", e)
                 }
 
                 awaitClose { if (registered) sm.unregisterForNtnSignalStrengthChanged(cb) }
@@ -228,11 +248,15 @@ constructor(
                 bgDispatcher.asExecutor(),
                 object : OutcomeReceiver<Boolean, SatelliteManager.SatelliteException> {
                     override fun onError(e: SatelliteManager.SatelliteException) {
-                        android.util.Log.e(TAG, "Found exception when checking for satellite: ", e)
+                        logBuffer.e(
+                            "Found exception when checking availability",
+                            e,
+                        )
                         isSatelliteAllowedForCurrentLocation.value = false
                     }
 
                     override fun onResult(allowed: Boolean) {
+                        logBuffer.i { allowed.toString() }
                         isSatelliteAllowedForCurrentLocation.value = allowed
                     }
                 }
@@ -254,6 +278,12 @@ constructor(
                     }
 
                     override fun onError(error: SatelliteManager.SatelliteException) {
+                        logBuffer.e(
+                            "Exception when checking for satellite support. " +
+                                "Assuming it is not supported for this device.",
+                            error,
+                        )
+
                         // Assume that an error means it's not supported
                         continuation.resume(NotSupported)
                     }
@@ -279,5 +309,19 @@ constructor(
                 delay(timeTilMinUptime)
             }
         }
+
+        /** A couple of convenience logging methods rather than a whole class */
+        private fun LogBuffer.i(
+            initializer: MessageInitializer = {},
+            printer: MessagePrinter,
+        ) = this.log(TAG, LogLevel.INFO, initializer, printer)
+
+        private fun LogBuffer.e(message: String, exception: Throwable? = null) =
+            this.log(
+                tag = TAG,
+                level = LogLevel.ERROR,
+                message = message,
+                exception = exception,
+            )
     }
 }
