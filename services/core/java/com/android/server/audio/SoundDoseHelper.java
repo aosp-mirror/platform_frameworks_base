@@ -893,7 +893,7 @@ public class SoundDoseHelper {
             if (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC
                     && safeDevicesContains(device)) {
                 soundDose.updateAttenuation(
-                        AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
+                        -AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
                                 (newIndex + 5) / 10,
                                 device), device);
             }
