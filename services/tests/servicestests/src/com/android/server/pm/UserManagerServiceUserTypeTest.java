@@ -93,7 +93,8 @@ public class UserManagerServiceUserTypeTest {
                 .setShowInSharingSurfaces(20)
                 .setShowInQuietMode(30)
                 .setInheritDevicePolicy(340)
-                .setDeleteAppWithParent(true);
+                .setDeleteAppWithParent(true)
+                .setCrossProfileContentSharingStrategy(1);
 
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
@@ -167,6 +168,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(340, type.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
         assertTrue(type.getDefaultUserPropertiesReference().getDeleteAppWithParent());
+        assertEquals(1, type.getDefaultUserPropertiesReference()
+                .getCrossProfileContentSharingStrategy());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -221,6 +224,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(UserProperties.SHOW_IN_LAUNCHER_SEPARATE, props.getShowInSharingSurfaces());
         assertEquals(UserProperties.SHOW_IN_QUIET_MODE_PAUSED,
                 props.getShowInQuietMode());
+        assertEquals(UserProperties.CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION,
+                props.getCrossProfileContentSharingStrategy());
 
         assertFalse(type.hasBadge());
     }
@@ -312,8 +317,8 @@ public class UserManagerServiceUserTypeTest {
                 .setDeleteAppWithParent(true)
                 .setShowInSharingSurfaces(22)
                 .setShowInQuietMode(24)
-                .setDeleteAppWithParent(true);
-
+                .setDeleteAppWithParent(true)
+                .setCrossProfileContentSharingStrategy(1);
 
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
@@ -357,6 +362,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(24,
                 aospType.getDefaultUserPropertiesReference().getShowInQuietMode());
         assertTrue(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
+        assertEquals(1, aospType.getDefaultUserPropertiesReference()
+                .getCrossProfileContentSharingStrategy());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -403,8 +410,9 @@ public class UserManagerServiceUserTypeTest {
                 aospType.getDefaultUserPropertiesReference().getShowInQuietMode());
         assertEquals(450, aospType.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
-        assertFalse(aospType.getDefaultUserPropertiesReference()
-                .getDeleteAppWithParent());
+        assertFalse(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
+        assertEquals(0, aospType.getDefaultUserPropertiesReference()
+                .getCrossProfileContentSharingStrategy());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);

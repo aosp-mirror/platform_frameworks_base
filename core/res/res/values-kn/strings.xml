@@ -1357,7 +1357,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"ಯಾವುದೇ ಅನುಮತಿಗಳ ಅಗತ್ಯವಿಲ್ಲ"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ಇದು ನಿಮ್ಮ ಹಣವನ್ನು ವ್ಯಯಿಸಬಹುದು"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ಸರಿ"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"USB ಮೂಲಕ ಈ ಸಾಧನವು ಚಾರ್ಜ್‌ ಆಗುತ್ತಿದೆ"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"USB ಮೂಲಕ ಈ ಸಾಧನವನ್ನು ಚಾರ್ಜ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB ಮೂಲಕ ಸಂಪರ್ಕಗೊಂಡಿರುವ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ಫೈಲ್ ವರ್ಗಾವಣೆಯು ಆನ್‌ ಆಗಿದೆ"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB ಮೂಲಕ PTP ಆನ್‌ ಆಗಿದೆ"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ಕೀಬೋರ್ಡ್ ಲೇಔಟ್ ಅನ್ನು <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> ಗೆ ಸೆಟ್ ಮಾಡಲಾಗಿದೆ… ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್‌ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ಕೀಬೋರ್ಡ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ಖಾಸಗಿ"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"ಕ್ಲೋನ್"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"ಕೆಲಸ"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"ಕೆಲಸ 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"ಕೆಲಸ 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"ಪರೀಕ್ಷೆ"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"ಸಮುದಾಯ"</string>
 </resources>

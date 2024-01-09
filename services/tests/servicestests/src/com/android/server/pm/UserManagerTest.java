@@ -207,6 +207,8 @@ public final class UserManagerTest {
                 .isEqualTo(cloneUserProperties.isMediaSharedWithParent());
         assertThat(typeProps.isCredentialShareableWithParent())
                 .isEqualTo(cloneUserProperties.isCredentialShareableWithParent());
+        assertThat(typeProps.getCrossProfileContentSharingStrategy())
+                .isEqualTo(cloneUserProperties.getCrossProfileContentSharingStrategy());
         assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
 
         compareDrawables(mUserManager.getUserBadge(),

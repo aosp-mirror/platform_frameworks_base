@@ -155,7 +155,9 @@ public final class UserTypeFactory {
                                 UserProperties.SHOW_IN_SHARING_SURFACES_WITH_PARENT)
                         .setMediaSharedWithParent(true)
                         .setCredentialShareableWithParent(true)
-                        .setDeleteAppWithParent(true));
+                        .setDeleteAppWithParent(true)
+                        .setCrossProfileContentSharingStrategy(UserProperties
+                                .CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT));
     }
 
     /**

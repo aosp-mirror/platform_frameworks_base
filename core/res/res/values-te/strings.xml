@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"కీబోర్డ్ లేఅవుట్ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>‌కు సెట్ చేయబడింది… మార్చడానికి ట్యాప్ చేయండి."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ఫిజికల్ కీబోర్డ్‌లు కాన్ఫిగర్ చేయబడ్డాయి"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"కీబోర్డ్‌లను చూడటానికి ట్యాప్ చేయండి"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ప్రైవేట్"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"క్లోన్ చేయండి"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"ఆఫీస్"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"ఆఫీస్ 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"ఆఫీస్ 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"పరీక్ష"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"కమ్యూనల్"</string>
 </resources>

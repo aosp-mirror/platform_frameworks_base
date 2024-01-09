@@ -484,7 +484,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"přístup k poloze na pozadí"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Tato aplikace má kdykoliv přístup k poloze (i když ji zrovna nepoužíváte)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"změna nastavení zvuku"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro výstup zvuku."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro zvukový výstup."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"nahrávání zvuku"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Tato aplikace může pomocí mikrofonu během svého používání zaznamenat zvuk."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"zaznamenávat zvuk na pozadí"</string>
@@ -2341,4 +2341,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Rozložení klávesnice je nastaveno na <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Klepnutím jej změníte."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fyzické klávesnice byly nakonfigurovány"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klepnutím zobrazíte klávesnice"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Soukromé"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Klonovat"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Práce"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Práce 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Práce 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Komunální"</string>
 </resources>
