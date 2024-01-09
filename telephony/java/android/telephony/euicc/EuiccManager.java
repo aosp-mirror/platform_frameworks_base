@@ -927,6 +927,9 @@ public class EuiccManager {
      * subscription APIs.
      *
      * @return true if embedded subscriptions are currently enabled.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public boolean isEnabled() {
         // In the future, this may reach out to IEuiccController (if non-null) to check any dynamic
@@ -942,6 +945,9 @@ public class EuiccManager {
      * access to the EID of another eUICC.
      *
      * @return the EID. May be null if the eUICC is not ready.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     @Nullable
     public String getEid() {
@@ -963,6 +969,8 @@ public class EuiccManager {
      * @return the status of eUICC OTA. If the eUICC is not ready,
      *         {@link OtaStatus#EUICC_OTA_STATUS_UNAVAILABLE} will be returned.
      *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1014,6 +1022,9 @@ public class EuiccManager {
      * @param subscription the subscription to download.
      * @param switchAfterDownload if true, the profile will be activated upon successful download.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void downloadSubscription(DownloadableSubscription subscription,
@@ -1075,6 +1086,9 @@ public class EuiccManager {
      * @param resolutionExtras Resolution-specific extras depending on the result of the resolution.
      *     For example, this may indicate whether the user has consented or may include the input
      *     they provided.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1111,6 +1125,9 @@ public class EuiccManager {
      *
      * @param subscription the subscription which needs metadata filled in
      * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1142,6 +1159,9 @@ public class EuiccManager {
      * internal system use only.
      *
      * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1163,6 +1183,9 @@ public class EuiccManager {
      * Returns information about the eUICC chip/device.
      *
      * @return the {@link EuiccInfo}. May be null if the eUICC is not ready.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     @Nullable
     public EuiccInfo getEuiccInfo() {
@@ -1188,6 +1211,9 @@ public class EuiccManager {
      *
      * @param subscriptionId the ID of the subscription to delete.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void deleteSubscription(int subscriptionId, PendingIntent callbackIntent) {
@@ -1251,6 +1277,9 @@ public class EuiccManager {
      *     {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission, or the
      *     calling app must be authorized to manage the active subscription on the target eUICC.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
@@ -1312,6 +1341,9 @@ public class EuiccManager {
      *     {@link SubscriptionInfo#getPortIndex()}.
      * @param portIndex the index of the port to target for the enabled subscription
      * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, int portIndex,
@@ -1349,6 +1381,9 @@ public class EuiccManager {
      * @param subscriptionId the ID of the subscription to update.
      * @param nickname the new nickname to apply.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void updateSubscriptionNickname(
@@ -1376,6 +1411,8 @@ public class EuiccManager {
      * @deprecated From R, callers should specify a flag for specific set of subscriptions to erase
      * and use {@link #eraseSubscriptions(int, PendingIntent)} instead
      *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1402,6 +1439,8 @@ public class EuiccManager {
      * @param options flag indicating specific set of subscriptions to erase
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1459,6 +1498,9 @@ public class EuiccManager {
      * determine whether a country is supported please check {@link #isSupportedCountry}.
      *
      * @param supportedCountries is a list of strings contains country ISO codes in uppercase.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1487,6 +1529,9 @@ public class EuiccManager {
      * determine whether a country is supported please check {@link #isSupportedCountry}.
      *
      * @param unsupportedCountries is a list of strings contains country ISO codes in uppercase.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1512,6 +1557,9 @@ public class EuiccManager {
      * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
      *
      * @return list of strings contains country ISO codes in uppercase.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1535,6 +1583,9 @@ public class EuiccManager {
      * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
      *
      * @return list of strings contains country ISO codes in uppercase.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1566,6 +1617,9 @@ public class EuiccManager {
      * @param countryIso should be the ISO-3166 country code is provided in uppercase 2 character
      * format.
      * @return whether the given country supports eUICC or not.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      * @hide
      */
     @SystemApi
@@ -1630,6 +1684,9 @@ public class EuiccManager {
      *
      * @param portIndex is an enumeration of the ports available on the UICC.
      * @return {@code true} if port is available
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_EUICC}.
      */
     public boolean isSimPortAvailable(int portIndex) {
         try {
