@@ -504,6 +504,11 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
+    public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
+        mOverviewProxyService.onNavigationBarLumaSamplingEnabled(displayId, enable);
+    }
+
+    @Override
     public void showPinningEnterExitToast(boolean entering) {
         updateSysuiFlags();
         if (mScreenPinningNotify == null) {
