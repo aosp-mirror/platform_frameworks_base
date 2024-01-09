@@ -192,8 +192,13 @@
 
     <!-- The identifier of the satellite's SIM profile. The identifier is composed of MCC and MNC
          of the satellite PLMN with the format "mccmnc". -->
-    <string name="config_satellite_sim_identifier" translatable="false"></string>
-    <java-symbol type="string" name="config_satellite_sim_identifier" />
+    <string name="config_satellite_sim_plmn_identifier" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_sim_plmn_identifier" />
+
+    <!-- The identifier for the satellite's SIM profile. The identifier is the service provider name
+    (spn) from the profile metadata. -->
+    <string name="config_satellite_sim_spn_identifier" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_sim_spn_identifier" />
 
     <!-- The app to which the emergency call will be handed over for OEM-enabled satellite
          messaging. The format of the config string is "package_name;class_name". -->
