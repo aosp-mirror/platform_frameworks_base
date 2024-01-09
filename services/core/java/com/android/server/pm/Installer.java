@@ -1183,8 +1183,7 @@ public class Installer extends SystemService {
      * Returns an auth token for the provided writable FD.
      *
      * @param authFd a file descriptor to proof that the caller can write to the file.
-     * @param appUid uid of the calling app.
-     * @param userId id of the user whose app file to enable fs-verity.
+     * @param uid uid of the calling app.
      *
      * @return authToken, or null if a remote call shouldn't be continued. See {@link
      * #checkBeforeRemote}.
@@ -1192,13 +1191,12 @@ public class Installer extends SystemService {
      * @throws InstallerException if the remote call failed.
      */
     public IInstalld.IFsveritySetupAuthToken createFsveritySetupAuthToken(
-            ParcelFileDescriptor authFd, int appUid, @UserIdInt int userId)
-            throws InstallerException {
+            ParcelFileDescriptor authFd, int uid) throws InstallerException {
         if (!checkBeforeRemote()) {
             return null;
         }
         try {
-            return mInstalld.createFsveritySetupAuthToken(authFd, appUid, userId);
+            return mInstalld.createFsveritySetupAuthToken(authFd, uid);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
