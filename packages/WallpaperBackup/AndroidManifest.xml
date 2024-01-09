@@ -17,11 +17,19 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.wallpaperbackup"
-    android:sharedUserId="android.uid.system" >
+    package="com.android.wallpaperbackup" >
+
+    <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER_COMPONENT" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+
+    <queries>
+        <intent>
+            <action android:name="android.service.wallpaper.WallpaperService" />
+        </intent>
+    </queries>
 
     <application android:allowClearUserData="false"
-                 android:process="system"
                  android:killAfterRestore="false"
                  android:allowBackup="true"
                  android:backupInForeground="true"
