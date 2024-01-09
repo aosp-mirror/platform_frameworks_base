@@ -1882,6 +1882,7 @@ package android.media {
     method public void setRampingRingerEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setRs2Value(float);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setTestDeviceConnectionState(@NonNull android.media.AudioDeviceAttributes, boolean);
+    method @FlaggedApi("android.media.audio.focus_exclusive_with_recording") @RequiresPermission(android.Manifest.permission.QUERY_AUDIO_STATE) public boolean shouldNotificationSoundPlay(@NonNull android.media.AudioAttributes);
   }
 
   public static final class AudioRecord.MetricsConstants {

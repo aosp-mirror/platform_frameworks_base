@@ -21,6 +21,7 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
+import static android.media.audio.Flags.FLAG_FOCUS_EXCLUSIVE_WITH_RECORDING;
 import static android.media.audio.Flags.FLAG_FOCUS_FREEZE_TEST_API;
 import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
 
@@ -10076,6 +10077,28 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             return service.isVolumeControlUsingVolumeGroups();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Checks whether a notification sound should be played or not, as reported by the state
+     * of the audio framework. Querying whether playback should proceed is favored over
+     * playing and letting the sound be muted or not.
+     * @param aa the {@link AudioAttributes} of the notification about to maybe play
+     * @return true if the audio framework state is such that the notification should be played
+     *    because at time of checking, and the notification will be heard,
+     *    false otherwise
+     */
+    @TestApi
+    @FlaggedApi(FLAG_FOCUS_EXCLUSIVE_WITH_RECORDING)
+    @RequiresPermission(android.Manifest.permission.QUERY_AUDIO_STATE)
+    public boolean shouldNotificationSoundPlay(@NonNull final AudioAttributes aa) {
+        final IAudioService service = getService();
+        try {
+            return service.shouldNotificationSoundPlay(Objects.requireNonNull(aa));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
