@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Rejestry połączeń"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Urządzenia w pobliżu"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Zmień wyjście multimediów"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Zdjęcia i multimedia"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Powiadomienia"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Powiadomienia"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplikacje"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Strumieniowanie"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Może wykonywać i odbierać połączenia"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Może odczytywać i zapisywać rejestr połączeń telefonicznych"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Może wysyłać i odbierać SMS-y"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Może uzyskać dostęp do kontaktów"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Może uzyskać dostęp do kalendarza"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Może nagrywać dźwięk"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Może znajdować urządzenia w pobliżu, określać ich względne położenie oraz łączyć się z nimi"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Może odczytywać wszystkie powiadomienia, w tym informacje takie jak kontakty, wiadomości i zdjęcia"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Nawiązywanie połączeń telefonicznych i zarządzanie nimi"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Odczytywanie i zapisywanie rejestru połączeń telefonicznych"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Wysyłanie i wyświetlanie SMS‑ów"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Dostęp do kontaktów"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Dostęp do kalendarza"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Nagrywanie dźwięku"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Znajdowanie urządzeń w pobliżu, określanie ich względnego położenia oraz łączenie się z nimi"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Odczytywanie wszystkich powiadomień, w tym informacji takich jak kontakty, wiadomości i zdjęcia"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Odczytywanie wszystkich powiadomień, w tym informacji takich jak kontakty, wiadomości i zdjęcia&lt;br/&gt;• Wysyłanie powiadomień&lt;br/&gt;&lt;br/&gt;W każdej chwili możesz zmienić uprawnienia tej aplikacji do odczytywania i wysyłania powiadomień, klikając Ustawienia &gt; Powiadomienia."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Odtwarzaj strumieniowo aplikacje z telefonu"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Aplikacje do odtwarzania strumieniowego i inne funkcje systemowe na Twoim telefonie"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Uzyskaj dostęp do listy dostępnych urządzeń i określ, które z nich ma strumieniować lub przesyłać ścieżkę audio bądź wideo z innych aplikacji"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

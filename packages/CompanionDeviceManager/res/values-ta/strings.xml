@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"மைக்ரோஃபோன்"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"அழைப்புப் பதிவுகள்"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"அருகிலுள்ள சாதனங்கள்"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"மீடியா அவுட்புட்டை மாற்றுதல்"</string>
     <string name="permission_storage" msgid="6831099350839392343">"படங்கள் மற்றும் மீடியா"</string>
-    <string name="permission_notification" msgid="693762568127741203">"அறிவிப்புகள்"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"அறிவிப்புகள்"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ஆப்ஸ்"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"ஸ்ட்ரீமிங்"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"மொபைல் அழைப்புகளைச் செய்யலாம் நிர்வகிக்கலாம்"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"மொபைல் அழைப்புப் பதிவைப் படிக்கலாம் எழுதலாம்"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"மெசேஜ்களை அனுப்பலாம் பார்க்கலாம்"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"உங்கள் தொடர்புகளை அணுகலாம்"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"உங்கள் கேலெண்டரை அணுகலாம்"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"ஆடியோவை ரெக்கார்டு செய்யலாம்"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"அருகிலுள்ள சாதனங்களைக் கண்டறியலாம் அவற்றுடன் இணையலாம் அவற்றின் தூரத்தைத் தீர்மானிக்கலாம்"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"தொடர்புகள், மெசேஜ்கள், படங்கள் போன்ற தகவல்கள் உட்பட அனைத்து அறிவிப்புகளையும் படிக்க முடியும்"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"மொபைல் அழைப்புகளைச் செய்யலாம் நிர்வகிக்கலாம்"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"மொபைல் அழைப்புப் பதிவைப் படிக்கலாம் எழுதலாம்"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS செய்திகளை அனுப்பலாம் பார்க்கலாம்"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"தொடர்புகளை அணுகலாம்"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"கேலெண்டரை அணுகலாம்"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"ஆடியோவை ரெக்கார்டு செய்யலாம்"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"அருகிலுள்ள சாதனங்களைக் கண்டறியலாம், அவற்றுடன் இணையலாம், அவற்றின் தூரத்தைத் தீர்மானிக்கலாம்"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"தொடர்புகள், மெசேஜ்கள், படங்கள் போன்ற தகவல்கள் உட்பட அனைத்து அறிவிப்புகளையும் படிக்கலாம்"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• தொடர்புகள், மெசேஜ்கள், படங்கள் போன்ற தகவல்கள் உட்பட அனைத்து அறிவிப்புகளையும் படிக்கலாம்&lt;br/&gt;• அறிவிப்புகளை அனுப்பலாம்&lt;br/&gt;&lt;br/&gt;இந்த ஆப்ஸின், அறிவிப்புகளைப் படிக்கும் மற்றும் அனுப்பும் திறனை எப்போது வேண்டுமானாலும் அமைப்புகள் &gt; அறிவிப்புகள் என்பதில் நிர்வகிக்கலாம்."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"உங்கள் மொபைல் ஆப்ஸை ஸ்ட்ரீம் செய்யலாம்"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"உங்கள் மொபைலில் இருந்து ஆப்ஸையும் பிற சிஸ்டம் அம்சங்களையும் ஸ்ட்ரீம் செய்யலாம்"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"கிடைக்கக்கூடிய சாதனங்களின் பட்டியலை அணுகி, அவற்றில் எது பிற ஆப்ஸின் ஆடியோ/வீடியோவைப் பிளே செய்யலாம் அல்லது அலைபரப்பலாம் என்பதைக் கட்டுப்படுத்தும்"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"மொபைல்"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"டேப்லெட்"</string>
 </resources>

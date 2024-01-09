@@ -1016,7 +1016,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Lupa corak?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Buka kunci akaun"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Nama Pengguna (E-mel)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Kata laluan"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Log masuk"</string>
@@ -1667,7 +1667,7 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Masukkan semula kod PIN yang betul. Percubaan berulang akan melumpuhkan SIM secara kekal."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"Kod PIN tidak sepadan"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nama Pengguna (E-mel)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Kata laluan"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Log masuk"</string>
@@ -1906,6 +1906,7 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Hujung minggu"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Acara"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Tidur"</string>
+    <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Diurus oleh <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Hidup"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Mati"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> meredamkan sesetengah bunyi"</string>
@@ -2341,8 +2342,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Tidak dapat menyegerakkan kepada paparan"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Gunakan kabel lain dan cuba lagi"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Peranti anda terlalu panas dan tidak dapat dicerminkan kepada paparan sehingga peranti sejuk"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kabel mungkin tidak menyokong paparan"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Kabel USB-C anda mungkin tidak bersambung kepada paparan dengan betul"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dwiskrin"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dwiskrin dihidupkan"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> menggunakan kedua-dua paparan untuk menunjukkan kandungan"</string>

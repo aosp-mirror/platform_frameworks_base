@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"మైక్రోఫోన్"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"కాల్ లాగ్‌లు"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"సమీపంలోని పరికరాలు"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"మీడియా అవుట్‌పుట్‌ను మార్చండి"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ఫోటోలు, మీడియా"</string>
-    <string name="permission_notification" msgid="693762568127741203">"నోటిఫికేషన్‌లు"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"నోటిఫికేషన్‌లు"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"యాప్‌లు"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"స్ట్రీమింగ్"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"ఫోన్ కాల్స్ చేయగలదు, అలాగే మేనేజ్ చేయగలదు"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ఫోన్ కాల్ లాగ్‌ను చదవగలదు, రాయగలదు"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS మెసేజ్‌లను పంపగలదు, అలాగే చూడగలదు"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"మీ కాంటాక్ట్‌లను యాక్సెస్ చేయగలదు"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయగలదు"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"ఆడియోను రికార్డ్ చేయగలదు"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"సమీపంలోని పరికరాలను కనుగొనగలదు, వాటికి కనెక్ట్ అవ్వగలదు, అవి ఎంత దూరంలో ఉన్నాయో తెలుసుకొనగలదు"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"కాంటాక్ట్‌లు, మెసేజ్‌లు, ఫోటోల వంటి సమాచారంతో సహా అన్ని నోటిఫికేషన్‌లను చదవగలదు"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"ఫోన్ కాల్స్‌ను చేయగలదు, మేనేజ్ చేయగలదు"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"ఫోన్ కాల్ లాగ్‌ను చదవగలదు, రాయగలదు"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS మెసేజ్‌లను పంపగలదు, చూడగలదు"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"మీ కాంటాక్ట్‌లను యాక్సెస్ చేయగలదు"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయగలదు"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"ఆడియోను రికార్డ్ చేయగలదు"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"సమీపంలోని పరికరాలను కనుగొనగలదు, వాటికి కనెక్ట్ అవ్వగలదు, అవి ఎంత దూరంలో ఉన్నాయో తెలుసుకోగలదు"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"కాంటాక్ట్‌లు, మెసేజ్‌లు, ఫోటోల వంటి సమాచారంతో సహా అన్ని నోటిఫికేషన్‌లను చదవగలదు"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• కాంటాక్ట్‌లు, మెసేజ్‌లు, ఫోటోల వంటి సమాచారంతో సహా నోటిఫికేషన్‌లన్నింటిని చదవగలదు&lt;br/&gt;• నోటిఫికేషన్‌లను పంపగలదు&lt;br/&gt;&lt;br/&gt;నోటిఫికేషన్‌లను చదవగల, పంపగల ఈ యాప్ సామర్థ్యాన్ని మీరు సెట్టింగ్‌లు &gt; నోటిఫికేషన్‌లలో ఎప్పుడైనా మేనేజ్ చేయవచ్చు."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"మీ ఫోన్‌లోని యాప్‌లను స్ట్రీమ్ చేయండి"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"మీ ఫోన్ నుండి యాప్‌లను, ఇతర సిస్టమ్ ఫీచర్‌లను స్ట్రీమ్ చేస్తుంది"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"అందుబాటులో ఉన్న పరికరాల లిస్ట్‌ను యాక్సెస్ చేసి, ఇతర యాప్‌లలోని ఆడియో లేదా వీడియోను ఏ పరికరం స్ట్రీమ్ చేయాలో లేదా ప్రసారం చేయాలో కంట్రోల్ చేయండి"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"ఫోన్"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"టాబ్లెట్"</string>
 </resources>

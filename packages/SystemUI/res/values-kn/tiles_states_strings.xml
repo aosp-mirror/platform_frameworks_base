@@ -33,148 +33,148 @@
     <!-- no translation found for tile_states_default:2 (9192445505551219506) -->
   <string-array name="tile_states_internet">
     <item msgid="5499482407653291407">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="3048856902433862868">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="6877982264300789870">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="3048856902433862868">"ಆಫ್"</item>
+    <item msgid="6877982264300789870">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_wifi">
     <item msgid="8054147400538405410">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="4293012229142257455">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="6221288736127914861">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="4293012229142257455">"ಆಫ್"</item>
+    <item msgid="6221288736127914861">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_cell">
     <item msgid="1235899788959500719">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="2074416252859094119">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="287997784730044767">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="2074416252859094119">"ಆಫ್"</item>
+    <item msgid="287997784730044767">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_battery">
     <item msgid="6311253873330062961">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="7838121007534579872">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="1578872232501319194">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="7838121007534579872">"ಆಫ್"</item>
+    <item msgid="1578872232501319194">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_dnd">
     <item msgid="467587075903158357">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="5376619709702103243">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="4875147066469902392">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="5376619709702103243">"ಆಫ್"</item>
+    <item msgid="4875147066469902392">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="5044688398303285224">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="8527389108867454098">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="5044688398303285224">"ಆಫ್"</item>
+    <item msgid="8527389108867454098">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="5776427577477729185">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="7105052717007227415">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="5776427577477729185">"ಆಫ್"</item>
+    <item msgid="7105052717007227415">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_bt">
     <item msgid="5330252067413512277">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="5315121904534729843">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="503679232285959074">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="5315121904534729843">"ಆಫ್"</item>
+    <item msgid="503679232285959074">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_airplane">
     <item msgid="1985366811411407764">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="4801037224991420996">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="1982293347302546665">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="4801037224991420996">"ಆಫ್"</item>
+    <item msgid="1982293347302546665">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_location">
     <item msgid="3316542218706374405">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="4813655083852587017">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="6744077414775180687">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="4813655083852587017">"ಆಫ್"</item>
+    <item msgid="6744077414775180687">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_hotspot">
     <item msgid="3145597331197351214">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="5715725170633593906">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="2075645297847971154">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="5715725170633593906">"ಆಫ್"</item>
+    <item msgid="2075645297847971154">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="1909756493418256167">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="4531508423703413340">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="1909756493418256167">"ಆಫ್"</item>
+    <item msgid="4531508423703413340">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="9103697205127645916">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="8067744885820618230">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="9103697205127645916">"ಆಫ್"</item>
+    <item msgid="8067744885820618230">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_saver">
     <item msgid="39714521631367660">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="6983679487661600728">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="7520663805910678476">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="6983679487661600728">"ಆಫ್"</item>
+    <item msgid="7520663805910678476">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_dark">
     <item msgid="2762596907080603047">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="400477985171353">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="630890598801118771">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="400477985171353">"ಆಫ್"</item>
+    <item msgid="630890598801118771">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_work">
     <item msgid="389523503690414094">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="8045580926543311193">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="4913460972266982499">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="8045580926543311193">"ಆಫ್"</item>
+    <item msgid="4913460972266982499">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_cast">
     <item msgid="6032026038702435350">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="1488620600954313499">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="588467578853244035">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="1488620600954313499">"ಆಫ್"</item>
+    <item msgid="588467578853244035">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_night">
     <item msgid="7857498964264855466">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="2744885441164350155">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="151121227514952197">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="2744885441164350155">"ಆಫ್"</item>
+    <item msgid="151121227514952197">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_screenrecord">
     <item msgid="1085836626613341403">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="8259411607272330225">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="578444932039713369">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="8259411607272330225">"ಆಫ್"</item>
+    <item msgid="578444932039713369">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="8707481475312432575">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="8031106212477483874">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="8707481475312432575">"ಆಫ್"</item>
+    <item msgid="8031106212477483874">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="4572245614982283078">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="6536448410252185664">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="4572245614982283078">"ಆಫ್"</item>
+    <item msgid="6536448410252185664">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_cameratoggle">
     <item msgid="6680671247180519913">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="4765607635752003190">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="1697460731949649844">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="4765607635752003190">"ಆಫ್"</item>
+    <item msgid="1697460731949649844">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_mictoggle">
     <item msgid="6895831614067195493">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="3296179158646568218">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="8998632451221157987">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="3296179158646568218">"ಆಫ್"</item>
+    <item msgid="8998632451221157987">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_controls">
     <item msgid="8199009425335668294">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="4544919905196727508">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="3422023746567004609">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="4544919905196727508">"ಆಫ್"</item>
+    <item msgid="3422023746567004609">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_wallet">
     <item msgid="4177615438710836341">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="7571394439974244289">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="6866424167599381915">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="7571394439974244289">"ಆಫ್"</item>
+    <item msgid="6866424167599381915">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_qr_code_scanner">
     <item msgid="7435143266149257618">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="3301403109049256043">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="8878684975184010135">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="3301403109049256043">"ಆಫ್"</item>
+    <item msgid="8878684975184010135">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="2710157085538036590">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="7809470840976856149">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="2710157085538036590">"ಆಫ್"</item>
+    <item msgid="7809470840976856149">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_onehanded">
     <item msgid="8189342855739930015">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="146088982397753810">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="460891964396502657">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="146088982397753810">"ಆಫ್"</item>
+    <item msgid="460891964396502657">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_dream">
     <item msgid="6184819793571079513">"ಲಭ್ಯವಿಲ್ಲ"</item>
-    <item msgid="8014986104355098744">"ಆಫ್ ಮಾಡಿ"</item>
-    <item msgid="5966994759929723339">"ಆನ್ ಮಾಡಿ"</item>
+    <item msgid="8014986104355098744">"ಆಫ್"</item>
+    <item msgid="5966994759929723339">"ಆನ್"</item>
   </string-array>
   <string-array name="tile_states_font_scaling">
     <item msgid="3173069902082305985">"ಲಭ್ಯವಿಲ್ಲ"</item>

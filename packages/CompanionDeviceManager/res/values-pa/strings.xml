@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"ਕਾਲ ਲੌਗ"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"ਨਜ਼ਦੀਕੀ ਡੀਵਾਈਸ"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"ਮੀਡੀਆ ਆਊਟਪੁੱਟ ਬਦਲੋ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਮੀਡੀਆ"</string>
-    <string name="permission_notification" msgid="693762568127741203">"ਸੂਚਨਾਵਾਂ"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ਐਪਾਂ"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"ਸਟ੍ਰੀਮਿੰਗ"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਨ੍ਹਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਹੈ"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"ਫ਼ੋਨ ਦੇ ਕਾਲ ਲੌਗ ਨੂੰ ਪੜ੍ਹਣ ਅਤੇ ਲਿਖਣ ਦੀ ਇਜਾਜ਼ਤ ਹੈ"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ ਦੀ ਇਜਾਜ਼ਤ ਹੈ"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਹੈ"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"ਆਪਣੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਹੈ"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"ਆਡੀਓ ਰਿਕਾਰਡ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"ਨਜ਼ਦੀਕੀ ਡੀਵਾਈਸਾਂ ਨੂੰ ਲੱਭਣ, ਉਨ੍ਹਾਂ ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਅਤੇ ਸੰਬੰਧਿਤ ਸਥਿਤੀ ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਹੈ"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"ਤੁਸੀਂ ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਪੜ੍ਹ ਸਕਦੇ ਹੋ, ਜਿਨ੍ਹਾਂ ਵਿੱਚ ਸੰਪਰਕਾਂ, ਸੁਨੇਹਿਆਂ ਅਤੇ ਫ਼ੋਟੋਆਂ ਵਰਗੀ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੁੰਦੀ ਹੈ"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਨ੍ਹਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"ਫ਼ੋਨ ਦੇ ਕਾਲ ਲੌਗ ਨੂੰ ਪੜ੍ਹਣ ਅਤੇ ਲਿਖਣ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"ਆਪਣੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"ਆਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"ਨਜ਼ਦੀਕੀ ਡੀਵਾਈਸਾਂ ਨੂੰ ਲੱਭਣ, ਉਨ੍ਹਾਂ ਨਾਲ ਕਨੈਕਟ ਕਰਨ ਅਤੇ ਸੰਬੰਧਿਤ ਸਥਿਤੀ ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਪੜ੍ਹਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ, ਜਿਵੇਂ ਕਿ ਸੰਪਰਕਾਂ, ਸੁਨੇਹਿਆਂ ਅਤੇ ਫ਼ੋਟੋਆਂ ਦੀ ਜਾਣਕਾਰੀ"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਪੜ੍ਹਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ, ਜਿਵੇਂ ਕਿ ਸੰਪਰਕਾਂ, ਸੁਨੇਹਿਆਂ ਅਤੇ ਫ਼ੋਟੋਆਂ ਦੀ ਜਾਣਕਾਰੀ&lt;br/&gt;• ਸੂਚਨਾਵਾਂ ਭੇਜਣ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ&lt;br/&gt;&lt;br/&gt;ਤੁਸੀਂ ਸੈਟਿੰਗਾਂ &gt; ਸੂਚਨਾਵਾਂ ਵਿੱਚ ਜਾ ਕੇ ਕਿਸੇ ਵੀ ਵੇਲੇ ਸੂਚਨਾਵਾਂ ਨੂੰ ਪੜ੍ਹਨ ਅਤੇ ਭੇਜਣ ਦੀ ਇਸ ਐਪ ਦੀ ਯੋਗਤਾ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰ ਸਕਦੇ ਹੋ।"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"ਆਪਣੇ ਫ਼ੋਨ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਸਟ੍ਰੀਮ ਕਰੋ"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"ਆਪਣੇ ਫ਼ੋਨ ਤੋਂ ਐਪਾਂ ਅਤੇ ਹੋਰ ਸਿਸਟਮ ਸੰਬੰਧੀ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਸਟ੍ਰੀਮ ਕਰੋ"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"ਉਪਲਬਧ ਡੀਵਾਈਸਾਂ ਦੀ ਸੂਚੀ ਤੱਕ ਪਹੁੰਚ ਕਰੋ ਅਤੇ ਇਹ ਕੰਟਰੋਲ ਕਰੋ ਕਿ ਕਿਹੜਾ ਡੀਵਾਈਸ ਹੋਰ ਐਪਾਂ ਤੋਂ ਆਡੀਓ ਜਾਂ ਵੀਡੀਓ ਨੂੰ ਸਟ੍ਰੀਮ ਜਾਂ ਕਾਸਟ ਕਰ ਸਕਦਾ ਹੈ"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"ਫ਼ੋਨ"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"ਟੈਬਲੈੱਟ"</string>
 </resources>

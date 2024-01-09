@@ -54,21 +54,24 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Micrófono"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Rexistros de chamadas"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Dispositivos próximos"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Cambiar a saída multimedia"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotos e contido multimedia"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Notificacións"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"Notificacións"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplicacións"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Reprodución en tempo real"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Pode facer e xestionar chamadas"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Pode ler e editar o rexistro de chamadas do teléfono"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Pode enviar e ver mensaxes SMS"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Pode acceder aos contactos"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Pode acceder ao calendario"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Pode gravar audio"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Pode atopar dispositivos próximos, conectarse a eles e determinar a súa posición relativa"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Pode ler todas as notificacións (que poden incluír información como contactos, mensaxes e fotos)"</string>
+    <string name="permission_phone_summary" msgid="8246321093970051702">"Fai e xestiona chamadas telefónicas"</string>
+    <string name="permission_call_logs_summary" msgid="7545243592757693321">"Le e edita o rexistro de chamadas do teléfono"</string>
+    <string name="permission_sms_summary" msgid="8499509535410068616">"Envía e consulta mensaxes SMS"</string>
+    <string name="permission_contacts_summary" msgid="2840800622763086808">"Accede aos contactos"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"Accede ao calendario"</string>
+    <string name="permission_microphone_summary" msgid="4862628553869973259">"Grava audio"</string>
+    <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"Busca dispositivos próximos, establece conexión con eles e determina a súa posición relativa"</string>
+    <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"Le todas as notificacións (que poden incluír información como contactos, mensaxes e fotos)"</string>
+    <string name="permission_notifications_summary" msgid="2272810466047367030">"• Le todas as notificacións (que poden incluír información como contactos, mensaxes e fotos)&lt;br/&gt;• Envía notificacións&lt;br/&gt;&lt;br/&gt;En Configuración &gt; Notificacións podes xestionar en calquera momento a capacidade desta aplicación para ler e enviar notificacións."</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Emite as aplicacións do teu teléfono"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Emite o contido das aplicacións e doutras funcións do sistema desde o teléfono"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Accede a unha lista de dispositivos dispoñibles e controla cal deles reproduce en tempo real ou emite audio ou vídeo desde outras aplicacións"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"teléfono"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tableta"</string>
 </resources>
