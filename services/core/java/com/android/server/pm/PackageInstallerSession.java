@@ -22,6 +22,8 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_UPDAT
 import static android.content.pm.DataLoaderType.INCREMENTAL;
 import static android.content.pm.DataLoaderType.STREAMING;
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_OK;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_STATUS_UNSET;
 import static android.content.pm.PackageItemInfo.MAX_SAFE_LABEL_LENGTH;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_SIGNATURE;
@@ -65,6 +67,7 @@ import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -97,6 +100,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.PreapprovalDetails;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
+import android.content.pm.PackageInstaller.UnarchivalStatus;
 import android.content.pm.PackageInstaller.UserActionReason;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
@@ -771,6 +775,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final List<String> mResolvedInstructionSets = new ArrayList<>();
     @GuardedBy("mLock")
     private final List<String> mResolvedNativeLibPaths = new ArrayList<>();
+
+    @GuardedBy("mLock")
+    private final Set<IntentSender> mUnarchivalListeners = new ArraySet<>();
+
     @GuardedBy("mLock")
     private File mInheritedFilesBase;
     @GuardedBy("mLock")
@@ -795,6 +803,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     @GuardedBy("mLock")
     private int mValidatedTargetSdk = INVALID_TARGET_SDK_VERSION;
+
+    @UnarchivalStatus
+    private int mUnarchivalStatus = UNARCHIVAL_STATUS_UNSET;
 
     private static final FileFilter sAddedApkFilter = new FileFilter() {
         @Override
@@ -5086,6 +5097,44 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             return mSessionErrorMessage;
         }
+    }
+
+    void registerUnarchivalListener(IntentSender intentSender) {
+        synchronized (mLock) {
+            this.mUnarchivalListeners.add(intentSender);
+        }
+    }
+
+    Set<IntentSender> getUnarchivalListeners() {
+        synchronized (mLock) {
+            return new ArraySet<>(mUnarchivalListeners);
+        }
+    }
+
+    void reportUnarchivalStatus(@UnarchivalStatus int status, int unarchiveId,
+            long requiredStorageBytes, PendingIntent userActionIntent) {
+        if (getUnarchivalStatus() != UNARCHIVAL_STATUS_UNSET) {
+            throw new IllegalStateException(
+                    TextUtils.formatSimple(
+                            "Unarchival status for ID %s has already been set or a session has "
+                                    + "been created for it already by the caller.",
+                            unarchiveId));
+        }
+        mUnarchivalStatus = status;
+
+        // Execute expensive calls outside the sync block.
+        mPm.mHandler.post(
+                () -> mPm.mInstallerService.mPackageArchiver.notifyUnarchivalListener(status,
+                        getInstallerPackageName(), params.appPackageName, requiredStorageBytes,
+                        userActionIntent, getUnarchivalListeners(), userId));
+        if (status != UNARCHIVAL_OK) {
+            Binder.withCleanCallingIdentity(this::abandon);
+        }
+    }
+
+    @UnarchivalStatus
+    int getUnarchivalStatus() {
+        return this.mUnarchivalStatus;
     }
 
     /**
