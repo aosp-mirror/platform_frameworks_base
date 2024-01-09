@@ -76,7 +76,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
                     ? Set.of()
                     : Set.of(RuleDiff.FIELD_TYPE, RuleDiff.FIELD_TRIGGER_DESCRIPTION,
                             RuleDiff.FIELD_ICON_RES, RuleDiff.FIELD_ALLOW_MANUAL,
-                            RuleDiff.FIELD_ZEN_DEVICE_EFFECTS);
+                            RuleDiff.FIELD_ZEN_DEVICE_EFFECTS, RuleDiff.FIELD_USER_MODIFIED_FIELDS);
 
     // allowPriorityChannels is flagged by android.app.modes_api
     public static final Set<String> ZEN_MODE_CONFIG_FLAGGED_FIELDS =
@@ -304,6 +304,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
             rule.zenDeviceEffects = new ZenDeviceEffects.Builder()
                     .setShouldDimWallpaper(true)
                     .build();
+            rule.userModifiedFields = AutomaticZenRule.FIELD_NAME;
         }
         return rule;
     }
