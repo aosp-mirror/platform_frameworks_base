@@ -86,4 +86,5 @@ interface INfcAdapter
     boolean enableReaderOption(boolean enable);
     boolean isObserveModeSupported();
     boolean setObserveMode(boolean enabled);
+    void updateDiscoveryTechnology(IBinder b, int pollFlags, int listenFlags);
 }
