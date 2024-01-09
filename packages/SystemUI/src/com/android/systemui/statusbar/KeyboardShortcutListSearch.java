@@ -84,6 +84,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -457,14 +458,43 @@ public final class KeyboardShortcutListSearch {
         List<KeyboardShortcutMultiMappingGroup> keyboardShortcutMultiMappingGroups =
                 new ArrayList<>();
         for (KeyboardShortcutGroup group : keyboardShortcutGroups) {
-            CharSequence categoryTitle = group.getLabel();
-            List<ShortcutMultiMappingInfo> shortcutMultiMappingInfos = new ArrayList<>();
-            for (KeyboardShortcutInfo info : group.getItems()) {
-                shortcutMultiMappingInfos.add(new ShortcutMultiMappingInfo(info));
-            }
-            keyboardShortcutMultiMappingGroups.add(
+            KeyboardShortcutMultiMappingGroup mappedGroup =
                     new KeyboardShortcutMultiMappingGroup(
-                            categoryTitle, shortcutMultiMappingInfos));
+                            group.getLabel(),
+                            new ArrayList<>());
+            Map<String, List<ShortcutMultiMappingInfo>> shortcutMap = new LinkedHashMap<>();
+            for (KeyboardShortcutInfo info : group.getItems()) {
+                String label = info.getLabel().toString();
+                Icon icon = info.getIcon();
+                if (shortcutMap.containsKey(label)) {
+                    List<ShortcutMultiMappingInfo> shortcuts = shortcutMap.get(label);
+                    boolean foundSameIcon = false;
+                    for (ShortcutMultiMappingInfo shortcut : shortcuts) {
+                        Icon shortcutIcon = shortcut.getIcon();
+                        if ((shortcutIcon != null
+                                && icon != null
+                                && shortcutIcon.sameAs(icon))
+                                || (shortcutIcon == null && icon == null)) {
+                            foundSameIcon = true;
+                            shortcut.addShortcutKeyGroup(new ShortcutKeyGroup(info, null));
+                            break;
+                        }
+                    }
+                    if (!foundSameIcon) {
+                        shortcuts.add(new ShortcutMultiMappingInfo(info));
+                    }
+                } else {
+                    List<ShortcutMultiMappingInfo> shortcuts = new ArrayList<>();
+                    shortcuts.add(new ShortcutMultiMappingInfo(info));
+                    shortcutMap.put(label, shortcuts);
+                }
+            }
+            for (List<ShortcutMultiMappingInfo> shortcutInfos : shortcutMap.values()) {
+                for (ShortcutMultiMappingInfo shortcutInfo : shortcutInfos) {
+                    mappedGroup.addItem(shortcutInfo);
+                }
+            }
+            keyboardShortcutMultiMappingGroups.add(mappedGroup);
         }
         return keyboardShortcutMultiMappingGroups;
     }
@@ -1377,7 +1407,9 @@ public final class KeyboardShortcutListSearch {
         ShortcutMultiMappingInfo(KeyboardShortcutInfo info) {
             mLabel = info.getLabel();
             mIcon = info.getIcon();
-            mShortcutKeyGroups = Arrays.asList(new ShortcutKeyGroup(info, null));
+            mShortcutKeyGroups = new ArrayList<>(
+                Arrays.asList(new ShortcutKeyGroup(info, null))
+            );
         }
 
         CharSequence getLabel() {
@@ -1386,6 +1418,10 @@ public final class KeyboardShortcutListSearch {
 
         Icon getIcon() {
             return mIcon;
+        }
+
+        void addShortcutKeyGroup(ShortcutKeyGroup group) {
+            mShortcutKeyGroups.add(group);
         }
 
         List<ShortcutKeyGroup> getShortcutKeyGroups() {
