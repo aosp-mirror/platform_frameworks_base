@@ -3603,12 +3603,17 @@ public final class Settings {
                                     + " type:" + mUri.getPath()
                                     + " in package:" + cr.getPackageName());
                         }
+                        // When a generation number changes, remove cached values, remove the old
+                        // generation tracker and request a new one
+                        generationTracker.destroy();
+                        mGenerationTrackers.remove(prefix);
                         for (int i = mValues.size() - 1; i >= 0; i--) {
                             String key = mValues.keyAt(i);
                             if (key.startsWith(prefix)) {
                                 mValues.remove(key);
                             }
                         }
+                        needsGenerationTracker = true;
                     } else {
                         boolean prefixCached = mValues.containsKey(prefix);
                         if (prefixCached) {
