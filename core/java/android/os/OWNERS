@@ -91,3 +91,7 @@ per-file Temperature.java = file:/THERMAL_OWNERS
 
 # SecurityStateManager
 per-file *SecurityStateManager* = file:/SECURITY_STATE_OWNERS
+
+# SystemConfig
+per-file ISystemConfig.aidl = file:/PACKAGE_MANAGER_OWNERS
+per-file SystemConfigManager.java = file:/PACKAGE_MANAGER_OWNERS
