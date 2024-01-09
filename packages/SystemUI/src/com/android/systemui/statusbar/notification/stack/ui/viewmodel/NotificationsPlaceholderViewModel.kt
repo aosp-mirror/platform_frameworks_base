@@ -87,4 +87,9 @@ constructor(
     fun onContentTopChanged(padding: Float) {
         interactor.setContentTop(padding)
     }
+
+    /** Sets whether the notification stack is scrolled to the top. */
+    fun setScrolledToTop(scrolledToTop: Boolean) {
+        interactor.setScrolledToTop(scrolledToTop)
+    }
 }

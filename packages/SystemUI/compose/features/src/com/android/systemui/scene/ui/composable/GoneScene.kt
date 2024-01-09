@@ -18,13 +18,10 @@ package com.android.systemui.scene.ui.composable
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
@@ -66,12 +63,6 @@ constructor(
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        Box(modifier = modifier) {
-            Box(modifier = Modifier.fillMaxSize().element(Notifications.Elements.NotificationScrim))
-            HeadsUpNotificationSpace(
-                viewModel = notificationsViewModel,
-                modifier = Modifier.padding(16.dp).fillMaxSize(),
-            )
-        }
+        Box(modifier = Modifier.fillMaxSize().element(Notifications.Elements.NotificationScrim))
     }
 }

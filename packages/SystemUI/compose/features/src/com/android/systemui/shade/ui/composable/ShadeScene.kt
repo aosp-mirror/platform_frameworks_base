@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
@@ -62,6 +63,7 @@ import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.util.animation.MeasurementInput
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -154,62 +156,104 @@ private fun SceneScope.ShadeScene(
     mediaHost: MediaHost,
     modifier: Modifier = Modifier,
 ) {
-    val localDensity = LocalDensity.current
+    val density = LocalDensity.current
     val layoutWidth = remember { mutableStateOf(0) }
+    val maxNotifScrimTop = remember { mutableStateOf(0f) }
 
     Box(
         modifier =
             modifier.element(Shade.Elements.Scrim).background(MaterialTheme.colorScheme.scrim),
     )
     Box {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().clickable(onClick = { viewModel.onContentClicked() })
-        ) {
-            CollapsedShadeHeader(
-                viewModel = viewModel.shadeHeaderViewModel,
-                createTintedIconManager = createTintedIconManager,
-                createBatteryMeterViewController = createBatteryMeterViewController,
-                statusBarIconController = statusBarIconController,
-                modifier = Modifier.padding(horizontal = Shade.Dimensions.HorizontalPadding)
-            )
-            QuickSettings(
-                modifier = Modifier.height(130.dp),
-                viewModel.qsSceneAdapter,
-            )
-
-            if (viewModel.isMediaVisible()) {
-                val mediaHeight = dimensionResource(R.dimen.qs_media_session_height_expanded)
-                MediaCarousel(
-                    modifier =
-                        Modifier.height(mediaHeight).fillMaxWidth().layout { measurable, constraints
-                            ->
-                            val placeable = measurable.measure(constraints)
-
-                            // Notify controller to size the carousel for the current space
-                            mediaHost.measurementInput =
-                                MeasurementInput(placeable.width, placeable.height)
-                            mediaCarouselController.setSceneContainerSize(
-                                placeable.width,
-                                placeable.height
+        Layout(
+            contents =
+                listOf(
+                    {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .clickable(onClick = { viewModel.onContentClicked() })
+                        ) {
+                            CollapsedShadeHeader(
+                                viewModel = viewModel.shadeHeaderViewModel,
+                                createTintedIconManager = createTintedIconManager,
+                                createBatteryMeterViewController = createBatteryMeterViewController,
+                                statusBarIconController = statusBarIconController,
+                                modifier =
+                                    Modifier.padding(
+                                        horizontal = Shade.Dimensions.HorizontalPadding
+                                    )
+                            )
+                            QuickSettings(
+                                modifier = Modifier.height(130.dp),
+                                viewModel.qsSceneAdapter,
                             )
 
-                            layout(placeable.width, placeable.height) {
-                                placeable.placeRelative(0, 0)
-                            }
-                        },
-                    mediaHost = mediaHost,
-                    layoutWidth = layoutWidth.value,
-                    layoutHeight = with(localDensity) { mediaHeight.toPx() }.toInt(),
-                    carouselController = mediaCarouselController,
-                )
-            }
+                            if (viewModel.isMediaVisible()) {
+                                val mediaHeight =
+                                    dimensionResource(R.dimen.qs_media_session_height_expanded)
+                                MediaCarousel(
+                                    modifier =
+                                        Modifier.height(mediaHeight).fillMaxWidth().layout {
+                                            measurable,
+                                            constraints ->
+                                            val placeable = measurable.measure(constraints)
 
-            Spacer(modifier = Modifier.height(16.dp))
-            NotificationScrollingStack(
-                viewModel = viewModel.notifications,
-                modifier = Modifier.fillMaxWidth().weight(1f),
-            )
+                                            // Notify controller to size the carousel for the
+                                            // current space
+                                            mediaHost.measurementInput =
+                                                MeasurementInput(placeable.width, placeable.height)
+                                            mediaCarouselController.setSceneContainerSize(
+                                                placeable.width,
+                                                placeable.height
+                                            )
+
+                                            layout(placeable.width, placeable.height) {
+                                                placeable.placeRelative(0, 0)
+                                            }
+                                        },
+                                    mediaHost = mediaHost,
+                                    layoutWidth = layoutWidth.value,
+                                    layoutHeight = with(density) { mediaHeight.toPx() }.toInt(),
+                                    carouselController = mediaCarouselController,
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    },
+                    {
+                        NotificationScrollingStack(
+                            viewModel = viewModel.notifications,
+                            maxScrimTop = { maxNotifScrimTop.value },
+                        )
+                    },
+                )
+        ) { measurables, constraints ->
+            check(measurables.size == 2)
+            check(measurables[0].size == 1)
+            check(measurables[1].size == 1)
+
+            val quickSettingsPlaceable = measurables[0][0].measure(constraints)
+
+            val notificationsMeasurable = measurables[1][0]
+            val notificationsScrimMaxHeight =
+                constraints.maxHeight - ShadeHeader.Dimensions.CollapsedHeight.roundToPx()
+            val notificationsPlaceable =
+                notificationsMeasurable.measure(
+                    constraints.copy(
+                        minHeight = notificationsScrimMaxHeight,
+                        maxHeight = notificationsScrimMaxHeight
+                    )
+                )
+
+            maxNotifScrimTop.value = quickSettingsPlaceable.height.toFloat()
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                quickSettingsPlaceable.placeRelative(x = 0, y = 0)
+                notificationsPlaceable.placeRelative(x = 0, y = maxNotifScrimTop.value.roundToInt())
+            }
         }
     }
 }

@@ -617,7 +617,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final ScrollAdapter mScrollAdapter = new ScrollAdapter() {
         @Override
         public boolean isScrolledToTop() {
-            return mOwnScrollY == 0;
+            if (SceneContainerFlag.isEnabled()) {
+                return mController.isPlaceholderScrolledToTop();
+            } else {
+                return mOwnScrollY == 0;
+            }
         }
 
         @Override
@@ -1442,7 +1446,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             fraction = BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(fraction);
         }
         final float stackY = MathUtils.lerp(0, endTopPosition, fraction);
-        mAmbientState.setStackY(stackY);
+        // TODO(b/322228881): Clean up scene container vs legacy behavior in NSSL
+        if (SceneContainerFlag.isEnabled()) {
+            // stackY should be driven by scene container, not NSSL
+            mAmbientState.setStackY(mTopPadding);
+        } else {
+            mAmbientState.setStackY(stackY);
+        }
+
         if (mOnStackYChanged != null) {
             mOnStackYChanged.accept(listenerNeedsAnimation);
         }

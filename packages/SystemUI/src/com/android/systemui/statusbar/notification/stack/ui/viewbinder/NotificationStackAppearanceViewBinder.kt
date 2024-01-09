@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
-import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -65,7 +64,9 @@ object NotificationStackAppearanceViewBinder {
                     viewModel.expandFraction.collect { expandFraction ->
                         ambientState.expansionFraction = expandFraction
                         controller.expandedHeight = expandFraction * controller.view.height
-                        controller.setMaxAlphaForExpansion(expandFraction.pow(0.75f))
+                        controller.setMaxAlphaForExpansion(
+                            ((expandFraction - 0.5f) / 0.5f).coerceAtLeast(0f)
+                        )
                     }
                 }
             }
