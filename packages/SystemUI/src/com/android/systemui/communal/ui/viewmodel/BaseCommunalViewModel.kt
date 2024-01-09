@@ -116,4 +116,13 @@ abstract class BaseCommunalViewModel(
 
     /** Gets the interaction handler used to handle taps on a remote view */
     abstract fun getInteractionHandler(): RemoteViews.InteractionHandler
+
+    /** Called as the user starts dragging a widget to reorder. */
+    open fun onReorderWidgetStart() {}
+
+    /** Called as the user finishes dragging a widget to reorder. */
+    open fun onReorderWidgetEnd() {}
+
+    /** Called as the user cancels dragging a widget to reorder. */
+    open fun onReorderWidgetCancel() {}
 }

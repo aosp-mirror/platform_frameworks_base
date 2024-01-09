@@ -172,7 +172,7 @@ private fun BoxScope.CommunalHubLazyGrid(
         gridModifier =
             gridModifier
                 .fillMaxSize()
-                .dragContainer(dragDropState, beforeContentPadding(contentPadding))
+                .dragContainer(dragDropState, beforeContentPadding(contentPadding), viewModel)
                 .onGloballyPositioned { setGridCoordinates(it) }
         // for widgets dropped from other activities
         val dragAndDropTargetState =

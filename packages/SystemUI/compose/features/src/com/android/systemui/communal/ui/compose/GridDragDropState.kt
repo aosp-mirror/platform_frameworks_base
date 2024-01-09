@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
 import com.android.systemui.communal.ui.compose.extensions.plus
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -207,7 +208,8 @@ internal constructor(
 
 fun Modifier.dragContainer(
     dragDropState: GridDragDropState,
-    beforeContentPadding: ContentPaddingInPx
+    beforeContentPadding: ContentPaddingInPx,
+    viewModel: BaseCommunalViewModel,
 ): Modifier {
     return pointerInput(dragDropState, beforeContentPadding) {
         detectDragGesturesAfterLongPress(
@@ -220,9 +222,16 @@ fun Modifier.dragContainer(
                     offset,
                     Offset(beforeContentPadding.startPadding, beforeContentPadding.topPadding)
                 )
+                viewModel.onReorderWidgetStart()
             },
-            onDragEnd = { dragDropState.onDragInterrupted() },
-            onDragCancel = { dragDropState.onDragInterrupted() }
+            onDragEnd = {
+                dragDropState.onDragInterrupted()
+                viewModel.onReorderWidgetEnd()
+            },
+            onDragCancel = {
+                dragDropState.onDragInterrupted()
+                viewModel.onReorderWidgetCancel()
+            }
         )
     }
 }

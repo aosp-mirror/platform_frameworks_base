@@ -25,8 +25,10 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.os.PowerManager
 import android.widget.RemoteViews
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.dagger.MediaModule
@@ -50,6 +52,7 @@ constructor(
     shadeViewController: Provider<ShadeViewController>,
     powerManager: PowerManager,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
+    private val uiEventLogger: UiEventLogger,
 ) : BaseCommunalViewModel(communalInteractor, shadeViewController, powerManager, mediaHost) {
 
     private companion object {
@@ -134,5 +137,17 @@ constructor(
     fun setConfigurationResult(resultCode: Int) {
         pendingConfiguration?.complete(resultCode)
             ?: throw IllegalStateException("No widget pending configuration")
+    }
+
+    override fun onReorderWidgetStart() {
+        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_START)
+    }
+
+    override fun onReorderWidgetEnd() {
+        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_FINISH)
+    }
+
+    override fun onReorderWidgetCancel() {
+        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_CANCEL)
     }
 }
