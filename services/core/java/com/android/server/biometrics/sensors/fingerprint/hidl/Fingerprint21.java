@@ -119,7 +119,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @NonNull private final AuthenticationStateListeners mAuthenticationStateListeners;
     private final ActivityTaskManager mActivityTaskManager;
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProperties;
-    private final BiometricScheduler mScheduler;
+    private final BiometricScheduler<IBiometricsFingerprint, AidlSession> mScheduler;
     private final Handler mHandler;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final LockoutFrameworkImpl mLockoutTracker;
@@ -198,11 +198,11 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         private final int mSensorId;
         @NonNull private final Context mContext;
         @NonNull final Handler mHandler;
-        @NonNull final BiometricScheduler mScheduler;
+        @NonNull final BiometricScheduler<IBiometricsFingerprint, AidlSession> mScheduler;
         @Nullable private Callback mCallback;
 
         HalResultController(int sensorId, @NonNull Context context, @NonNull Handler handler,
-                @NonNull BiometricScheduler scheduler) {
+                @NonNull BiometricScheduler<IBiometricsFingerprint, AidlSession> scheduler) {
             mSensorId = sensorId;
             mContext = context;
             mHandler = handler;
@@ -336,7 +336,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             @NonNull BiometricStateCallback biometricStateCallback,
             @NonNull AuthenticationStateListeners authenticationStateListeners,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
-            @NonNull BiometricScheduler scheduler,
+            @NonNull BiometricScheduler<IBiometricsFingerprint, AidlSession> scheduler,
             @NonNull Handler handler,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull HalResultController controller,
@@ -389,8 +389,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             @NonNull Handler handler,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-        final BiometricScheduler scheduler =
-                new BiometricScheduler(TAG,
+        final BiometricScheduler<IBiometricsFingerprint, AidlSession> scheduler =
+                new BiometricScheduler<>(
                         BiometricScheduler.sensorTypeFromFingerprintProperties(sensorProps),
                         gestureAvailabilityDispatcher);
         final HalResultController controller = new HalResultController(sensorProps.sensorId,
@@ -533,8 +533,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private void scheduleUpdateActiveUserWithoutHandler(int targetUserId, boolean force) {
         final boolean hasEnrolled =
                 !getEnrolledFingerprints(mSensorProperties.sensorId, targetUserId).isEmpty();
-        final FingerprintUpdateActiveUserClient client =
-                new FingerprintUpdateActiveUserClient(mContext, mLazyDaemon, targetUserId,
+        final FingerprintUpdateActiveUserClientLegacy client =
+                new FingerprintUpdateActiveUserClientLegacy(mContext, mLazyDaemon, targetUserId,
                         mContext.getOpPackageName(), mSensorProperties.sensorId,
                         createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
                                 BiometricsProtoEnums.CLIENT_UNKNOWN,

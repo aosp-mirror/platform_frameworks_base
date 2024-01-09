@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.Handler;
@@ -67,8 +68,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
             };
     private LockoutHalImpl mLockoutTracker;
 
-    public HidlToAidlSensorAdapter(@NonNull String tag,
-            @NonNull FaceProvider provider,
+    public HidlToAidlSensorAdapter(@NonNull FaceProvider provider,
             @NonNull Context context,
             @NonNull Handler handler,
             @NonNull SensorProps prop,
@@ -76,15 +76,14 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
             @NonNull BiometricContext biometricContext,
             boolean resetLockoutRequiresChallenge,
             @NonNull Runnable internalCleanupAndGetFeatureRunnable) {
-        this(tag, provider, context, handler, prop, lockoutResetDispatcher, biometricContext,
+        this(provider, context, handler, prop, lockoutResetDispatcher, biometricContext,
                 resetLockoutRequiresChallenge, internalCleanupAndGetFeatureRunnable,
                 new AuthSessionCoordinator(), null /* daemon */,
                 null /* onEnrollSuccessCallback */);
     }
 
     @VisibleForTesting
-    HidlToAidlSensorAdapter(@NonNull String tag,
-            @NonNull FaceProvider provider,
+    HidlToAidlSensorAdapter(@NonNull FaceProvider provider,
             @NonNull Context context,
             @NonNull Handler handler,
             @NonNull SensorProps prop,
@@ -95,7 +94,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
             @NonNull AuthSessionCoordinator authSessionCoordinator,
             @Nullable IBiometricsFace daemon,
             @Nullable AidlResponseHandler.AidlResponseHandlerCallback aidlResponseHandlerCallback) {
-        super(tag, provider, context, handler, prop, lockoutResetDispatcher, biometricContext,
+        super(provider, context, handler, prop, biometricContext,
                 resetLockoutRequiresChallenge);
         mInternalCleanupAndGetFeatureRunnable = internalCleanupAndGetFeatureRunnable;
         mFaceProvider = provider;
@@ -124,7 +123,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
 
     @Override
     public void serviceDied(long cookie) {
-        Slog.d(TAG, "HAL died.");
+        Slog.d(TAG, "Face HAL died.");
         mDaemon = null;
     }
 
@@ -140,10 +139,12 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
     }
 
     @Override
-    public void init(LockoutResetDispatcher lockoutResetDispatcher,
-            FaceProvider provider) {
-        setScheduler(new BiometricScheduler(TAG, BiometricScheduler.SENSOR_TYPE_FACE,
-                null /* gestureAvailabilityTracker */));
+    public void init(@NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull FaceProvider provider) {
+        setScheduler(new BiometricScheduler<ISession, AidlSession>(getHandler(),
+                BiometricScheduler.SENSOR_TYPE_FACE,
+                null /* gestureAvailabilityTracker */, () -> mCurrentUserId,
+                null /* userSwitchProvider */));
         setLazySession(this::getSession);
         mLockoutTracker = new LockoutHalImpl();
     }
@@ -188,7 +189,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
             return mDaemon;
         }
 
-        Slog.d(TAG, "Daemon was null, reconnecting, current operation: "
+        Slog.d(TAG, "Face daemon was null, reconnecting, current operation: "
                 + getScheduler().getCurrentClient());
 
         try {
@@ -213,7 +214,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
     }
 
     @VisibleForTesting void handleUserChanged(int newUserId) {
-        Slog.d(TAG, "User changed. Current user is " + newUserId);
+        Slog.d(TAG, "User changed. Current user for face sensor is " + newUserId);
         mSession = null;
         mCurrentUserId = newUserId;
     }

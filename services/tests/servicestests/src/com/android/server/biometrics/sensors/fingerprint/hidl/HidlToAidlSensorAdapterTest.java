@@ -36,12 +36,12 @@ import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.HidlFingerprintSensorConfig;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
 
-import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
@@ -49,17 +49,11 @@ import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationStateListeners;
-import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricUtils;
-import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
-import com.android.server.biometrics.sensors.StartUserClient;
-import com.android.server.biometrics.sensors.StopUserClient;
-import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.aidl.AidlResponseHandler;
-import com.android.server.biometrics.sensors.fingerprint.aidl.AidlSession;
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintEnrollClient;
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvider;
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintResetLockoutClient;
@@ -111,60 +105,18 @@ public class HidlToAidlSensorAdapterTest {
     private BiometricUtils<Fingerprint> mBiometricUtils;
     @Mock
     private AuthenticationStateListeners mAuthenticationStateListeners;
+    @Mock
+    private HandlerThread mThread;
 
     private final TestLooper mLooper = new TestLooper();
     private HidlToAidlSensorAdapter mHidlToAidlSensorAdapter;
     private final TestableContext mContext = new TestableContext(
             ApplicationProvider.getApplicationContext());
 
-    private final UserAwareBiometricScheduler.UserSwitchCallback mUserSwitchCallback =
-            new UserAwareBiometricScheduler.UserSwitchCallback() {
-                @NonNull
-                @Override
-                public StopUserClient<?> getStopUserClient(int userId) {
-                    return new StopUserClient<IBiometricsFingerprint>(mContext,
-                            mHidlToAidlSensorAdapter::getIBiometricsFingerprint, null, USER_ID,
-                            SENSOR_ID, mLogger, mBiometricContext, () -> {}) {
-                        @Override
-                        protected void startHalOperation() {
-                            getCallback().onClientFinished(this, true /* success */);
-                        }
-
-                        @Override
-                        public void unableToStart() {}
-                    };
-                }
-
-                @NonNull
-                @Override
-                public StartUserClient<?, ?> getStartUserClient(int newUserId) {
-                    return new StartUserClient<IBiometricsFingerprint, AidlSession>(mContext,
-                            mHidlToAidlSensorAdapter::getIBiometricsFingerprint, null,
-                            USER_ID, SENSOR_ID,
-                            mLogger, mBiometricContext,
-                            (newUserId1, newUser, halInterfaceVersion) ->
-                                    mHidlToAidlSensorAdapter.handleUserChanged(newUserId1)) {
-                        @Override
-                        public void start(@NonNull ClientMonitorCallback callback) {
-                            super.start(callback);
-                            startHalOperation();
-                        }
-
-                        @Override
-                        protected void startHalOperation() {
-                            mUserStartedCallback.onUserStarted(USER_ID, null, 0);
-                            getCallback().onClientFinished(this, true /* success */);
-                        }
-
-                        @Override
-                        public void unableToStart() {}
-                    };
-                }
-            };;
-
     @Before
     public void setUp() throws RemoteException {
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
+        when(mThread.getLooper()).thenReturn(mLooper.getLooper());
         doAnswer((answer) -> {
             mHidlToAidlSensorAdapter.getLazySession().get().getHalSessionCallback()
                     .onEnrollmentProgress(1 /* enrollmentId */, 0 /* remaining */);
@@ -175,26 +127,18 @@ public class HidlToAidlSensorAdapterTest {
         mContext.getOrCreateTestableResources();
 
         final String config = String.format("%d:2:15", SENSOR_ID);
-        final UserAwareBiometricScheduler scheduler = new UserAwareBiometricScheduler(TAG,
-                new Handler(mLooper.getLooper()),
-                BiometricScheduler.SENSOR_TYPE_FP_OTHER,
-                null /* gestureAvailabilityDispatcher */,
-                mBiometricService,
-                () -> USER_ID,
-                mUserSwitchCallback);
         final HidlFingerprintSensorConfig fingerprintSensorConfig =
                 new HidlFingerprintSensorConfig();
         fingerprintSensorConfig.parse(config, mContext);
-        mHidlToAidlSensorAdapter = new HidlToAidlSensorAdapter(TAG,
+        mHidlToAidlSensorAdapter = new HidlToAidlSensorAdapter(
                 mFingerprintProvider, mContext, new Handler(mLooper.getLooper()),
                 fingerprintSensorConfig, mLockoutResetDispatcherForSensor,
-                mGestureAvailabilityDispatcher, mBiometricContext,
-                false /* resetLockoutRequiresHardwareAuthToken */,
+                mBiometricContext, false /* resetLockoutRequiresHardwareAuthToken */,
                 mInternalCleanupRunnable, mAuthSessionCoordinator, mDaemon,
                 mAidlResponseHandlerCallback);
         mHidlToAidlSensorAdapter.init(mGestureAvailabilityDispatcher,
                 mLockoutResetDispatcherForSensor);
-        mHidlToAidlSensorAdapter.setScheduler(scheduler);
+
         mHidlToAidlSensorAdapter.handleUserChanged(USER_ID);
     }
 

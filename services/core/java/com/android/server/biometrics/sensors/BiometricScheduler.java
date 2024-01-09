@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors;
 
+import static com.android.server.biometrics.sensors.BiometricSchedulerOperation.STATE_STARTED;
+
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -28,6 +30,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -35,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.modules.expresslog.Counter;
 import com.android.server.biometrics.BiometricSchedulerProto;
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.io.PrintWriter;
@@ -48,6 +52,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A scheduler for biometric HAL operations. Maintains a queue of {@link BaseClientMonitor}
@@ -56,11 +61,16 @@ import java.util.function.Consumer;
  *
  * We currently assume (and require) that each biometric sensor have its own instance of a
  * {@link BiometricScheduler}.
+ *
+ * @param <T> Hal instance for starting the user.
+ * @param <U> Session associated with the current user id.
+ *
+ * TODO: (b/304604965) Update thread annotation when FLAGS_DE_HIDL is removed.
  */
 @MainThread
-public class BiometricScheduler {
+public class BiometricScheduler<T, U> {
 
-    private static final String BASE_TAG = "BiometricScheduler";
+    private static final String TAG = "BiometricScheduler";
     // Number of recent operations to keep in our logs for dumpsys
     protected static final int LOG_NUM_RECENT_OPERATIONS = 50;
 
@@ -88,30 +98,6 @@ public class BiometricScheduler {
     @IntDef({SENSOR_TYPE_UNKNOWN, SENSOR_TYPE_FACE, SENSOR_TYPE_UDFPS, SENSOR_TYPE_FP_OTHER})
     @Retention(RetentionPolicy.SOURCE)
     public @interface SensorType {}
-
-    public static @SensorType int sensorTypeFromFingerprintProperties(
-            @NonNull FingerprintSensorPropertiesInternal props) {
-        if (props.isAnyUdfpsType()) {
-            return SENSOR_TYPE_UDFPS;
-        }
-
-        return SENSOR_TYPE_FP_OTHER;
-    }
-
-    public static String sensorTypeToString(@SensorType int sensorType) {
-        switch (sensorType) {
-            case SENSOR_TYPE_UNKNOWN:
-                return "Unknown";
-            case SENSOR_TYPE_FACE:
-                return "Face";
-            case SENSOR_TYPE_UDFPS:
-                return "Udfps";
-            case SENSOR_TYPE_FP_OTHER:
-                return "OtherFp";
-            default:
-                return "UnknownUnknown";
-        }
-    }
 
     private static final class CrashState {
         static final int NUM_ENTRIES = 10;
@@ -145,8 +131,8 @@ public class BiometricScheduler {
         }
     }
 
-    @NonNull protected final String mBiometricTag;
-    private final @SensorType int mSensorType;
+    @SensorType
+    private final int mSensorType;
     @Nullable private final GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     @NonNull private final IBiometricService mBiometricService;
     @NonNull protected final Handler mHandler;
@@ -157,6 +143,43 @@ public class BiometricScheduler {
     private int mTotalOperationsHandled;
     private final int mRecentOperationsLimit;
     @NonNull private final List<Integer> mRecentOperations;
+    @Nullable private StopUserClient<U> mStopUserClient;
+    @NonNull private Supplier<Integer> mCurrentUserRetriever;
+    @Nullable private UserSwitchProvider<T, U> mUserSwitchProvider;
+
+    private class UserSwitchClientCallback implements ClientMonitorCallback {
+        @NonNull private final BaseClientMonitor mOwner;
+
+        UserSwitchClientCallback(@NonNull BaseClientMonitor owner) {
+            mOwner = owner;
+        }
+
+        @Override
+        public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
+            mHandler.post(() -> {
+                Slog.d(TAG, "[Client finished] " + clientMonitor + ", success: " + success);
+
+                // Set mStopUserClient to null when StopUserClient fails. Otherwise it's possible
+                // for that the queue will wait indefinitely until the field is cleared.
+                if (clientMonitor instanceof StopUserClient<?>) {
+                    if (!success) {
+                        Slog.w(TAG, "StopUserClient failed(), is the HAL stuck? "
+                                + "Clearing mStopUserClient");
+                    }
+                    mStopUserClient = null;
+                }
+                if (mCurrentOperation != null && mCurrentOperation.isFor(mOwner)) {
+                    mCurrentOperation = null;
+                } else {
+                    // can happen if the hal dies and is usually okay
+                    // do not unset the current operation that may be newer
+                    Slog.w(TAG, "operation is already null or different (reset?): "
+                            + mCurrentOperation);
+                }
+                startNextOperationIfIdle();
+            });
+        }
+    }
 
     // Internal callback, notified when an operation is complete. Notifies the requester
     // that the operation is complete, before performing internal scheduler work (such as
@@ -164,26 +187,26 @@ public class BiometricScheduler {
     private final ClientMonitorCallback mInternalCallback = new ClientMonitorCallback() {
         @Override
         public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-            Slog.d(getTag(), "[Started] " + clientMonitor);
+            Slog.d(TAG, "[Started] " + clientMonitor);
         }
 
         @Override
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             mHandler.post(() -> {
                 if (mCurrentOperation == null) {
-                    Slog.e(getTag(), "[Finishing] " + clientMonitor
+                    Slog.e(TAG, "[Finishing] " + clientMonitor
                             + " but current operation is null, success: " + success
                             + ", possible lifecycle bug in clientMonitor implementation?");
                     return;
                 }
 
                 if (!mCurrentOperation.isFor(clientMonitor)) {
-                    Slog.e(getTag(), "[Ignoring Finish] " + clientMonitor + " does not match"
+                    Slog.e(TAG, "[Ignoring Finish] " + clientMonitor + " does not match"
                             + " current: " + mCurrentOperation);
                     return;
                 }
 
-                Slog.d(getTag(), "[Finishing] " + clientMonitor + ", success: " + success);
+                Slog.d(TAG, "[Finishing] " + clientMonitor + ", success: " + success);
 
                 if (mGestureAvailabilityDispatcher != null) {
                     mGestureAvailabilityDispatcher.markSensorActive(
@@ -202,13 +225,11 @@ public class BiometricScheduler {
     };
 
     @VisibleForTesting
-    public BiometricScheduler(@NonNull String tag,
-            @NonNull Handler handler,
+    public BiometricScheduler(@NonNull Handler handler,
             @SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull IBiometricService biometricService,
             int recentOperationsLimit) {
-        mBiometricTag = tag;
         mHandler = handler;
         mSensorType = sensorType;
         mGestureAvailabilityDispatcher = gestureAvailabilityDispatcher;
@@ -219,21 +240,63 @@ public class BiometricScheduler {
         mRecentOperations = new ArrayList<>();
     }
 
+    @VisibleForTesting
+    public BiometricScheduler(@NonNull Handler handler,
+            @SensorType int sensorType,
+            @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull IBiometricService biometricService,
+            int recentOperationsLimit,
+            @NonNull Supplier<Integer> currentUserRetriever,
+            @Nullable UserSwitchProvider<T, U> userSwitchProvider) {
+        mHandler = handler;
+        mSensorType = sensorType;
+        mGestureAvailabilityDispatcher = gestureAvailabilityDispatcher;
+        mPendingOperations = new ArrayDeque<>();
+        mBiometricService = biometricService;
+        mCrashStates = new ArrayDeque<>();
+        mRecentOperationsLimit = recentOperationsLimit;
+        mRecentOperations = new ArrayList<>();
+        mCurrentUserRetriever = currentUserRetriever;
+        mUserSwitchProvider = userSwitchProvider;
+    }
+
+    public BiometricScheduler(@NonNull Handler handler,
+            @SensorType int sensorType,
+            @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull Supplier<Integer> currentUserRetriever,
+            @NonNull UserSwitchProvider<T, U> userSwitchProvider) {
+        this(handler, sensorType, gestureAvailabilityDispatcher,
+                IBiometricService.Stub.asInterface(ServiceManager.getService(
+                        Context.BIOMETRIC_SERVICE)), LOG_NUM_RECENT_OPERATIONS,
+                currentUserRetriever, userSwitchProvider);
+    }
+
     /**
      * Creates a new scheduler.
      *
-     * @param tag for the specific instance of the scheduler. Should be unique.
      * @param sensorType the sensorType that this scheduler is handling.
      * @param gestureAvailabilityDispatcher may be null if the sensor does not support gestures
      *                                      (such as fingerprint swipe).
      */
-    public BiometricScheduler(@NonNull String tag,
-            @SensorType int sensorType,
+    public BiometricScheduler(@SensorType int sensorType,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-        this(tag, new Handler(Looper.getMainLooper()), sensorType, gestureAvailabilityDispatcher,
+        this(new Handler(Looper.getMainLooper()), sensorType, gestureAvailabilityDispatcher,
                 IBiometricService.Stub.asInterface(
                         ServiceManager.getService(Context.BIOMETRIC_SERVICE)),
                 LOG_NUM_RECENT_OPERATIONS);
+    }
+
+    /**
+     * Returns sensor type for a fingerprint sensor.
+     */
+    @SensorType
+    public static int sensorTypeFromFingerprintProperties(
+            @NonNull FingerprintSensorPropertiesInternal props) {
+        if (props.isAnyUdfpsType()) {
+            return SENSOR_TYPE_UDFPS;
+        }
+
+        return SENSOR_TYPE_FP_OTHER;
     }
 
     @VisibleForTesting
@@ -241,27 +304,76 @@ public class BiometricScheduler {
         return mInternalCallback;
     }
 
-    protected String getTag() {
-        return BASE_TAG + "/" + mBiometricTag;
+    protected void startNextOperationIfIdle() {
+        if (Flags.deHidl()) {
+            startNextOperation();
+        } else {
+            startNextOperationIfIdleLegacy();
+        }
     }
 
-    protected void startNextOperationIfIdle() {
+    protected void startNextOperation() {
         if (mCurrentOperation != null) {
-            Slog.v(getTag(), "Not idle, current operation: " + mCurrentOperation);
+            Slog.v(TAG, "Not idle, current operation: " + mCurrentOperation);
             return;
         }
         if (mPendingOperations.isEmpty()) {
-            Slog.d(getTag(), "No operations, returning to idle");
+            Slog.d(TAG, "No operations, returning to idle");
+            return;
+        }
+
+        final int currentUserId = mCurrentUserRetriever.get();
+        final int nextUserId = mPendingOperations.getFirst().getTargetUserId();
+
+        if (nextUserId == currentUserId || mPendingOperations.getFirst().isStartUserOperation()) {
+            startNextOperationIfIdleLegacy();
+        } else if (currentUserId == UserHandle.USER_NULL && mUserSwitchProvider != null) {
+            final BaseClientMonitor startClient =
+                    mUserSwitchProvider.getStartUserClient(nextUserId);
+            final UserSwitchClientCallback finishedCallback =
+                    new UserSwitchClientCallback(startClient);
+
+            Slog.d(TAG, "[Starting User] " + startClient);
+            mCurrentOperation = new BiometricSchedulerOperation(
+                    startClient, finishedCallback, STATE_STARTED);
+            startClient.start(finishedCallback);
+        } else if (mUserSwitchProvider != null) {
+            if (mStopUserClient != null) {
+                Slog.d(TAG, "[Waiting for StopUser] " + mStopUserClient);
+            } else {
+                mStopUserClient = mUserSwitchProvider
+                        .getStopUserClient(currentUserId);
+                final UserSwitchClientCallback finishedCallback =
+                        new UserSwitchClientCallback(mStopUserClient);
+
+                Slog.d(TAG, "[Stopping User] current: " + currentUserId
+                        + ", next: " + nextUserId + ". " + mStopUserClient);
+                mCurrentOperation = new BiometricSchedulerOperation(
+                        mStopUserClient, finishedCallback, STATE_STARTED);
+                mStopUserClient.start(finishedCallback);
+            }
+        } else {
+            Slog.e(TAG, "Cannot start next operation.");
+        }
+    }
+
+    protected void startNextOperationIfIdleLegacy() {
+        if (mCurrentOperation != null) {
+            Slog.v(TAG, "Not idle, current operation: " + mCurrentOperation);
+            return;
+        }
+        if (mPendingOperations.isEmpty()) {
+            Slog.d(TAG, "No operations, returning to idle");
             return;
         }
 
         mCurrentOperation = mPendingOperations.poll();
-        Slog.d(getTag(), "[Polled] " + mCurrentOperation);
+        Slog.d(TAG, "[Polled] " + mCurrentOperation);
 
         // If the operation at the front of the queue has been marked for cancellation, send
         // ERROR_CANCELED. No need to start this client.
         if (mCurrentOperation.isMarkedCanceling()) {
-            Slog.d(getTag(), "[Now Cancelling] " + mCurrentOperation);
+            Slog.d(TAG, "[Now Cancelling] " + mCurrentOperation);
             mCurrentOperation.cancel(mHandler, mInternalCallback);
             // Now we wait for the client to send its FinishCallback, which kicks off the next
             // operation.
@@ -289,7 +401,7 @@ public class BiometricScheduler {
                 // Note down current length of queue
                 final int pendingOperationsLength = mPendingOperations.size();
                 final BiometricSchedulerOperation lastOperation = mPendingOperations.peekLast();
-                Slog.e(getTag(), "[Unable To Start] " + mCurrentOperation
+                Slog.e(TAG, "[Unable To Start] " + mCurrentOperation
                         + ". Last pending operation: " + lastOperation);
 
                 // Then for each operation currently in the pending queue at the time of this
@@ -298,10 +410,10 @@ public class BiometricScheduler {
                 for (int i = 0; i < pendingOperationsLength; i++) {
                     final BiometricSchedulerOperation operation = mPendingOperations.pollFirst();
                     if (operation != null) {
-                        Slog.w(getTag(), "[Aborting Operation] " + operation);
+                        Slog.w(TAG, "[Aborting Operation] " + operation);
                         operation.abort();
                     } else {
-                        Slog.e(getTag(), "Null operation, index: " + i
+                        Slog.e(TAG, "Null operation, index: " + i
                                 + ", expected length: " + pendingOperationsLength);
                     }
                 }
@@ -317,9 +429,9 @@ public class BiometricScheduler {
                 mBiometricService.onReadyForAuthentication(
                         mCurrentOperation.getClientMonitor().getRequestId(), cookie);
             } catch (RemoteException e) {
-                Slog.e(getTag(), "Remote exception when contacting BiometricService", e);
+                Slog.e(TAG, "Remote exception when contacting BiometricService", e);
             }
-            Slog.d(getTag(), "Waiting for cookie before starting: " + mCurrentOperation);
+            Slog.d(TAG, "Waiting for cookie before starting: " + mCurrentOperation);
         }
     }
 
@@ -338,14 +450,14 @@ public class BiometricScheduler {
      */
     public void startPreparedClient(int cookie) {
         if (mCurrentOperation == null) {
-            Slog.e(getTag(), "Current operation is null");
+            Slog.e(TAG, "Current operation is null");
             return;
         }
 
         if (mCurrentOperation.startWithCookie(mInternalCallback, cookie)) {
-            Slog.d(getTag(), "[Started] Prepared client: " + mCurrentOperation);
+            Slog.d(TAG, "[Started] Prepared client: " + mCurrentOperation);
         } else {
-            Slog.e(getTag(), "[Unable To Start] Prepared client: " + mCurrentOperation);
+            Slog.e(TAG, "[Unable To Start] Prepared client: " + mCurrentOperation);
             mCurrentOperation = null;
             startNextOperationIfIdle();
         }
@@ -374,13 +486,13 @@ public class BiometricScheduler {
         if (clientMonitor.interruptsPrecedingClients()) {
             for (BiometricSchedulerOperation operation : mPendingOperations) {
                 if (operation.markCanceling()) {
-                    Slog.d(getTag(), "New client, marking pending op as canceling: " + operation);
+                    Slog.d(TAG, "New client, marking pending op as canceling: " + operation);
                 }
             }
         }
 
         mPendingOperations.add(new BiometricSchedulerOperation(clientMonitor, clientCallback));
-        Slog.d(getTag(), "[Added] " + clientMonitor
+        Slog.d(TAG, "[Added] " + clientMonitor
                 + ", new queue size: " + mPendingOperations.size());
 
         // If the new operation should interrupt preceding clients, and if the current operation is
@@ -389,7 +501,7 @@ public class BiometricScheduler {
                 && mCurrentOperation != null
                 && mCurrentOperation.isInterruptable()
                 && mCurrentOperation.isStarted()) {
-            Slog.d(getTag(), "[Cancelling Interruptable]: " + mCurrentOperation);
+            Slog.d(TAG, "[Cancelling Interruptable]: " + mCurrentOperation);
             mCurrentOperation.cancel(mHandler, mInternalCallback);
         } else {
             startNextOperationIfIdle();
@@ -401,16 +513,16 @@ public class BiometricScheduler {
      * @param token from the caller, should match the token passed in when requesting enrollment
      */
     public void cancelEnrollment(IBinder token, long requestId) {
-        Slog.d(getTag(), "cancelEnrollment, requestId: " + requestId);
+        Slog.d(TAG, "cancelEnrollment, requestId: " + requestId);
 
         if (mCurrentOperation != null
                 && canCancelEnrollOperation(mCurrentOperation, token, requestId)) {
-            Slog.d(getTag(), "Cancelling enrollment op: " + mCurrentOperation);
+            Slog.d(TAG, "Cancelling enrollment op: " + mCurrentOperation);
             mCurrentOperation.cancel(mHandler, mInternalCallback);
         } else {
             for (BiometricSchedulerOperation operation : mPendingOperations) {
                 if (canCancelEnrollOperation(operation, token, requestId)) {
-                    Slog.d(getTag(), "Cancelling pending enrollment op: " + operation);
+                    Slog.d(TAG, "Cancelling pending enrollment op: " + operation);
                     operation.markCanceling();
                 }
             }
@@ -423,16 +535,16 @@ public class BiometricScheduler {
      * @param requestId the id returned when requesting authentication
      */
     public void cancelAuthenticationOrDetection(IBinder token, long requestId) {
-        Slog.d(getTag(), "cancelAuthenticationOrDetection, requestId: " + requestId);
+        Slog.d(TAG, "cancelAuthenticationOrDetection, requestId: " + requestId);
 
         if (mCurrentOperation != null
                 && canCancelAuthOperation(mCurrentOperation, token, requestId)) {
-            Slog.d(getTag(), "Cancelling auth/detect op: " + mCurrentOperation);
+            Slog.d(TAG, "Cancelling auth/detect op: " + mCurrentOperation);
             mCurrentOperation.cancel(mHandler, mInternalCallback);
         } else {
             for (BiometricSchedulerOperation operation : mPendingOperations) {
                 if (canCancelAuthOperation(operation, token, requestId)) {
-                    Slog.d(getTag(), "Cancelling pending auth/detect op: " + operation);
+                    Slog.d(TAG, "Cancelling pending auth/detect op: " + operation);
                     operation.markCanceling();
                 }
             }
@@ -504,11 +616,11 @@ public class BiometricScheduler {
                 mCurrentOperation != null ? mCurrentOperation.toString() : null,
                 pendingOperations);
         mCrashStates.add(crashState);
-        Slog.e(getTag(), "Recorded crash state: " + crashState.toString());
+        Slog.e(TAG, "Recorded crash state: " + crashState.toString());
     }
 
     public void dump(PrintWriter pw) {
-        pw.println("Dump of BiometricScheduler " + getTag());
+        pw.println("Dump of BiometricScheduler " + TAG);
         pw.println("Type: " + mSensorType);
         pw.println("Current operation: " + mCurrentOperation);
         pw.println("Pending operations: " + mPendingOperations.size());
@@ -548,7 +660,7 @@ public class BiometricScheduler {
      * HAL dies.
      */
     public void reset() {
-        Slog.d(getTag(), "Resetting scheduler");
+        Slog.d(TAG, "Resetting scheduler");
         mPendingOperations.clear();
         mCurrentOperation = null;
     }
@@ -562,11 +674,11 @@ public class BiometricScheduler {
             return;
         }
         for (BiometricSchedulerOperation pendingOperation : mPendingOperations) {
-            Slog.d(getTag(), "[Watchdog cancelling pending] "
+            Slog.d(TAG, "[Watchdog cancelling pending] "
                     + pendingOperation.getClientMonitor());
             pendingOperation.markCancelingForWatchdog();
         }
-        Slog.d(getTag(), "[Watchdog cancelling current] "
+        Slog.d(TAG, "[Watchdog cancelling current] "
                 + mCurrentOperation.getClientMonitor());
         mCurrentOperation.cancel(mHandler, getInternalCallback());
     }
@@ -590,9 +702,23 @@ public class BiometricScheduler {
     /**
      * Handle stop user client when user switching occurs.
      */
-    public void onUserStopped() {}
+    public void onUserStopped() {
+        if (mStopUserClient == null) {
+            Slog.e(TAG, "Unexpected onUserStopped");
+            return;
+        }
+
+        Slog.d(TAG, "[OnUserStopped]: " + mStopUserClient);
+        mStopUserClient.onUserStopped();
+        mStopUserClient = null;
+    }
 
     public Handler getHandler() {
         return mHandler;
+    }
+
+    @Nullable
+    public StopUserClient<?> getStopUserClient() {
+        return mStopUserClient;
     }
 }
