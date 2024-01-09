@@ -22,12 +22,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.annotations.WeaklyReferencedCallback;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -241,6 +246,21 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
             }
             mProxy = mTransformer.convert(service);
             applyToCallbacksLocked(callback -> callback.onConnected(this, mProxy));
+        });
+    }
+
+    void dump(@NonNull PrintWriter pw) {
+        IndentingPrintWriter ipw = DumpUtilsKt.asIndenting(pw);
+        ipw.println("ObservableServiceConnection state:");
+        DumpUtilsKt.withIncreasedIndent(ipw, () -> {
+            ipw.println("mServiceIntent: " + mServiceIntent);
+            ipw.println("mLastDisconnectReason: " + mLastDisconnectReason.orElse(-1));
+            ipw.println("Callbacks:");
+            DumpUtilsKt.withIncreasedIndent(ipw, () -> {
+                for (WeakReference<Callback<T>> cbRef : mCallbacks) {
+                    ipw.println(cbRef.get());
+                }
+            });
         });
     }
 
