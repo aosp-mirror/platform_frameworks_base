@@ -43,9 +43,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -178,8 +176,14 @@ public class GraphicsActivity extends Activity {
             this.deviceFrameRate = deviceFrameRate;
         }
 
+        FrameRateTimeoutException(List<Float> expectedFrameRates, float deviceFrameRate) {
+            this.expectedFrameRates = expectedFrameRates;
+            this.deviceFrameRate = deviceFrameRate;
+        }
+
         public float expectedFrameRate;
         public float deviceFrameRate;
+        public List<Float> expectedFrameRates;
     }
 
     public enum Api {
@@ -502,31 +506,37 @@ public class GraphicsActivity extends Activity {
     }
 
     private void waitForStableFrameRate(TestSurface... surfaces) throws InterruptedException {
-        verifyCompatibleAndStableFrameRate(0, surfaces);
+        verifyFrameRates(List.of(), surfaces);
     }
 
     private void verifyExactAndStableFrameRate(
             float expectedFrameRate,
             TestSurface... surfaces) throws InterruptedException {
-        verifyFrameRate(expectedFrameRate, false, surfaces);
+        verifyFrameRate(List.of(expectedFrameRate), false, surfaces);
     }
 
     private void verifyCompatibleAndStableFrameRate(
             float expectedFrameRate,
             TestSurface... surfaces) throws InterruptedException {
-        verifyFrameRate(expectedFrameRate, true, surfaces);
+        verifyFrameRate(List.of(expectedFrameRate), true, surfaces);
     }
 
-    // Set expectedFrameRate to 0.0 to verify only stable frame rate.
-    private void verifyFrameRate(
-            float expectedFrameRate, boolean multiplesAllowed,
+    /** Verify stable frame rate at one of the expectedFrameRates. */
+    private void verifyFrameRates(List<Float> expectedFrameRates, TestSurface... surfaces)
+            throws InterruptedException {
+        verifyFrameRate(expectedFrameRates, true, surfaces);
+    }
+
+    // Set expectedFrameRates to empty to verify only stable frame rate.
+    private void verifyFrameRate(List<Float> expectedFrameRates, boolean multiplesAllowed,
             TestSurface... surfaces) throws InterruptedException {
         Log.i(TAG, "Verifying compatible and stable frame rate");
         long nowNanos = System.nanoTime();
         long gracePeriodEndTimeNanos =
                 nowNanos + FRAME_RATE_SWITCH_GRACE_PERIOD_SECONDS * 1_000_000_000L;
         while (true) {
-            if (expectedFrameRate > FRAME_RATE_TOLERANCE) { // expectedFrameRate > 0
+            if (expectedFrameRates.size() == 1) {
+                float expectedFrameRate = expectedFrameRates.get(0);
                 // Wait until we switch to a compatible frame rate.
                 Log.i(TAG,
                         String.format(
@@ -557,11 +567,25 @@ public class GraphicsActivity extends Activity {
             while (endTimeNanos > nowNanos) {
                 int numModeChangedEvents = mModeChangedEvents.size();
                 if (waitForEvents(endTimeNanos, surfaces)) {
-                    Log.i(TAG,
-                            String.format("Stable frame rate %.2f verified",
-                                    multiplesAllowed ? mDisplayModeRefreshRate
-                                                     : mDisplayRefreshRate));
-                    return;
+                    // Verify any expected frame rate since there are multiple that will suffice.
+                    // Mainly to account for running tests on real devices, where other non-test
+                    // layers may affect the outcome.
+                    if (expectedFrameRates.size() > 1) {
+                        for (float expectedFrameRate : expectedFrameRates) {
+                            if (isFrameRateMultiple(mDisplayModeRefreshRate, expectedFrameRate)) {
+                                return;
+                            }
+                        }
+                        // The frame rate is stable but it is not one of the expected frame rates.
+                        throw new FrameRateTimeoutException(
+                                expectedFrameRates, mDisplayModeRefreshRate);
+                    } else {
+                        Log.i(TAG,
+                                String.format("Stable frame rate %.2f verified",
+                                        multiplesAllowed ? mDisplayModeRefreshRate
+                                                         : mDisplayRefreshRate));
+                        return;
+                    }
                 }
                 nowNanos = System.nanoTime();
                 if (mModeChangedEvents.size() > numModeChangedEvents) {
@@ -623,12 +647,28 @@ public class GraphicsActivity extends Activity {
                             // caused the timeout failure. Wait for a bit to see if we get notified
                             // of a precondition violation, and if so, retry the test. Otherwise
                             // fail.
-                            assertTrue(String.format(
-                                               "Timed out waiting for a stable and compatible frame"
-                                                       + " rate. expected=%.2f received=%.2f."
-                                                       + " Stack trace: " + stackTrace,
-                                               exc.expectedFrameRate, exc.deviceFrameRate),
-                                    waitForPreconditionViolation());
+                            if (exc.expectedFrameRates.isEmpty()) {
+                                assertTrue(
+                                        String.format(
+                                                "Timed out waiting for a stable and compatible"
+                                                        + " frame rate."
+                                                        + " expected=%.2f received=%.2f."
+                                                        + " Stack trace: " + stackTrace,
+                                                exc.expectedFrameRate, exc.deviceFrameRate),
+                                        waitForPreconditionViolation());
+                            } else {
+                                assertTrue(
+                                        String.format(
+                                                "Timed out waiting for a stable and compatible"
+                                                        + " frame rate."
+                                                        + " expected={%.2f} received=%.2f."
+                                                        + " Stack trace: " + stackTrace,
+                                                exc.expectedFrameRates.stream()
+                                                        .map(Object::toString)
+                                                        .collect(Collectors.joining(", ")),
+                                                exc.deviceFrameRate),
+                                        waitForPreconditionViolation());
+                            }
                         }
 
                         if (!testPassed) {
@@ -679,10 +719,15 @@ public class GraphicsActivity extends Activity {
                     "**** Running testSurfaceControlFrameRateCompatibility with compatibility "
                             + compatibility);
 
-            float expectedFrameRate = getExpectedFrameRateForCompatibility(compatibility);
+            List<Float> expectedFrameRates = getExpectedFrameRateForCompatibility(compatibility);
+            Log.i(TAG,
+                    "Expected frame rates: "
+                            + expectedFrameRates.stream()
+                                      .map(Object::toString)
+                                      .collect(Collectors.joining(", ")));
             int initialNumEvents = mModeChangedEvents.size();
             surface.setFrameRate(30.f, compatibility);
-            verifyExactAndStableFrameRate(expectedFrameRate, surface);
+            verifyFrameRates(expectedFrameRates, surface);
             verifyModeSwitchesDontChangeResolution(initialNumEvents, mModeChangedEvents.size());
         });
     }
@@ -699,10 +744,10 @@ public class GraphicsActivity extends Activity {
         runOneSurfaceTest((TestSurface surface) -> {
             Log.i(TAG, "**** Running testSurfaceControlFrameRateCategory for category " + category);
 
-            float expectedFrameRate = getExpectedFrameRateForCategory(category);
+            List<Float> expectedFrameRates = getExpectedFrameRateForCategory(category);
             int initialNumEvents = mModeChangedEvents.size();
             surface.setFrameRateCategory(category);
-            verifyCompatibleAndStableFrameRate(expectedFrameRate, surface);
+            verifyFrameRates(expectedFrameRates, surface);
             verifyModeSwitchesDontChangeResolution(initialNumEvents, mModeChangedEvents.size());
         });
     }
@@ -771,41 +816,41 @@ public class GraphicsActivity extends Activity {
                 "frame rate strategy=" + parentStrategy);
     }
 
-    private float getExpectedFrameRateForCompatibility(int compatibility) {
+    private List<Float> getExpectedFrameRateForCompatibility(int compatibility) {
         assumeTrue("**** testSurfaceControlFrameRateCompatibility SKIPPED for compatibility "
                         + compatibility,
                 compatibility == Surface.FRAME_RATE_COMPATIBILITY_GTE);
 
         Display display = getDisplay();
-        Optional<Float> expectedFrameRate = getRefreshRates(display.getMode(), display)
-                                                    .stream()
-                                                    .filter(rate -> rate >= 30.f)
-                                                    .min(Comparator.naturalOrder());
+        List<Float> expectedFrameRates = getRefreshRates(display.getMode(), display)
+                                                 .stream()
+                                                 .filter(rate -> rate >= 30.f)
+                                                 .collect(Collectors.toList());
 
         assumeTrue("**** testSurfaceControlFrameRateCompatibility SKIPPED because no refresh rate "
                         + "is >= 30",
-                expectedFrameRate.isPresent());
-        return expectedFrameRate.get();
+                !expectedFrameRates.isEmpty());
+        return expectedFrameRates;
     }
 
-    private float getExpectedFrameRateForCategory(int category) {
+    private List<Float> getExpectedFrameRateForCategory(int category) {
         Display display = getDisplay();
         List<Float> frameRates = getRefreshRates(display.getMode(), display);
 
         if (category == Surface.FRAME_RATE_CATEGORY_DEFAULT) {
             // Max due to default vote and no other frame rate specifications.
-            return Collections.max(frameRates);
+            return List.of(Collections.max(frameRates));
         } else if (category == Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE) {
-            return Collections.min(frameRates);
+            return frameRates;
         }
 
         FpsRange categoryRange = convertCategory(category);
-        Optional<Float> expectedFrameRate = frameRates.stream()
-                                                    .filter(fps -> categoryRange.includes(fps))
-                                                    .min(Comparator.naturalOrder());
+        List<Float> expectedFrameRates = frameRates.stream()
+                                                 .filter(fps -> categoryRange.includes(fps))
+                                                 .collect(Collectors.toList());
         assumeTrue("**** testSurfaceControlFrameRateCategory SKIPPED for category " + category,
-                expectedFrameRate.isPresent());
-        return expectedFrameRate.get();
+                !expectedFrameRates.isEmpty());
+        return expectedFrameRates;
     }
 
     private FpsRange convertCategory(int category) {
