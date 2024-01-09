@@ -47,7 +47,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -280,7 +279,7 @@ public class TrustManagerServiceTest {
                 "com.android/.SystemTrustAgent");
         addTrustAgent(newAgentComponentName, /* isSystemApp= */ true);
 
-        mMockContext.sendPackageChangedBroadcast(newAgentComponentName);
+        notifyPackageChanged(newAgentComponentName);
 
         assertThat(mEnabledTrustAgents).containsExactly(newAgentComponentName);
         assertThat(mKnownTrustAgents).containsExactly(newAgentComponentName);
@@ -299,7 +298,7 @@ public class TrustManagerServiceTest {
                 "com.android/.SystemTrustAgent");
         addTrustAgent(newAgentComponentName, /* isSystemApp= */ true);
 
-        mMockContext.sendPackageChangedBroadcast(newAgentComponentName);
+        notifyPackageChanged(newAgentComponentName);
 
         assertThat(mEnabledTrustAgents).containsExactly(defaultTrustAgent);
         assertThat(mKnownTrustAgents).containsExactly(defaultTrustAgent, newAgentComponentName);
@@ -312,7 +311,7 @@ public class TrustManagerServiceTest {
                 "com.user/.UserTrustAgent");
         addTrustAgent(newAgentComponentName, /* isSystemApp= */ false);
 
-        mMockContext.sendPackageChangedBroadcast(newAgentComponentName);
+        notifyPackageChanged(newAgentComponentName);
 
         assertThat(mEnabledTrustAgents).isEmpty();
         assertThat(mKnownTrustAgents).containsExactly(newAgentComponentName);
@@ -330,7 +329,7 @@ public class TrustManagerServiceTest {
         // Simulate user turning off systemTrustAgent2
         mLockPatternUtils.setEnabledTrustAgents(List.of(systemTrustAgent1), TEST_USER_ID);
 
-        mMockContext.sendPackageChangedBroadcast(systemTrustAgent2);
+        notifyPackageChanged(systemTrustAgent2);
 
         assertThat(mEnabledTrustAgents).containsExactly(systemTrustAgent1);
     }
@@ -440,11 +439,16 @@ public class TrustManagerServiceTest {
                 permission, PackageManager.PERMISSION_GRANTED);
     }
 
+    private void notifyPackageChanged(ComponentName changedComponent) {
+        mService.mPackageMonitor.onPackageChanged(
+                changedComponent.getPackageName(),
+                UserHandle.of(TEST_USER_ID).getUid(1234),
+                new String[] { changedComponent.getClassName() });
+    }
+
     /** A mock Context that allows the test process to send protected broadcasts. */
     private static final class MockContext extends TestableContext {
 
-        private final ArrayList<BroadcastReceiver> mPackageChangedBroadcastReceivers =
-                new ArrayList<>();
         private final ArrayList<BroadcastReceiver> mUserStartedBroadcastReceivers =
                 new ArrayList<>();
 
@@ -458,9 +462,6 @@ public class TrustManagerServiceTest {
                 UserHandle user, IntentFilter filter, @Nullable String broadcastPermission,
                 @Nullable Handler scheduler) {
 
-            if (filter.hasAction(Intent.ACTION_PACKAGE_CHANGED)) {
-                mPackageChangedBroadcastReceivers.add(receiver);
-            }
             if (filter.hasAction(Intent.ACTION_USER_STARTED)) {
                 mUserStartedBroadcastReceivers.add(receiver);
             }
@@ -471,20 +472,6 @@ public class TrustManagerServiceTest {
         @Override
         public void sendBroadcastAsUser(Intent intent, UserHandle user,
                 @Nullable String receiverPermission, @Nullable Bundle options) {
-        }
-
-        void sendPackageChangedBroadcast(ComponentName changedComponent) {
-            Intent intent = new Intent(
-                    Intent.ACTION_PACKAGE_CHANGED,
-                    Uri.fromParts(URI_SCHEME_PACKAGE,
-                            changedComponent.getPackageName(), /* fragment= */ null))
-                    .putExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST,
-                            new String[]{changedComponent.getClassName()})
-                    .putExtra(Intent.EXTRA_USER_HANDLE, TEST_USER_ID)
-                    .putExtra(Intent.EXTRA_UID, UserHandle.of(TEST_USER_ID).getUid(1234));
-            for (BroadcastReceiver receiver : mPackageChangedBroadcastReceivers) {
-                receiver.onReceive(this, intent);
-            }
         }
 
         void sendUserStartedBroadcast() {
