@@ -968,7 +968,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             throws Exception {
         Set<String> excludedKeysForPackage = getExcludedKeysForPackage(packageName);
 
-        byte[] buffer = new byte[8192]; // will grow when needed
+        int bufferSize = 8192; // 8KB
+        if (Flags.enableMaxSizeWritesToPipes()) {
+            // Linux pipe capacity (buffer size) is 16 pages where each page is 4KB
+            bufferSize = 64 * 1024; // 64KB
+        }
+        byte[] buffer = new byte[bufferSize]; // will grow when needed
         while (in.readNextHeader()) {
             final String key = in.getKey();
             final int size = in.getDataSize();
@@ -1116,7 +1121,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             ParcelFileDescriptor tReadEnd = mTransportPipes[0];
             ParcelFileDescriptor tWriteEnd = mTransportPipes[1];
 
-            int bufferSize = 32 * 1024;
+            int bufferSize = 32 * 1024; // 32KB
+            if (Flags.enableMaxSizeWritesToPipes()) {
+                // Linux pipe capacity (buffer size) is 16 pages where each page is 4KB
+                bufferSize = 64 * 1024; // 64KB
+            }
             byte[] buffer = new byte[bufferSize];
             FileOutputStream engineOut = new FileOutputStream(eWriteEnd.getFileDescriptor());
             FileInputStream transportIn = new FileInputStream(tReadEnd.getFileDescriptor());
