@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -755,7 +756,10 @@ public final class CredentialManager {
         @Override
         public void onPendingIntent(PendingIntent pendingIntent) {
             try {
-                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0);
+                mContext.startIntentSender(pendingIntent.getIntentSender(), null, 0, 0, 0,
+                        ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle());
             } catch (IntentSender.SendIntentException e) {
                 Log.e(
                         TAG,

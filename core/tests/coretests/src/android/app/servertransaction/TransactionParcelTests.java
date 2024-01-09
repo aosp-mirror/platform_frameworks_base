@@ -262,7 +262,7 @@ public class TransactionParcelTests {
     public void testStart() {
         // Write to parcel
         StartActivityItem item = StartActivityItem.obtain(mActivityToken,
-                ActivityOptions.makeBasic());
+                new ActivityOptions.SceneTransitionInfo());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert

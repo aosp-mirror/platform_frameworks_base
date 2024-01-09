@@ -129,7 +129,9 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
     public DisplayDevice getByAddressLocked(@NonNull DisplayAddress address) {
         for (int i = mDisplayDevices.size() - 1; i >= 0; i--) {
             final DisplayDevice device = mDisplayDevices.get(i);
-            if (address.equals(device.getDisplayDeviceInfoLocked().address)) {
+            final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
+            if (address.equals(info.address)
+                    || DisplayAddress.Physical.isPortMatch(address, info.address)) {
                 return device;
             }
         }

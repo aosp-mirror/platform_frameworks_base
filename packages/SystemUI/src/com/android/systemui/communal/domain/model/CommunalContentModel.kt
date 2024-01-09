@@ -30,46 +30,78 @@ sealed interface CommunalContentModel {
     /** Size to be rendered in the grid. */
     val size: CommunalContentSize
 
+    /**
+     * A type of communal content is ongoing / live / ephemeral, and can be sized and ordered
+     * dynamically.
+     */
+    sealed interface Ongoing : CommunalContentModel {
+        override var size: CommunalContentSize
+
+        /** Timestamp in milliseconds of when the content was created. */
+        val createdTimestampMillis: Long
+    }
+
     class Widget(
         val appWidgetId: Int,
         val providerInfo: AppWidgetProviderInfo,
         val appWidgetHost: AppWidgetHost,
     ) : CommunalContentModel {
-        override val key = "widget_$appWidgetId"
+        override val key = KEY.widget(appWidgetId)
         // Widget size is always half.
         override val size = CommunalContentSize.HALF
     }
 
     /** A placeholder item representing a new widget being added */
     class WidgetPlaceholder : CommunalContentModel {
-        override val key: String = "widget_placeholder_${UUID.randomUUID()}"
+        override val key: String = KEY.widgetPlaceholder()
         // Same as widget size.
         override val size = CommunalContentSize.HALF
     }
 
     class Tutorial(
         id: Int,
-        override val size: CommunalContentSize,
+        override var size: CommunalContentSize,
     ) : CommunalContentModel {
-        override val key = "tutorial_$id"
+        override val key = KEY.tutorial(id)
     }
 
     class Smartspace(
         smartspaceTargetId: String,
         val remoteViews: RemoteViews,
-        override val size: CommunalContentSize,
-    ) : CommunalContentModel {
-        override val key = "smartspace_$smartspaceTargetId"
+        override val createdTimestampMillis: Long,
+        override var size: CommunalContentSize = CommunalContentSize.HALF,
+    ) : Ongoing {
+        override val key = KEY.smartspace(smartspaceTargetId)
     }
 
     class Umo(
-        override val size: CommunalContentSize,
-    ) : CommunalContentModel {
-        override val key = UMO_KEY
+        override val createdTimestampMillis: Long,
+        override var size: CommunalContentSize = CommunalContentSize.HALF,
+    ) : Ongoing {
+        override val key = KEY.umo()
     }
 
-    companion object {
-        /** Key for the [Umo] in CommunalContentModel. There should only ever be one UMO. */
-        const val UMO_KEY = "umo"
+    class KEY {
+        companion object {
+            fun widget(id: Int): String {
+                return "widget_$id"
+            }
+
+            fun widgetPlaceholder(): String {
+                return "widget_placeholder_${UUID.randomUUID()}"
+            }
+
+            fun tutorial(id: Int): String {
+                return "tutorial_$id"
+            }
+
+            fun smartspace(id: String): String {
+                return "smartspace_$id"
+            }
+
+            fun umo(): String {
+                return "umo"
+            }
+        }
     }
 }

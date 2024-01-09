@@ -200,13 +200,7 @@ public class Layout {
      * @return True if the specified address is used in this layout.
      */
     public boolean contains(@NonNull DisplayAddress address) {
-        final int size = mDisplays.size();
-        for (int i = 0; i < size; i++) {
-            if (address.equals(mDisplays.get(i).getAddress())) {
-                return true;
-            }
-        }
-        return false;
+        return getByAddress(address) != null;
     }
 
     /**
@@ -235,6 +229,9 @@ public class Layout {
         for (int i = 0; i < mDisplays.size(); i++) {
             Display display = mDisplays.get(i);
             if (address.equals(display.getAddress())) {
+                return display;
+            }
+            if (DisplayAddress.Physical.isPortMatch(address, display.getAddress())) {
                 return display;
             }
         }

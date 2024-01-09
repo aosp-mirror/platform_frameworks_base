@@ -40,6 +40,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_CONSUME_IME_INSETS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -959,15 +960,17 @@ public class DisplayPolicy {
 
             case TYPE_BASE_APPLICATION:
 
-                // A non-translucent main app window isn't allowed to fit insets, as it would create
-                // a hole on the display!
+                // A non-translucent main app window isn't allowed to fit insets or display cutouts,
+                // as it would create a hole on the display!
                 if (attrs.isFullscreen() && win.mActivityRecord != null
                         && win.mActivityRecord.fillsParent()
-                        && (win.mAttrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
-                        && attrs.getFitInsetsTypes() != 0) {
+                        && (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
+                        && (attrs.getFitInsetsTypes() != 0
+                                || (attrs.privateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0
+                                        && attrs.layoutInDisplayCutoutMode
+                                                != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS)) {
                     throw new IllegalArgumentException("Illegal attributes: Main activity window"
-                            + " that isn't translucent trying to fit insets: "
-                            + attrs.getFitInsetsTypes()
+                            + " that isn't translucent trying to fit insets or display cutouts."
                             + " attrs=" + attrs);
                 }
                 break;

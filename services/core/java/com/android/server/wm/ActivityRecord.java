@@ -2181,7 +2181,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // The result receiver is the transition receiver, which will handle the shared element
             // exit transition.
             mHasSceneTransition = options.getAnimationType() == ANIM_SCENE_TRANSITION
-                    && options.getResultReceiver() != null;
+                    && options.getSceneTransitionInfo() != null
+                    && options.getSceneTransitionInfo().getResultReceiver() != null;
             final PendingIntent usageReport = options.getUsageTimeReport();
             if (usageReport != null) {
                 appTimeTracker = new AppTimeTracker(usageReport);
@@ -5178,16 +5179,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mPendingOptions;
     }
 
-    ActivityOptions takeOptions() {
-        if (DEBUG_TRANSITION) Slog.i(TAG, "Taking options for " + this + " callers="
-                + Debug.getCallers(6));
+    ActivityOptions.SceneTransitionInfo takeSceneTransitionInfo() {
+        if (DEBUG_TRANSITION) {
+            Slog.i(TAG, "Taking SceneTransitionInfo for " + this + " callers="
+                    + Debug.getCallers(6));
+        }
         if (mPendingOptions == null) return null;
         final ActivityOptions opts = mPendingOptions;
         mPendingOptions = null;
-        // Strip sensitive information from options before sending it to app.
-        opts.setRemoteTransition(null);
-        opts.setRemoteAnimationAdapter(null);
-        return opts;
+        return opts.getSceneTransitionInfo();
     }
 
     RemoteTransition takeRemoteTransition() {
@@ -6153,7 +6153,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             try {
                 mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                        StartActivityItem.obtain(token, takeOptions()));
+                        StartActivityItem.obtain(token, takeSceneTransitionInfo()));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending start: " + intent.getComponent(), e);
             }
@@ -6258,8 +6258,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void handleAlreadyVisible() {
         try {
-            if (returningOptions != null) {
-                app.getThread().scheduleOnNewActivityOptions(token, returningOptions.toBundle());
+            if (returningOptions != null
+                    && returningOptions.getAnimationType() == ANIM_SCENE_TRANSITION
+                    && returningOptions.getSceneTransitionInfo() != null) {
+                app.getThread().scheduleOnNewSceneTransitionInfo(token,
+                        returningOptions.getSceneTransitionInfo());
             }
         } catch(RemoteException e) {
         }
@@ -6606,10 +6609,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // In any other case, we can't count on getting the screen unfrozen,
         // so it is best to leave as-is.
         return hasProcess() && !app.isCrashing() && !app.isNotResponding();
-    }
-
-    void startFreezingScreenLocked(int configChanges) {
-        startFreezingScreenLocked(app, configChanges);
     }
 
     void startFreezingScreenLocked(WindowProcessController app, int configChanges) {
@@ -8095,12 +8094,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Set the last reported configuration to the client. Should be called whenever
      * a new merged configuration is sent to the client for this activity.
      */
-    void setLastReportedConfiguration(@NonNull MergedConfiguration config) {
-        setLastReportedConfiguration(config.getGlobalConfiguration(),
-            config.getOverrideConfiguration());
-    }
-
-    private void setLastReportedConfiguration(Configuration global, Configuration override) {
+    void setLastReportedConfiguration(@NonNull Configuration global,
+            @NonNull Configuration override) {
         mLastReportedConfiguration.setConfiguration(global, override);
     }
 
@@ -9634,7 +9629,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             configChangeFlags |= changes;
             if (mVisible && mAtmService.mTmpUpdateConfigurationResult.mIsUpdating
                     && !mTransitionController.isShellTransitionsEnabled()) {
-                startFreezingScreenLocked(mAtmService.mTmpUpdateConfigurationResult.changes);
+                startFreezingScreenLocked(app, mAtmService.mTmpUpdateConfigurationResult.changes);
             }
             final boolean displayMayChange = mTmpConfig.windowConfiguration.getDisplayRotation()
                     != getWindowConfiguration().getDisplayRotation()

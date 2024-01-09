@@ -356,6 +356,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         updateActiveLocationRequests();
     }
 
+    // IMPORTANT: This handler guarantees that any operations on the list of callbacks is
+    // sequential, so no concurrent exceptions
     private final class H extends Handler {
         private static final int MSG_LOCATION_SETTINGS_CHANGED = 1;
         private static final int MSG_LOCATION_ACTIVE_CHANGED = 2;

@@ -11534,14 +11534,14 @@ public abstract class PackageManager {
     }
 
     /**
-     * Retrieve AndroidManifest.xml information for the given application apk path.
+     * Retrieve AndroidManifest.xml information for the given application apk file.
      *
      * <p>Example:
      *
      * <pre><code>
      * Bundle result;
      * try {
-     *     result = getContext().getPackageManager().parseAndroidManifest(apkFilePath,
+     *     result = getContext().getPackageManager().parseAndroidManifest(apkFile,
      *             xmlResourceParser -> {
      *                 Bundle bundle = new Bundle();
      *                 // Search the start tag
@@ -11570,9 +11570,10 @@ public abstract class PackageManager {
      *
      * Note: When the parserFunction is invoked, the client can read the AndroidManifest.xml
      * information by the XmlResourceParser object. After leaving the parserFunction, the
-     * XmlResourceParser object will be closed.
+     * XmlResourceParser object will be closed. The caller should also handle the exception for
+     * calling this method.
      *
-     * @param apkFilePath The path of an application apk file.
+     * @param apkFile The file of an application apk.
      * @param parserFunction The parserFunction will be invoked with the XmlResourceParser object
      *        after getting the AndroidManifest.xml of an application package.
      *
@@ -11583,7 +11584,7 @@ public abstract class PackageManager {
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_GET_PACKAGE_INFO)
     @WorkerThread
-    public <T> T parseAndroidManifest(@NonNull String apkFilePath,
+    public <T> T parseAndroidManifest(@NonNull File apkFile,
             @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
         throw new UnsupportedOperationException(
                 "parseAndroidManifest not implemented in subclass");

@@ -34,6 +34,8 @@ interface InstallActionListener {
      */
     fun onNegativeResponse(stageCode: Int)
 
+    fun onNegativeResponse(resultCode: Int, data: Intent?)
+
     /**
      * Launch the intent to open the newly installed / updated app.
      */

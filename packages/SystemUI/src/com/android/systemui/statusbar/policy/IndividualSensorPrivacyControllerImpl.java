@@ -119,7 +119,8 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
             mHardwareToggleState.put(sensor, enabled);
         }
 
-        for (Callback callback : mCallbacks) {
+        Set<Callback> copy = new ArraySet<>(mCallbacks);
+        for (Callback callback : copy) {
             callback.onSensorBlockedChanged(sensor, isSensorBlocked(sensor));
         }
     }

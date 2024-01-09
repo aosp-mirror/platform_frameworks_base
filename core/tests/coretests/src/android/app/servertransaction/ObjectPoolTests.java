@@ -171,7 +171,8 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleStartActivityItem() {
-        testRecycle(() -> StartActivityItem.obtain(mActivityToken, ActivityOptions.makeBasic()));
+        testRecycle(() -> StartActivityItem.obtain(mActivityToken,
+                new ActivityOptions.SceneTransitionInfo()));
     }
 
     @Test

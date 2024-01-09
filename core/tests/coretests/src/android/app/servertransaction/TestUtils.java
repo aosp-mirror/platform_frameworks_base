@@ -255,9 +255,9 @@ class TestUtils {
             return LaunchActivityItem.obtain(mActivityToken, mIntent, mIdent, mInfo,
                     mCurConfig, mOverrideConfig, mDeviceId, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
-                    mActivityOptions, mIsForward, mProfilerInfo, mAssistToken,
-                    null /* activityClientController */, mShareableActivityToken,
-                    mLaunchedFromBubble, mTaskFragmentToken);
+                    mActivityOptions != null ? mActivityOptions.getSceneTransitionInfo() : null,
+                    mIsForward, mProfilerInfo, mAssistToken, null /* activityClientController */,
+                    mShareableActivityToken, mLaunchedFromBubble, mTaskFragmentToken);
         }
     }
 }

@@ -50,12 +50,12 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
-import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -429,10 +429,12 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     private void fireCallbacks() {
+        final ArrayList<SecurityControllerCallback> copy;
         synchronized (mCallbacks) {
-            for (SecurityControllerCallback callback : mCallbacks) {
-                callback.onStateChanged();
-            }
+            copy = new ArrayList<>(mCallbacks);
+        }
+        for (SecurityControllerCallback callback : copy) {
+            callback.onStateChanged();
         }
     }
 

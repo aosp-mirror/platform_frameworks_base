@@ -48,12 +48,12 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -243,46 +243,43 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     }
 
     private void fireNextAlarmChanged() {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onNextAlarmChanged());
-        }
+        fireSafeChange(Callback::onNextAlarmChanged);
     }
 
     private void fireEffectsSuppressorChanged() {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onEffectsSupressorChanged());
-        }
+        fireSafeChange(Callback::onEffectsSupressorChanged);
     }
 
     private void fireZenChanged(int zen) {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onZenChanged(zen));
-        }
+        fireSafeChange(c -> c.onZenChanged(zen));
     }
 
     private void fireZenAvailableChanged(boolean available) {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onZenAvailableChanged(available));
-        }
+        fireSafeChange(c -> c.onZenAvailableChanged(available));
     }
 
     private void fireManualRuleChanged(ZenRule rule) {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onManualRuleChanged(rule));
-        }
+        fireSafeChange(c -> c.onManualRuleChanged(rule));
     }
 
     private void fireConsolidatedPolicyChanged(NotificationManager.Policy policy) {
+        fireSafeChange(c -> c.onConsolidatedPolicyChanged(policy));
+    }
+
+    private void fireSafeChange(Consumer<Callback> action) {
+        final ArrayList<Callback> copy;
         synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onConsolidatedPolicyChanged(policy));
+            copy = new ArrayList<>(mCallbacks);
+        }
+        final int n = copy.size();
+        for (int i = 0; i < n; i++) {
+            action.accept(copy.get(i));
         }
     }
 
     @VisibleForTesting
     protected void fireConfigChanged(ZenModeConfig config) {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onConfigChanged(config));
-        }
+        fireSafeChange(c -> c.onConfigChanged(config));
     }
 
     @VisibleForTesting

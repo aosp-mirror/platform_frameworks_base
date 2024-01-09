@@ -148,25 +148,29 @@ class CommunalInteractorTest : SysuiTestCase() {
             whenever(target1.smartspaceTargetId).thenReturn("target1")
             whenever(target1.featureType).thenReturn(SmartspaceTarget.FEATURE_WEATHER)
             whenever(target1.remoteViews).thenReturn(mock(RemoteViews::class.java))
+            whenever(target1.creationTimeMillis).thenReturn(0L)
 
             // Does not have RemoteViews
             val target2 = mock(SmartspaceTarget::class.java)
-            whenever(target1.smartspaceTargetId).thenReturn("target2")
-            whenever(target1.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-            whenever(target1.remoteViews).thenReturn(null)
+            whenever(target2.smartspaceTargetId).thenReturn("target2")
+            whenever(target2.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
+            whenever(target2.remoteViews).thenReturn(null)
+            whenever(target2.creationTimeMillis).thenReturn(0L)
 
             // Timer and has RemoteViews
             val target3 = mock(SmartspaceTarget::class.java)
-            whenever(target1.smartspaceTargetId).thenReturn("target3")
-            whenever(target1.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-            whenever(target1.remoteViews).thenReturn(mock(RemoteViews::class.java))
+            whenever(target3.smartspaceTargetId).thenReturn("target3")
+            whenever(target3.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
+            whenever(target3.remoteViews).thenReturn(mock(RemoteViews::class.java))
+            whenever(target3.creationTimeMillis).thenReturn(0L)
 
             val targets = listOf(target1, target2, target3)
             smartspaceRepository.setCommunalSmartspaceTargets(targets)
 
-            val smartspaceContent by collectLastValue(underTest.smartspaceContent)
+            val smartspaceContent by collectLastValue(underTest.ongoingContent)
             assertThat(smartspaceContent?.size).isEqualTo(1)
-            assertThat(smartspaceContent?.get(0)?.key).isEqualTo("smartspace_target3")
+            assertThat(smartspaceContent?.get(0)?.key)
+                .isEqualTo(CommunalContentModel.KEY.smartspace("target3"))
         }
 
     @Test
@@ -256,16 +260,12 @@ class CommunalInteractorTest : SysuiTestCase() {
 
             val targets = mutableListOf<SmartspaceTarget>()
             for (index in 0 until totalTargets) {
-                val target = mock(SmartspaceTarget::class.java)
-                whenever(target.smartspaceTargetId).thenReturn("target$index")
-                whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-                whenever(target.remoteViews).thenReturn(mock(RemoteViews::class.java))
-                targets.add(target)
+                targets.add(smartspaceTimer(index.toString()))
             }
 
             smartspaceRepository.setCommunalSmartspaceTargets(targets)
 
-            val smartspaceContent by collectLastValue(underTest.smartspaceContent)
+            val smartspaceContent by collectLastValue(underTest.ongoingContent)
             assertThat(smartspaceContent?.size).isEqualTo(totalTargets)
             for (index in 0 until totalTargets) {
                 assertThat(smartspaceContent?.get(index)?.size).isEqualTo(expectedSizes[index])
@@ -279,13 +279,51 @@ class CommunalInteractorTest : SysuiTestCase() {
             tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 
             // Media is playing.
-            mediaRepository.mediaPlaying.value = true
+            mediaRepository.mediaActive()
 
-            val umoContent by collectLastValue(underTest.umoContent)
+            val umoContent by collectLastValue(underTest.ongoingContent)
 
             assertThat(umoContent?.size).isEqualTo(1)
             assertThat(umoContent?.get(0)).isInstanceOf(CommunalContentModel.Umo::class.java)
-            assertThat(umoContent?.get(0)?.key).isEqualTo(CommunalContentModel.UMO_KEY)
+            assertThat(umoContent?.get(0)?.key).isEqualTo(CommunalContentModel.KEY.umo())
+        }
+
+    @Test
+    fun ongoing_shouldOrderAndSizeByTimestamp() =
+        testScope.runTest {
+            // Keyguard showing, and tutorial completed.
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            // Timer1 started
+            val timer1 = smartspaceTimer("timer1", timestamp = 1L)
+            smartspaceRepository.setCommunalSmartspaceTargets(listOf(timer1))
+
+            // Umo started
+            mediaRepository.mediaActive(timestamp = 2L)
+
+            // Timer2 started
+            val timer2 = smartspaceTimer("timer2", timestamp = 3L)
+            smartspaceRepository.setCommunalSmartspaceTargets(listOf(timer1, timer2))
+
+            // Timer3 started
+            val timer3 = smartspaceTimer("timer3", timestamp = 4L)
+            smartspaceRepository.setCommunalSmartspaceTargets(listOf(timer1, timer2, timer3))
+
+            val ongoingContent by collectLastValue(underTest.ongoingContent)
+            assertThat(ongoingContent?.size).isEqualTo(4)
+            assertThat(ongoingContent?.get(0)?.key)
+                .isEqualTo(CommunalContentModel.KEY.smartspace("timer3"))
+            assertThat(ongoingContent?.get(0)?.size).isEqualTo(CommunalContentSize.FULL)
+            assertThat(ongoingContent?.get(1)?.key)
+                .isEqualTo(CommunalContentModel.KEY.smartspace("timer2"))
+            assertThat(ongoingContent?.get(1)?.size).isEqualTo(CommunalContentSize.THIRD)
+            assertThat(ongoingContent?.get(2)?.key).isEqualTo(CommunalContentModel.KEY.umo())
+            assertThat(ongoingContent?.get(2)?.size).isEqualTo(CommunalContentSize.THIRD)
+            assertThat(ongoingContent?.get(3)?.key)
+                .isEqualTo(CommunalContentModel.KEY.smartspace("timer1"))
+            assertThat(ongoingContent?.get(3)?.size).isEqualTo(CommunalContentSize.THIRD)
         }
 
     @Test
@@ -334,4 +372,13 @@ class CommunalInteractorTest : SysuiTestCase() {
             underTest.showWidgetEditor()
             verify(editWidgetsActivityStarter).startActivity()
         }
+
+    private fun smartspaceTimer(id: String, timestamp: Long = 0L): SmartspaceTarget {
+        val timer = mock(SmartspaceTarget::class.java)
+        whenever(timer.smartspaceTargetId).thenReturn(id)
+        whenever(timer.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
+        whenever(timer.remoteViews).thenReturn(mock(RemoteViews::class.java))
+        whenever(timer.creationTimeMillis).thenReturn(timestamp)
+        return timer
+    }
 }

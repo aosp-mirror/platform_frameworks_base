@@ -320,9 +320,8 @@ class DesktopTasksController(
     }
 
     /** Move a task with given `taskId` to fullscreen */
-    fun moveToFullscreen(taskId: Int, windowDecor: DesktopModeWindowDecoration) {
+    fun moveToFullscreen(taskId: Int) {
         shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task ->
-            windowDecor.incrementRelayoutBlock()
             moveToFullscreenWithAnimation(task, task.positionInParent)
         }
     }
@@ -906,20 +905,17 @@ class DesktopTasksController(
      * @param position position of surface when drag ends.
      * @param inputCoordinate the coordinates of the motion event
      * @param taskBounds the updated bounds of the task being dragged.
-     * @param windowDecor the window decoration for the task being dragged
      */
     fun onDragPositioningEnd(
         taskInfo: RunningTaskInfo,
         position: Point,
         inputCoordinate: PointF,
-        taskBounds: Rect,
-        windowDecor: DesktopModeWindowDecoration
+        taskBounds: Rect
     ) {
         if (taskInfo.configuration.windowConfiguration.windowingMode != WINDOWING_MODE_FREEFORM) {
             return
         }
         if (taskBounds.top <= transitionAreaHeight) {
-            windowDecor.incrementRelayoutBlock()
             moveToFullscreenWithAnimation(taskInfo, position)
         }
         if (inputCoordinate.x <= transitionAreaWidth) {

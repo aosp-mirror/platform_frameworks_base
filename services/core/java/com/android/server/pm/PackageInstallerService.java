@@ -291,9 +291,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     @NonNull
     private final RequestThrottle mSettingsWriteRequest = new RequestThrottle(IoThread.getHandler(),
             () -> {
-                synchronized (mSessions) {
-                    return writeSessionsLocked();
-                }
+                return writeSessions();
             });
 
     public PackageInstallerService(Context context, PackageManagerService pm,
@@ -600,9 +598,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 mHistoricalSessionsByInstaller.get(installerUid) + 1);
     }
 
-    @GuardedBy("mSessions")
-    private boolean writeSessionsLocked() {
-        if (LOGD) Slog.v(TAG, "writeSessionsLocked()");
+    private boolean writeSessions() {
+        if (LOGD) Slog.v(TAG, "writeSessions()");
+        final PackageInstallerSession[] sessions;
+        synchronized (mSessions) {
+            final int size = mSessions.size();
+            sessions = new PackageInstallerSession[size];
+            for (int i = 0; i < size; i++) {
+                sessions[i] = mSessions.valueAt(i);
+            }
+        }
 
         FileOutputStream fos = null;
         try {
@@ -611,9 +616,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             final TypedXmlSerializer out = Xml.resolveSerializer(fos);
             out.startDocument(null, true);
             out.startTag(null, TAG_SESSIONS);
-            final int size = mSessions.size();
-            for (int i = 0; i < size; i++) {
-                final PackageInstallerSession session = mSessions.valueAt(i);
+            for (var session : sessions) {
                 session.write(out, mSessionsDir);
             }
             out.endTag(null, TAG_SESSIONS);

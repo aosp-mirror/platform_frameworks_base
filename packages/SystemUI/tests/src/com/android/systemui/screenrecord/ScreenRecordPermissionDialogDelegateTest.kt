@@ -74,7 +74,6 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
         val systemUIDialogFactory =
             SystemUIDialog.Factory(
                 context,
-                Dependency.get(FeatureFlags::class.java),
                 Dependency.get(SystemUIDialogManager::class.java),
                 Dependency.get(SysUiState::class.java),
                 Dependency.get(BroadcastDispatcher::class.java),

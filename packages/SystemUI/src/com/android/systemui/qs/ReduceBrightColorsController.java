@@ -67,9 +67,7 @@ public class ReduceBrightColorsController implements
                 synchronized (mListeners) {
                     if (setting != null && mListeners.size() != 0) {
                         if (setting.equals(Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED)) {
-                            for (Listener listener : mListeners) {
-                                listener.onActivated(mManager.isReduceBrightColorsActivated());
-                            }
+                            dispatchOnActivated(mManager.isReduceBrightColorsActivated());
                         }
                     }
                 }
@@ -123,6 +121,13 @@ public class ReduceBrightColorsController implements
     /** Sets the activation state of Reduce Bright Colors */
     public void setReduceBrightColorsActivated(boolean activated) {
         mManager.setReduceBrightColorsActivated(activated);
+    }
+
+    private void dispatchOnActivated(boolean activated) {
+        ArrayList<Listener> copy = new ArrayList<>(mListeners);
+        for (Listener l : copy) {
+            l.onActivated(activated);
+        }
     }
 
     /**

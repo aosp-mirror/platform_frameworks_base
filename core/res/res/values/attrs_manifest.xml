@@ -301,9 +301,7 @@
             granted to the system companion device manager service -->
         <flag name="companion" value="0x800000" />
         <!-- Additional flag from base permission type: this permission will be granted to the
-             retail demo app, as defined by the OEM.
-             This flag has been replaced by the retail demo role and is a no-op since Android V.
-          -->
+             retail demo app, as defined by the OEM. -->
         <flag name="retailDemo" value="0x1000000" />
         <!-- Additional flag from base permission type: this permission will be granted to the
              recents app. -->

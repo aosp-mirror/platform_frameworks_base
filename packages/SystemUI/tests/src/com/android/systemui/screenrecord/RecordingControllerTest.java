@@ -44,7 +44,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.mediaprojection.SessionCreationSource;
@@ -113,7 +112,6 @@ public class RecordingControllerTest extends SysuiTestCase {
 
         mDialogFactory = new TestSystemUIDialogFactory(
                 mContext,
-                mFeatureFlags,
                 Dependency.get(SystemUIDialogManager.class),
                 Dependency.get(SysUiState.class),
                 Dependency.get(BroadcastDispatcher.class),
@@ -313,14 +311,12 @@ public class RecordingControllerTest extends SysuiTestCase {
 
         TestSystemUIDialogFactory(
                 Context context,
-                FeatureFlags featureFlags,
                 SystemUIDialogManager systemUIDialogManager,
                 SysUiState sysUiState,
                 BroadcastDispatcher broadcastDispatcher,
                 DialogLaunchAnimator dialogLaunchAnimator) {
             super(
                     context,
-                    featureFlags,
                     systemUIDialogManager,
                     sysUiState,
                     broadcastDispatcher,

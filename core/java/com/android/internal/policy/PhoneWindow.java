@@ -31,6 +31,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 
@@ -294,9 +295,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private int mFrameResource = 0;
 
     private int mTextColor = 0;
-    int mStatusBarColor = 0;
-    int mNavigationBarColor = 0;
-    int mNavigationBarDividerColor = 0;
+    int mStatusBarColor = Color.TRANSPARENT;
+    int mNavigationBarColor = Color.TRANSPARENT;
+    int mNavigationBarDividerColor = Color.TRANSPARENT;
     private boolean mForcedStatusBarColor = false;
     private boolean mForcedNavigationBarColor = false;
 
@@ -393,6 +394,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         || (CompatChanges.isChangeEnabled(ENFORCE_EDGE_TO_EDGE)
                                 && Flags.enforceEdgeToEdge());
         if (mEdgeToEdgeEnforced) {
+            getAttributes().privateFlags |= PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
             mDecorFitsSystemWindows = false;
         }
     }
@@ -2548,17 +2550,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final boolean targetPreL = targetSdk < android.os.Build.VERSION_CODES.LOLLIPOP;
         final boolean targetPreQ = targetSdk < Build.VERSION_CODES.Q;
 
-        if (!mForcedStatusBarColor) {
-            final int statusBarCompatibleColor = context.getColor(R.color.status_bar_compatible);
-            final int statusBarDefaultColor = context.getColor(R.color.status_bar_default);
-            final int statusBarColor = a.getColor(R.styleable.Window_statusBarColor,
-                    statusBarDefaultColor);
-
-            mStatusBarColor = statusBarColor == statusBarDefaultColor && !mEdgeToEdgeEnforced
-                    ? statusBarCompatibleColor
-                    : statusBarColor;
+        if (!mForcedStatusBarColor && !mEdgeToEdgeEnforced) {
+            mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, Color.BLACK);
         }
-        if (!mForcedNavigationBarColor) {
+        if (!mForcedNavigationBarColor && !mEdgeToEdgeEnforced) {
             final int navBarCompatibleColor = context.getColor(R.color.navigation_bar_compatible);
             final int navBarDefaultColor = context.getColor(R.color.navigation_bar_default);
             final int navBarColor = a.getColor(R.styleable.Window_navigationBarColor,
@@ -2566,7 +2561,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             mNavigationBarColor =
                     navBarColor == navBarDefaultColor
-                            && !mEdgeToEdgeEnforced
                             && !context.getResources().getBoolean(
                                     R.bool.config_navBarDefaultTransparent)
                     ? navBarCompatibleColor
@@ -2575,7 +2569,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mNavigationBarDividerColor = a.getColor(R.styleable.Window_navigationBarDividerColor,
                     Color.TRANSPARENT);
         }
-        if (!targetPreQ) {
+        if (!targetPreQ && !mEdgeToEdgeEnforced) {
             mEnsureStatusBarContrastWhenTransparent = a.getBoolean(
                     R.styleable.Window_enforceStatusBarContrast, false);
             mEnsureNavigationBarContrastWhenTransparent = a.getBoolean(
@@ -3899,6 +3893,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setStatusBarColor(int color) {
+        if (mEdgeToEdgeEnforced) {
+            return;
+        }
         if (mStatusBarColor == color && mForcedStatusBarColor) {
             return;
         }
@@ -3920,6 +3917,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setNavigationBarColor(int color) {
+        if (mEdgeToEdgeEnforced) {
+            return;
+        }
         if (mNavigationBarColor == color && mForcedNavigationBarColor) {
             return;
         }
@@ -3936,6 +3936,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setNavigationBarDividerColor(int navigationBarDividerColor) {
+        if (mEdgeToEdgeEnforced) {
+            return;
+        }
         mNavigationBarDividerColor = navigationBarDividerColor;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
@@ -3949,6 +3952,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setStatusBarContrastEnforced(boolean ensureContrast) {
+        if (mEdgeToEdgeEnforced) {
+            return;
+        }
         mEnsureStatusBarContrastWhenTransparent = ensureContrast;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
@@ -3962,6 +3968,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setNavigationBarContrastEnforced(boolean enforceContrast) {
+        if (mEdgeToEdgeEnforced) {
+            return;
+        }
         mEnsureNavigationBarContrastWhenTransparent = enforceContrast;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
@@ -4031,6 +4040,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
+        if (mEdgeToEdgeEnforced) {
+            return;
+        }
         mDecorFitsSystemWindows = decorFitsSystemWindows;
         applyDecorFitsSystemWindows();
     }

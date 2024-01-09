@@ -54,8 +54,6 @@ class ToggleResizeDesktopTaskTransitionHandler(
         taskId: Int,
         windowDecoration: DesktopModeWindowDecoration
     ) {
-        // Pause relayout until the transition animation finishes.
-        windowDecoration.incrementRelayoutBlock()
         transitions.startTransition(TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE, wct, this)
         taskToDecorationMap.put(taskId, windowDecoration)
     }

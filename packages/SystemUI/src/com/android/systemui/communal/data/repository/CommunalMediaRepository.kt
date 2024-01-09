@@ -16,18 +16,17 @@
 
 package com.android.systemui.communal.data.repository
 
+import com.android.systemui.communal.data.model.CommunalMediaModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 
 /** Encapsulates the state of smartspace in communal. */
 interface CommunalMediaRepository {
-    val mediaPlaying: Flow<Boolean>
+    val mediaModel: Flow<CommunalMediaModel>
 }
 
 @SysUISingleton
@@ -47,27 +46,32 @@ constructor(
                 receivedSmartspaceCardLatency: Int,
                 isSsReactivated: Boolean
             ) {
-                if (!mediaDataManager.hasAnyMediaOrRecommendation()) {
-                    return
-                }
-                _mediaPlaying.value = true
+                updateMediaModel(data)
             }
 
             override fun onMediaDataRemoved(key: String) {
-                if (mediaDataManager.hasAnyMediaOrRecommendation()) {
-                    return
-                }
-                _mediaPlaying.value = false
+                updateMediaModel()
             }
         }
 
-    private val _mediaPlaying: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    init {
+        mediaDataManager.addListener(mediaDataListener)
+    }
 
-    override val mediaPlaying: Flow<Boolean> =
-        _mediaPlaying
-            .onStart {
-                mediaDataManager.addListener(mediaDataListener)
-                _mediaPlaying.value = mediaDataManager.hasAnyMediaOrRecommendation()
-            }
-            .onCompletion { mediaDataManager.removeListener(mediaDataListener) }
+    private val _mediaModel: MutableStateFlow<CommunalMediaModel> =
+        MutableStateFlow(CommunalMediaModel.INACTIVE)
+
+    override val mediaModel: Flow<CommunalMediaModel> = _mediaModel
+
+    private fun updateMediaModel(data: MediaData? = null) {
+        if (mediaDataManager.hasAnyMediaOrRecommendation()) {
+            _mediaModel.value =
+                CommunalMediaModel(
+                    hasAnyMediaOrRecommendation = true,
+                    createdTimestampMillis = data?.createdTimestampMillis ?: 0L,
+                )
+        } else {
+            _mediaModel.value = CommunalMediaModel.INACTIVE
+        }
+    }
 }

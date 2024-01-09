@@ -131,6 +131,7 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -4038,11 +4039,11 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public <T> T parseAndroidManifest(@NonNull String apkFilePath,
+    public <T> T parseAndroidManifest(@NonNull File apkFile,
             @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
-        Objects.requireNonNull(apkFilePath, "apkFilePath cannot be null");
+        Objects.requireNonNull(apkFile, "apkFile cannot be null");
         Objects.requireNonNull(parserFunction, "parserFunction cannot be null");
-        try (XmlResourceParser xmlResourceParser = getAndroidManifestParser(apkFilePath)) {
+        try (XmlResourceParser xmlResourceParser = getAndroidManifestParser(apkFile)) {
             return parserFunction.apply(xmlResourceParser);
         } catch (IOException e) {
             Log.w(TAG, "Failed to get the android manifest parser", e);
@@ -4050,11 +4051,11 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
-    private static XmlResourceParser getAndroidManifestParser(@NonNull String apkFilePath)
+    private static XmlResourceParser getAndroidManifestParser(@NonNull File apkFile)
             throws IOException {
         ApkAssets apkAssets = null;
         try {
-            apkAssets = ApkAssets.loadFromPath(apkFilePath);
+            apkAssets = ApkAssets.loadFromPath(apkFile.getAbsolutePath());
             return apkAssets.openXml(ApkLiteParseUtils.ANDROID_MANIFEST_FILENAME);
         } finally {
             if (apkAssets != null) {

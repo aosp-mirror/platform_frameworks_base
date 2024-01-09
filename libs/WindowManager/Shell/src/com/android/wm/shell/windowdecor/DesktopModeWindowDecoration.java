@@ -36,7 +36,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
@@ -62,8 +61,6 @@ import com.android.wm.shell.windowdecor.viewholder.DesktopModeAppControlsWindowD
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeFocusedWindowDecorationViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.DesktopModeWindowDecorationViewHolder;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -104,8 +101,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private ExclusionRegionListener mExclusionRegionListener;
 
-    private final Set<IBinder> mTransitionsPausingRelayout = new HashSet<>();
-    private int mRelayoutBlock;
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
 
     DesktopModeWindowDecoration(
@@ -179,13 +174,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     @Override
     void relayout(ActivityManager.RunningTaskInfo taskInfo) {
-        // TaskListener callbacks and shell transitions aren't synchronized, so starting a shell
-        // transition can trigger an onTaskInfoChanged call that updates the task's SurfaceControl
-        // and interferes with the transition animation that is playing at the same time.
-        if (mRelayoutBlock > 0) {
-            return;
-        }
-
         final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
         // The crop and position of the task should only be set when a task is fluid resizing. In
         // all other cases, it is expected that the transition handler positions and crops the task
@@ -737,16 +725,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return exclusionRegion;
     }
 
-    /**
-     * If transition exists in mTransitionsPausingRelayout, remove the transition and decrement
-     * mRelayoutBlock
-     */
-    void removeTransitionPausingRelayout(IBinder transition) {
-        if (mTransitionsPausingRelayout.remove(transition)) {
-            mRelayoutBlock--;
-        }
-    }
-
     @Override
     int getCaptionHeightId(@WindowingMode int windowingMode) {
         return getCaptionHeightIdStatic(windowingMode);
@@ -767,35 +745,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return R.id.desktop_mode_caption;
     }
 
-    /**
-     * Add transition to mTransitionsPausingRelayout
-     */
-    void addTransitionPausingRelayout(IBinder transition) {
-        mTransitionsPausingRelayout.add(transition);
-    }
-
-    /**
-     * If two transitions merge and the merged transition is in mTransitionsPausingRelayout,
-     * remove the merged transition from the set and add the transition it was merged into.
-     */
-    public void mergeTransitionPausingRelayout(IBinder merged, IBinder playing) {
-        if (mTransitionsPausingRelayout.remove(merged)) {
-            mTransitionsPausingRelayout.add(playing);
-        }
-    }
-
-    /**
-     * Increase mRelayoutBlock, stopping relayout if mRelayoutBlock is now greater than 0.
-     */
-    public void incrementRelayoutBlock() {
-        mRelayoutBlock++;
-    }
-
     @Override
     public String toString() {
         return "{"
                 + "mPositionInParent=" + mPositionInParent + ", "
-                + "mRelayoutBlock=" + mRelayoutBlock + ", "
                 + "taskId=" + mTaskInfo.taskId + ", "
                 + "windowingMode=" + windowingModeToString(mTaskInfo.getWindowingMode()) + ", "
                 + "isFocused=" + isFocused()

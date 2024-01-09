@@ -128,7 +128,7 @@
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01ba0000">
-    <!-- @hide @SystemApi -->
+    <!-- @hide @SystemApi @FlaggedApi("android.permission.flags.retail_demo_role_enabled") -->
     <public name="config_defaultRetailDemo" />
   </staging-public-group>
 

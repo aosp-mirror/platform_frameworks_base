@@ -118,6 +118,10 @@ public class NotificationHistoryManager {
         }
     }
 
+    public void onUserAdded(@UserIdInt int userId) {
+        mSettingsObserver.update(null, userId);
+    }
+
     public void onUserStopped(@UserIdInt int userId) {
         synchronized (mLock) {
             mUserUnlockedStates.put(userId, false);
@@ -401,9 +405,7 @@ public class NotificationHistoryManager {
                     false, this, UserHandle.USER_ALL);
             synchronized (mLock) {
                 for (UserInfo userInfo : mUserManager.getUsers()) {
-                    if (!userInfo.isProfile()) {
-                        update(null, userInfo.id);
-                    }
+                    update(null, userInfo.id);
                 }
             }
         }
@@ -424,10 +426,7 @@ public class NotificationHistoryManager {
                 boolean historyEnabled = Settings.Secure.getIntForUser(resolver,
                         Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, userId)
                         != 0;
-                int[] profiles = mUserManager.getProfileIds(userId, true);
-                for (int profileId : profiles) {
-                    onHistoryEnabledChanged(profileId, historyEnabled);
-                }
+                onHistoryEnabledChanged(userId, historyEnabled);
             }
         }
     }

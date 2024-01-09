@@ -68,10 +68,10 @@ public class SystemUiSystemPropertiesFlags {
         // TODO b/291899544: for released flags, use resource config values
         /** Value used by polite notif. feature */
         public static final Flag NOTIF_COOLDOWN_T1 = devFlag(
-                "persist.debug.sysui.notification.notif_cooldown_t1", 5000);
+                "persist.debug.sysui.notification.notif_cooldown_t1", 60000);
         /** Value used by polite notif. feature */
         public static final Flag NOTIF_COOLDOWN_T2 = devFlag(
-                "persist.debug.sysui.notification.notif_cooldown_t2", 3000);
+                "persist.debug.sysui.notification.notif_cooldown_t2", 5000);
         /** Value used by polite notif. feature */
         public static final Flag NOTIF_VOLUME1 = devFlag(
                 "persist.debug.sysui.notification.notif_volume1", 30);
@@ -80,12 +80,6 @@ public class SystemUiSystemPropertiesFlags {
         /** Value used by polite notif. feature. -1 to ignore the counter */
         public static final Flag NOTIF_COOLDOWN_COUNTER_RESET = devFlag(
                 "persist.debug.sysui.notification.notif_cooldown_counter_reset", 10);
-        /**
-         * Value used by polite notif. feature: cooldown behavior/strategy. Valid values: rule1,
-         * rule2
-         */
-        public static final Flag NOTIF_COOLDOWN_RULE = devFlag(
-                "persist.debug.sysui.notification.notif_cooldown_rule", "rule1");
 
         /** b/303716154: For debugging only: use short bitmap duration. */
         public static final Flag DEBUG_SHORT_BITMAP_DURATION = devFlag(

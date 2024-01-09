@@ -26,6 +26,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.time.FakeSystemClock
 import java.util.concurrent.Executor
@@ -128,11 +130,42 @@ class FlashlightControllerImplTest : SysuiTestCase() {
         verify(cameraManager).setTorchMode(id, enable)
     }
 
+    @Test
+    fun testCallbackRemovedWhileDispatching_doesntCrash() {
+        injectCamera()
+        var remove = false
+        val callback = object : FlashlightController.FlashlightListener {
+            override fun onFlashlightChanged(enabled: Boolean) {
+                if (remove) {
+                    controller.removeCallback(this)
+                }
+            }
+
+            override fun onFlashlightError() {}
+
+            override fun onFlashlightAvailabilityChanged(available: Boolean) {}
+        }
+        controller.addCallback(callback)
+        controller.addCallback(object : FlashlightController.FlashlightListener {
+            override fun onFlashlightChanged(enabled: Boolean) {}
+
+            override fun onFlashlightError() {}
+
+            override fun onFlashlightAvailabilityChanged(available: Boolean) {}
+        })
+        backgroundExecutor.runAllReady()
+
+        val captor = argumentCaptor<CameraManager.TorchCallback>()
+        verify(cameraManager).registerTorchCallback(any(), capture(captor))
+        remove = true
+        captor.value.onTorchModeChanged(ID, true)
+    }
+
     private fun injectCamera(
         flash: Boolean = true,
         facing: Int = CameraCharacteristics.LENS_FACING_BACK
     ): String {
-        val cameraID = "ID"
+        val cameraID = ID
         val camera = CameraCharacteristics(CameraMetadataNative().apply {
             set(CameraCharacteristics.FLASH_INFO_AVAILABLE, flash)
             set(CameraCharacteristics.LENS_FACING, facing)
@@ -140,5 +173,9 @@ class FlashlightControllerImplTest : SysuiTestCase() {
         `when`(cameraManager.cameraIdList).thenReturn(arrayOf(cameraID))
         `when`(cameraManager.getCameraCharacteristics(cameraID)).thenReturn(camera)
         return cameraID
+    }
+
+    companion object {
+        private const val ID = "ID"
     }
 }

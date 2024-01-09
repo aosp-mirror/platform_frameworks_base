@@ -448,11 +448,6 @@ object Flags {
     // TODO(b/270987164): Tracking Bug
     @JvmField val TRACKPAD_GESTURE_FEATURES = releasedFlag("trackpad_gesture_features")
 
-    // TODO(b/265639042): Tracking Bug
-    @JvmField
-    val WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM =
-        unreleasedFlag("persist.wm.debug.predictive_back_qs_dialog_anim", teamfood = true)
-
     // TODO(b/273800936): Tracking Bug
     @JvmField val TRACKPAD_GESTURE_COMMON = releasedFlag("trackpad_gesture_common")
 

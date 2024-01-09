@@ -63,6 +63,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -215,6 +216,28 @@ public class SecurityControllerTest extends SysuiTestCase {
                 (NetworkRequest request) ->
                         request.equals(new NetworkRequest.Builder().clearCapabilities().build())
                 ), any(NetworkCallback.class));
+    }
+
+    @Test
+    public void testRemoveCallbackWhileDispatch_doesntCrash() {
+        final AtomicBoolean remove = new AtomicBoolean(false);
+        SecurityController.SecurityControllerCallback callback =
+                new SecurityController.SecurityControllerCallback() {
+                    @Override
+                    public void onStateChanged() {
+                        if (remove.get()) {
+                            mSecurityController.removeCallback(this);
+                        }
+                    }
+                };
+        mSecurityController.addCallback(callback);
+        // Add another callback so the iteration continues
+        mSecurityController.addCallback(() -> {});
+        mBgExecutor.runAllReady();
+        remove.set(true);
+
+        mSecurityController.onUserSwitched(10);
+        mBgExecutor.runAllReady();
     }
 
     /**
