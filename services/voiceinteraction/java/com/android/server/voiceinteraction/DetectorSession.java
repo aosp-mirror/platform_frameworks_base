@@ -184,7 +184,7 @@ abstract class DetectorSession {
     private final Executor mAudioCopyExecutor = Executors.newCachedThreadPool();
     // TODO: This may need to be a Handler(looper)
     final ScheduledExecutorService mScheduledExecutorService;
-    private final AppOpsManager mAppOpsManager;
+    final AppOpsManager mAppOpsManager;
     final HotwordAudioStreamCopier mHotwordAudioStreamCopier;
     final AtomicBoolean mUpdateStateAfterStartFinished = new AtomicBoolean(false);
     final IHotwordRecognitionStatusCallback mCallback;
@@ -201,7 +201,7 @@ abstract class DetectorSession {
 
     /** Identity used for attributing app ops when delivering data to the Interactor. */
     @Nullable
-    private final Identity mVoiceInteractorIdentity;
+    final Identity mVoiceInteractorIdentity;
     @GuardedBy("mLock")
     ParcelFileDescriptor mCurrentAudioSink;
     @GuardedBy("mLock")
@@ -926,7 +926,7 @@ abstract class DetectorSession {
      * @param permission The identifier of the permission we want to check.
      * @param reason     The reason why we're requesting the permission, for auditing purposes.
      */
-    private static void enforcePermissionForDataDelivery(@NonNull Context context,
+    protected static void enforcePermissionForDataDelivery(@NonNull Context context,
             @NonNull Identity identity, @NonNull String permission, @NonNull String reason) {
         final int status = PermissionUtil.checkPermissionForDataDelivery(context, identity,
                 permission, reason);
