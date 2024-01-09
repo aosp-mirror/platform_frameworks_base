@@ -912,7 +912,7 @@ droidstubs {
 }
 
 // This module can be built with:
-// m out/soong/.intermediates/frameworks/base/api_versions_module_lib/android_common/metalava/api-versions.xml
+// m out/soong/.intermediates/frameworks/base/api/api_versions_module_lib/android_common/metalava/api-versions.xml
 droidstubs {
     name: "api_versions_module_lib",
     srcs: [":android_module_stubs_current_with_test_libs{.jar}"],
