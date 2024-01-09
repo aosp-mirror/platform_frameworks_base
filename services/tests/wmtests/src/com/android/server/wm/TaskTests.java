@@ -1822,6 +1822,35 @@ public class TaskTests extends WindowTestsBase {
         verify(fragment2).assignLayer(t, 2);
     }
 
+    @Test
+    public void testMoveTaskFragmentsToBottomIfNeeded() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord unembeddedActivity = task.getTopMostActivity();
+
+        final TaskFragment fragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment fragment2 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment fragment3 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        doReturn(true).when(fragment1).isMoveToBottomIfClearWhenLaunch();
+        doReturn(false).when(fragment2).isMoveToBottomIfClearWhenLaunch();
+        doReturn(true).when(fragment3).isMoveToBottomIfClearWhenLaunch();
+
+        assertEquals(unembeddedActivity, task.mChildren.get(0));
+        assertEquals(fragment1, task.mChildren.get(1));
+        assertEquals(fragment2, task.mChildren.get(2));
+        assertEquals(fragment3, task.mChildren.get(3));
+
+        final int[] finishCount = {0};
+        task.moveTaskFragmentsToBottomIfNeeded(unembeddedActivity, finishCount);
+
+        // fragment1 and fragment3 should be moved to the bottom of the task
+        assertEquals(fragment1, task.mChildren.get(0));
+        assertEquals(fragment3, task.mChildren.get(1));
+        assertEquals(unembeddedActivity, task.mChildren.get(2));
+        assertEquals(fragment2, task.mChildren.get(3));
+        assertEquals(2, finishCount[0]);
+    }
+
     private Task getTestTask() {
         return new TaskBuilder(mSupervisor).setCreateActivity(true).build();
     }
