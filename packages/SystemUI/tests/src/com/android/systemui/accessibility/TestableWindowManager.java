@@ -16,8 +16,10 @@
 
 package com.android.systemui.accessibility;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.IBinder;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,6 +89,11 @@ public class TestableWindowManager implements WindowManager {
     @Override
     public WindowMetrics getMaximumWindowMetrics() {
         return mWindowManager.getMaximumWindowMetrics();
+    }
+
+    @Override
+    public @NonNull IBinder getDefaultToken() {
+        return mWindowManager.getDefaultToken();
     }
 
     public View getAttachedView() {

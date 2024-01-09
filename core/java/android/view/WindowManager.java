@@ -6109,4 +6109,12 @@ public interface WindowManager extends ViewManager {
         throw new UnsupportedOperationException(
                 "getSurfaceControlInputClientToken is not implemented");
     }
+
+    /**
+     * @hide
+     */
+    default @NonNull IBinder getDefaultToken() {
+        throw new UnsupportedOperationException(
+                "getDefaultToken is not implemented");
+    }
 }

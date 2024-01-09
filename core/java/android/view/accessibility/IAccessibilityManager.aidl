@@ -31,6 +31,7 @@ import android.view.accessibility.IMagnificationConnection;
 import android.view.InputEvent;
 import android.view.IWindow;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 
 /**
  * Interface implemented by the AccessibilityManagerService called by
@@ -136,4 +137,7 @@ interface IAccessibilityManager {
         MagnificationSpec magnificationSpec;
     }
     WindowTransformationSpec getWindowTransformationSpec(int windowId);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)")
+    void attachAccessibilityOverlayToDisplay_enforcePermission(int displayId, in SurfaceControl surfaceControl);
 }
