@@ -573,10 +573,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mBrightnessClamperController = mInjector.getBrightnessClamperController(
                 mHandler, modeChangeCallback::run,
                 new BrightnessClamperController.DisplayDeviceData(
-                mUniqueDisplayId,
-                mThermalBrightnessThrottlingDataId,
-                logicalDisplay.getPowerThrottlingDataIdLocked(),
-                mDisplayDeviceConfig), mContext, flags);
+                        mUniqueDisplayId,
+                        mThermalBrightnessThrottlingDataId,
+                        logicalDisplay.getPowerThrottlingDataIdLocked(),
+                        mDisplayDeviceConfig), mContext, flags);
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
         mAutomaticBrightnessStrategy =
@@ -1508,7 +1508,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // Note throttling effectively changes the allowed brightness range, so, similarly to HBM,
         // we broadcast this change through setting.
         final float unthrottledBrightnessState = brightnessState;
-
         DisplayBrightnessState clampedState = mBrightnessClamperController.clamp(mPowerRequest,
                 brightnessState, slowChange);
 
@@ -1522,11 +1521,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         if (updateScreenBrightnessSetting) {
             // Tell the rest of the system about the new brightness in case we had to change it
             // for things like auto-brightness or high-brightness-mode. Note that we do this
-            // only considering maxBrightness (ignroing brightness modifiers like low power or dim)
+            // only considering maxBrightness (ignoring brightness modifiers like low power or dim)
             // so that the slider accurately represents the full possible range,
             // even if they range changes what it means in absolute terms.
             mDisplayBrightnessController.updateScreenBrightnessSetting(
-                    Math.min(unthrottledBrightnessState, clampedState.getMaxBrightness()));
+                    MathUtils.constrain(unthrottledBrightnessState,
+                            clampedState.getMinBrightness(), clampedState.getMaxBrightness()));
         }
 
         // The current brightness to use has been calculated at this point, and HbmController should
@@ -1935,8 +1935,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             @Nullable DisplayBrightnessState state) {
         synchronized (mCachedBrightnessInfo) {
             float stateMax = state != null ? state.getMaxBrightness() : PowerManager.BRIGHTNESS_MAX;
-            final float minBrightness = Math.min(
-                    mBrightnessRangeController.getCurrentBrightnessMin(), stateMax);
+            float stateMin = state != null ? state.getMinBrightness() : PowerManager.BRIGHTNESS_MAX;
+            final float minBrightness = Math.max(stateMin, Math.min(
+                    mBrightnessRangeController.getCurrentBrightnessMin(), stateMax));
             final float maxBrightness = Math.min(
                     mBrightnessRangeController.getCurrentBrightnessMax(), stateMax);
             boolean changed = false;
@@ -1962,7 +1963,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             changed |=
                     mCachedBrightnessInfo.checkAndSetInt(mCachedBrightnessInfo.brightnessMaxReason,
                             mBrightnessClamperController.getBrightnessMaxReason());
-
             return changed;
         }
     }
@@ -2880,6 +2880,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     event.getHbmMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR,
                     (modifier & BrightnessReason.MODIFIER_LOW_POWER) > 0,
                     mBrightnessClamperController.getBrightnessMaxReason(),
+                    // TODO: (flc) add brightnessMinReason here too.
                     (modifier & BrightnessReason.MODIFIER_DIMMED) > 0,
                     event.isRbcEnabled(),
                     (flags & BrightnessEvent.FLAG_INVALID_LUX) > 0,

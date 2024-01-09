@@ -33,6 +33,7 @@ public final class DisplayBrightnessState {
     private final float mSdrBrightness;
 
     private final float mMaxBrightness;
+    private final float mMinBrightness;
     private final BrightnessReason mBrightnessReason;
     private final String mDisplayBrightnessStrategyName;
     private final boolean mShouldUseAutoBrightness;
@@ -50,6 +51,7 @@ public final class DisplayBrightnessState {
         mShouldUseAutoBrightness = builder.getShouldUseAutoBrightness();
         mIsSlowChange = builder.isSlowChange();
         mMaxBrightness = builder.getMaxBrightness();
+        mMinBrightness = builder.getMinBrightness();
         mCustomAnimationRate = builder.getCustomAnimationRate();
         mShouldUpdateScreenBrightnessSetting = builder.shouldUpdateScreenBrightnessSetting();
     }
@@ -105,6 +107,13 @@ public final class DisplayBrightnessState {
     }
 
     /**
+     * @return minimum allowed brightness
+     */
+    public float getMinBrightness() {
+        return mMinBrightness;
+    }
+
+    /**
      * @return custom animation rate
      */
     public float getCustomAnimationRate() {
@@ -131,6 +140,7 @@ public final class DisplayBrightnessState {
         stringBuilder.append(getShouldUseAutoBrightness());
         stringBuilder.append("\n    isSlowChange:").append(mIsSlowChange);
         stringBuilder.append("\n    maxBrightness:").append(mMaxBrightness);
+        stringBuilder.append("\n    minBrightness:").append(mMinBrightness);
         stringBuilder.append("\n    customAnimationRate:").append(mCustomAnimationRate);
         stringBuilder.append("\n    shouldUpdateScreenBrightnessSetting:")
                 .append(mShouldUpdateScreenBrightnessSetting);
@@ -160,6 +170,7 @@ public final class DisplayBrightnessState {
                 && mShouldUseAutoBrightness == otherState.getShouldUseAutoBrightness()
                 && mIsSlowChange == otherState.isSlowChange()
                 && mMaxBrightness == otherState.getMaxBrightness()
+                && mMinBrightness == otherState.getMinBrightness()
                 && mCustomAnimationRate == otherState.getCustomAnimationRate()
                 && mShouldUpdateScreenBrightnessSetting
                     == otherState.shouldUpdateScreenBrightnessSetting();
@@ -168,7 +179,8 @@ public final class DisplayBrightnessState {
     @Override
     public int hashCode() {
         return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
-                mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mCustomAnimationRate,
+                mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mMinBrightness,
+                mCustomAnimationRate,
                 mShouldUpdateScreenBrightnessSetting);
     }
 
@@ -190,6 +202,7 @@ public final class DisplayBrightnessState {
         private boolean mShouldUseAutoBrightness;
         private boolean mIsSlowChange;
         private float mMaxBrightness;
+        private float mMinBrightness;
         private float mCustomAnimationRate = CUSTOM_ANIMATION_RATE_NOT_SET;
         private boolean mShouldUpdateScreenBrightnessSetting;
 
@@ -208,6 +221,7 @@ public final class DisplayBrightnessState {
             builder.setShouldUseAutoBrightness(state.getShouldUseAutoBrightness());
             builder.setIsSlowChange(state.isSlowChange());
             builder.setMaxBrightness(state.getMaxBrightness());
+            builder.setMinBrightness(state.getMinBrightness());
             builder.setCustomAnimationRate(state.getCustomAnimationRate());
             builder.setShouldUpdateScreenBrightnessSetting(
                     state.shouldUpdateScreenBrightnessSetting());
@@ -334,6 +348,20 @@ public final class DisplayBrightnessState {
             return mMaxBrightness;
         }
 
+        /**
+         * See {@link DisplayBrightnessState#getMinBrightness()}.
+         */
+        public Builder setMinBrightness(float minBrightness) {
+            this.mMinBrightness = minBrightness;
+            return this;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#getMinBrightness()}.
+         */
+        public float getMinBrightness() {
+            return mMinBrightness;
+        }
 
         /**
          * See {@link DisplayBrightnessState#getCustomAnimationRate()}.
