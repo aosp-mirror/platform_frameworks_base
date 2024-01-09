@@ -34,6 +34,15 @@ object SettingsDimension {
         end = itemPaddingEnd,
         bottom = itemPaddingVertical,
     )
+    val textFieldPadding = PaddingValues(
+        start = itemPaddingStart,
+        end = itemPaddingEnd,
+    )
+    val menuFieldPadding = PaddingValues(
+        start = itemPaddingStart,
+        end = itemPaddingEnd,
+        bottom = itemPaddingVertical,
+    )
     val itemPaddingAround = 8.dp
     val itemDividerHeight = 32.dp
 

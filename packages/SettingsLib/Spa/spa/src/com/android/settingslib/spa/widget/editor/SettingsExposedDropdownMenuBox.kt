@@ -51,7 +51,7 @@ fun SettingsExposedDropdownMenuBox(
         onExpandedChange = { expanded = it },
         modifier = Modifier
             .width(350.dp)
-            .padding(SettingsDimension.itemPadding),
+            .padding(SettingsDimension.menuFieldPadding),
     ) {
         OutlinedTextField(
             // The `menuAnchor` modifier must be passed to the text field for correctness.
