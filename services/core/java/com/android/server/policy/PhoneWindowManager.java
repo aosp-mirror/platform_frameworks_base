@@ -1301,7 +1301,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Global.putInt(mContext.getContentResolver(),
                             Settings.Global.THEATER_MODE_ON, 0);
                     if (!interactive) {
-                        wakeUpFromWakeKey(eventTime, KEYCODE_POWER);
+                        wakeUpFromWakeKey(eventTime, KEYCODE_POWER, /* isDown= */ false);
                     }
                 } else {
                     Slog.i(TAG, "Toggling theater mode on.");
@@ -1317,7 +1317,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case MULTI_PRESS_POWER_BRIGHTNESS_BOOST:
                 Slog.i(TAG, "Starting brightness boost.");
                 if (!interactive) {
-                    wakeUpFromWakeKey(eventTime, KEYCODE_POWER);
+                    wakeUpFromWakeKey(eventTime, KEYCODE_POWER, /* isDown= */ false);
                 }
                 mPowerManager.boostScreenBrightness(eventTime);
                 break;
@@ -5185,7 +5185,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptMotionBeforeQueueingNonInteractive(int displayId, int source, int action,
             long whenNanos, int policyFlags) {
         if ((policyFlags & FLAG_WAKE) != 0) {
-            if (mWindowWakeUpPolicy.wakeUpFromMotion(whenNanos / 1000000)) {
+            if (mWindowWakeUpPolicy.wakeUpFromMotion(
+                        whenNanos / 1000000, source, action == MotionEvent.ACTION_DOWN)) {
                 // Woke up. Pass motion events to user.
                 return ACTION_PASS_TO_USER;
             }
@@ -5199,7 +5200,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // there will be no dream to intercept the touch and wake into ambient.  The device should
         // wake up in this case.
         if (isTheaterModeEnabled() && (policyFlags & FLAG_WAKE) != 0) {
-            if (mWindowWakeUpPolicy.wakeUpFromMotion(whenNanos / 1000000)) {
+            if (mWindowWakeUpPolicy.wakeUpFromMotion(
+                        whenNanos / 1000000, source, action == MotionEvent.ACTION_DOWN)) {
                 // Woke up. Pass motion events to user.
                 return ACTION_PASS_TO_USER;
             }
@@ -5534,11 +5536,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void wakeUpFromWakeKey(KeyEvent event) {
-        wakeUpFromWakeKey(event.getEventTime(), event.getKeyCode());
+        wakeUpFromWakeKey(
+                event.getEventTime(),
+                event.getKeyCode(),
+                event.getAction() == KeyEvent.ACTION_DOWN);
     }
 
-    private void wakeUpFromWakeKey(long eventTime, int keyCode) {
-        if (mWindowWakeUpPolicy.wakeUpFromKey(eventTime, keyCode)) {
+    private void wakeUpFromWakeKey(long eventTime, int keyCode, boolean isDown) {
+        if (mWindowWakeUpPolicy.wakeUpFromKey(eventTime, keyCode, isDown)) {
             final boolean keyCanLaunchHome = keyCode == KEYCODE_HOME || keyCode == KEYCODE_POWER;
             // Start HOME with "reason" extra if sleeping for more than mWakeUpToLastStateTimeout
             if (shouldWakeUpWithHomeIntent() &&  keyCanLaunchHome) {
