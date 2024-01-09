@@ -982,8 +982,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void stopSwipePipToHome(int taskId, ComponentName componentName, Rect destinationBounds,
-            SurfaceControl overlay) {
-        mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay);
+            SurfaceControl overlay, Rect appBounds) {
+        mPipTaskOrganizer.stopSwipePipToHome(taskId, componentName, destinationBounds, overlay,
+                appBounds);
     }
 
     private void abortSwipePipToHome(int taskId, ComponentName componentName) {
@@ -1280,13 +1281,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         @Override
         public void stopSwipePipToHome(int taskId, ComponentName componentName,
-                Rect destinationBounds, SurfaceControl overlay) {
+                Rect destinationBounds, SurfaceControl overlay, Rect appBounds) {
             if (overlay != null) {
                 overlay.setUnreleasedWarningCallSite("PipController.stopSwipePipToHome");
             }
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> controller.stopSwipePipToHome(
-                            taskId, componentName, destinationBounds, overlay));
+                            taskId, componentName, destinationBounds, overlay, appBounds));
         }
 
         @Override
