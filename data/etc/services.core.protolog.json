@@ -1867,6 +1867,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityTaskSupervisor.java"
     },
+    "-483957611": {
+      "message": "Resuming configuration dispatch for %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-481924678": {
       "message": "handleNotObscuredLocked w: %s, w.mHasSurface: %b, w.isOnScreen(): %b, w.isDisplayedLw(): %b, w.mAttrs.userActivityTimeout: %d",
       "level": "DEBUG",
@@ -4020,6 +4026,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
+    },
+    "1473051122": {
+      "message": "Pausing configuration dispatch for  %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1494644409": {
       "message": "  Rejecting as detached: %s",

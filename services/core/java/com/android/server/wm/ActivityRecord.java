@@ -141,6 +141,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SWITCH;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
@@ -990,6 +991,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Records whether client has overridden the WindowAnimation_(Open/Close)(Enter/Exit)Animation.
     private CustomAppTransition mCustomOpenTransition;
     private CustomAppTransition mCustomCloseTransition;
+
+    /** Non-zero to pause dispatching configuration changes to the client. */
+    int mPauseConfigurationDispatchCount = 0;
 
     private final Runnable mPauseTimeoutRunnable = new Runnable() {
         @Override
@@ -9276,6 +9280,59 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    @Override
+    void dispatchConfigurationToChild(WindowState child, Configuration config) {
+        if (isConfigurationDispatchPaused()) {
+            return;
+        }
+        super.dispatchConfigurationToChild(child, config);
+    }
+
+    /**
+     * Pauses dispatch of configuration changes to the client. This includes any
+     * configuration-triggered lifecycle changes, WindowState configs, and surface changes. If
+     * a lifecycle change comes from another source (eg. stop), it will still run but will use the
+     * paused configuration.
+     *
+     * The main way this works is by blocking calls to {@link #updateReportedConfigurationAndSend}.
+     * That method is responsible for evaluating whether the activity needs to be relaunched and
+     * sending configurations.
+     */
+    void pauseConfigurationDispatch() {
+        ++mPauseConfigurationDispatchCount;
+        if (mPauseConfigurationDispatchCount == 1) {
+            ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Pausing configuration dispatch for "
+                    + " %s", this);
+        }
+    }
+
+    /** @return `true` if configuration actually changed. */
+    boolean resumeConfigurationDispatch() {
+        --mPauseConfigurationDispatchCount;
+        if (mPauseConfigurationDispatchCount > 0) {
+            return false;
+        }
+        ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Resuming configuration dispatch for %s", this);
+        if (mPauseConfigurationDispatchCount < 0) {
+            Slog.wtf(TAG, "Trying to resume non-paused configuration dispatch");
+            mPauseConfigurationDispatchCount = 0;
+            return false;
+        }
+        if (mLastReportedDisplayId == getDisplayId()
+                && getConfiguration().equals(mLastReportedConfiguration.getMergedConfiguration())) {
+            return false;
+        }
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            dispatchConfigurationToChild(getChildAt(i), getConfiguration());
+        }
+        updateReportedConfigurationAndSend();
+        return true;
+    }
+
+    boolean isConfigurationDispatchPaused() {
+        return mPauseConfigurationDispatchCount > 0;
+    }
+
     private boolean applyAspectRatio(Rect outBounds, Rect containingAppBounds,
             Rect containingBounds) {
         return applyAspectRatio(outBounds, containingAppBounds, containingBounds,
@@ -9525,6 +9582,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
 
+        if (isConfigurationDispatchPaused()) {
+            return true;
+        }
+
+        return updateReportedConfigurationAndSend();
+    }
+
+    boolean updateReportedConfigurationAndSend() {
+        if (isConfigurationDispatchPaused()) {
+            Slog.wtf(TAG, "trying to update reported(client) config while dispatch is paused");
+        }
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Ensuring correct "
                 + "configuration: %s", this);
 
