@@ -35,9 +35,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.res.R;
 import com.android.systemui.util.Utils;
 
 import java.io.PrintWriter;
@@ -291,11 +291,12 @@ public class CastControllerImpl implements CastController {
 
     @VisibleForTesting
     void fireOnCastDevicesChanged() {
+        final ArrayList<Callback> callbacks;
         synchronized (mCallbacks) {
-            for (Callback callback : mCallbacks) {
-                fireOnCastDevicesChanged(callback);
-            }
-
+            callbacks = new ArrayList<>(mCallbacks);
+        }
+        for (Callback callback : callbacks) {
+            fireOnCastDevicesChanged(callback);
         }
     }
 

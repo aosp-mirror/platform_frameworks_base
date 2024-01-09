@@ -3163,6 +3163,12 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 1 << 10;
 
         /**
+         * Flag to indicate that the window is forcibly to go edge-to-edge.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED = 1 << 11;
+
+        /**
          * Flag to indicate that the window frame should be the requested frame adding the display
          * cutout frame. This will only be applied if a specific size smaller than the parent frame
          * is given, and the window is covering the display cutout. The extended frame will not be
@@ -3338,6 +3344,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_OPTIMIZE_MEASURE,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
+                PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED,
                 PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                 PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
@@ -3399,6 +3406,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                         equals = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                         name = "DISABLE_WALLPAPER_TOUCH_EVENTS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED,
+                        equals = PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED,
+                        name = "EDGE_TO_EDGE_ENFORCED"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                         equals = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,

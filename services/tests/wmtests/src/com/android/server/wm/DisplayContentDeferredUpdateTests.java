@@ -55,6 +55,11 @@ import org.mockito.ArgumentCaptor;
 @RunWith(WindowTestRunner.class)
 public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
 
+    // The fields to override the current DisplayInfo.
+    private String mUniqueId;
+    private int mColorMode;
+    private int mLogicalDensityDpi;
+
     @Override
     protected void onBeforeSystemServicesCreated() {
         // Set other flags to their default values
@@ -73,7 +78,7 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
     public void testUpdate_deferrableFieldChangedTransitionStarted_deferrableFieldUpdated() {
         performInitialDisplayUpdate();
 
-        givenDisplayInfo(/* uniqueId= */ "old");
+        mUniqueId = "old";
         Runnable onUpdated = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated);
 
@@ -82,11 +87,21 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         verify(onUpdated).run();
         clearInvocations(mDisplayContent.mTransitionController, onUpdated);
 
-        givenDisplayInfo(/* uniqueId= */ "new");
+        mUniqueId = "new";
         mDisplayContent.requestDisplayUpdate(onUpdated);
         captureStartTransitionCollection().getValue().onCollectStarted(/* deferred= */ true);
         verify(onUpdated).run();
+        verify(mDisplayContent.mTransitionController).requestStartTransition(
+                any(), any(), any(), any());
         assertThat(mDisplayContent.getDisplayInfo().uniqueId).isEqualTo("new");
+        clearInvocations(mDisplayContent.mTransitionController, onUpdated);
+
+        mLogicalDensityDpi += 100;
+        mDisplayContent.requestDisplayUpdate(onUpdated);
+        captureStartTransitionCollection().getValue().onCollectStarted(/* deferred= */ true);
+        verify(onUpdated).run();
+        verify(mDisplayContent.mTransitionController).requestStartTransition(
+                any(), any(), any(), any());
     }
 
     @Test
@@ -94,7 +109,8 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         performInitialDisplayUpdate();
 
         // Update only color mode (non-deferrable field) and keep the same unique id
-        givenDisplayInfo(/* uniqueId= */ "initial_unique_id", /* colorMode= */ 123);
+        mUniqueId = "initial_unique_id";
+        mColorMode = 123;
         Runnable onUpdated = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated);
 
@@ -107,7 +123,8 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         performInitialDisplayUpdate();
 
         // Update only color mode (non-deferrable field) and keep the same unique id
-        givenDisplayInfo(/* uniqueId= */ "initial_unique_id", /* colorMode= */ 123);
+        mUniqueId = "initial_unique_id";
+        mColorMode = 123;
         mDisplayContent.requestDisplayUpdate(mock(Runnable.class));
 
         assertThat(mDisplayContent.getDisplayInfo().colorMode).isEqualTo(123);
@@ -116,7 +133,7 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
 
         // Update unique id (deferrable field), keep the same color mode,
         // this update should be deferred
-        givenDisplayInfo(/* uniqueId= */ "new_unique_id", /* colorMode= */ 123);
+        mUniqueId = "new_unique_id";
         mDisplayContent.requestDisplayUpdate(mock(Runnable.class));
 
         assertThat(mDisplayContent.getDisplayInfo().colorMode).isEqualTo(123);
@@ -126,7 +143,7 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         // Update color mode again and keep the same unique id, color mode update
         // should not be deferred, unique id update is still deferred as transition
         // has not started collecting yet
-        givenDisplayInfo(/* uniqueId= */ "new_unique_id", /* colorMode= */ 456);
+        mColorMode = 456;
         Runnable onUpdated = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated);
 
@@ -146,14 +163,14 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
     @Test
     public void testUpdate_deferrableFieldUpdatedTransitionPending_fieldNotUpdated() {
         performInitialDisplayUpdate();
-        givenDisplayInfo(/* uniqueId= */ "old");
+        mUniqueId = "old";
         Runnable onUpdated = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated);
         captureStartTransitionCollection().getValue().onCollectStarted(/* deferred= */ true);
         verify(onUpdated).run();
         clearInvocations(mDisplayContent.mTransitionController, onUpdated);
 
-        givenDisplayInfo(/* uniqueId= */ "new");
+        mUniqueId = "new";
         mDisplayContent.requestDisplayUpdate(onUpdated);
 
         captureStartTransitionCollection(); // do not continue by not starting the collection
@@ -164,7 +181,7 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
     @Test
     public void testTwoDisplayUpdates_transitionStarted_displayUpdated() {
         performInitialDisplayUpdate();
-        givenDisplayInfo(/* uniqueId= */ "old");
+        mUniqueId = "old";
         Runnable onUpdated = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated);
         captureStartTransitionCollection().getValue()
@@ -173,10 +190,10 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         clearInvocations(mDisplayContent.mTransitionController, onUpdated);
 
         // Perform two display updates while WM is 'busy'
-        givenDisplayInfo(/* uniqueId= */ "new1");
+        mUniqueId = "new1";
         Runnable onUpdated1 = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated1);
-        givenDisplayInfo(/* uniqueId= */ "new2");
+        mUniqueId = "new2";
         Runnable onUpdated2 = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated2);
 
@@ -215,22 +232,19 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
         return callbackCaptor;
     }
 
-    private void givenDisplayInfo(String uniqueId) {
-        givenDisplayInfo(uniqueId, /* colorMode= */ 0);
-    }
+    private void performInitialDisplayUpdate() {
+        mUniqueId = "initial_unique_id";
+        mColorMode = 0;
+        mLogicalDensityDpi = 400;
 
-    private void givenDisplayInfo(String uniqueId, int colorMode) {
         spyOn(mDisplayContent.mDisplay);
         doAnswer(invocation -> {
             DisplayInfo info = invocation.getArgument(0);
-            info.uniqueId = uniqueId;
-            info.colorMode = colorMode;
+            info.uniqueId = mUniqueId;
+            info.colorMode = mColorMode;
+            info.logicalDensityDpi = mLogicalDensityDpi;
             return null;
         }).when(mDisplayContent.mDisplay).getDisplayInfo(any());
-    }
-
-    private void performInitialDisplayUpdate() {
-        givenDisplayInfo(/* uniqueId= */ "initial_unique_id", /* colorMode= */ 0);
         Runnable onUpdated = mock(Runnable.class);
         mDisplayContent.requestDisplayUpdate(onUpdated);
     }

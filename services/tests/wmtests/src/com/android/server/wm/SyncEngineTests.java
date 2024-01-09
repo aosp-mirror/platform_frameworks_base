@@ -134,6 +134,14 @@ public class SyncEngineTests extends WindowTestsBase {
         assertFalse(r.isSyncFinished(r.getSyncGroup()));
         r.finishRelaunching();
         assertTrue(r.isSyncFinished(r.getSyncGroup()));
+        assertEquals(SYNC_STATE_READY, r.mSyncState);
+
+        // If the container has finished the sync, isSyncFinished should not change the sync state.
+        final BLASTSyncEngine.SyncGroup syncGroup = r.getSyncGroup();
+        r.finishSync(mTransaction, syncGroup, false /* cancel */);
+        assertEquals(SYNC_STATE_NONE, r.mSyncState);
+        assertTrue(r.isSyncFinished(syncGroup));
+        assertEquals(SYNC_STATE_NONE, r.mSyncState);
     }
 
     @Test

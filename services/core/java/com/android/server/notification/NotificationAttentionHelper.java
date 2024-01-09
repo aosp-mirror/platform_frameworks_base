@@ -94,8 +94,6 @@ public final class NotificationAttentionHelper {
 
     private static final float DEFAULT_VOLUME = 1.0f;
     // TODO (b/291899544): remove for release
-    private static final String POLITE_STRATEGY1 = "rule1";
-    private static final String POLITE_STRATEGY2 = "rule2";
     private static final int DEFAULT_NOTIFICATION_COOLDOWN_ENABLED = 1;
     private static final int DEFAULT_NOTIFICATION_COOLDOWN_ENABLED_FOR_WORK = 0;
     private static final int DEFAULT_NOTIFICATION_COOLDOWN_ALL = 1;
@@ -146,7 +144,6 @@ public final class NotificationAttentionHelper {
     private boolean mNotificationCooldownApplyToAll;
     private boolean mNotificationCooldownVibrateUnlocked;
 
-    private boolean mEnablePoliteNotificationsFeature;
     private final PolitenessStrategy mStrategy;
     private int mCurrentWorkProfileId = UserHandle.USER_NULL;
 
@@ -192,9 +189,7 @@ public final class NotificationAttentionHelper {
                 .build();
         mInCallNotificationVolume = resources.getFloat(R.dimen.config_inCallNotificationVolume);
 
-        mEnablePoliteNotificationsFeature = Flags.politeNotifications();
-
-        if (mEnablePoliteNotificationsFeature) {
+        if (Flags.politeNotifications()) {
             mStrategy = getPolitenessStrategy();
         } else {
             mStrategy = null;
@@ -205,21 +200,23 @@ public final class NotificationAttentionHelper {
     }
 
     private PolitenessStrategy getPolitenessStrategy() {
-        final String politenessStrategy = mFlagResolver.getStringValue(
-                NotificationFlags.NOTIF_COOLDOWN_RULE);
-
-        if (POLITE_STRATEGY2.equals(politenessStrategy)) {
-            return new Strategy2(mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
+        if (Flags.crossAppPoliteNotifications()) {
+            PolitenessStrategy appStrategy = new StrategyPerApp(
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME1),
-                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2));
-        } else {
-            if (!POLITE_STRATEGY1.equals(politenessStrategy)) {
-                Log.w(TAG, "Invalid cooldown strategy: " + politenessStrategy + ". Defaulting to "
-                        + POLITE_STRATEGY1);
-            }
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_COUNTER_RESET));
 
-            return new Strategy1(mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
+            return new StrategyGlobal(
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T2),
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME1),
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
+                    appStrategy);
+        } else {
+            return new StrategyPerApp(
+                    mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_COOLDOWN_T2),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME1),
                     mFlagResolver.getIntValue(NotificationFlags.NOTIF_VOLUME2),
@@ -266,7 +263,7 @@ public final class NotificationAttentionHelper {
         mContext.getContentResolver().registerContentObserver(
                 SettingsObserver.NOTIFICATION_LIGHT_PULSE_URI, false, mSettingsObserver,
                 UserHandle.USER_ALL);
-        if (mEnablePoliteNotificationsFeature) {
+        if (Flags.politeNotifications()) {
             mContext.getContentResolver().registerContentObserver(
                     SettingsObserver.NOTIFICATION_COOLDOWN_ENABLED_URI, false, mSettingsObserver,
                     UserHandle.USER_ALL);
@@ -280,7 +277,7 @@ public final class NotificationAttentionHelper {
     }
 
     private void loadUserSettings() {
-        if (mEnablePoliteNotificationsFeature) {
+        if (Flags.politeNotifications()) {
             try {
                 mCurrentWorkProfileId = getManagedProfileId(ActivityManager.getCurrentUser());
 
@@ -301,11 +298,14 @@ public final class NotificationAttentionHelper {
                     mContext.getContentResolver(),
                     Settings.System.NOTIFICATION_COOLDOWN_ALL, DEFAULT_NOTIFICATION_COOLDOWN_ALL,
                     UserHandle.USER_CURRENT) != 0;
-                mNotificationCooldownVibrateUnlocked = Settings.System.getIntForUser(
-                    mContext.getContentResolver(),
-                    Settings.System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
-                    DEFAULT_NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
-                    UserHandle.USER_CURRENT) != 0;
+                mStrategy.setApplyCooldownPerPackage(mNotificationCooldownApplyToAll);
+                if (Flags.vibrateWhileUnlocked()) {
+                    mNotificationCooldownVibrateUnlocked = Settings.System.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
+                        DEFAULT_NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
+                        UserHandle.USER_CURRENT) != 0;
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to read Settings: " + e);
             }
@@ -482,10 +482,10 @@ public final class NotificationAttentionHelper {
                     getPolitenessState(record));
         }
         record.setAudiblyAlerted(buzz || beep);
-        if (mEnablePoliteNotificationsFeature) {
+        if (Flags.politeNotifications()) {
             // Update last alert time
             if (buzz || beep) {
-                record.getChannel().setLastNotificationUpdateTimeMs(System.currentTimeMillis());
+                mStrategy.setLastNotificationUpdateTimeMs(record, System.currentTimeMillis());
             }
         }
         return buzzBeepBlinkLoggingCode;
@@ -618,7 +618,7 @@ public final class NotificationAttentionHelper {
 
     private boolean isPoliteNotificationFeatureEnabled(final NotificationRecord record) {
         // Check feature flag
-        if (!mEnablePoliteNotificationsFeature) {
+        if (!Flags.politeNotifications()) {
             return false;
         }
 
@@ -1064,9 +1064,13 @@ public final class NotificationAttentionHelper {
         // Volume for muted state
         protected final float mVolumeMuted;
 
+        protected boolean mApplyPerPackage;
+        protected final Map<String, Long> mLastUpdatedTimestampByPackage;
+
         public PolitenessStrategy(int timeoutPolite, int timeoutMuted, int volumePolite,
                 int volumeMuted) {
             mVolumeStates = new HashMap<>();
+            mLastUpdatedTimestampByPackage = new HashMap<>();
 
             this.mTimeoutPolite = timeoutPolite;
             this.mTimeoutMuted = timeoutMuted;
@@ -1076,10 +1080,38 @@ public final class NotificationAttentionHelper {
 
         abstract void onNotificationPosted(NotificationRecord record);
 
+        /**
+         *  Set true if the cooldown strategy should apply per app(package).
+         *  Otherwise apply per conversation channel.
+         * @param applyPerPackage if the cooldown should be applied per app
+         */
+        void setApplyCooldownPerPackage(boolean applyPerPackage) {
+            mApplyPerPackage = applyPerPackage;
+        }
+
+        boolean shouldIgnoreNotification(final NotificationRecord record) {
+            // Ignore group summaries
+            return (record.getSbn().isGroup() && record.getSbn().getNotification()
+                    .isGroupSummary());
+        }
+
+        /**
+         * Get the key that determines the grouping for the cooldown behavior.
+         *
+         * @param record the notification being posted
+         * @return the key to group this notification under
+         */
         String getChannelKey(final NotificationRecord record) {
-            // use conversationId if it's a conversation
+            // Use conversationId if it's a conversation
             String channelId = record.getChannel().getConversationId() != null
                     ? record.getChannel().getConversationId() : record.getChannel().getId();
+
+            // Use only the package name to apply cooldown per app, unless the user explicitly
+            // changed the channel notification sound => treat separately
+            if (mApplyPerPackage && !record.getChannel().hasUserSetSound()) {
+                channelId = "";
+            }
+
             return record.getSbn().getNormalizedUserId() + ":" + record.getSbn().getPackageName()
                     + ":" + channelId;
         }
@@ -1121,11 +1153,58 @@ public final class NotificationAttentionHelper {
             final String key = getChannelKey(record);
             // reset to default state after user interaction
             mVolumeStates.put(key, POLITE_STATE_DEFAULT);
-            record.getChannel().setLastNotificationUpdateTimeMs(0);
+            setLastNotificationUpdateTimeMs(record, 0);
         }
 
         public final @PolitenessState int getPolitenessState(final NotificationRecord record) {
             return mVolumeStates.getOrDefault(getChannelKey(record), POLITE_STATE_DEFAULT);
+        }
+
+        void setLastNotificationUpdateTimeMs(final NotificationRecord record,
+                long timestampMillis) {
+            record.getChannel().setLastNotificationUpdateTimeMs(timestampMillis);
+            mLastUpdatedTimestampByPackage.put(record.getSbn().getPackageName(), timestampMillis);
+        }
+
+        long getLastNotificationUpdateTimeMs(final NotificationRecord record) {
+            if (record.getChannel().hasUserSetSound() || !mApplyPerPackage) {
+                return record.getChannel().getLastNotificationUpdateTimeMs();
+            } else {
+                return mLastUpdatedTimestampByPackage.getOrDefault(record.getSbn().getPackageName(),
+                        0L);
+            }
+        }
+
+        @PolitenessState int getNextState(@PolitenessState final int currState,
+                final long timeSinceLastNotif) {
+            @PolitenessState int nextState = currState;
+            switch (currState) {
+                case POLITE_STATE_DEFAULT:
+                    if (timeSinceLastNotif < mTimeoutPolite) {
+                        nextState = POLITE_STATE_POLITE;
+                    }
+                    break;
+                case POLITE_STATE_POLITE:
+                    if (timeSinceLastNotif < mTimeoutMuted) {
+                        nextState = POLITE_STATE_MUTED;
+                    } else if (timeSinceLastNotif > mTimeoutPolite) {
+                        nextState = POLITE_STATE_DEFAULT;
+                    } else {
+                        nextState = POLITE_STATE_POLITE;
+                    }
+                    break;
+                case POLITE_STATE_MUTED:
+                    if (timeSinceLastNotif > mTimeoutMuted) {
+                        nextState = POLITE_STATE_POLITE;
+                    } else {
+                        nextState = POLITE_STATE_MUTED;
+                    }
+                    break;
+                default:
+                    Log.w(TAG, "getNextState unexpected volume state: " + currState);
+                    break;
+            }
+            return nextState;
         }
     }
 
@@ -1143,72 +1222,51 @@ public final class NotificationAttentionHelper {
      *  after timeoutMuted.
      *  - Transitions back to the default state after a user interaction with a notification.
      */
-    public static class Strategy1 extends PolitenessStrategy {
+    private static class StrategyPerApp extends PolitenessStrategy {
         // Keep track of the number of notifications posted per channel
         private final Map<String, Integer> mNumPosted;
         // Reset to default state if number of posted notifications exceed this value when muted
         private final int mMaxPostedForReset;
 
-        public Strategy1(int timeoutPolite, int timeoutMuted, int volumePolite, int volumeMuted,
-                int maxPosted) {
+        public StrategyPerApp(int timeoutPolite, int timeoutMuted, int volumePolite,
+                int volumeMuted, int maxPosted) {
             super(timeoutPolite, timeoutMuted, volumePolite, volumeMuted);
 
             mNumPosted = new HashMap<>();
             mMaxPostedForReset = maxPosted;
 
             if (DEBUG) {
-                Log.i(TAG, "Strategy1: " + timeoutPolite + " " + timeoutMuted);
+                Log.i(TAG, "StrategyPerApp: " + timeoutPolite + " " + timeoutMuted);
             }
         }
 
         @Override
         public void onNotificationPosted(final NotificationRecord record) {
-            long timeSinceLastNotif = System.currentTimeMillis()
-                    - record.getChannel().getLastNotificationUpdateTimeMs();
+            if (shouldIgnoreNotification(record)) {
+                return;
+            }
+
+            long timeSinceLastNotif =
+                    System.currentTimeMillis() - getLastNotificationUpdateTimeMs(record);
 
             final String key = getChannelKey(record);
-            @PolitenessState int volState = getPolitenessState(record);
+            @PolitenessState final int currState = getPolitenessState(record);
+            @PolitenessState int nextState = getNextState(currState, timeSinceLastNotif);
 
+            // Reset to default state if number of posted notifications exceed this value when muted
             int numPosted = mNumPosted.getOrDefault(key, 0) + 1;
             mNumPosted.put(key, numPosted);
-
-            switch (volState) {
-                case POLITE_STATE_DEFAULT:
-                    if (timeSinceLastNotif < mTimeoutPolite) {
-                        volState = POLITE_STATE_POLITE;
-                    }
-                    break;
-                case POLITE_STATE_POLITE:
-                    if (timeSinceLastNotif < mTimeoutMuted) {
-                        volState = POLITE_STATE_MUTED;
-                    } else if (timeSinceLastNotif > mTimeoutPolite) {
-                        volState = POLITE_STATE_DEFAULT;
-                    } else {
-                        volState = POLITE_STATE_POLITE;
-                    }
-                    break;
-                case POLITE_STATE_MUTED:
-                    if (timeSinceLastNotif > mTimeoutMuted) {
-                        volState = POLITE_STATE_POLITE;
-                    } else {
-                        volState = POLITE_STATE_MUTED;
-                    }
-                    if (numPosted >= mMaxPostedForReset) {
-                        volState = POLITE_STATE_DEFAULT;
-                        mNumPosted.put(key, 0);
-                    }
-                    break;
-                default:
-                    Log.w(TAG, "onNotificationPosted unexpected volume state: " + volState);
-                    break;
+            if (currState == POLITE_STATE_MUTED && numPosted >= mMaxPostedForReset) {
+                nextState = POLITE_STATE_DEFAULT;
+                mNumPosted.put(key, 0);
             }
 
             if (DEBUG) {
                 Log.i(TAG, "onNotificationPosted time delta: " + timeSinceLastNotif + " vol state: "
-                        + volState + " key: " + key + " numposted " + numPosted);
+                        + nextState + " key: " + key + " numposted " + numPosted);
             }
 
-            mVolumeStates.put(key, volState);
+            mVolumeStates.put(key, nextState);
         }
 
         @Override
@@ -1219,61 +1277,98 @@ public final class NotificationAttentionHelper {
     }
 
     /**
-     *  Polite notification strategy 2:
-     *   - Transitions from default (loud) => muted state if a notification
-     *   alerts the same channel before timeoutPolite.
-     *   - Transitions from polite => default state if a notification
-     *  alerts the same channel before timeoutMuted.
-     *   - Transitions from muted => default state if a notification alerts after timeoutMuted,
-     *  otherwise transitions to the polite state.
-     *   - Transitions back to the default state after a user interaction with a notification.
+     * Global (cross-app) strategy.
      */
-    public static class Strategy2 extends PolitenessStrategy {
-        public Strategy2(int timeoutPolite, int timeoutMuted, int volumePolite, int volumeMuted) {
+    private static class StrategyGlobal extends PolitenessStrategy {
+        private static final String COMMON_KEY = "cross_app_common_key";
+
+        private final PolitenessStrategy mAppStrategy;
+        private long mLastNotificationTimestamp = 0;
+
+        public StrategyGlobal(int timeoutPolite, int timeoutMuted, int volumePolite,
+                int volumeMuted, PolitenessStrategy appStrategy) {
             super(timeoutPolite, timeoutMuted, volumePolite, volumeMuted);
 
+            mAppStrategy = appStrategy;
+
             if (DEBUG) {
-                Log.i(TAG, "Strategy2: " + timeoutPolite + " " + timeoutMuted);
+                Log.i(TAG, "StrategyGlobal: " + timeoutPolite + " " + timeoutMuted);
             }
         }
 
         @Override
-        public void onNotificationPosted(final NotificationRecord record) {
-            long timeSinceLastNotif = System.currentTimeMillis()
-                    - record.getChannel().getLastNotificationUpdateTimeMs();
+        void onNotificationPosted(NotificationRecord record) {
+            if (shouldIgnoreNotification(record)) {
+                return;
+            }
+
+            long timeSinceLastNotif =
+                    System.currentTimeMillis() - getLastNotificationUpdateTimeMs(record);
 
             final String key = getChannelKey(record);
-            @PolitenessState int volState = getPolitenessState(record);
-
-            switch (volState) {
-                case POLITE_STATE_DEFAULT:
-                    if (timeSinceLastNotif < mTimeoutPolite) {
-                        volState = POLITE_STATE_MUTED;
-                    }
-                    break;
-                case POLITE_STATE_POLITE:
-                    if (timeSinceLastNotif > mTimeoutMuted) {
-                        volState = POLITE_STATE_DEFAULT;
-                    }
-                    break;
-                case POLITE_STATE_MUTED:
-                    if (timeSinceLastNotif > mTimeoutMuted) {
-                        volState = POLITE_STATE_DEFAULT;
-                    } else {
-                        volState = POLITE_STATE_POLITE;
-                    }
-                    break;
-                default:
-                    Log.w(TAG, "onNotificationPosted unexpected volume state: " + volState);
-                    break;
-            }
+            @PolitenessState final int currState = getPolitenessState(record);
+            @PolitenessState int nextState = getNextState(currState, timeSinceLastNotif);
 
             if (DEBUG) {
-                Log.i(TAG, "onNotificationPosted time delta: " + timeSinceLastNotif + " vol state: "
-                        + volState + " key: " + key);
+                Log.i(TAG, "StrategyGlobal onNotificationPosted time delta: " + timeSinceLastNotif
+                        + " vol state: " + nextState + " key: " + key);
             }
 
-            mVolumeStates.put(key, volState);
+            mVolumeStates.put(key, nextState);
+
+            mAppStrategy.onNotificationPosted(record);
+        }
+
+        @Override
+        public float getSoundVolume(final NotificationRecord record) {
+            final @PolitenessState int globalVolState = getPolitenessState(record);
+            final @PolitenessState int appVolState = mAppStrategy.getPolitenessState(record);
+
+            // Prioritize the most polite outcome
+            if (globalVolState > appVolState) {
+                return super.getSoundVolume(record);
+            } else {
+                return mAppStrategy.getSoundVolume(record);
+            }
+        }
+
+        @Override
+        public void onUserInteraction(final NotificationRecord record) {
+            super.onUserInteraction(record);
+            mAppStrategy.onUserInteraction(record);
+        }
+
+        @Override
+        String getChannelKey(final NotificationRecord record) {
+            // If the user explicitly changed the channel notification sound:
+            // handle as a separate channel
+            if (record.getChannel().hasUserSetSound()) {
+                return super.getChannelKey(record);
+            } else {
+                // Use one global key per user
+                return record.getSbn().getNormalizedUserId() + ":" + COMMON_KEY;
+            }
+        }
+
+        @Override
+        public void setLastNotificationUpdateTimeMs(NotificationRecord record,
+                long timestampMillis) {
+            super.setLastNotificationUpdateTimeMs(record, timestampMillis);
+            mLastNotificationTimestamp = timestampMillis;
+        }
+
+        long getLastNotificationUpdateTimeMs(final NotificationRecord record) {
+            if (record.getChannel().hasUserSetSound()) {
+                return super.getLastNotificationUpdateTimeMs(record);
+            } else {
+                return mLastNotificationTimestamp;
+            }
+        }
+
+        @Override
+        void setApplyCooldownPerPackage(boolean applyPerPackage) {
+            super.setApplyCooldownPerPackage(applyPerPackage);
+            mAppStrategy.setApplyCooldownPerPackage(applyPerPackage);
         }
     }
 
@@ -1338,7 +1433,7 @@ public final class NotificationAttentionHelper {
                     updateLightsLocked();
                 }
             }
-            if (mEnablePoliteNotificationsFeature) {
+            if (Flags.politeNotifications()) {
                 if (NOTIFICATION_COOLDOWN_ENABLED_URI.equals(uri)) {
                     mNotificationCooldownEnabled = Settings.System.getIntForUser(
                             mContext.getContentResolver(),
@@ -1363,13 +1458,16 @@ public final class NotificationAttentionHelper {
                             Settings.System.NOTIFICATION_COOLDOWN_ALL,
                             DEFAULT_NOTIFICATION_COOLDOWN_ALL, UserHandle.USER_CURRENT)
                             != 0;
+                    mStrategy.setApplyCooldownPerPackage(mNotificationCooldownApplyToAll);
                 }
-                if (NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED_URI.equals(uri)) {
-                    mNotificationCooldownVibrateUnlocked = Settings.System.getIntForUser(
+                if (Flags.vibrateWhileUnlocked()) {
+                    if (NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED_URI.equals(uri)) {
+                        mNotificationCooldownVibrateUnlocked = Settings.System.getIntForUser(
                             mContext.getContentResolver(),
                             Settings.System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
                             DEFAULT_NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
                             UserHandle.USER_CURRENT) != 0;
+                    }
                 }
             }
         }

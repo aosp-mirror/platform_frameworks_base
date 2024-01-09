@@ -27,6 +27,7 @@ import android.view.DisplayAddress;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.config.layout.Layouts;
 import com.android.server.display.config.layout.XmlParser;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
 
@@ -68,12 +69,15 @@ class DeviceStateToLayoutMap {
 
     private final SparseArray<Layout> mLayoutMap = new SparseArray<>();
     private final DisplayIdProducer mIdProducer;
+    private final boolean mIsPortInDisplayLayoutEnabled;
 
-    DeviceStateToLayoutMap(DisplayIdProducer idProducer) {
-        this(idProducer, getConfigFile());
+    DeviceStateToLayoutMap(DisplayIdProducer idProducer, DisplayManagerFlags flags) {
+        this(idProducer, flags, getConfigFile());
     }
 
-    DeviceStateToLayoutMap(DisplayIdProducer idProducer, File configFile) {
+    DeviceStateToLayoutMap(DisplayIdProducer idProducer, DisplayManagerFlags flags,
+            File configFile) {
+        mIsPortInDisplayLayoutEnabled = flags.isPortInDisplayLayoutEnabled();
         mIdProducer = idProducer;
         loadLayoutsFromConfig(configFile);
         createLayout(STATE_DEFAULT);
@@ -93,6 +97,7 @@ class DeviceStateToLayoutMap {
         ipw.println("DeviceStateToLayoutMap:");
         ipw.increaseIndent();
 
+        ipw.println("mIsPortInDisplayLayoutEnabled=" + mIsPortInDisplayLayoutEnabled);
         ipw.println("Registered Layouts:");
         for (int i = 0; i < mLayoutMap.size(); i++) {
             ipw.println("state(" + mLayoutMap.keyAt(i) + "): " + mLayoutMap.valueAt(i));
@@ -132,13 +137,15 @@ class DeviceStateToLayoutMap {
                 final Layout layout = createLayout(state);
                 for (com.android.server.display.config.layout.Display d: l.getDisplay()) {
                     assert layout != null;
+                    final DisplayAddress address = getDisplayAddressForLayoutDisplay(d);
+
                     int position = getPosition(d.getPosition());
                     BigInteger leadDisplayPhysicalId = d.getLeadDisplayAddress();
                     DisplayAddress leadDisplayAddress = leadDisplayPhysicalId == null ? null
                             : DisplayAddress.fromPhysicalDisplayId(
                                     leadDisplayPhysicalId.longValue());
                     layout.createDisplayLocked(
-                            DisplayAddress.fromPhysicalDisplayId(d.getAddress().longValue()),
+                            address,
                             d.isDefaultDisplay(),
                             d.isEnabled(),
                             d.getDisplayGroup(),
@@ -156,6 +163,20 @@ class DeviceStateToLayoutMap {
             Slog.e(TAG, "Encountered an error while reading/parsing display layout config file: "
                     + configFile, e);
         }
+    }
+
+    private DisplayAddress getDisplayAddressForLayoutDisplay(
+            @NonNull com.android.server.display.config.layout.Display display) {
+        BigInteger xmlAddress = display.getAddress_optional();
+        if (xmlAddress != null) {
+            return DisplayAddress.fromPhysicalDisplayId(xmlAddress.longValue());
+        }
+        if (!mIsPortInDisplayLayoutEnabled || display.getPort_optional() == null) {
+            throw new IllegalArgumentException(
+                  "Must specify a display identifier in display layout configuration: " + display);
+        }
+        return DisplayAddress.fromPortAndModel((int) display.getPort_optional().longValue(),
+                /* model= */ null);
     }
 
     private int getPosition(@NonNull String position) {

@@ -83,7 +83,6 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM, true);
         when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
         when(mSystemUIDialogFactory.create()).thenReturn(mSystemUIDialog);
         when(mSystemUIDialog.getContext()).thenReturn(mContext);

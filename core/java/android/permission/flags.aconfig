@@ -64,3 +64,10 @@ flag {
   description: "enable Permission PREPARE_FACTORY_RESET."
   bug: "302016478"
 }
+
+flag {
+    name: "retail_demo_role_enabled"
+    namespace: "permissions"
+    description: "default retail demo role holder"
+    bug: "274132354"
+}

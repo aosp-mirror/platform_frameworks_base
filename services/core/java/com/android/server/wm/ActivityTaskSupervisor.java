@@ -134,7 +134,6 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.MediaStore;
 import android.util.ArrayMap;
-import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -820,8 +819,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         proc.pauseConfigurationDispatch();
 
         try {
-            r.startFreezingScreenLocked(proc, 0);
-
             // schedule launch ticks to collect information about slow apps.
             r.startLaunchTickingLocked();
             r.lastLaunchTime = SystemClock.uptimeMillis();
@@ -908,13 +905,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
                 mService.getAppWarningsLocked().onStartActivity(r);
 
-                // Because we could be starting an Activity in the system process this may not go
-                // across a Binder interface which would create a new Configuration. Consequently
-                // we have to always create a new Configuration here.
                 final Configuration procConfig = proc.prepareConfigurationForLaunchingActivity();
-                final MergedConfiguration mergedConfiguration = new MergedConfiguration(
-                        procConfig, r.getMergedOverrideConfiguration());
-                r.setLastReportedConfiguration(mergedConfiguration);
+                final Configuration overrideConfig = r.getMergedOverrideConfiguration();
+                r.setLastReportedConfiguration(procConfig, overrideConfig);
 
                 logIfTransactionTooLarge(r.intent, r.getSavedState());
 
@@ -932,13 +925,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 final int deviceId = getDeviceIdForDisplayId(r.getDisplayId());
                 final LaunchActivityItem launchActivityItem = LaunchActivityItem.obtain(r.token,
                         r.intent, System.identityHashCode(r), r.info,
-                        // TODO: Have this take the merged configuration instead of separate global
-                        // and override configs.
-                        mergedConfiguration.getGlobalConfiguration(),
-                        mergedConfiguration.getOverrideConfiguration(), deviceId,
+                        procConfig, overrideConfig, deviceId,
                         r.getFilteredReferrer(r.launchedFromPackage), task.voiceInteractor,
                         proc.getReportedProcState(), r.getSavedState(), r.getPersistentSavedState(),
-                        results, newIntents, r.takeOptions(), isTransitionForward,
+                        results, newIntents, r.takeSceneTransitionInfo(), isTransitionForward,
                         proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
                         r.shareableActivityToken, r.getLaunchedFromBubble(), fragmentToken);
 

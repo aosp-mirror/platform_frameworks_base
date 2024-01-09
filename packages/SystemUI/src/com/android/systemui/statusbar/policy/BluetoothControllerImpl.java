@@ -436,6 +436,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     @Override
     public void onServiceDisconnected() {}
 
+    // IMPORTANT: This handler guarantees that any operations on the list of callbacks is
+    // sequential, so no concurrent exceptions
     private final class H extends Handler {
         private final ArrayList<BluetoothController.Callback> mCallbacks = new ArrayList<>();
 

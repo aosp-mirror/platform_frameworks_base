@@ -34,7 +34,6 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.model.SysUiState
 
 /**
@@ -53,7 +52,6 @@ class ComponentSystemUIDialog(
     context: Context,
     theme: Int,
     dismissOnDeviceLock: Boolean,
-    featureFlags: FeatureFlags,
     dialogManager: SystemUIDialogManager,
     sysUiState: SysUiState,
     broadcastDispatcher: BroadcastDispatcher,
@@ -63,7 +61,6 @@ class ComponentSystemUIDialog(
         context,
         theme,
         dismissOnDeviceLock,
-        featureFlags,
         dialogManager,
         sysUiState,
         broadcastDispatcher,

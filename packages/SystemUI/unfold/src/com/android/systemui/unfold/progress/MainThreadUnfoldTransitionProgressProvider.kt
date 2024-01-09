@@ -24,12 +24,16 @@ import com.android.systemui.unfold.dagger.UnfoldMain
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.util.Collections.synchronizedMap
 
 /**
  * [UnfoldTransitionProgressProvider] that forwards all progress to the main thread handler.
  *
  * This is needed when progress are calculated in the background, but some listeners need the
  * callbacks in the main thread.
+ *
+ * Note that this class assumes that the root provider has thread safe callback registration, as
+ * they might be called from any thread.
  */
 class MainThreadUnfoldTransitionProgressProvider
 @AssistedInject
@@ -38,25 +42,18 @@ constructor(
     @Assisted private val rootProvider: UnfoldTransitionProgressProvider
 ) : UnfoldTransitionProgressProvider {
 
-    private val listenerMap = mutableMapOf<TransitionProgressListener, TransitionProgressListener>()
+    private val listenerMap: MutableMap<TransitionProgressListener, TransitionProgressListener> =
+        synchronizedMap(mutableMapOf())
 
     override fun addCallback(listener: TransitionProgressListener) {
-        assertMainThread()
         val proxy = TransitionProgressListerProxy(listener)
         rootProvider.addCallback(proxy)
         listenerMap[listener] = proxy
     }
 
     override fun removeCallback(listener: TransitionProgressListener) {
-        assertMainThread()
         val proxy = listenerMap.remove(listener) ?: return
         rootProvider.removeCallback(proxy)
-    }
-
-    private fun assertMainThread() {
-        check(mainHandler.looper.isCurrentThread) {
-            "Should be called from the main thread, but this is ${Thread.currentThread()}"
-        }
     }
 
     override fun destroy() {

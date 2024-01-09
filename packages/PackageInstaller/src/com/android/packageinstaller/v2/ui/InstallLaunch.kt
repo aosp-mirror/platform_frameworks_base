@@ -36,10 +36,10 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.android.packageinstaller.R
-import com.android.packageinstaller.v2.model.InstallRepository
 import com.android.packageinstaller.v2.model.InstallAborted
 import com.android.packageinstaller.v2.model.InstallFailed
 import com.android.packageinstaller.v2.model.InstallInstalling
+import com.android.packageinstaller.v2.model.InstallRepository
 import com.android.packageinstaller.v2.model.InstallStage
 import com.android.packageinstaller.v2.model.InstallSuccess
 import com.android.packageinstaller.v2.model.InstallUserActionRequired
@@ -50,6 +50,7 @@ import com.android.packageinstaller.v2.ui.fragments.InstallFailedFragment
 import com.android.packageinstaller.v2.ui.fragments.InstallInstallingFragment
 import com.android.packageinstaller.v2.ui.fragments.InstallStagingFragment
 import com.android.packageinstaller.v2.ui.fragments.InstallSuccessFragment
+import com.android.packageinstaller.v2.ui.fragments.ParseErrorFragment
 import com.android.packageinstaller.v2.ui.fragments.SimpleErrorFragment
 import com.android.packageinstaller.v2.viewmodel.InstallViewModel
 import com.android.packageinstaller.v2.viewmodel.InstallViewModelFactory
@@ -124,8 +125,15 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
             InstallStage.STAGE_ABORTED -> {
                 val aborted = installStage as InstallAborted
                 when (aborted.abortReason) {
-                    InstallAborted.ABORT_REASON_DONE, InstallAborted.ABORT_REASON_INTERNAL_ERROR ->
-                        setResult(aborted.activityResultCode, aborted.resultIntent, true)
+                    InstallAborted.ABORT_REASON_DONE,
+                    InstallAborted.ABORT_REASON_INTERNAL_ERROR -> {
+                        if (aborted.errorDialogType == InstallAborted.DLG_PACKAGE_ERROR) {
+                            val parseErrorDialog = ParseErrorFragment(aborted)
+                            showDialogInner(parseErrorDialog)
+                        } else {
+                            setResult(aborted.activityResultCode, aborted.resultIntent, true)
+                        }
+                    }
 
                     InstallAborted.ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted)
                     else -> setResult(Activity.RESULT_CANCELED, null, true)
@@ -204,7 +212,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
             val blockedByPolicyDialog = createDevicePolicyRestrictionDialog(restriction)
             // Don't finish the package installer app since the next dialog
             // will be shown by this app
-            shouldFinish = blockedByPolicyDialog != null
+            shouldFinish = blockedByPolicyDialog == null
             showDialogInner(blockedByPolicyDialog)
         }
         setResult(Activity.RESULT_CANCELED, null, shouldFinish)
@@ -265,6 +273,10 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
             installViewModel!!.cleanupInstall()
         }
         setResult(Activity.RESULT_CANCELED, null, true)
+    }
+
+    override fun onNegativeResponse(resultCode: Int, data: Intent?) {
+        setResult(resultCode, data, true)
     }
 
     override fun sendUnknownAppsIntent(sourcePackageName: String) {

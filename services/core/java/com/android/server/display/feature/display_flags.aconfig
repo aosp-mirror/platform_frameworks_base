@@ -3,6 +3,14 @@ package: "com.android.server.display.feature.flags"
 # Important: Flags must be accessed through DisplayManagerFlags.
 
 flag {
+    name: "enable_port_in_display_layout"
+    namespace: "display_manager"
+    description: "Allows refering to displays by port in display layout"
+    bug: "303058435"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_connected_display_management"
     namespace: "display_manager"
     description: "Feature flag for Connected Display management"

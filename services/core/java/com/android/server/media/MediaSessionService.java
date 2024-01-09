@@ -260,7 +260,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         return mGlobalPrioritySession != null && mGlobalPrioritySession.isActive();
     }
 
-    void onSessionActiveStateChanged(MediaSessionRecordImpl record) {
+    void onSessionActiveStateChanged(
+            MediaSessionRecordImpl record, @Nullable PlaybackState playbackState) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
             if (user == null) {
@@ -287,7 +288,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                 user.mPriorityStack.onSessionActiveStateChanged(record);
             }
             setForegroundServiceAllowance(
-                    record, /* allowRunningInForeground= */ record.isActive());
+                    record,
+                    /* allowRunningInForeground= */ record.isActive()
+                            && (playbackState == null || playbackState.isActive()));
             mHandler.postSessionsChanged(record);
         }
     }
@@ -386,7 +389,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             user.mPriorityStack.onPlaybackStateChanged(record, shouldUpdatePriority);
             if (playbackState != null) {
                 setForegroundServiceAllowance(
-                        record, playbackState.shouldAllowServiceToRunInForeground());
+                        record,
+                        /* allowRunningInForeground= */ playbackState.isActive()
+                                && record.isActive());
             }
         }
     }

@@ -393,7 +393,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToFullscreen_displayFullscreen_windowingModeSetToUndefined() {
         val task = setUpFreeformTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FULLSCREEN
-        controller.moveToFullscreen(task.taskId, desktopModeWindowDecoration)
+        controller.moveToFullscreen(task.taskId)
         val wct = getLatestExitDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_UNDEFINED)
@@ -403,7 +403,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToFullscreen_displayFreeform_windowingModeSetToFullscreen() {
         val task = setUpFreeformTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FREEFORM
-        controller.moveToFullscreen(task.taskId, desktopModeWindowDecoration)
+        controller.moveToFullscreen(task.taskId)
         val wct = getLatestExitDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
                 .isEqualTo(WINDOWING_MODE_FULLSCREEN)
@@ -411,7 +411,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun moveToFullscreen_nonExistentTask_doesNothing() {
-        controller.moveToFullscreen(999, desktopModeWindowDecoration)
+        controller.moveToFullscreen(999)
         verifyWCTNotExecuted()
     }
 
@@ -420,7 +420,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val taskDefaultDisplay = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val taskSecondDisplay = setUpFreeformTask(displayId = SECOND_DISPLAY)
 
-        controller.moveToFullscreen(taskDefaultDisplay.taskId, desktopModeWindowDecoration)
+        controller.moveToFullscreen(taskDefaultDisplay.taskId)
 
         with(getLatestExitDesktopWct()) {
             assertThat(changes.keys).contains(taskDefaultDisplay.token.asBinder())

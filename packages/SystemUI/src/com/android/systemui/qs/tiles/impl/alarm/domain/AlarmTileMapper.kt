@@ -24,6 +24,7 @@ import com.android.systemui.qs.tiles.impl.alarm.domain.model.AlarmTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.util.time.SystemClock
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -36,10 +37,12 @@ class AlarmTileMapper
 constructor(
     @Main private val resources: Resources,
     private val theme: Theme,
+    private val clock: SystemClock,
 ) : QSTileDataToStateMapper<AlarmTileModel> {
     companion object {
         val formatter12Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("E hh:mm a")
         val formatter24Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("E HH:mm")
+        val formatterDateOnly: DateTimeFormatter = DateTimeFormatter.ofPattern("E MMM d")
     }
     override fun map(config: QSTileConfig, data: AlarmTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
@@ -47,14 +50,32 @@ constructor(
                 is AlarmTileModel.NextAlarmSet -> {
                     activationState = QSTileState.ActivationState.ACTIVE
 
-                    val localDateTime =
+                    val alarmDateTime =
                         LocalDateTime.ofInstant(
                             Instant.ofEpochMilli(data.alarmClockInfo.triggerTime),
                             TimeZone.getDefault().toZoneId()
                         )
-                    secondaryLabel =
-                        if (data.is24HourFormat) formatter24Hour.format(localDateTime)
-                        else formatter12Hour.format(localDateTime)
+
+                    val nowDateTime =
+                        LocalDateTime.ofInstant(
+                            Instant.ofEpochMilli(clock.currentTimeMillis()),
+                            TimeZone.getDefault().toZoneId()
+                        )
+
+                    // Edge case: If it's 8:00:30 right now and alarm is requested for next week at
+                    // 8:00:29, we still want to show the date. Same at nanosecond level.
+                    val nextWeekThisTime = nowDateTime.plusWeeks(1).withSecond(0).withNano(0)
+
+                    // is the alarm over a week away?
+                    val shouldShowDateAndHideTime = alarmDateTime >= nextWeekThisTime
+
+                    if (shouldShowDateAndHideTime) {
+                        secondaryLabel = formatterDateOnly.format(alarmDateTime)
+                    } else {
+                        secondaryLabel =
+                            if (data.is24HourFormat) formatter24Hour.format(alarmDateTime)
+                            else formatter12Hour.format(alarmDateTime)
+                    }
                 }
                 is AlarmTileModel.NoAlarmSet -> {
                     activationState = QSTileState.ActivationState.INACTIVE

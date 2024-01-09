@@ -21,29 +21,30 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.model.SysUiState;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -61,17 +62,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SystemUIDialogTest extends SysuiTestCase {
 
     @Mock
-    private FeatureFlags mFeatureFlags;
-    @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private SystemUIDialog.Delegate mDelegate;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mDependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);
         mDependency.injectTestDependency(BroadcastDispatcher.class, mBroadcastDispatcher);
     }
 
@@ -110,16 +111,13 @@ public class SystemUIDialogTest extends SysuiTestCase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_PREDICTIVE_BACK_ANIMATE_DIALOGS)
     public void usePredictiveBackAnimFlag() {
-        when(mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM))
-                .thenReturn(true);
         final SystemUIDialog dialog = new SystemUIDialog(mContext);
 
         dialog.show();
 
         assertTrue(dialog.isShowing());
-        verify(mFeatureFlags, atLeast(1))
-                .isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM);
 
         dialog.dismiss();
         assertFalse(dialog.isShowing());
@@ -174,7 +172,6 @@ public class SystemUIDialogTest extends SysuiTestCase {
     private SystemUIDialog createDialogWithDelegate() {
         SystemUIDialog.Factory factory = new SystemUIDialog.Factory(
                 getContext(),
-                mFeatureFlags,
                 Dependency.get(SystemUIDialogManager.class),
                 Dependency.get(SysUiState.class),
                 Dependency.get(BroadcastDispatcher.class),

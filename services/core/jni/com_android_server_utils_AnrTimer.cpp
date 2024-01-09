@@ -486,9 +486,11 @@ class AnrTimerService::Ticker {
     void remove(AnrTimerService const* service) {
         AutoMutex _l(lock_);
         timer_id_t front = headTimerId();
-        for (auto i = running_.begin(); i != running_.end(); i++) {
+        for (auto i = running_.begin(); i != running_.end(); ) {
             if (i->service == service) {
-                running_.erase(i);
+                i = running_.erase(i);
+            } else {
+                i++;
             }
         }
         if (front != headTimerId()) restartLocked();

@@ -17,6 +17,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityOptions.SceneTransitionInfo;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.DestroyActivityItem;
@@ -207,7 +208,7 @@ public abstract class ClientTransactionHandler {
 
     /** Perform activity start. */
     public abstract void handleStartActivity(@NonNull ActivityClientRecord r,
-            PendingTransactionActions pendingActions, ActivityOptions activityOptions);
+            PendingTransactionActions pendingActions, SceneTransitionInfo sceneTransitionInfo);
 
     /** Get package info. */
     public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai);

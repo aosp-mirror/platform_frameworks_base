@@ -46,6 +46,7 @@ import com.android.packageinstaller.common.InstallEventReceiver
 import com.android.packageinstaller.v2.model.InstallAborted.Companion.ABORT_REASON_DONE
 import com.android.packageinstaller.v2.model.InstallAborted.Companion.ABORT_REASON_INTERNAL_ERROR
 import com.android.packageinstaller.v2.model.InstallAborted.Companion.ABORT_REASON_POLICY
+import com.android.packageinstaller.v2.model.InstallAborted.Companion.DLG_NONE
 import com.android.packageinstaller.v2.model.InstallAborted.Companion.DLG_PACKAGE_ERROR
 import com.android.packageinstaller.v2.model.InstallUserActionRequired.Companion.USER_ACTION_REASON_ANONYMOUS_SOURCE
 import com.android.packageinstaller.v2.model.InstallUserActionRequired.Companion.USER_ACTION_REASON_INSTALL_CONFIRMATION
@@ -283,14 +284,15 @@ class InstallRepository(private val context: Context) {
                             createSessionParams(intent, pfd, uri.toString())
                         stagedSessionId = packageInstaller.createSession(params)
                     }
-                } catch (e: IOException) {
+                } catch (e: Exception) {
                     Log.w(LOG_TAG, "Failed to create a staging session", e)
                     _stagingResult.value = InstallAborted(
                         ABORT_REASON_INTERNAL_ERROR,
                         resultIntent = Intent().putExtra(
                             Intent.EXTRA_INSTALL_RESULT, PackageManager.INSTALL_FAILED_INVALID_APK
                         ),
-                        activityResultCode = Activity.RESULT_FIRST_USER
+                        activityResultCode = Activity.RESULT_FIRST_USER,
+                        errorDialogType =  if (e is IOException) DLG_PACKAGE_ERROR else DLG_NONE
                     )
                     return
                 }
@@ -313,6 +315,14 @@ class InstallRepository(private val context: Context) {
                     )
                 }
             }
+        } else {
+            _stagingResult.value = InstallAborted(
+                ABORT_REASON_INTERNAL_ERROR,
+                resultIntent = Intent().putExtra(
+                    Intent.EXTRA_INSTALL_RESULT, PackageManager.INSTALL_FAILED_INVALID_URI
+                ),
+                activityResultCode = Activity.RESULT_FIRST_USER
+            )
         }
     }
 

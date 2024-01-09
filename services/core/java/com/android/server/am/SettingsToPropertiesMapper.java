@@ -176,6 +176,7 @@ public class SettingsToPropertiesMapper {
         "system_performance",
         "system_sw_touch",
         "system_sw_usb",
+        "statsd",
         "test_suites",
         "text",
         "threadnetwork",

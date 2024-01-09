@@ -20,3 +20,10 @@ flag {
     description: "Enable Predictive Back Animation in Bouncer"
     bug: "309545085"
 }
+
+flag {
+    name: "predictive_back_animate_dialogs"
+    namespace: "systemui"
+    description: "Enable Predictive Back Animation for SysUI dialogs"
+    bug: "309545085"
+}

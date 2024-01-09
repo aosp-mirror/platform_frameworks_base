@@ -494,7 +494,7 @@ constructor(
             }
 
             for (i in 0 until drawable.numberOfLayers) {
-                (drawable.getDrawable(i) as? GradientDrawable)?.cornerRadii = radii
+                applyBackgroundRadii(drawable.getDrawable(i), radii)
             }
         }
 

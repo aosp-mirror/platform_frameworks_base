@@ -89,7 +89,6 @@
                 android:textColorHint="@color/remote_input_hint"
                 android:textSize="16sp"
                 android:background="@null"
-                android:maxLines="4"
                 android:ellipsize="start"
                 android:inputType="textShortMessage|textMultiLine|textAutoCorrect|textCapSentences"
                 android:imeOptions="actionSend|flagNoExtractUi|flagNoFullscreen" />

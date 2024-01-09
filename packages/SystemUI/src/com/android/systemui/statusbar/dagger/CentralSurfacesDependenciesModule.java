@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.dagger;
 
+import static com.android.systemui.Flags.predictiveBackAnimateDialogs;
+
 import android.content.Context;
 import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
@@ -31,8 +33,6 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.DisplayTracker;
@@ -230,11 +230,11 @@ public interface CentralSurfacesDependenciesModule {
     /** */
     @Provides
     @SysUISingleton
-    static AnimationFeatureFlags provideAnimationFeatureFlags(FeatureFlags featureFlags) {
+    static AnimationFeatureFlags provideAnimationFeatureFlags() {
         return new AnimationFeatureFlags() {
             @Override
             public boolean isPredictiveBackQsDialogAnim() {
-                return featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM);
+                return predictiveBackAnimateDialogs();
             }
         };
     }

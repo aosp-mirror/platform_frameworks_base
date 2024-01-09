@@ -122,13 +122,14 @@ data class InstallAborted(
      */
     val resultIntent: Intent? = null,
     val activityResultCode: Int = Activity.RESULT_CANCELED,
-    val errorDialogType: Int? = 0,
+    val errorDialogType: Int? = DLG_NONE,
 ) : InstallStage(STAGE_ABORTED) {
 
     companion object {
         const val ABORT_REASON_INTERNAL_ERROR = 0
         const val ABORT_REASON_POLICY = 1
         const val ABORT_REASON_DONE = 2
+        const val DLG_NONE = 0
         const val DLG_PACKAGE_ERROR = 1
     }
 }
