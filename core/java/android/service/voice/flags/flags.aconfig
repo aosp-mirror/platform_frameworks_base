@@ -34,3 +34,10 @@ flag {
     description: "This flag allows visual query detection service egress detailed results. "
     bug: "318617199"
 }
+
+flag {
+    name: "allow_speaker_id_egress"
+    namespace: "machine_learning"
+    description: "This flag allows hotword detection service and visual query detection service to egress current speaker profile id."
+    bug: "318617199"
+}
