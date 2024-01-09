@@ -4877,14 +4877,14 @@ public class NotificationManagerService extends SystemService {
                                 continue;
                             }
                             notificationsRapidlyCleared = notificationsRapidlyCleared
-                                    || isNotificationRecent(r);
+                                    || isNotificationRecent(r.getUpdateTimeMs());
                             cancelNotificationFromListenerLocked(info, callingUid, callingPid,
                                     r.getSbn().getPackageName(), r.getSbn().getTag(),
                                     r.getSbn().getId(), userId, reason);
                         }
                     } else {
                         for (NotificationRecord notificationRecord : mNotificationList) {
-                            if (isNotificationRecent(notificationRecord)) {
+                            if (isNotificationRecent(notificationRecord.getUpdateTimeMs())) {
                                 notificationsRapidlyCleared = true;
                                 break;
                             }
@@ -4908,14 +4908,6 @@ public class NotificationManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-        }
-
-        private boolean isNotificationRecent(@NonNull NotificationRecord notificationRecord) {
-            if (!rapidClearNotificationsByListenerAppOpEnabled()) {
-                return false;
-            }
-            return notificationRecord.getFreshnessMs(System.currentTimeMillis())
-                    < NOTIFICATION_RAPID_CLEAR_THRESHOLD_MS;
         }
 
         /**
@@ -5041,12 +5033,11 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void snoozeNotificationUntilContextFromListener(INotificationListener token,
                 String key, String snoozeCriterionId) {
+            final int callingUid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
-                synchronized (mNotificationLock) {
-                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    snoozeNotificationInt(key, SNOOZE_UNTIL_UNSPECIFIED, snoozeCriterionId, info);
-                }
+                snoozeNotificationInt(callingUid, token, key, SNOOZE_UNTIL_UNSPECIFIED,
+                        snoozeCriterionId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -5060,12 +5051,10 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void snoozeNotificationUntilFromListener(INotificationListener token, String key,
                 long duration) {
+            final int callingUid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
-                synchronized (mNotificationLock) {
-                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    snoozeNotificationInt(key, duration, null, info);
-                }
+                snoozeNotificationInt(callingUid, token, key, duration, null);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -10306,16 +10295,22 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    void snoozeNotificationInt(String key, long duration, String snoozeCriterionId,
-            ManagedServiceInfo listener) {
-        if (listener == null) {
-            return;
-        }
-        String listenerName = listener.component.toShortString();
-        if ((duration <= 0 && snoozeCriterionId == null) || key == null) {
-            return;
-        }
+    void snoozeNotificationInt(int callingUid, INotificationListener token, String key,
+            long duration, String snoozeCriterionId) {
+        final String packageName;
+        final long notificationUpdateTimeMs;
+
         synchronized (mNotificationLock) {
+            final ManagedServiceInfo listener = mListeners.checkServiceTokenLocked(token);
+            if (listener == null) {
+                return;
+            }
+            packageName = listener.component.getPackageName();
+            String listenerName = listener.component.toShortString();
+            if ((duration <= 0 && snoozeCriterionId == null) || key == null) {
+                return;
+            }
+
             final NotificationRecord r = findInCurrentAndSnoozedNotificationByKeyLocked(key);
             if (r == null) {
                 return;
@@ -10323,14 +10318,20 @@ public class NotificationManagerService extends SystemService {
             if (!listener.enabledAndUserMatches(r.getSbn().getNormalizedUserId())){
                 return;
             }
+            notificationUpdateTimeMs = r.getUpdateTimeMs();
+
+            if (DBG) {
+                Slog.d(TAG, String.format("snooze event(%s, %d, %s, %s)", key, duration,
+                        snoozeCriterionId, listenerName));
+            }
+            // Needs to post so that it can cancel notifications not yet enqueued.
+            mHandler.post(new SnoozeNotificationRunnable(key, duration, snoozeCriterionId));
         }
 
-        if (DBG) {
-            Slog.d(TAG, String.format("snooze event(%s, %d, %s, %s)", key, duration,
-                    snoozeCriterionId, listenerName));
+        if (isNotificationRecent(notificationUpdateTimeMs)) {
+            mAppOps.noteOpNoThrow(AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
+                    callingUid, packageName, /* attributionTag= */ null, /* message= */ null);
         }
-        // Needs to post so that it can cancel notifications not yet enqueued.
-        mHandler.post(new SnoozeNotificationRunnable(key, duration, snoozeCriterionId));
     }
 
     void unsnoozeNotificationInt(String key, ManagedServiceInfo listener, boolean muteOnReturn) {
@@ -10340,6 +10341,14 @@ public class NotificationManagerService extends SystemService {
         }
         mSnoozeHelper.repost(key, muteOnReturn);
         handleSavePolicyFile();
+    }
+
+    private boolean isNotificationRecent(long notificationUpdateTimeMs) {
+        if (!rapidClearNotificationsByListenerAppOpEnabled()) {
+            return false;
+        }
+        return System.currentTimeMillis() - notificationUpdateTimeMs
+                < NOTIFICATION_RAPID_CLEAR_THRESHOLD_MS;
     }
 
     @GuardedBy("mNotificationLock")
