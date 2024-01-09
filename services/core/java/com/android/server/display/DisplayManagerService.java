@@ -1615,6 +1615,10 @@ public final class DisplayManagerService extends SystemService {
                 if ((flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) == 0) {
                     Slog.w(TAG, "Display created with home support but lacks "
                             + "VIRTUAL_DISPLAY_FLAG_TRUSTED, ignoring the home support request.");
+                } else if ((flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
+                    Slog.w(TAG, "Display created with home support but has "
+                            + "VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, ignoring the home support "
+                            + "request.");
                 } else {
                     mWindowManagerInternal.setHomeSupportedOnDisplay(displayUniqueId,
                             Display.TYPE_VIRTUAL, true);
