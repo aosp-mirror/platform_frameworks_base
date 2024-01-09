@@ -3055,6 +3055,29 @@ interface ITelephony {
     boolean setEmergencyCallToSatelliteHandoverType(int handoverType, int delaySeconds);
 
     /**
+     * This API should be used by only CTS tests to forcefully set the country codes.
+     *
+     * @param reset {@code true} mean the overridden country codes should not be used, {@code false}
+     *              otherwise.
+     * @return {@code true} if the country code is set successfully, {@code false} otherwise.
+     */
+    boolean setCountryCodes(in boolean reset, in List<String> currentNetworkCountryCodes,
+            in Map cachedNetworkCountryCodes, in String locationCountryCode,
+            in long locationCountryCodeTimestampNanos);
+
+    /**
+     * This API should be used by only CTS tests to override the overlay configs of satellite
+     * access controller.
+     *
+     * @param reset {@code true} mean the overridden configs should not be used, {@code false}
+     *              otherwise.
+     * @return {@code true} if the overlay configs are set successfully, {@code false} otherwise.
+     */
+    boolean setSatelliteAccessControlOverlayConfigs(in boolean reset, in boolean isAllowed,
+            in String s2CellFile, in long locationFreshDurationNanos,
+            in List<String> satelliteCountryCodes);
+
+    /**
      * Test method to confirm the file contents are not altered.
      */
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission("

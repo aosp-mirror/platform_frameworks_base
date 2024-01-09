@@ -212,6 +212,36 @@
     <bool name="config_send_satellite_datagram_to_modem_in_demo_mode">false</bool>
     <java-symbol type="bool" name="config_send_satellite_datagram_to_modem_in_demo_mode" />
 
+    <!-- List of country codes where oem-enabled satellite services are either allowed or disallowed
+         by the device. Each country code is a lowercase 2 character ISO-3166-1 alpha-2.
+         -->
+    <string-array name="config_oem_enabled_satellite_country_codes">
+    </string-array>
+    <java-symbol type="array" name="config_oem_enabled_satellite_country_codes" />
+
+    <!-- The file storing S2-cell-based satellite access restriction of the countries defined by
+         config_oem_enabled_satellite_countries. -->
+    <string name="config_oem_enabled_satellite_s2cell_file"></string>
+    <java-symbol type="string" name="config_oem_enabled_satellite_s2cell_file" />
+
+    <!-- Whether to treat the countries defined by the config_oem_enabled_satellite_countries
+         as satellite-allowed areas. The default true value means the countries defined by
+         config_oem_enabled_satellite_countries will be treated as satellite-allowed areas.
+         -->
+    <bool name="config_oem_enabled_satellite_access_allow">true</bool>
+    <java-symbol type="bool" name="config_oem_enabled_satellite_access_allow" />
+
+    <!-- The time duration in seconds which is used to decide whether the Location returned from
+         LocationManager#getLastKnownLocation is fresh.
+
+         The Location is considered fresh if the duration from the Location's elapsed real time to
+         the current elapsed real time is less than this config. If the Location is considered
+         fresh, it will be used as the current location by Telephony to decide whether satellite
+         services should be allowed.
+         -->
+    <integer name="config_oem_enabled_satellite_location_fresh_duration">600</integer>
+    <java-symbol type="integer" name="config_oem_enabled_satellite_location_fresh_duration" />
+
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not
          supported. The network will be torn down on the source transport, and will be
