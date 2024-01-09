@@ -63,7 +63,7 @@ fun SettingsExposedDropdownMenuCheckBox(
         onExpandedChange = { expanded = it },
         modifier = Modifier
             .width(350.dp)
-            .padding(SettingsDimension.itemPadding)
+            .padding(SettingsDimension.menuFieldPadding)
             .onSizeChanged { dropDownWidth = it.width },
     ) {
         OutlinedTextField(
