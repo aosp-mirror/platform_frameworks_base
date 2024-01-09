@@ -184,10 +184,6 @@ public class LocalMediaManager implements BluetoothCallback {
             return false;
         }
 
-        if (mCurrentConnectedDevice != null) {
-            mCurrentConnectedDevice.disconnect();
-        }
-
         device.setState(MediaDeviceState.STATE_CONNECTING);
         mInfoMediaManager.connectToDevice(device);
         return true;

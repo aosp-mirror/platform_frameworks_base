@@ -396,12 +396,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     }
 
     /**
-     * Stop transfer MediaDevice
-     */
-    public void disconnect() {
-    }
-
-    /**
      * Set current device's state
      */
     public void setState(@LocalMediaManager.MediaDeviceState int state) {
