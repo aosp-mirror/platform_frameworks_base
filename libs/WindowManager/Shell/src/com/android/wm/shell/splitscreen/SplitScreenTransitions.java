@@ -388,6 +388,7 @@ class SplitScreenTransitions {
 
     IBinder startResizeTransition(WindowContainerTransaction wct,
             Transitions.TransitionHandler handler,
+            @Nullable TransitionConsumedCallback consumedCallback,
             @Nullable TransitionFinishedCallback finishCallback) {
         if (mPendingResize != null) {
             mPendingResize.cancel(null);
@@ -396,13 +397,14 @@ class SplitScreenTransitions {
         }
 
         IBinder transition = mTransitions.startTransition(TRANSIT_CHANGE, wct, handler);
-        setResizeTransition(transition, finishCallback);
+        setResizeTransition(transition, consumedCallback, finishCallback);
         return transition;
     }
 
     void setResizeTransition(@NonNull IBinder transition,
+            @Nullable TransitionConsumedCallback consumedCallback,
             @Nullable TransitionFinishedCallback finishCallback) {
-        mPendingResize = new TransitSession(transition, null /* consumedCb */, finishCallback);
+        mPendingResize = new TransitSession(transition, consumedCallback, finishCallback);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                 + " deduced Resize split screen");
     }
