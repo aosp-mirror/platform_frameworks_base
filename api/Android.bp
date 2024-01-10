@@ -444,3 +444,12 @@ genrule {
         targets: ["droid"],
     },
 }
+
+phony_rule {
+    name: "checkapi",
+    phony_deps: [
+        "frameworks-base-api-current-compat",
+        "frameworks-base-api-system-current-compat",
+        "frameworks-base-api-module-lib-current-compat",
+    ],
+}
