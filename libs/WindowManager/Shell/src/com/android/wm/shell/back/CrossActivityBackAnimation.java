@@ -199,6 +199,10 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
     }
 
     private void applyTransform(SurfaceControl leash, RectF targetRect, float targetAlpha) {
+        if (leash == null || !leash.isValid()) {
+            return;
+        }
+
         final float scale = targetRect.width() / mStartTaskRect.width();
         mTransformMatrix.reset();
         mTransformMatrix.setScale(scale, scale);
@@ -211,12 +215,16 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
 
     private void finishAnimation() {
         if (mEnteringTarget != null) {
-            mTransaction.setCornerRadius(mEnteringTarget.leash, 0);
-            mEnteringTarget.leash.release();
+            if (mEnteringTarget.leash != null && mEnteringTarget.leash.isValid()) {
+                mTransaction.setCornerRadius(mEnteringTarget.leash, 0);
+                mEnteringTarget.leash.release();
+            }
             mEnteringTarget = null;
         }
         if (mClosingTarget != null) {
-            mClosingTarget.leash.release();
+            if (mClosingTarget.leash != null) {
+                mClosingTarget.leash.release();
+            }
             mClosingTarget = null;
         }
         if (mBackground != null) {
@@ -260,7 +268,9 @@ public class CrossActivityBackAnimation extends ShellBackAnimation {
     }
 
     private void onGestureCommitted() {
-        if (mEnteringTarget == null || mClosingTarget == null) {
+        if (mEnteringTarget == null || mClosingTarget == null || mClosingTarget.leash == null
+                || mEnteringTarget.leash == null || !mEnteringTarget.leash.isValid()
+                || !mClosingTarget.leash.isValid()) {
             finishAnimation();
             return;
         }

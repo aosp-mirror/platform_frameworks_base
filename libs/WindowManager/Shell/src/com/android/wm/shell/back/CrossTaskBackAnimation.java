@@ -205,7 +205,9 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         float top = mapRange(progress, mClosingStartRect.top, targetTop);
         float width = mapRange(progress, mClosingStartRect.width(), targetWidth);
         float height = mapRange(progress, mClosingStartRect.height(), targetHeight);
-        mTransaction.setLayer(mClosingTarget.leash, 0);
+        if (mClosingTarget.leash != null && mClosingTarget.leash.isValid()) {
+            mTransaction.setLayer(mClosingTarget.leash, 0);
+        }
 
         mClosingCurrentRect.set(left, top, left + width, top + height);
         applyTransform(mClosingTarget.leash, mClosingCurrentRect, mCornerRadius);
@@ -223,7 +225,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     /** Transform the target window to match the target rect. */
     private void applyTransform(SurfaceControl leash, RectF targetRect, float cornerRadius) {
-        if (leash == null) {
+        if (leash == null || !leash.isValid()) {
             return;
         }
 
