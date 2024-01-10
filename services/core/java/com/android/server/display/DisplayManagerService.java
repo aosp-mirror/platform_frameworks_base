@@ -3390,17 +3390,10 @@ public final class DisplayManagerService extends SystemService {
         // with the corresponding displaydevice.
         HighBrightnessModeMetadata hbmMetadata =
                 mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(display);
-        if (mConfigParameterProvider.isNewPowerControllerFeatureEnabled()) {
-            displayPowerController = new DisplayPowerController2(
-                    mContext, /* injector= */ null, mDisplayPowerCallbacks, mPowerHandler,
-                    mSensorManager, mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
-                    () -> handleBrightnessChange(display), hbmMetadata, mBootCompleted, mFlags);
-        } else {
-            displayPowerController = new DisplayPowerController(
-                    mContext, /* injector= */ null, mDisplayPowerCallbacks, mPowerHandler,
-                    mSensorManager, mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
-                    () -> handleBrightnessChange(display), hbmMetadata, mBootCompleted, mFlags);
-        }
+        displayPowerController = new DisplayPowerController2(
+                mContext, /* injector= */ null, mDisplayPowerCallbacks, mPowerHandler,
+                mSensorManager, mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
+                () -> handleBrightnessChange(display), hbmMetadata, mBootCompleted, mFlags);
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
         return displayPowerController;
     }
