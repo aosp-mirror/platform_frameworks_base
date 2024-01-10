@@ -247,6 +247,7 @@ public class SQLiteDatabaseTest {
 
         final String query = "--comment\nSELECT count(*) from t1";
 
+        database.beginTransactionReadOnly();
         try {
             for (int i = count; i > 0; i--) {
                 ticker.arriveAndAwaitAdvance();
@@ -260,6 +261,7 @@ public class SQLiteDatabaseTest {
         } catch (Throwable t) {
             errors.add(t);
         } finally {
+            database.endTransaction();
             ticker.arriveAndDeregister();
         }
     }
