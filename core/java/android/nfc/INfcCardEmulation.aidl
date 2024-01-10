@@ -43,4 +43,7 @@ interface INfcCardEmulation
     ApduServiceInfo getPreferredPaymentService(int userHandle);
     boolean setServiceEnabledForCategoryOther(int userHandle, in ComponentName app, boolean status);
     boolean isDefaultPaymentRegistered();
+
+    boolean overrideRoutingTable(int userHandle, String protocol, String technology);
+    boolean recoverRoutingTable(int userHandle);
 }

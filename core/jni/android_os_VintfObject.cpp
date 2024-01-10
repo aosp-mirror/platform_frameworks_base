@@ -46,6 +46,7 @@ using vintf::toXml;
 using vintf::Version;
 using vintf::VintfObject;
 using vintf::Vndk;
+using vintf::CheckFlags::ENABLE_ALL_CHECKS;
 
 template<typename V>
 static inline jobjectArray toJavaStringArray(JNIEnv* env, const V& v) {
@@ -93,12 +94,13 @@ static jobjectArray android_os_VintfObject_report(JNIEnv* env, jclass)
     return toJavaStringArray(env, cStrings);
 }
 
-static jint android_os_VintfObject_verifyWithoutAvb(JNIEnv* env, jclass) {
+static jint android_os_VintfObject_verifyBuildAtBoot(JNIEnv* env, jclass) {
     std::string error;
-    int32_t status = VintfObject::GetInstance()->checkCompatibility(&error,
-            ::android::vintf::CheckFlags::DISABLE_AVB_CHECK);
+    int32_t status =
+            VintfObject::GetInstance()
+                    ->checkCompatibility(&error, ENABLE_ALL_CHECKS.disableAvb().disableKernel());
     if (status)
-        LOG(WARNING) << "VintfObject.verifyWithoutAvb() returns " << status << ": " << error;
+        LOG(WARNING) << "VintfObject.verifyBuildAtBoot() returns " << status << ": " << error;
     return status;
 }
 
@@ -170,7 +172,7 @@ static jobject android_os_VintfObject_getTargetFrameworkCompatibilityMatrixVersi
 
 static const JNINativeMethod gVintfObjectMethods[] = {
         {"report", "()[Ljava/lang/String;", (void*)android_os_VintfObject_report},
-        {"verifyWithoutAvb", "()I", (void*)android_os_VintfObject_verifyWithoutAvb},
+        {"verifyBuildAtBoot", "()I", (void*)android_os_VintfObject_verifyBuildAtBoot},
         {"getHalNamesAndVersions", "()[Ljava/lang/String;",
          (void*)android_os_VintfObject_getHalNamesAndVersions},
         {"getSepolicyVersion", "()Ljava/lang/String;",

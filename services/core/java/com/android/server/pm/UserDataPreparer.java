@@ -92,7 +92,7 @@ class UserDataPreparer {
                 volumeUuid, userId, flags, isNewUser);
         try {
             // Prepare CE and/or DE storage.
-            storage.prepareUserStorage(volumeUuid, userId, userSerial, flags);
+            storage.prepareUserStorage(volumeUuid, userId, flags);
 
             // Ensure that the data directories of a removed user with the same ID are not being
             // reused.  New users must get fresh data directories, to avoid leaking data.
