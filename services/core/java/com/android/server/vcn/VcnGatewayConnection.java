@@ -1242,9 +1242,28 @@ public class VcnGatewayConnection extends StateMachine {
                 createScheduledAlarm(
                         SAFEMODE_TIMEOUT_ALARM,
                         delayedMessage,
-                        mVcnContext.isInTestMode()
-                                ? TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS_TEST_MODE)
-                                : TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
+                        getSafeModeTimeoutMs(mVcnContext, mLastSnapshot, mSubscriptionGroup));
+    }
+
+    /** Gets the safe mode timeout */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static long getSafeModeTimeoutMs(
+            VcnContext vcnContext, TelephonySubscriptionSnapshot snapshot, ParcelUuid subGrp) {
+        final int defaultSeconds =
+                vcnContext.isInTestMode()
+                        ? SAFEMODE_TIMEOUT_SECONDS_TEST_MODE
+                        : SAFEMODE_TIMEOUT_SECONDS;
+
+        final PersistableBundleWrapper carrierConfig = snapshot.getCarrierConfigForSubGrp(subGrp);
+        int resultSeconds = defaultSeconds;
+
+        if (vcnContext.isFlagSafeModeTimeoutConfigEnabled() && carrierConfig != null) {
+            resultSeconds =
+                    carrierConfig.getInt(
+                            VcnManager.VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY, defaultSeconds);
+        }
+
+        return TimeUnit.SECONDS.toMillis(resultSeconds);
     }
 
     private void cancelSafeModeAlarm() {
