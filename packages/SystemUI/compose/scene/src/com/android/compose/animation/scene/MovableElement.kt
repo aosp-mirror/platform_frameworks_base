@@ -174,22 +174,6 @@ private fun shouldComposeMovableElement(
         // If we are idle, there is only one [scene] that is composed so we can compose our
         // movable content here.
         ?: return true
-    val fromScene = transition.fromScene
-    val toScene = transition.toScene
-
-    val fromReady = layoutImpl.isSceneReady(fromScene)
-    val toReady = layoutImpl.isSceneReady(toScene)
-
-    if (!fromReady && !toReady) {
-        // Neither of the scenes will be drawn, so where we compose it doesn't really matter. Note
-        // that we could have slightly more complicated logic here to optimize for this case, but
-        // it's not worth it given that readyScenes should disappear soon (b/316901148).
-        return scene == toScene
-    }
-
-    // If one of the scenes is not ready, compose it in the other one to make sure it is drawn.
-    if (!fromReady) return scene == toScene
-    if (!toReady) return scene == fromScene
 
     // Always compose movable elements in the scene picked by their scene picker.
     return shouldDrawOrComposeSharedElement(

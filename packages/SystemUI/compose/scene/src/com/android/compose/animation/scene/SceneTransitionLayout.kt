@@ -19,17 +19,48 @@ package com.android.compose.animation.scene
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
-import kotlinx.coroutines.channels.Channel
+
+/**
+ * [SceneTransitionLayout] is a container that automatically animates its content whenever its state
+ * changes.
+ *
+ * Note: You should use [androidx.compose.animation.AnimatedContent] instead of
+ * [SceneTransitionLayout] if it fits your need. Use [SceneTransitionLayout] over AnimatedContent if
+ * you need support for swipe gestures, shared elements or transitions defined declaratively outside
+ * UI code.
+ *
+ * @param state the state of this layout.
+ * @param edgeDetector the edge detector used to detect which edge a swipe is started from, if any.
+ * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
+ *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
+ * @param scenes the configuration of the different scenes of this layout.
+ * @see updateSceneTransitionLayoutState
+ */
+@Composable
+fun SceneTransitionLayout(
+    state: SceneTransitionLayoutState,
+    modifier: Modifier = Modifier,
+    edgeDetector: EdgeDetector = DefaultEdgeDetector,
+    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
+    scenes: SceneTransitionLayoutScope.() -> Unit,
+) {
+    SceneTransitionLayoutForTesting(
+        state,
+        modifier,
+        edgeDetector,
+        transitionInterceptionThreshold,
+        onLayoutImpl = null,
+        scenes,
+    )
+}
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever
@@ -45,7 +76,6 @@ import kotlinx.coroutines.channels.Channel
  *   This is called when the user commits a transition to a new scene because of a [UserAction], for
  *   instance by triggering back navigation or by swiping to a new scene.
  * @param transitions the definition of the transitions used to animate a change of scene.
- * @param state the observable state of this layout.
  * @param edgeDetector the edge detector used to detect which edge a swipe is started from, if any.
  * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
  *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
@@ -57,20 +87,16 @@ fun SceneTransitionLayout(
     onChangeScene: (SceneKey) -> Unit,
     transitions: SceneTransitions,
     modifier: Modifier = Modifier,
-    state: SceneTransitionLayoutState = remember { SceneTransitionLayoutState(currentScene) },
     edgeDetector: EdgeDetector = DefaultEdgeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
-    SceneTransitionLayoutForTesting(
-        currentScene,
-        onChangeScene,
-        modifier,
-        transitions,
+    val state = updateSceneTransitionLayoutState(currentScene, onChangeScene, transitions)
+    SceneTransitionLayout(
         state,
+        modifier,
         edgeDetector,
         transitionInterceptionThreshold,
-        onLayoutImpl = null,
         scenes,
     )
 }
@@ -201,18 +227,6 @@ interface BaseSceneScope {
         topBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
         bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
     ): Modifier
-
-    /**
-     * Punch a hole in this [element] using the bounds of [bounds] in [scene] and the given [shape].
-     *
-     * Punching a hole in an element will "remove" any pixel drawn by that element in the hole area.
-     * This can be used to make content drawn below an opaque element visible. For example, if we
-     * have [this lockscreen scene](http://shortn/_VYySFnJDhN) drawn below
-     * [this shade scene](http://shortn/_fpxGUk0Rg7) and punch a hole in the latter using the big
-     * clock time bounds and a RoundedCornerShape(10dp), [this](http://shortn/_qt80IvORFj) would be
-     * the result.
-     */
-    fun Modifier.punchHole(element: ElementKey, bounds: ElementKey, shape: Shape): Modifier
 
     /**
      * Don't resize during transitions. This can for instance be used to make sure that scrollable
@@ -346,11 +360,8 @@ enum class SwipeDirection(val orientation: Orientation) {
  */
 @Composable
 internal fun SceneTransitionLayoutForTesting(
-    currentScene: SceneKey,
-    onChangeScene: (SceneKey) -> Unit,
+    state: SceneTransitionLayoutState,
     modifier: Modifier = Modifier,
-    transitions: SceneTransitions = transitions {},
-    state: SceneTransitionLayoutState = remember { SceneTransitionLayoutState(currentScene) },
     edgeDetector: EdgeDetector = DefaultEdgeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
@@ -360,8 +371,7 @@ internal fun SceneTransitionLayoutForTesting(
     val coroutineScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
-                state = state as SceneTransitionLayoutStateImpl,
-                onChangeScene = onChangeScene,
+                state = state as BaseSceneTransitionLayoutState,
                 density = density,
                 edgeDetector = edgeDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
@@ -375,7 +385,6 @@ internal fun SceneTransitionLayoutForTesting(
     // SnapshotStateMap anymore.
     layoutImpl.updateScenes(scenes)
 
-    val targetSceneChannel = remember { Channel<SceneKey>(Channel.CONFLATED) }
     SideEffect {
         if (state != layoutImpl.state) {
             error(
@@ -384,23 +393,8 @@ internal fun SceneTransitionLayoutForTesting(
             )
         }
 
-        layoutImpl.onChangeScene = onChangeScene
-        (state as SceneTransitionLayoutStateImpl).transitions = transitions
         layoutImpl.density = density
         layoutImpl.edgeDetector = edgeDetector
-
-        state.transitions = transitions
-
-        targetSceneChannel.trySend(currentScene)
-    }
-
-    LaunchedEffect(targetSceneChannel) {
-        for (newKey in targetSceneChannel) {
-            // Inspired by AnimateAsState.kt: let's poll the last value to avoid being one frame
-            // late.
-            val newKey = targetSceneChannel.tryReceive().getOrNull() ?: newKey
-            animateToScene(layoutImpl.state, newKey)
-        }
     }
 
     layoutImpl.Content(modifier)

@@ -20,10 +20,10 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
@@ -46,41 +46,18 @@ import kotlinx.coroutines.launch
 /** An element on screen, that can be composed in one or more scenes. */
 @Stable
 internal class Element(val key: ElementKey) {
-    /**
-     * The last state of this element, coming from any scene. Note that this state will be unstable
-     * if this element is present in multiple scenes but the shared element animation is disabled,
-     * given that multiple instances of the element with different states will write to this state.
-     * You should prefer using [SceneState.lastState] in the current scene when it is defined.
-     */
-    val lastSharedState = State()
-
     /** The mapping between a scene and the state this element has in that scene, if any. */
-    val sceneStates = mutableMapOf<SceneKey, SceneState>()
+    // TODO(b/316901148): Make this a normal map instead once we can make sure that new transitions
+    // are first seen by composition then layout/drawing code. See 316901148#comment2 for details.
+    val sceneStates = SnapshotStateMap<SceneKey, SceneState>()
 
     override fun toString(): String {
         return "Element(key=$key)"
     }
 
-    /** The state of this element, either in a specific scene or in a shared context. */
-    class State {
-        /** The offset of the element, relative to the SceneTransitionLayout containing it. */
-        var offset = Offset.Unspecified
-
-        /** The size of this element. */
-        var size = SizeUnspecified
-
-        /** The draw scale of this element. */
-        var drawScale = Scale.Default
-
-        /** The alpha of this element. */
-        var alpha = AlphaUnspecified
-    }
-
     /** The last and target state of this element in a given scene. */
     @Stable
     class SceneState(val scene: SceneKey) {
-        val lastState = State()
-
         var targetSize by mutableStateOf(SizeUnspecified)
         var targetOffset by mutableStateOf(Offset.Unspecified)
 
@@ -94,7 +71,6 @@ internal class Element(val key: ElementKey) {
 
     companion object {
         val SizeUnspecified = IntSize(Int.MAX_VALUE, Int.MAX_VALUE)
-        val AlphaUnspecified = Float.MIN_VALUE
     }
 }
 
@@ -219,7 +195,7 @@ internal class ElementNode(
     }
 
     override fun ContentDrawScope.draw() {
-        val drawScale = getDrawScale(layoutImpl, element, scene, sceneState)
+        val drawScale = getDrawScale(layoutImpl, element, scene)
         if (drawScale == Scale.Default) {
             drawContent()
         } else {
@@ -264,7 +240,6 @@ private fun shouldDrawElement(
     // Always draw the element if there is no ongoing transition or if the element is not shared.
     if (
         transition == null ||
-            !layoutImpl.isTransitionReady(transition) ||
             transition.fromScene !in element.sceneStates ||
             transition.toScene !in element.sceneStates
     ) {
@@ -304,7 +279,7 @@ internal fun shouldDrawOrComposeSharedElement(
 }
 
 private fun isSharedElementEnabled(
-    layoutState: SceneTransitionLayoutStateImpl,
+    layoutState: BaseSceneTransitionLayoutState,
     transition: TransitionState.Transition,
     element: ElementKey,
 ): Boolean {
@@ -312,7 +287,7 @@ private fun isSharedElementEnabled(
 }
 
 internal fun sharedElementTransformation(
-    layoutState: SceneTransitionLayoutStateImpl,
+    layoutState: BaseSceneTransitionLayoutState,
     transition: TransitionState.Transition,
     element: ElementKey,
 ): SharedElementTransformation? {
@@ -342,17 +317,8 @@ private fun isElementOpaque(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
     scene: Scene,
-    sceneState: Element.SceneState,
 ): Boolean {
     val transition = layoutImpl.state.currentTransition ?: return true
-
-    if (!layoutImpl.isTransitionReady(transition)) {
-        val lastValue =
-            sceneState.lastState.alpha.takeIf { it != Element.AlphaUnspecified }
-                ?: element.lastSharedState.alpha.takeIf { it != Element.AlphaUnspecified } ?: 1f
-
-        return lastValue == 1f
-    }
 
     val fromScene = transition.fromScene
     val toScene = transition.toScene
@@ -383,7 +349,6 @@ private fun elementAlpha(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
     scene: Scene,
-    sceneState: Element.SceneState,
 ): Float {
     return computeValue(
             layoutImpl,
@@ -393,10 +358,7 @@ private fun elementAlpha(
             transformation = { it.alpha },
             idleValue = 1f,
             currentValue = { 1f },
-            lastValue = {
-                sceneState.lastState.alpha.takeIf { it != Element.AlphaUnspecified }
-                    ?: element.lastSharedState.alpha.takeIf { it != Element.AlphaUnspecified } ?: 1f
-            },
+            isSpecified = { true },
             ::lerp,
         )
         .coerceIn(0f, 1f)
@@ -434,34 +396,23 @@ private fun IntermediateMeasureScope.measure(
             transformation = { it.size },
             idleValue = lookaheadSize,
             currentValue = { measurable.measure(constraints).also { maybePlaceable = it }.size() },
-            lastValue = {
-                sceneState.lastState.size.takeIf { it != Element.SizeUnspecified }
-                    ?: element.lastSharedState.size.takeIf { it != Element.SizeUnspecified }
-                        ?: measurable.measure(constraints).also { maybePlaceable = it }.size()
-            },
+            isSpecified = { it != Element.SizeUnspecified },
             ::lerp,
         )
 
-    val placeable =
-        maybePlaceable
-            ?: measurable.measure(
-                Constraints.fixed(
-                    targetSize.width.coerceAtLeast(0),
-                    targetSize.height.coerceAtLeast(0),
-                )
+    return maybePlaceable
+        ?: measurable.measure(
+            Constraints.fixed(
+                targetSize.width.coerceAtLeast(0),
+                targetSize.height.coerceAtLeast(0),
             )
-
-    val size = placeable.size()
-    element.lastSharedState.size = size
-    sceneState.lastState.size = size
-    return placeable
+        )
 }
 
 private fun getDrawScale(
     layoutImpl: SceneTransitionLayoutImpl,
     element: Element,
-    scene: Scene,
-    sceneState: Element.SceneState
+    scene: Scene
 ): Scale {
     return computeValue(
         layoutImpl,
@@ -471,10 +422,7 @@ private fun getDrawScale(
         transformation = { it.drawScale },
         idleValue = Scale.Default,
         currentValue = { Scale.Default },
-        lastValue = {
-            sceneState.lastState.drawScale.takeIf { it != Scale.Default }
-                ?: element.lastSharedState.drawScale
-        },
+        isSpecified = { true },
         ::lerp,
     )
 }
@@ -498,9 +446,12 @@ private fun IntermediateMeasureScope.place(
             sceneState.targetOffset = targetOffsetInScene
         }
 
+        // No need to place the element in this scene if we don't want to draw it anyways.
+        if (!shouldDrawElement(layoutImpl, scene, element)) {
+            return
+        }
+
         val currentOffset = lookaheadScopeCoordinates.localPositionOf(coords, Offset.Zero)
-        val lastSharedState = element.lastSharedState
-        val lastSceneState = sceneState.lastState
         val targetOffset =
             computeValue(
                 layoutImpl,
@@ -510,37 +461,19 @@ private fun IntermediateMeasureScope.place(
                 transformation = { it.offset },
                 idleValue = targetOffsetInScene,
                 currentValue = { currentOffset },
-                lastValue = {
-                    lastSceneState.offset.takeIf { it.isSpecified }
-                        ?: lastSharedState.offset.takeIf { it.isSpecified } ?: currentOffset
-                },
+                isSpecified = { it != Offset.Unspecified },
                 ::lerp,
             )
 
-        lastSharedState.offset = targetOffset
-        lastSceneState.offset = targetOffset
-
-        // No need to place the element in this scene if we don't want to draw it anyways. Note that
-        // it's still important to compute the target offset and update last(Shared|Scene)State,
-        // otherwise they will be out of date.
-        if (!shouldDrawElement(layoutImpl, scene, element)) {
-            return
-        }
-
         val offset = (targetOffset - currentOffset).round()
-        if (isElementOpaque(layoutImpl, element, scene, sceneState)) {
+        if (isElementOpaque(layoutImpl, element, scene)) {
             // TODO(b/291071158): Call placeWithLayer() if offset != IntOffset.Zero and size is not
             // animated once b/305195729 is fixed. Test that drawing is not invalidated in that
             // case.
             placeable.place(offset)
-            lastSharedState.alpha = 1f
-            lastSceneState.alpha = 1f
         } else {
             placeable.placeWithLayer(offset) {
-                val alpha = elementAlpha(layoutImpl, element, scene, sceneState)
-                this.alpha = alpha
-                lastSharedState.alpha = alpha
-                lastSceneState.alpha = alpha
+                this.alpha = elementAlpha(layoutImpl, element, scene)
             }
         }
     }
@@ -563,8 +496,6 @@ private fun IntermediateMeasureScope.place(
  *   different than [idleValue] even if the value is not transformed directly because it could be
  *   impacted by the transformations on other elements, like a parent that is being translated or
  *   resized.
- * @param lastValue the last value that was used. This should be equal to [currentValue] if this is
- *   the first time the value is set.
  * @param lerp the linear interpolation function used to interpolate between two values of this
  *   value type.
  */
@@ -576,7 +507,7 @@ private inline fun <T> computeValue(
     transformation: (ElementTransformations) -> PropertyTransformation<T>?,
     idleValue: T,
     currentValue: () -> T,
-    lastValue: () -> T,
+    isSpecified: (T) -> Boolean,
     lerp: (T, T, Float) -> T,
 ): T {
     val transition =
@@ -587,21 +518,16 @@ private inline fun <T> computeValue(
         // layout phase.
         ?: return currentValue()
 
-    // A transition was started but it's not ready yet (not all elements have been composed/laid
-    // out yet). Use the last value that was set, to make sure elements don't unexpectedly jump.
-    if (!layoutImpl.isTransitionReady(transition)) {
-        return lastValue()
-    }
-
     val fromScene = transition.fromScene
     val toScene = transition.toScene
+
     val fromState = element.sceneStates[fromScene]
     val toState = element.sceneStates[toScene]
 
     if (fromState == null && toState == null) {
         // TODO(b/311600838): Throw an exception instead once layers of disposed elements are not
         // run anymore.
-        return lastValue()
+        return idleValue
     }
 
     // The element is shared: interpolate between the value in fromScene and the value in toScene.
@@ -611,6 +537,11 @@ private inline fun <T> computeValue(
     if (isSharedElement && isSharedElementEnabled(layoutImpl.state, transition, element.key)) {
         val start = sceneValue(fromState!!)
         val end = sceneValue(toState!!)
+
+        // TODO(b/316901148): Remove checks to isSpecified() once the lookahead pass runs for all
+        // nodes before the intermediate layout pass.
+        if (!isSpecified(start)) return end
+        if (!isSpecified(end)) return start
 
         // Make sure we don't read progress if values are the same and we don't need to interpolate,
         // so we don't invalidate the phase where this is read.

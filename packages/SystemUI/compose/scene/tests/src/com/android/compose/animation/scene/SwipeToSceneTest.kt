@@ -20,9 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -58,18 +55,15 @@ class SwipeToSceneTest {
             get() = Offset(0f, (LayoutHeight / 2).toPx())
     }
 
-    private var currentScene by mutableStateOf(TestScenes.SceneA)
-    private val layoutState = SceneTransitionLayoutState(currentScene)
-
     @get:Rule val rule = createComposeRule()
+
+    private fun layoutState(initialScene: SceneKey = TestScenes.SceneA) =
+        MutableSceneTransitionLayoutState(initialScene, EmptyTestTransitions)
 
     /** The content under test. */
     @Composable
-    private fun TestContent() {
+    private fun TestContent(layoutState: SceneTransitionLayoutState) {
         SceneTransitionLayout(
-            currentScene,
-            { currentScene = it },
-            EmptyTestTransitions,
             state = layoutState,
             modifier = Modifier.size(LayoutWidth, LayoutHeight).testTag(TestElements.Foo.debugName),
         ) {
@@ -109,9 +103,11 @@ class SwipeToSceneTest {
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
+
+        val layoutState = layoutState()
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
-            TestContent()
+            TestContent(layoutState)
         }
 
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
@@ -195,9 +191,10 @@ class SwipeToSceneTest {
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
+        val layoutState = layoutState()
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
-            TestContent()
+            TestContent(layoutState)
         }
 
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
@@ -260,14 +257,14 @@ class SwipeToSceneTest {
     @Test
     fun multiPointerSwipe() {
         // Start at scene C.
-        currentScene = TestScenes.SceneC
+        val layoutState = layoutState(TestScenes.SceneC)
 
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
-            TestContent()
+            TestContent(layoutState)
         }
 
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
@@ -299,14 +296,14 @@ class SwipeToSceneTest {
     @Test
     fun defaultEdgeSwipe() {
         // Start at scene C.
-        currentScene = TestScenes.SceneC
+        val layoutState = layoutState(TestScenes.SceneC)
 
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
-            TestContent()
+            TestContent(layoutState)
         }
 
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
