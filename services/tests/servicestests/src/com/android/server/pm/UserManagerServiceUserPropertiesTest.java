@@ -69,6 +69,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .setMediaSharedWithParent(false)
                 .setCredentialShareableWithParent(true)
                 .setDeleteAppWithParent(false)
+                .setCrossProfileContentSharingStrategy(0)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
@@ -82,6 +83,7 @@ public class UserManagerServiceUserPropertiesTest {
         actualProps.setMediaSharedWithParent(true);
         actualProps.setCredentialShareableWithParent(false);
         actualProps.setDeleteAppWithParent(true);
+        actualProps.setCrossProfileContentSharingStrategy(1);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -188,6 +190,8 @@ public class UserManagerServiceUserPropertiesTest {
                 copy::isMediaSharedWithParent, true);
         assertEqualGetterOrThrows(orig::isCredentialShareableWithParent,
                 copy::isCredentialShareableWithParent, true);
+        assertEqualGetterOrThrows(orig::getCrossProfileContentSharingStrategy,
+                copy::getCrossProfileContentSharingStrategy, true);
     }
 
     /**
@@ -242,5 +246,7 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.isCredentialShareableWithParent())
                 .isEqualTo(actual.isCredentialShareableWithParent());
         assertThat(expected.getDeleteAppWithParent()).isEqualTo(actual.getDeleteAppWithParent());
+        assertThat(expected.getCrossProfileContentSharingStrategy())
+                .isEqualTo(actual.getCrossProfileContentSharingStrategy());
     }
 }

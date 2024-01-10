@@ -33,6 +33,7 @@ import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.function.Consumer;
@@ -236,7 +237,15 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * operation directly to avoid waiting until timeout.
      */
     void updateTargetWindows() {
-        if (mTransitionOp == OP_LEGACY || !mIsStartTransactionCommitted) return;
+        if (mTransitionOp == OP_LEGACY) return;
+        if (!mIsStartTransactionCommitted) {
+            if (mTimeoutRunnable == null && !mDisplayContent.hasTopFixedRotationLaunchingApp()
+                    && !mDisplayContent.isRotationChanging() && !mDisplayContent.inTransition()) {
+                Slog.d(TAG, "Cancel for no change");
+                mDisplayContent.finishAsyncRotationIfPossible();
+            }
+            return;
+        }
         for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
             final Operation op = mTargetWindowTokens.valueAt(i);
             if (op.mIsCompletionPending || op.mAction == Operation.ACTION_SEAMLESS) {
@@ -592,6 +601,16 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         return !mAlwaysWaitForStartTransaction && op.mAction != Operation.ACTION_SEAMLESS;
     }
 
+    void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "AsyncRotationController");
+        prefix += "  ";
+        pw.println(prefix + "mTransitionOp=" + mTransitionOp);
+        pw.println(prefix + "mIsStartTransactionCommitted=" + mIsStartTransactionCommitted);
+        pw.println(prefix + "mIsSyncDrawRequested=" + mIsSyncDrawRequested);
+        pw.println(prefix + "mOriginalRotation=" + mOriginalRotation);
+        pw.println(prefix + "mTargetWindowTokens=" + mTargetWindowTokens);
+    }
+
     /** The operation to control the rotation appearance associated with window token. */
     private static class Operation {
         @Retention(RetentionPolicy.SOURCE)
@@ -618,6 +637,11 @@ class AsyncRotationController extends FadeAnimationController implements Consume
 
         Operation(@Action int action) {
             mAction = action;
+        }
+
+        @Override
+        public String toString() {
+            return "Operation{a=" + mAction + " pending=" + mIsCompletionPending + '}';
         }
     }
 }

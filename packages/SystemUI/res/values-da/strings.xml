@@ -188,7 +188,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ansigtsoplåsning er utilgængelig"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth tilsluttet."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batteriniveauet er ukendt."</string>
-    <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Tilsluttet <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
+    <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Forbundet med <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Forbundet til <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Ikke tilsluttet."</string>
     <string name="data_connection_roaming" msgid="375650836665414797">"Roaming"</string>
@@ -273,8 +273,8 @@
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Administrer brugere"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Udfør"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Luk"</string>
-    <string name="quick_settings_connected" msgid="3873605509184830379">"Tilsluttet"</string>
-    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Tilsluttet – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="quick_settings_connected" msgid="3873605509184830379">"Forbundet"</string>
+    <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Forbundet – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Opretter forbindelse…"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Aktiverer…"</string>
