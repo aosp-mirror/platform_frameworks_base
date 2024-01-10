@@ -491,8 +491,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     return true;
                 }
                 case MotionEvent.ACTION_MOVE: {
+                    mShouldClick = false;
                     final DesktopModeWindowDecoration decoration =
                             mWindowDecorByTaskId.get(mTaskId);
+                    // If a decor's resize drag zone is active, don't also try to reposition it.
+                    if (decoration.isHandlingDragResize()) break;
                     decoration.closeMaximizeMenu();
                     if (e.findPointerIndex(mDragPointerId) == -1) {
                         mDragPointerId = e.getPointerId(0);
@@ -505,7 +508,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             e.getRawX(dragPointerIdx),
                             newTaskBounds));
                     mIsDragging = true;
-                    mShouldClick = false;
                     return true;
                 }
                 case MotionEvent.ACTION_UP:

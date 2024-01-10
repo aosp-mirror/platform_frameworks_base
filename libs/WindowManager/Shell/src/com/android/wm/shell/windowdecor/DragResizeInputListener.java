@@ -320,6 +320,10 @@ class DragResizeInputListener implements AutoCloseable {
         }
     }
 
+    boolean isHandlingDragResize() {
+        return mInputEventReceiver.isHandlingEvents();
+    }
+
     @Override
     public void close() {
         mInputEventReceiver.dispose();
@@ -386,6 +390,10 @@ class DragResizeInputListener implements AutoCloseable {
             finishInputEvent(inputEvent, handleInputEvent(inputEvent));
         }
 
+        boolean isHandlingEvents() {
+            return mShouldHandleEvents;
+        }
+
         private boolean handleInputEvent(InputEvent inputEvent) {
             if (!(inputEvent instanceof MotionEvent)) {
                 return false;
@@ -409,7 +417,6 @@ class DragResizeInputListener implements AutoCloseable {
                         mShouldHandleEvents = isInResizeHandleBounds(x, y);
                     }
                     if (mShouldHandleEvents) {
-                        mInputManager.pilferPointers(mInputChannel.getToken());
                         mDragPointerId = e.getPointerId(0);
                         float rawX = e.getRawX(0);
                         float rawY = e.getRawY(0);
@@ -427,6 +434,7 @@ class DragResizeInputListener implements AutoCloseable {
                     if (!mShouldHandleEvents) {
                         break;
                     }
+                    mInputManager.pilferPointers(mInputChannel.getToken());
                     int dragPointerIndex = e.findPointerIndex(mDragPointerId);
                     float rawX = e.getRawX(dragPointerIndex);
                     float rawY = e.getRawY(dragPointerIndex);
@@ -437,6 +445,7 @@ class DragResizeInputListener implements AutoCloseable {
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
+                    mInputManager.pilferPointers(mInputChannel.getToken());
                     if (mShouldHandleEvents) {
                         int dragPointerIndex = e.findPointerIndex(mDragPointerId);
                         final Rect taskBounds = mCallback.onDragPositioningEnd(

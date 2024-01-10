@@ -144,13 +144,13 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     }
 
     @Test
-    fun testDragResize_noMove_showsResizeVeil() {
+    fun testDragResize_noMove_doesNotShowResizeVeil() {
         taskPositioner.onDragPositioningStart(
             CTRL_TYPE_TOP or CTRL_TYPE_RIGHT,
             STARTING_BOUNDS.left.toFloat(),
             STARTING_BOUNDS.top.toFloat()
         )
-        verify(mockDesktopWindowDecoration).showResizeVeil(STARTING_BOUNDS)
+        verify(mockDesktopWindowDecoration, never()).showResizeVeil(STARTING_BOUNDS)
 
         taskPositioner.onDragPositioningEnd(
             STARTING_BOUNDS.left.toFloat(),
@@ -162,7 +162,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                         (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
                         change.configuration.windowConfiguration.bounds == STARTING_BOUNDS}},
             eq(taskPositioner))
-        verify(mockDesktopWindowDecoration).hideResizeVeil()
+        verify(mockDesktopWindowDecoration, never()).hideResizeVeil()
     }
 
     @Test
@@ -212,7 +212,6 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             STARTING_BOUNDS.right.toFloat(),
             STARTING_BOUNDS.top.toFloat()
         )
-        verify(mockDesktopWindowDecoration).showResizeVeil(STARTING_BOUNDS)
 
         taskPositioner.onDragPositioningMove(
             STARTING_BOUNDS.right.toFloat() + 10,
@@ -222,6 +221,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         val rectAfterMove = Rect(STARTING_BOUNDS)
         rectAfterMove.right += 10
         rectAfterMove.top += 10
+        verify(mockDesktopWindowDecoration).showResizeVeil(rectAfterMove)
         verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
                 token == taskBinder &&
@@ -237,7 +237,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         val rectAfterEnd = Rect(rectAfterMove)
         rectAfterEnd.right += 10
         rectAfterEnd.top += 10
-        verify(mockDesktopWindowDecoration, times(2)).updateResizeVeil(any())
+        verify(mockDesktopWindowDecoration).updateResizeVeil(any())
         verify(mockTransitions).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
                 token == taskBinder &&
@@ -253,7 +253,6 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             STARTING_BOUNDS.left.toFloat(),
             STARTING_BOUNDS.top.toFloat()
         )
-        verify(mockDesktopWindowDecoration).showResizeVeil(STARTING_BOUNDS)
 
         taskPositioner.onDragPositioningMove(
             STARTING_BOUNDS.left.toFloat(),
