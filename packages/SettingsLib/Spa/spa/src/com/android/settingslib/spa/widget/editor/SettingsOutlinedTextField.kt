@@ -42,7 +42,7 @@ fun SettingsOutlinedTextField(
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(SettingsDimension.itemPadding),
+            .padding(SettingsDimension.textFieldPadding),
         value = value,
         onValueChange = onTextChange,
         label = {

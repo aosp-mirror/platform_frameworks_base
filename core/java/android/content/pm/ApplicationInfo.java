@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.compat.CompatChanges;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -381,10 +382,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * start it unless initiated by a user interaction (typically launching its icon
      * from the launcher, could also include user actions like adding it as an app widget,
      * selecting it as a live wallpaper, selecting it as a keyboard, etc). Stopped
-     * applications will not receive broadcasts unless the sender specifies
+     * applications will not receive implicit broadcasts unless the sender specifies
      * {@link android.content.Intent#FLAG_INCLUDE_STOPPED_PACKAGES}.
      *
-     * <p>Applications should avoid launching activies, binding to or starting services, or
+     * <p>Applications should avoid launching activities, binding to or starting services, or
      * otherwise causing a stopped application to run unless initiated by the user.
      *
      * <p>An app can also return to the stopped state by a "force stop".
@@ -2642,6 +2643,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isResourceOverlay() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_IS_RESOURCE_OVERLAY) != 0;
+    }
+
+    /**
+     * Checks if a changeId is enabled for the current user
+     * @param changeId The changeId to verify
+     * @return True of the changeId is enabled
+     * @hide
+     */
+    public boolean isChangeEnabled(long changeId) {
+        return CompatChanges.isChangeEnabled(changeId, packageName,
+                UserHandle.getUserHandleForUid(uid));
     }
 
     /**

@@ -60,7 +60,10 @@ message CriticalEventProto {
     JavaCrash java_crash = 5;
     NativeCrash native_crash = 6;
     SystemServerStarted system_server_started = 7;
+    InstallPackages install_packages = 8;
   }
+
+  message InstallPackages {}
 
   message SystemServerStarted {}
 

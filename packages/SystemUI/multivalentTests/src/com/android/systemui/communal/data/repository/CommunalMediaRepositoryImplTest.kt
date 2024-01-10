@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
@@ -59,37 +59,43 @@ class CommunalMediaRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun mediaPlaying_defaultsToFalse() =
+    fun hasAnyMediaOrRecommendation_defaultsToFalse() =
         testScope.runTest {
             mediaRepository = CommunalMediaRepositoryImpl(mediaDataManager)
 
-            val isMediaPlaying = collectLastValue(mediaRepository.mediaPlaying)
+            val mediaModel = collectLastValue(mediaRepository.mediaModel)
             runCurrent()
-            assertThat(isMediaPlaying()).isFalse()
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isFalse()
         }
 
     @Test
-    fun mediaPlaying_emitsInitialValue() =
-        testScope.runTest {
-            // Start with media available.
-            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(true)
-
-            mediaRepository = CommunalMediaRepositoryImpl(mediaDataManager)
-
-            val isMediaPlaying = collectLastValue(mediaRepository.mediaPlaying)
-            runCurrent()
-            assertThat(isMediaPlaying()).isTrue()
-        }
-
-    @Test
-    fun mediaPlaying_updatesWhenMediaDataLoaded() =
+    fun mediaModel_updatesWhenMediaDataLoaded() =
         testScope.runTest {
             mediaRepository = CommunalMediaRepositoryImpl(mediaDataManager)
+
+            // Listener is added
+            verify(mediaDataManager).addListener(mediaDataListenerCaptor.capture())
 
             // Initial value is false.
-            var isMediaPlaying = collectLastValue(mediaRepository.mediaPlaying)
+            val mediaModel = collectLastValue(mediaRepository.mediaModel)
             runCurrent()
-            assertThat(isMediaPlaying()).isFalse()
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isFalse()
+
+            // Change to media available and notify the listener.
+            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(true)
+            whenever(mediaData.createdTimestampMillis).thenReturn(1234L)
+            mediaDataListenerCaptor.value.onMediaDataLoaded("key", null, mediaData)
+            runCurrent()
+
+            // Media active now returns true.
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isTrue()
+            assertThat(mediaModel()?.createdTimestampMillis).isEqualTo(1234L)
+        }
+
+    @Test
+    fun mediaModel_updatesWhenMediaDataRemoved() =
+        testScope.runTest {
+            mediaRepository = CommunalMediaRepositoryImpl(mediaDataManager)
 
             // Listener is added
             verify(mediaDataManager).addListener(mediaDataListenerCaptor.capture())
@@ -97,36 +103,18 @@ class CommunalMediaRepositoryImplTest : SysuiTestCase() {
             // Change to media available and notify the listener.
             whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(true)
             mediaDataListenerCaptor.value.onMediaDataLoaded("key", null, mediaData)
-
-            // mediaPlaying now returns true.
-            isMediaPlaying = collectLastValue(mediaRepository.mediaPlaying)
             runCurrent()
-            assertThat(isMediaPlaying()).isTrue()
-        }
 
-    @Test
-    fun mediaPlaying_updatesWhenMediaDataRemoved() =
-        testScope.runTest {
-            // Start with media available.
-            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(true)
-
-            mediaRepository = CommunalMediaRepositoryImpl(mediaDataManager)
-
-            // Initial value is true.
-            var isMediaPlaying = collectLastValue(mediaRepository.mediaPlaying)
-            runCurrent()
-            assertThat(isMediaPlaying()).isTrue()
-
-            // Listener is added.
-            verify(mediaDataManager).addListener(mediaDataListenerCaptor.capture())
+            // Media active now returns true.
+            val mediaModel = collectLastValue(mediaRepository.mediaModel)
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isTrue()
 
             // Change to media unavailable and notify the listener.
             whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(false)
-            mediaDataListenerCaptor.value.onMediaDataLoaded("key", null, mediaData)
-
-            // mediaPlaying now returns false.
-            isMediaPlaying = collectLastValue(mediaRepository.mediaPlaying)
+            mediaDataListenerCaptor.value.onMediaDataRemoved("key")
             runCurrent()
-            assertThat(isMediaPlaying()).isFalse()
+
+            // Media active now returns false.
+            assertThat(mediaModel()?.hasAnyMediaOrRecommendation).isFalse()
         }
 }

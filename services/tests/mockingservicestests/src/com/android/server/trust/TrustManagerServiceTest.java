@@ -32,6 +32,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustListener;
 import android.app.trust.ITrustManager;
@@ -45,7 +46,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
-import android.net.Uri;
+import android.hardware.biometrics.BiometricManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -53,7 +55,12 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
+import android.security.Authorization;
+import android.security.authorization.IKeystoreAuthorization;
 import android.service.trust.TrustAgentService;
 import android.testing.TestableContext;
 import android.view.IWindowManager;
@@ -83,9 +90,14 @@ public class TrustManagerServiceTest {
 
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .spyStatic(ActivityManager.class)
+            .spyStatic(Authorization.class)
             .mockStatic(ServiceManager.class)
             .mockStatic(WindowManagerGlobal.class)
             .build();
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Rule
     public final MockContext mMockContext = new MockContext(
@@ -93,13 +105,19 @@ public class TrustManagerServiceTest {
 
     private static final String URI_SCHEME_PACKAGE = "package";
     private static final int TEST_USER_ID = 50;
+    private static final int PARENT_USER_ID = 60;
+    private static final int PROFILE_USER_ID = 70;
+    private static final long[] PARENT_BIOMETRIC_SIDS = new long[] { 600L, 601L };
+    private static final long[] PROFILE_BIOMETRIC_SIDS = new long[] { 700L, 701L };
 
     private final ArrayList<ResolveInfo> mTrustAgentResolveInfoList = new ArrayList<>();
     private final ArrayList<ComponentName> mKnownTrustAgents = new ArrayList<>();
     private final ArrayList<ComponentName> mEnabledTrustAgents = new ArrayList<>();
 
     private @Mock ActivityManager mActivityManager;
+    private @Mock BiometricManager mBiometricManager;
     private @Mock DevicePolicyManager mDevicePolicyManager;
+    private @Mock IKeystoreAuthorization mKeystoreAuthorization;
     private @Mock LockPatternUtils mLockPatternUtils;
     private @Mock PackageManager mPackageManager;
     private @Mock UserManager mUserManager;
@@ -113,6 +131,9 @@ public class TrustManagerServiceTest {
     @Before
     public void setUp() throws Exception {
         when(mActivityManager.isUserRunning(TEST_USER_ID)).thenReturn(true);
+        doReturn(mock(IActivityManager.class)).when(() -> ActivityManager.getService());
+
+        doReturn(mKeystoreAuthorization).when(() -> Authorization.getService());
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mLockPatternUtils.isSecure(TEST_USER_ID)).thenReturn(true);
@@ -146,6 +167,7 @@ public class TrustManagerServiceTest {
         when(mWindowManager.isKeyguardLocked()).thenReturn(true);
 
         mMockContext.addMockSystemService(ActivityManager.class, mActivityManager);
+        mMockContext.addMockSystemService(BiometricManager.class, mBiometricManager);
         mMockContext.setMockPackageManager(mPackageManager);
         mMockContext.addMockSystemService(UserManager.class, mUserManager);
         doReturn(mWindowManager).when(() -> WindowManagerGlobal.getWindowManagerService());
@@ -257,7 +279,7 @@ public class TrustManagerServiceTest {
                 "com.android/.SystemTrustAgent");
         addTrustAgent(newAgentComponentName, /* isSystemApp= */ true);
 
-        mMockContext.sendPackageChangedBroadcast(newAgentComponentName);
+        notifyPackageChanged(newAgentComponentName);
 
         assertThat(mEnabledTrustAgents).containsExactly(newAgentComponentName);
         assertThat(mKnownTrustAgents).containsExactly(newAgentComponentName);
@@ -276,7 +298,7 @@ public class TrustManagerServiceTest {
                 "com.android/.SystemTrustAgent");
         addTrustAgent(newAgentComponentName, /* isSystemApp= */ true);
 
-        mMockContext.sendPackageChangedBroadcast(newAgentComponentName);
+        notifyPackageChanged(newAgentComponentName);
 
         assertThat(mEnabledTrustAgents).containsExactly(defaultTrustAgent);
         assertThat(mKnownTrustAgents).containsExactly(defaultTrustAgent, newAgentComponentName);
@@ -289,7 +311,7 @@ public class TrustManagerServiceTest {
                 "com.user/.UserTrustAgent");
         addTrustAgent(newAgentComponentName, /* isSystemApp= */ false);
 
-        mMockContext.sendPackageChangedBroadcast(newAgentComponentName);
+        notifyPackageChanged(newAgentComponentName);
 
         assertThat(mEnabledTrustAgents).isEmpty();
         assertThat(mKnownTrustAgents).containsExactly(newAgentComponentName);
@@ -307,7 +329,7 @@ public class TrustManagerServiceTest {
         // Simulate user turning off systemTrustAgent2
         mLockPatternUtils.setEnabledTrustAgents(List.of(systemTrustAgent1), TEST_USER_ID);
 
-        mMockContext.sendPackageChangedBroadcast(systemTrustAgent2);
+        notifyPackageChanged(systemTrustAgent2);
 
         assertThat(mEnabledTrustAgents).containsExactly(systemTrustAgent1);
     }
@@ -320,6 +342,73 @@ public class TrustManagerServiceTest {
         mTrustManager.reportEnabledTrustAgentsChanged(TEST_USER_ID);
         mService.waitForIdle();
         verify(trustListener).onEnabledTrustAgentsChanged(TEST_USER_ID);
+    }
+
+    // Tests that when the device is locked for a managed profile with a *unified* challenge, the
+    // device locked notification that is sent to Keystore contains the biometric SIDs of the parent
+    // user, not the profile.  This matches the authentication that is needed to unlock the device
+    // for the profile again.
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testLockDeviceForManagedProfileWithUnifiedChallenge_usesParentBiometricSids()
+            throws Exception {
+        setupMocksForProfile(/* unifiedChallenge= */ true);
+
+        when(mWindowManager.isKeyguardLocked()).thenReturn(false);
+        mTrustManager.reportKeyguardShowingChanged();
+        verify(mKeystoreAuthorization).onDeviceUnlocked(PARENT_USER_ID, null);
+        verify(mKeystoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
+
+        when(mWindowManager.isKeyguardLocked()).thenReturn(true);
+        mTrustManager.reportKeyguardShowingChanged();
+        verify(mKeystoreAuthorization)
+                .onDeviceLocked(eq(PARENT_USER_ID), eq(PARENT_BIOMETRIC_SIDS));
+        verify(mKeystoreAuthorization)
+                .onDeviceLocked(eq(PROFILE_USER_ID), eq(PARENT_BIOMETRIC_SIDS));
+    }
+
+    // Tests that when the device is locked for a managed profile with a *separate* challenge, the
+    // device locked notification that is sent to Keystore contains the biometric SIDs of the
+    // profile itself.  This matches the authentication that is needed to unlock the device for the
+    // profile again.
+    @Test
+    public void testLockDeviceForManagedProfileWithSeparateChallenge_usesProfileBiometricSids()
+            throws Exception {
+        setupMocksForProfile(/* unifiedChallenge= */ false);
+
+        mTrustManager.setDeviceLockedForUser(PROFILE_USER_ID, false);
+        verify(mKeystoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
+
+        mTrustManager.setDeviceLockedForUser(PROFILE_USER_ID, true);
+        verify(mKeystoreAuthorization)
+                .onDeviceLocked(eq(PROFILE_USER_ID), eq(PROFILE_BIOMETRIC_SIDS));
+    }
+
+    private void setupMocksForProfile(boolean unifiedChallenge) {
+        UserInfo parent = new UserInfo(PARENT_USER_ID, "parent", UserInfo.FLAG_FULL);
+        UserInfo profile = new UserInfo(PROFILE_USER_ID, "profile", UserInfo.FLAG_MANAGED_PROFILE);
+        when(mUserManager.getAliveUsers()).thenReturn(List.of(parent, profile));
+        when(mUserManager.getUserInfo(PARENT_USER_ID)).thenReturn(parent);
+        when(mUserManager.getUserInfo(PROFILE_USER_ID)).thenReturn(profile);
+        when(mUserManager.getProfileParent(PROFILE_USER_ID)).thenReturn(parent);
+        when(mUserManager.getEnabledProfileIds(PARENT_USER_ID))
+                .thenReturn(new int[] { PROFILE_USER_ID });
+
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        when(mLockPatternUtils.isProfileWithUnifiedChallenge(PROFILE_USER_ID))
+                .thenReturn(unifiedChallenge);
+        when(mLockPatternUtils.isManagedProfileWithUnifiedChallenge(PROFILE_USER_ID))
+                .thenReturn(unifiedChallenge);
+        when(mLockPatternUtils.isSeparateProfileChallengeEnabled(PROFILE_USER_ID))
+                .thenReturn(!unifiedChallenge);
+
+        when(mBiometricManager.getAuthenticatorIds(PARENT_USER_ID))
+                .thenReturn(PARENT_BIOMETRIC_SIDS);
+        when(mBiometricManager.getAuthenticatorIds(PROFILE_USER_ID))
+                .thenReturn(PROFILE_BIOMETRIC_SIDS);
+
+        bootService();
+        mService.onUserSwitching(null, new SystemService.TargetUser(parent));
     }
 
     private void addTrustAgent(ComponentName agentComponentName, boolean isSystemApp) {
@@ -350,11 +439,16 @@ public class TrustManagerServiceTest {
                 permission, PackageManager.PERMISSION_GRANTED);
     }
 
+    private void notifyPackageChanged(ComponentName changedComponent) {
+        mService.mPackageMonitor.onPackageChanged(
+                changedComponent.getPackageName(),
+                UserHandle.of(TEST_USER_ID).getUid(1234),
+                new String[] { changedComponent.getClassName() });
+    }
+
     /** A mock Context that allows the test process to send protected broadcasts. */
     private static final class MockContext extends TestableContext {
 
-        private final ArrayList<BroadcastReceiver> mPackageChangedBroadcastReceivers =
-                new ArrayList<>();
         private final ArrayList<BroadcastReceiver> mUserStartedBroadcastReceivers =
                 new ArrayList<>();
 
@@ -368,9 +462,6 @@ public class TrustManagerServiceTest {
                 UserHandle user, IntentFilter filter, @Nullable String broadcastPermission,
                 @Nullable Handler scheduler) {
 
-            if (filter.hasAction(Intent.ACTION_PACKAGE_CHANGED)) {
-                mPackageChangedBroadcastReceivers.add(receiver);
-            }
             if (filter.hasAction(Intent.ACTION_USER_STARTED)) {
                 mUserStartedBroadcastReceivers.add(receiver);
             }
@@ -378,18 +469,9 @@ public class TrustManagerServiceTest {
                     scheduler);
         }
 
-        void sendPackageChangedBroadcast(ComponentName changedComponent) {
-            Intent intent = new Intent(
-                    Intent.ACTION_PACKAGE_CHANGED,
-                    Uri.fromParts(URI_SCHEME_PACKAGE,
-                            changedComponent.getPackageName(), /* fragment= */ null))
-                    .putExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST,
-                            new String[]{changedComponent.getClassName()})
-                    .putExtra(Intent.EXTRA_USER_HANDLE, TEST_USER_ID)
-                    .putExtra(Intent.EXTRA_UID, UserHandle.of(TEST_USER_ID).getUid(1234));
-            for (BroadcastReceiver receiver : mPackageChangedBroadcastReceivers) {
-                receiver.onReceive(this, intent);
-            }
+        @Override
+        public void sendBroadcastAsUser(Intent intent, UserHandle user,
+                @Nullable String receiverPermission, @Nullable Bundle options) {
         }
 
         void sendUserStartedBroadcast() {

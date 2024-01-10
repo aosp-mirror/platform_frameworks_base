@@ -21,6 +21,7 @@ import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.Position
@@ -277,6 +278,7 @@ constructor(
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
     private val systemClock: SystemClock,
+    facePropertyRepository: FacePropertyRepository,
 ) : KeyguardRepository {
     private val _dismissAction: MutableStateFlow<DismissAction> =
         MutableStateFlow(DismissAction.None)
@@ -599,27 +601,7 @@ constructor(
         awaitClose { authController.removeCallback(callback) }
     }
 
-    override val faceSensorLocation: Flow<Point?> = conflatedCallbackFlow {
-        fun sendSensorLocation() {
-            trySendWithFailureLogging(
-                authController.faceSensorLocation,
-                TAG,
-                "AuthController.Callback#onFingerprintLocationChanged"
-            )
-        }
-
-        val callback =
-            object : AuthController.Callback {
-                override fun onFaceSensorLocationChanged() {
-                    sendSensorLocation()
-                }
-            }
-
-        authController.addCallback(callback)
-        sendSensorLocation()
-
-        awaitClose { authController.removeCallback(callback) }
-    }
+    override val faceSensorLocation: Flow<Point?> = facePropertyRepository.sensorLocation
 
     override val biometricUnlockSource: Flow<BiometricUnlockSource?> = conflatedCallbackFlow {
         val callback =

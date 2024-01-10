@@ -212,7 +212,9 @@ public final class TransitionFilter implements Parcelable {
                         continue;
                     }
                 }
-                if (!matchesTopActivity(change.getTaskInfo())) continue;
+                if (!matchesTopActivity(change.getTaskInfo(), change.getActivityComponent())) {
+                    continue;
+                }
                 if (mModes != null) {
                     boolean pass = false;
                     for (int m = 0; m < mModes.length; ++m) {
@@ -234,11 +236,15 @@ public final class TransitionFilter implements Parcelable {
             return false;
         }
 
-        private boolean matchesTopActivity(ActivityManager.RunningTaskInfo info) {
+        private boolean matchesTopActivity(ActivityManager.RunningTaskInfo taskInfo,
+                @Nullable ComponentName activityComponent) {
             if (mTopActivity == null) return true;
-            if (info == null) return false;
-            final ComponentName component = info.topActivity;
-            return mTopActivity.equals(component);
+            if (activityComponent != null) {
+                return mTopActivity.equals(activityComponent);
+            } else if (taskInfo != null) {
+                return mTopActivity.equals(taskInfo.topActivity);
+            }
+            return false;
         }
 
         /** Check if the request matches this filter. It may generate false positives */
@@ -247,7 +253,7 @@ public final class TransitionFilter implements Parcelable {
             if (mActivityType == ACTIVITY_TYPE_UNDEFINED) return true;
             return request.getTriggerTask() != null
                     && request.getTriggerTask().getActivityType() == mActivityType
-                    && matchesTopActivity(request.getTriggerTask());
+                    && matchesTopActivity(request.getTriggerTask(), null /* activityCmp */);
         }
 
         @Override

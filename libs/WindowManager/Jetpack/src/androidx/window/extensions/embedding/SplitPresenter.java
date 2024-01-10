@@ -893,8 +893,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         return new SplitAttributes.Builder()
                 .setSplitType(splitTypeToUpdate)
                 .setLayoutDirection(splitAttributes.getLayoutDirection())
-                // TODO(b/263047900): Update extensions API.
-                // .setAnimationBackgroundColor(splitAttributes.getAnimationBackgroundColor())
+                .setAnimationBackground(splitAttributes.getAnimationBackground())
                 .build();
     }
 

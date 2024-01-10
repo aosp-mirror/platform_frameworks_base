@@ -84,6 +84,7 @@
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
     <uses-permission android:name="android.permission.NETWORK_FACTORY" />
+    <uses-permission android:name="android.permission.SATELLITE_COMMUNICATION" />
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />

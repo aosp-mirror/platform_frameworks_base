@@ -25,6 +25,7 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
 import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Flags;
 import android.app.KeyguardManager;
@@ -167,7 +168,7 @@ public final class NotificationRecord {
     private boolean mPreChannelsNotification = true;
     private Uri mSound;
     private VibrationEffect mVibration;
-    private AudioAttributes mAttributes;
+    private @NonNull AudioAttributes mAttributes;
     private NotificationChannel mChannel;
     private ArrayList<String> mPeopleOverride;
     private ArrayList<SnoozeCriterion> mSnoozeCriteria;
@@ -334,7 +335,7 @@ public final class NotificationRecord {
         return vibration;
     }
 
-    private AudioAttributes calculateAttributes() {
+    private @NonNull AudioAttributes calculateAttributes() {
         final Notification n = getSbn().getNotification();
         AudioAttributes attributes = getChannel().getAudioAttributes();
         if (attributes == null) {
@@ -1003,7 +1004,7 @@ public final class NotificationRecord {
     }
 
     public boolean isAudioAttributesUsage(int usage) {
-        return mAttributes != null && mAttributes.getUsage() == usage;
+        return mAttributes.getUsage() == usage;
     }
 
     /**
@@ -1172,7 +1173,7 @@ public final class NotificationRecord {
         return mVibration;
     }
 
-    public AudioAttributes getAudioAttributes() {
+    public @NonNull AudioAttributes getAudioAttributes() {
         return mAttributes;
     }
 

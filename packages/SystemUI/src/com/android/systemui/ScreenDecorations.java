@@ -68,7 +68,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.Preconditions;
 import com.android.settingslib.Utils;
-import com.android.systemui.biometrics.AuthController;
+import com.android.systemui.biometrics.data.repository.FacePropertyRepository;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
 import com.android.systemui.decor.DebugRoundedCornerDelegate;
@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.SecureSettings;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -130,8 +131,6 @@ public class ScreenDecorations implements
             R.id.display_cutout_bottom
     };
     private final ScreenDecorationsLogger mLogger;
-
-    private final AuthController mAuthController;
 
     private DisplayTracker mDisplayTracker;
     @VisibleForTesting
@@ -182,6 +181,9 @@ public class ScreenDecorations implements
     protected DisplayInfo mDisplayInfo = new DisplayInfo();
     private DisplayCutout mDisplayCutout;
     private boolean mPendingManualConfigUpdate;
+
+    private FacePropertyRepository mFacePropertyRepository;
+    private JavaAdapter mJavaAdapter;
 
     @VisibleForTesting
     protected void showCameraProtection(@NonNull Path protectionPath, @NonNull Rect bounds) {
@@ -330,7 +332,8 @@ public class ScreenDecorations implements
             PrivacyDotDecorProviderFactory dotFactory,
             FaceScanningProviderFactory faceScanningFactory,
             ScreenDecorationsLogger logger,
-            AuthController authController) {
+            FacePropertyRepository facePropertyRepository,
+            JavaAdapter javaAdapter) {
         mContext = context;
         mSecureSettings = secureSettings;
         mCommandRegistry = commandRegistry;
@@ -342,21 +345,9 @@ public class ScreenDecorations implements
         mFaceScanningFactory = faceScanningFactory;
         mFaceScanningViewId = com.android.systemui.res.R.id.face_scanning_anim;
         mLogger = logger;
-        mAuthController = authController;
+        mFacePropertyRepository = facePropertyRepository;
+        mJavaAdapter = javaAdapter;
     }
-
-
-    private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
-        @Override
-        public void onFaceSensorLocationChanged() {
-            mLogger.onSensorLocationChanged();
-            if (mExecutor != null) {
-                mExecutor.execute(
-                        () -> updateOverlayProviderViews(
-                                new Integer[]{mFaceScanningViewId}));
-            }
-        }
-    };
 
     private final ScreenDecorCommand.Callback mScreenDecorCommandCallback = (cmd, pw) -> {
         // If we are exiting debug mode, we can set it (false) and bail, otherwise we will
@@ -407,7 +398,8 @@ public class ScreenDecorations implements
         mExecutor = mThreadFactory.buildDelayableExecutorOnHandler(mHandler);
         mExecutor.execute(this::startOnScreenDecorationsThread);
         mDotViewController.setUiExecutor(mExecutor);
-        mAuthController.addCallback(mAuthControllerCallback);
+        mJavaAdapter.alwaysCollectFlow(mFacePropertyRepository.getSensorLocation(),
+                this::onFaceSensorLocationChanged);
         mCommandRegistry.registerCommand(ScreenDecorCommand.SCREEN_DECOR_CMD_NAME,
                 () -> new ScreenDecorCommand(mScreenDecorCommandCallback));
     }
@@ -1318,6 +1310,16 @@ public class ScreenDecorations implements
         params.width = pixelSize.getWidth();
         params.height = pixelSize.getHeight();
         view.setLayoutParams(params);
+    }
+
+    @VisibleForTesting
+    void onFaceSensorLocationChanged(Point location) {
+        mLogger.onSensorLocationChanged();
+        if (mExecutor != null) {
+            mExecutor.execute(
+                    () -> updateOverlayProviderViews(
+                            new Integer[]{mFaceScanningViewId}));
+        }
     }
 
     public static class DisplayCutoutView extends DisplayCutoutBaseView {

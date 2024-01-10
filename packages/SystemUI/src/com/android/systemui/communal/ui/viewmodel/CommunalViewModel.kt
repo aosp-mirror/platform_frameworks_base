@@ -54,15 +54,18 @@ constructor(
                 return@flatMapLatest flowOf(communalInteractor.tutorialContent)
             }
             combine(
-                communalInteractor.smartspaceContent,
-                communalInteractor.umoContent,
+                communalInteractor.ongoingContent,
                 communalInteractor.widgetContent,
-            ) { smartspace, umo, widgets ->
-                smartspace + umo + widgets
+                communalInteractor.ctaTileContent,
+            ) { ongoing, widgets, ctaTile,
+                ->
+                ongoing + widgets + ctaTile
             }
         }
 
     override fun onOpenWidgetEditor() = communalInteractor.showWidgetEditor()
+
+    override fun onDismissCtaTile() = communalInteractor.dismissCtaTile()
 
     override fun getInteractionHandler(): RemoteViews.InteractionHandler = interactionHandler
 }

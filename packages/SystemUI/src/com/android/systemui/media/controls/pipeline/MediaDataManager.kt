@@ -400,7 +400,12 @@ class MediaDataManager(
             val oldKey = findExistingEntry(key, sbn.packageName)
             if (oldKey == null) {
                 val instanceId = logger.getNewInstanceId()
-                val temp = LOADING.copy(packageName = sbn.packageName, instanceId = instanceId)
+                val temp =
+                    LOADING.copy(
+                        packageName = sbn.packageName,
+                        instanceId = instanceId,
+                        createdTimestampMillis = systemClock.currentTimeMillis(),
+                    )
                 mediaEntries.put(key, temp)
                 isNewlyActiveEntry = true
             } else if (oldKey != key) {
@@ -454,7 +459,8 @@ class MediaDataManager(
                     resumeAction = action,
                     hasCheckedForResume = true,
                     instanceId = instanceId,
-                    appUid = appUid
+                    appUid = appUid,
+                    createdTimestampMillis = systemClock.currentTimeMillis(),
                 )
             mediaEntries.put(packageName, resumeData)
             logSingleVsMultipleMediaAdded(appUid, packageName, instanceId)
@@ -732,6 +738,7 @@ class MediaDataManager(
 
         val mediaAction = getResumeMediaAction(resumeAction)
         val lastActive = systemClock.elapsedRealtime()
+        val createdTimestampMillis = currentEntry?.createdTimestampMillis ?: 0L
         foregroundExecutor.execute {
             onMediaDataLoaded(
                 packageName,
@@ -757,6 +764,7 @@ class MediaDataManager(
                     notificationKey = packageName,
                     hasCheckedForResume = true,
                     lastActive = lastActive,
+                    createdTimestampMillis = createdTimestampMillis,
                     instanceId = instanceId,
                     appUid = appUid,
                     isExplicit = isExplicit,
@@ -907,6 +915,7 @@ class MediaDataManager(
         }
 
         val lastActive = systemClock.elapsedRealtime()
+        val createdTimestampMillis = currentEntry?.createdTimestampMillis ?: 0L
         foregroundExecutor.execute {
             val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
             val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
@@ -937,6 +946,7 @@ class MediaDataManager(
                     isPlaying = isPlaying,
                     isClearable = !sbn.isOngoing,
                     lastActive = lastActive,
+                    createdTimestampMillis = createdTimestampMillis,
                     instanceId = instanceId,
                     appUid = appUid,
                     isExplicit = isExplicit,

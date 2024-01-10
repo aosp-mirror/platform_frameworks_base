@@ -21,7 +21,6 @@ import com.android.systemui.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.runCurrent
 import com.android.systemui.runTest
-import com.android.systemui.statusbar.notification.data.repository.FakeNotificationsKeyguardViewStateRepository
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -33,9 +32,6 @@ class NotificationsKeyguardInteractorTest : SysuiTestCase() {
     @SysUISingleton
     @Component(modules = [SysUITestModule::class])
     interface TestComponent : SysUITestComponent<NotificationsKeyguardInteractor> {
-
-        val repository: FakeNotificationsKeyguardViewStateRepository
-
         @Component.Factory
         interface Factory {
             fun create(@BindsInstance test: SysuiTestCase): TestComponent
@@ -48,13 +44,13 @@ class NotificationsKeyguardInteractorTest : SysuiTestCase() {
     @Test
     fun areNotifsFullyHidden_reflectsRepository() =
         testComponent.runTest {
-            repository.setNotificationsFullyHidden(false)
+            underTest.setNotificationsFullyHidden(false)
             val notifsFullyHidden by collectLastValue(underTest.areNotificationsFullyHidden)
             runCurrent()
 
             assertThat(notifsFullyHidden).isFalse()
 
-            repository.setNotificationsFullyHidden(true)
+            underTest.setNotificationsFullyHidden(true)
             runCurrent()
 
             assertThat(notifsFullyHidden).isTrue()
@@ -63,13 +59,13 @@ class NotificationsKeyguardInteractorTest : SysuiTestCase() {
     @Test
     fun isPulseExpanding_reflectsRepository() =
         testComponent.runTest {
-            repository.setPulseExpanding(false)
+            underTest.setPulseExpanding(false)
             val isPulseExpanding by collectLastValue(underTest.isPulseExpanding)
             runCurrent()
 
             assertThat(isPulseExpanding).isFalse()
 
-            repository.setPulseExpanding(true)
+            underTest.setPulseExpanding(true)
             runCurrent()
 
             assertThat(isPulseExpanding).isTrue()

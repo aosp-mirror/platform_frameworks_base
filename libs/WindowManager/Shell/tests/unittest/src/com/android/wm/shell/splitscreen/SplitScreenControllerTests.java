@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
+import static android.view.WindowManager.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -36,6 +37,8 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -46,8 +49,10 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.test.annotation.UiThreadTest;
@@ -55,6 +60,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
@@ -91,6 +97,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class SplitScreenControllerTests extends ShellTestCase {
 
+    private static final String TEST_PACKAGE = "com.android.wm.shell.splitscreen";
+    private static final String TEST_NOT_ALLOWED_PACKAGE = "com.android.wm.shell.splitscreen.fake";
+    private static final String TEST_ACTIVITY = "TestActivity";
+
     @Mock ShellInit mShellInit;
     @Mock ShellCommandHandler mShellCommandHandler;
     @Mock ShellTaskOrganizer mTaskOrganizer;
@@ -118,6 +128,8 @@ public class SplitScreenControllerTests extends ShellTestCase {
     public void setup() {
         assumeTrue(ActivityTaskManager.supportsSplitScreenMultiWindow(mContext));
         MockitoAnnotations.initMocks(this);
+        String[] appsSupportingMultiInstance = mContext.getResources()
+                .getStringArray(R.array.config_appsSupportMultiInstancesSplit);
         mShellController = spy(new ShellController(mContext, mShellInit, mShellCommandHandler,
                 mMainExecutor));
         mSplitScreenController = spy(new SplitScreenController(mContext, mShellInit,
@@ -125,7 +137,8 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 mRootTDAOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
                 mIconProvider, mRecentTasks, mLaunchAdjacentController, mWindowDecorViewModel,
-                mDesktopTasksController, mMainExecutor, mStageCoordinator));
+                mDesktopTasksController, mMainExecutor, mStageCoordinator,
+                appsSupportingMultiInstance));
     }
 
     @Test
@@ -200,7 +213,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
 
     @Test
     public void startIntent_multiInstancesSupported_appendsMultipleTaskFag() {
-        doReturn(true).when(mSplitScreenController).supportMultiInstancesSplit(any());
+        doReturn(true).when(mSplitScreenController).supportsMultiInstanceSplit(any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
@@ -237,12 +250,13 @@ public class SplitScreenControllerTests extends ShellTestCase {
 
         verify(mStageCoordinator).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
                 isNull());
-        verify(mSplitScreenController, never()).supportMultiInstancesSplit(any());
+        verify(mSplitScreenController, never()).supportsMultiInstanceSplit(any());
         verify(mStageCoordinator, never()).switchSplitPosition(any());
     }
 
     @Test
     public void startIntent_multiInstancesSupported_startTaskInBackgroundAfterSplitActivated() {
+        doReturn(true).when(mSplitScreenController).supportsMultiInstanceSplit(any());
         doNothing().when(mSplitScreenController).startTask(anyInt(), anyInt(), any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
@@ -259,14 +273,14 @@ public class SplitScreenControllerTests extends ShellTestCase {
 
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
                 SPLIT_POSITION_TOP_OR_LEFT, null);
-        verify(mSplitScreenController, never()).supportMultiInstancesSplit(any());
+        verify(mSplitScreenController, never()).supportsMultiInstanceSplit(any());
         verify(mStageCoordinator).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
                 isNull());
     }
 
     @Test
     public void startIntent_multiInstancesNotSupported_switchesPositionAfterSplitActivated() {
-        doReturn(false).when(mSplitScreenController).supportMultiInstancesSplit(any());
+        doReturn(false).when(mSplitScreenController).supportsMultiInstanceSplit(any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(mContext, 0, startIntent, FLAG_IMMUTABLE);
@@ -281,6 +295,130 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 SPLIT_POSITION_TOP_OR_LEFT, null);
 
         verify(mStageCoordinator).switchSplitPosition(anyString());
+    }
+
+    @Test
+    public void supportsMultiInstanceSplit_inStaticAllowList() {
+        String[] allowList = { TEST_PACKAGE };
+        SplitScreenController controller = new SplitScreenController(mContext, mShellInit,
+                mShellCommandHandler, mShellController, mTaskOrganizer, mSyncQueue,
+                mRootTDAOrganizer, mDisplayController, mDisplayImeController,
+                mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
+                mIconProvider, mRecentTasks, mLaunchAdjacentController, mWindowDecorViewModel,
+                mDesktopTasksController, mMainExecutor, mStageCoordinator,
+                allowList);
+        ComponentName component = new ComponentName(TEST_PACKAGE, TEST_ACTIVITY);
+        assertEquals(true, controller.supportsMultiInstanceSplit(component));
+    }
+
+    @Test
+    public void supportsMultiInstanceSplit_notInStaticAllowList() {
+        String[] allowList = { TEST_PACKAGE };
+        SplitScreenController controller = new SplitScreenController(mContext, mShellInit,
+                mShellCommandHandler, mShellController, mTaskOrganizer, mSyncQueue,
+                mRootTDAOrganizer, mDisplayController, mDisplayImeController,
+                mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
+                mIconProvider, mRecentTasks, mLaunchAdjacentController, mWindowDecorViewModel,
+                mDesktopTasksController, mMainExecutor, mStageCoordinator,
+                allowList);
+        ComponentName component = new ComponentName(TEST_NOT_ALLOWED_PACKAGE, TEST_ACTIVITY);
+        assertEquals(false, controller.supportsMultiInstanceSplit(component));
+    }
+
+    @Test
+    public void supportsMultiInstanceSplit_activityPropertyTrue()
+            throws PackageManager.NameNotFoundException {
+        Context context = spy(mContext);
+        ComponentName component = new ComponentName(TEST_PACKAGE, TEST_ACTIVITY);
+        PackageManager pm = mock(PackageManager.class);
+        doReturn(pm).when(context).getPackageManager();
+        PackageManager.Property activityProp = new PackageManager.Property("", true, "", "");
+        doReturn(activityProp).when(pm).getProperty(eq(PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI),
+                eq(component));
+        PackageManager.Property appProp = new PackageManager.Property("", false, "", "");
+        doReturn(appProp).when(pm).getProperty(eq(PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI),
+                eq(component.getPackageName()));
+
+        SplitScreenController controller = new SplitScreenController(context, mShellInit,
+                mShellCommandHandler, mShellController, mTaskOrganizer, mSyncQueue,
+                mRootTDAOrganizer, mDisplayController, mDisplayImeController,
+                mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
+                mIconProvider, mRecentTasks, mLaunchAdjacentController, mWindowDecorViewModel,
+                mDesktopTasksController, mMainExecutor, mStageCoordinator,
+                new String[0]);
+        // Expect activity property to override application property
+        assertEquals(true, controller.supportsMultiInstanceSplit(component));
+    }
+
+    @Test
+    public void supportsMultiInstanceSplit_activityPropertyFalseApplicationPropertyTrue()
+            throws PackageManager.NameNotFoundException {
+        Context context = spy(mContext);
+        ComponentName component = new ComponentName(TEST_PACKAGE, TEST_ACTIVITY);
+        PackageManager pm = mock(PackageManager.class);
+        doReturn(pm).when(context).getPackageManager();
+        PackageManager.Property activityProp = new PackageManager.Property("", false, "", "");
+        doReturn(activityProp).when(pm).getProperty(eq(PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI),
+                eq(component));
+        PackageManager.Property appProp = new PackageManager.Property("", true, "", "");
+        doReturn(appProp).when(pm).getProperty(eq(PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI),
+                eq(component.getPackageName()));
+
+        SplitScreenController controller = new SplitScreenController(context, mShellInit,
+                mShellCommandHandler, mShellController, mTaskOrganizer, mSyncQueue,
+                mRootTDAOrganizer, mDisplayController, mDisplayImeController,
+                mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
+                mIconProvider, mRecentTasks, mLaunchAdjacentController, mWindowDecorViewModel,
+                mDesktopTasksController, mMainExecutor, mStageCoordinator,
+                new String[0]);
+        // Expect activity property to override application property
+        assertEquals(false, controller.supportsMultiInstanceSplit(component));
+    }
+
+    @Test
+    public void supportsMultiInstanceSplit_noActivityPropertyApplicationPropertyTrue()
+            throws PackageManager.NameNotFoundException {
+        Context context = spy(mContext);
+        ComponentName component = new ComponentName(TEST_PACKAGE, TEST_ACTIVITY);
+        PackageManager pm = mock(PackageManager.class);
+        doReturn(pm).when(context).getPackageManager();
+        doThrow(PackageManager.NameNotFoundException.class).when(pm).getProperty(
+                eq(PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI), eq(component));
+        PackageManager.Property appProp = new PackageManager.Property("", true, "", "");
+        doReturn(appProp).when(pm).getProperty(eq(PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI),
+                eq(component.getPackageName()));
+
+        SplitScreenController controller = new SplitScreenController(context, mShellInit,
+                mShellCommandHandler, mShellController, mTaskOrganizer, mSyncQueue,
+                mRootTDAOrganizer, mDisplayController, mDisplayImeController,
+                mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
+                mIconProvider, mRecentTasks, mLaunchAdjacentController, mWindowDecorViewModel,
+                mDesktopTasksController, mMainExecutor, mStageCoordinator,
+                new String[0]);
+        // Expect fall through to app property
+        assertEquals(true, controller.supportsMultiInstanceSplit(component));
+    }
+
+    @Test
+    public void supportsMultiInstanceSplit_noActivityOrAppProperty()
+            throws PackageManager.NameNotFoundException {
+        Context context = spy(mContext);
+        ComponentName component = new ComponentName(TEST_PACKAGE, TEST_ACTIVITY);
+        PackageManager pm = mock(PackageManager.class);
+        doReturn(pm).when(context).getPackageManager();
+        doThrow(PackageManager.NameNotFoundException.class).when(pm).getProperty(
+                eq(PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI), eq(component));
+        doThrow(PackageManager.NameNotFoundException.class).when(pm).getProperty(
+                eq(PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI), eq(component.getPackageName()));
+
+        SplitScreenController controller = new SplitScreenController(context, mShellInit,
+                mShellCommandHandler, mShellController, mTaskOrganizer, mSyncQueue,
+                mRootTDAOrganizer, mDisplayController, mDisplayImeController,
+                mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
+                mIconProvider, mRecentTasks, mLaunchAdjacentController, mWindowDecorViewModel,
+                mDesktopTasksController, mMainExecutor, mStageCoordinator,
+                new String[0]);
+        assertEquals(false, controller.supportsMultiInstanceSplit(component));
     }
 
     private Intent createStartIntent(String activityName) {

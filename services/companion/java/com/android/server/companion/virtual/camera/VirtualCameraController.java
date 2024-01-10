@@ -55,9 +55,7 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
     @GuardedBy("mCameras")
     private final Map<IBinder, CameraDescriptor> mCameras = new ArrayMap<>();
 
-    public VirtualCameraController() {
-        connectVirtualCameraService();
-    }
+    public VirtualCameraController() {}
 
     @VisibleForTesting
     VirtualCameraController(IVirtualCameraService virtualCameraService) {

@@ -2236,8 +2236,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         sendOnBoundsChanged();
         if (ENABLE_SHELL_TRANSITIONS) {
             mSplitLayout.setDividerInteractive(false, false, "onSplitResizeStart");
-            mSplitTransitions.startResizeTransition(wct, this, (finishWct, t) ->
-                    mSplitLayout.setDividerInteractive(true, false, "onSplitResizeFinish"));
+            mSplitTransitions.startResizeTransition(wct, this, (aborted) -> {
+                mSplitLayout.setDividerInteractive(true, false, "onSplitResizeConsumed");
+            }, (finishWct, t) -> {
+                mSplitLayout.setDividerInteractive(true, false, "onSplitResizeFinish");
+            });
         } else {
             // Only need screenshot for legacy case because shell transition should screenshot
             // itself during transition.

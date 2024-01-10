@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.os.Parcel;
@@ -471,6 +472,17 @@ public class ServiceInfo extends ComponentInfo
     public static final int FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT = 1 << 12;
 
     /**
+     * Constant corresponding to {@code mediaProcessing} in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * Media processing use cases such as video or photo editing and processing.
+     */
+    @RequiresPermission(
+            value = Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING
+    )
+    @FlaggedApi(Flags.FLAG_INTRODUCE_MEDIA_PROCESSING_TYPE)
+    public static final int FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING = 1 << 13;
+
+    /**
      * Constant corresponding to {@code specialUse} in
      * the {@link android.R.attr#foregroundServiceType} attribute.
      * Use cases that can't be categorized into any other foreground service types, but also
@@ -554,6 +566,7 @@ public class ServiceInfo extends ComponentInfo
             FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED,
             FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
             FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT,
+            FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING,
             FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -640,6 +653,8 @@ public class ServiceInfo extends ComponentInfo
                 return "shortService";
             case FOREGROUND_SERVICE_TYPE_FILE_MANAGEMENT:
                 return "fileManagement";
+            case FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING:
+                return "mediaProcessing";
             case FOREGROUND_SERVICE_TYPE_SPECIAL_USE:
                 return "specialUse";
             default:

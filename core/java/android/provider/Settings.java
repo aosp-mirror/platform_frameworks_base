@@ -108,10 +108,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -3585,10 +3585,12 @@ public final class Settings {
                     || applicationInfo.isSignedWithPlatformKey();
         }
 
-        public ArrayMap<String, String> getStringsForPrefix(ContentResolver cr, String prefix,
-                List<String> names) {
+        private ArrayMap<String, String> getStringsForPrefixStripPrefix(
+                ContentResolver cr, String prefix, String[] names) {
             String namespace = prefix.substring(0, prefix.length() - 1);
             ArrayMap<String, String> keyValues = new ArrayMap<>();
+            int substringLength = prefix.length();
+
             int currentGeneration = -1;
             boolean needsGenerationTracker = false;
 
@@ -3601,22 +3603,30 @@ public final class Settings {
                                     + " type:" + mUri.getPath()
                                     + " in package:" + cr.getPackageName());
                         }
+                        // When a generation number changes, remove cached values, remove the old
+                        // generation tracker and request a new one
+                        generationTracker.destroy();
+                        mGenerationTrackers.remove(prefix);
                         for (int i = mValues.size() - 1; i >= 0; i--) {
                             String key = mValues.keyAt(i);
                             if (key.startsWith(prefix)) {
                                 mValues.remove(key);
                             }
                         }
+                        needsGenerationTracker = true;
                     } else {
                         boolean prefixCached = mValues.containsKey(prefix);
                         if (prefixCached) {
                             if (DEBUG) {
                                 Log.i(TAG, "Cache hit for prefix:" + prefix);
                             }
-                            if (!names.isEmpty()) {
+                            if (names.length > 0) {
                                 for (String name : names) {
-                                    if (mValues.containsKey(name)) {
-                                        keyValues.put(name, mValues.get(name));
+                                    String value = mValues.get(name);
+                                    if (value != null) {
+                                        keyValues.put(
+                                                name.substring(substringLength),
+                                                value);
                                     }
                                 }
                             } else {
@@ -3625,7 +3635,10 @@ public final class Settings {
                                     // Explicitly exclude the prefix as it is only there to
                                     // signal that the prefix has been cached.
                                     if (key.startsWith(prefix) && !key.equals(prefix)) {
-                                        keyValues.put(key, mValues.get(key));
+                                        String value = mValues.valueAt(i);
+                                        keyValues.put(
+                                                key.substring(substringLength),
+                                                value);
                                     }
                                 }
                             }
@@ -3685,14 +3698,22 @@ public final class Settings {
                 Map<String, String> flagsToValues =
                         (HashMap) b.getSerializable(Settings.NameValueTable.VALUE, java.util.HashMap.class);
                 // Only the flags requested by the caller
-                if (!names.isEmpty()) {
-                    for (Map.Entry<String, String> flag : flagsToValues.entrySet()) {
-                        if (names.contains(flag.getKey())) {
-                            keyValues.put(flag.getKey(), flag.getValue());
+                if (names.length > 0) {
+                    for (String name : names) {
+                        String value = flagsToValues.get(name);
+                        if (value != null) {
+                            keyValues.put(
+                                    name.substring(substringLength),
+                                    value);
                         }
                     }
                 } else {
-                    keyValues.putAll(flagsToValues);
+                    keyValues.ensureCapacity(keyValues.size() + flagsToValues.size());
+                    for (Map.Entry<String, String> flag : flagsToValues.entrySet()) {
+                        keyValues.put(
+                                flag.getKey().substring(substringLength),
+                                flag.getValue());
+                    }
                 }
 
                 synchronized (NameValueCache.this) {
@@ -19675,6 +19696,15 @@ public final class Settings {
             @Readable
             public static final String WRIST_DETECTION_AUTO_LOCKING_ENABLED =
                     "wear_wrist_detection_auto_locking_enabled";
+
+            /**
+             * Whether consistent notification blocking experience is enabled.
+             *
+             * @hide
+             */
+            @Readable
+            public static final String CONSISTENT_NOTIFICATION_BLOCKING_ENABLED =
+                    "consistent_notification_blocking_enabled";
         }
     }
 
@@ -19835,21 +19865,15 @@ public final class Settings {
         @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
         public static Map<String, String> getStrings(@NonNull ContentResolver resolver,
                 @NonNull String namespace, @NonNull List<String> names) {
-            List<String> compositeNames = new ArrayList<>(names.size());
-            for (String name : names) {
-                compositeNames.add(createCompositeName(namespace, name));
+            String[] compositeNames = new String[names.size()];
+            for (int i = 0, size = names.size(); i < size; ++i) {
+                compositeNames[i] = createCompositeName(namespace, names.get(i));
             }
 
             String prefix = createPrefix(namespace);
-            ArrayMap<String, String> rawKeyValues = sNameValueCache.getStringsForPrefix(
+
+            ArrayMap<String, String> keyValues = sNameValueCache.getStringsForPrefixStripPrefix(
                     resolver, prefix, compositeNames);
-            int size = rawKeyValues.size();
-            int substringLength = prefix.length();
-            ArrayMap<String, String> keyValues = new ArrayMap<>(size);
-            for (int i = 0; i < size; ++i) {
-                keyValues.put(rawKeyValues.keyAt(i).substring(substringLength),
-                        rawKeyValues.valueAt(i));
-            }
             return keyValues;
         }
 
@@ -20175,12 +20199,13 @@ public final class Settings {
         private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
             Preconditions.checkNotNull(namespace);
             Preconditions.checkNotNull(name);
-            return createPrefix(namespace) + name;
+            var sb = new StringBuilder(namespace.length() + 1 + name.length());
+            return sb.append(namespace).append('/').append(name).toString();
         }
 
         private static String createPrefix(@NonNull String namespace) {
             Preconditions.checkNotNull(namespace);
-            return namespace + "/";
+            return namespace + '/';
         }
 
         private static Uri createNamespaceUri(@NonNull String namespace) {

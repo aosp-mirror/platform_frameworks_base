@@ -1385,6 +1385,8 @@ public class OomAdjuster {
                         break;
                 }
 
+                // TODO: b/319163103 - limit isolated/sandbox trimming to just the processes
+                //  evaluated in the current update.
                 if (app.isolated && psr.numberOfRunningServices() <= 0
                         && app.getIsolatedEntryPoint() == null) {
                     // If this is an isolated process, there are no services

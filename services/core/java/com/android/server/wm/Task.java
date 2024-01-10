@@ -1411,12 +1411,13 @@ class Task extends TaskFragment {
         return isUidPresent;
     }
 
+    WindowState topStartingWindow() {
+        return getWindow(w -> w.mAttrs.type == TYPE_APPLICATION_STARTING);
+    }
+
     ActivityRecord topActivityContainsStartingWindow() {
-        if (getParent() == null) {
-            return null;
-        }
-        return getActivity((r) -> r.getWindow(window ->
-                window.getBaseType() == TYPE_APPLICATION_STARTING) != null);
+        final WindowState startingWindow = topStartingWindow();
+        return startingWindow != null ? startingWindow.mActivityRecord : null;
     }
 
     /**
@@ -3697,6 +3698,16 @@ class Task extends TaskFragment {
                     decorSurfacePlaced = true;
                 }
                 wc.assignLayer(t, layer++);
+
+                // Boost the adjacent TaskFragment for dimmer if needed.
+                final TaskFragment taskFragment = wc.asTaskFragment();
+                if (taskFragment != null && taskFragment.isEmbedded()
+                        && taskFragment.isVisibleRequested()) {
+                    final TaskFragment adjacentTf = taskFragment.getAdjacentTaskFragment();
+                    if (adjacentTf != null && adjacentTf.shouldBoostDimmer()) {
+                        adjacentTf.assignLayer(t, layer++);
+                    }
+                }
 
                 // Place the decor surface just above the owner TaskFragment.
                 if (mDecorSurfaceContainer != null && !decorSurfacePlaced

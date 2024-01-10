@@ -1,0 +1,10 @@
+aconfig_declarations {
+    name: "policy_flags",
+    package: "com.android.server.policy",
+    srcs: ["*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "policy_flags_lib",
+    aconfig_declarations: "policy_flags",
+}

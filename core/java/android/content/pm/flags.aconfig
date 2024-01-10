@@ -131,3 +131,18 @@ flag {
     bug: "310801107"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "introduce_media_processing_type"
+    namespace: "backstage_power"
+    description: "Add a new FGS type for media processing use cases."
+    bug: "317788011"
+}
+
+flag {
+    name: "encode_app_intent"
+    namespace: "package_manager_service"
+    description: "Feature flag to encode app intent."
+    bug: "281848623"
+}
+

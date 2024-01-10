@@ -80,6 +80,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
 import android.view.IWindow;
@@ -102,16 +103,19 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.compatibility.common.util.AdoptShellPermissionsRule;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.LocalServices;
+import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import com.android.server.wm.WindowManagerService.WindowContainerInfo;
 
 import com.google.common.truth.Expect;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Build/Install/Run:
@@ -132,6 +136,11 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Rule
     public Expect mExpect = Expect.create();
+
+    @After
+    public void tearDown() {
+        mWm.mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(Collections.emptySet());
+    }
 
     @Test
     public void testIsRequestedOrientationMapped() {
@@ -812,6 +821,42 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mExpect.that(session.getTokenToRecord())
                 .isEqualTo(task.mRemoteToken.toWindowContainerToken().asBinder());
         mExpect.that(session.getTargetUid()).isEqualTo(activityRecord.getUid());
+    }
+
+    @Test
+    public void setShouldBlockScreenCaptureForApp() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        int ownerId2 = 21;
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.setShouldBlockScreenCaptureForApp(blockedPackages);
+
+        assertTrue(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
+        assertFalse(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId2));
+        verify(mWm).refreshScreenCaptureDisabled();
+    }
+
+    @Test
+    public void setShouldBlockScreenCaptureForApp_emptySet_clearsCache() {
+        String testPackage = "test";
+        int ownerId1 = 20;
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.setShouldBlockScreenCaptureForApp(blockedPackages);
+        wmInternal.setShouldBlockScreenCaptureForApp(Collections.emptySet());
+
+        assertFalse(mWm.mSensitiveContentPackages
+                .shouldBlockScreenCaptureForApp(testPackage, ownerId1));
+        verify(mWm, times(2)).refreshScreenCaptureDisabled();
     }
 
     @Test

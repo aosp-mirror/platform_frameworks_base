@@ -893,48 +893,206 @@ public class ZenModeHelper {
     }
 
     void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
-            @ConfigChangeOrigin int origin, boolean isNew) {
-        // TODO: b/308671593,b/311406021 - Handle origins more precisely:
-        //  - USER can override anything and updates bitmask of user-modified fields;
-        //  - SYSTEM_OR_SYSTEMUI can override anything and preserves bitmask;
-        //  - APP can only update if not user-modified.
-        if (rule.enabled != automaticZenRule.isEnabled()) {
-            rule.snoozing = false;
-        }
-        rule.name = automaticZenRule.getName();
-        rule.condition = null;
-        rule.conditionId = automaticZenRule.getConditionId();
-        rule.enabled = automaticZenRule.isEnabled();
-        rule.modified = automaticZenRule.isModified();
-        rule.zenPolicy = automaticZenRule.getZenPolicy();
+                         @ConfigChangeOrigin int origin, boolean isNew) {
         if (Flags.modesApi()) {
-            rule.zenDeviceEffects = fixZenDeviceEffects(
-                    rule.zenDeviceEffects,
-                    automaticZenRule.getDeviceEffects(),
-                    origin);
-        }
-        rule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
-                automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
-        rule.configurationActivity = automaticZenRule.getConfigurationActivity();
+            // These values can always be edited by the app, so we apply changes immediately.
+            if (isNew) {
+                rule.id = ZenModeConfig.newRuleId();
+                rule.creationTime = System.currentTimeMillis();
+                rule.component = automaticZenRule.getOwner();
+                rule.pkg = pkg;
+            }
 
-        if (isNew) {
-            rule.id = ZenModeConfig.newRuleId();
-            rule.creationTime = System.currentTimeMillis();
-            rule.component = automaticZenRule.getOwner();
-            rule.pkg = pkg;
-        }
-
-        if (Flags.modesApi()) {
+            rule.condition = null;
+            rule.conditionId = automaticZenRule.getConditionId();
+            if (rule.enabled != automaticZenRule.isEnabled()) {
+                rule.snoozing = false;
+            }
+            rule.enabled = automaticZenRule.isEnabled();
+            rule.configurationActivity = automaticZenRule.getConfigurationActivity();
             rule.allowManualInvocation = automaticZenRule.isManualInvocationAllowed();
-            rule.iconResName = drawableResIdToResName(rule.pkg, automaticZenRule.getIconResId());
+            rule.iconResName =
+                    drawableResIdToResName(rule.pkg, automaticZenRule.getIconResId());
             rule.triggerDescription = automaticZenRule.getTriggerDescription();
             rule.type = automaticZenRule.getType();
+            // TODO: b/310620812 - Remove this once FLAG_MODES_API is inlined.
+            rule.modified = automaticZenRule.isModified();
+
+            // Name is treated differently than other values:
+            // App is allowed to update name if the name was not modified by the user (even if
+            // other values have been modified). In this way, if the locale of an app changes,
+            // i18n of the rule name can still occur even if the user has customized the rule
+            // contents.
+            String previousName = rule.name;
+            if (isNew || doesOriginAlwaysUpdateValues(origin)
+                    || (rule.userModifiedFields & AutomaticZenRule.FIELD_NAME) == 0) {
+                rule.name = automaticZenRule.getName();
+            }
+
+            // For the remaining values, rules can always have all values updated if:
+            // * the rule is newly added, or
+            // * the request comes from an origin that can always update values, like the user, or
+            // * the rule has not yet been user modified, and thus can be updated by the app.
+            boolean updateValues = isNew || doesOriginAlwaysUpdateValues(origin)
+                    || rule.canBeUpdatedByApp();
+
+            // For all other values, if updates are not allowed, we discard the update.
+            if (!updateValues) {
+                return;
+            }
+
+            // Updates the bitmasks if the origin of the change is the user.
+            boolean updateBitmask = (origin == UPDATE_ORIGIN_USER);
+
+            if (updateBitmask && !TextUtils.equals(previousName, automaticZenRule.getName())) {
+                rule.userModifiedFields |= AutomaticZenRule.FIELD_NAME;
+            }
+            int newZenMode = NotificationManager.zenModeFromInterruptionFilter(
+                    automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
+            if (updateBitmask && rule.zenMode != newZenMode) {
+                rule.userModifiedFields |= AutomaticZenRule.FIELD_INTERRUPTION_FILTER;
+            }
+
+            // Updates the values in the ZenRule itself.
+            rule.zenMode = newZenMode;
+
+            // Updates the bitmask and values for all policy fields, based on the origin.
+            rule.zenPolicy = updatePolicy(rule.zenPolicy, automaticZenRule.getZenPolicy(),
+                    updateBitmask);
+            // Updates the bitmask and values for all device effect fields, based on the origin.
+            rule.zenDeviceEffects = updateZenDeviceEffects(
+                    rule.zenDeviceEffects, automaticZenRule.getDeviceEffects(),
+                    origin == UPDATE_ORIGIN_APP, updateBitmask);
+        } else {
+            if (rule.enabled != automaticZenRule.isEnabled()) {
+                rule.snoozing = false;
+            }
+            rule.name = automaticZenRule.getName();
+            rule.condition = null;
+            rule.conditionId = automaticZenRule.getConditionId();
+            rule.enabled = automaticZenRule.isEnabled();
+            rule.modified = automaticZenRule.isModified();
+            rule.zenPolicy = automaticZenRule.getZenPolicy();
+            if (Flags.modesApi()) {
+                rule.zenDeviceEffects = updateZenDeviceEffects(
+                        rule.zenDeviceEffects,
+                        automaticZenRule.getDeviceEffects(),
+                        origin == UPDATE_ORIGIN_APP,
+                        origin == UPDATE_ORIGIN_USER);
+            }
+            rule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
+                    automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
+            rule.configurationActivity = automaticZenRule.getConfigurationActivity();
+
+            if (isNew) {
+                rule.id = ZenModeConfig.newRuleId();
+                rule.creationTime = System.currentTimeMillis();
+                rule.component = automaticZenRule.getOwner();
+                rule.pkg = pkg;
+            }
         }
     }
 
     /**
-     * Fix {@link ZenDeviceEffects} that are being stored as part of a new or updated ZenRule.
-     *
+     * Returns true when fields can always be updated, based on the provided origin of an AZR
+     * change. (Note that regardless of origin, fields can always be updated if they're not already
+     * user modified.)
+     */
+    private static boolean doesOriginAlwaysUpdateValues(@ConfigChangeOrigin int origin) {
+        return origin == UPDATE_ORIGIN_USER || origin == UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI;
+    }
+
+    /**
+     * Modifies {@link ZenPolicy} that is being stored as part of a new or updated ZenRule.
+     * Returns a policy based on {@code oldPolicy}, but with fields updated to match
+     * {@code newPolicy} where they differ, and updating the internal user-modified bitmask to
+     * track these changes, if applicable based on {@code origin}.
+     */
+    @Nullable
+    private ZenPolicy updatePolicy(@Nullable ZenPolicy oldPolicy, @Nullable ZenPolicy newPolicy,
+                                   boolean updateBitmask) {
+        // If the update is to make the policy null, we don't need to update the bitmask,
+        // because it won't be stored anywhere anyway.
+        if (newPolicy == null) {
+            return null;
+        }
+
+        // If oldPolicy is null, we compare against the default policy when determining which
+        // fields in the bitmask should be marked as updated.
+        if (oldPolicy == null) {
+            oldPolicy = mDefaultConfig.toZenPolicy();
+        }
+
+        int userModifiedFields = oldPolicy.getUserModifiedFields();
+        if (updateBitmask) {
+            if (oldPolicy.getPriorityMessageSenders() != newPolicy.getPriorityMessageSenders()) {
+                userModifiedFields |= ZenPolicy.FIELD_MESSAGES;
+            }
+            if (oldPolicy.getPriorityCallSenders() != newPolicy.getPriorityCallSenders()) {
+                userModifiedFields |= ZenPolicy.FIELD_CALLS;
+            }
+            if (oldPolicy.getPriorityConversationSenders()
+                    != newPolicy.getPriorityConversationSenders()) {
+                userModifiedFields |= ZenPolicy.FIELD_CONVERSATIONS;
+            }
+            if (oldPolicy.getAllowedChannels() != newPolicy.getAllowedChannels()) {
+                userModifiedFields |= ZenPolicy.FIELD_ALLOW_CHANNELS;
+            }
+            if (oldPolicy.getPriorityCategoryReminders()
+                    != newPolicy.getPriorityCategoryReminders()) {
+                userModifiedFields |= ZenPolicy.FIELD_PRIORITY_CATEGORY_REMINDERS;
+            }
+            if (oldPolicy.getPriorityCategoryEvents() != newPolicy.getPriorityCategoryEvents()) {
+                userModifiedFields |= ZenPolicy.FIELD_PRIORITY_CATEGORY_EVENTS;
+            }
+            if (oldPolicy.getPriorityCategoryRepeatCallers()
+                    != newPolicy.getPriorityCategoryRepeatCallers()) {
+                userModifiedFields |= ZenPolicy.FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS;
+            }
+            if (oldPolicy.getPriorityCategoryAlarms() != newPolicy.getPriorityCategoryAlarms()) {
+                userModifiedFields |= ZenPolicy.FIELD_PRIORITY_CATEGORY_ALARMS;
+            }
+            if (oldPolicy.getPriorityCategoryMedia() != newPolicy.getPriorityCategoryMedia()) {
+                userModifiedFields |= ZenPolicy.FIELD_PRIORITY_CATEGORY_MEDIA;
+            }
+            if (oldPolicy.getPriorityCategorySystem() != newPolicy.getPriorityCategorySystem()) {
+                userModifiedFields |= ZenPolicy.FIELD_PRIORITY_CATEGORY_SYSTEM;
+            }
+            // Visual effects
+            if (oldPolicy.getVisualEffectFullScreenIntent()
+                    != newPolicy.getVisualEffectFullScreenIntent()) {
+                userModifiedFields |= ZenPolicy.FIELD_VISUAL_EFFECT_FULL_SCREEN_INTENT;
+            }
+            if (oldPolicy.getVisualEffectLights() != newPolicy.getVisualEffectLights()) {
+                userModifiedFields |= ZenPolicy.FIELD_VISUAL_EFFECT_LIGHTS;
+            }
+            if (oldPolicy.getVisualEffectPeek() != newPolicy.getVisualEffectPeek()) {
+                userModifiedFields |= ZenPolicy.FIELD_VISUAL_EFFECT_PEEK;
+            }
+            if (oldPolicy.getVisualEffectStatusBar() != newPolicy.getVisualEffectStatusBar()) {
+                userModifiedFields |= ZenPolicy.FIELD_VISUAL_EFFECT_STATUS_BAR;
+            }
+            if (oldPolicy.getVisualEffectBadge() != newPolicy.getVisualEffectBadge()) {
+                userModifiedFields |= ZenPolicy.FIELD_VISUAL_EFFECT_BADGE;
+            }
+            if (oldPolicy.getVisualEffectAmbient() != newPolicy.getVisualEffectAmbient()) {
+                userModifiedFields |= ZenPolicy.FIELD_VISUAL_EFFECT_AMBIENT;
+            }
+            if (oldPolicy.getVisualEffectNotificationList()
+                    != newPolicy.getVisualEffectNotificationList()) {
+                userModifiedFields |= ZenPolicy.FIELD_VISUAL_EFFECT_NOTIFICATION_LIST;
+            }
+        }
+
+        // After all bitmask changes have been made, sets the bitmask.
+        return new ZenPolicy.Builder(newPolicy).setUserModifiedFields(userModifiedFields).build();
+    }
+
+    /**
+     * Modifies {@link ZenDeviceEffects} that are being stored as part of a new or updated ZenRule.
+     * Returns a {@link ZenDeviceEffects} based on {@code oldEffects}, but with fields updated to
+     * match {@code newEffects} where they differ, and updating the internal user-modified bitmask
+     * to track these changes, if applicable based on {@code origin}.
      * <ul>
      *     <li> Apps cannot turn on hidden effects (those tagged as {@code @hide}) since they are
      *     intended for platform-specific rules (e.g. wearables). If it's a new rule, we blank them
@@ -942,38 +1100,85 @@ public class ZenModeHelper {
      * </ul>
      */
     @Nullable
-    private static ZenDeviceEffects fixZenDeviceEffects(@Nullable ZenDeviceEffects oldEffects,
-            @Nullable ZenDeviceEffects newEffects, @ConfigChangeOrigin int origin) {
-        // TODO: b/308671593,b/311406021 - Handle origins more precisely:
-        //  - USER can override anything and updates bitmask of user-modified fields;
-        //  - SYSTEM_OR_SYSTEMUI can override anything and preserves bitmask;
-        //  - APP can only update if not user-modified.
-        if (origin != UPDATE_ORIGIN_APP) {
-            return newEffects;
-        }
-
+    private static ZenDeviceEffects updateZenDeviceEffects(@Nullable ZenDeviceEffects oldEffects,
+                                                           @Nullable ZenDeviceEffects newEffects,
+                                                           boolean isFromApp,
+                                                           boolean updateBitmask) {
         if (newEffects == null) {
             return null;
         }
-        if (oldEffects != null) {
-            return new ZenDeviceEffects.Builder(newEffects)
-                    .setShouldDisableAutoBrightness(oldEffects.shouldDisableAutoBrightness())
-                    .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
-                    .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
-                    .setShouldDisableTouch(oldEffects.shouldDisableTouch())
-                    .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
-                    .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
-                    .build();
-        } else {
-            return new ZenDeviceEffects.Builder(newEffects)
-                    .setShouldDisableAutoBrightness(false)
-                    .setShouldDisableTapToWake(false)
-                    .setShouldDisableTiltToWake(false)
-                    .setShouldDisableTouch(false)
-                    .setShouldMinimizeRadioUsage(false)
-                    .setShouldMaximizeDoze(false)
-                    .build();
+
+        // Since newEffects is not null, we want to adopt all the new provided device effects.
+        ZenDeviceEffects.Builder builder = new ZenDeviceEffects.Builder(newEffects);
+
+        if (isFromApp) {
+            if (oldEffects != null) {
+                // We can do this because we know we don't need to update the bitmask FROM_APP.
+                return builder
+                        .setShouldDisableAutoBrightness(oldEffects.shouldDisableAutoBrightness())
+                        .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
+                        .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
+                        .setShouldDisableTouch(oldEffects.shouldDisableTouch())
+                        .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
+                        .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
+                        .build();
+            } else {
+                return builder
+                        .setShouldDisableAutoBrightness(false)
+                        .setShouldDisableTapToWake(false)
+                        .setShouldDisableTiltToWake(false)
+                        .setShouldDisableTouch(false)
+                        .setShouldMinimizeRadioUsage(false)
+                        .setShouldMaximizeDoze(false)
+                        .build();
+            }
         }
+
+        // If oldEffects is null, we compare against the default device effects object when
+        // determining which fields in the bitmask should be marked as updated.
+        if (oldEffects == null) {
+            oldEffects = new ZenDeviceEffects.Builder().build();
+        }
+
+        int userModifiedFields = oldEffects.getUserModifiedFields();
+        if (updateBitmask) {
+            if (oldEffects.shouldDisplayGrayscale() != newEffects.shouldDisplayGrayscale()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_GRAYSCALE;
+            }
+            if (oldEffects.shouldSuppressAmbientDisplay()
+                    != newEffects.shouldSuppressAmbientDisplay()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_SUPPRESS_AMBIENT_DISPLAY;
+            }
+            if (oldEffects.shouldDimWallpaper() != newEffects.shouldDimWallpaper()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_DIM_WALLPAPER;
+            }
+            if (oldEffects.shouldUseNightMode() != newEffects.shouldUseNightMode()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_NIGHT_MODE;
+            }
+            if (oldEffects.shouldDisableAutoBrightness()
+                    != newEffects.shouldDisableAutoBrightness()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_DISABLE_AUTO_BRIGHTNESS;
+            }
+            if (oldEffects.shouldDisableTapToWake() != newEffects.shouldDisableTapToWake()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_DISABLE_TAP_TO_WAKE;
+            }
+            if (oldEffects.shouldDisableTiltToWake() != newEffects.shouldDisableTiltToWake()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_DISABLE_TILT_TO_WAKE;
+            }
+            if (oldEffects.shouldDisableTouch() != newEffects.shouldDisableTouch()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_DISABLE_TOUCH;
+            }
+            if (oldEffects.shouldMinimizeRadioUsage() != newEffects.shouldMinimizeRadioUsage()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_MINIMIZE_RADIO_USAGE;
+            }
+            if (oldEffects.shouldMaximizeDoze() != newEffects.shouldMaximizeDoze()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_MAXIMIZE_DOZE;
+            }
+        }
+
+        // Since newEffects is not null, we want to adopt all the new provided device effects.
+        // Set the usermodifiedFields value separately, to reflect the updated bitmask.
+        return builder.setUserModifiedFields(userModifiedFields).build();
     }
 
     private AutomaticZenRule zenRuleToAutomaticZenRule(ZenRule rule) {
@@ -992,6 +1197,7 @@ public class ZenModeHelper {
                     .setOwner(rule.component)
                     .setConfigurationActivity(rule.configurationActivity)
                     .setTriggerDescription(rule.triggerDescription)
+                    .setUserModifiedFields(rule.userModifiedFields)
                     .build();
         } else {
             azr = new AutomaticZenRule(rule.name, rule.component,
@@ -2023,6 +2229,7 @@ public class ZenModeHelper {
         if (resId == 0) {
             return null;
         }
+        Objects.requireNonNull(packageName);
         try {
             final Resources res = mPm.getResourcesForApplication(packageName);
             return res.getResourceName(resId);

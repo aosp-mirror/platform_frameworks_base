@@ -297,6 +297,23 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     }
 
     /**
+     * Return the UID of the focus owner that has focus with exclusive focus gain
+     * @return -1 if nobody has exclusive focus, the UID of the owner otherwise
+     */
+    protected int getExclusiveFocusOwnerUid() {
+        synchronized (mAudioFocusLock) {
+            if (mFocusStack.empty()) {
+                return -1;
+            }
+            final FocusRequester owner = mFocusStack.peek();
+            if (owner.getGainRequest() != AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE) {
+                return -1;
+            }
+            return owner.getClientUid();
+        }
+    }
+
+    /**
      * Send AUDIOFOCUS_LOSS to a specific stack entry.
      * Note this method is supporting an external API, and is restricted to LOSS in order to
      * prevent allowing the stack to be in an invalid state (e.g. entry inside stack has focus)

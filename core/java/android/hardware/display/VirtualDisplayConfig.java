@@ -450,11 +450,14 @@ public final class VirtualDisplayConfig implements Parcelable {
          * automatically launched upon the display creation. If unset or set to {@code false}, the
          * display will not host any activities upon creation.</p>
          *
-         * <p>Note: setting to {@code true} requires the display to be trusted. If the display is
-         * not trusted, this property is ignored.</p>
+         * <p>Note: setting to {@code true} requires the display to be trusted and to not mirror
+         * content of other displays. If the display is not trusted, or if it mirrors content of
+         * other displays, this property is ignored.</p>
          *
          * @param isHomeSupported whether home activities are supported on the display
          * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
          * @hide
          */
         @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_HOME)

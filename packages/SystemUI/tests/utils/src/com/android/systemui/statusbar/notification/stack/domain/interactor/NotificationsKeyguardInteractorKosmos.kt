@@ -18,13 +18,11 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.statusbar.notification.data.repository.notificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 
 val Kosmos.notificationsKeyguardInteractor by Fixture {
     NotificationsKeyguardInteractor(
         repository = notificationsKeyguardViewStateRepository,
-        backgroundDispatcher = testDispatcher,
     )
 }

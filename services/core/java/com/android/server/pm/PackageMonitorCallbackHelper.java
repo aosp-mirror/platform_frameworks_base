@@ -48,6 +48,7 @@ import java.util.function.BiFunction;
 class PackageMonitorCallbackHelper {
 
     private static final boolean DEBUG = false;
+    private static final String TAG = "PackageMonitorCallbackHelper";
 
     @NonNull
     private final Object mLock = new Object();
@@ -243,25 +244,33 @@ class PackageMonitorCallbackHelper {
                 return;
             }
             int registerUid = registerUser.getUid();
+            if (allowUids != null && registerUid != Process.SYSTEM_UID
+                    && !ArrayUtils.contains(allowUids, registerUid)) {
+                if (DEBUG) {
+                    Slog.w(TAG, "Skip invoke PackageMonitorCallback for " + intent.getAction()
+                            + ", uid " + registerUid);
+                }
+                return;
+            }
+            Intent newIntent = intent;
             if (filterExtrasFunction != null) {
                 final Bundle extras = intent.getExtras();
                 if (extras != null) {
                     final Bundle filteredExtras = filterExtrasFunction.apply(registerUid, extras);
-                    if (filteredExtras != null) {
-                        intent.replaceExtras(filteredExtras);
+                    if (filteredExtras == null) {
+                        // caller is unable to access this intent
+                        if (DEBUG) {
+                            Slog.w(TAG,
+                                    "Skip invoke PackageMonitorCallback for " + intent.getAction()
+                                            + " because null filteredExtras");
+                        }
+                        return;
                     }
+                    newIntent = new Intent(newIntent);
+                    newIntent.replaceExtras(filteredExtras);
                 }
             }
-            if (allowUids != null && registerUid != Process.SYSTEM_UID
-                    && !ArrayUtils.contains(allowUids, registerUid)) {
-                if (DEBUG) {
-                    Slog.w("PackageMonitorCallbackHelper",
-                            "Skip invoke PackageMonitorCallback for " + intent.getAction()
-                                    + ", uid " + registerUid);
-                }
-                return;
-            }
-            invokeCallback(callback, intent);
+            invokeCallback(callback, newIntent);
         }));
     }
 

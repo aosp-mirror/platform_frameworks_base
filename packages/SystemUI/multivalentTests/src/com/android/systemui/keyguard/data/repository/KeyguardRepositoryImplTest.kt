@@ -24,6 +24,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.DozeMachine
@@ -71,6 +72,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private lateinit var systemClock: FakeSystemClock
+    private lateinit var facePropertyRepository: FakeFacePropertyRepository
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
@@ -78,6 +80,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         systemClock = FakeSystemClock()
+        facePropertyRepository = FakeFacePropertyRepository()
         underTest =
             KeyguardRepositoryImpl(
                 statusBarStateController,
@@ -89,6 +92,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 mainDispatcher,
                 testScope.backgroundScope,
                 systemClock,
+                facePropertyRepository,
             )
     }
 
@@ -482,10 +486,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val values = mutableListOf<Point?>()
             val job = underTest.faceSensorLocation.onEach(values::add).launchIn(this)
-
-            val captor = argumentCaptor<AuthController.Callback>()
             runCurrent()
-            verify(authController).addCallback(captor.capture())
 
             // An initial, null value should be initially emitted so that flows combined with this
             // one
@@ -500,8 +501,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                     Point(250, 250),
                 )
                 .onEach {
-                    whenever(authController.faceSensorLocation).thenReturn(it)
-                    captor.value.onFaceSensorLocationChanged()
+                    facePropertyRepository.setSensorLocation(it)
                     runCurrent()
                 }
                 .also { dispatchedSensorLocations ->

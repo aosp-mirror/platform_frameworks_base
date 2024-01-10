@@ -1260,7 +1260,7 @@ public interface WindowManager extends ViewManager {
      * <p>When this compat override is enabled the min aspect ratio given in the app's manifest can
      * be overridden by the device manufacturer using their discretion to improve display
      * compatibility unless the app's manifest value is higher. This treatment will also apply if
-     * no min aspect ratio value is provided in the manifest. These treatments can apply only in
+     * no min aspect ratio value is provided in the manifest. These treatments can apply either in
      * specific cases (e.g. device is in portrait) or each time the app is displayed on screen.
      *
      * <p>Setting this property to {@code false} informs the system that the app must be
@@ -1492,6 +1492,30 @@ public interface WindowManager extends ViewManager {
      */
     String PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED =
             "android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED";
+
+    /**
+     * Activity or Application level {@link android.content.pm.PackageManager.Property
+     * PackageManager.Property} for an app to declare that System UI should be shown for this
+     * app/component to allow it to be launched as multiple instances.  This property only affects
+     * SystemUI behavior and does _not_ affect whether a component can actually be launched into
+     * multiple instances, which is determined by the Activity's {@code launchMode} or the launching
+     * Intent's flags.  If the property is set on the Application, then all components within that
+     * application will use that value unless specified per component.
+     *
+     * The value must be a boolean string.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;activity&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI"
+     *     android:value="true|false"/&gt;
+     * &lt;/activity&gt;
+     * </pre>
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI)
+    public static final String PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI =
+            "android.window.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI";
 
     /**
      * Request for app's keyboard shortcuts to be retrieved asynchronously.
