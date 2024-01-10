@@ -30,6 +30,7 @@ import com.android.systemui.shade.ShadeViewController
 import javax.inject.Provider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 
 /** The base view model for the communal hub. */
 abstract class BaseCommunalViewModel(
@@ -95,6 +96,12 @@ abstract class BaseCommunalViewModel(
 
     /** Whether in edit mode for the communal hub. */
     open val isEditMode = false
+
+    /** Whether the popup message triggered by dismissing the CTA tile is showing. */
+    open val isPopupOnDismissCtaShowing: Flow<Boolean> = flowOf(false)
+
+    /** Hide the popup message triggered by dismissing the CTA tile. */
+    open fun onHidePopupAfterDismissCta() {}
 
     /** Called as the UI requests deleting a widget. */
     open fun onDeleteWidget(id: Int) {}

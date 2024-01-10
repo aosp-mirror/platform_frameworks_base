@@ -1087,6 +1087,8 @@
     <string name="cta_label_to_edit_widget">Add, remove, and reorder your widgets in this space</string>
     <!-- Label for CTA tile that opens widget picker on click in edit mode [CHAR LIMIT=50] -->
     <string name="cta_label_to_open_widget_picker">Add more widgets</string>
+    <!-- Text for the popup to be displayed after dismissing the CTA tile. [CHAR LIMIT=50] -->
+    <string name="popup_on_dismiss_cta_tile_text">Long press to customize widgets</string>
     <!-- Description for the button that removes a widget on click. [CHAR LIMIT=50] -->
     <string name="button_to_remove_widget">Remove</string>
     <!-- Text for the button that launches the hub mode widget picker. [CHAR LIMIT=50] -->
