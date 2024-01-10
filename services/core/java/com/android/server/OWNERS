@@ -43,3 +43,6 @@ per-file SystemTimeZone.java = file:/services/core/java/com/android/server/timez
 per-file TelephonyRegistry.java = file:/telephony/OWNERS
 per-file UiModeManagerService.java = file:/packages/SystemUI/OWNERS
 per-file VcnManagementService.java = file:/services/core/java/com/android/server/vcn/OWNERS
+
+# SystemConfig
+per-file SystemConfig.java = file:/PACKAGE_MANAGER_OWNERS
