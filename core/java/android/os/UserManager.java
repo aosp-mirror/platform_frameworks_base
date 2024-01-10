@@ -103,6 +103,21 @@ public class UserManager {
     /** Whether the device is in headless system user mode; null until cached. */
     private static Boolean sIsHeadlessSystemUser = null;
 
+    /** Maximum length of username.
+     * @hide
+     */
+    public static final int MAX_USER_NAME_LENGTH = 100;
+
+    /** Maximum length of user property String value.
+     * @hide
+     */
+    public static final int MAX_ACCOUNT_STRING_LENGTH = 500;
+
+    /** Maximum length of account options String values.
+     * @hide
+     */
+    public static final int MAX_ACCOUNT_OPTIONS_LENGTH = 1000;
+
     /**
      * User type representing a {@link UserHandle#USER_SYSTEM system} user that is a human user.
      * This type of user cannot be created; it can only pre-exist on first boot.
@@ -4204,15 +4219,15 @@ public class UserManager {
      * This API should only be called if the current user is an {@link #isAdminUser() admin} user,
      * as otherwise the returned intent will not be able to create a user.
      *
-     * @param userName Optional name to assign to the user.
+     * @param userName Optional name to assign to the user. Character limit is 100.
      * @param accountName Optional account name that will be used by the setup wizard to initialize
-     *                    the user.
+     *                    the user. Character limit is 500.
      * @param accountType Optional account type for the account to be created. This is required
-     *                    if the account name is specified.
+     *                    if the account name is specified. Character limit is 500.
      * @param accountOptions Optional bundle of data to be passed in during account creation in the
      *                       new user via {@link AccountManager#addAccount(String, String, String[],
      *                       Bundle, android.app.Activity, android.accounts.AccountManagerCallback,
-     *                       Handler)}.
+     *                       Handler)}. Character limit is 1000.
      * @return An Intent that can be launched from an Activity.
      * @see #USER_CREATION_FAILED_NOT_PERMITTED
      * @see #USER_CREATION_FAILED_NO_MORE_USERS
