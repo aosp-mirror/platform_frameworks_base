@@ -2596,7 +2596,6 @@ public abstract class PackageManager {
             DELETE_SYSTEM_APP,
             DELETE_DONT_KILL_APP,
             DELETE_CHATTY,
-            DELETE_SHOW_DIALOG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeleteFlags {}
@@ -2647,12 +2646,6 @@ public abstract class PackageManager {
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public static final int DELETE_ARCHIVE = 0x00000010;
-
-    /**
-     * Show a confirmation dialog to the user when app is being deleted.
-     */
-    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
-    public static final int DELETE_SHOW_DIALOG = 0x00000020;
 
     /**
      * Flag parameter for {@link #deletePackage} to indicate that package deletion
