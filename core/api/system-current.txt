@@ -5487,6 +5487,7 @@ package android.hardware.location {
     method @NonNull public android.hardware.location.ContextHubInfo getAttachedHub();
     method @IntRange(from=0, to=65535) public int getId();
     method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int sendMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
+    method @FlaggedApi("android.chre.flags.reliable_message") @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> sendReliableMessageToNanoApp(@NonNull android.hardware.location.NanoAppMessage);
   }
 
   public class ContextHubClientCallback {
@@ -5522,6 +5523,7 @@ package android.hardware.location {
     method public String getToolchain();
     method public int getToolchainVersion();
     method public String getVendor();
+    method @FlaggedApi("android.chre.flags.reliable_message") public boolean supportsReliableMessages();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubInfo> CREATOR;
   }
@@ -5605,6 +5607,7 @@ package android.hardware.location {
     field public static final int RESULT_FAILED_BAD_PARAMS = 2; // 0x2
     field public static final int RESULT_FAILED_BUSY = 4; // 0x4
     field public static final int RESULT_FAILED_HAL_UNAVAILABLE = 8; // 0x8
+    field @FlaggedApi("android.chre.flags.reliable_message") public static final int RESULT_FAILED_NOT_SUPPORTED = 9; // 0x9
     field public static final int RESULT_FAILED_SERVICE_INTERNAL_FAILURE = 7; // 0x7
     field public static final int RESULT_FAILED_TIMEOUT = 6; // 0x6
     field public static final int RESULT_FAILED_UNINITIALIZED = 3; // 0x3
@@ -5614,6 +5617,7 @@ package android.hardware.location {
     field public static final int TYPE_ENABLE_NANOAPP = 2; // 0x2
     field public static final int TYPE_LOAD_NANOAPP = 0; // 0x0
     field public static final int TYPE_QUERY_NANOAPPS = 4; // 0x4
+    field @FlaggedApi("android.chre.flags.reliable_message") public static final int TYPE_RELIABLE_MESSAGE = 5; // 0x5
     field public static final int TYPE_UNLOAD_NANOAPP = 1; // 0x1
   }
 
@@ -5796,12 +5800,17 @@ package android.hardware.location {
 
   public final class NanoAppMessage implements android.os.Parcelable {
     method public static android.hardware.location.NanoAppMessage createMessageFromNanoApp(long, int, byte[], boolean);
+    method @FlaggedApi("android.chre.flags.reliable_message") @NonNull public static android.hardware.location.NanoAppMessage createMessageFromNanoApp(long, int, @NonNull byte[], boolean, boolean, int);
     method public static android.hardware.location.NanoAppMessage createMessageToNanoApp(long, int, byte[]);
     method public int describeContents();
     method public byte[] getMessageBody();
+    method @FlaggedApi("android.chre.flags.reliable_message") public int getMessageSequenceNumber();
     method public int getMessageType();
     method public long getNanoAppId();
     method public boolean isBroadcastMessage();
+    method @FlaggedApi("android.chre.flags.reliable_message") public boolean isReliable();
+    method @FlaggedApi("android.chre.flags.reliable_message") public void setIsReliable(boolean);
+    method @FlaggedApi("android.chre.flags.reliable_message") public void setMessageSequenceNumber(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
   }
