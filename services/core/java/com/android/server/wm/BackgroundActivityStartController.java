@@ -120,38 +120,56 @@ public class BackgroundActivityStartController {
 
     static final int BAL_BLOCK = 0;
 
-    static final int BAL_ALLOW_DEFAULT = 1;
+    static final int BAL_ALLOW_DEFAULT =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_DEFAULT;
 
     // Following codes are in order of precedence
 
     /** Important UIDs which should be always allowed to launch activities */
-    static final int BAL_ALLOW_ALLOWLISTED_UID = 2;
+    static final int BAL_ALLOW_ALLOWLISTED_UID =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_ALLOWLISTED_UID;
 
     /** Apps that fulfill a certain role that can can always launch new tasks */
-    static final int BAL_ALLOW_ALLOWLISTED_COMPONENT = 3;
+    static final int BAL_ALLOW_ALLOWLISTED_COMPONENT =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_ALLOWLISTED_COMPONENT;
 
-    /** Apps which currently have a visible window or are bound by a service with a visible
-     * window */
-    static final int BAL_ALLOW_VISIBLE_WINDOW = 4;
+    /**
+     * Apps which currently have a visible window or are bound by a service with a visible
+     * window
+     */
+    static final int BAL_ALLOW_VISIBLE_WINDOW =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_VISIBLE_WINDOW;
 
     /** Allowed due to the PendingIntent sender */
-    static final int BAL_ALLOW_PENDING_INTENT = 5;
+    static final int BAL_ALLOW_PENDING_INTENT =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_PENDING_INTENT;
 
-    /** App has START_ACTIVITIES_FROM_BACKGROUND permission or BAL instrumentation privileges
-     * granted to it */
-    static final int BAL_ALLOW_PERMISSION = 6;
+    /**
+     * App has START_ACTIVITIES_FROM_BACKGROUND permission or BAL instrumentation privileges
+     * granted to it
+     */
+    static final int BAL_ALLOW_PERMISSION =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_BAL_PERMISSION;
 
     /** Process has SYSTEM_ALERT_WINDOW permission granted to it */
-    static final int BAL_ALLOW_SAW_PERMISSION = 7;
+    static final int BAL_ALLOW_SAW_PERMISSION =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_SAW_PERMISSION;
 
     /** App is in grace period after an activity was started or finished */
-    static final int BAL_ALLOW_GRACE_PERIOD = 8;
+    static final int BAL_ALLOW_GRACE_PERIOD =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_GRACE_PERIOD;
 
     /** App is in a foreground task or bound to a foreground service (but not itself visible) */
-    static final int BAL_ALLOW_FOREGROUND = 9;
+    static final int BAL_ALLOW_FOREGROUND =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_FOREGROUND;
 
     /** Process belongs to a SDK sandbox */
-    static final int BAL_ALLOW_SDK_SANDBOX = 10;
+    static final int BAL_ALLOW_SDK_SANDBOX =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_SDK_SANDBOX;
+
+    /** Process belongs to a SDK sandbox */
+    static final int BAL_ALLOW_NON_APP_VISIBLE_WINDOW =
+            FrameworkStatsLog.BAL_ALLOWED__ALLOWED_REASON__BAL_ALLOW_NON_APP_VISIBLE_WINDOW;
 
     static String balCodeToString(@BalCode int balCode) {
         return switch (balCode) {
@@ -160,6 +178,7 @@ public class BackgroundActivityStartController {
             case BAL_ALLOW_DEFAULT -> "BAL_ALLOW_DEFAULT";
             case BAL_ALLOW_FOREGROUND -> "BAL_ALLOW_FOREGROUND";
             case BAL_ALLOW_GRACE_PERIOD -> "BAL_ALLOW_GRACE_PERIOD";
+            case BAL_ALLOW_NON_APP_VISIBLE_WINDOW -> "BAL_ALLOW_NON_APP_VISIBLE_WINDOW";
             case BAL_ALLOW_PENDING_INTENT -> "BAL_ALLOW_PENDING_INTENT";
             case BAL_ALLOW_PERMISSION -> "BAL_ALLOW_PERMISSION";
             case BAL_ALLOW_SAW_PERMISSION -> "BAL_ALLOW_SAW_PERMISSION";
@@ -788,7 +807,7 @@ public class BackgroundActivityStartController {
                     /*background*/ false, "callingUid has visible window");
         }
         if (mService.mActiveUids.hasNonAppVisibleWindow(callingUid)) {
-            return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
+            return new BalVerdict(BAL_ALLOW_NON_APP_VISIBLE_WINDOW,
                     /*background*/ false, "callingUid has non-app visible window");
         }
 
@@ -884,7 +903,7 @@ public class BackgroundActivityStartController {
                         /*background*/ false, "realCallingUid has visible window");
             }
             if (mService.mActiveUids.hasNonAppVisibleWindow(state.mRealCallingUid)) {
-                return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
+                return new BalVerdict(BAL_ALLOW_NON_APP_VISIBLE_WINDOW,
                         /*background*/ false, "realCallingUid has non-app visible window");
             }
         } else {
@@ -989,7 +1008,8 @@ public class BackgroundActivityStartController {
                     || balCode == BAL_ALLOW_PERMISSION
                     || balCode == BAL_ALLOW_PENDING_INTENT
                     || balCode == BAL_ALLOW_SAW_PERMISSION
-                    || balCode == BAL_ALLOW_VISIBLE_WINDOW) {
+                    || balCode == BAL_ALLOW_VISIBLE_WINDOW
+                    || balCode == BAL_ALLOW_NON_APP_VISIBLE_WINDOW) {
                 return true;
             }
         }
@@ -1501,7 +1521,8 @@ public class BackgroundActivityStartController {
         Intent intent = state.mIntent;
 
         if (code == BAL_ALLOW_PENDING_INTENT
-                && (callingUid == Process.SYSTEM_UID || realCallingUid == Process.SYSTEM_UID)) {
+                && (callingUid < Process.FIRST_APPLICATION_UID
+                || realCallingUid < Process.FIRST_APPLICATION_UID)) {
             String activityName = intent != null
                     ? requireNonNull(intent.getComponent()).flattenToShortString() : "";
             writeBalAllowedLog(activityName, BAL_ALLOW_PENDING_INTENT,
