@@ -506,12 +506,6 @@
          receivers, and providers; it can not be used with activities. -->
     <attr name="singleUser" format="boolean" />
 
-    <!-- If set to true, only a single instance of this component will
-    run and be available for the SYSTEM user. Non SYSTEM users will not be
-    allowed to access the component if this flag is enabled.
-    This flag can be used with services, receivers, providers and activities. -->
-    <attr name="systemUserOnly" format="boolean" />
-
     <!-- Specify a specific process that the associated code is to run in.
          Use with the application tag (to supply a default process for all
          application components), or with the activity, receiver, service,
@@ -2865,7 +2859,6 @@
              Context.createAttributionContext() using the first attribution tag
              contained here. -->
         <attr name="attributionTags" />
-        <attr name="systemUserOnly" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -3024,7 +3017,6 @@
              ignored when the process is bound into a shared isolated process by a client.
         -->
         <attr name="allowSharedIsolatedProcess" format="boolean" />
-        <attr name="systemUserOnly" format="boolean" />
     </declare-styleable>
 
     <!-- @hide The <code>apex-system-service</code> tag declares an apex system service
@@ -3152,7 +3144,7 @@
         <attr name="uiOptions" />
         <attr name="parentActivityName" />
         <attr name="singleUser" />
-        <!-- This broadcast receiver or activity will only receive broadcasts for the
+        <!-- @hide This broadcast receiver or activity will only receive broadcasts for the
              system user-->
         <attr name="systemUserOnly" format="boolean" />
         <attr name="persistableMode" />
