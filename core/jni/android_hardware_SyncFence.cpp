@@ -66,6 +66,10 @@ static jlong SyncFence_getSignalTime(JNIEnv* env, jobject, jlong jPtr) {
     return fromJlong<Fence>(jPtr)->getSignalTime();
 }
 
+static void SyncFence_incRef(JNIEnv*, jobject, jlong jPtr) {
+    fromJlong<Fence>(jPtr)->incStrong((void*)SyncFence_incRef);
+}
+
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -80,6 +84,7 @@ static const JNINativeMethod gMethods[] = {
         { "nGetFd", "(J)I", (void*) SyncFence_getFd },
         { "nWait",  "(JJ)Z", (void*) SyncFence_wait },
         { "nGetSignalTime", "(J)J", (void*) SyncFence_getSignalTime },
+        { "nIncRef", "(J)V", (void*) SyncFence_incRef },
 };
 // clang-format on
 
