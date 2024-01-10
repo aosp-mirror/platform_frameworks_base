@@ -1214,7 +1214,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 .setMaxLengthSeconds(0.4f).build();
         mStatusBarMinHeight = SystemBarUtils.getStatusBarHeight(mView.getContext());
         mStatusBarHeaderHeightKeyguard = Utils.getStatusBarHeaderHeightKeyguard(mView.getContext());
-        mClockPositionAlgorithm.loadDimens(mResources);
+        mClockPositionAlgorithm.loadDimens(mView.getContext(), mResources);
         mIndicationBottomPadding = mResources.getDimensionPixelSize(
                 R.dimen.keyguard_indication_bottom_padding);
         int statusbarHeight = SystemBarUtils.getStatusBarHeight(mView.getContext());

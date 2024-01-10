@@ -27,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.lifecycle.lifecycleScope
+import com.android.systemui.Flags.centralizedStatusBarDimensRefactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
@@ -47,10 +48,11 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import kotlinx.coroutines.launch
+import dagger.Lazy
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlin.reflect.KMutableProperty0
+import kotlinx.coroutines.launch
 
 @VisibleForTesting
 internal const val INSET_DEBOUNCE_MILLIS = 500L
@@ -67,7 +69,8 @@ class NotificationsQSContainerController @Inject constructor(
         private val featureFlags: FeatureFlags,
         private val
             notificationStackScrollLayoutController: NotificationStackScrollLayoutController,
-        private val splitShadeStateController: SplitShadeStateController
+        private val splitShadeStateController: SplitShadeStateController,
+        private val largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
 
     private var splitShadeEnabled = false
@@ -186,7 +189,11 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     private fun calculateLargeShadeHeaderHeight(): Int {
-        return resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
+        return if (centralizedStatusBarDimensRefactor()) {
+            largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
+        } else {
+            resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
+        }
     }
 
     private fun calculateShadeHeaderHeight(): Int {

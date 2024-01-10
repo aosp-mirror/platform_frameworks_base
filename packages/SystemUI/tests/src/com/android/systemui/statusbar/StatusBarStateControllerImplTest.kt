@@ -27,7 +27,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -44,6 +44,7 @@ import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
@@ -65,7 +66,6 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -83,9 +83,10 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
     private lateinit var fromPrimaryBouncerTransitionInteractor:
         FromPrimaryBouncerTransitionInteractor
-    @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
-    @Mock lateinit var mockDarkAnimator: ObjectAnimator
-    @Mock lateinit var deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor
+    private val interactionJankMonitor = mock<InteractionJankMonitor>()
+    private val mockDarkAnimator = mock<ObjectAnimator>()
+    private val deviceEntryUdfpsInteractor = mock<DeviceEntryUdfpsInteractor>()
+    private val largeScreenHeaderHelper = mock<LargeScreenHeaderHelper>()
 
     private lateinit var controller: StatusBarStateControllerImpl
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -189,6 +190,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                         ResourcesSplitShadeStateController(),
                         keyguardInteractor,
                         deviceEntryUdfpsInteractor,
+                        largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
                     ),
                     shadeRepository,
                 )

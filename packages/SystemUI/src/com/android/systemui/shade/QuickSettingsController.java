@@ -20,6 +20,7 @@ package com.android.systemui.shade;
 import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
+import static com.android.systemui.Flags.centralizedStatusBarDimensRefactor;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.shade.NotificationPanelViewController.COUNTER_PANEL_OPEN_QS;
 import static com.android.systemui.shade.NotificationPanelViewController.FLING_COLLAPSE;
@@ -126,6 +127,7 @@ public class QuickSettingsController implements Dumpable {
     private final Lazy<NotificationPanelViewController> mPanelViewControllerLazy;
 
     private final NotificationPanelView mPanelView;
+    private final Lazy<LargeScreenHeaderHelper> mLargeScreenHeaderHelperLazy;
     private final KeyguardStatusBarView mKeyguardStatusBar;
     private final FrameLayout mQsFrame;
 
@@ -344,10 +346,12 @@ public class QuickSettingsController implements Dumpable {
             ActiveNotificationsInteractor activeNotificationsInteractor,
             JavaAdapter javaAdapter,
             CastController castController,
-            SplitShadeStateController splitShadeStateController
+            SplitShadeStateController splitShadeStateController,
+            Lazy<LargeScreenHeaderHelper> largeScreenHeaderHelperLazy
     ) {
         mPanelViewControllerLazy = panelViewControllerLazy;
         mPanelView = panelView;
+        mLargeScreenHeaderHelperLazy = largeScreenHeaderHelperLazy;
         mQsFrame = mPanelView.findViewById(R.id.qs_frame);
         mKeyguardStatusBar = mPanelView.findViewById(R.id.keyguard_header);
         mResources = mPanelView.getResources();
@@ -449,7 +453,10 @@ public class QuickSettingsController implements Dumpable {
         mUseLargeScreenShadeHeader =
                 LargeScreenUtils.shouldUseLargeScreenShadeHeader(mPanelView.getResources());
         mLargeScreenShadeHeaderHeight =
-                mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
+                centralizedStatusBarDimensRefactor()
+                        ? mLargeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
+                        : mResources.getDimensionPixelSize(
+                                R.dimen.large_screen_shade_header_height);
         int topMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
         mShadeHeaderController.setLargeScreenActive(mUseLargeScreenShadeHeader);

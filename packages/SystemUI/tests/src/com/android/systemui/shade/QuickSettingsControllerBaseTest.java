@@ -176,6 +176,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     @Mock protected CastController mCastController;
     @Mock protected UserSwitcherInteractor mUserSwitcherInteractor;
     @Mock protected SelectedUserInteractor mSelectedUserInteractor;
+    @Mock protected LargeScreenHeaderHelper mLargeScreenHeaderHelper;
 
     protected FakeDisableFlagsRepository mDisableFlagsRepository =
             new FakeDisableFlagsRepository();
@@ -299,7 +300,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                                 mContext,
                                 splitShadeStateController,
                                 keyguardInteractor,
-                                deviceEntryUdfpsInteractor),
+                                deviceEntryUdfpsInteractor,
+                                () -> mLargeScreenHeaderHelper),
                         mShadeRepository
                 )
         );
@@ -384,7 +386,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mActiveNotificationsInteractor,
                 new JavaAdapter(mTestScope.getBackgroundScope()),
                 mCastController,
-                splitShadeStateController
+                splitShadeStateController,
+                () -> mLargeScreenHeaderHelper
         );
         mQsController.init();
 
