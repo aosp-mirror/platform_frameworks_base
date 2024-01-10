@@ -19,6 +19,7 @@ package android.os;
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -37,6 +38,7 @@ import android.webkit.WebViewZygote;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
+import com.android.sdksandbox.flags.Flags;
 
 import dalvik.system.VMRuntime;
 
@@ -1016,7 +1018,26 @@ public class Process {
     @SystemApi(client = MODULE_LIBRARIES)
     @TestApi
     @android.ravenwood.annotation.RavenwoodKeep
+    // TODO(b/318651609): Deprecate once Process#getSdkSandboxUidForAppUid is rolled out to 100%
     public static final int toSdkSandboxUid(int uid) {
+        return uid + (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
+    }
+
+    /**
+     * Returns the sdk sandbox uid corresponding to an app uid.
+     * @see android.app.sdksandbox.SdkSandboxManager
+     *
+     * @param uid the app uid
+     * @return the sdk sandbox uid for the given app uid
+     *
+     * @throws IllegalArgumentException if input is not an app uid
+     */
+    @FlaggedApi(Flags.FLAG_SDK_SANDBOX_UID_TO_APP_UID_API)
+    @android.ravenwood.annotation.RavenwoodKeep
+    public static final int getSdkSandboxUidForAppUid(int uid) {
+        if (!isApplicationUid(uid)) {
+            throw new IllegalArgumentException("Input UID is not an app UID");
+        }
         return uid + (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
     }
 
