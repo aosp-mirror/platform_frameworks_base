@@ -62,6 +62,7 @@ android_library {
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",
+        extra_check_modules: ["SettingsLibLintChecker"],
     },
 }
 
