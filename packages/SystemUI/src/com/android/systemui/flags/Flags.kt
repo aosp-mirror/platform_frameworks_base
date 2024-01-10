@@ -377,9 +377,6 @@ object Flags {
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag("simulate_dock_through_charging")
 
-    // TODO(b/254512758): Tracking Bug
-    @JvmField val ROUNDED_BOX_RIPPLE = releasedFlag("rounded_box_ripple")
-
     // TODO(b/273509374): Tracking Bug
     @JvmField
     val ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS =
