@@ -12180,6 +12180,36 @@ public final class Settings {
          */
         public static final String HIDE_PRIVATESPACE_ENTRY_POINT = "hide_privatespace_entry_point";
 
+        /** @hide */
+        public static final int PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK = 0;
+        /** @hide */
+        public static final int PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY = 1;
+        /** @hide */
+        public static final int PRIVATE_SPACE_AUTO_LOCK_NEVER = 2;
+
+        /**
+         * The different auto lock options for private space.
+         *
+         * @hide
+         */
+        @IntDef(prefix = {"PRIVATE_SPACE_AUTO_LOCK_"}, value = {
+                PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK,
+                PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY,
+                PRIVATE_SPACE_AUTO_LOCK_NEVER,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface PrivateSpaceAutoLockOption {
+        }
+
+
+        /**
+         *  Store auto lock value for private space.
+         *  The possible values are defined in {@link PrivateSpaceAutoLockOption}.
+         *
+         * @hide
+         */
+        public static final String PRIVATE_SPACE_AUTO_LOCK = "private_space_auto_lock";
+
         /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
