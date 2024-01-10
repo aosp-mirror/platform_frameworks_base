@@ -3230,4 +3230,32 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
         + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
     boolean isCellularIdentifierDisclosureNotificationsEnabled();
+
+    /**
+     * Enables or disables notifications sent when cellular null cipher or integrity algorithms
+     * are in use by the cellular modem.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support reporting on ciphering
+     * and integrity algorithms in use
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.MODIFY_PHONE_STATE)")
+    void setEnableNullCipherNotifications(boolean enable);
+
+    /**
+     * Get whether notifications are enabled for null cipher or integrity algorithms in use by the
+     * cellular modem.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support reporting on ciphering
+     * and integrity algorithms in use
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+    boolean isNullCipherNotificationsEnabled();
 }
