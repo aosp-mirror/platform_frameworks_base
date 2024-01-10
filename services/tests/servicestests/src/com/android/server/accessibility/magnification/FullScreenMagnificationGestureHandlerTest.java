@@ -724,7 +724,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         //The minimum movement to transit to panningState.
         final float sWipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
         pointer2.offset(sWipeMinDistance + 1, 0);
-        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 1));
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 0));
         fastForward(ViewConfiguration.getTapTimeout());
         assertIn(STATE_PANNING);
 
@@ -743,7 +743,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         //The minimum movement to transit to panningState.
         final float sWipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
         pointer2.offset(sWipeMinDistance + 1, 0);
-        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 1));
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 0));
         fastForward(ViewConfiguration.getTapTimeout());
         assertIn(STATE_PANNING);
 
@@ -762,7 +762,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         //The minimum movement to transit to panningState.
         final float sWipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
         pointer2.offset(sWipeMinDistance + 1, 0);
-        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 1));
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 0));
         assertIn(STATE_PANNING);
 
         returnToNormalFrom(STATE_PANNING);
@@ -780,7 +780,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         //The minimum movement to transit to panningState.
         final float sWipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
         pointer2.offset(sWipeMinDistance + 1, 0);
-        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 1));
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 0));
         assertIn(STATE_PANNING);
 
         returnToNormalFrom(STATE_PANNING);
@@ -1491,9 +1491,18 @@ public class FullScreenMagnificationGestureHandlerTest {
 
 
     private MotionEvent pointerEvent(int action, float x, float y) {
-        return pointerEvent(action, new PointF[] {DEFAULT_POINT, new PointF(x, y)}, 1);
+        return pointerEvent(action, new PointF[] {DEFAULT_POINT, new PointF(x, y)},
+                (action == ACTION_POINTER_UP || action == ACTION_POINTER_DOWN) ? 1 : 0);
     }
 
+    /**
+     * Create a pointer event simulating the given pointer positions.
+     *
+     * @param action the action
+     * @param pointersPosition positions of the pointers
+     * @param changedIndex the index of the pointer associated with the ACTION_POINTER_UP or
+     *                     ACTION_POINTER_DOWN action. Must be 0 for all other actions.
+     */
     private MotionEvent pointerEvent(int action, PointF[] pointersPosition, int changedIndex) {
         final MotionEvent.PointerProperties[] PointerPropertiesArray =
                 new MotionEvent.PointerProperties[pointersPosition.length];
@@ -1513,12 +1522,12 @@ public class FullScreenMagnificationGestureHandlerTest {
             pointerCoordsArray[i] = pointerCoords;
         }
 
-        action += (changedIndex << ACTION_POINTER_INDEX_SHIFT);
+        var actionWithPointer = action | (changedIndex << ACTION_POINTER_INDEX_SHIFT);
 
-        return MotionEvent.obtain(
+        var event = MotionEvent.obtain(
                 /* downTime */ mClock.now(),
                 /* eventTime */ mClock.now(),
-                /* action */ action,
+                /* action */ actionWithPointer,
                 /* pointerCount */ pointersPosition.length,
                 /* pointerProperties */ PointerPropertiesArray,
                 /* pointerCoords */ pointerCoordsArray,
@@ -1530,6 +1539,14 @@ public class FullScreenMagnificationGestureHandlerTest {
                 /* edgeFlags */ 0,
                 /* source */ InputDevice.SOURCE_TOUCHSCREEN,
                 /* flags */ 0);
+
+        Truth.assertThat(event.getActionIndex()).isEqualTo(changedIndex);
+        Truth.assertThat(event.getActionMasked()).isEqualTo(action);
+        if (action == ACTION_DOWN) {
+            Truth.assertThat(changedIndex).isEqualTo(0);
+        }
+
+        return event;
     }
 
 
