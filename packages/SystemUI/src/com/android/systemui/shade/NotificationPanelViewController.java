@@ -1751,14 +1751,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         } else {
             layout = mNotificationContainerParent;
         }
-
-        if (migrateClocksToBlueprint()) {
-            mKeyguardInteractor.setClockShouldBeCentered(mSplitShadeEnabled && shouldBeCentered);
-        } else {
-            mKeyguardStatusViewController.updateAlignment(
-                    layout, mSplitShadeEnabled, shouldBeCentered, animate);
-            mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
-        }
+        mKeyguardStatusViewController.updateAlignment(
+                layout, mSplitShadeEnabled, shouldBeCentered, animate);
+        mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
     }
 
     private boolean shouldKeyguardStatusViewBeCentered() {
