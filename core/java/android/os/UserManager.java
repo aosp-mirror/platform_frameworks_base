@@ -115,6 +115,21 @@ public class UserManager {
      */
     public static final int MAX_ACCOUNT_OPTIONS_LENGTH = 1000;
 
+    /** Maximum length of username.
+     * @hide
+     */
+    public static final int MAX_USER_NAME_LENGTH = 100;
+
+    /** Maximum length of user property String value.
+     * @hide
+     */
+    public static final int MAX_ACCOUNT_STRING_LENGTH = 500;
+
+    /** Maximum length of account options String values.
+     * @hide
+     */
+    public static final int MAX_ACCOUNT_OPTIONS_LENGTH = 1000;
+
     /**
      * User type representing a {@link UserHandle#USER_SYSTEM system} user that is a human user.
      * This type of user cannot be created; it can only pre-exist on first boot.
