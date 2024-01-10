@@ -108,7 +108,7 @@ public class NotificationHistoryManager {
                 for (int i = 0; i < pendingPackageRemovals.size(); i++) {
                     userHistory.onPackageRemoved(pendingPackageRemovals.get(i));
                 }
-                mUserPendingPackageRemovals.put(userId, null);
+                mUserPendingPackageRemovals.remove(userId);
             }
 
             // delete history if it was disabled when the user was locked
@@ -133,7 +133,7 @@ public class NotificationHistoryManager {
         synchronized (mLock) {
             // Actual data deletion is handled by other parts of the system (the entire directory is
             // removed) - we just need clean up our internal state for GC
-            mUserPendingPackageRemovals.put(userId, null);
+            mUserPendingPackageRemovals.remove(userId);
             mHistoryEnabled.put(userId, false);
             mUserPendingHistoryDisables.put(userId, false);
             onUserStopped(userId);
