@@ -30,6 +30,8 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.internal.logging.UiEventLogger
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.compose.ComposeFacade.setCommunalEditWidgetActivityContent
 import javax.inject.Inject
@@ -41,6 +43,7 @@ class EditWidgetsActivity
 constructor(
     private val communalViewModel: CommunalEditModeViewModel,
     private var windowManagerService: IWindowManager? = null,
+    private val uiEventLogger: UiEventLogger,
 ) : ComponentActivity() {
     companion object {
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
@@ -54,6 +57,8 @@ constructor(
         registerForActivityResult(StartActivityForResult()) { result ->
             when (result.resultCode) {
                 RESULT_OK -> {
+                    uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_WIDGET_PICKER_SHOWN)
+
                     result.data?.let { intent ->
                         val isPendingWidgetDrag =
                             intent.getBooleanExtra(EXTRA_IS_PENDING_WIDGET_DRAG, false)
@@ -143,5 +148,17 @@ constructor(
         if (requestCode == REQUEST_CODE_CONFIGURE_WIDGET) {
             communalViewModel.setConfigurationResult(resultCode)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_SHOWN)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_GONE)
     }
 }
