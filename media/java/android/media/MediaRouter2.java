@@ -282,6 +282,8 @@ public final class MediaRouter2 {
             MediaRouter2 instance = sAppToProxyRouterMap.get(key);
             if (instance == null) {
                 instance = new MediaRouter2(context, looper, clientPackageName, user);
+                // Register proxy router after instantiation to avoid race condition.
+                ((ProxyMediaRouter2Impl) instance.mImpl).registerProxyRouter();
                 sAppToProxyRouterMap.put(key, instance);
             }
             return instance;
@@ -368,6 +370,7 @@ public final class MediaRouter2 {
                 new SystemRoutingController(
                         ProxyMediaRouter2Impl.getSystemSessionInfoImpl(
                                 mMediaRouterService, clientPackageName));
+
         mImpl = new ProxyMediaRouter2Impl(context, clientPackageName, user);
     }
 
@@ -2153,18 +2156,19 @@ public final class MediaRouter2 {
             mClientUser = user;
             mClientPackageName = clientPackageName;
             mClient = new Client();
+            mDiscoveryPreference = RouteDiscoveryPreference.EMPTY;
+        }
 
+        public void registerProxyRouter() {
             try {
                 mMediaRouterService.registerProxyRouter(
                         mClient,
-                        context.getApplicationContext().getPackageName(),
-                        clientPackageName,
-                        user);
+                        mContext.getApplicationContext().getPackageName(),
+                        mClientPackageName,
+                        mClientUser);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
-
-            mDiscoveryPreference = RouteDiscoveryPreference.EMPTY;
         }
 
         @Override
