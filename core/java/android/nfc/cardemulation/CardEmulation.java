@@ -69,7 +69,12 @@ public final class CardEmulation {
      * specified in {@link #EXTRA_CATEGORY}. There is an optional
      * extra field using {@link Intent#EXTRA_USER} to specify
      * the {@link UserHandle} of the user that owns the app.
+     *
+     * @deprecated Please use {@link android.app.role.RoleManager#createRequestRoleIntent(String)}
+     * with {@link android.app.role.RoleManager#ROLE_WALLET} parameter
+     * and {@link Activity#startActivityForResult(Intent, int)} instead.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CHANGE_DEFAULT =
             "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
@@ -1082,6 +1087,34 @@ public final class CardEmulation {
     void recoverService() {
         NfcAdapter adapter = NfcAdapter.getDefaultAdapter(mContext);
         sService = adapter.getCardEmulationService();
+    }
+
+    /**
+     * Returns the {@link Settings.Secure#NFC_PAYMENT_DEFAULT_COMPONENT} for the given user.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
+    @FlaggedApi(android.permission.flags.Flags.FLAG_WALLET_ROLE_ENABLED)
+    @Nullable
+    public ApduServiceInfo getPreferredPaymentService() {
+        try {
+            return sService.getPreferredPaymentService(mContext.getUser().getIdentifier());
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return null;
+            }
+            try {
+                return sService.getPreferredPaymentService(mContext.getUser().getIdentifier());
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return null;
+            }
+        }
     }
 
 }
