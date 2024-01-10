@@ -1962,10 +1962,20 @@ final public class MediaCodec {
                                         index, infos);
                                 break;
                             case BUFFER_MODE_BLOCK:
-                                // TODO
+                                while (mOutputFrames.size() <= index) {
+                                    mOutputFrames.add(null);
+                                }
+                                OutputFrame frame = mOutputFrames.get(index);
+                                if (frame == null) {
+                                    frame = new OutputFrame(index);
+                                    mOutputFrames.set(index, frame);
+                                }
+                                frame.setBufferInfos(infos);
+                                frame.setAccessible(true);
+                                break;
                             default:
                                 throw new IllegalArgumentException(
-                                        "Unrecognized buffer mode: for large frame audio");
+                                        "Unrecognized buffer mode: for large frame output");
                         }
                     }
                     mCallback.onOutputBuffersAvailable(
@@ -3552,6 +3562,26 @@ final public class MediaCodec {
         }
 
         /**
+         * Sets MediaCodec.BufferInfo objects describing the access units
+         * contained in this queue request. Access units must be laid out
+         * contiguously without gaps and in order.
+         *
+         * @param infos Represents {@link MediaCodec.BufferInfo} objects to mark
+         *              individual access-unit boundaries and the timestamps associated with it.
+         *              The buffer is expected to contain the data in a continuous manner.
+         * @return this object
+         */
+        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+        public @NonNull QueueRequest setBufferInfos(@NonNull ArrayDeque<BufferInfo> infos) {
+            if (!isAccessible()) {
+                throw new IllegalStateException("The request is stale");
+            }
+            mBufferInfos.clear();
+            mBufferInfos.addAll(infos);
+            return this;
+        }
+
+        /**
          * Add an integer parameter.
          * See {@link MediaFormat} for an exhaustive list of supported keys with
          * values of type int, that can also be set with {@link MediaFormat#setInteger}.
@@ -3667,10 +3697,18 @@ final public class MediaCodec {
                 throw new IllegalStateException("No block is set");
             }
             setAccessible(false);
+            if (mBufferInfos.isEmpty()) {
+                BufferInfo info = new BufferInfo();
+                info.size = mSize;
+                info.offset = mOffset;
+                info.presentationTimeUs = mPresentationTimeUs;
+                info.flags = mFlags;
+                mBufferInfos.add(info);
+            }
             if (mLinearBlock != null) {
                 mCodec.native_queueLinearBlock(
-                        mIndex, mLinearBlock, mOffset, mSize, mCryptoInfo,
-                        mPresentationTimeUs, mFlags,
+                        mIndex, mLinearBlock, mCryptoInfo,
+                        mBufferInfos.toArray(),
                         mTuningKeys, mTuningValues);
             } else if (mHardwareBuffer != null) {
                 mCodec.native_queueHardwareBuffer(
@@ -3688,6 +3726,7 @@ final public class MediaCodec {
             mHardwareBuffer = null;
             mPresentationTimeUs = 0;
             mFlags = 0;
+            mBufferInfos.clear();
             mTuningKeys.clear();
             mTuningValues.clear();
             return this;
@@ -3711,6 +3750,7 @@ final public class MediaCodec {
         private HardwareBuffer mHardwareBuffer = null;
         private long mPresentationTimeUs = 0;
         private @BufferFlag int mFlags = 0;
+        private final ArrayDeque<BufferInfo> mBufferInfos = new ArrayDeque<>();
         private final ArrayList<String> mTuningKeys = new ArrayList<>();
         private final ArrayList<Object> mTuningValues = new ArrayList<>();
 
@@ -3720,11 +3760,8 @@ final public class MediaCodec {
     private native void native_queueLinearBlock(
             int index,
             @NonNull LinearBlock block,
-            int offset,
-            int size,
             @Nullable CryptoInfo cryptoInfo,
-            long presentationTimeUs,
-            int flags,
+            @NonNull Object[] bufferInfos,
             @NonNull ArrayList<String> keys,
             @NonNull ArrayList<Object> values);
 
@@ -4516,6 +4553,22 @@ final public class MediaCodec {
             return mFlags;
         }
 
+        /*
+         * Returns the BufferInfos associated with this OutputFrame. These BufferInfos
+         * describes the access units present in the OutputFrame. Access units are laid
+         * out contiguously without gaps and in order.
+         */
+        @FlaggedApi(FLAG_LARGE_AUDIO_FRAME)
+        public @NonNull ArrayDeque<BufferInfo> getBufferInfos() {
+            if (mBufferInfos.isEmpty()) {
+                // single BufferInfo could be present.
+                BufferInfo bufferInfo = new BufferInfo();
+                bufferInfo.set(0, 0, mPresentationTimeUs, mFlags);
+                mBufferInfos.add(bufferInfo);
+            }
+            return mBufferInfos;
+        }
+
         /**
          * Returns a read-only {@link MediaFormat} for this frame. The returned
          * object is valid only until the client calls {@link MediaCodec#releaseOutputBuffer}.
@@ -4541,6 +4594,7 @@ final public class MediaCodec {
             mLinearBlock = null;
             mHardwareBuffer = null;
             mFormat = null;
+            mBufferInfos.clear();
             mChangedKeys.clear();
             mKeySet.clear();
             mLoaded = false;
@@ -4559,6 +4613,11 @@ final public class MediaCodec {
             mFlags = info.flags;
         }
 
+        void setBufferInfos(ArrayDeque<BufferInfo> infos) {
+            mBufferInfos.clear();
+            mBufferInfos.addAll(infos);
+        }
+
         boolean isLoaded() {
             return mLoaded;
         }
@@ -4573,6 +4632,7 @@ final public class MediaCodec {
         private long mPresentationTimeUs = 0;
         private @BufferFlag int mFlags = 0;
         private MediaFormat mFormat = null;
+        private final ArrayDeque<BufferInfo> mBufferInfos = new ArrayDeque<>();
         private final ArrayList<String> mChangedKeys = new ArrayList<>();
         private final Set<String> mKeySet = new HashSet<>();
         private boolean mAccessible = false;
