@@ -87,8 +87,6 @@ import com.android.systemui.bluetooth.BroadcastDialogController;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.models.GutsViewHolder;
 import com.android.systemui.media.controls.models.player.MediaAction;
 import com.android.systemui.media.controls.models.player.MediaButton;
@@ -247,7 +245,6 @@ public class MediaControlPanel {
     private String mCurrentBroadcastApp;
     private MultiRippleController mMultiRippleController;
     private TurbulenceNoiseController mTurbulenceNoiseController;
-    private final FeatureFlags mFeatureFlags;
     private final GlobalSettings mGlobalSettings;
 
     private TurbulenceNoiseAnimationConfig mTurbulenceNoiseAnimationConfig;
@@ -281,7 +278,6 @@ public class MediaControlPanel {
             ActivityIntentHelper activityIntentHelper,
             NotificationLockscreenUserManager lockscreenUserManager,
             BroadcastDialogController broadcastDialogController,
-            FeatureFlags featureFlags,
             GlobalSettings globalSettings,
             MediaFlags mediaFlags
     ) {
@@ -311,8 +307,6 @@ public class MediaControlPanel {
             logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
             return Unit.INSTANCE;
         });
-
-        mFeatureFlags = featureFlags;
 
         mGlobalSettings = globalSettings;
         updateAnimatorDurationScale();
@@ -1187,9 +1181,7 @@ public class MediaControlPanel {
 
                         action.run();
 
-                        if (mFeatureFlags.isEnabled(Flags.UMO_SURFACE_RIPPLE)) {
-                            mMultiRippleController.play(createTouchRippleAnimation(button));
-                        }
+                        mMultiRippleController.play(createTouchRippleAnimation(button));
 
                         if (icon instanceof Animatable) {
                             ((Animatable) icon).start();
@@ -1228,8 +1220,7 @@ public class MediaControlPanel {
     }
 
     private boolean shouldPlayTurbulenceNoise() {
-        return mFeatureFlags.isEnabled(Flags.UMO_TURBULENCE_NOISE) && mButtonClicked && !mWasPlaying
-                && isPlaying();
+        return mButtonClicked && !mWasPlaying && isPlaying();
     }
 
     private TurbulenceNoiseAnimationConfig createTurbulenceNoiseAnimation() {
