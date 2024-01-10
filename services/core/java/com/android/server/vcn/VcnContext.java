@@ -74,6 +74,10 @@ public class VcnContext {
         return mFeatureFlags;
     }
 
+    public boolean isFlagSafeModeTimeoutConfigEnabled() {
+        return mFeatureFlags.safeModeTimeoutConfig();
+    }
+
     /**
      * Verifies that the caller is running on the VcnContext Thread.
      *

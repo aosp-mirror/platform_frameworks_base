@@ -6,3 +6,10 @@ flag {
     description: "Feature flag for safe mode configurability"
     bug: "276358140"
 }
+
+flag {
+    name: "safe_mode_timeout_config"
+    namespace: "vcn"
+    description: "Feature flag for adjustable safe mode timeout"
+    bug: "317406085"
+}
