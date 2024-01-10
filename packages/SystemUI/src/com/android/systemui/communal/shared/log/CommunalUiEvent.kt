@@ -22,8 +22,6 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum
 /** UI events for the Communal Hub. */
 enum class CommunalUiEvent(private val id: Int) : UiEventEnum {
     @UiEvent(doc = "Communal Hub is fully shown") COMMUNAL_HUB_SHOWN(1566),
-    @UiEvent(doc = "Communal Hub starts entering") COMMUNAL_HUB_ENTERING(1575),
-    @UiEvent(doc = "Communal Hub starts exiting") COMMUNAL_HUB_EXITING(1576),
     @UiEvent(doc = "Communal Hub is fully gone") COMMUNAL_HUB_GONE(1577),
     @UiEvent(doc = "Communal Hub times out") COMMUNAL_HUB_TIMEOUT(1578),
     @UiEvent(doc = "The visible content in the Communal Hub is fully loaded and rendered")

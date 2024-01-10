@@ -35,7 +35,8 @@ object CommunalInteractorFactory {
     @JvmStatic
     fun create(
         testScope: TestScope = TestScope(),
-        communalRepository: FakeCommunalRepository = FakeCommunalRepository(),
+        communalRepository: FakeCommunalRepository =
+            FakeCommunalRepository(testScope.backgroundScope),
         widgetRepository: FakeCommunalWidgetRepository =
             FakeCommunalWidgetRepository(testScope.backgroundScope),
         mediaRepository: FakeCommunalMediaRepository = FakeCommunalMediaRepository(),
@@ -51,6 +52,7 @@ object CommunalInteractorFactory {
                 communalRepository = communalRepository,
             )
         return WithDependencies(
+            testScope,
             communalRepository,
             widgetRepository,
             mediaRepository,
@@ -74,6 +76,7 @@ object CommunalInteractorFactory {
     }
 
     data class WithDependencies(
+        val testScope: TestScope,
         val communalRepository: FakeCommunalRepository,
         val widgetRepository: FakeCommunalWidgetRepository,
         val mediaRepository: FakeCommunalMediaRepository,
