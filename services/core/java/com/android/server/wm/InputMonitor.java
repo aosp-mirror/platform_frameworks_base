@@ -112,7 +112,7 @@ final class InputMonitor {
      * z-layering reference so that we can place the recents input consumer above it.
      */
     private WeakReference<ActivityRecord> mActiveRecentsActivity = null;
-    private WeakReference<ActivityRecord> mActiveRecentsLayerRef = null;
+    private WeakReference<Task> mActiveRecentsLayerRef = null;
 
     private class UpdateInputWindows implements Runnable {
         @Override
@@ -389,9 +389,9 @@ final class InputMonitor {
     /**
      * Inform InputMonitor when recents is active so it can enable the recents input consumer.
      * @param activity The active recents activity. {@code null} means recents is not active.
-     * @param layer An activity whose Z-layer is used as a reference for how to sort the consumer.
+     * @param layer A task whose Z-layer is used as a reference for how to sort the consumer.
      */
-    void setActiveRecents(@Nullable ActivityRecord activity, @Nullable ActivityRecord layer) {
+    void setActiveRecents(@Nullable ActivityRecord activity, @Nullable Task layer) {
         final boolean clear = activity == null;
         final boolean wasActive = mActiveRecentsActivity != null && mActiveRecentsLayerRef != null;
         mActiveRecentsActivity = clear ? null : new WeakReference<>(activity);
