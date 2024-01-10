@@ -105,6 +105,13 @@ public class KeyguardSimPinViewController
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
+        mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
+    }
+
+    @Override
+    protected void onViewDetached() {
+        super.onViewDetached();
+        mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
     }
 
     @Override
@@ -128,14 +135,12 @@ public class KeyguardSimPinViewController
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
-        mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mView.resetState();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
 
         // dismiss the dialog.
         if (mSimUnlockProgressDialog != null) {
