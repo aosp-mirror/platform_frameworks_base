@@ -22,6 +22,7 @@ import android.content.pm.PermissionGroupInfo
 import android.content.pm.PermissionInfo
 import android.content.pm.SigningDetails
 import android.os.Build
+import android.permission.flags.Flags
 import android.util.Slog
 import com.android.internal.os.RoSystemProperties
 import com.android.internal.pm.permission.CompatibilityPermissionInfo
@@ -1193,15 +1194,80 @@ class AppIdPermissionPolicy : SchemePolicy() {
             newState.externalState.packageStates[PLATFORM_PACKAGE_NAME]!!
                 .androidPackage!!
                 .signingDetails
-        return sourceSigningDetails?.hasCommonSignerWithCapability(
-            packageSigningDetails,
-            SigningDetails.CertCapabilities.PERMISSION
-        ) == true ||
-            packageSigningDetails.hasAncestorOrSelf(platformSigningDetails) ||
-            platformSigningDetails.checkCapability(
+        val hasCommonSigner =
+            sourceSigningDetails?.hasCommonSignerWithCapability(
                 packageSigningDetails,
                 SigningDetails.CertCapabilities.PERMISSION
-            )
+            ) == true ||
+                packageSigningDetails.hasAncestorOrSelf(platformSigningDetails) ||
+                platformSigningDetails.checkCapability(
+                    packageSigningDetails,
+                    SigningDetails.CertCapabilities.PERMISSION
+                )
+        if (!Flags.signaturePermissionAllowlistEnabled()) {
+            return hasCommonSigner;
+        }
+        if (!hasCommonSigner) {
+            return false
+        }
+        // A platform signature permission also needs to be allowlisted on non-debuggable builds.
+        if (permission.packageName == PLATFORM_PACKAGE_NAME) {
+            val isRequestedByFactoryApp =
+                if (packageState.isSystem) {
+                    // For updated system applications, a signature permission still needs to be
+                    // allowlisted if it wasn't requested by the original application.
+                    if (packageState.isUpdatedSystemApp) {
+                        val disabledSystemPackage =
+                            newState.externalState.disabledSystemPackageStates[
+                                    packageState.packageName]
+                                ?.androidPackage
+                        disabledSystemPackage != null &&
+                            permission.name in disabledSystemPackage.requestedPermissions
+                    } else {
+                        true
+                    }
+                } else {
+                    false
+                }
+            if (
+                !(isRequestedByFactoryApp ||
+                    getSignaturePermissionAllowlistState(packageState, permission.name) == true)
+            ) {
+                Slog.w(
+                    LOG_TAG,
+                    "Signature permission ${permission.name} for package" +
+                        " ${packageState.packageName} (${packageState.path}) not in" +
+                        " signature permission allowlist"
+                )
+                if (!Build.isDebuggable()) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
+    private fun MutateStateScope.getSignaturePermissionAllowlistState(
+        packageState: PackageState,
+        permissionName: String
+    ): Boolean? {
+        val permissionAllowlist = newState.externalState.permissionAllowlist
+        val packageName = packageState.packageName
+        return when {
+            packageState.isVendor || packageState.isOdm ->
+                permissionAllowlist.getVendorSignatureAppAllowlistState(packageName, permissionName)
+            packageState.isProduct ->
+                permissionAllowlist.getProductSignatureAppAllowlistState(
+                    packageName,
+                    permissionName
+                )
+            packageState.isSystemExt ->
+                permissionAllowlist.getSystemExtSignatureAppAllowlistState(
+                    packageName,
+                    permissionName
+                )
+            else -> permissionAllowlist.getSignatureAppAllowlistState(packageName, permissionName)
+        }
     }
 
     private fun MutateStateScope.checkPrivilegedPermissionAllowlist(

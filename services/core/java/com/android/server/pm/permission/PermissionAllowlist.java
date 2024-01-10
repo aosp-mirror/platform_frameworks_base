@@ -26,6 +26,7 @@ import android.util.ArrayMap;
 public final class PermissionAllowlist {
     @NonNull
     private final ArrayMap<String, ArrayMap<String, Boolean>> mOemAppAllowlist = new ArrayMap<>();
+
     @NonNull
     private final ArrayMap<String, ArrayMap<String, Boolean>> mPrivilegedAppAllowlist =
             new ArrayMap<>();
@@ -41,6 +42,19 @@ public final class PermissionAllowlist {
     @NonNull
     private final ArrayMap<String, ArrayMap<String, ArrayMap<String, Boolean>>>
             mApexPrivilegedAppAllowlists = new ArrayMap<>();
+
+    @NonNull
+    private final ArrayMap<String, ArrayMap<String, Boolean>> mSignatureAppAllowlist =
+            new ArrayMap<>();
+    @NonNull
+    private final ArrayMap<String, ArrayMap<String, Boolean>> mVendorSignatureAppAllowlist =
+            new ArrayMap<>();
+    @NonNull
+    private final ArrayMap<String, ArrayMap<String, Boolean>> mProductSignatureAppAllowlist =
+            new ArrayMap<>();
+    @NonNull
+    private final ArrayMap<String, ArrayMap<String, Boolean>> mSystemExtSignatureAppAllowlist =
+            new ArrayMap<>();
 
     @NonNull
     public ArrayMap<String, ArrayMap<String, Boolean>> getOemAppAllowlist() {
@@ -71,6 +85,26 @@ public final class PermissionAllowlist {
     public ArrayMap<String, ArrayMap<String, ArrayMap<String, Boolean>>>
             getApexPrivilegedAppAllowlists() {
         return mApexPrivilegedAppAllowlists;
+    }
+
+    @NonNull
+    public ArrayMap<String, ArrayMap<String, Boolean>> getSignatureAppAllowlist() {
+        return mSignatureAppAllowlist;
+    }
+
+    @NonNull
+    public ArrayMap<String, ArrayMap<String, Boolean>> getVendorSignatureAppAllowlist() {
+        return mVendorSignatureAppAllowlist;
+    }
+
+    @NonNull
+    public ArrayMap<String, ArrayMap<String, Boolean>> getProductSignatureAppAllowlist() {
+        return mProductSignatureAppAllowlist;
+    }
+
+    @NonNull
+    public ArrayMap<String, ArrayMap<String, Boolean>> getSystemExtSignatureAppAllowlist() {
+        return mSystemExtSignatureAppAllowlist;
     }
 
     @Nullable
@@ -132,6 +166,46 @@ public final class PermissionAllowlist {
             return null;
         }
         ArrayMap<String, Boolean> permissions = allowlist.get(packageName);
+        if (permissions == null) {
+            return null;
+        }
+        return permissions.get(permissionName);
+    }
+
+    @Nullable
+    public Boolean getSignatureAppAllowlistState(@NonNull String packageName,
+            @NonNull String permissionName) {
+        ArrayMap<String, Boolean> permissions = mSignatureAppAllowlist.get(packageName);
+        if (permissions == null) {
+            return null;
+        }
+        return permissions.get(permissionName);
+    }
+
+    @Nullable
+    public Boolean getVendorSignatureAppAllowlistState(@NonNull String packageName,
+            @NonNull String permissionName) {
+        ArrayMap<String, Boolean> permissions = mVendorSignatureAppAllowlist.get(packageName);
+        if (permissions == null) {
+            return null;
+        }
+        return permissions.get(permissionName);
+    }
+
+    @Nullable
+    public Boolean getProductSignatureAppAllowlistState(@NonNull String packageName,
+            @NonNull String permissionName) {
+        ArrayMap<String, Boolean> permissions = mProductSignatureAppAllowlist.get(packageName);
+        if (permissions == null) {
+            return null;
+        }
+        return permissions.get(permissionName);
+    }
+
+    @Nullable
+    public Boolean getSystemExtSignatureAppAllowlistState(@NonNull String packageName,
+            @NonNull String permissionName) {
+        ArrayMap<String, Boolean> permissions = mSystemExtSignatureAppAllowlist.get(packageName);
         if (permissions == null) {
             return null;
         }
