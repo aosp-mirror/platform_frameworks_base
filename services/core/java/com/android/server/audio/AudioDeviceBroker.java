@@ -1812,22 +1812,21 @@ public class AudioDeviceBroker {
                                         "msg: MSG_L_SET_BT_ACTIVE_DEVICE "
                                             + "received with null profile proxy: "
                                             + btInfo)).printLog(TAG));
-                                sendMsg(MSG_CHECK_MUTE_MUSIC, SENDMSG_REPLACE, 0 /*delay*/);
-                                return;
-                            }
-                            @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
-                                    mBtHelper.getCodecWithFallback(btInfo.mDevice,
-                                            btInfo.mProfile, btInfo.mIsLeOutput,
-                                            "MSG_L_SET_BT_ACTIVE_DEVICE");
-                            mDeviceInventory.onSetBtActiveDevice(btInfo, codec,
-                                    (btInfo.mProfile
-                                            != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
-                                            ? mAudioService.getBluetoothContextualVolumeStream()
-                                            : AudioSystem.STREAM_DEFAULT);
-                            if (btInfo.mProfile == BluetoothProfile.LE_AUDIO
-                                    || btInfo.mProfile == BluetoothProfile.HEARING_AID) {
-                                onUpdateCommunicationRouteClient(isBluetoothScoRequested(),
-                                        "setBluetoothActiveDevice");
+                            } else {
+                                @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
+                                        mBtHelper.getCodecWithFallback(btInfo.mDevice,
+                                                btInfo.mProfile, btInfo.mIsLeOutput,
+                                                "MSG_L_SET_BT_ACTIVE_DEVICE");
+                                mDeviceInventory.onSetBtActiveDevice(btInfo, codec,
+                                        (btInfo.mProfile
+                                                != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
+                                                ? mAudioService.getBluetoothContextualVolumeStream()
+                                                : AudioSystem.STREAM_DEFAULT);
+                                if (btInfo.mProfile == BluetoothProfile.LE_AUDIO
+                                        || btInfo.mProfile == BluetoothProfile.HEARING_AID) {
+                                    onUpdateCommunicationRouteClient(isBluetoothScoRequested(),
+                                            "setBluetoothActiveDevice");
+                                }
                             }
                         }
                     }
