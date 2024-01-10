@@ -101,7 +101,8 @@ abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTran
     override fun pipLayerReduces() {
         flicker.assertLayers {
             val pipLayerList =
-                this.layers { standardAppHelper.layerMatchesAnyOf(it) && it.isVisible }
+                this.layers { standardAppHelper.packageNameMatcher.layerMatchesAnyOf(it)
+                        && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
             }
