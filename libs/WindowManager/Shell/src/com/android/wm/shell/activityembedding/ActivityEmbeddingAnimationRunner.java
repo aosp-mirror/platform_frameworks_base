@@ -331,7 +331,9 @@ class ActivityEmbeddingAnimationRunner {
             if (!animation.hasExtension()) {
                 continue;
             }
-            if (adapter.mChange.hasFlags(FLAG_TRANSLUCENT)) {
+            if (adapter.mChange.hasFlags(FLAG_TRANSLUCENT)
+                    && adapter.mChange.getActivityComponent() != null) {
+                // Skip edge extension for translucent activity.
                 continue;
             }
             final TransitionInfo.Change change = adapter.mChange;
