@@ -22,6 +22,7 @@ import android.content.res.Resources
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.res.R
@@ -31,6 +32,8 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import dagger.Lazy
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,6 +49,8 @@ class ClockSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardClockInteractor: KeyguardClockInteractor
     @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
     @Mock private lateinit var splitShadeStateController: SplitShadeStateController
+    @Mock private lateinit var blueprintInteractor: Lazy<KeyguardBlueprintInteractor>
+    private val clockShouldBeCentered: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
     private lateinit var underTest: ClockSection
 
@@ -104,12 +109,15 @@ class ClockSectionTest : SysuiTestCase() {
         whenever(packageManager.getResourcesForApplication(anyString())).thenReturn(remoteResources)
         mContext.setMockPackageManager(packageManager)
 
+        whenever(keyguardClockViewModel.clockShouldBeCentered).thenReturn(clockShouldBeCentered)
+
         underTest =
             ClockSection(
                 keyguardClockInteractor,
                 keyguardClockViewModel,
                 mContext,
                 splitShadeStateController,
+                blueprintInteractor
             )
     }
 

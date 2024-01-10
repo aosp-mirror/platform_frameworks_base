@@ -20,7 +20,6 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
-import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
@@ -31,11 +30,9 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.media.controls.ui.KeyguardMediaController
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
-import com.android.systemui.shared.R as sharedR
 import javax.inject.Inject
 
 /** Aligns media on left side for split shade, below smartspace, date, and weather. */
@@ -44,11 +41,9 @@ class SplitShadeMediaSection
 constructor(
     private val context: Context,
     private val notificationPanelView: NotificationPanelView,
-    private val keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel,
     private val keyguardMediaController: KeyguardMediaController
 ) : KeyguardSection() {
     private val mediaContainerId = R.id.status_view_media_container
-    private val smartSpaceBarrier = R.id.smart_space_barrier_bottom
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!migrateClocksToBlueprint()) {
@@ -85,18 +80,7 @@ constructor(
         constraintSet.apply {
             constrainWidth(mediaContainerId, MATCH_CONSTRAINT)
             constrainHeight(mediaContainerId, WRAP_CONTENT)
-
-            createBarrier(
-                smartSpaceBarrier,
-                Barrier.BOTTOM,
-                0,
-                *intArrayOf(
-                    sharedR.id.bc_smartspace_view,
-                    sharedR.id.date_smartspace_view,
-                    sharedR.id.weather_smartspace_view,
-                )
-            )
-            connect(mediaContainerId, TOP, smartSpaceBarrier, BOTTOM)
+            connect(mediaContainerId, TOP, R.id.smart_space_barrier_bottom, BOTTOM)
             connect(mediaContainerId, START, PARENT_ID, START)
             connect(mediaContainerId, END, R.id.split_shade_guideline, END)
         }

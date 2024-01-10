@@ -25,6 +25,8 @@ import android.transition.Visibility
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.helper.widget.Layer
+import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
+import com.android.systemui.res.R
 
 class BaseBlueprintTransition : TransitionSet() {
     init {
@@ -33,7 +35,16 @@ class BaseBlueprintTransition : TransitionSet() {
             .addTransition(ChangeBounds())
             .addTransition(AlphaInVisibility())
         excludeTarget(Layer::class.java, /* exclude= */ true)
+        excludeClockAndSmartspaceViews()
     }
+
+    private fun excludeClockAndSmartspaceViews() {
+        excludeTarget(R.id.lockscreen_clock_view, true)
+        excludeTarget(R.id.lockscreen_clock_view_large, true)
+        excludeTarget(SmartspaceView::class.java, true)
+        // TODO(b/319468190): need to exclude views from large weather clock
+    }
+
     class AlphaOutVisibility : Visibility() {
         override fun onDisappear(
             sceneRoot: ViewGroup?,
