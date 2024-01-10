@@ -449,11 +449,11 @@
     <!-- Content description after successful auth when confirmation required -->
     <string name="fingerprint_dialog_authenticated_confirmation">Press the unlock icon to continue</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
-    <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead">Face not recognized. Use fingerprint instead.</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
     <string name="keyguard_face_failed_use_fp">@string/fingerprint_dialog_use_fingerprint_instead</string>
     <!-- Message shown to inform the user a face cannot be recognized. [CHAR LIMIT=25] -->
-    <string name="keyguard_face_failed">Can\u2019t recognize face</string>
+    <string name="keyguard_face_failed">Face not recognized</string>
     <!-- Message shown to suggest using fingerprint sensor to authenticate after another biometric failed. [CHAR LIMIT=25] -->
     <string name="keyguard_suggest_fingerprint">Use fingerprint instead</string>
     <!-- Message shown to inform the user that face unlock is not available. [CHAR LIMIT=59] -->
