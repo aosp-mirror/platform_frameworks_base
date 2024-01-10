@@ -22,7 +22,6 @@ import android.content.ContextWrapper
 import android.hardware.display.DisplayViewport
 import android.hardware.input.InputManager
 import android.hardware.input.InputManagerGlobal
-import android.os.IInputConstants
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.provider.Settings
@@ -295,14 +294,13 @@ class InputManagerServiceTests {
 
         localService.setPointerIconVisible(false, 10)
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
-        localService.setPointerAcceleration(5f, 10)
-        verify(native).setPointerAcceleration(eq(5f))
+        localService.setMousePointerAccelerationEnabled(false, 10)
+        verify(native).setMousePointerAccelerationEnabled(eq(false))
 
         service.onDisplayRemoved(10)
         verify(native).displayRemoved(eq(10))
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NOT_SPECIFIED))
-        verify(native).setPointerAcceleration(
-            eq(IInputConstants.DEFAULT_POINTER_ACCELERATION.toFloat()))
+        verify(native).setMousePointerAccelerationEnabled(true)
         verifyNoMoreInteractions(native)
 
         // This call should not block because the virtual mouse pointer override was never removed.
@@ -318,38 +316,38 @@ class InputManagerServiceTests {
 
         localService.setPointerIconVisible(false, 10)
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
-        localService.setPointerAcceleration(5f, 10)
-        verify(native).setPointerAcceleration(eq(5f))
+        localService.setMousePointerAccelerationEnabled(false, 10)
+        verify(native).setMousePointerAccelerationEnabled(eq(false))
 
         localService.setPointerIconVisible(true, 10)
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NOT_SPECIFIED))
-        localService.setPointerAcceleration(1f, 10)
-        verify(native).setPointerAcceleration(eq(1f))
+        localService.setMousePointerAccelerationEnabled(true, 10)
+        verify(native).setMousePointerAccelerationEnabled(eq(true))
 
         // Verify that setting properties on a different display is not propagated until the
         // pointer is moved to that display.
         localService.setPointerIconVisible(false, 20)
-        localService.setPointerAcceleration(6f, 20)
+        localService.setMousePointerAccelerationEnabled(false, 20)
         verifyNoMoreInteractions(native)
 
         clearInvocations(native)
         setVirtualMousePointerDisplayIdAndVerify(20)
 
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
-        verify(native).setPointerAcceleration(eq(6f))
+        verify(native).setMousePointerAccelerationEnabled(eq(false))
     }
 
     @Test
     fun setAdditionalInputPropertiesBeforeOverride() {
         localService.setPointerIconVisible(false, 10)
-        localService.setPointerAcceleration(5f, 10)
+        localService.setMousePointerAccelerationEnabled(false, 10)
 
         verifyNoMoreInteractions(native)
 
         setVirtualMousePointerDisplayIdAndVerify(10)
 
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
-        verify(native).setPointerAcceleration(eq(5f))
+        verify(native).setMousePointerAccelerationEnabled(eq(false))
     }
 
     @Test
