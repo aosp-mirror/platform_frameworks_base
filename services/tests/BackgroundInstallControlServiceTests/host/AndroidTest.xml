@@ -29,11 +29,14 @@
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
         <option name="push-file"
-                key="BackgroundInstallControlMockApp1.apk"
-                value="/data/local/tmp/BackgroundInstallControlMockApp1.apk" />
+            key="BackgroundInstallControlMockApp1.apk"
+            value="/data/local/tmp/BackgroundInstallControlMockApp1.apk" />
         <option name="push-file"
-                key="BackgroundInstallControlMockApp2.apk"
-                value="/data/local/tmp/BackgroundInstallControlMockApp2.apk" />
+            key="BackgroundInstallControlMockApp2.apk"
+            value="/data/local/tmp/BackgroundInstallControlMockApp2.apk" />
+        <option name="push-file"
+            key="BackgroundInstallControlMockApp3.apk"
+            value="/data/local/tmp/BackgroundInstallControlMockApp3.apk" />
     </target_preparer>
 
     <test class="com.android.compatibility.common.tradefed.testtype.JarHostTest" >
