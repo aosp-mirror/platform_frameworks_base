@@ -1596,12 +1596,14 @@ package android.app.ambientcontext {
     method public int getDensityLevel();
     method @NonNull public java.time.Instant getEndTime();
     method public int getEventType();
+    method @FlaggedApi("android.app.ambient_heart_rate") @IntRange(from=0xffffffff) public int getRatePerMinute();
     method @NonNull public java.time.Instant getStartTime();
     method @NonNull public android.os.PersistableBundle getVendorData();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ambientcontext.AmbientContextEvent> CREATOR;
     field public static final int EVENT_BACK_DOUBLE_TAP = 3; // 0x3
     field public static final int EVENT_COUGH = 1; // 0x1
+    field @FlaggedApi("android.app.ambient_heart_rate") public static final int EVENT_HEART_RATE = 4; // 0x4
     field public static final int EVENT_SNORE = 2; // 0x2
     field public static final int EVENT_UNKNOWN = 0; // 0x0
     field public static final int EVENT_VENDOR_WEARABLE_START = 100000; // 0x186a0
@@ -1621,6 +1623,7 @@ package android.app.ambientcontext {
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setDensityLevel(int);
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setEndTime(@NonNull java.time.Instant);
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setEventType(int);
+    method @FlaggedApi("android.app.ambient_heart_rate") @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setRatePerMinute(@IntRange(from=0xffffffff) int);
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setStartTime(@NonNull java.time.Instant);
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setVendorData(@NonNull android.os.PersistableBundle);
   }
