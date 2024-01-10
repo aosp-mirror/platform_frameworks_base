@@ -2965,6 +2965,12 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
         }
 
+        if (com.android.server.notification.Flags.sensitiveNotificationAppProtection()) {
+            t.traceBegin("StartSensitiveContentProtectionManager");
+            mSystemServiceManager.startService(SensitiveContentProtectionManagerService.class);
+            t.traceEnd();
+        }
+
         // These are needed to propagate to the runnable below.
         final NetworkManagementService networkManagementF = networkManagement;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;

@@ -4869,10 +4869,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public void generateHeadsUpAnimation(NotificationEntry entry, boolean isHeadsUp) {
         ExpandableNotificationRow row = entry.getHeadsUpAnimationView();
-        generateHeadsUpAnimation(row, isHeadsUp);
-    }
-
-    public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
         final boolean add = mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed);
         if (SPEW) {
             Log.v(TAG, "generateHeadsUpAnimation:"

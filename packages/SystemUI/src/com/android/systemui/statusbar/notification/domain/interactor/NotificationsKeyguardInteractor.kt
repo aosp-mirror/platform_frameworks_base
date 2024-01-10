@@ -15,24 +15,29 @@
  */
 package com.android.systemui.statusbar.notification.domain.interactor
 
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardViewStateRepository
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 
 /** Domain logic pertaining to notifications on the keyguard. */
 class NotificationsKeyguardInteractor
 @Inject
 constructor(
-    repository: NotificationsKeyguardViewStateRepository,
-    @Background backgroundDispatcher: CoroutineDispatcher,
+    private val repository: NotificationsKeyguardViewStateRepository,
 ) {
     /** Is a pulse expansion occurring? */
-    val isPulseExpanding: Flow<Boolean> = repository.isPulseExpanding.flowOn(backgroundDispatcher)
+    val isPulseExpanding: Flow<Boolean> = repository.isPulseExpanding
 
     /** Are notifications fully hidden from view? */
-    val areNotificationsFullyHidden: Flow<Boolean> =
-        repository.areNotificationsFullyHidden.flowOn(backgroundDispatcher)
+    val areNotificationsFullyHidden: Flow<Boolean> = repository.areNotificationsFullyHidden
+
+    /** Updates whether notifications are fully hidden from view. */
+    fun setNotificationsFullyHidden(fullyHidden: Boolean) {
+        repository.areNotificationsFullyHidden.value = fullyHidden
+    }
+
+    /** Updates whether a pulse expansion is occurring. */
+    fun setPulseExpanding(pulseExpanding: Boolean) {
+        repository.isPulseExpanding.value = pulseExpanding
+    }
 }

@@ -22,12 +22,14 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeViewController.Companion.WAKEUP_ANIMATION_DELAY_MS
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_WAKEUP
+import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -53,6 +55,8 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
 
     @get:Rule val animatorTestRule = AnimatorTestRule()
+
+    private val kosmos = Kosmos()
 
     private val dumpManager: DumpManager = mock()
     private val headsUpManager: HeadsUpManager = mock()
@@ -100,6 +104,7 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
                 dozeParameters,
                 screenOffAnimationController,
                 logger,
+                kosmos.notificationsKeyguardInteractor,
             )
         statusBarStateCallback = withArgCaptor {
             verify(statusBarStateController).addCallback(capture())

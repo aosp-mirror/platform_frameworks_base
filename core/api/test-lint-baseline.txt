@@ -535,6 +535,10 @@ MissingNullability: android.widget.ImageView#isDefaultFocusHighlightNeeded(andro
     Missing nullability on parameter `foreground` in method `isDefaultFocusHighlightNeeded`
 
 
+OptionalBuilderConstructorArgument: android.service.notification.ZenPolicy.Builder#Builder(android.service.notification.ZenPolicy) parameter #0:
+    Builder constructor arguments must be mandatory (i.e. not @Nullable): parameter policy in android.service.notification.ZenPolicy.Builder(android.service.notification.ZenPolicy policy)
+
+
 ProtectedMember: android.app.AppDetailsActivity#onCreate(android.os.Bundle):
     Protected methods not allowed; must be public: method android.app.AppDetailsActivity.onCreate(android.os.Bundle)}
 ProtectedMember: android.view.ViewGroup#resetResolvedDrawables():
@@ -2143,6 +2147,8 @@ UnflaggedApi: android.service.notification.NotificationRankingUpdate#PARCELABLE_
     New API must be flagged with @FlaggedApi: field android.service.notification.NotificationRankingUpdate.PARCELABLE_WRITE_RETURN_VALUE
 UnflaggedApi: android.service.notification.NotificationRankingUpdate#isFdNotNullAndClosed():
     New API must be flagged with @FlaggedApi: method android.service.notification.NotificationRankingUpdate.isFdNotNullAndClosed()
+UnflaggedApi: android.service.notification.ZenPolicy.Builder#Builder(android.service.notification.ZenPolicy):
+    New API must be flagged with @FlaggedApi: constructor android.service.notification.ZenPolicy.Builder(android.service.notification.ZenPolicy)
 UnflaggedApi: android.telephony.TelephonyManager#HAL_SERVICE_SATELLITE:
     New API must be flagged with @FlaggedApi: field android.telephony.TelephonyManager.HAL_SERVICE_SATELLITE
 UnflaggedApi: android.telephony.ims.feature.MmTelFeature.MmTelCapabilities:

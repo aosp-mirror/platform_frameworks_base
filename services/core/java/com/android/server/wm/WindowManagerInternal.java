@@ -51,6 +51,7 @@ import android.window.ScreenCapture;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.SensitiveContentPackages.PackageInfo;
 
 import java.lang.annotation.Retention;
 import java.util.List;
@@ -1012,4 +1013,12 @@ public abstract class WindowManagerInternal {
      */
     public abstract void setOrientationRequestPolicy(boolean respected,
             int[] fromOrientations, int[] toOrientations);
+
+    /**
+     * Set whether screen capture should be disabled for all windows of a specific app windows based
+     * on sensitive content protections.
+     *
+     * @param packageInfos set of {@link PackageInfo} whose windows should be blocked from capture
+     */
+    public abstract void setShouldBlockScreenCaptureForApp(@NonNull Set<PackageInfo> packageInfos);
 }

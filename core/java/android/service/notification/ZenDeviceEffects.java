@@ -17,12 +17,16 @@
 package android.service.notification;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -32,6 +36,76 @@ import java.util.Objects;
  */
 @FlaggedApi(Flags.FLAG_MODES_API)
 public final class ZenDeviceEffects implements Parcelable {
+
+    /** Used to track which rule variables have been modified by the user.
+     * Should be checked against the bitmask {@link #getUserModifiedFields()}.
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "FIELD_" }, value = {
+            FIELD_GRAYSCALE,
+            FIELD_SUPPRESS_AMBIENT_DISPLAY,
+            FIELD_DIM_WALLPAPER,
+            FIELD_NIGHT_MODE,
+            FIELD_DISABLE_AUTO_BRIGHTNESS,
+            FIELD_DISABLE_TAP_TO_WAKE,
+            FIELD_DISABLE_TILT_TO_WAKE,
+            FIELD_DISABLE_TOUCH,
+            FIELD_MINIMIZE_RADIO_USAGE,
+            FIELD_MAXIMIZE_DOZE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ModifiableField {}
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_GRAYSCALE = 1 << 0;
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_SUPPRESS_AMBIENT_DISPLAY = 1 << 1;
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_DIM_WALLPAPER = 1 << 2;
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_NIGHT_MODE = 1 << 3;
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_DISABLE_AUTO_BRIGHTNESS = 1 << 4;
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_DISABLE_TAP_TO_WAKE = 1 << 5;
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_DISABLE_TILT_TO_WAKE = 1 << 6;
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_DISABLE_TOUCH = 1 << 7;
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_MINIMIZE_RADIO_USAGE = 1 << 8;
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final int FIELD_MAXIMIZE_DOZE = 1 << 9;
 
     private final boolean mGrayscale;
     private final boolean mSuppressAmbientDisplay;
@@ -45,10 +119,13 @@ public final class ZenDeviceEffects implements Parcelable {
     private final boolean mMinimizeRadioUsage;
     private final boolean mMaximizeDoze;
 
+    private final @ModifiableField int mUserModifiedFields; // Bitwise representation
+
     private ZenDeviceEffects(boolean grayscale, boolean suppressAmbientDisplay,
             boolean dimWallpaper, boolean nightMode, boolean disableAutoBrightness,
             boolean disableTapToWake, boolean disableTiltToWake, boolean disableTouch,
-            boolean minimizeRadioUsage, boolean maximizeDoze) {
+            boolean minimizeRadioUsage, boolean maximizeDoze,
+            @ModifiableField int userModifiedFields) {
         mGrayscale = grayscale;
         mSuppressAmbientDisplay = suppressAmbientDisplay;
         mDimWallpaper = dimWallpaper;
@@ -59,6 +136,7 @@ public final class ZenDeviceEffects implements Parcelable {
         mDisableTouch = disableTouch;
         mMinimizeRadioUsage = minimizeRadioUsage;
         mMaximizeDoze = maximizeDoze;
+        mUserModifiedFields = userModifiedFields;
     }
 
     @Override
@@ -75,14 +153,15 @@ public final class ZenDeviceEffects implements Parcelable {
                 && this.mDisableTiltToWake == that.mDisableTiltToWake
                 && this.mDisableTouch == that.mDisableTouch
                 && this.mMinimizeRadioUsage == that.mMinimizeRadioUsage
-                && this.mMaximizeDoze == that.mMaximizeDoze;
+                && this.mMaximizeDoze == that.mMaximizeDoze
+                && this.mUserModifiedFields == that.mUserModifiedFields;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mGrayscale, mSuppressAmbientDisplay, mDimWallpaper, mNightMode,
                 mDisableAutoBrightness, mDisableTapToWake, mDisableTiltToWake, mDisableTouch,
-                mMinimizeRadioUsage, mMaximizeDoze);
+                mMinimizeRadioUsage, mMaximizeDoze, mUserModifiedFields);
     }
 
     @Override
@@ -98,7 +177,43 @@ public final class ZenDeviceEffects implements Parcelable {
         if (mDisableTouch) effects.add("disableTouch");
         if (mMinimizeRadioUsage) effects.add("minimizeRadioUsage");
         if (mMaximizeDoze) effects.add("maximizeDoze");
-        return "[" + String.join(", ", effects) + "]";
+        return "[" + String.join(", ", effects) + "]"
+                + " userModifiedFields: " + modifiedFieldsToString(mUserModifiedFields);
+    }
+
+    private String modifiedFieldsToString(int bitmask) {
+        ArrayList<String> modified = new ArrayList<>();
+        if ((bitmask & FIELD_GRAYSCALE) != 0) {
+            modified.add("FIELD_GRAYSCALE");
+        }
+        if ((bitmask & FIELD_SUPPRESS_AMBIENT_DISPLAY) != 0) {
+            modified.add("FIELD_SUPPRESS_AMBIENT_DISPLAY");
+        }
+        if ((bitmask & FIELD_DIM_WALLPAPER) != 0) {
+            modified.add("FIELD_DIM_WALLPAPER");
+        }
+        if ((bitmask & FIELD_NIGHT_MODE) != 0) {
+            modified.add("FIELD_NIGHT_MODE");
+        }
+        if ((bitmask & FIELD_DISABLE_AUTO_BRIGHTNESS) != 0) {
+            modified.add("FIELD_DISABLE_AUTO_BRIGHTNESS");
+        }
+        if ((bitmask & FIELD_DISABLE_TAP_TO_WAKE) != 0) {
+            modified.add("FIELD_DISABLE_TAP_TO_WAKE");
+        }
+        if ((bitmask & FIELD_DISABLE_TILT_TO_WAKE) != 0) {
+            modified.add("FIELD_DISABLE_TILT_TO_WAKE");
+        }
+        if ((bitmask & FIELD_DISABLE_TOUCH) != 0) {
+            modified.add("FIELD_DISABLE_TOUCH");
+        }
+        if ((bitmask & FIELD_MINIMIZE_RADIO_USAGE) != 0) {
+            modified.add("FIELD_MINIMIZE_RADIO_USAGE");
+        }
+        if ((bitmask & FIELD_MAXIMIZE_DOZE) != 0) {
+            modified.add("FIELD_MAXIMIZE_DOZE");
+        }
+        return "{" + String.join(",", modified) + "}";
     }
 
     /**
@@ -194,9 +309,10 @@ public final class ZenDeviceEffects implements Parcelable {
     public static final Creator<ZenDeviceEffects> CREATOR = new Creator<ZenDeviceEffects>() {
         @Override
         public ZenDeviceEffects createFromParcel(Parcel in) {
-            return new ZenDeviceEffects(in.readBoolean(), in.readBoolean(), in.readBoolean(),
+            return new ZenDeviceEffects(in.readBoolean(),
                     in.readBoolean(), in.readBoolean(), in.readBoolean(), in.readBoolean(),
-                    in.readBoolean(), in.readBoolean(), in.readBoolean());
+                    in.readBoolean(), in.readBoolean(), in.readBoolean(), in.readBoolean(),
+                    in.readBoolean(), in.readInt());
         }
 
         @Override
@@ -204,6 +320,16 @@ public final class ZenDeviceEffects implements Parcelable {
             return new ZenDeviceEffects[size];
         }
     };
+
+    /**
+     * Gets the bitmask representing which fields are user modified. Bits are set using
+     * {@link ModifiableField}.
+     * @hide
+     */
+    @TestApi
+    public @ModifiableField int getUserModifiedFields() {
+        return mUserModifiedFields;
+    }
 
     @Override
     public int describeContents() {
@@ -222,6 +348,7 @@ public final class ZenDeviceEffects implements Parcelable {
         dest.writeBoolean(mDisableTouch);
         dest.writeBoolean(mMinimizeRadioUsage);
         dest.writeBoolean(mMaximizeDoze);
+        dest.writeInt(mUserModifiedFields);
     }
 
     /** Builder class for {@link ZenDeviceEffects} objects. */
@@ -238,6 +365,7 @@ public final class ZenDeviceEffects implements Parcelable {
         private boolean mDisableTouch;
         private boolean mMinimizeRadioUsage;
         private boolean mMaximizeDoze;
+        private @ModifiableField int mUserModifiedFields;
 
         /**
          * Instantiates a new {@link ZenPolicy.Builder} with all effects set to default (disabled).
@@ -260,6 +388,7 @@ public final class ZenDeviceEffects implements Parcelable {
             mDisableTouch = zenDeviceEffects.shouldDisableTouch();
             mMinimizeRadioUsage = zenDeviceEffects.shouldMinimizeRadioUsage();
             mMaximizeDoze = zenDeviceEffects.shouldMaximizeDoze();
+            mUserModifiedFields = zenDeviceEffects.mUserModifiedFields;
         }
 
         /**
@@ -381,12 +510,24 @@ public final class ZenDeviceEffects implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the bitmask representing which fields are user modified. See the FIELD_ constants.
+         * @hide
+         */
+        @TestApi
+        @NonNull
+        public Builder setUserModifiedFields(@ModifiableField int userModifiedFields) {
+            mUserModifiedFields = userModifiedFields;
+            return this;
+        }
+
         /** Builds a {@link ZenDeviceEffects} object based on the builder's state. */
         @NonNull
         public ZenDeviceEffects build() {
-            return new ZenDeviceEffects(mGrayscale, mSuppressAmbientDisplay, mDimWallpaper,
-                    mNightMode, mDisableAutoBrightness, mDisableTapToWake, mDisableTiltToWake,
-                    mDisableTouch, mMinimizeRadioUsage, mMaximizeDoze);
+            return new ZenDeviceEffects(mGrayscale,
+                    mSuppressAmbientDisplay, mDimWallpaper, mNightMode, mDisableAutoBrightness,
+                    mDisableTapToWake, mDisableTiltToWake, mDisableTouch, mMinimizeRadioUsage,
+                    mMaximizeDoze, mUserModifiedFields);
         }
     }
 }

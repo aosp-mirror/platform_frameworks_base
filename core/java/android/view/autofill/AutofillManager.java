@@ -1469,7 +1469,8 @@ public final class AutofillManager {
         if (infos.size() == 0) {
             throw new IllegalArgumentException("No VirtualViewInfo found");
         }
-        if (isCredmanRequested(view) && mIsFillAndSaveDialogDisabledForCredentialManager) {
+        if (shouldSuppressDialogsForCredman(view)
+                && mIsFillAndSaveDialogDisabledForCredentialManager) {
             if (sDebug) {
                 Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
                         + view.getAutofillId().toString());
@@ -1493,7 +1494,7 @@ public final class AutofillManager {
      * @hide
      */
     public void notifyViewEnteredForFillDialog(View v) {
-        if (isCredmanRequested(v)
+        if (shouldSuppressDialogsForCredman(v)
                 && mIsFillAndSaveDialogDisabledForCredentialManager) {
             if (sDebug) {
                 Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
@@ -3390,19 +3391,39 @@ public final class AutofillManager {
         }
     }
 
-    private boolean isCredmanRequested(View view) {
+    private boolean shouldSuppressDialogsForCredman(View view) {
         if (view == null) {
             return false;
         }
+        // isCredential field indicates that the developer might be calling Credman, and we should
+        // suppress autofill dialogs. But it is not a good enough indicator that there is a valid
+        // credman option.
         if (view.isCredential()) {
             return true;
+        }
+        return containsAutofillHintPrefix(view, View.AUTOFILL_HINT_CREDENTIAL_MANAGER);
+    }
+
+    private boolean isCredmanRequested(View view) {
+        if (view == null) {
+            return false;
         }
         String[] hints = view.getAutofillHints();
         if (hints == null) {
             return false;
         }
+        // if hint starts with 'credential=', then we assume that there is a valid
+        // credential option set by the client.
+        return containsAutofillHintPrefix(view, View.AUTOFILL_HINT_CREDENTIAL_MANAGER + "=");
+    }
+
+    private boolean containsAutofillHintPrefix(View view, String prefix) {
+        String[] hints = view.getAutofillHints();
+        if (hints == null) {
+            return false;
+        }
         for (String hint : hints) {
-            if (hint != null && hint.startsWith(View.AUTOFILL_HINT_CREDENTIAL_MANAGER)) {
+            if (hint != null && hint.startsWith(prefix)) {
                 return true;
             }
         }

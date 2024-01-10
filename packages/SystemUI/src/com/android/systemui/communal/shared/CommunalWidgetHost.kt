@@ -18,6 +18,8 @@ package com.android.systemui.communal.shared
 
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
+import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -60,6 +62,25 @@ constructor(
     private fun bindWidget(widgetId: Int, provider: ComponentName): Boolean {
         if (appWidgetManager.isPresent) {
             return appWidgetManager.get().bindAppWidgetIdIfAllowed(widgetId, provider)
+        }
+        return false
+    }
+
+    /**
+     * Returns whether a particular widget requires configuration when it is first added.
+     *
+     * Must be called after the widget id has been bound.
+     */
+    fun requiresConfiguration(widgetId: Int): Boolean {
+        if (appWidgetManager.isPresent) {
+            val widgetInfo = appWidgetManager.get().getAppWidgetInfo(widgetId)
+            val featureFlags: Int = widgetInfo.widgetFeatures
+            // A widget's configuration is optional only if it's configuration is marked as optional
+            // AND it can be reconfigured later.
+            val configurationOptional =
+                (featureFlags and WIDGET_FEATURE_CONFIGURATION_OPTIONAL != 0 &&
+                    featureFlags and WIDGET_FEATURE_RECONFIGURABLE != 0)
+            return widgetInfo.configure != null && !configurationOptional
         }
         return false
     }

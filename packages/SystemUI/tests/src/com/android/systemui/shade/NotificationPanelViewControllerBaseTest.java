@@ -152,7 +152,9 @@ import com.android.systemui.statusbar.notification.ConversationNotificationManag
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinatorLogger;
+import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardViewStateRepository;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -586,6 +588,10 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mPrimaryBouncerToGoneTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
 
+        NotificationsKeyguardViewStateRepository notifsKeyguardViewStateRepository =
+                new NotificationsKeyguardViewStateRepository();
+        NotificationsKeyguardInteractor notifsKeyguardInteractor =
+                new NotificationsKeyguardInteractor(notifsKeyguardViewStateRepository);
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
                         mDumpManager,
@@ -596,7 +602,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         mKeyguardBypassController,
                         mDozeParameters,
                         mScreenOffAnimationController,
-                        new NotificationWakeUpCoordinatorLogger(logcatLogBuffer()));
+                        new NotificationWakeUpCoordinatorLogger(logcatLogBuffer()),
+                        notifsKeyguardInteractor);
         mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,

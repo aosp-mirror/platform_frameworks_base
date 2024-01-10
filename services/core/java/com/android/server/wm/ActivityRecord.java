@@ -2495,7 +2495,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Creating SnapshotStartingData");
         mStartingData = new SnapshotStartingData(mWmService, snapshot, typeParams);
-        if (task.forAllLeafTaskFragments(TaskFragment::isEmbedded)) {
+        if ((!mStyleFillsParent && task.getChildCount() > 1)
+                || task.forAllLeafTaskFragments(TaskFragment::isEmbedded)) {
+            // Case 1:
+            // If it is moving a Task{[0]=main activity, [1]=translucent activity} to front, use
+            // shared starting window so that the transition doesn't need to wait for the activity
+            // behind the translucent activity. Also, onFirstWindowDrawn will check all visible
+            // activities are drawn in the task to remove the snapshot starting window.
+            // Case 2:
             // Associate with the task so if this activity is resized by task fragment later, the
             // starting window can keep the same bounds as the task.
             associateStartingDataWithTask();
@@ -10616,6 +10623,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
+        if (task != null && task.mSharedStartingData != null) {
+            final WindowState startingWin = task.topStartingWindow();
+            if (startingWin != null && startingWin.mSyncState == SYNC_STATE_READY
+                    && mDisplayContent.mUnknownAppVisibilityController.allResolved()) {
+                // The sync is ready if a drawn starting window covered the task.
+                return true;
+            }
+        }
         if (!super.isSyncFinished(group)) return false;
         if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController
                 .isVisibilityUnknown(this)) {

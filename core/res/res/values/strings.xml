@@ -1248,6 +1248,11 @@
     <string name="permdesc_foregroundServiceFileManagement">Allows the app to make use of foreground services with the type \"fileManagement\"</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceMediaProcessing">run foreground service with the type \"mediaProcessing\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceMediaProcessing">Allows the app to make use of foreground services with the type \"mediaProcessing\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_foregroundServiceSpecialUse">run foreground service with the type \"specialUse\"</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_foregroundServiceSpecialUse">Allows the app to make use of foreground services with the type \"specialUse\"</string>

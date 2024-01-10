@@ -58,8 +58,16 @@ abstract class BaseCommunalViewModel(
     /**
      * Called when a widget is added via drag and drop from the widget picker into the communal hub.
      */
-    fun onAddWidget(componentName: ComponentName, priority: Int) {
-        communalInteractor.addWidget(componentName, priority)
+    open fun onAddWidget(componentName: ComponentName, priority: Int) {
+        communalInteractor.addWidget(componentName, priority, ::configureWidget)
+    }
+
+    /**
+     * Called when a widget needs to be configured, with the id of the widget. The return value
+     * should represent whether configuring the widget was successful.
+     */
+    protected open suspend fun configureWidget(widgetId: Int): Boolean {
+        return true
     }
 
     // TODO(b/308813166): remove once CommunalContainer is moved lower in z-order and doesn't block
@@ -102,6 +110,9 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the UI requests opening the widget editor. */
     open fun onOpenWidgetEditor() {}
+
+    /** Called as the UI requests to dismiss the CTA tile. */
+    open fun onDismissCtaTile() {}
 
     /** Gets the interaction handler used to handle taps on a remote view */
     abstract fun getInteractionHandler(): RemoteViews.InteractionHandler

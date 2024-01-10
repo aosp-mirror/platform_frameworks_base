@@ -21,9 +21,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
@@ -84,7 +84,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     private UnfoldTransitionHandler mUnfoldHandler;
     private ActivityEmbeddingController mActivityEmbeddingController;
 
-    private class MixedTransition {
+    private static class MixedTransition {
         static final int TYPE_ENTER_PIP_FROM_SPLIT = 1;
 
         /** Both the display and split-state (enter/exit) is changing */
@@ -175,7 +175,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             joinFinishArgs(wct);
 
             if (mInFlightSubAnimations == 0) {
-                mActiveTransitions.remove(MixedTransition.this);
                 mFinishCB.onTransitionFinished(mFinishWCT);
             }
         }
@@ -401,8 +400,12 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 final MixedTransition keyguardMixed =
                         new MixedTransition(MixedTransition.TYPE_KEYGUARD, transition);
                 mActiveTransitions.add(keyguardMixed);
-                final boolean hasAnimateKeyguard = animateKeyguard(keyguardMixed, info,
-                        startTransaction, finishTransaction, finishCallback);
+                Transitions.TransitionFinishCallback callback = wct -> {
+                    mActiveTransitions.remove(keyguardMixed);
+                    finishCallback.onTransitionFinished(wct);
+                };
+                final boolean hasAnimateKeyguard = animateKeyguard(
+                        keyguardMixed, info, startTransaction, finishTransaction, callback);
                 if (hasAnimateKeyguard) {
                     ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                             "Converting mixed transition into a keyguard transition");
@@ -420,27 +423,34 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
         if (mixed == null) return false;
 
-        if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
-            return animateEnterPipFromSplit(mixed, info, startTransaction, finishTransaction,
-                    finishCallback);
-        } else if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING) {
-            return animateEnterPipFromActivityEmbedding(mixed, info, startTransaction,
-                    finishTransaction, finishCallback);
-        } else if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
+        final MixedTransition chosenTransition = mixed;
+        Transitions.TransitionFinishCallback callback = wct -> {
+            mActiveTransitions.remove(chosenTransition);
+            finishCallback.onTransitionFinished(wct);
+        };
+
+        if (chosenTransition.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
+            return animateEnterPipFromSplit(
+                    chosenTransition, info, startTransaction, finishTransaction, callback);
+        } else if (chosenTransition.mType
+                == MixedTransition.TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING) {
+            return animateEnterPipFromActivityEmbedding(
+                    chosenTransition, info, startTransaction, finishTransaction, callback);
+        } else if (chosenTransition.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
             return false;
-        } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
-            final boolean handledToPip = animateOpenIntentWithRemoteAndPip(mixed, info,
-                    startTransaction, finishTransaction, finishCallback);
+        } else if (chosenTransition.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
+            final boolean handledToPip = animateOpenIntentWithRemoteAndPip(
+                    chosenTransition, info, startTransaction, finishTransaction, callback);
             // Consume the transition on remote handler if the leftover handler already handle this
             // transition. And if it cannot, the transition will be handled by remote handler, so
             // don't consume here.
             // Need to check leftOverHandler as it may change in #animateOpenIntentWithRemoteAndPip
-            if (handledToPip && mixed.mHasRequestToRemote
-                    && mixed.mLeftoversHandler != mPlayer.getRemoteTransitionHandler()) {
+            if (handledToPip && chosenTransition.mHasRequestToRemote
+                    && chosenTransition.mLeftoversHandler != mPlayer.getRemoteTransitionHandler()) {
                 mPlayer.getRemoteTransitionHandler().onTransitionConsumed(transition, false, null);
             }
             return handledToPip;
-        } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
+        } else if (chosenTransition.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 // Pip auto-entering info might be appended to recent transition like pressing
@@ -449,28 +459,29 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 if (mPipHandler.isEnteringPip(change, info.getType())
                         && mSplitHandler.getSplitItemPosition(change.getLastParent())
                         != SPLIT_POSITION_UNDEFINED) {
-                    return animateEnterPipFromSplit(mixed, info, startTransaction,
-                            finishTransaction, finishCallback);
+                    return animateEnterPipFromSplit(
+                            chosenTransition, info, startTransaction, finishTransaction, callback);
                 }
             }
 
-            return animateRecentsDuringSplit(mixed, info, startTransaction, finishTransaction,
-                    finishCallback);
-        } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
-            return animateKeyguard(mixed, info, startTransaction, finishTransaction,
-                    finishCallback);
-        } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_KEYGUARD) {
-            return animateRecentsDuringKeyguard(mixed, info, startTransaction, finishTransaction,
-                    finishCallback);
-        } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_DESKTOP) {
-            return animateRecentsDuringDesktop(mixed, info, startTransaction, finishTransaction,
-                    finishCallback);
-        } else if (mixed.mType == MixedTransition.TYPE_UNFOLD) {
-            return animateUnfold(mixed, info, startTransaction, finishTransaction, finishCallback);
+            return animateRecentsDuringSplit(
+                    chosenTransition, info, startTransaction, finishTransaction, callback);
+        } else if (chosenTransition.mType == MixedTransition.TYPE_KEYGUARD) {
+            return animateKeyguard(
+                    chosenTransition, info, startTransaction, finishTransaction, callback);
+        } else if (chosenTransition.mType == MixedTransition.TYPE_RECENTS_DURING_KEYGUARD) {
+            return animateRecentsDuringKeyguard(
+                    chosenTransition, info, startTransaction, finishTransaction, callback);
+        } else if (chosenTransition.mType == MixedTransition.TYPE_RECENTS_DURING_DESKTOP) {
+            return animateRecentsDuringDesktop(
+                    chosenTransition, info, startTransaction, finishTransaction, callback);
+        } else if (chosenTransition.mType == MixedTransition.TYPE_UNFOLD) {
+            return animateUnfold(
+                    chosenTransition, info, startTransaction, finishTransaction, callback);
         } else {
-            mActiveTransitions.remove(mixed);
+            mActiveTransitions.remove(chosenTransition);
             throw new IllegalStateException("Starting mixed animation without a known mixed type? "
-                    + mixed.mType);
+                    + chosenTransition.mType);
         }
     }
 
@@ -727,7 +738,11 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         final MixedTransition mixed = new MixedTransition(
                 MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT, transition);
         mActiveTransitions.add(mixed);
-        return animateEnterPipFromSplit(mixed, info, startT, finishT, finishCallback);
+        Transitions.TransitionFinishCallback callback = wct -> {
+            mActiveTransitions.remove(mixed);
+            finishCallback.onTransitionFinished(wct);
+        };
+        return animateEnterPipFromSplit(mixed, info, startT, finishT, callback);
     }
 
     /**

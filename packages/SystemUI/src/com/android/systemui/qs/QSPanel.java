@@ -189,6 +189,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     public void setBrightnessView(@NonNull View view) {
         if (mBrightnessView != null) {
             removeView(mBrightnessView);
+            mChildrenLayoutTop.remove(mBrightnessView);
             mMovableContentStartIndex--;
         }
         addView(view, 0);

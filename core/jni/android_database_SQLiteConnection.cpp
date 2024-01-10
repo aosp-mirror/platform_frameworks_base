@@ -82,10 +82,16 @@ struct SQLiteConnection {
     const String8 path;
     const String8 label;
 
+    // The prepared statement used to determine which tables are updated by a statement.  This
+    // is is initially null.  It is set non-null on first use.
+    sqlite3_stmt* tableQuery;
+
     volatile bool canceled;
 
     SQLiteConnection(sqlite3* db, int openFlags, const String8& path, const String8& label) :
-        db(db), openFlags(openFlags), path(path), label(label), canceled(false) { }
+            db(db), openFlags(openFlags), path(path), label(label), tableQuery(nullptr),
+            canceled(false) { }
+
 };
 
 // Called each time a statement begins execution, when tracing is enabled.
@@ -188,6 +194,9 @@ static void nativeClose(JNIEnv* env, jclass clazz, jlong connectionPtr) {
 
     if (connection) {
         ALOGV("Closing connection %p", connection->db);
+        if (connection->tableQuery != nullptr) {
+            sqlite3_finalize(connection->tableQuery);
+        }
         int err = sqlite3_close(connection->db);
         if (err != SQLITE_OK) {
             // This can happen if sub-objects aren't closed first.  Make sure the caller knows.
@@ -417,6 +426,46 @@ static jboolean nativeIsReadOnly(JNIEnv* env, jclass clazz, jlong connectionPtr,
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     return sqlite3_stmt_readonly(statement) != 0;
+}
+
+static jboolean nativeUpdatesTempOnly(JNIEnv* env, jclass,
+        jlong connectionPtr, jlong statementPtr) {
+    sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
+
+    int result = SQLITE_OK;
+    if (connection->tableQuery == nullptr) {
+        static char const* sql =
+                "SELECT COUNT(*) FROM tables_used(?) WHERE schema != 'temp' AND wr != 0";
+        result = sqlite3_prepare_v2(connection->db, sql, -1, &connection->tableQuery, nullptr);
+        if (result != SQLITE_OK) {
+            ALOGE("failed to compile query table: %s",
+                  sqlite3_errstr(sqlite3_extended_errcode(connection->db)));
+            return false;
+        }
+    }
+
+    // A temporary, to simplify the code.
+    sqlite3_stmt* query = connection->tableQuery;
+    sqlite3_reset(query);
+    sqlite3_clear_bindings(query);
+    result = sqlite3_bind_text(query, 1, sqlite3_sql(statement), -1, SQLITE_STATIC);
+    if (result != SQLITE_OK) {
+        ALOGE("tables bind pointer returns %s", sqlite3_errstr(result));
+        return false;
+    }
+    result = sqlite3_step(query);
+    if (result != SQLITE_ROW) {
+        ALOGE("tables query error: %d/%s", result, sqlite3_errstr(result));
+        // Make sure the query is no longer bound to the statement.
+        sqlite3_clear_bindings(query);
+        return false;
+    }
+
+    int count = sqlite3_column_int(query, 0);
+    // Make sure the query is no longer bound to the statement SQL string.
+    sqlite3_clear_bindings(query);
+    return count == 0;
 }
 
 static jint nativeGetColumnCount(JNIEnv* env, jclass clazz, jlong connectionPtr,
@@ -915,6 +964,8 @@ static const JNINativeMethod sMethods[] =
             (void*)nativeGetParameterCount },
     { "nativeIsReadOnly", "(JJ)Z",
             (void*)nativeIsReadOnly },
+    { "nativeUpdatesTempOnly", "(JJ)Z",
+            (void*)nativeUpdatesTempOnly },
     { "nativeGetColumnCount", "(JJ)I",
             (void*)nativeGetColumnCount },
     { "nativeGetColumnName", "(JJI)Ljava/lang/String;",

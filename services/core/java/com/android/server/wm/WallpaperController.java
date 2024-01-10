@@ -183,18 +183,21 @@ class WallpaperController {
                 && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
+            mFindResults.setIsWallpaperTargetForLetterbox(w.hasWallpaperForLetterboxBackground());
             if (w == mWallpaperTarget && w.isAnimating(TRANSITION | PARENTS)) {
                 // The current wallpaper target is animating, so we'll look behind it for
                 // another possible target and figure out what is going on later.
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
                         "Win " + w + ": token animating, looking behind.");
             }
-            mFindResults.setIsWallpaperTargetForLetterbox(w.hasWallpaperForLetterboxBackground());
             // While the keyguard is going away, both notification shade and a normal activity such
             // as a launcher can satisfy criteria for a wallpaper target. In this case, we should
             // chose the normal activity, otherwise wallpaper becomes invisible when a new animation
             // starts before the keyguard going away animation finishes.
-            return w.mActivityRecord != null;
+            if (w.mActivityRecord == null && mDisplayContent.isKeyguardGoingAway()) {
+                return false;
+            }
+            return true;
         }
         return false;
     };

@@ -44,6 +44,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -635,6 +636,7 @@ public final class TransitionInfo implements Parcelable {
         private @ColorInt int mBackgroundColor;
         private SurfaceControl mSnapshot = null;
         private float mSnapshotLuma;
+        private ComponentName mActivityComponent = null;
 
         public Change(@Nullable WindowContainerToken container, @NonNull SurfaceControl leash) {
             mContainer = container;
@@ -663,6 +665,7 @@ public final class TransitionInfo implements Parcelable {
             mBackgroundColor = in.readInt();
             mSnapshot = in.readTypedObject(SurfaceControl.CREATOR);
             mSnapshotLuma = in.readFloat();
+            mActivityComponent = in.readTypedObject(ComponentName.CREATOR);
         }
 
         private Change localRemoteCopy() {
@@ -685,6 +688,7 @@ public final class TransitionInfo implements Parcelable {
             out.mBackgroundColor = mBackgroundColor;
             out.mSnapshot = mSnapshot != null ? new SurfaceControl(mSnapshot, "localRemote") : null;
             out.mSnapshotLuma = mSnapshotLuma;
+            out.mActivityComponent = mActivityComponent;
             return out;
         }
 
@@ -778,6 +782,11 @@ public final class TransitionInfo implements Parcelable {
         public void setSnapshot(@Nullable SurfaceControl snapshot, float luma) {
             mSnapshot = snapshot;
             mSnapshotLuma = luma;
+        }
+
+        /** Sets the component-name of the container. Container must be an Activity. */
+        public void setActivityComponent(@Nullable ComponentName component) {
+            mActivityComponent = component;
         }
 
         /** @return the container that is changing. May be null if non-remotable (eg. activity) */
@@ -913,6 +922,12 @@ public final class TransitionInfo implements Parcelable {
             return mSnapshotLuma;
         }
 
+        /** @return the component-name of this container (if it is an activity). */
+        @Nullable
+        public ComponentName getActivityComponent() {
+            return mActivityComponent;
+        }
+
         /** @hide */
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -936,6 +951,7 @@ public final class TransitionInfo implements Parcelable {
             dest.writeInt(mBackgroundColor);
             dest.writeTypedObject(mSnapshot, flags);
             dest.writeFloat(mSnapshotLuma);
+            dest.writeTypedObject(mActivityComponent, flags);
         }
 
         @NonNull
@@ -993,6 +1009,10 @@ public final class TransitionInfo implements Parcelable {
             }
             if (mLastParent != null) {
                 sb.append(" lastParent="); sb.append(mLastParent);
+            }
+            if (mActivityComponent != null) {
+                sb.append(" component=");
+                sb.append(mActivityComponent.flattenToShortString());
             }
             sb.append('}');
             return sb.toString();

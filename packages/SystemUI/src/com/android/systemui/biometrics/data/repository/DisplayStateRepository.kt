@@ -22,6 +22,7 @@ import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManager.DisplayListener
 import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
 import android.os.Handler
+import android.util.Size
 import android.view.DisplayInfo
 import com.android.internal.util.ArrayUtils
 import com.android.systemui.biometrics.shared.model.DisplayRotation
@@ -40,6 +41,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Repository for the current state of the display */
@@ -58,6 +60,9 @@ interface DisplayStateRepository {
 
     /** Provides the current display rotation */
     val currentRotation: StateFlow<DisplayRotation>
+
+    /** Provides the current display size */
+    val currentDisplaySize: StateFlow<Size>
 }
 
 // TODO(b/296211844): This class could directly use DeviceStateRepository and DisplayRepository
@@ -110,17 +115,13 @@ constructor(
                 initialValue = false,
             )
 
-    private fun getDisplayRotation(): DisplayRotation {
+    private fun getDisplayInfo(): DisplayInfo {
         val cachedDisplayInfo = DisplayInfo()
         context.display?.getDisplayInfo(cachedDisplayInfo)
-        var rotation = cachedDisplayInfo.rotation
-        if (isReverseDefaultRotation) {
-            rotation = (rotation + 1) % 4
-        }
-        return rotation.toDisplayRotation()
+        return cachedDisplayInfo
     }
 
-    override val currentRotation: StateFlow<DisplayRotation> =
+    private val currentDisplayInfo: StateFlow<DisplayInfo> =
         conflatedCallbackFlow {
                 val callback =
                     object : DisplayListener {
@@ -129,11 +130,11 @@ constructor(
                         override fun onDisplayAdded(displayId: Int) {}
 
                         override fun onDisplayChanged(displayId: Int) {
-                            val rotation = getDisplayRotation()
+                            val displayInfo = getDisplayInfo()
                             trySendWithFailureLogging(
-                                rotation,
+                                displayInfo,
                                 TAG,
-                                "Error sending display rotation to $rotation"
+                                "Error sending displayInfo to $displayInfo"
                             )
                         }
                     }
@@ -148,7 +149,37 @@ constructor(
             .stateIn(
                 applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = getDisplayRotation(),
+                initialValue = getDisplayInfo(),
+            )
+
+    private fun rotationToDisplayRotation(rotation: Int): DisplayRotation {
+        var adjustedRotation = rotation
+        if (isReverseDefaultRotation) {
+            adjustedRotation = (rotation + 1) % 4
+        }
+        return adjustedRotation.toDisplayRotation()
+    }
+
+    override val currentRotation: StateFlow<DisplayRotation> =
+        currentDisplayInfo
+            .map { rotationToDisplayRotation(it.rotation) }
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = rotationToDisplayRotation(currentDisplayInfo.value.rotation)
+            )
+
+    override val currentDisplaySize: StateFlow<Size> =
+        currentDisplayInfo
+            .map { Size(it.naturalWidth, it.naturalHeight) }
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue =
+                    Size(
+                        currentDisplayInfo.value.naturalWidth,
+                        currentDisplayInfo.value.naturalHeight
+                    ),
             )
 
     companion object {

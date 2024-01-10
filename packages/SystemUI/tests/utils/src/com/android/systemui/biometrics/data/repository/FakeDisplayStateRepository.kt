@@ -17,6 +17,7 @@
 
 package com.android.systemui.biometrics.data.repository
 
+import android.util.Size
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,9 @@ class FakeDisplayStateRepository : DisplayStateRepository {
     private val _currentRotation = MutableStateFlow<DisplayRotation>(DisplayRotation.ROTATION_0)
     override val currentRotation: StateFlow<DisplayRotation> = _currentRotation.asStateFlow()
 
+    private val _currentDisplaySize = MutableStateFlow<Size>(Size(0, 0))
+    override val currentDisplaySize: StateFlow<Size> = _currentDisplaySize.asStateFlow()
+
     override val isReverseDefaultRotation = false
 
     fun setIsInRearDisplayMode(isInRearDisplayMode: Boolean) {
@@ -37,5 +41,9 @@ class FakeDisplayStateRepository : DisplayStateRepository {
 
     fun setCurrentRotation(currentRotation: DisplayRotation) {
         _currentRotation.value = currentRotation
+    }
+
+    fun setCurrentDisplaySize(size: Size) {
+        _currentDisplaySize.value = size
     }
 }

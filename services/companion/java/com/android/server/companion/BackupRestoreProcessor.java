@@ -18,6 +18,8 @@ package com.android.server.companion;
 
 import static android.os.UserHandle.getCallingUserId;
 
+import static com.android.server.companion.CompanionDeviceManagerService.PerUserAssociationSet;
+
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
@@ -26,9 +28,11 @@ import android.companion.Flags;
 import android.companion.datatransfer.SystemDataTransferRequest;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 
@@ -57,6 +61,14 @@ class BackupRestoreProcessor {
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     @NonNull
     private final AssociationRequestsProcessor mAssociationRequestsProcessor;
+
+    /**
+     * A structure that consists of a set of restored associations that are pending corresponding
+     * companion app to be installed.
+     */
+    @GuardedBy("mAssociationsPendingAppInstall")
+    private final PerUserAssociationSet mAssociationsPendingAppInstall =
+            new PerUserAssociationSet();
 
     BackupRestoreProcessor(@NonNull CompanionDeviceManagerService service,
                            @NonNull AssociationStoreImpl associationStore,
@@ -124,7 +136,7 @@ class BackupRestoreProcessor {
         byte[] requestsPayload = new byte[buffer.getInt()];
         buffer.get(requestsPayload);
         List<SystemDataTransferRequest> restoredRequestsForUser =
-                mSystemDataTransferRequestStore.readRequestsFromPayload(requestsPayload);
+                mSystemDataTransferRequestStore.readRequestsFromPayload(requestsPayload, userId);
 
         // Get a list of installed packages ahead of time.
         List<ApplicationInfo> installedApps = mPackageManager.getInstalledApplications(
@@ -170,7 +182,7 @@ class BackupRestoreProcessor {
                 mAssociationRequestsProcessor.maybeGrantRoleAndStoreAssociation(newAssociation,
                         null, null);
             } else {
-                // TODO(b/314992577): Check if package is installed before granting
+                addToPendingAppInstall(newAssociation);
             }
 
             // Re-map restored system data transfer requests to newly created associations
@@ -183,6 +195,30 @@ class BackupRestoreProcessor {
 
         // Persist restored state.
         mService.persistStateForUser(userId);
+    }
+
+    void addToPendingAppInstall(@NonNull AssociationInfo association) {
+        association = (new AssociationInfo.Builder(association))
+                .setPending(true)
+                .build();
+
+        synchronized (mAssociationsPendingAppInstall) {
+            mAssociationsPendingAppInstall.forUser(association.getUserId()).add(association);
+        }
+    }
+
+    void removeFromPendingAppInstall(@NonNull AssociationInfo association) {
+        synchronized (mAssociationsPendingAppInstall) {
+            mAssociationsPendingAppInstall.forUser(association.getUserId()).remove(association);
+        }
+    }
+
+    @NonNull
+    Set<AssociationInfo> getAssociationsPendingAppInstallForUser(@UserIdInt int userId) {
+        synchronized (mAssociationsPendingAppInstall) {
+            // Return a copy.
+            return new ArraySet<>(mAssociationsPendingAppInstall.forUser(userId));
+        }
     }
 
     /**

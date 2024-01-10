@@ -39,6 +39,7 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -2993,6 +2994,30 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 taskFragment.setCompanionTaskFragment(null /* companionTaskFragment */);
             }
         }, false /* traverseTopToBottom */);
+    }
+
+    boolean shouldBoostDimmer() {
+        if (asTask() != null || !isDimmingOnParentTask()) {
+            // early return if not embedded or should not dim on parent Task.
+            return false;
+        }
+
+        final TaskFragment adjacentTf = getAdjacentTaskFragment();
+        if (adjacentTf == null) {
+            // early return if no adjacent TF.
+            return false;
+        }
+
+        if (getParent().mChildren.indexOf(adjacentTf) < getParent().mChildren.indexOf(this)) {
+            // early return if this TF already has higher z-ordering.
+            return false;
+        }
+
+        // boost if there's an Activity window that has FLAG_DIM_BEHIND flag.
+        return forAllWindows(
+                (w) -> (w.mAttrs.flags & FLAG_DIM_BEHIND) != 0 && w.mActivityRecord != null
+                        && w.mActivityRecord.isEmbedded() && (w.mActivityRecord.isVisibleRequested()
+                        || w.mActivityRecord.isVisible()), true);
     }
 
     @Override

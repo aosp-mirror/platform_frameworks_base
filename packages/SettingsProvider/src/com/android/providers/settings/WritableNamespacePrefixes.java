@@ -99,7 +99,6 @@ final class WritableNamespacePrefixes {
                 "kiwi",
                 "latency_tracker",
                 "launcher",
-                "launcher_lily",
                 "leaked_animator",
                 "lmkd_native",
                 "location",

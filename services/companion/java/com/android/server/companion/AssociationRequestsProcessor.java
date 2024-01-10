@@ -284,7 +284,7 @@ class AssociationRequestsProcessor {
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,
                 /* tag */ null, macAddress, displayName, deviceProfile, associatedDevice,
                 selfManaged, /* notifyOnDeviceNearby */ false, /* revoked */ false,
-                timestamp, Long.MAX_VALUE, /* systemDataSyncFlags */ 0);
+                /* pending */ false, timestamp, Long.MAX_VALUE, /* systemDataSyncFlags */ 0);
 
         // Add role holder for association (if specified) and add new association to store.
         maybeGrantRoleAndStoreAssociation(association, callback, resultReceiver);

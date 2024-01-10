@@ -29,6 +29,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -93,6 +94,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var fpSensorProp: FingerprintSensorPropertiesInternal
 
+    private val facePropertyRepository = FakeFacePropertyRepository()
     private val displayMetrics = DisplayMetrics()
 
     @Captor
@@ -126,6 +128,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             KeyguardLogger(logcatLogBuffer(AuthRippleController.TAG)),
             biometricUnlockController,
             lightRevealScrim,
+            facePropertyRepository,
             rippleView,
         )
         controller.init()
@@ -202,7 +205,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
 
     @Test
     fun testNullFaceSensorLocationDoesNothing() {
-        `when`(authController.faceSensorLocation).thenReturn(null)
+        facePropertyRepository.setSensorLocation(null)
         controller.onViewAttached()
 
         val captor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
@@ -270,7 +273,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
     fun testAnimatorRunWhenWakeAndUnlock_faceUdfpsFingerDown() {
         mSetFlagsRule.disableFlags(FLAG_LIGHT_REVEAL_MIGRATION)
         val faceLocation = Point(5, 5)
-        `when`(authController.faceSensorLocation).thenReturn(faceLocation)
+        facePropertyRepository.setSensorLocation(faceLocation)
         controller.onViewAttached()
         `when`(keyguardStateController.isShowing).thenReturn(true)
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)

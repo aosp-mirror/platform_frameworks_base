@@ -147,7 +147,6 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.registerCallback(mCallback);
         assertThat(mLocalMediaManager.connectDevice(device)).isTrue();
 
-        verify(currentDevice).disconnect();
         verify(mInfoMediaManager).connectToDevice(device);
     }
 

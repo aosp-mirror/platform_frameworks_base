@@ -327,6 +327,32 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun cta_visibilityTrue_shows() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+            communalRepository.setCtaTileInViewModeVisibility(true)
+
+            val ctaTileContent by collectLastValue(underTest.ctaTileContent)
+
+            assertThat(ctaTileContent?.size).isEqualTo(1)
+            assertThat(ctaTileContent?.get(0))
+                .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
+            assertThat(ctaTileContent?.get(0)?.key)
+                .isEqualTo(CommunalContentModel.KEY.CTA_TILE_IN_VIEW_MODE_KEY)
+        }
+
+    @Test
+    fun ctaTile_visibilityFalse_doesNotShow() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+            communalRepository.setCtaTileInViewModeVisibility(false)
+
+            val ctaTileContent by collectLastValue(underTest.ctaTileContent)
+
+            assertThat(ctaTileContent).isEmpty()
+        }
+
+    @Test
     fun listensToSceneChange() =
         testScope.runTest {
             var desiredScene = collectLastValue(underTest.desiredScene)

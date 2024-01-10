@@ -32,6 +32,7 @@ import com.android.keyguard.logging.KeyguardLogger
 import com.android.settingslib.Utils
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.lightRevealMigration
+import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
@@ -80,6 +81,7 @@ class AuthRippleController @Inject constructor(
     private val logger: KeyguardLogger,
     private val biometricUnlockController: BiometricUnlockController,
     private val lightRevealScrim: LightRevealScrim,
+    private val facePropertyRepository: FacePropertyRepository,
     rippleView: AuthRippleView?
 ) :
     ViewController<AuthRippleView>(rippleView),
@@ -263,7 +265,7 @@ class AuthRippleController @Inject constructor(
 
     fun updateSensorLocation() {
         fingerprintSensorLocation = authController.fingerprintSensorLocation
-        faceSensorLocation = authController.faceSensorLocation
+        faceSensorLocation = facePropertyRepository.sensorLocation.value
     }
 
     private fun updateRippleColor() {

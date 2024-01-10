@@ -122,6 +122,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.wallpaper.WallpaperData.BindSource;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -335,6 +336,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     };
 
                     // If this was the system wallpaper, rebind...
+                    wallpaper.mBindSource = BindSource.SET_STATIC;
                     bindWallpaperComponentLocked(mImageWallpaper, true, false, wallpaper,
                             callback);
                 }
@@ -354,6 +356,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         }
                     };
 
+                    wallpaper.mBindSource = BindSource.SET_STATIC;
                     bindWallpaperComponentLocked(mImageWallpaper, true /* force */,
                             false /* fromUser */, wallpaper, callback);
                 } else if (isAppliedToLock) {
@@ -811,6 +814,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 Slog.w(TAG, "Failed attaching wallpaper on display", e);
                 if (wallpaper != null && !wallpaper.wallpaperUpdating
                         && connection.getConnectedEngineSize() == 0) {
+                    wallpaper.mBindSource = BindSource.CONNECT_LOCKED;
                     bindWallpaperComponentLocked(null /* componentName */, false /* force */,
                             false /* fromUser */, wallpaper, null /* reply */);
                 }
@@ -1035,6 +1039,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 final ComponentName wpService = mWallpaper.wallpaperComponent;
                 // The broadcast of package update could be delayed after service disconnected. Try
                 // to re-bind the service for 10 seconds.
+                mWallpaper.mBindSource = BindSource.CONNECTION_TRY_TO_REBIND;
                 if (bindWallpaperComponentLocked(
                         wpService, true, false, mWallpaper, null)) {
                     mWallpaper.connection.scheduleTimeoutLocked();
@@ -1321,6 +1326,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         }
                         wallpaper.wallpaperUpdating = false;
                         clearWallpaperComponentLocked(wallpaper);
+                        wallpaper.mBindSource = BindSource.PACKAGE_UPDATE_FINISHED;
                         if (!bindWallpaperComponentLocked(wpService, false, false,
                                 wallpaper, null)) {
                             Slog.w(TAG, "Wallpaper " + wpService
@@ -1711,6 +1717,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (mHomeWallpaperWaitingForUnlock) {
                     final WallpaperData systemWallpaper =
                             getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+                    systemWallpaper.mBindSource = BindSource.SWITCH_WALLPAPER_UNLOCK_USER;
                     switchWallpaper(systemWallpaper, null);
                     // TODO(b/278261563): call notifyCallbacksLocked inside switchWallpaper
                     notifyCallbacksLocked(systemWallpaper);
@@ -1718,6 +1725,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (mLockWallpaperWaitingForUnlock) {
                     final WallpaperData lockWallpaper =
                             getWallpaperSafeLocked(userId, FLAG_LOCK);
+                    lockWallpaper.mBindSource = BindSource.SWITCH_WALLPAPER_UNLOCK_USER;
                     switchWallpaper(lockWallpaper, null);
                     notifyCallbacksLocked(lockWallpaper);
                 }
@@ -1838,6 +1846,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         // delete them in order to show the default wallpaper.
         clearWallpaperBitmaps(wallpaper);
 
+        fallback.mBindSource = BindSource.SWITCH_WALLPAPER_FAILURE;
         bindWallpaperComponentLocked(mImageWallpaper, true, false, fallback, reply);
         if ((wallpaper.mWhich & FLAG_SYSTEM) != 0) mHomeWallpaperWaitingForUnlock = true;
         if ((wallpaper.mWhich & FLAG_LOCK) != 0) mLockWallpaperWaitingForUnlock = true;
@@ -2963,6 +2972,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                  */
                 boolean forceRebind = force || (same && systemIsBoth && which == FLAG_SYSTEM);
 
+                newWallpaper.mBindSource =
+                        (name == null) ? BindSource.SET_LIVE_TO_CLEAR : BindSource.SET_LIVE;
                 bindSuccess = bindWallpaperComponentLocked(name, /* force */
                         forceRebind, /* fromUser */ true, newWallpaper, reply);
                 if (bindSuccess) {
@@ -3530,6 +3541,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mFallbackWallpaper = new WallpaperData(systemUserId, FLAG_SYSTEM);
             mFallbackWallpaper.allowBackup = false;
             mFallbackWallpaper.wallpaperId = makeWallpaperIdLocked();
+            mFallbackWallpaper.mBindSource = BindSource.INITIALIZE_FALLBACK;
             bindWallpaperComponentLocked(mDefaultWallpaperComponent, true, false,
                     mFallbackWallpaper, null);
         }
@@ -3553,11 +3565,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             wallpaper.allowBackup = true;   // by definition if it was restored
             if (wallpaper.nextWallpaperComponent != null
                     && !wallpaper.nextWallpaperComponent.equals(mImageWallpaper)) {
+                wallpaper.mBindSource = BindSource.RESTORE_SETTINGS_LIVE_SUCCESS;
                 if (!bindWallpaperComponentLocked(wallpaper.nextWallpaperComponent, false, false,
                         wallpaper, null)) {
                     // No such live wallpaper or other failure; fall back to the default
                     // live wallpaper (since the profile being restored indicated that the
                     // user had selected a live rather than static one).
+                    wallpaper.mBindSource = BindSource.RESTORE_SETTINGS_LIVE_FAILURE;
                     bindWallpaperComponentLocked(null, false, false, wallpaper, null);
                 }
                 success = true;
@@ -3575,6 +3589,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         + " id=" + wallpaper.wallpaperId);
                 if (success) {
                     mWallpaperCropper.generateCrop(wallpaper); // based on the new image + metadata
+                    wallpaper.mBindSource = BindSource.RESTORE_SETTINGS_STATIC;
                     bindWallpaperComponentLocked(wallpaper.nextWallpaperComponent, true, false,
                             wallpaper, null);
                 }
@@ -3608,7 +3623,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         pw.print(" User "); pw.print(wallpaper.userId);
         pw.print(": id="); pw.print(wallpaper.wallpaperId);
         pw.print(": mWhich="); pw.print(wallpaper.mWhich);
-        pw.print(": mSystemWasBoth="); pw.println(wallpaper.mSystemWasBoth);
+        pw.print(": mSystemWasBoth="); pw.print(wallpaper.mSystemWasBoth);
+        pw.print(": mBindSource="); pw.println(wallpaper.mBindSource.name());
         pw.println(" Display state:");
         mWallpaperDisplayHelper.forEachDisplayData(wpSize -> {
             pw.print("  displayId=");

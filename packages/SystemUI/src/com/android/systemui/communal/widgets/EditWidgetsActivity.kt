@@ -27,23 +27,26 @@ import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.compose.ComposeFacade.setCommunalEditWidgetActivityContent
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 /** An Activity for editing the widgets that appear in hub mode. */
 class EditWidgetsActivity
 @Inject
 constructor(
     private val communalViewModel: CommunalEditModeViewModel,
-    private val communalInteractor: CommunalInteractor,
     private var windowManagerService: IWindowManager? = null,
 ) : ComponentActivity() {
     companion object {
         private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
         private const val EXTRA_FILTER_STRATEGY = "filter_strategy"
         private const val FILTER_STRATEGY_GLANCEABLE_HUB = 1
+        private const val REQUEST_CODE_CONFIGURE_WIDGET = 1
         private const val TAG = "EditWidgetsActivity"
     }
 
@@ -63,7 +66,7 @@ constructor(
                                     Intent.EXTRA_COMPONENT_NAME,
                                     ComponentName::class.java
                                 )
-                                ?.let { communalInteractor.addWidget(it, 0) }
+                                ?.let { communalViewModel.onAddWidget(it, 0) }
                                 ?: run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
                         }
                     }
@@ -84,14 +87,26 @@ constructor(
         windowInsetsController?.hide(WindowInsets.Type.systemBars())
         window.setDecorFitsSystemWindows(false)
 
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Start the configuration activity when new widgets are added.
+                communalViewModel.widgetsToConfigure.collect { widgetId ->
+                    communalViewModel.startConfigurationActivity(
+                        activity = this@EditWidgetsActivity,
+                        widgetId = widgetId,
+                        requestCode = REQUEST_CODE_CONFIGURE_WIDGET
+                    )
+                }
+            }
+        }
+
         setCommunalEditWidgetActivityContent(
             activity = this,
             viewModel = communalViewModel,
             onOpenWidgetPicker = {
-                val localPackageManager: PackageManager = getPackageManager()
                 val intent =
                     Intent(Intent.ACTION_MAIN).also { it.addCategory(Intent.CATEGORY_HOME) }
-                localPackageManager
+                packageManager
                     .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
                     ?.activityInfo
                     ?.packageName
@@ -121,5 +136,12 @@ constructor(
                 }
             }
         )
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_CONFIGURE_WIDGET) {
+            communalViewModel.setConfigurationResult(resultCode)
+        }
     }
 }

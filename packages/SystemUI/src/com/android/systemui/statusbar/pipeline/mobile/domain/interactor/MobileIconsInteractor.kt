@@ -71,6 +71,12 @@ interface MobileIconsInteractor {
     /** List of subscriptions, potentially filtered for CBRS */
     val filteredSubscriptions: Flow<List<SubscriptionModel>>
 
+    /**
+     * The current list of [MobileIconInteractor]s associated with the current list of
+     * [filteredSubscriptions]
+     */
+    val icons: StateFlow<List<MobileIconInteractor>>
+
     /** True if the active mobile data subscription has data enabled */
     val activeDataConnectionHasDataEnabled: StateFlow<Boolean>
 
@@ -258,6 +264,13 @@ constructor(
             }
         }
     }
+
+    override val icons =
+        filteredSubscriptions
+            .mapLatest { subs ->
+                subs.map { getMobileConnectionInteractorForSubId(it.subscriptionId) }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
 
     /**
      * Copied from the old pipeline. We maintain a 2s period of time where we will keep the

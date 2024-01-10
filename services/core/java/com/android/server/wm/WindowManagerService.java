@@ -123,6 +123,7 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
+import static com.android.server.wm.SensitiveContentPackages.PackageInfo;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
@@ -312,6 +313,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContextInfo;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -366,6 +368,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -1052,6 +1055,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     SystemPerformanceHinter mSystemPerformanceHinter;
+
+    @GuardedBy("mGlobalLock")
+    final SensitiveContentPackages mSensitiveContentPackages = new SensitiveContentPackages();
 
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
@@ -1797,7 +1803,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Don't do layout here, the window must call
             // relayout to be displayed, so we'll do it there.
-            win.getParent().assignChildLayers();
+            if (win.mActivityRecord != null && win.mActivityRecord.isEmbedded()) {
+                // Assign child layers from the parent Task if the Activity is embedded.
+                win.getTask().assignChildLayers();
+            } else {
+                win.getParent().assignChildLayers();
+            }
 
             if (focusChanged) {
                 displayContent.getInputMonitor().setInputFocusLw(displayContent.mCurrentFocus,
@@ -1931,12 +1942,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Set whether screen capture is disabled for all windows of a specific user from
-     * the device policy cache.
+     * the device policy cache, or specific windows based on sensitive content protections.
      */
     @Override
     public void refreshScreenCaptureDisabled() {
         int callingUid = Binder.getCallingUid();
-        if (callingUid != SYSTEM_UID) {
+        // MY_UID (Process.myUid()) should always be SYSTEM_UID here, but using MY_UID for tests
+        if (callingUid != MY_UID) {
             throw new SecurityException("Only system can call refreshScreenCaptureDisabled.");
         }
 
@@ -7169,6 +7181,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mSystemPerformanceHinter.dump(pw, "");
             mTrustedPresentationListenerController.dump(pw);
+            mSensitiveContentPackages.dump(pw);
         }
     }
 
@@ -8549,6 +8562,14 @@ public class WindowManagerService extends IWindowManager.Stub
         public @Nullable IBinder getTargetWindowTokenFromInputToken(IBinder inputToken) {
             InputTarget inputTarget = WindowManagerService.this.getInputTargetFromToken(inputToken);
             return inputTarget == null ? null : inputTarget.getWindowToken();
+        }
+
+        @Override
+        public void setShouldBlockScreenCaptureForApp(Set<PackageInfo> packageInfos) {
+            synchronized (mGlobalLock) {
+                mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(packageInfos);
+                WindowManagerService.this.refreshScreenCaptureDisabled();
+            }
         }
     }
 

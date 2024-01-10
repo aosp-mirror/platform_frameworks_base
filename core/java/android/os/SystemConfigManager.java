@@ -161,4 +161,18 @@ public class SystemConfigManager {
         }
         return Collections.emptyList();
     }
+
+    /**
+     * Return the packages that are prevented from being disabled, where if
+     * disabled it would result in a non-functioning system or similar.
+     * @hide
+     */
+    @NonNull
+    public List<String> getPreventUserDisablePackages() {
+        try {
+            return mInterface.getPreventUserDisablePackages();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

@@ -1759,26 +1759,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         binderUid, unarchiveId));
             }
 
-            IntentSender unarchiveIntentSender = session.params.unarchiveIntentSender;
-            if (unarchiveIntentSender == null) {
-                throw new IllegalStateException(
-                        TextUtils.formatSimple(
-                                "Unarchival status for ID %s has already been set or a "
-                                        + "session has been created for it already by the "
-                                        + "caller.",
-                                unarchiveId));
-            }
-
-            // Execute expensive calls outside the sync block.
-            mPm.mHandler.post(
-                    () -> mPackageArchiver.notifyUnarchivalListener(status,
-                            session.getInstallerPackageName(),
-                            session.params.appPackageName, requiredStorageBytes, userActionIntent,
-                            unarchiveIntentSender, userId));
-            session.params.unarchiveIntentSender = null;
-            if (status != UNARCHIVAL_OK) {
-                Binder.withCleanCallingIdentity(session::abandon);
-            }
+            session.reportUnarchivalStatus(unarchiveId, status, requiredStorageBytes,
+                    userActionIntent);
         }
     }
 

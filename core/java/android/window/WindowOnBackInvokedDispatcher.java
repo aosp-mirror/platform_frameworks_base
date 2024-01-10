@@ -174,6 +174,21 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
     }
 
+    /**
+     * Indicates if the dispatcher is actively dispatching to a callback.
+     */
+    public boolean isDispatching() {
+        return mIsDispatching;
+    }
+
+    private void onStartDispatching() {
+        mIsDispatching = true;
+    }
+
+    private void onStopDispatching() {
+        mIsDispatching = false;
+    }
+
     private void sendCancelledIfInProgress(@NonNull OnBackInvokedCallback callback) {
         boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
         if (isInProgress && callback instanceof OnBackAnimationCallback) {
@@ -231,7 +246,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                                     .ImeOnBackInvokedCallback
                                 ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
                                         callback).getIOnBackInvokedCallback()
-                                : new OnBackInvokedCallbackWrapper(callback);
+                                : new OnBackInvokedCallbackWrapper(callback, this);
                 callbackInfo = new OnBackInvokedCallbackInfo(
                         iCallback,
                         priority,
@@ -258,6 +273,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     @NonNull
     private static final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
+    private boolean mIsDispatching = false;
 
     /**
      * The {@link Context} in ViewRootImp and Activity could be different, this will make sure it
@@ -317,18 +333,33 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             }
         }
         final CallbackRef mCallbackRef;
+        /**
+         * The dispatcher this callback is registered with.
+         * This can be null for callbacks on {@link ImeOnBackInvokedDispatcher} because they are
+         * forwarded and registered on the app's {@link WindowOnBackInvokedDispatcher}. */
+        @Nullable
+        private final WindowOnBackInvokedDispatcher mDispatcher;
 
-        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
+        OnBackInvokedCallbackWrapper(
+                @NonNull OnBackInvokedCallback callback,
+                WindowOnBackInvokedDispatcher dispatcher) {
             mCallbackRef = new CallbackRef(callback, true /* useWeakRef */);
+            mDispatcher = dispatcher;
         }
 
-        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback, boolean useWeakRef) {
+        OnBackInvokedCallbackWrapper(
+                @NonNull OnBackInvokedCallback callback,
+                boolean useWeakRef) {
             mCallbackRef = new CallbackRef(callback, useWeakRef);
+            mDispatcher = null;
         }
 
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
             Handler.getMain().post(() -> {
+                if (mDispatcher != null) {
+                    mDispatcher.onStartDispatching();
+                }
                 final OnBackAnimationCallback callback = getBackAnimationCallback();
                 if (callback != null) {
                     mProgressAnimator.onBackStarted(backEvent, event ->
@@ -353,6 +384,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackCancelled() {
             Handler.getMain().post(() -> {
+                if (mDispatcher != null) {
+                    mDispatcher.onStopDispatching();
+                }
                 mProgressAnimator.onBackCancelled(() -> {
                     final OnBackAnimationCallback callback = getBackAnimationCallback();
                     if (callback != null) {
@@ -365,6 +399,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackInvoked() throws RemoteException {
             Handler.getMain().post(() -> {
+                if (mDispatcher != null) {
+                    mDispatcher.onStopDispatching();
+                }
                 boolean isInProgress = mProgressAnimator.isBackAnimationInProgress();
                 mProgressAnimator.reset();
                 final OnBackInvokedCallback callback = mCallbackRef.get();

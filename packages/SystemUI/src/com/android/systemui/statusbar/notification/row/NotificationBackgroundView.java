@@ -32,6 +32,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.util.ContrastColorUtil;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.res.R;
 
@@ -58,11 +60,19 @@ public class NotificationBackgroundView extends View implements Dumpable {
     private int mExpandAnimationWidth = -1;
     private int mExpandAnimationHeight = -1;
     private int mDrawableAlpha = 255;
+    private final ColorStateList mLightColoredStatefulColors;
+    private final ColorStateList mDarkColoredStatefulColors;
+    private final int mNormalColor;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mDontModifyCorners = getResources().getBoolean(
-                R.bool.config_clipNotificationsToOutline);
+        mDontModifyCorners = getResources().getBoolean(R.bool.config_clipNotificationsToOutline);
+        mLightColoredStatefulColors = getResources().getColorStateList(
+                R.color.notification_state_color_light);
+        mDarkColoredStatefulColors = getResources().getColorStateList(
+                R.color.notification_state_color_dark);
+        mNormalColor = Utils.getColorAttrDefaultColor(mContext,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh);
     }
 
     @Override
@@ -122,6 +132,18 @@ public class NotificationBackgroundView extends View implements Dumpable {
     }
 
     /**
+     * Stateful colors are colors that will overlay on the notification original color when one of
+     * hover states, pressed states or other similar states is activated.
+     */
+    private void setStatefulColors() {
+        if (mTintColor != mNormalColor) {
+            ColorStateList newColor = ContrastColorUtil.isColorDark(mTintColor)
+                    ? mDarkColoredStatefulColors : mLightColoredStatefulColors;
+            ((GradientDrawable) getStatefulBackgroundLayer().mutate()).setColor(newColor);
+        }
+    }
+
+    /**
      * Sets a background drawable. As we need to change our bounds independently of layout, we need
      * the notion of a background independently of the regular View background..
      */
@@ -149,21 +171,20 @@ public class NotificationBackgroundView extends View implements Dumpable {
         setCustomBackground(d);
     }
 
-    public void setTint(int tintColor) {
-        if (tintColor != 0) {
-            ColorStateList stateList = new ColorStateList(new int[][]{
-                    new int[]{com.android.internal.R.attr.state_pressed},
-                    new int[]{com.android.internal.R.attr.state_hovered},
-                    new int[]{}},
+    private Drawable getBaseBackgroundLayer() {
+        return ((LayerDrawable) mBackground).getDrawable(0);
+    }
 
-                    new int[]{tintColor, 0, tintColor}
-            );
-            mBackground.setTintMode(PorterDuff.Mode.SRC_ATOP);
-            mBackground.setTintList(stateList);
-        } else {
-            mBackground.setTintList(null);
-        }
+    private Drawable getStatefulBackgroundLayer() {
+        return ((LayerDrawable) mBackground).getDrawable(1);
+    }
+
+    public void setTint(int tintColor) {
+        Drawable baseLayer = getBaseBackgroundLayer();
+        baseLayer.mutate().setTintMode(PorterDuff.Mode.SRC_ATOP);
+        baseLayer.setTint(tintColor);
         mTintColor = tintColor;
+        setStatefulColors();
         invalidate();
     }
 
