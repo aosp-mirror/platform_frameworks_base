@@ -37,12 +37,12 @@ public class BatteryChargeCalculatorTest {
     private static final double PRECISION = 0.00001;
 
     @Rule
-    public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule();
+    public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
+                    .setAveragePower(PowerProfile.POWER_BATTERY_CAPACITY, 4000.0);
 
     @Test
     public void testDischargeTotals() {
         // Nominal battery capacity should be ignored
-        mStatsRule.setAveragePower(PowerProfile.POWER_BATTERY_CAPACITY, 1234.0);
 
         final BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
@@ -84,8 +84,6 @@ public class BatteryChargeCalculatorTest {
 
     @Test
     public void testDischargeTotals_chargeUahUnavailable() {
-        mStatsRule.setAveragePower(PowerProfile.POWER_BATTERY_CAPACITY, 4000.0);
-
         final BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
         batteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,

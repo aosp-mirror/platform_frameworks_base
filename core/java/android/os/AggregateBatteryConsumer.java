@@ -33,6 +33,7 @@ import java.io.PrintWriter;
  *
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class AggregateBatteryConsumer extends BatteryConsumer {
     static final int CONSUMER_TYPE_AGGREGATE = 0;
 

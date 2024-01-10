@@ -40,6 +40,7 @@ import java.io.PrintWriter;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 class PowerComponents {
     private final BatteryConsumer.BatteryConsumerData mData;
 

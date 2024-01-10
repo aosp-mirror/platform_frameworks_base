@@ -9,8 +9,10 @@ com.android.internal.os.Clock
 com.android.internal.os.LongArrayMultiStateCounter
 com.android.internal.os.LongArrayMultiStateCounter$LongArrayContainer
 com.android.internal.os.MonotonicClock
+com.android.internal.os.PowerProfile
 com.android.internal.os.PowerStats
 com.android.internal.os.PowerStats$Descriptor
+com.android.internal.power.ModemPowerProfile
 
 android.util.AtomicFile
 android.util.DataUnit
@@ -32,11 +34,16 @@ android.util.SparseSetArray
 android.util.TimeUtils
 android.util.Xml
 
+android.os.AggregateBatteryConsumer
 android.os.BatteryConsumer
+android.os.BatteryStats
 android.os.BatteryStats$HistoryItem
 android.os.BatteryStats$HistoryStepDetails
 android.os.BatteryStats$HistoryTag
+android.os.BatteryStats$LongCounter
 android.os.BatteryStats$ProcessStateChange
+android.os.BatteryUsageStats
+android.os.BatteryUsageStatsQuery
 android.os.Binder
 android.os.Binder$IdentitySupplier
 android.os.Broadcaster
@@ -54,11 +61,14 @@ android.os.MessageQueue
 android.os.PackageTagsList
 android.os.Parcel
 android.os.Parcelable
+android.os.PowerComponents
 android.os.Process
 android.os.ServiceSpecificException
 android.os.SystemClock
 android.os.ThreadLocalWorkSource
 android.os.TimestampedValue
+android.os.UidBatteryConsumer
+android.os.UidBatteryConsumer$Builder
 android.os.UserHandle
 android.os.WorkSource
 
@@ -117,6 +127,7 @@ android.graphics.RectF
 android.content.ContentProvider
 
 com.android.server.LocalServices
+com.android.server.power.stats.BatteryStatsImpl
 
 com.android.internal.util.BitUtils
 com.android.internal.util.BitwiseInputStream

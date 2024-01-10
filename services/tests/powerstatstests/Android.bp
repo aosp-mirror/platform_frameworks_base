@@ -11,6 +11,7 @@ filegroup {
         "src/com/android/server/power/stats/MultiStateStatsTest.java",
         "src/com/android/server/power/stats/PowerStatsAggregatorTest.java",
         "src/com/android/server/power/stats/PowerStatsCollectorTest.java",
+        "src/com/android/server/power/stats/PowerStatsExporterTest.java",
         "src/com/android/server/power/stats/PowerStatsSchedulerTest.java",
         "src/com/android/server/power/stats/PowerStatsStoreTest.java",
         "src/com/android/server/power/stats/PowerStatsUidResolverTest.java",
@@ -83,6 +84,9 @@ android_ravenwood_test {
     ],
     srcs: [
         ":power_stats_ravenwood_tests",
+
+        "src/com/android/server/power/stats/BatteryUsageStatsRule.java",
+        "src/com/android/server/power/stats/MockBatteryStatsImpl.java",
         "src/com/android/server/power/stats/MockClock.java",
     ],
     auto_gen_config: true,

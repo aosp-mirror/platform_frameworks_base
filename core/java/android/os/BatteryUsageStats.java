@@ -56,6 +56,7 @@ import java.util.List;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class BatteryUsageStats implements Parcelable, Closeable {
 
     /**
