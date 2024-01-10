@@ -104,7 +104,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public final class DisplayPowerController2Test {
+public final class DisplayPowerControllerTest {
     private static final int DISPLAY_ID = Display.DEFAULT_DISPLAY;
     private static final String UNIQUE_ID = "unique_id_test123";
     private static final int FOLLOWER_DISPLAY_ID = DISPLAY_ID + 1;
@@ -1739,7 +1739,7 @@ public final class DisplayPowerController2Test {
 
         setUpDisplay(displayId, uniqueId, display, device, config, isEnabled);
 
-        final DisplayPowerController2 dpc = new DisplayPowerController2(
+        final DisplayPowerController dpc = new DisplayPowerController(
                 mContext, injector, mDisplayPowerCallbacksMock, mHandler,
                 mSensorManagerMock, mDisplayBlankerMock, display,
                 mBrightnessTrackerMock, brightnessSetting, () -> {
@@ -1757,7 +1757,7 @@ public final class DisplayPowerController2Test {
      * related to it.
      */
     private static class DisplayPowerControllerHolder {
-        public final DisplayPowerController2 dpc;
+        public final DisplayPowerController dpc;
         public final LogicalDisplay display;
         public final DisplayPowerState displayPowerState;
         public final BrightnessSetting brightnessSetting;
@@ -1771,10 +1771,10 @@ public final class DisplayPowerController2Test {
         public final BrightnessClamperController clamperController;
         public final HighBrightnessModeMetadata hbmMetadata;
         public final BrightnessMappingStrategy brightnessMappingStrategy;
-        public final DisplayPowerController2.Injector injector;
+        public final DisplayPowerController.Injector injector;
         public final DisplayDeviceConfig config;
 
-        DisplayPowerControllerHolder(DisplayPowerController2 dpc, LogicalDisplay display,
+        DisplayPowerControllerHolder(DisplayPowerController dpc, LogicalDisplay display,
                 DisplayPowerState displayPowerState, BrightnessSetting brightnessSetting,
                 DualRampAnimator<DisplayPowerState> animator,
                 AutomaticBrightnessController automaticBrightnessController,
@@ -1785,7 +1785,7 @@ public final class DisplayPowerController2Test {
                 BrightnessClamperController clamperController,
                 HighBrightnessModeMetadata hbmMetadata,
                 BrightnessMappingStrategy brightnessMappingStrategy,
-                DisplayPowerController2.Injector injector,
+                DisplayPowerController.Injector injector,
                 DisplayDeviceConfig config) {
             this.dpc = dpc;
             this.display = display;
@@ -1805,7 +1805,7 @@ public final class DisplayPowerController2Test {
         }
     }
 
-    private class TestInjector extends DisplayPowerController2.Injector {
+    private class TestInjector extends DisplayPowerController.Injector {
         private final DisplayPowerState mDisplayPowerState;
         private final DualRampAnimator<DisplayPowerState> mAnimator;
         private final AutomaticBrightnessController mAutomaticBrightnessController;
@@ -1845,7 +1845,7 @@ public final class DisplayPowerController2Test {
         }
 
         @Override
-        DisplayPowerController2.Clock getClock() {
+        DisplayPowerController.Clock getClock() {
             return mClock::now;
         }
 

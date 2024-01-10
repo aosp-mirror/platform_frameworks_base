@@ -119,7 +119,7 @@ import java.util.Objects;
  * For debugging, you can make the color fade and brightness animations run
  * slower by changing the "animator duration scale" option in Development Settings.
  */
-final class DisplayPowerController2 implements AutomaticBrightnessController.Callbacks,
+final class DisplayPowerController implements AutomaticBrightnessController.Callbacks,
         DisplayWhiteBalanceController.Callbacks, DisplayPowerControllerInterface {
     private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
     private static final String SCREEN_OFF_BLOCKED_TRACE_NAME = "Screen off blocked";
@@ -488,7 +488,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     /**
      * Creates the display power controller.
      */
-    DisplayPowerController2(Context context, Injector injector,
+    DisplayPowerController(Context context, Injector injector,
             DisplayPowerCallbacks callbacks, Handler handler,
             SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay,
             BrightnessTracker brightnessTracker, BrightnessSetting brightnessSetting,

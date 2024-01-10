@@ -3390,7 +3390,7 @@ public final class DisplayManagerService extends SystemService {
         // with the corresponding displaydevice.
         HighBrightnessModeMetadata hbmMetadata =
                 mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(display);
-        displayPowerController = new DisplayPowerController2(
+        displayPowerController = new DisplayPowerController(
                 mContext, /* injector= */ null, mDisplayPowerCallbacks, mPowerHandler,
                 mSensorManager, mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
                 () -> handleBrightnessChange(display), hbmMetadata, mBootCompleted, mFlags);
