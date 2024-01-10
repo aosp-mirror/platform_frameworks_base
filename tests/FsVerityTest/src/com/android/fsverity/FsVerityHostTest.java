@@ -25,6 +25,7 @@ import android.platform.test.flag.junit.host.HostFlagsValueProvider;
 import android.security.Flags;
 
 import com.android.blockdevicewriter.BlockDeviceWriter;
+import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
@@ -52,7 +53,6 @@ public class FsVerityHostTest extends BaseHostJUnit4Test {
     private static final String TARGET_PACKAGE = "com.android.fsverity";
 
     private static final String BASENAME = "test.file";
-    private static final String TARGET_PATH = "/data/data/" + TARGET_PACKAGE + "/files/" + BASENAME;
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =
@@ -63,11 +63,11 @@ public class FsVerityHostTest extends BaseHostJUnit4Test {
         prepareTest(10000);
 
         ITestDevice device = getDevice();
-        BlockDeviceWriter.damageFileAgainstBlockDevice(device, TARGET_PATH, 0);
-        BlockDeviceWriter.damageFileAgainstBlockDevice(device, TARGET_PATH, 8192);
+        BlockDeviceWriter.damageFileAgainstBlockDevice(device, getTargetFilePath(), 0);
+        BlockDeviceWriter.damageFileAgainstBlockDevice(device, getTargetFilePath(), 8192);
         BlockDeviceWriter.dropCaches(device);
 
-        verifyRead(TARGET_PATH, "0,2");
+        verifyRead(getTargetFilePath(), "0,2");
     }
 
     @Test
@@ -75,12 +75,17 @@ public class FsVerityHostTest extends BaseHostJUnit4Test {
         prepareTest(128 * 4096 + 1);
 
         ITestDevice device = getDevice();
-        BlockDeviceWriter.damageFileAgainstBlockDevice(device, TARGET_PATH, 4096);
-        BlockDeviceWriter.damageFileAgainstBlockDevice(device, TARGET_PATH, 100 * 4096);
-        BlockDeviceWriter.damageFileAgainstBlockDevice(device, TARGET_PATH, 128 * 4096 + 1);
+        BlockDeviceWriter.damageFileAgainstBlockDevice(device, getTargetFilePath(), 4096);
+        BlockDeviceWriter.damageFileAgainstBlockDevice(device, getTargetFilePath(), 100 * 4096);
+        BlockDeviceWriter.damageFileAgainstBlockDevice(device, getTargetFilePath(), 128 * 4096 + 1);
         BlockDeviceWriter.dropCaches(device);
 
-        verifyRead(TARGET_PATH, "1,100,128");
+        verifyRead(getTargetFilePath(), "1,100,128");
+    }
+
+    private String getTargetFilePath() throws DeviceNotAvailableException {
+        return "/data/user/" + getDevice().getCurrentUser() + "/" + TARGET_PACKAGE + "/files/"
+                + BASENAME;
     }
 
     private void prepareTest(int fileSize) throws Exception {
@@ -97,7 +102,7 @@ public class FsVerityHostTest extends BaseHostJUnit4Test {
         options.setTestClassName(TARGET_PACKAGE + ".Helper");
         options.setTestMethodName("verifyFileRead");
         options.addInstrumentationArg("brokenBlockIndicesCsv", indicesCsv);
-        options.addInstrumentationArg("filePath", TARGET_PATH);
+        options.addInstrumentationArg("filePath", getTargetFilePath());
         assertThat(runDeviceTests(options)).isTrue();
     }
 }
