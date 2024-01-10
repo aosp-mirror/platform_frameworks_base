@@ -277,7 +277,7 @@
     <string name="notification_channel_account" msgid="6436294521740148173">"ଆକାଉଣ୍ଟର ସ୍ଥିତି"</string>
     <string name="notification_channel_developer" msgid="1691059964407549150">"ଡେଭଲପରଙ୍କ ମେସେଜ୍‍"</string>
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"ଗୁରୁତ୍ଵପୂର୍ଣ୍ଣ ଡେଭେଲପର୍ ମେସେଜ୍‌ଗୁଡ଼ିକ"</string>
-    <string name="notification_channel_updates" msgid="7907863984825495278">"ଅପଡେଟ୍‍"</string>
+    <string name="notification_channel_updates" msgid="7907863984825495278">"ଅପଡେଟ କରନ୍ତୁ"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"ନେଟୱର୍କ ସ୍ଥିତି"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ନେଟୱର୍କ ଅଲର୍ଟ"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"ନେଟ୍‌ୱର୍କ ଉପଲବ୍ଧ ଅଛି"</string>
@@ -903,7 +903,7 @@
     <string name="eventTypeCustom" msgid="3257367158986466481">"କଷ୍ଟମ୍‌"</string>
     <string name="eventTypeBirthday" msgid="7770026752793912283">"ଜନ୍ମଦିନ"</string>
     <string name="eventTypeAnniversary" msgid="4684702412407916888">"ଆନିଭର୍ସରୀ"</string>
-    <string name="eventTypeOther" msgid="530671238533887997">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="eventTypeOther" msgid="530671238533887997">"ଅନ୍ୟ"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"କଷ୍ଟମ୍‌"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"ହୋମ"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"ୱାର୍କ"</string>

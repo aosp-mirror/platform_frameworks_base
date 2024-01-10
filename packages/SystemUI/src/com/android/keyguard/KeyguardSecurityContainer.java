@@ -281,6 +281,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
     public interface SwipeListener {
         void onSwipeUp();
+        /** */
+        void onSwipeDown();
     }
 
     @VisibleForTesting
@@ -542,6 +544,11 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     MIN_DRAG_SIZE, getResources().getDisplayMetrics())) {
                 if (mSwipeListener != null) {
                     mSwipeListener.onSwipeUp();
+                }
+            } else if (getTranslationY() > TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    MIN_DRAG_SIZE, getResources().getDisplayMetrics())) {
+                if (mSwipeListener != null) {
+                    mSwipeListener.onSwipeDown();
                 }
             }
         }

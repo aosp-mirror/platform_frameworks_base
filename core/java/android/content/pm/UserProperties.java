@@ -66,6 +66,9 @@ public final class UserProperties implements Parcelable {
             "credentialShareableWithParent";
     private static final String ATTR_DELETE_APP_WITH_PARENT = "deleteAppWithParent";
 
+    private static final String ATTR_CROSS_PROFILE_CONTENT_SHARING_STRATEGY =
+            "crossProfileContentSharingStrategy";
+
     /** Index values of each property (to indicate whether they are present in this object). */
     @IntDef(prefix = "INDEX_", value = {
             INDEX_SHOW_IN_LAUNCHER,
@@ -83,6 +86,7 @@ public final class UserProperties implements Parcelable {
             INDEX_SHOW_IN_QUIET_MODE,
             INDEX_SHOW_IN_SHARING_SURFACES,
             INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE,
+            INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -102,6 +106,7 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_SHOW_IN_QUIET_MODE = 12;
     private static final int INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE = 13;
     private static final int INDEX_SHOW_IN_SHARING_SURFACES = 14;
+    private static final int INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY = 15;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -362,6 +367,45 @@ public final class UserProperties implements Parcelable {
      */
     @SuppressLint("UnflaggedApi") // b/306636213
     public static final int SHOW_IN_SHARING_SURFACES_NO = SHOW_IN_LAUNCHER_NO;
+    /**
+     * Possible values for cross profile content sharing strategy for this profile.
+     *
+     * @hide
+     */
+    @IntDef(prefix = {"CROSS_PROFILE_CONTENT_SHARING_STRATEGY_"}, value = {
+            CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION,
+            CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CrossProfileContentSharingStrategy {
+    }
+
+    /**
+     * Signifies that cross-profile content sharing strategy, both to and from this profile, should
+     * not be delegated to any other user/profile.
+     * For ex:
+     * If this property is set for a profile, content sharing applications (such as Android
+     * Sharesheet), should not delegate the decision to share content between that profile and
+     * another profile to whether content sharing is allowed between any other profile/user related
+     * to those profiles. They should instead decide, based upon whether content sharing is
+     * specifically allowed between the two profiles in question.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION = 0;
+
+    /**
+     * Signifies that cross-profile content sharing strategy, both to and from this profile, should
+     * be based upon the strategy used by the parent user of the profile.
+     * For ex:
+     * If this property is set for a profile A, content sharing applications (such as Android
+     * Sharesheet), should share content between profile A and profile B, based upon whether content
+     * sharing is allowed between the parent of profile A and profile B.
+     * If it's also set for profile B, then decision should, in turn be made by considering content
+     * sharing strategy between the parents of both profiles.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT = 1;
+
 
     /**
      * Creates a UserProperties (intended for the SystemServer) that stores a reference to the given
@@ -417,6 +461,7 @@ public final class UserProperties implements Parcelable {
         setCredentialShareableWithParent(orig.isCredentialShareableWithParent());
         setShowInQuietMode(orig.getShowInQuietMode());
         setShowInSharingSurfaces(orig.getShowInSharingSurfaces());
+        setCrossProfileContentSharingStrategy(orig.getCrossProfileContentSharingStrategy());
     }
 
     /**
@@ -727,8 +772,7 @@ public final class UserProperties implements Parcelable {
     private @CrossProfileIntentFilterAccessControlLevel int mCrossProfileIntentFilterAccessControl;
 
     /**
-     * Returns the user's {@link CrossProfileIntentResolutionStrategy}. If not explicitly
-     * configured, default value is {@link #CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_DEFAULT}.
+     * Returns the user's {@link CrossProfileIntentResolutionStrategy}.
      * @return user's {@link CrossProfileIntentResolutionStrategy}.
      *
      * @hide
@@ -743,17 +787,47 @@ public final class UserProperties implements Parcelable {
         throw new SecurityException("You don't have permission to query "
                 + "crossProfileIntentResolutionStrategy");
     }
-    /**
-     * Sets {@link CrossProfileIntentResolutionStrategy} for the user.
-     * @param val resolution strategy for user
-     * @hide
-     */
+
+    /** @hide */
     public void setCrossProfileIntentResolutionStrategy(
             @CrossProfileIntentResolutionStrategy int val) {
         this.mCrossProfileIntentResolutionStrategy = val;
         setPresent(INDEX_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY);
     }
     private @CrossProfileIntentResolutionStrategy int mCrossProfileIntentResolutionStrategy;
+
+    /**
+     * Returns the user's {@link CrossProfileContentSharingStrategy}.
+     *
+     * Content sharing applications, such as Android Sharesheet allow sharing of content
+     * (an image, for ex.) between profiles, based upon cross-profile access checks between the
+     * originating and destined profile.
+     * In some cases however, we may want another user (such as profile parent) to serve as the
+     * delegated user to be used for such checks.
+     * To effect the same, clients can fetch this property and accordingly replace the
+     * originating/destined profile by another user for cross-profile access checks.
+     *
+     * @return user's {@link CrossProfileContentSharingStrategy}.
+     */
+    @SuppressLint("UnflaggedApi")  // b/306636213
+    public @CrossProfileContentSharingStrategy int getCrossProfileContentSharingStrategy() {
+        if (isPresent(INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY)) {
+            return mCrossProfileContentSharingStrategy;
+        }
+        if (mDefaultProperties != null) {
+            return mDefaultProperties.mCrossProfileContentSharingStrategy;
+        }
+        throw new SecurityException("You don't have permission to query "
+                + "crossProfileContentSharingStrategy");
+    }
+
+    /** @hide */
+    public void setCrossProfileContentSharingStrategy(
+            @CrossProfileContentSharingStrategy int val) {
+        this.mCrossProfileContentSharingStrategy = val;
+        setPresent(INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY);
+    }
+    private @CrossProfileContentSharingStrategy int mCrossProfileContentSharingStrategy;
 
 
     @Override
@@ -775,6 +849,7 @@ public final class UserProperties implements Parcelable {
                 + ", mMediaSharedWithParent=" + isMediaSharedWithParent()
                 + ", mCredentialShareableWithParent=" + isCredentialShareableWithParent()
                 + ", mDeleteAppWithParent=" + getDeleteAppWithParent()
+                + ", mCrossProfileContentSharingStrategy=" + getCrossProfileContentSharingStrategy()
                 + "}";
     }
 
@@ -801,6 +876,8 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mCredentialShareableWithParent="
                 + isCredentialShareableWithParent());
         pw.println(prefix + "    mDeleteAppWithParent=" + getDeleteAppWithParent());
+        pw.println(prefix + "    mCrossProfileContentSharingStrategy="
+                + getCrossProfileContentSharingStrategy());
     }
 
     /**
@@ -873,6 +950,8 @@ public final class UserProperties implements Parcelable {
                 case ATTR_DELETE_APP_WITH_PARENT:
                     setDeleteAppWithParent(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_CROSS_PROFILE_CONTENT_SHARING_STRATEGY:
+                    setCrossProfileContentSharingStrategy(parser.getAttributeInt(i));
                 default:
                     Slog.w(LOG_TAG, "Skipping unknown property " + attributeName);
             }
@@ -939,6 +1018,10 @@ public final class UserProperties implements Parcelable {
             serializer.attributeBoolean(null, ATTR_DELETE_APP_WITH_PARENT,
                     mDeleteAppWithParent);
         }
+        if (isPresent(INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY)) {
+            serializer.attributeInt(null, ATTR_CROSS_PROFILE_CONTENT_SHARING_STRATEGY,
+                    mCrossProfileContentSharingStrategy);
+        }
     }
 
     // For use only with an object that has already had any permission-lacking fields stripped out.
@@ -958,6 +1041,7 @@ public final class UserProperties implements Parcelable {
         dest.writeBoolean(mMediaSharedWithParent);
         dest.writeBoolean(mCredentialShareableWithParent);
         dest.writeBoolean(mDeleteAppWithParent);
+        dest.writeInt(mCrossProfileContentSharingStrategy);
     }
 
     /**
@@ -981,6 +1065,7 @@ public final class UserProperties implements Parcelable {
         mMediaSharedWithParent = source.readBoolean();
         mCredentialShareableWithParent = source.readBoolean();
         mDeleteAppWithParent = source.readBoolean();
+        mCrossProfileContentSharingStrategy = source.readInt();
     }
 
     @Override
@@ -1003,6 +1088,8 @@ public final class UserProperties implements Parcelable {
      * Intended for building default values (and so all properties are present in the built object).
      * @hide
      */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // b/306636213
     public static final class Builder {
         // UserProperties fields and their default values.
         private @ShowInLauncher int mShowInLauncher = SHOW_IN_LAUNCHER_WITH_PARENT;
@@ -1023,56 +1110,85 @@ public final class UserProperties implements Parcelable {
         private boolean mMediaSharedWithParent = false;
         private boolean mCredentialShareableWithParent = false;
         private boolean mDeleteAppWithParent = false;
+        private @CrossProfileContentSharingStrategy int mCrossProfileContentSharingStrategy =
+                CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION;
 
+        /**
+         * @hide
+         */
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @TestApi
+        public Builder() {}
+
+        /** @hide */
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
             return this;
         }
 
+        /** @hide */
         public Builder setStartWithParent(boolean startWithParent) {
             mStartWithParent = startWithParent;
             return this;
         }
 
-        /** Sets the value for {@link #mShowInSettings} */
+        /** Sets the value for {@link #mShowInSettings}
+         * @hide
+         */
         public Builder setShowInSettings(@ShowInSettings int showInSettings) {
             mShowInSettings = showInSettings;
             return this;
         }
 
-        /** Sets the value for {@link #mShowInQuietMode} */
+        /** Sets the value for {@link #mShowInQuietMode}
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
         public Builder setShowInQuietMode(@ShowInQuietMode int showInQuietMode) {
             mShowInQuietMode = showInQuietMode;
             return this;
         }
 
-        /** Sets the value for {@link #mShowInSharingSurfaces}. */
+        /** Sets the value for {@link #mShowInSharingSurfaces}.
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
         public Builder setShowInSharingSurfaces(@ShowInSharingSurfaces int showInSharingSurfaces) {
             mShowInSharingSurfaces = showInSharingSurfaces;
             return this;
         }
 
-
-        /** Sets the value for {@link #mInheritDevicePolicy}*/
+        /** Sets the value for {@link #mInheritDevicePolicy}
+         * @hide
+         */
         public Builder setInheritDevicePolicy(
                 @InheritDevicePolicy int inheritRestrictionsDevicePolicy) {
             mInheritDevicePolicy = inheritRestrictionsDevicePolicy;
             return this;
         }
 
+        /** @hide */
         public Builder setUseParentsContacts(boolean useParentsContacts) {
             mUseParentsContacts = useParentsContacts;
             return this;
         }
 
-        /** Sets the value for {@link #mUpdateCrossProfileIntentFiltersOnOTA} */
+        /** Sets the value for {@link #mUpdateCrossProfileIntentFiltersOnOTA}
+         * @hide
+         */
         public Builder setUpdateCrossProfileIntentFiltersOnOTA(boolean
                 updateCrossProfileIntentFiltersOnOTA) {
             mUpdateCrossProfileIntentFiltersOnOTA = updateCrossProfileIntentFiltersOnOTA;
             return this;
         }
 
-        /** Sets the value for {@link #mCrossProfileIntentFilterAccessControl} */
+        /** Sets the value for {@link #mCrossProfileIntentFilterAccessControl}
+         * @hide
+         */
         public Builder setCrossProfileIntentFilterAccessControl(
                 @CrossProfileIntentFilterAccessControlLevel int
                         crossProfileIntentFilterAccessControl) {
@@ -1080,30 +1196,55 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
-        /** Sets the value for {@link #mCrossProfileIntentResolutionStrategy} */
+        /** Sets the value for {@link #mCrossProfileIntentResolutionStrategy}
+         * @hide
+         */
         public Builder setCrossProfileIntentResolutionStrategy(@CrossProfileIntentResolutionStrategy
                 int crossProfileIntentResolutionStrategy) {
             mCrossProfileIntentResolutionStrategy = crossProfileIntentResolutionStrategy;
             return this;
         }
 
+        /** @hide */
         public Builder setMediaSharedWithParent(boolean mediaSharedWithParent) {
             mMediaSharedWithParent = mediaSharedWithParent;
             return this;
         }
 
+        /** @hide */
         public Builder setCredentialShareableWithParent(boolean credentialShareableWithParent) {
             mCredentialShareableWithParent = credentialShareableWithParent;
             return this;
         }
 
-        /** Sets the value for {@link #mDeleteAppWithParent}*/
+
+        /** Sets the value for {@link #mDeleteAppWithParent}
+         * @hide
+         */
         public Builder setDeleteAppWithParent(boolean deleteAppWithParent) {
             mDeleteAppWithParent = deleteAppWithParent;
             return this;
         }
 
-        /** Builds a UserProperties object with *all* values populated. */
+        /** Sets the value for {@link #mCrossProfileContentSharingStrategy}
+         * @hide
+         */
+
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
+        public Builder setCrossProfileContentSharingStrategy(@CrossProfileContentSharingStrategy
+                int crossProfileContentSharingStrategy) {
+            mCrossProfileContentSharingStrategy = crossProfileContentSharingStrategy;
+            return this;
+        }
+
+        /** Builds a UserProperties object with *all* values populated.
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
         public UserProperties build() {
             return new UserProperties(
                     mShowInLauncher,
@@ -1118,7 +1259,8 @@ public final class UserProperties implements Parcelable {
                     mCrossProfileIntentResolutionStrategy,
                     mMediaSharedWithParent,
                     mCredentialShareableWithParent,
-                    mDeleteAppWithParent);
+                    mDeleteAppWithParent,
+                    mCrossProfileContentSharingStrategy);
         }
     } // end Builder
 
@@ -1135,7 +1277,8 @@ public final class UserProperties implements Parcelable {
             @CrossProfileIntentResolutionStrategy int crossProfileIntentResolutionStrategy,
             boolean mediaSharedWithParent,
             boolean credentialShareableWithParent,
-            boolean deleteAppWithParent) {
+            boolean deleteAppWithParent,
+            @CrossProfileContentSharingStrategy int crossProfileContentSharingStrategy) {
         mDefaultProperties = null;
         setShowInLauncher(showInLauncher);
         setStartWithParent(startWithParent);
@@ -1150,5 +1293,6 @@ public final class UserProperties implements Parcelable {
         setMediaSharedWithParent(mediaSharedWithParent);
         setCredentialShareableWithParent(credentialShareableWithParent);
         setDeleteAppWithParent(deleteAppWithParent);
+        setCrossProfileContentSharingStrategy(crossProfileContentSharingStrategy);
     }
 }

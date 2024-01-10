@@ -555,7 +555,7 @@
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"aldatu telefono bidezko konektagarritasuna"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Partekatutako Interneterako konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"ikusi wifi-konexioak"</string>
-    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi sareei buruzko informazioa ikusteko baimena ematen die aplikazioei, adibidez, Wi-Fi konexioa aktibatuta dagoen eta konektatutako Wi-Fi gailuen izenak zein diren."</string>
+    <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi sareei buruzko informazioa ikusteko baimena ematen die aplikazioei, adibidez, wifi-konexioa aktibatuta dagoen eta konektatutako Wi-Fi gailuen izenak zein diren."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"konektatu wifira edo deskonektatu bertatik"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi sarbide-puntuetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei, baita Wi-Fi sareen gailu-konfigurazioari aldaketak egitekoa ere."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"onartu Wi-Fi Multicast harrera"</string>
@@ -2315,7 +2315,7 @@
     <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> TXARTELA"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Aplikazio osagarrien erloju-profilaren baimena erlojuak kudeatzeko"</string>
     <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Erlojuak kudeatzeko baimena ematen die aplikazio osagarriei."</string>
-    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Begiratu gailu osagarrien presentzia"</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"Begiratu gailu osagarrien presentziari"</string>
     <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"Gailu osagarrien presentzia begiratzeko baimena ematen die aplikazio osagarriei gailuak inguruan edo urrun daudenean."</string>
     <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"Entregatu aplikazio osagarrien mezuak"</string>
     <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"Beste gailuetan mezuak entregatzeko baimena ematen die aplikazio osagarriei."</string>
