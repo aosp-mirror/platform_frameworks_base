@@ -16341,7 +16341,7 @@ package android.telephony.ims {
 
   public interface RegistrationManager {
     field public static final int SUGGESTED_ACTION_NONE = 0; // 0x0
-    field @FlaggedApi("com.android.internal.telephony.flags.add_rat_related_suggested_action_to_ims_registration") public static final int SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCK = 4; // 0x4
+    field @FlaggedApi("com.android.internal.telephony.flags.add_rat_related_suggested_action_to_ims_registration") public static final int SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCKS = 4; // 0x4
     field public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK = 1; // 0x1
     field public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT = 2; // 0x2
     field @FlaggedApi("com.android.internal.telephony.flags.add_rat_related_suggested_action_to_ims_registration") public static final int SUGGESTED_ACTION_TRIGGER_RAT_BLOCK = 3; // 0x3
