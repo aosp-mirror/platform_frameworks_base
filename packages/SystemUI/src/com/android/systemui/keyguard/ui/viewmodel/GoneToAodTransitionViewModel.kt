@@ -20,7 +20,7 @@ import com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_AOD_DURATION
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 class GoneToAodTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
@@ -44,7 +43,8 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_AOD_DURATION,
-            stepFlow = interactor.goneToAodTransition,
+            from = KeyguardState.GONE,
+            to = KeyguardState.AOD,
         )
 
     /** y-translation from the top of the screen for AOD */

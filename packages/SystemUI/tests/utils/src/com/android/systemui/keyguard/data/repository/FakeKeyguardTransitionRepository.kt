@@ -147,7 +147,6 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
                 )
             }
         }
-
         _transitions.emit(step)
     }
 

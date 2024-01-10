@@ -33,6 +33,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -65,6 +66,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun bouncerAlpha() =
         testScope.runTest {
             val values by collectValues(underTest.bouncerAlpha)
+            runCurrent()
 
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
@@ -83,6 +85,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun bouncerAlpha_runDimissFromKeyguard() =
         testScope.runTest {
             val values by collectValues(underTest.bouncerAlpha)
+            runCurrent()
 
             whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(true)
 
@@ -95,7 +98,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(1)
+            assertThat(values.size).isEqualTo(2)
             values.forEach { assertThat(it).isEqualTo(0f) }
         }
 
@@ -103,11 +106,12 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun lockscreenAlpha() =
         testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
+            runCurrent()
 
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
             keyguardTransitionRepository.sendTransitionStep(step(1f))
 
-            assertThat(values.size).isEqualTo(1)
+            assertThat(values.size).isEqualTo(2)
             values.forEach { assertThat(it).isEqualTo(0f) }
         }
 
@@ -115,13 +119,14 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun lockscreenAlpha_runDimissFromKeyguard() =
         testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
+            runCurrent()
 
             sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
 
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
             keyguardTransitionRepository.sendTransitionStep(step(1f))
 
-            assertThat(values.size).isEqualTo(1)
+            assertThat(values.size).isEqualTo(2)
             values.forEach { assertThat(it).isEqualTo(1f) }
         }
 
@@ -129,13 +134,14 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     fun lockscreenAlpha_leaveShadeOpen() =
         testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
+            runCurrent()
 
             sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
 
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
             keyguardTransitionRepository.sendTransitionStep(step(1f))
 
-            assertThat(values.size).isEqualTo(1)
+            assertThat(values.size).isEqualTo(2)
             values.forEach { assertThat(it).isEqualTo(1f) }
         }
 

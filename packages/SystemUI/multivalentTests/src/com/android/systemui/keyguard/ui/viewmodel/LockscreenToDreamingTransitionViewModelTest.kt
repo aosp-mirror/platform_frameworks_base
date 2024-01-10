@@ -73,9 +73,9 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
                 testScope = testScope,
             )
 
-            // Only three values should be present, since the dream overlay runs for a small
+            // Only five values should be present, since the dream overlay runs for a small
             // fraction of the overall animation time
-            assertThat(values.size).isEqualTo(4)
+            assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
         }
 
@@ -98,10 +98,10 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
                 testScope = testScope,
             )
 
-            assertThat(values.size).isEqualTo(5)
+            assertThat(values.size).isEqualTo(6)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 100f)) }
             // Validate finished value
-            assertThat(values[4]).isEqualTo(0f)
+            assertThat(values[5]).isEqualTo(0f)
         }
 
     @Test

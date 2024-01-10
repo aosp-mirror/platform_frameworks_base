@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 class LockscreenToAodTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     shadeDependentFlows: ShadeDependentFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
@@ -45,7 +44,8 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromLockscreenTransitionInteractor.TO_AOD_DURATION,
-            stepFlow = interactor.lockscreenToAodTransition,
+            from = KeyguardState.LOCKSCREEN,
+            to = KeyguardState.AOD,
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
