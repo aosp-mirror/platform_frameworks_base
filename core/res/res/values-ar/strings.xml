@@ -2300,7 +2300,7 @@
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"إزالة الحظر"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"الخصوصية في جهاز الاستشعار"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"رمز التطبيق"</string>
-    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"الصورة الذهنية للعلامة التجارية للتطبيق"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"هوية العلامة التجارية للتطبيق"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"التحقّق من إعدادات الوصول"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"يمكن لخدمة <xliff:g id="SERVICE_NAME">%s</xliff:g> الاطّلاع على شاشتك والتحكّم فيها. انقر لمراجعة الإعدادات."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> (مُترجَم)."</string>
@@ -2343,4 +2343,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"تم ضبط تنسيق لوحة المفاتيح على <xliff:g id="LAYOUT_1">%1$s</xliff:g> و<xliff:g id="LAYOUT_2">%2$s</xliff:g> و<xliff:g id="LAYOUT_3">%3$s</xliff:g>… انقر لتغييره."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"تم إعداد لوحات المفاتيح الخارجية"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"انقر لعرض لوحات المفاتيح."</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ملف شخصي خاص"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"نسخة طبق الأصل"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"ملف العمل"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"ملف العمل 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"ملف العمل 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"ملف شخصي تجريبي"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"ملف شخصي مشترك"</string>
 </resources>

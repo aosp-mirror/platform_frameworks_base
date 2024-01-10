@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"යතුරු පුවරුව <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> ලෙස සකසා ඇත… වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"භෞතික යතුරු පුවරුව වින්‍යාස කෙරිණි"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"යතුරු පුවරු බැලීමට තට්ටු කරන්න"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"පෞද්ගලික"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"ක්ලෝන කරන්න"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"කාර්යාලය"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"කාර්යාලය 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"කාර්යාලය 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"පරීක්ෂණය"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"වාර්ගික"</string>
 </resources>
