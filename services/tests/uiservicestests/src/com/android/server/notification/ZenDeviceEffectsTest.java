@@ -52,7 +52,6 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
                 .setShouldMaximizeDoze(true)
                 .setShouldUseNightMode(false)
                 .setShouldSuppressAmbientDisplay(false).setShouldSuppressAmbientDisplay(true)
-                .setUserModifiedFields(8)
                 .build();
 
         assertThat(deviceEffects.shouldDimWallpaper()).isTrue();
@@ -65,7 +64,6 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
         assertThat(deviceEffects.shouldMinimizeRadioUsage()).isFalse();
         assertThat(deviceEffects.shouldUseNightMode()).isFalse();
         assertThat(deviceEffects.shouldSuppressAmbientDisplay()).isTrue();
-        assertThat(deviceEffects.getUserModifiedFields()).isEqualTo(8);
     }
 
     @Test
@@ -97,7 +95,6 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
                 .setShouldMinimizeRadioUsage(true)
                 .setShouldUseNightMode(true)
                 .setShouldSuppressAmbientDisplay(true)
-                .setUserModifiedFields(6)
                 .build();
 
         Parcel parcel = Parcel.obtain();
@@ -116,7 +113,6 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
         assertThat(copy.shouldUseNightMode()).isTrue();
         assertThat(copy.shouldSuppressAmbientDisplay()).isTrue();
         assertThat(copy.shouldDisplayGrayscale()).isFalse();
-        assertThat(copy.getUserModifiedFields()).isEqualTo(6);
     }
 
     @Test

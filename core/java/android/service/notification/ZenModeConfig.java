@@ -206,7 +206,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_CONV = "convos";
     private static final String ALLOW_ATT_CONV_FROM = "convosFrom";
     private static final String ALLOW_ATT_CHANNELS = "priorityChannels";
-    private static final String USER_MODIFIED_FIELDS = "policyUserModifiedFields";
+    private static final String POLICY_USER_MODIFIED_FIELDS = "policyUserModifiedFields";
     private static final String DISALLOW_TAG = "disallow";
     private static final String DISALLOW_ATT_VISUAL_EFFECTS = "visualEffects";
     private static final String STATE_TAG = "state";
@@ -806,6 +806,9 @@ public class ZenModeConfig implements Parcelable {
             rt.triggerDescription = parser.getAttributeValue(null, RULE_ATT_TRIGGER_DESC);
             rt.type = safeInt(parser, RULE_ATT_TYPE, AutomaticZenRule.TYPE_UNKNOWN);
             rt.userModifiedFields = safeInt(parser, RULE_ATT_USER_MODIFIED_FIELDS, 0);
+            rt.zenPolicyUserModifiedFields = safeInt(parser, POLICY_USER_MODIFIED_FIELDS, 0);
+            rt.zenDeviceEffectsUserModifiedFields = safeInt(parser,
+                    DEVICE_EFFECT_USER_MODIFIED_FIELDS, 0);
             Long deletionInstant = tryParseLong(
                     parser.getAttributeValue(null, RULE_ATT_DELETION_INSTANT), null);
             if (deletionInstant != null) {
@@ -858,6 +861,9 @@ public class ZenModeConfig implements Parcelable {
             }
             out.attributeInt(null, RULE_ATT_TYPE, rule.type);
             out.attributeInt(null, RULE_ATT_USER_MODIFIED_FIELDS, rule.userModifiedFields);
+            out.attributeInt(null, POLICY_USER_MODIFIED_FIELDS, rule.zenPolicyUserModifiedFields);
+            out.attributeInt(null, DEVICE_EFFECT_USER_MODIFIED_FIELDS,
+                    rule.zenDeviceEffectsUserModifiedFields);
             if (rule.deletionInstant != null) {
                 out.attributeLong(null, RULE_ATT_DELETION_INSTANT,
                         rule.deletionInstant.toEpochMilli());
@@ -924,7 +930,6 @@ public class ZenModeConfig implements Parcelable {
                 builder.allowPriorityChannels(channels == ZenPolicy.STATE_ALLOW);
                 policySet = true;
             }
-            builder.setUserModifiedFields(safeInt(parser, USER_MODIFIED_FIELDS, 0));
         }
 
         if (calls != ZenPolicy.PEOPLE_TYPE_UNSET) {
@@ -1037,7 +1042,6 @@ public class ZenModeConfig implements Parcelable {
 
         if (Flags.modesApi()) {
             writeZenPolicyState(ALLOW_ATT_CHANNELS, policy.getPriorityChannels(), out);
-            out.attributeInt(null, USER_MODIFIED_FIELDS, policy.getUserModifiedFields());
         }
     }
 
@@ -1083,7 +1087,6 @@ public class ZenModeConfig implements Parcelable {
                 .setShouldMinimizeRadioUsage(
                         safeBoolean(parser, DEVICE_EFFECT_MINIMIZE_RADIO_USAGE, false))
                 .setShouldMaximizeDoze(safeBoolean(parser, DEVICE_EFFECT_MAXIMIZE_DOZE, false))
-                .setUserModifiedFields(safeInt(parser, DEVICE_EFFECT_USER_MODIFIED_FIELDS, 0))
                 .build();
 
         return deviceEffects.hasEffects() ? deviceEffects : null;
@@ -1108,8 +1111,6 @@ public class ZenModeConfig implements Parcelable {
         writeBooleanIfTrue(out, DEVICE_EFFECT_MINIMIZE_RADIO_USAGE,
                 deviceEffects.shouldMinimizeRadioUsage());
         writeBooleanIfTrue(out, DEVICE_EFFECT_MAXIMIZE_DOZE, deviceEffects.shouldMaximizeDoze());
-        out.attributeInt(null, DEVICE_EFFECT_USER_MODIFIED_FIELDS,
-                deviceEffects.getUserModifiedFields());
     }
 
     private static void writeBooleanIfTrue(TypedXmlSerializer out, String att, boolean value)
@@ -2041,7 +2042,9 @@ public class ZenModeConfig implements Parcelable {
         public String triggerDescription;
         public String iconResName;
         public boolean allowManualInvocation;
-        public int userModifiedFields;
+        @AutomaticZenRule.ModifiableField public int userModifiedFields;
+        @ZenPolicy.ModifiableField public int zenPolicyUserModifiedFields;
+        @ZenDeviceEffects.ModifiableField public int zenDeviceEffectsUserModifiedFields;
         @Nullable public Instant deletionInstant; // Only set on deleted rules.
 
         public ZenRule() { }
@@ -2076,6 +2079,8 @@ public class ZenModeConfig implements Parcelable {
                 triggerDescription = source.readString();
                 type = source.readInt();
                 userModifiedFields = source.readInt();
+                zenPolicyUserModifiedFields = source.readInt();
+                zenDeviceEffectsUserModifiedFields = source.readInt();
                 if (source.readInt() == 1) {
                     deletionInstant = Instant.ofEpochMilli(source.readLong());
                 }
@@ -2083,15 +2088,21 @@ public class ZenModeConfig implements Parcelable {
         }
 
         /**
-         * @see AutomaticZenRule#canUpdate()
+         * Whether this ZenRule can be updated by an app. In general, rules that have been
+         * customized by the user cannot be further updated by an app, with some exceptions:
+         * <ul>
+         *     <li>Non user-configurable fields, like type, icon, configurationActivity, etc.
+         *     <li>Name, if the name was not specifically modified by the user (to support language
+         *          switches).
+         * </ul>
          */
         @FlaggedApi(Flags.FLAG_MODES_API)
         public boolean canBeUpdatedByApp() {
             // The rule is considered updateable if its bitmask has no user modifications, and
             // the bitmasks of the policy and device effects have no modification.
             return userModifiedFields == 0
-                    && (zenPolicy == null || zenPolicy.getUserModifiedFields() == 0)
-                    && (zenDeviceEffects == null || zenDeviceEffects.getUserModifiedFields() == 0);
+                    && zenPolicyUserModifiedFields == 0
+                    && zenDeviceEffectsUserModifiedFields == 0;
         }
 
         @Override
@@ -2139,6 +2150,8 @@ public class ZenModeConfig implements Parcelable {
                 dest.writeString(triggerDescription);
                 dest.writeInt(type);
                 dest.writeInt(userModifiedFields);
+                dest.writeInt(zenPolicyUserModifiedFields);
+                dest.writeInt(zenDeviceEffectsUserModifiedFields);
                 if (deletionInstant != null) {
                     dest.writeInt(1);
                     dest.writeLong(deletionInstant.toEpochMilli());
@@ -2173,8 +2186,20 @@ public class ZenModeConfig implements Parcelable {
                         .append(",allowManualInvocation=").append(allowManualInvocation)
                         .append(",iconResName=").append(iconResName)
                         .append(",triggerDescription=").append(triggerDescription)
-                        .append(",type=").append(type)
-                        .append(",userModifiedFields=").append(userModifiedFields);
+                        .append(",type=").append(type);
+                if (userModifiedFields != 0) {
+                    sb.append(",userModifiedFields=")
+                            .append(AutomaticZenRule.fieldsToString(userModifiedFields));
+                }
+                if (zenPolicyUserModifiedFields != 0) {
+                    sb.append(",zenPolicyUserModifiedFields=")
+                            .append(ZenPolicy.fieldsToString(zenPolicyUserModifiedFields));
+                }
+                if (zenDeviceEffectsUserModifiedFields != 0) {
+                    sb.append(",zenDeviceEffectsUserModifiedFields=")
+                            .append(ZenDeviceEffects.fieldsToString(
+                                    zenDeviceEffectsUserModifiedFields));
+                }
                 if (deletionInstant != null) {
                     sb.append(",deletionInstant=").append(deletionInstant);
                 }
@@ -2238,6 +2263,9 @@ public class ZenModeConfig implements Parcelable {
                         && Objects.equals(other.triggerDescription, triggerDescription)
                         && other.type == type
                         && other.userModifiedFields == userModifiedFields
+                        && other.zenPolicyUserModifiedFields == zenPolicyUserModifiedFields
+                        && other.zenDeviceEffectsUserModifiedFields
+                            == zenDeviceEffectsUserModifiedFields
                         && Objects.equals(other.deletionInstant, deletionInstant);
             }
 
@@ -2250,7 +2278,8 @@ public class ZenModeConfig implements Parcelable {
                 return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                         component, configurationActivity, pkg, id, enabler, zenPolicy,
                         zenDeviceEffects, modified, allowManualInvocation, iconResName,
-                        triggerDescription, type, userModifiedFields, deletionInstant);
+                        triggerDescription, type, userModifiedFields, zenPolicyUserModifiedFields,
+                        zenDeviceEffectsUserModifiedFields, deletionInstant);
             }
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                     component, configurationActivity, pkg, id, enabler, zenPolicy, modified);
