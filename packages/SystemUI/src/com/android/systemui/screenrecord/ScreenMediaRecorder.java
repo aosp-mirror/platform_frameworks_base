@@ -83,7 +83,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     private Surface mInputSurface;
     private VirtualDisplay mVirtualDisplay;
     private MediaRecorder mMediaRecorder;
-    private int mUser;
+    private int mUid;
     private ScreenRecordingMuxer mMuxer;
     private ScreenInternalAudioRecorder mAudio;
     private ScreenRecordingAudioSource mAudioSource;
@@ -94,12 +94,12 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     ScreenMediaRecorderListener mListener;
 
     public ScreenMediaRecorder(Context context, Handler handler,
-            int user, ScreenRecordingAudioSource audioSource,
+            int uid, ScreenRecordingAudioSource audioSource,
             MediaProjectionCaptureTarget captureRegion,
             ScreenMediaRecorderListener listener) {
         mContext = context;
         mHandler = handler;
-        mUser = user;
+        mUid = uid;
         mCaptureRegion = captureRegion;
         mListener = listener;
         mAudioSource = audioSource;
@@ -111,7 +111,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         IMediaProjectionManager mediaService =
                 IMediaProjectionManager.Stub.asInterface(b);
         IMediaProjection proj = null;
-        proj = mediaService.createProjection(mUser, mContext.getPackageName(),
+        proj = mediaService.createProjection(mUid, mContext.getPackageName(),
                     MediaProjectionManager.TYPE_SCREEN_CAPTURE, false);
         IMediaProjection projection = IMediaProjection.Stub.asInterface(proj.asBinder());
         if (mCaptureRegion != null) {
