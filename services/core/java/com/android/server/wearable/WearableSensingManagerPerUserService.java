@@ -22,17 +22,19 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.ambientcontext.AmbientContextEvent;
+import android.app.wearable.Flags;
 import android.app.wearable.WearableSensingManager;
+import android.companion.CompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
-import android.system.OsConstants;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.system.OsConstants;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -40,6 +42,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.infra.AbstractPerUserSystemService;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
@@ -55,6 +58,10 @@ final class WearableSensingManagerPerUserService extends
     RemoteWearableSensingService mRemoteService;
 
     private ComponentName mComponentName;
+    private final Object mSecureChannelLock = new Object();
+
+    @GuardedBy("mSecureChannelLock")
+    private WearableSensingSecureChannel mSecureChannel;
 
     WearableSensingManagerPerUserService(
             @NonNull WearableSensingManagerService master, Object lock, @UserIdInt int userId) {
@@ -74,6 +81,11 @@ final class WearableSensingManagerPerUserService extends
             synchronized (mLock) {
                 mRemoteService.unbind();
                 mRemoteService = null;
+            }
+        }
+        synchronized (mSecureChannelLock) {
+            if (mSecureChannel != null) {
+                mSecureChannel.close();
             }
         }
     }
@@ -152,6 +164,63 @@ final class WearableSensingManagerPerUserService extends
         }
         if (mRemoteService != null) {
             mRemoteService.dump("", new IndentingPrintWriter(pw, "  "));
+        }
+    }
+
+    /**
+     * Creates a CompanionDeviceManager secure channel and sends a proxy to the wearable sensing
+     * service.
+     */
+    public void onProvideWearableConnection(
+            ParcelFileDescriptor wearableConnection, RemoteCallback callback) {
+        Slog.i(TAG, "onProvideWearableConnection in per user service.");
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                notifyStatusCallback(callback, WearableSensingManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+        }
+        synchronized (mSecureChannelLock) {
+            if (mSecureChannel != null) {
+                // TODO(b/321012559): Kill the WearableSensingService process if it has not been
+                // killed from onError
+                mSecureChannel.close();
+            }
+            try {
+                mSecureChannel =
+                        WearableSensingSecureChannel.create(
+                                getContext().getSystemService(CompanionDeviceManager.class),
+                                wearableConnection,
+                                new WearableSensingSecureChannel.SecureTransportListener() {
+                                    @Override
+                                    public void onSecureTransportAvailable(
+                                            ParcelFileDescriptor secureTransport) {
+                                        Slog.i(TAG, "calling over to remote service.");
+                                        synchronized (mLock) {
+                                            ensureRemoteServiceInitiated();
+                                            mRemoteService.provideSecureWearableConnection(
+                                                    secureTransport, callback);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        // TODO(b/321012559): Kill the WearableSensingService
+                                        // process if mSecureChannel has not been reassigned
+                                        if (Flags.enableProvideWearableConnectionApi()) {
+                                            notifyStatusCallback(
+                                                    callback,
+                                                    WearableSensingManager.STATUS_CHANNEL_ERROR);
+                                        }
+                                    }
+                                });
+            } catch (IOException ex) {
+                Slog.e(TAG, "Unable to create the secure channel.", ex);
+                if (Flags.enableProvideWearableConnectionApi()) {
+                    notifyStatusCallback(callback, WearableSensingManager.STATUS_CHANNEL_ERROR);
+                }
+            }
         }
     }
 

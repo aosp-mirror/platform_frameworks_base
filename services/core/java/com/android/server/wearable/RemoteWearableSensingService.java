@@ -32,6 +32,8 @@ import android.util.Slog;
 
 import com.android.internal.infra.ServiceConnector;
 
+import java.io.IOException;
+
 /** Manages the connection to the remote wearable sensing service. */
 final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearableSensingService> {
     private static final String TAG =
@@ -56,6 +58,29 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
     }
 
     /**
+     * Provides a secure connection to the wearable.
+     *
+     * @param secureWearableConnection The secure connection to the wearable
+     * @param callback The callback for service status
+     */
+    public void provideSecureWearableConnection(
+            ParcelFileDescriptor secureWearableConnection, RemoteCallback callback) {
+        if (DEBUG) {
+            Slog.i(TAG, "Providing secure wearable connection.");
+        }
+        var unused = post(
+                service -> {
+                    service.provideSecureWearableConnection(secureWearableConnection, callback);
+                    try {
+                        // close the local fd after it has been sent to the WSS process
+                        secureWearableConnection.close();
+                    } catch (IOException ex) {
+                        Slog.w(TAG, "Unable to close the local parcelFileDescriptor.", ex);
+                    }
+                });
+    }
+
+    /**
      * Provides the implementation a data stream to the wearable.
      *
      * @param parcelFileDescriptor The data stream to the wearable
@@ -66,7 +91,16 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
         if (DEBUG) {
             Slog.i(TAG, "Providing data stream.");
         }
-        post(service -> service.provideDataStream(parcelFileDescriptor, callback));
+        var unused = post(
+                service -> {
+                    service.provideDataStream(parcelFileDescriptor, callback);
+                    try {
+                        // close the local fd after it has been sent to the WSS process
+                        parcelFileDescriptor.close();
+                    } catch (IOException ex) {
+                        Slog.w(TAG, "Unable to close the local parcelFileDescriptor.", ex);
+                    }
+                });
     }
 
     /**
