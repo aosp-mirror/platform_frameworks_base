@@ -74,10 +74,10 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging,
-            @NonNull DetectorRemoteExceptionListener listener) {
+            @NonNull DetectorRemoteExceptionListener listener, int userId) {
         super(remoteHotwordDetectionService, lock, context, token, callback,
                 voiceInteractionServiceUid, voiceInteractorIdentity, scheduledExecutorService,
-                logging, listener);
+                logging, listener, userId);
     }
 
     @SuppressWarnings("GuardedBy")

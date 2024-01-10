@@ -192,6 +192,7 @@ abstract class DetectorSession {
     final Object mLock;
     final int mVoiceInteractionServiceUid;
     final Context mContext;
+    final int mUserId;
 
     @Nullable AttentionManagerInternal mAttentionManagerInternal = null;
 
@@ -224,12 +225,13 @@ abstract class DetectorSession {
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
             @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging,
-            @NonNull DetectorRemoteExceptionListener listener) {
+            @NonNull DetectorRemoteExceptionListener listener, int userId) {
         mRemoteExceptionListener = listener;
         mRemoteDetectionService = remoteDetectionService;
         mLock = lock;
         mContext = context;
         mToken = token;
+        mUserId = userId;
         mCallback = callback;
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
         mVoiceInteractorIdentity = voiceInteractorIdentity;
