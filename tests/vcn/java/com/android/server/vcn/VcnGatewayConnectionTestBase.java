@@ -67,6 +67,8 @@ import com.android.server.IpSecService;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionCallback;
+import com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
+import com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import com.android.server.vcn.VcnGatewayConnection.VcnWakeLock;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController;
 import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
@@ -118,13 +120,7 @@ public class VcnGatewayConnectionTestBase {
             NetworkCapabilities networkCapabilities,
             LinkProperties linkProperties,
             boolean isBlocked) {
-        return new UnderlyingNetworkRecord(
-                network,
-                networkCapabilities,
-                linkProperties,
-                isBlocked,
-                false /* isSelected */,
-                0 /* priorityClass */);
+        return new UnderlyingNetworkRecord(network, networkCapabilities, linkProperties, isBlocked);
     }
 
     protected static final String TEST_TCP_BUFFER_SIZES_1 = "1,2,3,4";
