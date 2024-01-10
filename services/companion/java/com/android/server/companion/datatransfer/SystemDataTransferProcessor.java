@@ -21,6 +21,7 @@ import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSION_RESTORE;
 import static android.content.ComponentName.createRelative;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
 
 import static com.android.server.companion.Utils.prepareForIpc;
 
@@ -40,6 +41,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -306,6 +308,13 @@ public class SystemDataTransferProcessor {
     }
 
     private void onReceivePermissionRestore(byte[] message) {
+        // TODO: Disable Permissions Sync for non-watch devices until we figure out a better UX
+        //       model
+        if (!Build.isDebuggable() && !mContext.getPackageManager().hasSystemFeature(
+                FEATURE_WATCH)) {
+            Slog.e(LOG_TAG, "Permissions restore is only available on watch.");
+            return;
+        }
         Slog.i(LOG_TAG, "Applying permissions.");
         // Start applying permissions
         UserHandle user = mContext.getUser();
