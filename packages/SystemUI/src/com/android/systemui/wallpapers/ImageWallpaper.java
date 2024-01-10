@@ -210,7 +210,13 @@ public class ImageWallpaper extends WallpaperService {
             if (DEBUG) {
                 Log.i(TAG, "onSurfaceDestroyed");
             }
-            mSurfaceHolder = null;
+            mLongExecutor.execute(this::onSurfaceDestroyedSynchronized);
+        }
+
+        private void onSurfaceDestroyedSynchronized() {
+            synchronized (mLock) {
+                mSurfaceHolder = null;
+            }
         }
 
         @Override
@@ -241,7 +247,7 @@ public class ImageWallpaper extends WallpaperService {
 
         private void drawFrameInternal() {
             if (mSurfaceHolder == null) {
-                Log.e(TAG, "attempt to draw a frame without a valid surface");
+                Log.i(TAG, "attempt to draw a frame without a valid surface");
                 return;
             }
 
