@@ -253,6 +253,8 @@ constructor(
     initialHeight: Int? = null
 ) : View(context, attrs) {
 
+    private val logString = this::class.simpleName!! + "@" + hashCode()
+
     /** Listener that is called if the scrim's opaqueness changes */
     var isScrimOpaqueChangedListener: Consumer<Boolean>? = null
 
@@ -267,13 +269,13 @@ constructor(
             if (field != value) {
                 field = value
                 if (value <= 0.0f || value >= 1.0f) {
-                    scrimLogger?.d(TAG, "revealAmount", "$value on ${logString()}")
+                    scrimLogger?.d(TAG, "revealAmount", "$value on $logString")
                 }
                 revealEffect.setRevealAmountOnScrim(value, this)
                 updateScrimOpaque()
                 Trace.traceCounter(
                     Trace.TRACE_TAG_APP,
-                    "light_reveal_amount",
+                    "light_reveal_amount $logString",
                     (field * 100).toInt()
                 )
                 invalidate()
@@ -290,7 +292,7 @@ constructor(
                 field = value
 
                 revealEffect.setRevealAmountOnScrim(revealAmount, this)
-                scrimLogger?.d(TAG, "revealEffect", "$value on ${logString()}")
+                scrimLogger?.d(TAG, "revealEffect", "$value on $logString")
                 invalidate()
             }
         }
@@ -350,7 +352,7 @@ constructor(
             if (field != value) {
                 field = value
                 isScrimOpaqueChangedListener?.accept(field)
-                scrimLogger?.d(TAG, "isScrimOpaque", "$value on ${logString()}")
+                scrimLogger?.d(TAG, "isScrimOpaque", "$value on $logString")
             }
         }
 
@@ -368,13 +370,13 @@ constructor(
 
     override fun setAlpha(alpha: Float) {
         super.setAlpha(alpha)
-        scrimLogger?.d(TAG, "alpha", "$alpha on ${logString()}")
+        scrimLogger?.d(TAG, "alpha", "$alpha on $logString")
         updateScrimOpaque()
     }
 
     override fun setVisibility(visibility: Int) {
         super.setVisibility(visibility)
-        scrimLogger?.d(TAG, "visibility", "$visibility on ${logString()}")
+        scrimLogger?.d(TAG, "visibility", "$visibility on $logString")
         updateScrimOpaque()
     }
 
@@ -466,9 +468,5 @@ constructor(
                 getColorWithAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
                 PorterDuff.Mode.MULTIPLY
             )
-    }
-
-    private fun logString(): String {
-        return this::class.simpleName!! + "@" + hashCode()
     }
 }
