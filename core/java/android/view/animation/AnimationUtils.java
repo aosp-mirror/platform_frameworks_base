@@ -109,6 +109,40 @@ public class AnimationUtils {
     }
 
     /**
+     * Locks AnimationUtils{@link #currentAnimationTimeMillis()} to a fixed value for the current
+     * thread. This is used by {@link android.view.Choreographer} to ensure that all accesses
+     * during a vsync update are synchronized to the timestamp of the vsync.
+     *
+     * It is also exposed to tests to allow for rapid, flake-free headless testing.
+     *
+     * Must be followed by a call to {@link #unlockAnimationClock()} to allow time to
+     * progress. Failing to do this will result in stuck animations, scrolls, and flings.
+     *
+     * Note that time is not allowed to "rewind" and must perpetually flow forward. So the
+     * lock may fail if the time is in the past from a previously returned value, however
+     * time will be frozen for the duration of the lock. The clock is a thread-local, so
+     * ensure that {@link #lockAnimationClock(long)}, {@link #unlockAnimationClock()}, and
+     * {@link #currentAnimationTimeMillis()} are all called on the same thread.
+     *
+     * This is also not reference counted in any way. Any call to {@link #unlockAnimationClock()}
+     * will unlock the clock for everyone on the same thread. It is therefore recommended
+     * for tests to use their own thread to ensure that there is no collision with any existing
+     * {@link android.view.Choreographer} instance.
+     *
+     * Have to add the method back because of b/307888459.
+     * Remove this method once the lockAnimationClock(long, long) change
+     * is landed to aosp/android14-tests-dev branch.
+     *
+     * @hide
+     */
+    @TestApi
+    public static void lockAnimationClock(long vsyncMillis) {
+        AnimationState state = sAnimationState.get();
+        state.animationClockLocked = true;
+        state.currentVsyncTimeMillis = vsyncMillis;
+    }
+
+    /**
      * Frees the time lock set in place by {@link #lockAnimationClock(long)}. Must be called
      * to allow the animation clock to self-update.
      *
