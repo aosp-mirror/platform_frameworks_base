@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2023 The Android Open Source Project
+  ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@
         android:shape="rectangle"
         android:top="1dp">
         <shape>
-            <corners android:radius="28dp" />
-            <solid android:color="@android:color/system_surface_container_high_light" />
+            <corners android:radius="16dp" />
+            <solid android:color="@color/dropdown_container" />
         </shape>
     </item>
 </ripple>

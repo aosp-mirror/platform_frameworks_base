@@ -16,23 +16,8 @@
 
 <!-- Color palette -->
 <resources>
-    <color name="autofill_light_colorPrimary">@color/primary_material_light</color>
-    <color name="autofill_light_colorAccent">@color/accent_material_light</color>
-    <color name="autofill_light_colorControlHighlight">@color/ripple_material_light</color>
-    <color name="autofill_light_colorButtonNormal">@color/button_material_light</color>
-
-    <!-- Text colors -->
-    <color name="autofill_light_textColorPrimary">@color/abc_primary_text_material_light</color>
-    <color name="autofill_light_textColorSecondary">@color/abc_secondary_text_material_light</color>
-    <color name="autofill_light_textColorHint">@color/abc_hint_foreground_material_light</color>
-    <color name="autofill_light_textColorHintInverse">@color/abc_hint_foreground_material_dark
-    </color>
-    <color name="autofill_light_textColorHighlight">@color/highlighted_text_material_light</color>
-    <color name="autofill_light_textColorLink">@color/autofill_light_colorAccent</color>
-
     <!-- These colors are used for Remote Views. -->
-    <color name="background_dark_mode">#0E0C0B</color>
-    <color name="background">#F1F3F4</color>
-    <color name="text_primary_dark_mode">#DFDEDB</color>
-    <color name="text_primary">#202124</color>
+    <color name="text_primary">#1A1B20</color>
+    <color name="text_secondary">#44474F</color>
+    <color name="dropdown_container">#F3F3FA</color>
 </resources>

@@ -15,24 +15,13 @@
   -->
 
 <resources>
-    <style name="autofill.TextAppearance.Small" parent="@style/autofill.TextAppearance">
-        <item name="android:textSize">12sp</item>
-    </style>
-
-
-    <style name="autofill.Dataset" parent="">
-        <item name="android:background">@drawable/autofill_light_selectable_item_background</item>
-    </style>
-
-    <style name="autofill.TextAppearance" parent="">
-        <item name="android:textColor">@color/autofill_light_textColorPrimary</item>
-        <item name="android:textColorHint">@color/autofill_light_textColorHint</item>
-        <item name="android:textColorHighlight">@color/autofill_light_textColorHighlight</item>
-        <item name="android:textColorLink">@color/autofill_light_textColorLink</item>
+    <style name="autofill.TextTitle" parent="">
+        <item name="android:fontFamily">google-sans-medium</item>
         <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="autofill.TextAppearance.Primary">
-        <item name="android:textColor">@color/autofill_light_textColorPrimary</item>
+    <style name="autofill.TextSubtitle" parent="">
+        <item name="android:fontFamily">google-sans-text</item>
+        <item name="android:textSize">12sp</item>
     </style>
 </resources>
