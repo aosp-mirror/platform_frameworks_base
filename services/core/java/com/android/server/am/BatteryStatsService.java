@@ -381,8 +381,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     };
 
-    BatteryStatsService(Context context, File systemDir, Handler handler) {
-        // BatteryStatsImpl expects the ActivityManagerService handler, so pass that one through.
+    BatteryStatsService(Context context, File systemDir) {
         mContext = context;
         mUserManagerUserInfoProvider = new BatteryStatsImpl.UserInfoProvider() {
             private UserManagerInternal umi;
@@ -416,7 +415,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         .build();
         mPowerStatsUidResolver = new PowerStatsUidResolver();
         mStats = new BatteryStatsImpl(mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
-                systemDir, handler, this, this, mUserManagerUserInfoProvider, mPowerProfile,
+                systemDir, mHandler, this, this, mUserManagerUserInfoProvider, mPowerProfile,
                 mCpuScalingPolicies, mPowerStatsUidResolver);
         mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
@@ -477,7 +476,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      */
     public static BatteryStatsService create(Context context, File systemDir, Handler handler,
             BatteryStatsImpl.BatteryCallback callback) {
-        BatteryStatsService service = new BatteryStatsService(context, systemDir, handler);
+        BatteryStatsService service = new BatteryStatsService(context, systemDir);
         service.mStats.setCallback(callback);
         synchronized (service.mStats) {
             service.mStats.readLocked();

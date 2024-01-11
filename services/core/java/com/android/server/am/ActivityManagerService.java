@@ -20144,8 +20144,7 @@ public class ActivityManagerService extends IActivityManager.Stub
          * Returns the {@link BatteryStatsService} instance
          */
         public BatteryStatsService getBatteryStatsService() {
-            return new BatteryStatsService(mContext, SystemServiceManager.ensureSystemDir(),
-                BackgroundThread.get().getHandler());
+            return new BatteryStatsService(mContext, SystemServiceManager.ensureSystemDir());
         }
 
         /**
