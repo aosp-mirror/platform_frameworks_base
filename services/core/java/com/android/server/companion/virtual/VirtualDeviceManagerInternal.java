@@ -137,9 +137,9 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract boolean isAppRunningOnAnyVirtualDevice(int uid);
 
     /**
-     * Returns true if the {@code displayId} is owned by any virtual device
+     * @return whether the input device with the given id was created by a virtual device.
      */
-    public abstract boolean isDisplayOwnedByAnyVirtualDevice(int displayId);
+    public abstract boolean isInputDeviceOwnedByVirtualDevice(int inputDeviceId);
 
     /**
      * Gets the ids of VirtualDisplays owned by a VirtualDevice.

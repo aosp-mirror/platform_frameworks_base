@@ -1337,6 +1337,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    boolean isInputDeviceOwnedByVirtualDevice(int inputDeviceId) {
+        return mInputController.getInputDeviceDescriptors().values().stream().anyMatch(
+                inputDeviceDescriptor -> inputDeviceDescriptor.getInputDeviceId() == inputDeviceId);
+    }
+
     void onEnteringPipBlocked(int uid) {
         // Do nothing. ActivityRecord#checkEnterPictureInPictureState logs that the display does not
         // support PiP.

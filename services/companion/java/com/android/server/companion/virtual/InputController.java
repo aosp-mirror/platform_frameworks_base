@@ -437,7 +437,7 @@ class InputController {
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     Map<IBinder, InputDeviceDescriptor> getInputDeviceDescriptors() {
         final Map<IBinder, InputDeviceDescriptor> inputDeviceDescriptors = new ArrayMap<>();
         synchronized (mLock) {
@@ -529,7 +529,8 @@ class InputController {
         }
     }
 
-    @VisibleForTesting static final class InputDeviceDescriptor {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    static final class InputDeviceDescriptor {
 
         static final int TYPE_KEYBOARD = 1;
         static final int TYPE_MOUSE = 2;
