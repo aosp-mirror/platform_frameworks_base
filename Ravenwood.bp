@@ -75,6 +75,22 @@ java_genrule {
     ],
 }
 
+java_library {
+    name: "mockito-ravenwood-prebuilt",
+    installable: false,
+    static_libs: [
+        "mockito-robolectric-prebuilt",
+    ],
+}
+
+java_library {
+    name: "inline-mockito-ravenwood-prebuilt",
+    installable: false,
+    static_libs: [
+        "inline-mockito-robolectric-prebuilt",
+    ],
+}
+
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     libs: [
@@ -86,6 +102,8 @@ android_ravenwood_libgroup {
         "truth",
         "ravenwood-junit-impl",
         "android.test.mock.ravenwood",
+        "mockito-ravenwood-prebuilt",
+        "inline-mockito-ravenwood-prebuilt",
     ],
 }
 
@@ -95,5 +113,7 @@ android_ravenwood_libgroup {
         "junit",
         "truth",
         "ravenwood-junit",
+        "mockito-ravenwood-prebuilt",
+        "inline-mockito-ravenwood-prebuilt",
     ],
 }

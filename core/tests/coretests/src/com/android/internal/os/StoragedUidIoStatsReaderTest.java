@@ -18,7 +18,6 @@ package com.android.internal.os;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.os.FileUtils;
 
@@ -73,8 +72,7 @@ public class StoragedUidIoStatsReaderTest {
     @Test
     public void testReadNonexistentFile() throws Exception {
         mStoragedUidIoStatsReader.readAbsolute(mCallback);
-        verifyZeroInteractions(mCallback);
-
+        verifyNoMoreInteractions(mCallback);
     }
 
     /**
