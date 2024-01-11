@@ -1190,13 +1190,16 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean isScreenSizeDecoupledFromStatusBarAndCutout = context.getResources()
                 .getBoolean(R.bool.config_decoupleStatusBarAndDisplayCutoutFromScreenSize)
                 && mFlags.mAllowsScreenSizeDecoupledFromStatusBarAndCutout;
-        if (!isScreenSizeDecoupledFromStatusBarAndCutout) {
+        if (mFlags.mInsetsDecoupledConfiguration) {
+            mDecorTypes = 0;
+            mConfigTypes = 0;
+        } else if (isScreenSizeDecoupledFromStatusBarAndCutout) {
+            mDecorTypes = WindowInsets.Type.navigationBars();
+            mConfigTypes = WindowInsets.Type.navigationBars();
+        } else {
             mDecorTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars();
             mConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
                     | WindowInsets.Type.navigationBars();
-        } else {
-            mDecorTypes = WindowInsets.Type.navigationBars();
-            mConfigTypes = WindowInsets.Type.navigationBars();
         }
 
         mLetterboxConfiguration = new LetterboxConfiguration(
