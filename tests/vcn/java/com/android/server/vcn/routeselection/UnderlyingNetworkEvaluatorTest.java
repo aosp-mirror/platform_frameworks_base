@@ -34,7 +34,7 @@ public class UnderlyingNetworkEvaluatorTest extends NetworkEvaluationTestBase {
     private PersistableBundleWrapper mCarrierConfig;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
         mCarrierConfig = new PersistableBundleWrapper(new PersistableBundle());
     }
