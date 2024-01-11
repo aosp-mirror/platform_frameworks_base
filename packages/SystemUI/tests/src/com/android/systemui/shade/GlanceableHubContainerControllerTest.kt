@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade
 
+import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
@@ -43,6 +44,8 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -52,6 +55,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var communalViewModel: CommunalViewModel
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock private lateinit var shadeInteractor: ShadeInteractor
+    @Mock private lateinit var powerManager: PowerManager
 
     private lateinit var containerView: View
     private lateinit var testableLooper: TestableLooper
@@ -76,7 +80,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 communalInteractor,
                 communalViewModel,
                 keyguardTransitionInteractor,
-                shadeInteractor
+                shadeInteractor,
+                powerManager
             )
         testableLooper = TestableLooper.get(this)
 
@@ -90,14 +95,14 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun isEnabled_interactorEnabled_returnsTrue() {
+    fun isEnabled_interactorEnabled_interceptsTouches() {
         communalRepository.setIsCommunalEnabled(true)
 
         assertThat(underTest.isEnabled()).isTrue()
     }
 
     @Test
-    fun isEnabled_interactorDisabled_returnsFalse() {
+    fun isEnabled_interactorDisabled_doesNotIntercept() {
         communalRepository.setIsCommunalEnabled(false)
 
         assertThat(underTest.isEnabled()).isFalse()
@@ -120,7 +125,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onTouchEvent_touchInsideGestureRegion_returnsTrue() {
+    fun onTouchEvent_touchInsideGestureRegion_interceptsTouches() {
         // Communal is open.
         communalRepository.setDesiredScene(CommunalSceneKey.Communal)
 
@@ -131,7 +136,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onTouchEvent_subsequentTouchesAfterGestureStart_returnsTrue() {
+    fun onTouchEvent_subsequentTouchesAfterGestureStart_interceptsTouches() {
         // Communal is open.
         communalRepository.setDesiredScene(CommunalSceneKey.Communal)
 
@@ -146,7 +151,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onTouchEvent_communalOpen_returnsTrue() {
+    fun onTouchEvent_communalOpen_interceptsTouches() {
         // Communal is open.
         communalRepository.setDesiredScene(CommunalSceneKey.Communal)
 
@@ -155,10 +160,12 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
         // Touch events are intercepted.
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+        // User activity sent to PowerManager.
+        verify(powerManager).userActivity(any(), any(), any())
     }
 
     @Test
-    fun onTouchEvent_communalAndBouncerShowing_returnsFalse() {
+    fun onTouchEvent_communalAndBouncerShowing_doesNotIntercept() {
         // Communal is open.
         communalRepository.setDesiredScene(CommunalSceneKey.Communal)
 
@@ -170,10 +177,12 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
         // Touch events are not intercepted.
         assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+        // User activity is not sent to PowerManager.
+        verify(powerManager, times(0)).userActivity(any(), any(), any())
     }
 
     @Test
-    fun onTouchEvent_communalAndShadeShowing_returnsFalse() {
+    fun onTouchEvent_communalAndShadeShowing_doesNotIntercept() {
         // Communal is open.
         communalRepository.setDesiredScene(CommunalSceneKey.Communal)
 
