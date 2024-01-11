@@ -16,10 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.QUERY_ALL_PACKAGES;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -31,7 +27,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -102,6 +97,7 @@ public final class BackgroundInstallControlServiceTest {
     private Looper mLooper;
     private File mFile;
 
+
     @Mock
     private Context mContext;
     @Mock
@@ -112,12 +108,8 @@ public final class BackgroundInstallControlServiceTest {
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
     @Mock
     private PermissionManagerServiceInternal mPermissionManager;
-    @Mock
-    private BackgroundInstallControlCallbackHelper mCallbackHelper;
-
     @Captor
     private ArgumentCaptor<PackageManagerInternal.PackageListObserver> mPackageListObserverCaptor;
-
     @Captor
     private ArgumentCaptor<UsageEventListener> mUsageEventListenerCaptor;
 
@@ -127,12 +119,11 @@ public final class BackgroundInstallControlServiceTest {
 
         mTestLooper = new TestLooper();
         mLooper = mTestLooper.getLooper();
-        mFile =
-                new File(
-                        InstrumentationRegistry.getInstrumentation().getContext().getCacheDir(),
-                        "test");
-        mBackgroundInstallControlService =
-                new BackgroundInstallControlService(new MockInjector(mContext));
+        mFile = new File(
+                InstrumentationRegistry.getInstrumentation().getContext().getCacheDir(),
+                "test");
+        mBackgroundInstallControlService = new BackgroundInstallControlService(
+                new MockInjector(mContext));
 
         verify(mUsageStatsManagerInternal).registerListener(mUsageEventListenerCaptor.capture());
         mUsageEventListener = mUsageEventListenerCaptor.getValue();
@@ -152,7 +143,8 @@ public final class BackgroundInstallControlServiceTest {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         mBackgroundInstallControlService.initBackgroundInstalledPackages();
         assertNotNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
-        assertEquals(0, mBackgroundInstallControlService.getBackgroundInstalledPackages().size());
+        assertEquals(0,
+                mBackgroundInstallControlService.getBackgroundInstalledPackages().size());
     }
 
     @Test
@@ -169,9 +161,12 @@ public final class BackgroundInstallControlServiceTest {
         // Write test data to the file on the disk.
         try {
             ProtoOutputStream protoOutputStream = new ProtoOutputStream(fileOutputStream);
-            long token = protoOutputStream.start(BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
-            protoOutputStream.write(BackgroundInstalledPackageProto.PACKAGE_NAME, PACKAGE_NAME_1);
-            protoOutputStream.write(BackgroundInstalledPackageProto.USER_ID, USER_ID_1 + 1);
+            long token = protoOutputStream.start(
+                    BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
+            protoOutputStream.write(
+                    BackgroundInstalledPackageProto.PACKAGE_NAME, PACKAGE_NAME_1);
+            protoOutputStream.write(
+                    BackgroundInstalledPackageProto.USER_ID, USER_ID_1 + 1);
             protoOutputStream.end(token);
             protoOutputStream.flush();
             atomicFile.finishWrite(fileOutputStream);
@@ -203,14 +198,20 @@ public final class BackgroundInstallControlServiceTest {
         try {
             ProtoOutputStream protoOutputStream = new ProtoOutputStream(fileOutputStream);
 
-            long token = protoOutputStream.start(BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
-            protoOutputStream.write(BackgroundInstalledPackageProto.PACKAGE_NAME, PACKAGE_NAME_1);
-            protoOutputStream.write(BackgroundInstalledPackageProto.USER_ID, USER_ID_1 + 1);
+            long token = protoOutputStream.start(
+                    BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
+            protoOutputStream.write(
+                    BackgroundInstalledPackageProto.PACKAGE_NAME, PACKAGE_NAME_1);
+            protoOutputStream.write(
+                    BackgroundInstalledPackageProto.USER_ID, USER_ID_1 + 1);
             protoOutputStream.end(token);
 
-            token = protoOutputStream.start(BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
-            protoOutputStream.write(BackgroundInstalledPackageProto.PACKAGE_NAME, PACKAGE_NAME_2);
-            protoOutputStream.write(BackgroundInstalledPackageProto.USER_ID, USER_ID_2 + 1);
+            token = protoOutputStream.start(
+                    BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
+            protoOutputStream.write(
+                    BackgroundInstalledPackageProto.PACKAGE_NAME, PACKAGE_NAME_2);
+            protoOutputStream.write(
+                    BackgroundInstalledPackageProto.USER_ID, USER_ID_2 + 1);
             protoOutputStream.end(token);
 
             protoOutputStream.flush();
@@ -240,7 +241,7 @@ public final class BackgroundInstallControlServiceTest {
         // Read the file on the disk to verify
         var packagesInDisk = new SparseSetArray<>();
         AtomicFile atomicFile = new AtomicFile(mFile);
-        try (FileInputStream fileInputStream = atomicFile.openRead()) {
+        try (FileInputStream fileInputStream  = atomicFile.openRead()) {
             ProtoInputStream protoInputStream = new ProtoInputStream(fileInputStream);
 
             while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
@@ -248,25 +249,23 @@ public final class BackgroundInstallControlServiceTest {
                         != (int) BackgroundInstalledPackagesProto.BG_INSTALLED_PKG) {
                     continue;
                 }
-                long token =
-                        protoInputStream.start(BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
+                long token = protoInputStream.start(
+                        BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
                 String packageName = null;
                 int userId = UserHandle.USER_NULL;
                 while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
                     switch (protoInputStream.getFieldNumber()) {
                         case (int) BackgroundInstalledPackageProto.PACKAGE_NAME:
-                            packageName =
-                                    protoInputStream.readString(
-                                            BackgroundInstalledPackageProto.PACKAGE_NAME);
+                            packageName = protoInputStream.readString(
+                                    BackgroundInstalledPackageProto.PACKAGE_NAME);
                             break;
                         case (int) BackgroundInstalledPackageProto.USER_ID:
-                            userId =
-                                    protoInputStream.readInt(
-                                            BackgroundInstalledPackageProto.USER_ID)
-                                            - 1;
+                            userId = protoInputStream.readInt(
+                                    BackgroundInstalledPackageProto.USER_ID) - 1;
                             break;
                         default:
-                            fail("Undefined field in proto: " + protoInputStream.getFieldNumber());
+                            fail("Undefined field in proto: "
+                                    + protoInputStream.getFieldNumber());
                     }
                 }
                 protoInputStream.end(token);
@@ -297,7 +296,7 @@ public final class BackgroundInstallControlServiceTest {
         // Read the file on the disk to verify
         var packagesInDisk = new SparseSetArray<>();
         AtomicFile atomicFile = new AtomicFile(mFile);
-        try (FileInputStream fileInputStream = atomicFile.openRead()) {
+        try (FileInputStream fileInputStream  = atomicFile.openRead()) {
             ProtoInputStream protoInputStream = new ProtoInputStream(fileInputStream);
 
             while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
@@ -305,25 +304,23 @@ public final class BackgroundInstallControlServiceTest {
                         != (int) BackgroundInstalledPackagesProto.BG_INSTALLED_PKG) {
                     continue;
                 }
-                long token =
-                        protoInputStream.start(BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
+                long token = protoInputStream.start(
+                        BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
                 String packageName = null;
                 int userId = UserHandle.USER_NULL;
                 while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
                     switch (protoInputStream.getFieldNumber()) {
                         case (int) BackgroundInstalledPackageProto.PACKAGE_NAME:
-                            packageName =
-                                    protoInputStream.readString(
-                                            BackgroundInstalledPackageProto.PACKAGE_NAME);
+                            packageName = protoInputStream.readString(
+                                    BackgroundInstalledPackageProto.PACKAGE_NAME);
                             break;
                         case (int) BackgroundInstalledPackageProto.USER_ID:
-                            userId =
-                                    protoInputStream.readInt(
-                                            BackgroundInstalledPackageProto.USER_ID)
-                                            - 1;
+                            userId = protoInputStream.readInt(
+                                    BackgroundInstalledPackageProto.USER_ID) - 1;
                             break;
                         default:
-                            fail("Undefined field in proto: " + protoInputStream.getFieldNumber());
+                            fail("Undefined field in proto: "
+                                    + protoInputStream.getFieldNumber());
                     }
                 }
                 protoInputStream.end(token);
@@ -356,7 +353,7 @@ public final class BackgroundInstallControlServiceTest {
         // Read the file on the disk to verify
         var packagesInDisk = new SparseSetArray<>();
         AtomicFile atomicFile = new AtomicFile(mFile);
-        try (FileInputStream fileInputStream = atomicFile.openRead()) {
+        try (FileInputStream fileInputStream  = atomicFile.openRead()) {
             ProtoInputStream protoInputStream = new ProtoInputStream(fileInputStream);
 
             while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
@@ -364,25 +361,23 @@ public final class BackgroundInstallControlServiceTest {
                         != (int) BackgroundInstalledPackagesProto.BG_INSTALLED_PKG) {
                     continue;
                 }
-                long token =
-                        protoInputStream.start(BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
+                long token = protoInputStream.start(
+                        BackgroundInstalledPackagesProto.BG_INSTALLED_PKG);
                 String packageName = null;
                 int userId = UserHandle.USER_NULL;
                 while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
                     switch (protoInputStream.getFieldNumber()) {
                         case (int) BackgroundInstalledPackageProto.PACKAGE_NAME:
-                            packageName =
-                                    protoInputStream.readString(
-                                            BackgroundInstalledPackageProto.PACKAGE_NAME);
+                            packageName = protoInputStream.readString(
+                                    BackgroundInstalledPackageProto.PACKAGE_NAME);
                             break;
                         case (int) BackgroundInstalledPackageProto.USER_ID:
-                            userId =
-                                    protoInputStream.readInt(
-                                            BackgroundInstalledPackageProto.USER_ID)
-                                            - 1;
+                            userId = protoInputStream.readInt(
+                                    BackgroundInstalledPackageProto.USER_ID) - 1;
                             break;
                         default:
-                            fail("Undefined field in proto: " + protoInputStream.getFieldNumber());
+                            fail("Undefined field in proto: "
+                                    + protoInputStream.getFieldNumber());
                     }
                 }
                 protoInputStream.end(token);
@@ -404,55 +399,51 @@ public final class BackgroundInstallControlServiceTest {
 
     @Test
     public void testHandleUsageEvent_permissionDenied() {
-        assertEquals(
-                0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
-        doReturn(PackageManager.PERMISSION_DENIED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED, USER_ID_1, INSTALLER_NAME_1, 0);
+        assertEquals(0,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, 0);
         mTestLooper.dispatchAll();
-        assertEquals(
-                0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        assertEquals(0,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
     }
 
     @Test
     public void testHandleUsageEvent_permissionGranted() {
-        assertEquals(
-                0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED, USER_ID_1, INSTALLER_NAME_1, 0);
+        assertEquals(0,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, 0);
         mTestLooper.dispatchAll();
-        assertEquals(
-                1, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        assertEquals(1,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
     }
 
     @Test
     public void testHandleUsageEvent_ignoredEvent() {
-        assertEquals(
-                0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(UsageEvents.Event.USER_INTERACTION, USER_ID_1, INSTALLER_NAME_1, 0);
+        assertEquals(0,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.USER_INTERACTION,
+                USER_ID_1, INSTALLER_NAME_1, 0);
         mTestLooper.dispatchAll();
-        assertEquals(
-                0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        assertEquals(0,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
     }
 
     @Test
     public void testHandleUsageEvent_firstActivityResumedHalfTimeFrame() {
-        assertEquals(
-                0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(
-                UsageEvents.Event.ACTIVITY_RESUMED,
-                USER_ID_1,
-                INSTALLER_NAME_1,
-                USAGE_EVENT_TIMESTAMP_1);
+        assertEquals(0,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_1);
         mTestLooper.dispatchAll();
 
         var installerForegroundTimeFrames =
@@ -470,18 +461,14 @@ public final class BackgroundInstallControlServiceTest {
 
     @Test
     public void testHandleUsageEvent_firstActivityResumedOneTimeFrame() {
-        assertEquals(
-                0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(
-                UsageEvents.Event.ACTIVITY_RESUMED,
-                USER_ID_1,
-                INSTALLER_NAME_1,
-                USAGE_EVENT_TIMESTAMP_1);
-        generateUsageEvent(
-                Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
+        assertEquals(0,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_1);
+        generateUsageEvent(Event.ACTIVITY_STOPPED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
         mTestLooper.dispatchAll();
 
         var installerForegroundTimeFrames =
@@ -499,23 +486,16 @@ public final class BackgroundInstallControlServiceTest {
 
     @Test
     public void testHandleUsageEvent_firstActivityResumedOneAndHalfTimeFrame() {
-        assertEquals(
-                0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(
-                UsageEvents.Event.ACTIVITY_RESUMED,
-                USER_ID_1,
-                INSTALLER_NAME_1,
-                USAGE_EVENT_TIMESTAMP_1);
-        generateUsageEvent(
-                Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
-        generateUsageEvent(
-                UsageEvents.Event.ACTIVITY_RESUMED,
-                USER_ID_1,
-                INSTALLER_NAME_1,
-                USAGE_EVENT_TIMESTAMP_3);
+        assertEquals(0,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_1);
+        generateUsageEvent(Event.ACTIVITY_STOPPED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_3);
         mTestLooper.dispatchAll();
 
         var installerForegroundTimeFrames =
@@ -537,13 +517,12 @@ public final class BackgroundInstallControlServiceTest {
 
     @Test
     public void testHandleUsageEvent_firstNoneActivityResumed() {
-        assertEquals(
-                0, mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(
-                Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_1);
+        assertEquals(0,
+                mBackgroundInstallControlService.getInstallerForegroundTimeFrames().numMaps());
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(Event.ACTIVITY_STOPPED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_1);
         mTestLooper.dispatchAll();
 
         var installerForegroundTimeFrames =
@@ -556,26 +535,27 @@ public final class BackgroundInstallControlServiceTest {
     }
 
     @Test
-    public void testHandleUsageEvent_packageAddedNoUsageEvent()
-            throws NoSuchFieldException, PackageManager.NameNotFoundException {
+    public void testHandleUsageEvent_packageAddedNoUsageEvent() throws
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
-        InstallSourceInfo installSourceInfo =
-                new InstallSourceInfo(
-                        /* initiatingPackageName= */ INSTALLER_NAME_1,
-                        /* initiatingPackageSigningInfo= */ null,
-                        /* originatingPackageName= */ null,
-                        /* installingPackageName= */ INSTALLER_NAME_1);
+        InstallSourceInfo installSourceInfo = new InstallSourceInfo(
+                /* initiatingPackageName = */ INSTALLER_NAME_1,
+                /* initiatingPackageSigningInfo = */ null,
+                /* originatingPackageName = */ null,
+                /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
         when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
-                .thenReturn(appInfo);
+        when(mPackageManager.getApplicationInfoAsUser(
+                eq(PACKAGE_NAME_1),
+                any(),
+                anyInt())
+        ).thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
-        FieldSetter.setField(
-                appInfo,
+        long createTimestamp = PACKAGE_ADD_TIMESTAMP_1
+                - (System.currentTimeMillis() - SystemClock.uptimeMillis());
+        FieldSetter.setField(appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
                 createTimestamp);
 
@@ -592,26 +572,27 @@ public final class BackgroundInstallControlServiceTest {
     }
 
     @Test
-    public void testHandleUsageEvent_packageAddedInsideTimeFrame()
-            throws NoSuchFieldException, PackageManager.NameNotFoundException {
+    public void testHandleUsageEvent_packageAddedInsideTimeFrame() throws
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
-        InstallSourceInfo installSourceInfo =
-                new InstallSourceInfo(
-                        /* initiatingPackageName= */ INSTALLER_NAME_1,
-                        /* initiatingPackageSigningInfo= */ null,
-                        /* originatingPackageName= */ null,
-                        /* installingPackageName= */ INSTALLER_NAME_1);
+        InstallSourceInfo installSourceInfo = new InstallSourceInfo(
+                /* initiatingPackageName = */ INSTALLER_NAME_1,
+                /* initiatingPackageSigningInfo = */ null,
+                /* originatingPackageName = */ null,
+                /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
         when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
-                .thenReturn(appInfo);
+        when(mPackageManager.getApplicationInfoAsUser(
+                eq(PACKAGE_NAME_1),
+                any(),
+                anyInt())
+        ).thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
-        FieldSetter.setField(
-                appInfo,
+        long createTimestamp = PACKAGE_ADD_TIMESTAMP_1
+                - (System.currentTimeMillis() - SystemClock.uptimeMillis());
+        FieldSetter.setField(appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
                 createTimestamp);
 
@@ -623,16 +604,12 @@ public final class BackgroundInstallControlServiceTest {
         // The 2 usage events make the package adding inside a time frame.
         // So it's not a background install. Thus, it's null for the return of
         // mBackgroundInstallControlService.getBackgroundInstalledPackages()
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(
-                UsageEvents.Event.ACTIVITY_RESUMED,
-                USER_ID_1,
-                INSTALLER_NAME_1,
-                USAGE_EVENT_TIMESTAMP_1);
-        generateUsageEvent(
-                Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_1);
+        generateUsageEvent(Event.ACTIVITY_STOPPED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
 
         mPackageListObserver.onPackageAdded(PACKAGE_NAME_1, uid);
         mTestLooper.dispatchAll();
@@ -640,26 +617,27 @@ public final class BackgroundInstallControlServiceTest {
     }
 
     @Test
-    public void testHandleUsageEvent_packageAddedOutsideTimeFrame1()
-            throws NoSuchFieldException, PackageManager.NameNotFoundException {
+    public void testHandleUsageEvent_packageAddedOutsideTimeFrame1() throws
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
-        InstallSourceInfo installSourceInfo =
-                new InstallSourceInfo(
-                        /* initiatingPackageName= */ INSTALLER_NAME_1,
-                        /* initiatingPackageSigningInfo= */ null,
-                        /* originatingPackageName= */ null,
-                        /* installingPackageName= */ INSTALLER_NAME_1);
+        InstallSourceInfo installSourceInfo = new InstallSourceInfo(
+                /* initiatingPackageName = */ INSTALLER_NAME_1,
+                /* initiatingPackageSigningInfo = */ null,
+                /* originatingPackageName = */ null,
+                /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
         when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
-                .thenReturn(appInfo);
+        when(mPackageManager.getApplicationInfoAsUser(
+                eq(PACKAGE_NAME_1),
+                any(),
+                anyInt())
+        ).thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
-        FieldSetter.setField(
-                appInfo,
+        long createTimestamp = PACKAGE_ADD_TIMESTAMP_1
+                - (System.currentTimeMillis() - SystemClock.uptimeMillis());
+        FieldSetter.setField(appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
                 createTimestamp);
 
@@ -672,16 +650,12 @@ public final class BackgroundInstallControlServiceTest {
         // Compared to testHandleUsageEvent_packageAddedInsideTimeFrame,
         // it's a background install. Thus, it's not null for the return of
         // mBackgroundInstallControlService.getBackgroundInstalledPackages()
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(
-                UsageEvents.Event.ACTIVITY_RESUMED,
-                USER_ID_1,
-                INSTALLER_NAME_1,
-                USAGE_EVENT_TIMESTAMP_2);
-        generateUsageEvent(
-                Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_3);
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
+        generateUsageEvent(Event.ACTIVITY_STOPPED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_3);
 
         mPackageListObserver.onPackageAdded(PACKAGE_NAME_1, uid);
         mTestLooper.dispatchAll();
@@ -691,28 +665,28 @@ public final class BackgroundInstallControlServiceTest {
         assertEquals(1, packages.size());
         assertTrue(packages.contains(USER_ID_1, PACKAGE_NAME_1));
     }
-
     @Test
-    public void testHandleUsageEvent_packageAddedOutsideTimeFrame2()
-            throws NoSuchFieldException, PackageManager.NameNotFoundException {
+    public void testHandleUsageEvent_packageAddedOutsideTimeFrame2() throws
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
-        InstallSourceInfo installSourceInfo =
-                new InstallSourceInfo(
-                        /* initiatingPackageName= */ INSTALLER_NAME_1,
-                        /* initiatingPackageSigningInfo= */ null,
-                        /* originatingPackageName= */ null,
-                        /* installingPackageName= */ INSTALLER_NAME_1);
+        InstallSourceInfo installSourceInfo = new InstallSourceInfo(
+                /* initiatingPackageName = */ INSTALLER_NAME_1,
+                /* initiatingPackageSigningInfo = */ null,
+                /* originatingPackageName = */ null,
+                /* installingPackageName = */ INSTALLER_NAME_1);
         assertEquals(installSourceInfo.getInstallingPackageName(), INSTALLER_NAME_1);
         when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
-                .thenReturn(appInfo);
+        when(mPackageManager.getApplicationInfoAsUser(
+                eq(PACKAGE_NAME_1),
+                any(),
+                anyInt())
+        ).thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
-        FieldSetter.setField(
-                appInfo,
+        long createTimestamp = PACKAGE_ADD_TIMESTAMP_1
+                - (System.currentTimeMillis() - SystemClock.uptimeMillis());
+        FieldSetter.setField(appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
                 createTimestamp);
 
@@ -726,16 +700,12 @@ public final class BackgroundInstallControlServiceTest {
         // Compared to testHandleUsageEvent_packageAddedInsideTimeFrame,
         // it's a background install. Thus, it's not null for the return of
         // mBackgroundInstallControlService.getBackgroundInstalledPackages()
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(
-                UsageEvents.Event.ACTIVITY_RESUMED,
-                USER_ID_2,
-                INSTALLER_NAME_2,
-                USAGE_EVENT_TIMESTAMP_2);
-        generateUsageEvent(
-                Event.ACTIVITY_STOPPED, USER_ID_2, INSTALLER_NAME_2, USAGE_EVENT_TIMESTAMP_3);
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_2, INSTALLER_NAME_2, USAGE_EVENT_TIMESTAMP_2);
+        generateUsageEvent(Event.ACTIVITY_STOPPED,
+                USER_ID_2, INSTALLER_NAME_2, USAGE_EVENT_TIMESTAMP_3);
 
         mPackageListObserver.onPackageAdded(PACKAGE_NAME_1, uid);
         mTestLooper.dispatchAll();
@@ -745,31 +715,31 @@ public final class BackgroundInstallControlServiceTest {
         assertEquals(1, packages.size());
         assertTrue(packages.contains(USER_ID_1, PACKAGE_NAME_1));
     }
-
     @Test
-    public void testHandleUsageEvent_packageAddedThroughAdb()
-            throws NoSuchFieldException, PackageManager.NameNotFoundException {
+    public void testHandleUsageEvent_packageAddedThroughAdb() throws
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         // This test is a duplicate of testHandleUsageEvent_packageAddedThroughAdb except the
         // initiatingPackageName used to be null but is now "com.android.shell". This test ensures
         // that the behavior is still the same for when the initiatingPackageName is null.
-        InstallSourceInfo installSourceInfo =
-                new InstallSourceInfo(
-                        /* initiatingPackageName= */ null,
-                        /* initiatingPackageSigningInfo= */ null,
-                        /* originatingPackageName= */ null,
-                        /* installingPackageName= */ INSTALLER_NAME_1);
+        InstallSourceInfo installSourceInfo = new InstallSourceInfo(
+                /* initiatingPackageName = */ null,
+                /* initiatingPackageSigningInfo = */ null,
+                /* originatingPackageName = */ null,
+                /* installingPackageName = */ INSTALLER_NAME_1);
         // b/265203007
         when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
-                .thenReturn(appInfo);
+        when(mPackageManager.getApplicationInfoAsUser(
+                eq(PACKAGE_NAME_1),
+                any(),
+                anyInt())
+        ).thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
-        FieldSetter.setField(
-                appInfo,
+        long createTimestamp = PACKAGE_ADD_TIMESTAMP_1
+                - (System.currentTimeMillis() - SystemClock.uptimeMillis());
+        FieldSetter.setField(appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
                 createTimestamp);
 
@@ -781,16 +751,12 @@ public final class BackgroundInstallControlServiceTest {
         // for ADB installs the initiatingPackageName used to be null, despite being detected
         // as a background install. Since we do not want to treat side-loaded apps as background
         // install getBackgroundInstalledPackages() is expected to return null
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(
-                UsageEvents.Event.ACTIVITY_RESUMED,
-                USER_ID_1,
-                INSTALLER_NAME_1,
-                USAGE_EVENT_TIMESTAMP_2);
-        generateUsageEvent(
-                Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_3);
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
+        generateUsageEvent(Event.ACTIVITY_STOPPED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_3);
 
         mPackageListObserver.onPackageAdded(PACKAGE_NAME_1, uid);
         mTestLooper.dispatchAll();
@@ -798,31 +764,31 @@ public final class BackgroundInstallControlServiceTest {
         var packages = mBackgroundInstallControlService.getBackgroundInstalledPackages();
         assertNull(packages);
     }
-
     @Test
-    public void testHandleUsageEvent_packageAddedThroughAdb2()
-            throws NoSuchFieldException, PackageManager.NameNotFoundException {
+    public void testHandleUsageEvent_packageAddedThroughAdb2() throws
+            NoSuchFieldException, PackageManager.NameNotFoundException {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
         // This test is a duplicate of testHandleUsageEvent_packageAddedThroughAdb except the
         // initiatingPackageName used to be null but is now "com.android.shell". This test ensures
         // that the behavior is still the same after this change.
-        InstallSourceInfo installSourceInfo =
-                new InstallSourceInfo(
-                        /* initiatingPackageName= */ "com.android.shell",
-                        /* initiatingPackageSigningInfo= */ null,
-                        /* originatingPackageName= */ null,
-                        /* installingPackageName= */ INSTALLER_NAME_1);
+        InstallSourceInfo installSourceInfo = new InstallSourceInfo(
+                /* initiatingPackageName = */ "com.android.shell",
+                /* initiatingPackageSigningInfo = */ null,
+                /* originatingPackageName = */ null,
+                /* installingPackageName = */ INSTALLER_NAME_1);
         // b/265203007
         when(mPackageManager.getInstallSourceInfo(anyString())).thenReturn(installSourceInfo);
         ApplicationInfo appInfo = mock(ApplicationInfo.class);
 
-        when(mPackageManager.getApplicationInfoAsUser(eq(PACKAGE_NAME_1), any(), anyInt()))
-                .thenReturn(appInfo);
+        when(mPackageManager.getApplicationInfoAsUser(
+                eq(PACKAGE_NAME_1),
+                any(),
+                anyInt())
+        ).thenReturn(appInfo);
 
-        long createTimestamp =
-                PACKAGE_ADD_TIMESTAMP_1 - (System.currentTimeMillis() - SystemClock.uptimeMillis());
-        FieldSetter.setField(
-                appInfo,
+        long createTimestamp = PACKAGE_ADD_TIMESTAMP_1
+                - (System.currentTimeMillis() - SystemClock.uptimeMillis());
+        FieldSetter.setField(appInfo,
                 ApplicationInfo.class.getDeclaredField("createTimestamp"),
                 createTimestamp);
 
@@ -834,16 +800,12 @@ public final class BackgroundInstallControlServiceTest {
         // for ADB installs the initiatingPackageName is com.android.shell, despite being detected
         // as a background install. Since we do not want to treat side-loaded apps as background
         // install getBackgroundInstalledPackages() is expected to return null
-        doReturn(PERMISSION_GRANTED)
-                .when(mPermissionManager)
-                .checkPermission(anyString(), anyString(), anyInt(), anyInt());
-        generateUsageEvent(
-                UsageEvents.Event.ACTIVITY_RESUMED,
-                USER_ID_1,
-                INSTALLER_NAME_1,
-                USAGE_EVENT_TIMESTAMP_2);
-        generateUsageEvent(
-                Event.ACTIVITY_STOPPED, USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_3);
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mPermissionManager).checkPermission(
+                anyString(), anyString(), anyInt(), anyInt());
+        generateUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_2);
+        generateUsageEvent(Event.ACTIVITY_STOPPED,
+                USER_ID_1, INSTALLER_NAME_1, USAGE_EVENT_TIMESTAMP_3);
 
         mPackageListObserver.onPackageAdded(PACKAGE_NAME_1, uid);
         mTestLooper.dispatchAll();
@@ -851,7 +813,6 @@ public final class BackgroundInstallControlServiceTest {
         var packages = mBackgroundInstallControlService.getBackgroundInstalledPackages();
         assertNull(packages);
     }
-
     @Test
     public void testPackageRemoved() {
         assertNull(mBackgroundInstallControlService.getBackgroundInstalledPackages());
@@ -898,7 +859,8 @@ public final class BackgroundInstallControlServiceTest {
         packages.add(packageInfo2);
         var packageInfo3 = makePackageInfo(PACKAGE_NAME_3);
         packages.add(packageInfo3);
-        doReturn(packages).when(mPackageManager).getInstalledPackagesAsUser(any(), anyInt());
+        doReturn(packages).when(mPackageManager).getInstalledPackagesAsUser(
+                any(), anyInt());
 
         var resultPackages =
                 mBackgroundInstallControlService.getBackgroundInstalledPackages(0L, USER_ID_1);
@@ -908,44 +870,18 @@ public final class BackgroundInstallControlServiceTest {
         assertFalse(resultPackages.getList().contains(packageInfo3));
     }
 
-    @Test(expected = SecurityException.class)
-    public void enforceCallerQueryPackagesPermissionsThrowsSecurityException() {
-        doThrow(new SecurityException("test")).when(mContext)
-                .enforceCallingPermission(eq(QUERY_ALL_PACKAGES), anyString());
-
-        mBackgroundInstallControlService.enforceCallerQueryPackagesPermissions();
-    }
-
-    @Test
-    public void enforceCallerQueryPackagesPermissionsDoesNotThrowSecurityException() {
-        //enforceCallerQueryPackagesPermissions do not throw
-
-        mBackgroundInstallControlService.enforceCallerQueryPackagesPermissions();
-    }
-
-    @Test(expected = SecurityException.class)
-    public void enforceCallerInteractCrossUserPermissionsThrowsSecurityException() {
-        doThrow(new SecurityException("test")).when(mContext)
-                .enforceCallingPermission(eq(INTERACT_ACROSS_USERS_FULL), anyString());
-
-        mBackgroundInstallControlService.enforceCallerInteractCrossUserPermissions();
-    }
-    @Test
-    public void enforceCallerInteractCrossUserPermissionsDoesNotThrowSecurityException() {
-        //enforceCallerQueryPackagesPermissions do not throw
-
-        mBackgroundInstallControlService.enforceCallerInteractCrossUserPermissions();
-    }
-
     /**
      * Mock a usage event occurring.
      *
      * @param usageEventId id of a usage event
-     * @param userId       user id of a usage event
-     * @param pkgName      package name of a usage event
-     * @param timestamp    timestamp of a usage event
+     * @param userId user id of a usage event
+     * @param pkgName package name of a usage event
+     * @param timestamp timestamp of a usage event
      */
-    private void generateUsageEvent(int usageEventId, int userId, String pkgName, long timestamp) {
+    private void generateUsageEvent(int usageEventId,
+            int userId,
+            String pkgName,
+            long timestamp) {
         Event event = new Event(usageEventId, timestamp);
         event.mPackage = pkgName;
         mUsageEventListener.onUsageEvent(userId, event);
@@ -998,11 +934,6 @@ public final class BackgroundInstallControlServiceTest {
         @Override
         public File getDiskFile() {
             return mFile;
-        }
-
-        @Override
-        public BackgroundInstallControlCallbackHelper getBackgroundInstallControlCallbackHelper() {
-            return mCallbackHelper;
         }
     }
 }

@@ -862,10 +862,6 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
   }
 
-  @FlaggedApi("android.app.bic_client") public final class BackgroundInstallControlManager {
-    method @FlaggedApi("android.app.bic_client") @NonNull @RequiresPermission(android.Manifest.permission.QUERY_ALL_PACKAGES) public java.util.List<android.content.pm.PackageInfo> getBackgroundInstalledPackages(long);
-  }
-
   public class BroadcastOptions {
     method public void clearRequireCompatChange();
     method public int getPendingIntentBackgroundActivityStartMode();
