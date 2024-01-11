@@ -20,7 +20,7 @@ package android.telephony.satellite;
  * Interface for satellite state change callback.
  * @hide
  */
-oneway interface ISatelliteStateCallback {
+oneway interface ISatelliteModemStateCallback {
     /**
      * Indicates that the satellite modem state has changed.
      *

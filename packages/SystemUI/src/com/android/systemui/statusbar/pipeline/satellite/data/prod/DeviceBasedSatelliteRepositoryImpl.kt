@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.satellite.data.prod
 import android.os.OutcomeReceiver
 import android.telephony.satellite.NtnSignalStrengthCallback
 import android.telephony.satellite.SatelliteManager
-import android.telephony.satellite.SatelliteStateCallback
+import android.telephony.satellite.SatelliteModemStateCallback
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -180,7 +180,7 @@ constructor(
     // By using the SupportedSatelliteManager here, we expect registration never to fail
     private fun connectionStateFlow(sm: SupportedSatelliteManager): Flow<SatelliteConnectionState> =
         conflatedCallbackFlow {
-                val cb = SatelliteStateCallback { state ->
+                val cb = SatelliteModemStateCallback { state ->
                     trySend(SatelliteConnectionState.fromModemState(state))
                 }
 
