@@ -13,3 +13,10 @@ flag {
     description: "Feature flag for adjustable safe mode timeout"
     bug: "317406085"
 }
+
+flag{
+    name: "network_metric_monitor"
+    namespace: "vcn"
+    description: "Feature flag for enabling network metric monitor"
+    bug: "282996138"
+}

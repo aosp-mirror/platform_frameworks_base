@@ -34,6 +34,7 @@ public class VcnContext {
     @NonNull private final Looper mLooper;
     @NonNull private final VcnNetworkProvider mVcnNetworkProvider;
     @NonNull private final FeatureFlags mFeatureFlags;
+    @NonNull private final com.android.net.flags.FeatureFlags mCoreNetFeatureFlags;
     private final boolean mIsInTestMode;
 
     public VcnContext(
@@ -48,6 +49,7 @@ public class VcnContext {
 
         // Auto-generated class
         mFeatureFlags = new FeatureFlagsImpl();
+        mCoreNetFeatureFlags = new com.android.net.flags.FeatureFlagsImpl();
     }
 
     @NonNull
@@ -67,6 +69,14 @@ public class VcnContext {
 
     public boolean isInTestMode() {
         return mIsInTestMode;
+    }
+
+    public boolean isFlagNetworkMetricMonitorEnabled() {
+        return mFeatureFlags.networkMetricMonitor();
+    }
+
+    public boolean isFlagIpSecTransformStateEnabled() {
+        return mCoreNetFeatureFlags.ipsecTransformState();
     }
 
     @NonNull
