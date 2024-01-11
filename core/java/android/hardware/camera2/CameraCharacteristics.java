@@ -19,6 +19,8 @@ package android.hardware.camera2;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.companion.virtual.VirtualDeviceManager;
+import android.companion.virtual.camera.VirtualCameraConfig;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.ExtensionKey;
@@ -5327,6 +5329,19 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
     public static final Key<Integer> INFO_SESSION_CONFIGURATION_QUERY_VERSION =
             new Key<Integer>("android.info.sessionConfigurationQueryVersion", int.class);
+
+    /**
+     * <p>Id of the device that owns this camera.</p>
+     * <p>In case of a virtual camera, this would be the id of the virtual device
+     * owning the camera. For any other camera, this key would not be present.
+     * Callers should assume {@link android.content.Context#DEVICE_ID_DEFAULT}
+     * in case this key is not present.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *  @see VirtualDeviceManager.VirtualDevice#createVirtualCamera(VirtualCameraConfig)
+     * @hide
+     */
+    public static final Key<Integer> INFO_DEVICE_ID =
+            new Key<Integer>("android.info.deviceId", int.class);
 
     /**
      * <p>The maximum number of frames that can occur after a request

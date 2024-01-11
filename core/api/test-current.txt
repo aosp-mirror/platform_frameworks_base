@@ -1527,6 +1527,13 @@ package android.graphics.fonts {
 
 package android.hardware {
 
+  @Deprecated public class Camera {
+    method @Deprecated public static void getCameraInfo(int, @NonNull android.content.Context, boolean, android.hardware.Camera.CameraInfo);
+    method @Deprecated public static int getNumberOfCameras(@NonNull android.content.Context);
+    method @Deprecated public static android.hardware.Camera open(int, @NonNull android.content.Context, boolean);
+    method @Deprecated public final void setPreviewSurface(android.view.Surface) throws java.io.IOException;
+  }
+
   public final class SensorPrivacyManager {
     method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setCameraPrivacyAllowlist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
