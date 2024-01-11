@@ -16,11 +16,13 @@
 
 package com.android.server.vibrator;
 
+import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
 import static android.os.VibrationAttributes.USAGE_HARDWARE_FEEDBACK;
 import static android.os.VibrationAttributes.USAGE_MEDIA;
 import static android.os.VibrationAttributes.USAGE_NOTIFICATION;
+import static android.os.VibrationAttributes.USAGE_PHYSICAL_EMULATION;
 import static android.os.VibrationAttributes.USAGE_RINGTONE;
 import static android.os.VibrationAttributes.USAGE_TOUCH;
 import static android.os.VibrationAttributes.USAGE_UNKNOWN;
@@ -32,12 +34,18 @@ import android.frameworks.vibrator.IVibratorControlService;
 import android.frameworks.vibrator.IVibratorController;
 import android.frameworks.vibrator.ScaleParam;
 import android.frameworks.vibrator.VibrationParam;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.VibrationAttributes;
 import android.util.Slog;
-import android.util.SparseArray;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Implementation of {@link IVibratorControlService} which allows the registration of
@@ -47,16 +55,25 @@ import java.util.Objects;
  */
 public final class VibratorControlService extends IVibratorControlService.Stub {
     private static final String TAG = "VibratorControlService";
+    private static final int UNRECOGNIZED_VIBRATION_TYPE = -1;
+    private static final int NO_SCALE = -1;
 
     private final VibratorControllerHolder mVibratorControllerHolder;
     private final VibrationScaler mVibrationScaler;
     private final Object mLock;
+    private final int[] mRequestVibrationParamsForUsages;
+
+    @GuardedBy("mLock")
+    private CompletableFuture<Void> mRequestVibrationParamsFuture = null;
+    @GuardedBy("mLock")
+    private IBinder mRequestVibrationParamsToken;
 
     public VibratorControlService(VibratorControllerHolder vibratorControllerHolder,
-            VibrationScaler vibrationScaler, Object lock) {
+            VibrationScaler vibrationScaler, VibrationSettings vibrationSettings, Object lock) {
         mVibratorControllerHolder = vibratorControllerHolder;
         mVibrationScaler = vibrationScaler;
         mLock = lock;
+        mRequestVibrationParamsForUsages = vibrationSettings.getRequestVibrationParamsForUsages();
     }
 
     @Override
@@ -85,8 +102,9 @@ public final class VibratorControlService extends IVibratorControlService.Stub {
                         + "controller doesn't match the registered one. " + this);
                 return;
             }
-            updateAdaptiveHapticsScales(/* params= */ null);
+            mVibrationScaler.clearAdaptiveHapticsScales();
             mVibratorControllerHolder.setVibratorController(null);
+            endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ true);
         }
     }
 
@@ -131,10 +149,8 @@ public final class VibratorControlService extends IVibratorControlService.Stub {
                         + "controller doesn't match the registered one. " + this);
                 return;
             }
-            //TODO(305942827): Update this method to only clear the specified vibration types.
-            // Perhaps look into whether it makes more sense to have this clear all scales and
-            // rely on setVibrationParams for clearing the scales for specific vibrations.
-            updateAdaptiveHapticsScales(/* params= */ null);
+
+            updateAdaptiveHapticsScales(types, NO_SCALE);
         }
     }
 
@@ -142,7 +158,26 @@ public final class VibratorControlService extends IVibratorControlService.Stub {
     public void onRequestVibrationParamsComplete(
             @NonNull IBinder requestToken, @SuppressLint("ArrayReturn") VibrationParam[] result)
             throws RemoteException {
-        // TODO(305942827): Cache the vibration params in VibrationScaler
+        Objects.requireNonNull(requestToken);
+
+        synchronized (mLock) {
+            if (mRequestVibrationParamsToken == null) {
+                Slog.wtf(TAG,
+                        "New vibration params received but no token was cached in the service. "
+                                + "New vibration params ignored.");
+                return;
+            }
+
+            if (!Objects.equals(requestToken, mRequestVibrationParamsToken)) {
+                Slog.w(TAG,
+                        "New vibration params received but the provided token does not match the "
+                                + "cached one. New vibration params ignored.");
+                return;
+            }
+
+            updateAdaptiveHapticsScales(result);
+            endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ false);
+        }
     }
 
     @Override
@@ -156,50 +191,190 @@ public final class VibratorControlService extends IVibratorControlService.Stub {
     }
 
     /**
-     * Extracts the vibration scales and caches them in {@link VibrationScaler}.
+     * If an {@link IVibratorController} is registered to the service, it will request the latest
+     * vibration params and return a {@link CompletableFuture} that completes when the request is
+     * fulfilled. Otherwise, ignores the call and returns null.
      *
-     * @param params the new vibration params to cache.
+     * @param usage a {@link android.os.VibrationAttributes} usage.
+     * @param timeoutInMillis the request's timeout in millis.
+     * @return a {@link CompletableFuture} to track the completion of the vibration param
+     * request, or null if no {@link IVibratorController} is registered.
      */
-    private void updateAdaptiveHapticsScales(@Nullable VibrationParam[] params) {
-        if (params == null || params.length == 0) {
-            mVibrationScaler.updateAdaptiveHapticsScales(null);
-            return;
-        }
+    @Nullable
+    public CompletableFuture<Void> triggerVibrationParamsRequest(
+            @VibrationAttributes.Usage int usage, int timeoutInMillis) {
+        synchronized (mLock) {
+            IVibratorController vibratorController =
+                    mVibratorControllerHolder.getVibratorController();
+            if (vibratorController == null) {
+                Slog.d(TAG, "Unable to request vibration params. There is no registered "
+                        + "IVibrationController.");
+                return null;
+            }
 
-        SparseArray<Float> vibrationScales = new SparseArray<>();
-        for (int i = 0; i < params.length; i++) {
-            ScaleParam scaleParam = params[i].getScale();
-            extractVibrationScales(scaleParam, vibrationScales);
+            int vibrationType = mapToAdaptiveVibrationType(usage);
+            if (vibrationType == UNRECOGNIZED_VIBRATION_TYPE) {
+                Slog.d(TAG, "Unable to request vibration params. The provided usage " + usage
+                        + " is unrecognized.");
+                return null;
+            }
+
+            try {
+                endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ true);
+                mRequestVibrationParamsFuture = new CompletableFuture<>();
+                mRequestVibrationParamsToken = new Binder();
+                vibratorController.requestVibrationParams(vibrationType, timeoutInMillis,
+                        mRequestVibrationParamsToken);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to request vibration params.", e);
+                endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ true);
+            }
+
+            return mRequestVibrationParamsFuture;
         }
-        mVibrationScaler.updateAdaptiveHapticsScales(vibrationScales);
     }
 
     /**
-     * Extracts the vibration scales and map them to their corresponding
-     * {@link android.os.VibrationAttributes} usages.
+     * If an {@link IVibratorController} is registered to the service, then it checks whether to
+     * request new vibration params before playing the vibration. Returns true if the
+     * usage is for high latency vibrations, e.g. ringtone and notification, and can be delayed
+     * slightly. Otherwise, returns false.
+     *
+     * @param usage a {@link android.os.VibrationAttributes} usage.
+     * @return true if usage is for high latency vibrations, false otherwise.
      */
-    private void extractVibrationScales(ScaleParam scaleParam, SparseArray<Float> vibrationScales) {
-        if ((ScaleParam.TYPE_ALARM & scaleParam.typesMask) != 0) {
-            vibrationScales.put(USAGE_ALARM, scaleParam.scale);
+    public boolean shouldRequestVibrationParams(@VibrationAttributes.Usage int usage) {
+        synchronized (mLock) {
+            IVibratorController vibratorController =
+                    mVibratorControllerHolder.getVibratorController();
+            if (vibratorController == null) {
+                Slog.d(TAG, "Unable to check if should request vibration params. "
+                        + "There is no registered IVibrationController.");
+                return false;
+            }
+
+            return ArrayUtils.contains(mRequestVibrationParamsForUsages, usage);
+        }
+    }
+
+    /**
+     * Returns the {@link #mRequestVibrationParamsToken} which is used to validate
+     * {@link #onRequestVibrationParamsComplete(IBinder, VibrationParam[])} calls.
+     */
+    @VisibleForTesting
+    public IBinder getRequestVibrationParamsToken() {
+        synchronized (mLock) {
+            return mRequestVibrationParamsToken;
+        }
+    }
+
+    /**
+     * Completes or cancels the vibration params request future and resets the future and token
+     * to null.
+     * @param wasCancelled specifies whether the future should be ended by being cancelled or not.
+     */
+    @GuardedBy("mLock")
+    private void endOngoingRequestVibrationParamsLocked(boolean wasCancelled) {
+        mRequestVibrationParamsToken = null;
+        if (mRequestVibrationParamsFuture == null) {
+            return;
         }
 
-        if ((ScaleParam.TYPE_NOTIFICATION & scaleParam.typesMask) != 0) {
-            vibrationScales.put(USAGE_NOTIFICATION, scaleParam.scale);
-            vibrationScales.put(USAGE_COMMUNICATION_REQUEST, scaleParam.scale);
+        if (wasCancelled) {
+            mRequestVibrationParamsFuture.cancel(/* mayInterruptIfRunning= */ true);
+        } else {
+            mRequestVibrationParamsFuture.complete(null);
         }
 
-        if ((ScaleParam.TYPE_RINGTONE & scaleParam.typesMask) != 0) {
-            vibrationScales.put(USAGE_RINGTONE, scaleParam.scale);
+        mRequestVibrationParamsFuture = null;
+    }
+
+    private static int mapToAdaptiveVibrationType(@VibrationAttributes.Usage int usage) {
+        switch (usage) {
+            case USAGE_ALARM -> {
+                return ScaleParam.TYPE_ALARM;
+            }
+            case USAGE_NOTIFICATION, USAGE_COMMUNICATION_REQUEST -> {
+                return ScaleParam.TYPE_NOTIFICATION;
+            }
+            case USAGE_RINGTONE -> {
+                return ScaleParam.TYPE_RINGTONE;
+            }
+            case USAGE_MEDIA, USAGE_UNKNOWN -> {
+                return ScaleParam.TYPE_MEDIA;
+            }
+            case USAGE_TOUCH, USAGE_HARDWARE_FEEDBACK, USAGE_ACCESSIBILITY,
+                    USAGE_PHYSICAL_EMULATION -> {
+                return ScaleParam.TYPE_INTERACTIVE;
+            }
+            default -> {
+                Slog.w(TAG, "Unrecognized vibration usage " + usage);
+                return UNRECOGNIZED_VIBRATION_TYPE;
+            }
+        }
+    }
+
+    /**
+     * Updates the adaptive haptics scales cached in {@link VibrationScaler} with the
+     * provided params.
+     *
+     * @param params the new vibration params.
+     */
+    private void updateAdaptiveHapticsScales(@Nullable VibrationParam[] params) {
+        for (VibrationParam param : params) {
+            ScaleParam scaleParam = param.getScale();
+            updateAdaptiveHapticsScales(scaleParam.typesMask, scaleParam.scale);
+        }
+    }
+
+    /**
+     * Updates the adaptive haptics scales, cached in {@link VibrationScaler}, for the provided
+     * vibration types.
+     *
+     * @param types The type of vibrations.
+     * @param scale The scaling factor that should be applied to the vibrations.
+     */
+    private void updateAdaptiveHapticsScales(int types, float scale) {
+        if ((ScaleParam.TYPE_ALARM & types) != 0) {
+            updateOrRemoveAdaptiveHapticsScale(USAGE_ALARM, scale);
         }
 
-        if ((ScaleParam.TYPE_MEDIA & scaleParam.typesMask) != 0) {
-            vibrationScales.put(USAGE_MEDIA, scaleParam.scale);
-            vibrationScales.put(USAGE_UNKNOWN, scaleParam.scale);
+        if ((ScaleParam.TYPE_NOTIFICATION & types) != 0) {
+            updateOrRemoveAdaptiveHapticsScale(USAGE_NOTIFICATION, scale);
+            updateOrRemoveAdaptiveHapticsScale(USAGE_COMMUNICATION_REQUEST, scale);
         }
 
-        if ((ScaleParam.TYPE_INTERACTIVE & scaleParam.typesMask) != 0) {
-            vibrationScales.put(USAGE_TOUCH, scaleParam.scale);
-            vibrationScales.put(USAGE_HARDWARE_FEEDBACK, scaleParam.scale);
+        if ((ScaleParam.TYPE_RINGTONE & types) != 0) {
+            updateOrRemoveAdaptiveHapticsScale(USAGE_RINGTONE, scale);
         }
+
+        if ((ScaleParam.TYPE_MEDIA & types) != 0) {
+            updateOrRemoveAdaptiveHapticsScale(USAGE_MEDIA, scale);
+            updateOrRemoveAdaptiveHapticsScale(USAGE_UNKNOWN, scale);
+        }
+
+        if ((ScaleParam.TYPE_INTERACTIVE & types) != 0) {
+            updateOrRemoveAdaptiveHapticsScale(USAGE_TOUCH, scale);
+            updateOrRemoveAdaptiveHapticsScale(USAGE_HARDWARE_FEEDBACK, scale);
+        }
+    }
+
+    /**
+     * Updates or removes the adaptive haptics scale for the specified usage. If the scale is set
+     * to {@link #NO_SCALE} then it will be removed from the cached usage scales in
+     * {@link VibrationScaler}. Otherwise, the cached usage scale will be updated by the new value.
+     *
+     * @param usageHint one of VibrationAttributes.USAGE_*.
+     * @param scale     The scaling factor that should be applied to the vibrations. If set to
+     *                  {@link #NO_SCALE} then the scale will be removed.
+     */
+    private void updateOrRemoveAdaptiveHapticsScale(@VibrationAttributes.Usage int usageHint,
+            float scale) {
+        if (scale == NO_SCALE) {
+            mVibrationScaler.removeAdaptiveHapticsScale(usageHint);
+            return;
+        }
+
+        mVibrationScaler.updateAdaptiveHapticsScale(usageHint, scale);
     }
 }

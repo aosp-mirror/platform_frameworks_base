@@ -281,6 +281,20 @@
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
 
+    <!-- The duration (in milliseconds) that the vibrator control service will wait for new
+         vibration params. -->
+    <integer name="config_requestVibrationParamsTimeout">50</integer>
+
+    <!-- Array containing the usages that should request vibration params before they are played.
+         These usages don't have strong latency requirements, e.g. ringtone and notification, and
+         can be slightly delayed. -->
+    <integer-array name="config_requestVibrationParamsForUsages">
+        <item>17</item> <!-- USAGE_ALARM -->
+        <item>33</item> <!-- USAGE_RINGTONE -->
+        <item>49</item> <!-- USAGE_NOTIFICATION -->
+        <item>65</item> <!-- USAGE_COMMUNICATION_REQUEST -->
+    </integer-array>
+
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
 

@@ -376,6 +376,25 @@ final class VibrationSettings {
     }
 
     /**
+     * Returns the duration, in milliseconds, that the vibrator control service will wait for new
+     * vibration params.
+     * @return The request vibration params timeout in milliseconds.
+     * @hide
+     */
+    public int getRequestVibrationParamsTimeoutMs() {
+        return mVibrationConfig.getRequestVibrationParamsTimeoutMs();
+    }
+
+    /**
+     * The list of usages that should request vibration params before they are played. These
+     * usages don't have strong latency requirements, e.g. ringtone and notification, and can be
+     * slightly delayed.
+     */
+    public int[] getRequestVibrationParamsForUsages() {
+        return mVibrationConfig.getRequestVibrationParamsForUsages();
+    }
+
+    /**
      * Return a {@link VibrationEffect} that should be played if the device do not support given
      * {@code effectId}.
      *

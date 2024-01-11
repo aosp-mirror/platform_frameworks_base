@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.frameworks.vibrator.IVibratorController;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.VibrationAttributes;
 
 /**
  * Provides a fake implementation of {@link android.frameworks.vibrator.IVibratorController} for
@@ -28,10 +29,16 @@ import android.os.RemoteException;
 public final class FakeVibratorController extends IVibratorController.Stub {
 
     public boolean isLinkedToDeath = false;
+    public boolean didRequestVibrationParams = false;
+    public int requestVibrationType = VibrationAttributes.USAGE_UNKNOWN;
+    public long requestTimeoutInMillis = 0;
 
     @Override
-    public void requestVibrationParams(int i, long l, IBinder iBinder) throws RemoteException {
-
+    public void requestVibrationParams(int vibrationType, long timeoutInMillis, IBinder iBinder)
+            throws RemoteException {
+        didRequestVibrationParams = true;
+        requestVibrationType = vibrationType;
+        requestTimeoutInMillis = timeoutInMillis;
     }
 
     @Override
