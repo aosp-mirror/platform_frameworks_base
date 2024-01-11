@@ -96,8 +96,11 @@ static jobjectArray android_os_VintfObject_report(JNIEnv* env, jclass)
 
 static jint android_os_VintfObject_verifyBuildAtBoot(JNIEnv* env, jclass) {
     std::string error;
+    // Use temporary VintfObject, not the shared instance, to release memory
+    // after check.
     int32_t status =
-            VintfObject::GetInstance()
+            VintfObject::Builder()
+                    .build()
                     ->checkCompatibility(&error, ENABLE_ALL_CHECKS.disableAvb().disableKernel());
     if (status)
         LOG(WARNING) << "VintfObject.verifyBuildAtBoot() returns " << status << ": " << error;
