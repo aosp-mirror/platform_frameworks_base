@@ -274,7 +274,9 @@ class SnapshotPersistQueue {
 
         @Override
         void write() {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "StoreWriteQueueItem");
+            if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "StoreWriteQueueItem#" + mId);
+            }
             if (!mPersistInfoProvider.createDirectory(mUserId)) {
                 Slog.e(TAG, "Unable to create snapshot directory for user dir="
                         + mPersistInfoProvider.getDirectory(mUserId));

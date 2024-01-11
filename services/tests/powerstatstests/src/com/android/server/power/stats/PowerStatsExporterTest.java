@@ -16,8 +16,6 @@
 
 package com.android.server.power.stats;
 
-import static androidx.test.InstrumentationRegistry.getContext;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -34,6 +32,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.UidBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -48,6 +47,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
@@ -57,7 +58,12 @@ public class PowerStatsExporterTest {
     private static final int APP_UID2 = 84;
     private static final double TOLERANCE = 0.01;
 
-    @Rule
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
+    @Rule(order = 1)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
             .setAveragePower(PowerProfile.POWER_CPU_ACTIVE, 720)
             .setCpuScalingPolicy(0, new int[]{0}, new int[]{100})
@@ -75,8 +81,8 @@ public class PowerStatsExporterTest {
     private PowerStats.Descriptor mPowerStatsDescriptor;
 
     @Before
-    public void setup() {
-        File storeDirectory = new File(getContext().getCacheDir(), getClass().getSimpleName());
+    public void setup() throws IOException {
+        File storeDirectory = Files.createTempDirectory("PowerStatsExporterTest").toFile();
         clearDirectory(storeDirectory);
 
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();

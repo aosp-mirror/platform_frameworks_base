@@ -1311,8 +1311,9 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         if (!node.mEnded) {
             float durationScale = ValueAnimator.getDurationScale();
             durationScale = durationScale == 0  ? 1 : durationScale;
-            node.mEnded = node.mAnimation.pulseAnimationFrame(
-                    (long) (animPlayTime * durationScale));
+            if (node.mAnimation.pulseAnimationFrame((long) (animPlayTime * durationScale))) {
+                node.mEnded = true;
+            }
         }
     }
 

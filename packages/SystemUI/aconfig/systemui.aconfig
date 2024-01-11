@@ -258,6 +258,15 @@ flag {
 }
 
 flag {
+   name: "centralized_status_bar_dimens_refactor"
+   namespace: "systemui"
+   description: "Refactors shade header and keyguard status bar to read status bar dimens from a"
+        " central place, instead of reading resources directly. This is to take into account display"
+        " cutouts and other special cases. "
+   bug: "317199366"
+}
+
+flag {
   name: "enable_layout_tracing"
   namespace: "systemui"
   description: "Enables detailed traversal slices during measure and layout in perfetto traces"

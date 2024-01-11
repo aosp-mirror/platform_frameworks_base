@@ -634,16 +634,17 @@ public class BtHelper {
             return;
         }
         List<BluetoothDevice> activeDevices = adapter.getActiveDevices(profile);
-        if (activeDevices.isEmpty() || activeDevices.get(0) == null) {
-            return;
+        BluetoothProfileConnectionInfo bpci = new BluetoothProfileConnectionInfo(profile);
+        for (BluetoothDevice device : activeDevices) {
+            if (device == null) {
+                continue;
+            }
+            AudioDeviceBroker.BtDeviceChangedData data = new AudioDeviceBroker.BtDeviceChangedData(
+                    device, null, bpci, "mBluetoothProfileServiceListener");
+            AudioDeviceBroker.BtDeviceInfo info = mDeviceBroker.createBtDeviceInfo(
+                    data, device, BluetoothProfile.STATE_CONNECTED);
+            mDeviceBroker.postBluetoothActiveDevice(info, 0 /* delay */);
         }
-        AudioDeviceBroker.BtDeviceChangedData data = new AudioDeviceBroker.BtDeviceChangedData(
-                activeDevices.get(0), null, new BluetoothProfileConnectionInfo(profile),
-                "mBluetoothProfileServiceListener");
-        AudioDeviceBroker.BtDeviceInfo info =
-                mDeviceBroker.createBtDeviceInfo(data, activeDevices.get(0),
-                        BluetoothProfile.STATE_CONNECTED);
-        mDeviceBroker.postBluetoothActiveDevice(info, 0 /* delay */);
     }
 
     // @GuardedBy("mDeviceBroker.mSetModeLock")
@@ -678,8 +679,11 @@ public class BtHelper {
         if (adapter != null) {
             List<BluetoothDevice> activeDevices =
                     adapter.getActiveDevices(BluetoothProfile.HEADSET);
-            if (activeDevices.size() > 0 && activeDevices.get(0) != null) {
-                onSetBtScoActiveDevice(activeDevices.get(0));
+            for (BluetoothDevice device : activeDevices) {
+                if (device == null) {
+                    continue;
+                }
+                onSetBtScoActiveDevice(device);
             }
         } else {
             Log.e(TAG, "onHeadsetProfileConnected: Null BluetoothAdapter");

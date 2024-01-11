@@ -16,6 +16,7 @@
 
 package com.android.server.autofill;
 
+import static com.android.server.autofill.Session.REQUEST_ID_KEY;
 import static com.android.server.autofill.Session.SESSION_ID_KEY;
 
 import android.annotation.NonNull;
@@ -107,15 +108,16 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
         mLastFlag = flag;
         if (mRemoteFillService != null && mRemoteFillService.isCredentialAutofillService()) {
             Slog.v(TAG, "About to call CredAutofill service as secondary provider");
-            addSessionIdToClientState(pendingFillRequest, pendingInlineSuggestionsRequest, id);
+            addSessionIdAndRequestIdToClientState(pendingFillRequest,
+                    pendingInlineSuggestionsRequest, id);
             mRemoteFillService.onFillCredentialRequest(pendingFillRequest, client);
         } else {
             mRemoteFillService.onFillRequest(pendingFillRequest);
         }
     }
 
-    private FillRequest addSessionIdToClientState(FillRequest pendingFillRequest,
-            InlineSuggestionsRequest pendingInlineSuggestionsRequest, int id) {
+    private FillRequest addSessionIdAndRequestIdToClientState(FillRequest pendingFillRequest,
+            InlineSuggestionsRequest pendingInlineSuggestionsRequest, int sessionId) {
         if (pendingFillRequest.getClientState() == null) {
             pendingFillRequest = new FillRequest(pendingFillRequest.getId(),
                     pendingFillRequest.getFillContexts(),
@@ -125,7 +127,8 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
                     pendingInlineSuggestionsRequest,
                     pendingFillRequest.getDelayedFillIntentSender());
         }
-        pendingFillRequest.getClientState().putInt(SESSION_ID_KEY, id);
+        pendingFillRequest.getClientState().putInt(SESSION_ID_KEY, sessionId);
+        pendingFillRequest.getClientState().putInt(REQUEST_ID_KEY, pendingFillRequest.getId());
         return pendingFillRequest;
     }
 

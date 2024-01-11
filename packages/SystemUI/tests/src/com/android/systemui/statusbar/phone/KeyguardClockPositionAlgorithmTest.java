@@ -84,7 +84,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         LogBuffer logBuffer = FakeLogBuffer.Factory.Companion.create();
         mClockPositionAlgorithm = new KeyguardClockPositionAlgorithm(logBuffer);
         when(mResources.getDimensionPixelSize(anyInt())).thenReturn(0);
-        mClockPositionAlgorithm.loadDimens(mResources);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
 
         mClockPosition = new KeyguardClockPositionAlgorithm.Result();
     }
@@ -297,7 +297,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
                 .thenReturn(100);
         when(mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height))
                 .thenReturn(70);
-        mClockPositionAlgorithm.loadDimens(mResources);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
         givenLockScreen();
         mIsSplitShade = true;
         // WHEN the position algorithm is run
@@ -589,7 +589,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private void setSplitShadeTopMargin(int value) {
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
                 .thenReturn(value);
-        mClockPositionAlgorithm.loadDimens(mResources);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
     }
 
     private void givenHighestBurnInOffset() {
@@ -603,7 +603,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private void givenMaxBurnInOffset(int offset) {
         when(mResources.getDimensionPixelSize(R.dimen.burn_in_prevention_offset_y_clock))
                 .thenReturn(offset);
-        mClockPositionAlgorithm.loadDimens(mResources);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
     }
 
     private void givenAOD() {

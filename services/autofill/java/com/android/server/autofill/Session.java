@@ -234,7 +234,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             new ComponentName("com.android.credentialmanager",
                     "com.android.credentialmanager.autofill.CredentialAutofillService");
 
-    static final String SESSION_ID_KEY = "session_id";
+    static final String SESSION_ID_KEY = "autofill_session_id";
+    static final String REQUEST_ID_KEY = "autofill_request_id";
 
     final Object mLock;
 
@@ -729,7 +730,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         mPendingFillRequest.getFlags(), id, mClient);
             } else if (mRemoteFillService != null) {
                 if (mIsPrimaryCredential) {
-                    mPendingFillRequest = addSessionIdToClientState(mPendingFillRequest,
+                    mPendingFillRequest = addSessionIdAndRequestIdToClientState(mPendingFillRequest,
                             mPendingInlineSuggestionsRequest, id);
                     mRemoteFillService.onFillCredentialRequest(mPendingFillRequest, mClient);
                 } else {
@@ -877,8 +878,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    private FillRequest addSessionIdToClientState(FillRequest pendingFillRequest,
-            InlineSuggestionsRequest pendingInlineSuggestionsRequest, int id) {
+    private FillRequest addSessionIdAndRequestIdToClientState(FillRequest pendingFillRequest,
+            InlineSuggestionsRequest pendingInlineSuggestionsRequest, int sessionId) {
         if (pendingFillRequest.getClientState() == null) {
             pendingFillRequest = new FillRequest(pendingFillRequest.getId(),
                     pendingFillRequest.getFillContexts(),
@@ -888,7 +889,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     pendingInlineSuggestionsRequest,
                     pendingFillRequest.getDelayedFillIntentSender());
         }
-        pendingFillRequest.getClientState().putInt(SESSION_ID_KEY, id);
+        pendingFillRequest.getClientState().putInt(SESSION_ID_KEY, sessionId);
+        pendingFillRequest.getClientState().putInt(REQUEST_ID_KEY, pendingFillRequest.getId());
         return pendingFillRequest;
     }
 

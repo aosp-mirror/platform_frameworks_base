@@ -18,9 +18,6 @@ package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -53,10 +50,8 @@ class SceneGestureHandlerTest {
     private class TestGestureScope(
         val coroutineScope: MonotonicClockTestScope,
     ) {
-        private var internalCurrentScene: SceneKey by mutableStateOf(SceneA)
-
         private val layoutState =
-            SceneTransitionLayoutStateImpl(internalCurrentScene, EmptyTestTransitions)
+            MutableSceneTransitionLayoutStateImpl(SceneA, EmptyTestTransitions)
 
         val mutableUserActionsA: MutableMap<UserAction, SceneKey> =
             mutableMapOf(Swipe.Up to SceneB, Swipe.Down to SceneC)
@@ -94,7 +89,6 @@ class SceneGestureHandlerTest {
         private val layoutImpl =
             SceneTransitionLayoutImpl(
                     state = layoutState,
-                    onChangeScene = { internalCurrentScene = it },
                     density = Density(1f),
                     edgeDetector = DefaultEdgeDetector,
                     transitionInterceptionThreshold = transitionInterceptionThreshold,

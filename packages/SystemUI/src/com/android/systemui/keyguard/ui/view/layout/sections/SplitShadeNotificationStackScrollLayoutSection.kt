@@ -23,11 +23,13 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.systemui.Flags.centralizedStatusBarDimensRefactor
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -35,6 +37,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCa
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -53,6 +56,7 @@ constructor(
     notificationStackSizeCalculator: NotificationStackSizeCalculator,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     @Main mainDispatcher: CoroutineDispatcher,
+    private val largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
 ) :
     NotificationStackScrollLayoutSection(
         context,
@@ -72,7 +76,13 @@ constructor(
         }
         constraintSet.apply {
             val splitShadeTopMargin =
-                context.resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
+                if (centralizedStatusBarDimensRefactor()) {
+                    largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
+                } else {
+                    context.resources.getDimensionPixelSize(
+                        R.dimen.large_screen_shade_header_height
+                    )
+                }
             connect(R.id.nssl_placeholder, TOP, PARENT_ID, TOP, splitShadeTopMargin)
 
             connect(R.id.nssl_placeholder, START, PARENT_ID, START)

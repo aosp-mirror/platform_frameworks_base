@@ -24,6 +24,7 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.common.bubbles.DismissView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
@@ -114,6 +115,11 @@ class DragToInteractAnimationController {
 
     void setMagnetListener(MagnetizedObject.MagnetListener magnetListener) {
         mMagnetizedObject.setMagnetListener(magnetListener);
+    }
+
+    @VisibleForTesting
+    MagnetizedObject.MagnetListener getMagnetListener() {
+        return mMagnetizedObject.getMagnetListener();
     }
 
     void maybeConsumeDownMotionEvent(MotionEvent event) {

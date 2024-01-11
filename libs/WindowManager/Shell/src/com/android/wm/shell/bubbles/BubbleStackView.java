@@ -1177,14 +1177,17 @@ public class BubbleStackView extends FrameLayout
             if (mStackAnimationController.isStackOnLeftSide()) {
                 int availableRectOffsetX =
                         mPositioner.getAvailableRect().left - mPositioner.getScreenRect().left;
-                animate().translationX(-(mBubbleSize + availableRectOffsetX)).start();
+                mBubbleContainer
+                        .animate()
+                        .translationX(-(mBubbleSize + availableRectOffsetX))
+                        .start();
             } else {
                 int availableRectOffsetX =
                         mPositioner.getAvailableRect().right - mPositioner.getScreenRect().right;
-                animate().translationX(mBubbleSize - availableRectOffsetX).start();
+                mBubbleContainer.animate().translationX(mBubbleSize - availableRectOffsetX).start();
             }
         } else {
-            animate().translationX(0).start();
+            mBubbleContainer.animate().translationX(0).start();
         }
     };
 

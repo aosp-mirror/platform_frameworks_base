@@ -15,17 +15,17 @@
  */
 package com.android.systemui.statusbar;
 
+import static android.app.Flags.keyguardPrivateNotifications;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
+import static android.os.Flags.allowPrivateProfile;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_NULL;
 import static android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
 import static android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS;
-import static android.app.Flags.keyguardPrivateNotifications;
-import static android.os.Flags.allowPrivateProfile;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
@@ -42,9 +42,8 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.database.ExecutorContentObserver;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -79,16 +78,16 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.settings.SecureSettings;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Handles keeping track of the current user, profiles, and various things related to hiding
@@ -228,7 +227,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 updateCurrentProfilesCache();
                 if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
                     final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
-                    mBackgroundHandler.post(() -> {
+                    mBackgroundExecutor.execute(() -> {
                         initValuesForUser(userId);
                     });
                 }
@@ -289,8 +288,7 @@ public class NotificationLockscreenUserManagerImpl implements
             };
 
     protected final Context mContext;
-    private final Handler mMainHandler;
-    private final Handler mBackgroundHandler;
+    private final Executor mMainExecutor;
     private final Executor mBackgroundExecutor;
     /** The current user and its profiles (possibly including a communal profile). */
     protected final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
@@ -313,8 +311,7 @@ public class NotificationLockscreenUserManagerImpl implements
             Lazy<OverviewProxyService> overviewProxyServiceLazy,
             KeyguardManager keyguardManager,
             StatusBarStateController statusBarStateController,
-            @Main Handler mainHandler,
-            @Background Handler backgroundHandler,
+            @Main Executor mainExecutor,
             @Background Executor backgroundExecutor,
             DeviceProvisionedController deviceProvisionedController,
             KeyguardStateController keyguardStateController,
@@ -323,8 +320,7 @@ public class NotificationLockscreenUserManagerImpl implements
             LockPatternUtils lockPatternUtils,
             FeatureFlagsClassic featureFlags) {
         mContext = context;
-        mMainHandler = mainHandler;
-        mBackgroundHandler = backgroundHandler;
+        mMainExecutor = mainExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mDevicePolicyManager = devicePolicyManager;
         mUserManager = userManager;
@@ -362,10 +358,10 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     private void init() {
-        mLockscreenSettingsObserver = new ContentObserver(
+        mLockscreenSettingsObserver = new ExecutorContentObserver(
                 mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)
-                        ? mBackgroundHandler
-                        : mMainHandler) {
+                        ? mBackgroundExecutor
+                        : mMainExecutor) {
 
             @Override
             public void onChange(boolean selfChange, Collection<Uri> uris, int flags) {
@@ -412,7 +408,7 @@ public class NotificationLockscreenUserManagerImpl implements
             }
         };
 
-        mSettingsObserver = new ContentObserver(mMainHandler) {
+        mSettingsObserver = new ExecutorContentObserver(mMainExecutor) {
             @Override
             public void onChange(boolean selfChange) {
                 updateLockscreenNotificationSetting();
@@ -468,14 +464,14 @@ public class NotificationLockscreenUserManagerImpl implements
         mContext.registerReceiver(mBaseBroadcastReceiver, internalFilter, PERMISSION_SELF, null,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
 
-        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mMainHandler));
+        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
 
         mCurrentUserId = mUserTracker.getUserId(); // in case we reg'd receiver too late
         updateCurrentProfilesCache();
 
         if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
             // Set  up
-            mBackgroundHandler.post(() -> {
+            mBackgroundExecutor.execute(() -> {
                 @SuppressLint("MissingPermission") List<UserInfo> users = mUserManager.getUsers();
                 for (int i = users.size() - 1; i >= 0; i--) {
                     initValuesForUser(users.get(i).id);
@@ -796,7 +792,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 }
             }
         }
-        mMainHandler.post(() -> {
+        mMainExecutor.execute(() -> {
             for (UserChangedListener listener : mListeners) {
                 listener.onCurrentProfilesChanged(mCurrentProfiles);
             }
@@ -895,7 +891,7 @@ public class NotificationLockscreenUserManagerImpl implements
 
     private void notifyNotificationStateChanged() {
         if (!Looper.getMainLooper().isCurrentThread()) {
-            mMainHandler.post(() -> {
+            mMainExecutor.execute(() -> {
                 for (NotificationStateChangedListener listener : mNotifStateChangedListeners) {
                     listener.onNotificationStateChanged();
                 }

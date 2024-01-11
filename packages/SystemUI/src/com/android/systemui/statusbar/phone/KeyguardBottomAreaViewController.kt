@@ -18,12 +18,23 @@ package com.android.systemui.statusbar.phone
 
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.Flags.smartspaceRelocateToBottom
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.util.ViewController
 import javax.inject.Inject
 
 class KeyguardBottomAreaViewController
-    @Inject constructor(view: KeyguardBottomAreaView, featureFlags: FeatureFlagsClassic) :
-    ViewController<KeyguardBottomAreaView> (view) {
+    @Inject constructor(
+            view: KeyguardBottomAreaView,
+            private val smartspaceController: LockscreenSmartspaceController,
+            featureFlags: FeatureFlagsClassic
+) : ViewController<KeyguardBottomAreaView> (view) {
+
+    private var smartspaceView: View? = null
 
     init {
         view.setIsLockscreenLandscapeEnabled(
@@ -31,6 +42,14 @@ class KeyguardBottomAreaViewController
     }
 
     override fun onViewAttached() {
+        if (!smartspaceRelocateToBottom() || !smartspaceController.isEnabled()) {
+            return
+        }
+
+        val ambientIndicationArea = mView.findViewById<View>(R.id.ambient_indication_container)
+        ambientIndicationArea?.visibility = View.GONE
+
+        addSmartspaceView()
     }
 
     override fun onViewDetached() {
@@ -39,5 +58,25 @@ class KeyguardBottomAreaViewController
     fun getView(): KeyguardBottomAreaView {
         // TODO: remove this method.
         return mView
+    }
+
+    private fun addSmartspaceView() {
+        if (!smartspaceRelocateToBottom()) {
+            return
+        }
+
+        val smartspaceContainer = mView.findViewById<View>(R.id.smartspace_container)
+        smartspaceContainer!!.visibility = View.VISIBLE
+
+        smartspaceView = smartspaceController.buildAndConnectView(smartspaceContainer as ViewGroup)
+        val lp = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        (smartspaceContainer as ViewGroup).addView(smartspaceView, 0, lp)
+        val startPadding = context.resources.getDimensionPixelSize(
+                R.dimen.below_clock_padding_start)
+        val endPadding = context.resources.getDimensionPixelSize(
+                R.dimen.below_clock_padding_end)
+        smartspaceView?.setPaddingRelative(startPadding, 0, endPadding, 0)
+//        mKeyguardUnlockAnimationController.lockscreenSmartspace = smartspaceView
     }
 }

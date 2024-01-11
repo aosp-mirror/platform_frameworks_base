@@ -517,6 +517,8 @@ public final class CredentialManagerService
                                     .map(CredentialOption::getType)
                                     .collect(Collectors.toList()));
 
+            finalizeAndEmitInitialPhaseMetric(session);
+
             if (providerSessions.isEmpty()) {
                 try {
                     callback.onError(
@@ -774,6 +776,13 @@ public final class CredentialManagerService
             finalizeAndEmitInitialPhaseMetric(session);
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(ProviderSession::invokeSession);
+        }
+
+        private void finalizeAndEmitInitialPhaseMetric(GetCandidateRequestSession session) {
+            var initMetric = session.mRequestSessionMetric.getInitialPhaseMetric();
+            initMetric.setAutofillSessionId(session.getAutofillSessionId());
+            initMetric.setAutofillRequestId(session.getAutofillRequestId());
+            finalizeAndEmitInitialPhaseMetric((RequestSession) session);
         }
 
         private void finalizeAndEmitInitialPhaseMetric(RequestSession session) {

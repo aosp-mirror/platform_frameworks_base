@@ -3075,7 +3075,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Request to put the freeform activity into fullscreen. The requester has to be the top-most
+     * Request to put the activity into fullscreen. The requester must be pinned or the top-most
      * activity of the focused display which can be verified using
      * {@link #onTopResumedActivityChanged(boolean)}. The request should also be a response to a
      * user input. When getting fullscreen and receiving corresponding

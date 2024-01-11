@@ -1110,7 +1110,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             mInputController.setShowPointerIcon(showPointer, displayId);
-            mInputController.setPointerAcceleration(1f, displayId);
+            mInputController.setMousePointerAccelerationEnabled(false, displayId);
             mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
                     displayId);
             // WM throws a SecurityException if the display is untrusted.

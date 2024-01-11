@@ -763,8 +763,7 @@ public class UserControllerTest {
 
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_BACKGROUND);
 
-        verify(mInjector.mStorageManagerMock, never())
-                .unlockCeStorage(eq(TEST_USER_ID), anyInt(), any());
+        verify(mInjector.mStorageManagerMock, never()).unlockCeStorage(eq(TEST_USER_ID), any());
     }
 
     @Test

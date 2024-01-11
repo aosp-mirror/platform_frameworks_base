@@ -867,6 +867,7 @@ public class SettingsBackupTest {
                         Settings.Secure.NEARBY_SHARING_SLICE_URI,
                         Settings.Secure.NOTIFIED_NON_ACCESSIBILITY_CATEGORY_SERVICES,
                         Settings.Secure.ONE_HANDED_TUTORIAL_SHOW_COUNT,
+                        Settings.Secure.PRIVATE_SPACE_AUTO_LOCK,
                         Settings.Secure.RELEASE_COMPRESS_BLOCKS_ON_INSTALL,
                         Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED,
                         Settings.Secure.SHOW_QR_CODE_SCANNER_SETTING,

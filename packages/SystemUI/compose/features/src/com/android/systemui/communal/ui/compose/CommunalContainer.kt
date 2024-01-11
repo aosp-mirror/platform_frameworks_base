@@ -33,11 +33,11 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
-import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
+import com.android.compose.animation.scene.updateSceneTransitionLayoutState
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
@@ -76,7 +76,13 @@ fun CommunalContainer(
         viewModel.currentScene
             .transform { value -> emit(value.toTransitionSceneKey()) }
             .collectAsState(TransitionSceneKey.Blank)
-    val sceneTransitionLayoutState = remember { SceneTransitionLayoutState(currentScene) }
+    val sceneTransitionLayoutState =
+        updateSceneTransitionLayoutState(
+            currentScene,
+            onChangeScene = { viewModel.onSceneChanged(it.toCommunalSceneKey()) },
+            transitions = sceneTransitions,
+        )
+
     // Don't show hub mode UI if keyguard is present. This is important since we're in the shade,
     // which can be opened from many locations.
     val isKeyguardShowing by viewModel.isKeyguardVisible.collectAsState(initial = false)
@@ -98,12 +104,9 @@ fun CommunalContainer(
 
     Box(modifier = modifier.fillMaxSize()) {
         SceneTransitionLayout(
-            modifier = Modifier.fillMaxSize(),
-            currentScene = currentScene,
-            onChangeScene = { sceneKey -> viewModel.onSceneChanged(sceneKey.toCommunalSceneKey()) },
-            transitions = sceneTransitions,
             state = sceneTransitionLayoutState,
-            edgeDetector = FixedSizeEdgeDetector(ContainerDimensions.EdgeSwipeSize)
+            modifier = Modifier.fillMaxSize(),
+            edgeDetector = FixedSizeEdgeDetector(ContainerDimensions.EdgeSwipeSize),
         ) {
             scene(
                 TransitionSceneKey.Blank,

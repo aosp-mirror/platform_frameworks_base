@@ -370,4 +370,14 @@ interface IWindowSession {
     boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow);
 
     boolean transferHostTouchGestureToEmbedded(IWindow hostWindow, IBinder transferTouchToken);
+
+    /**
+     * Moves the focus to the adjacent window if there is one in the given direction. This can only
+     * move the focus to the window in the same leaf task.
+     *
+     * @param fromWindow The calling window that the focus is moved from.
+     * @param direction The {@link android.view.View.FocusDirection} that the new focus should go.
+     * @return {@code true} if the focus changes. Otherwise, {@code false}.
+     */
+    boolean moveFocusToAdjacentWindow(IWindow fromWindow, int direction);
 }

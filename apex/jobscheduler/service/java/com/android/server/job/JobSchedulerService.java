@@ -159,6 +159,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -512,6 +513,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 for (String name : properties.getKeyset()) {
                     if (name == null) {
                         continue;
+                    }
+                    if (DEBUG) {
+                        Slog.d(TAG, "DeviceConfig " + name
+                                + " changed to " + properties.getString(name, null));
                     }
                     switch (name) {
                         case Constants.KEY_ENABLE_API_QUOTAS:
@@ -3507,7 +3512,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
 
                 final boolean shouldForceBatchJob;
-                if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob()) {
+                if (job.overrideState > JobStatus.OVERRIDE_NONE) {
+                    // The job should run for some test. Don't force batch it.
+                    shouldForceBatchJob = false;
+                } else if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob()) {
                     // Never batch expedited or user-initiated jobs, even for RESTRICTED apps.
                     shouldForceBatchJob = false;
                 } else if (job.getEffectiveStandbyBucket() == RESTRICTED_INDEX) {
@@ -4960,6 +4968,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         Slog.d(TAG, "executeRunCommand(): " + pkgName + "/" + namespace + "/" + userId
                 + " " + jobId + " s=" + satisfied + " f=" + force);
 
+        final CountDownLatch delayLatch = new CountDownLatch(1);
+        final JobStatus js;
         try {
             final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
                     userId != UserHandle.USER_ALL ? userId : UserHandle.USER_SYSTEM);
@@ -4968,7 +4978,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
 
             synchronized (mLock) {
-                final JobStatus js = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+                js = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
                 if (js == null) {
                     return JobSchedulerShellCommand.CMD_ERR_NO_JOB;
                 }
@@ -4979,21 +4989,69 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // Re-evaluate constraints after the override is set in case one of the overridden
                 // constraints was preventing another constraint from thinking it needed to update.
                 for (int c = mControllers.size() - 1; c >= 0; --c) {
-                    mControllers.get(c).reevaluateStateLocked(uid);
+                    mControllers.get(c).evaluateStateLocked(js);
                 }
 
                 if (!js.isConstraintsSatisfied()) {
-                    js.overrideState = JobStatus.OVERRIDE_NONE;
-                    return JobSchedulerShellCommand.CMD_ERR_CONSTRAINTS;
+                    if (js.hasConnectivityConstraint()
+                            && !js.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY)
+                            && js.wouldBeReadyWithConstraint(JobStatus.CONSTRAINT_CONNECTIVITY)) {
+                        // Because of how asynchronous the connectivity signals are, JobScheduler
+                        // may not get the connectivity satisfaction signal immediately. In this
+                        // case, wait a few seconds to see if it comes in before saying the
+                        // connectivity constraint isn't satisfied.
+                        mHandler.postDelayed(
+                                checkConstraintRunnableForTesting(
+                                        mHandler, js, delayLatch, 5, 1000),
+                                1000);
+                    } else {
+                        // There's no asynchronous signal to wait for. We can immediately say the
+                        // job's constraints aren't satisfied and return.
+                        js.overrideState = JobStatus.OVERRIDE_NONE;
+                        return JobSchedulerShellCommand.CMD_ERR_CONSTRAINTS;
+                    }
+                } else {
+                    delayLatch.countDown();
                 }
-
-                queueReadyJobsForExecutionLocked();
-                maybeRunPendingJobsLocked();
             }
         } catch (RemoteException e) {
             // can't happen
+            return 0;
+        }
+
+        // Choose to block the return until we're sure about the state of the connectivity job
+        // so that tests can expect a reliable state after calling the run command.
+        try {
+            delayLatch.await(7L, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Couldn't wait for asynchronous constraint change", e);
+        }
+
+        synchronized (mLock) {
+            if (!js.isConstraintsSatisfied()) {
+                js.overrideState = JobStatus.OVERRIDE_NONE;
+                return JobSchedulerShellCommand.CMD_ERR_CONSTRAINTS;
+            }
+
+            queueReadyJobsForExecutionLocked();
+            maybeRunPendingJobsLocked();
         }
         return 0;
+    }
+
+    private static Runnable checkConstraintRunnableForTesting(@NonNull final Handler handler,
+            @NonNull final JobStatus js, @NonNull final CountDownLatch latch,
+            final int remainingAttempts, final long delayMs) {
+        return () -> {
+            if (remainingAttempts <= 0 || js.isConstraintsSatisfied()) {
+                latch.countDown();
+                return;
+            }
+            handler.postDelayed(
+                    checkConstraintRunnableForTesting(
+                            handler, js, latch, remainingAttempts - 1, delayMs),
+                    delayMs);
+        };
     }
 
     // Shell command infrastructure: immediately timeout currently executing jobs

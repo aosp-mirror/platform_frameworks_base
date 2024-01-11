@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
@@ -121,6 +122,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
         )
 
         utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_SWITCH_USER_ON_BG)
         spyContext = spy(context)
         keyguardReply = KeyguardInteractorFactory.create(featureFlags = utils.featureFlags)
         keyguardRepository = keyguardReply.repository
@@ -172,6 +174,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
             underTest.onRecordSelected(UserRecord(info = userInfos[1]), dialogShower)
+            runCurrent()
 
             verify(uiEventLogger, times(1))
                 .log(MultiUserActionsEvent.SWITCH_TO_USER_FROM_USER_SWITCHER)
@@ -191,6 +194,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
             underTest.onRecordSelected(UserRecord(info = userInfos.last()))
+            runCurrent()
 
             verify(uiEventLogger, times(1))
                 .log(MultiUserActionsEvent.SWITCH_TO_GUEST_FROM_USER_SWITCHER)
@@ -218,6 +222,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
 
             underTest.onRecordSelected(UserRecord(info = userInfos.last()))
+            runCurrent()
 
             verify(uiEventLogger, times(1))
                 .log(MultiUserActionsEvent.SWITCH_TO_RESTRICTED_USER_FROM_USER_SWITCHER)

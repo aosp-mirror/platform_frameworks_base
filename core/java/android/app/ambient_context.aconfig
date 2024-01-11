@@ -1,0 +1,8 @@
+package: "android.app"
+
+flag {
+  namespace: "biometrics_integration"
+  name: "ambient_heart_rate"
+  description: "Feature flag for adding heart rate api to ambient context."
+  bug: "318309481"
+}

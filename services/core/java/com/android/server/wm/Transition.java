@@ -1933,29 +1933,29 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 dc.getInputMonitor().getInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
         ActivityRecord recentsActivity = null;
         if (recentsAnimationInputConsumer != null) {
-            // find the top-most going-away activity and the recents activity. The top-most
+            // Find the top-most going-away task and the recents activity. The top-most
             // is used as layer reference while the recents is used for registering the consumer
             // override.
-            ActivityRecord topActivity = null;
+            Task topNonRecentsTask = null;
             for (int i = 0; i < info.getChanges().size(); ++i) {
-                final TransitionInfo.Change change = info.getChanges().get(i);
-                if (change.getTaskInfo() == null) continue;
-                final Task task = Task.fromWindowContainerToken(
-                        info.getChanges().get(i).getTaskInfo().token);
+                final ActivityManager.RunningTaskInfo taskInfo =
+                        info.getChanges().get(i).getTaskInfo();
+                if (taskInfo == null) continue;
+                final Task task = Task.fromWindowContainerToken(taskInfo.token);
                 if (task == null) continue;
-                final int activityType = change.getTaskInfo().topActivityType;
+                final int activityType = taskInfo.topActivityType;
                 final boolean isRecents = activityType == ACTIVITY_TYPE_HOME
                         || activityType == ACTIVITY_TYPE_RECENTS;
                 if (isRecents && recentsActivity == null) {
                     recentsActivity = task.getTopVisibleActivity();
-                } else if (!isRecents && topActivity == null) {
-                    topActivity = task.getTopNonFinishingActivity();
+                } else if (!isRecents && topNonRecentsTask == null) {
+                    topNonRecentsTask = task;
                 }
             }
-            if (recentsActivity != null && topActivity != null) {
+            if (recentsActivity != null && topNonRecentsTask != null) {
                 recentsAnimationInputConsumer.mWindowHandle.touchableRegion.set(
-                        topActivity.getBounds());
-                dc.getInputMonitor().setActiveRecents(recentsActivity, topActivity);
+                        topNonRecentsTask.getBounds());
+                dc.getInputMonitor().setActiveRecents(recentsActivity, topNonRecentsTask);
             }
         }
 
@@ -2020,16 +2020,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         mController.mNavigationBarAttachedToApp = false;
 
-        if (mRecentsDisplayId == INVALID_DISPLAY) {
-            Slog.e(TAG, "Reparented navigation bar without a valid display");
-            mRecentsDisplayId = DEFAULT_DISPLAY;
+        int recentsDisplayId = mRecentsDisplayId;
+        if (recentsDisplayId == INVALID_DISPLAY) {
+            Slog.i(TAG, "Restore parent surface of navigation bar by another transition");
+            recentsDisplayId = DEFAULT_DISPLAY;
         }
 
         final DisplayContent dc =
-                mController.mAtm.mRootWindowContainer.getDisplayContent(mRecentsDisplayId);
+                mController.mAtm.mRootWindowContainer.getDisplayContent(recentsDisplayId);
         final StatusBarManagerInternal bar = dc.getDisplayPolicy().getStatusBarManagerInternal();
         if (bar != null) {
-            bar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, true);
+            bar.setNavigationBarLumaSamplingEnabled(recentsDisplayId, true);
         }
         final WindowState navWindow = dc.getDisplayPolicy().getNavigationBar();
         if (navWindow == null) return;

@@ -44,12 +44,18 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricService;
+import android.hardware.biometrics.fingerprint.IFingerprint;
+import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
@@ -60,6 +66,7 @@ import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.nano.BiometricSchedulerProto;
@@ -95,14 +102,39 @@ public class BiometricSchedulerTest {
     @Rule
     public final TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getContext(), null);
-    private BiometricScheduler mScheduler;
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+    private BiometricScheduler<IFingerprint, ISession> mScheduler;
     private IBinder mToken;
+    private int mCurrentUserId = UserHandle.USER_SYSTEM;
+    private boolean mShouldFailStopUser = false;
+    private final List<Integer> mStartedUsers = new ArrayList<>();
+    private final StartUserClient.UserStartedCallback<ISession> mUserStartedCallback =
+            (newUserId, newUser, halInterfaceVersion) -> {
+                mStartedUsers.add(newUserId);
+                mCurrentUserId = newUserId;
+            };
+    private int mUsersStoppedCount = 0;
+    private final StopUserClient.UserStoppedCallback mUserStoppedCallback =
+            () -> {
+                mUsersStoppedCount++;
+                mCurrentUserId = UserHandle.USER_NULL;
+            };
+    private boolean mStartOperationsFinish = true;
+    private int mStartUserClientCount = 0;
     @Mock
     private IBiometricService mBiometricService;
     @Mock
     private BiometricContext mBiometricContext;
     @Mock
     private AuthSessionCoordinator mAuthSessionCoordinator;
+    @Mock
+    private BiometricLogger mBiometricLogger;
+    @Mock
+    private ISession mSession;
+    @Mock
+    private IFingerprint mFingerprint;
 
     @Before
     public void setUp() {
@@ -111,9 +143,39 @@ public class BiometricSchedulerTest {
         when(mAuthSessionCoordinator.getLockoutStateFor(anyInt(), anyInt())).thenReturn(
                 BIOMETRIC_SUCCESS);
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
-        mScheduler = new BiometricScheduler(TAG, new Handler(TestableLooper.get(this).getLooper()),
-                BiometricScheduler.SENSOR_TYPE_UNKNOWN, null /* gestureAvailabilityTracker */,
-                mBiometricService, LOG_NUM_RECENT_OPERATIONS);
+        if (Flags.deHidl()) {
+            mScheduler = new BiometricScheduler<>(
+                    new Handler(TestableLooper.get(this).getLooper()),
+                    BiometricScheduler.SENSOR_TYPE_UNKNOWN,
+                    null /* gestureAvailabilityDispatcher */,
+                    mBiometricService,
+                    LOG_NUM_RECENT_OPERATIONS,
+                    () -> mCurrentUserId,
+                    new UserSwitchProvider<IFingerprint, ISession>() {
+                        @NonNull
+                        @Override
+                        public StopUserClient<ISession> getStopUserClient(int userId) {
+                            return new TestStopUserClient(mContext, () -> mSession, mToken, userId,
+                                    TEST_SENSOR_ID, mBiometricLogger, mBiometricContext,
+                                    mUserStoppedCallback, () -> mShouldFailStopUser);
+                        }
+
+                        @NonNull
+                        @Override
+                        public StartUserClient<IFingerprint, ISession> getStartUserClient(
+                                int newUserId) {
+                            mStartUserClientCount++;
+                            return new TestStartUserClient(mContext, () -> mFingerprint, mToken,
+                                    newUserId, TEST_SENSOR_ID, mBiometricLogger, mBiometricContext,
+                                    mUserStartedCallback, mStartOperationsFinish);
+                        }
+                    });
+        } else {
+            mScheduler = new BiometricScheduler<>(
+                    new Handler(TestableLooper.get(this).getLooper()),
+                    BiometricScheduler.SENSOR_TYPE_UNKNOWN, null /* gestureAvailabilityTracker */,
+                    mBiometricService, LOG_NUM_RECENT_OPERATIONS);
+        }
     }
 
     @Test
@@ -479,6 +541,7 @@ public class BiometricSchedulerTest {
         final boolean isEnroll = client instanceof TestEnrollClient;
 
         mScheduler.scheduleClientMonitor(client);
+        waitForIdle();
         if (started) {
             mScheduler.startPreparedClient(client.getCookie());
         }
@@ -789,6 +852,172 @@ public class BiometricSchedulerTest {
         assertEquals(1,  client1.getFingerprints().size());
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testScheduleOperation_whenNoUser() {
+        mCurrentUserId = UserHandle.USER_NULL;
+
+        final BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(0);
+
+        mScheduler.scheduleClientMonitor(nextClient);
+        waitForIdle();
+
+        assertThat(mUsersStoppedCount).isEqualTo(0);
+        assertThat(mStartedUsers).containsExactly(0);
+        verify(nextClient).start(any());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testScheduleOperation_whenNoUser_notStarted() {
+        mCurrentUserId = UserHandle.USER_NULL;
+        mStartOperationsFinish = false;
+
+        final BaseClientMonitor[] nextClients = new BaseClientMonitor[]{
+                mock(BaseClientMonitor.class),
+                mock(BaseClientMonitor.class),
+                mock(BaseClientMonitor.class)
+        };
+        for (BaseClientMonitor client : nextClients) {
+            when(client.getTargetUserId()).thenReturn(5);
+            mScheduler.scheduleClientMonitor(client);
+            waitForIdle();
+        }
+
+        assertThat(mUsersStoppedCount).isEqualTo(0);
+        assertThat(mStartedUsers).isEmpty();
+        assertThat(mStartUserClientCount).isEqualTo(1);
+        for (BaseClientMonitor client : nextClients) {
+            verify(client, never()).start(any());
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testScheduleOperation_whenNoUser_notStarted_andReset() {
+        mCurrentUserId = UserHandle.USER_NULL;
+        mStartOperationsFinish = false;
+
+        final BaseClientMonitor client = mock(BaseClientMonitor.class);
+
+        when(client.getTargetUserId()).thenReturn(5);
+
+        mScheduler.scheduleClientMonitor(client);
+        waitForIdle();
+
+        final TestStartUserClient startUserClient =
+                (TestStartUserClient) mScheduler.mCurrentOperation.getClientMonitor();
+        mScheduler.reset();
+
+        assertThat(mScheduler.mCurrentOperation).isNull();
+
+        final BiometricSchedulerOperation fakeOperation = new BiometricSchedulerOperation(
+                mock(BaseClientMonitor.class), new ClientMonitorCallback() {});
+        mScheduler.mCurrentOperation = fakeOperation;
+        startUserClient.mCallback.onClientFinished(startUserClient, true);
+
+        assertThat(fakeOperation).isSameInstanceAs(mScheduler.mCurrentOperation);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testScheduleOperation_whenSameUser() {
+        mCurrentUserId = 10;
+
+        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(mCurrentUserId);
+
+        mScheduler.scheduleClientMonitor(nextClient);
+
+        waitForIdle();
+
+        verify(nextClient).start(any());
+        assertThat(mUsersStoppedCount).isEqualTo(0);
+        assertThat(mStartedUsers).isEmpty();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testScheduleOperation_whenDifferentUser() {
+        mCurrentUserId = 10;
+
+        final int nextUserId = 11;
+        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(nextUserId);
+
+        mScheduler.scheduleClientMonitor(nextClient);
+
+        waitForIdle();
+        assertThat(mUsersStoppedCount).isEqualTo(1);
+
+        waitForIdle();
+        assertThat(mStartedUsers).containsExactly(nextUserId);
+
+        waitForIdle();
+        verify(nextClient).start(any());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testStartUser_alwaysStartsNextOperation() {
+        mCurrentUserId = UserHandle.USER_NULL;
+
+        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(10);
+
+        mScheduler.scheduleClientMonitor(nextClient);
+
+        waitForIdle();
+        verify(nextClient).start(any());
+
+        // finish first operation
+        mScheduler.getInternalCallback().onClientFinished(nextClient, true /* success */);
+        waitForIdle();
+
+        // schedule second operation but swap out the current operation
+        // before it runs so that it's not current when it's completion callback runs
+        nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(11);
+        mScheduler.scheduleClientMonitor(nextClient);
+
+        waitForIdle();
+        verify(nextClient).start(any());
+        assertThat(mStartedUsers).containsExactly(10, 11).inOrder();
+        assertThat(mUsersStoppedCount).isEqualTo(1);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    public void testStartUser_failsClearsStopUserClient() {
+        mCurrentUserId = UserHandle.USER_NULL;
+
+        // When a stop user client fails, check that mStopUserClient
+        // is set to null to prevent the scheduler from getting stuck.
+        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(10);
+
+        mScheduler.scheduleClientMonitor(nextClient);
+
+        waitForIdle();
+        verify(nextClient).start(any());
+
+        // finish first operation
+        mScheduler.getInternalCallback().onClientFinished(nextClient, true /* success */);
+        waitForIdle();
+
+        // schedule second operation but swap out the current operation
+        // before it runs so that it's not current when it's completion callback runs
+        nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(11);
+        mShouldFailStopUser = true;
+        mScheduler.scheduleClientMonitor(nextClient);
+
+        waitForIdle();
+        assertThat(mStartedUsers).containsExactly(10, 11).inOrder();
+        assertThat(mUsersStoppedCount).isEqualTo(0);
+        assertThat(mScheduler.getStopUserClient()).isEqualTo(null);
+    }
 
     private BiometricSchedulerProto getDump(boolean clearSchedulerBuffer) throws Exception {
         return BiometricSchedulerProto.parseFrom(mScheduler.dumpProtoState(clearSchedulerBuffer));
@@ -1067,6 +1296,84 @@ public class BiometricSchedulerTest {
 
         public List<Fingerprint> getFingerprints() {
             return mFingerprints;
+        }
+    }
+
+    private interface StopUserClientShouldFail {
+        boolean shouldFail();
+    }
+
+    private class TestStopUserClient extends StopUserClient<ISession> {
+        private StopUserClientShouldFail mShouldFailClient;
+        TestStopUserClient(@NonNull Context context,
+                @NonNull Supplier<ISession> lazyDaemon, @Nullable IBinder token, int userId,
+                int sensorId, @NonNull BiometricLogger logger,
+                @NonNull BiometricContext biometricContext,
+                @NonNull UserStoppedCallback callback, StopUserClientShouldFail shouldFail) {
+            super(context, lazyDaemon, token, userId, sensorId, logger, biometricContext, callback);
+            mShouldFailClient = shouldFail;
+        }
+
+        @Override
+        protected void startHalOperation() {
+
+        }
+
+        @Override
+        public void start(@NonNull ClientMonitorCallback callback) {
+            super.start(callback);
+            if (mShouldFailClient.shouldFail()) {
+                getCallback().onClientFinished(this, false /* success */);
+                // When the above fails, it means that the HAL has died, in this case we
+                // need to ensure the UserSwitchCallback correctly returns the NULL user handle.
+                mCurrentUserId = UserHandle.USER_NULL;
+            } else {
+                onUserStopped();
+            }
+        }
+
+        @Override
+        public void unableToStart() {
+
+        }
+    }
+
+    private static class TestStartUserClient extends StartUserClient<IFingerprint, ISession> {
+
+        @Mock
+        private ISession mSession;
+        private final boolean mShouldFinish;
+        ClientMonitorCallback mCallback;
+
+        TestStartUserClient(@NonNull Context context,
+                @NonNull Supplier<IFingerprint> lazyDaemon, @Nullable IBinder token, int userId,
+                int sensorId, @NonNull BiometricLogger logger,
+                @NonNull BiometricContext biometricContext,
+                @NonNull UserStartedCallback<ISession> callback, boolean shouldFinish) {
+            super(context, lazyDaemon, token, userId, sensorId, logger, biometricContext, callback);
+            mShouldFinish = shouldFinish;
+        }
+
+        @Override
+        protected void startHalOperation() {
+
+        }
+
+        @Override
+        public void start(@NonNull ClientMonitorCallback callback) {
+            super.start(callback);
+
+            mCallback = callback;
+            if (mShouldFinish) {
+                mUserStartedCallback.onUserStarted(
+                        getTargetUserId(), mSession, 1 /* halInterfaceVersion */);
+                callback.onClientFinished(this, true /* success */);
+            }
+        }
+
+        @Override
+        public void unableToStart() {
+
         }
     }
 }

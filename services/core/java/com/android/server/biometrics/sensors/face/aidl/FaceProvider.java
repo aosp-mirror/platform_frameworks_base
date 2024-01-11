@@ -39,6 +39,7 @@ import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -88,6 +89,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * Provider for a single instance of the {@link IFace} HAL.
  */
 public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
+
+    private static final String TAG = "FaceProvider";
     private static final int ENROLL_TIMEOUT_SEC = 75;
 
     private boolean mTestHalEnabled;
@@ -159,7 +162,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             @NonNull BiometricContext biometricContext,
             boolean resetLockoutRequiresChallenge) {
         this(context, biometricStateCallback, props, halInstanceName, lockoutResetDispatcher,
-                biometricContext, null /* daemon */, resetLockoutRequiresChallenge,
+                biometricContext, null /* daemon */, getHandler(), resetLockoutRequiresChallenge,
                 false /* testHalEnabled */);
     }
 
@@ -169,13 +172,19 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             @NonNull String halInstanceName,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull BiometricContext biometricContext,
-            @Nullable IFace daemon, boolean resetLockoutRequiresChallenge,
+            @Nullable IFace daemon,
+            @NonNull Handler handler,
+            boolean resetLockoutRequiresChallenge,
             boolean testHalEnabled) {
         mContext = context;
         mBiometricStateCallback = biometricStateCallback;
         mHalInstanceName = halInstanceName;
         mFaceSensors = new SensorList<>(ActivityManager.getService());
-        mHandler = new Handler(Looper.getMainLooper());
+        if (Flags.deHidl()) {
+            mHandler = handler;
+        } else {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
         mUsageStats = new UsageStats(context);
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mActivityTaskManager = ActivityTaskManager.getInstance();
@@ -187,6 +196,13 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
         initAuthenticationBroadcastReceiver();
         initSensors(resetLockoutRequiresChallenge, props);
+    }
+
+    @NonNull
+    private static Handler getHandler() {
+        HandlerThread handlerThread = new HandlerThread(TAG);
+        handlerThread.start();
+        return new Handler(handlerThread.getLooper());
     }
 
     private void initAuthenticationBroadcastReceiver() {
@@ -230,8 +246,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         prop.commonProps.maxEnrollmentsPerUser, componentInfo, prop.sensorType,
                         prop.supportsDetectInteraction, prop.halControlsPreview,
                         false /* resetLockoutRequiresChallenge */);
-                final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this,
-                        mContext, mHandler, internalProp, mLockoutResetDispatcher,
+                final Sensor sensor = new Sensor(this,
+                        mContext, mHandler, internalProp,
                         mBiometricContext);
                 sensor.init(mLockoutResetDispatcher, this);
                 final int userId = sensor.getLazySession().get() == null ? UserHandle.USER_NULL :
@@ -250,9 +266,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     private void addHidlSensors(SensorProps prop, boolean resetLockoutRequiresChallenge) {
         final int sensorId = prop.commonProps.sensorId;
-        final Sensor sensor = new HidlToAidlSensorAdapter(getTag() + "/" + sensorId, this,
-                mContext, mHandler, prop, mLockoutResetDispatcher,
-                mBiometricContext, resetLockoutRequiresChallenge,
+        final Sensor sensor = new HidlToAidlSensorAdapter(this, mContext, mHandler, prop,
+                mLockoutResetDispatcher, mBiometricContext, resetLockoutRequiresChallenge,
                 () -> {
                     //TODO: update to make this testable
                     scheduleInternalCleanup(sensorId, ActivityManager.getCurrentUser(),
@@ -279,8 +294,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     private void addAidlSensors(SensorProps prop, boolean resetLockoutRequiresChallenge) {
         final int sensorId = prop.commonProps.sensorId;
-        final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext,
-                mHandler, prop, mLockoutResetDispatcher, mBiometricContext,
+        final Sensor sensor = new Sensor(this, mContext, mHandler, prop, mBiometricContext,
                 resetLockoutRequiresChallenge);
         sensor.init(mLockoutResetDispatcher, this);
         final int userId = sensor.getLazySession().get() == null ? UserHandle.USER_NULL :
@@ -296,7 +310,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     private String getTag() {
-        return "FaceProvider/" + mHalInstanceName;
+        return TAG + "/" + mHalInstanceName;
     }
 
     boolean hasHalInstance() {

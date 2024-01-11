@@ -29,4 +29,8 @@ class KeyguardRootView(
     ConstraintLayout(
         context,
         attrs,
-    )
+    ) {
+    init {
+        clipChildren = false
+    }
+}

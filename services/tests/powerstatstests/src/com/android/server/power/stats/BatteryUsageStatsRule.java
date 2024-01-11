@@ -18,11 +18,11 @@ package com.android.server.power.stats;
 
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.annotation.XmlRes;
-import android.content.Context;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
@@ -54,12 +54,11 @@ public class BatteryUsageStatsRule implements TestRule {
                     .powerProfileModeledOnly()
                     .includePowerModels()
                     .build();
-    private final Context mContext;
 
     private final PowerProfile mPowerProfile;
     private final MockClock mMockClock = new MockClock();
     private final MockBatteryStatsImpl mBatteryStats;
-    private final Handler mHandler;
+    private Handler mHandler;
 
     private BatteryUsageStats mBatteryUsageStats;
     private boolean mScreenOn;
@@ -76,11 +75,8 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     public BatteryUsageStatsRule(long currentTime, File historyDir) {
-        HandlerThread bgThread = new HandlerThread("bg thread");
-        bgThread.start();
-        mHandler = new Handler(bgThread.getLooper());
-        mContext = InstrumentationRegistry.getContext();
-        mPowerProfile = spy(new PowerProfile(mContext, true /* forTest */));
+        mHandler = mock(Handler.class);
+        mPowerProfile = spy(new PowerProfile());
         mMockClock.currentTime = currentTime;
         mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir, mHandler);
         mBatteryStats.setPowerProfile(mPowerProfile);
@@ -103,7 +99,7 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     public BatteryUsageStatsRule setTestPowerProfile(@XmlRes int xmlId) {
-        mPowerProfile.forceInitForTesting(mContext, xmlId);
+        mPowerProfile.forceInitForTesting(InstrumentationRegistry.getContext(), xmlId);
         return this;
     }
 
@@ -222,13 +218,17 @@ public class BatteryUsageStatsRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                noteOnBattery();
+                before();
                 base.evaluate();
             }
         };
     }
 
-    private void noteOnBattery() {
+    private void before() {
+        HandlerThread bgThread = new HandlerThread("bg thread");
+        bgThread.start();
+        mHandler = new Handler(bgThread.getLooper());
+        mBatteryStats.setHandler(mHandler);
         mBatteryStats.setOnBatteryInternal(true);
         mBatteryStats.getOnBatteryTimeBase().setRunning(true, 0, 0);
         mBatteryStats.getOnBatteryScreenOffTimeBase().setRunning(!mScreenOn, 0, 0);

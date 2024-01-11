@@ -977,9 +977,14 @@ public class BatteryStatsHistory {
     /**
      * @return true if there is more than 100MB free disk space left.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     private boolean hasFreeDiskSpace() {
         final StatFs stats = new StatFs(mHistoryDir.getAbsolutePath());
         return stats.getAvailableBytes() > MIN_FREE_SPACE;
+    }
+
+    private boolean hasFreeDiskSpace$ravenwood() {
+        return true;
     }
 
     @VisibleForTesting

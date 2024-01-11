@@ -287,6 +287,7 @@ import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
 import android.view.TaskTransitionSpec;
 import android.view.View;
+import android.view.View.FocusDirection;
 import android.view.ViewDebug;
 import android.view.WindowContentFrameStats;
 import android.view.WindowInsets;
@@ -9102,6 +9103,66 @@ public class WindowManagerService extends IWindowManager.Stub
         updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
                 applicationHandle, flags, privateFlags, inputFeatures, win.mWindowType, region,
                 win.mClient);
+    }
+
+    boolean moveFocusToAdjacentWindow(Session session, IWindow fromWindow,
+            @FocusDirection int direction) {
+        synchronized (mGlobalLock) {
+            final WindowState fromWin = windowForClientLocked(session, fromWindow, false);
+            if (fromWin == null || !fromWin.isFocused()) {
+                return false;
+            }
+            final TaskFragment fromFragment = fromWin.getTaskFragment();
+            if (fromFragment == null) {
+                return false;
+            }
+            final TaskFragment adjacentFragment = fromFragment.getAdjacentTaskFragment();
+            if (adjacentFragment == null || adjacentFragment.asTask() != null) {
+                // Don't move the focus to another task.
+                return false;
+            }
+            final Rect fromBounds = fromFragment.getBounds();
+            final Rect adjacentBounds = adjacentFragment.getBounds();
+            switch (direction) {
+                case View.FOCUS_LEFT:
+                    if (adjacentBounds.left >= fromBounds.left) {
+                        return false;
+                    }
+                    break;
+                case View.FOCUS_UP:
+                    if (adjacentBounds.top >= fromBounds.top) {
+                        return false;
+                    }
+                    break;
+                case View.FOCUS_RIGHT:
+                    if (adjacentBounds.right <= fromBounds.right) {
+                        return false;
+                    }
+                    break;
+                case View.FOCUS_DOWN:
+                    if (adjacentBounds.bottom <= fromBounds.bottom) {
+                        return false;
+                    }
+                    break;
+                case View.FOCUS_BACKWARD:
+                case View.FOCUS_FORWARD:
+                    // These are not absolute directions. Skip checking the bounds.
+                    break;
+                default:
+                    return false;
+            }
+            final ActivityRecord topRunningActivity = adjacentFragment.topRunningActivity(
+                    true /* focusableOnly */);
+            if (topRunningActivity == null) {
+                return false;
+            }
+            moveDisplayToTopInternal(topRunningActivity.getDisplayId());
+            handleTaskFocusChange(topRunningActivity.getTask(), topRunningActivity);
+            if (fromWin.isFocused()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** Return whether layer tracing is enabled */

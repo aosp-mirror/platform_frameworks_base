@@ -475,6 +475,7 @@ package android {
     field public static final int config_defaultNotes = 17039429; // 0x1040045
     field @FlaggedApi("android.permission.flags.retail_demo_role_enabled") public static final int config_defaultRetailDemo;
     field public static final int config_defaultSms = 17039396; // 0x1040024
+    field @FlaggedApi("android.permission.flags.wallet_role_enabled") public static final int config_defaultWallet;
     field public static final int config_devicePolicyManagement = 17039421; // 0x104003d
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
     field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
@@ -859,6 +860,10 @@ package android.app {
     method public int getUid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
+  }
+
+  @FlaggedApi("android.app.bic_client") public final class BackgroundInstallControlManager {
+    method @FlaggedApi("android.app.bic_client") @NonNull @RequiresPermission(android.Manifest.permission.QUERY_ALL_PACKAGES) public java.util.List<android.content.pm.PackageInfo> getBackgroundInstalledPackages(long);
   }
 
   public class BroadcastOptions {
@@ -1595,12 +1600,14 @@ package android.app.ambientcontext {
     method public int getDensityLevel();
     method @NonNull public java.time.Instant getEndTime();
     method public int getEventType();
+    method @FlaggedApi("android.app.ambient_heart_rate") @IntRange(from=0xffffffff) public int getRatePerMinute();
     method @NonNull public java.time.Instant getStartTime();
     method @NonNull public android.os.PersistableBundle getVendorData();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ambientcontext.AmbientContextEvent> CREATOR;
     field public static final int EVENT_BACK_DOUBLE_TAP = 3; // 0x3
     field public static final int EVENT_COUGH = 1; // 0x1
+    field @FlaggedApi("android.app.ambient_heart_rate") public static final int EVENT_HEART_RATE = 4; // 0x4
     field public static final int EVENT_SNORE = 2; // 0x2
     field public static final int EVENT_UNKNOWN = 0; // 0x0
     field public static final int EVENT_VENDOR_WEARABLE_START = 100000; // 0x186a0
@@ -1620,6 +1627,7 @@ package android.app.ambientcontext {
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setDensityLevel(int);
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setEndTime(@NonNull java.time.Instant);
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setEventType(int);
+    method @FlaggedApi("android.app.ambient_heart_rate") @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setRatePerMinute(@IntRange(from=0xffffffff) int);
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setStartTime(@NonNull java.time.Instant);
     method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setVendorData(@NonNull android.os.PersistableBundle);
   }
@@ -5747,7 +5755,7 @@ package android.hardware.radio {
     method public void addOnCompleteListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.radio.ProgramList.OnCompleteListener);
     method public void addOnCompleteListener(@NonNull android.hardware.radio.ProgramList.OnCompleteListener);
     method public void close();
-    method @Deprecated @Nullable public android.hardware.radio.RadioManager.ProgramInfo get(@NonNull android.hardware.radio.ProgramSelector.Identifier);
+    method @Nullable public android.hardware.radio.RadioManager.ProgramInfo get(@NonNull android.hardware.radio.ProgramSelector.Identifier);
     method @FlaggedApi("android.hardware.radio.hd_radio_improved") @NonNull public java.util.List<android.hardware.radio.RadioManager.ProgramInfo> getProgramInfos(@NonNull android.hardware.radio.ProgramSelector.Identifier);
     method public void registerListCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.radio.ProgramList.ListCallback);
     method public void registerListCallback(@NonNull android.hardware.radio.ProgramList.ListCallback);
@@ -5799,7 +5807,7 @@ package android.hardware.radio {
     field @Deprecated public static final int IDENTIFIER_TYPE_DAB_SIDECC = 5; // 0x5
     field @Deprecated public static final int IDENTIFIER_TYPE_DAB_SID_EXT = 5; // 0x5
     field public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10; // 0xa
-    field @Deprecated public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11; // 0xb
+    field public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11; // 0xb
     field public static final int IDENTIFIER_TYPE_DRMO_SERVICE_ID = 9; // 0x9
     field public static final int IDENTIFIER_TYPE_HD_STATION_ID_EXT = 3; // 0x3
     field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int IDENTIFIER_TYPE_HD_STATION_LOCATION = 15; // 0xf
@@ -5807,8 +5815,8 @@ package android.hardware.radio {
     field @Deprecated public static final int IDENTIFIER_TYPE_HD_SUBCHANNEL = 4; // 0x4
     field public static final int IDENTIFIER_TYPE_INVALID = 0; // 0x0
     field public static final int IDENTIFIER_TYPE_RDS_PI = 2; // 0x2
-    field @Deprecated public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13; // 0xd
-    field @Deprecated public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12; // 0xc
+    field public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13; // 0xd
+    field public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12; // 0xc
     field public static final int IDENTIFIER_TYPE_VENDOR_END = 1999; // 0x7cf
     field @Deprecated public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = 1999; // 0x7cf
     field @Deprecated public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = 1000; // 0x3e8
@@ -5861,7 +5869,7 @@ package android.hardware.radio {
     field public static final int CONFIG_DAB_DAB_SOFT_LINKING = 8; // 0x8
     field public static final int CONFIG_DAB_FM_LINKING = 7; // 0x7
     field public static final int CONFIG_DAB_FM_SOFT_LINKING = 9; // 0x9
-    field @Deprecated public static final int CONFIG_FORCE_ANALOG = 2; // 0x2
+    field public static final int CONFIG_FORCE_ANALOG = 2; // 0x2
     field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int CONFIG_FORCE_ANALOG_AM = 11; // 0xb
     field @FlaggedApi("android.hardware.radio.hd_radio_improved") public static final int CONFIG_FORCE_ANALOG_FM = 10; // 0xa
     field public static final int CONFIG_FORCE_DIGITAL = 3; // 0x3
@@ -9967,6 +9975,7 @@ package android.nfc.cardemulation {
   }
 
   public final class CardEmulation {
+    method @FlaggedApi("android.permission.flags.wallet_role_enabled") @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public android.nfc.cardemulation.ApduServiceInfo getPreferredPaymentService();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
   }
 

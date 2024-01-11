@@ -118,7 +118,8 @@ import java.util.function.Supplier;
 @Presubmit
 public class GameManagerServiceTests {
     @Mock MockContext mMockContext;
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
+                SetFlagsRule.DefaultInitValueType.NULL_DEFAULT);
     private static final String TAG = "GameManagerServiceTests";
     private static final String PACKAGE_NAME_INVALID = "com.android.app";
     private static final int USER_ID_1 = 1001;

@@ -2192,7 +2192,7 @@ public final class JobStatus {
      * @return Whether or not this job would be ready to run if it had the specified constraint
      * granted, based on its requirements.
      */
-    boolean wouldBeReadyWithConstraint(int constraint) {
+    public boolean wouldBeReadyWithConstraint(int constraint) {
         return readinessStatusWithConstraint(constraint, true);
     }
 

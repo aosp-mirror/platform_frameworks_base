@@ -742,7 +742,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         MockitoSession mockitoSession = mockitoSession().mockStatic(BackNavigationController.class)
                 .strictness(Strictness.LENIENT).startMocking();
-        doReturn(taskSnapshot).when(() -> BackNavigationController.getSnapshot(any()));
+        doReturn(taskSnapshot).when(() -> BackNavigationController.getSnapshot(any(), any()));
         when(resourcesSpy.getBoolean(
                 com.android.internal.R.bool.config_predictShowStartingSurface))
                 .thenReturn(preferWindowlessSurface);

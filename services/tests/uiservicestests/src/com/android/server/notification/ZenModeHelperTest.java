@@ -185,8 +185,9 @@ import java.util.concurrent.TimeUnit;
 @TestableLooper.RunWithLooper
 public class ZenModeHelperTest extends UiServiceTestCase {
 
-    private static final String EVENTS_DEFAULT_RULE_ID = "EVENTS_DEFAULT_RULE";
-    private static final String SCHEDULE_DEFAULT_RULE_ID = "EVERY_NIGHT_DEFAULT_RULE";
+    private static final String EVENTS_DEFAULT_RULE_ID = ZenModeConfig.EVENTS_DEFAULT_RULE_ID;
+    private static final String SCHEDULE_DEFAULT_RULE_ID =
+            ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID;
     private static final String CUSTOM_PKG_NAME = "not.android";
     private static final String CUSTOM_APP_LABEL = "This is not Android";
     private static final int CUSTOM_PKG_UID = 1;
@@ -2327,6 +2328,68 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .setUserModifiedFields(0).build();
 
         assertThat(savedEffects).isEqualTo(updateFromUser);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void addAutomaticZenRule_withTypeBedtime_replacesDisabledSleeping() {
+        ZenRule sleepingRule = createCustomAutomaticRule(ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID);
+        sleepingRule.enabled = false;
+        sleepingRule.userModifiedFields = 0;
+        sleepingRule.name = "ZZZZZZZ...";
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mZenModeHelper.mConfig.automaticRules.put(sleepingRule.id, sleepingRule);
+
+        AutomaticZenRule bedtime = new AutomaticZenRule.Builder("Bedtime Mode (TM)", CONDITION_ID)
+                .setType(TYPE_BEDTIME)
+                .build();
+        String bedtimeRuleId = mZenModeHelper.addAutomaticZenRule("pkg", bedtime, UPDATE_ORIGIN_APP,
+                "reason", CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.keySet()).containsExactly(bedtimeRuleId);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void addAutomaticZenRule_withTypeBedtime_keepsEnabledSleeping() {
+        ZenRule sleepingRule = createCustomAutomaticRule(ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID);
+        sleepingRule.enabled = true;
+        sleepingRule.userModifiedFields = 0;
+        sleepingRule.name = "ZZZZZZZ...";
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mZenModeHelper.mConfig.automaticRules.put(sleepingRule.id, sleepingRule);
+
+        AutomaticZenRule bedtime = new AutomaticZenRule.Builder("Bedtime Mode (TM)", CONDITION_ID)
+                .setType(TYPE_BEDTIME)
+                .build();
+        String bedtimeRuleId = mZenModeHelper.addAutomaticZenRule("pkg", bedtime, UPDATE_ORIGIN_APP,
+                "reason", CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.keySet()).containsExactly(
+                ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID, bedtimeRuleId);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void addAutomaticZenRule_withTypeBedtime_keepsCustomizedSleeping() {
+        ZenRule sleepingRule = createCustomAutomaticRule(ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID);
+        sleepingRule.enabled = false;
+        sleepingRule.userModifiedFields = AutomaticZenRule.FIELD_INTERRUPTION_FILTER;
+        sleepingRule.name = "ZZZZZZZ...";
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mZenModeHelper.mConfig.automaticRules.put(sleepingRule.id, sleepingRule);
+
+        AutomaticZenRule bedtime = new AutomaticZenRule.Builder("Bedtime Mode (TM)", CONDITION_ID)
+                .setType(TYPE_BEDTIME)
+                .build();
+        String bedtimeRuleId = mZenModeHelper.addAutomaticZenRule("pkg", bedtime, UPDATE_ORIGIN_APP,
+                "reason", CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.keySet()).containsExactly(
+                ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID, bedtimeRuleId);
     }
 
     @Test

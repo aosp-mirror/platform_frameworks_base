@@ -51,12 +51,10 @@ public class AidlSession {
         mAidlResponseHandler = aidlResponseHandler;
     }
 
-    /** The underlying {@link ISession}. */
     @NonNull public ISession getSession() {
         return mSession;
     }
 
-    /** The user id associated with the session. */
     public int getUserId() {
         return mUserId;
     }

@@ -88,18 +88,23 @@ oneway interface IOverviewProxy {
      */
     void onNavButtonsDarkIntensityChanged(float darkIntensity) = 22;
 
-     /**
-      * Sent when split keyboard shortcut is triggered to enter stage split.
-      */
-     void enterStageSplitFromRunningApp(boolean leftOrTop) = 25;
+    /**
+     * Sent when when navigation bar luma sampling is enabled or disabled.
+     */
+    void onNavigationBarLumaSamplingEnabled(int displayId, boolean enable) = 23;
 
-     /**
-      * Sent when the surface for navigation bar is created or changed
-      */
-     void onNavigationBarSurface(in SurfaceControl surface) = 26;
+    /**
+     * Sent when split keyboard shortcut is triggered to enter stage split.
+     */
+    void enterStageSplitFromRunningApp(boolean leftOrTop) = 25;
 
-     /**
-      * Sent when the task bar stash state is toggled.
-      */
-     void onTaskbarToggled() = 27;
+    /**
+     * Sent when the surface for navigation bar is created or changed
+     */
+    void onNavigationBarSurface(in SurfaceControl surface) = 26;
+
+    /**
+     * Sent when the task bar stash state is toggled.
+     */
+    void onTaskbarToggled() = 27;
 }

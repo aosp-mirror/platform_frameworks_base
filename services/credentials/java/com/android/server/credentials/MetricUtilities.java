@@ -426,7 +426,11 @@ public class MetricUtilities {
                     /* per_classtype_counts */
                     initialPhaseMetric.getUniqueRequestCounts(),
                     /* origin_specified */
-                    initialPhaseMetric.isOriginSpecified()
+                    initialPhaseMetric.isOriginSpecified(),
+                    /* autofill_session_id */
+                    initialPhaseMetric.getAutofillSessionId(),
+                    /* autofill_request_id */
+                    initialPhaseMetric.getAutofillRequestId()
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during initial metric emit: " + e);

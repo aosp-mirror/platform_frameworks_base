@@ -71,6 +71,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelableException;
 import android.os.Process;
@@ -309,6 +310,26 @@ public class PackageArchiver {
         return false;
     }
 
+    void clearArchiveState(String packageName, int userId) {
+        synchronized (mPm.mLock) {
+            PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+            if (ps != null) {
+                ps.setArchiveState(/* archiveState= */ null, userId);
+            }
+        }
+        mPm.mBackgroundHandler.post(
+                () -> {
+                    File iconsDir = getIconsDir(packageName, userId);
+                    if (!iconsDir.exists()) {
+                        return;
+                    }
+                    // TODO(b/319238030) Move this into installd.
+                    if (!FileUtils.deleteContentsAndDir(iconsDir)) {
+                        Slog.e(TAG, "Failed to clean up archive files for " + packageName);
+                    }
+                });
+    }
+
     @Nullable
     private String getCurrentLauncherPackageName(int userId) {
         ComponentName defaultLauncherComponent = mPm.snapshotComputer().getDefaultHomeActivity(
@@ -437,8 +458,8 @@ public class PackageArchiver {
         if (mainActivity.iconBitmap == null) {
             return null;
         }
-        File iconsDir = createIconsDir(userId);
-        File iconFile = new File(iconsDir, packageName + "-" + index + ".png");
+        File iconsDir = createIconsDir(packageName, userId);
+        File iconFile = new File(iconsDir, index + ".png");
         try (FileOutputStream out = new FileOutputStream(iconFile)) {
             out.write(mainActivity.iconBitmap);
             out.flush();
@@ -454,14 +475,14 @@ public class PackageArchiver {
             // The app doesn't define an icon. No need to store anything.
             return null;
         }
-        File iconsDir = createIconsDir(userId);
-        File iconFile = new File(iconsDir, packageName + "-" + index + ".png");
+        File iconsDir = createIconsDir(packageName, userId);
+        File iconFile = new File(iconsDir, index + ".png");
         Bitmap icon = drawableToBitmap(mainActivity.getIcon(/* density= */ 0), iconSize);
         try (FileOutputStream out = new FileOutputStream(iconFile)) {
             // Note: Quality is ignored for PNGs.
             if (!icon.compress(Bitmap.CompressFormat.PNG, /* quality= */ 100, out)) {
                 throw new IOException(TextUtils.formatSimple("Failure to store icon file %s",
-                        iconFile.getName()));
+                        iconFile.getAbsolutePath()));
             }
             out.flush();
         }
@@ -793,8 +814,20 @@ public class PackageArchiver {
     }
 
     @VisibleForTesting
-    Bitmap decodeIcon(ArchiveActivityInfo archiveActivityInfo) {
-        return BitmapFactory.decodeFile(archiveActivityInfo.getIconBitmap().toString());
+    @Nullable
+    Bitmap decodeIcon(ArchiveActivityInfo activityInfo) {
+        Path iconBitmap = activityInfo.getIconBitmap();
+        if (iconBitmap == null) {
+            return null;
+        }
+        Bitmap bitmap = BitmapFactory.decodeFile(iconBitmap.toString());
+        // TODO(b/278553670) We should throw here after some time. Failing graciously now because
+        // we've just changed the place where we store icons.
+        if (bitmap == null) {
+            Slog.e(TAG, "Archived icon cannot be decoded " + iconBitmap.toAbsolutePath());
+            return null;
+        }
+        return bitmap;
     }
 
     Bitmap includeCloudOverlay(Bitmap bitmap) {
@@ -1075,8 +1108,9 @@ public class PackageArchiver {
         }
     }
 
-    private static File createIconsDir(@UserIdInt int userId) throws IOException {
-        File iconsDir = getIconsDir(userId);
+    private static File createIconsDir(String packageName, @UserIdInt int userId)
+            throws IOException {
+        File iconsDir = getIconsDir(packageName, userId);
         if (!iconsDir.isDirectory()) {
             iconsDir.delete();
             iconsDir.mkdirs();
@@ -1088,8 +1122,10 @@ public class PackageArchiver {
         return iconsDir;
     }
 
-    private static File getIconsDir(int userId) {
-        return new File(Environment.getDataSystemCeDirectory(userId), ARCHIVE_ICONS_DIR);
+    private static File getIconsDir(String packageName, int userId) {
+        return new File(
+                new File(Environment.getDataSystemCeDirectory(userId), ARCHIVE_ICONS_DIR),
+                packageName);
     }
 
     private static byte[] bytesFromBitmapFile(Path path) throws IOException {
@@ -1195,7 +1231,7 @@ public class PackageArchiver {
             UserHandle user = intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle.class);
             if (extraIntent != null && user != null
                     && mAppStateHelper.isAppTopVisible(
-                            getCurrentLauncherPackageName(user.getIdentifier()))) {
+                    getCurrentLauncherPackageName(user.getIdentifier()))) {
                 extraIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mContext.startActivityAsUser(extraIntent, user);
             }

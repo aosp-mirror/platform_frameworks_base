@@ -160,9 +160,7 @@ class SnapshotController {
                 if (!allOpensOptInOnBackInvoked() || mCloseActivities.isEmpty()) {
                     return;
                 }
-                for (int i = mCloseActivities.size() - 1; i >= 0; --i) {
-                    controller.recordSnapshot(mCloseActivities.get(i));
-                }
+                controller.recordSnapshot(mCloseActivities);
             }
         }
     }

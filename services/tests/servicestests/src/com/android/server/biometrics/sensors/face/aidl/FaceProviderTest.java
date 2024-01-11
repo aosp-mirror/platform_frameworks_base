@@ -36,8 +36,10 @@ import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.HidlFaceSensorConfig;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -88,13 +90,10 @@ public class FaceProviderTest {
     @Mock
     private BiometricStateCallback mBiometricStateCallback;
 
+    private final TestLooper mLooper = new TestLooper();
     private SensorProps[] mSensorProps;
     private LockoutResetDispatcher mLockoutResetDispatcher;
     private FaceProvider mFaceProvider;
-
-    private static void waitForIdle() {
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-    }
 
     @Before
     public void setUp() throws RemoteException {
@@ -121,7 +120,8 @@ public class FaceProviderTest {
 
         mFaceProvider = new FaceProvider(mContext, mBiometricStateCallback,
                 mSensorProps, TAG, mLockoutResetDispatcher, mBiometricContext,
-                mDaemon, false /* resetLockoutRequiresChallenge */, false /* testHalEnabled */);
+                mDaemon, new Handler(mLooper.getLooper()),
+                false /* resetLockoutRequiresChallenge */, false /* testHalEnabled */);
     }
 
     @Test
@@ -156,6 +156,7 @@ public class FaceProviderTest {
         mFaceProvider = new FaceProvider(mContext,
                 mBiometricStateCallback, hidlFaceSensorConfig, TAG,
                 mLockoutResetDispatcher, mBiometricContext, mDaemon,
+                new Handler(mLooper.getLooper()),
                 true /* resetLockoutRequiresChallenge */,
                 true /* testHalEnabled */);
 
@@ -208,6 +209,14 @@ public class FaceProviderTest {
                     mFaceProvider.mFaceSensors.get(prop.commonProps.sensorId).getScheduler();
             assertNull(scheduler.getCurrentClient());
             assertEquals(0, scheduler.getCurrentPendingCount());
+        }
+    }
+
+    private void waitForIdle() {
+        if (Flags.deHidl()) {
+            mLooper.dispatchAll();
+        } else {
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         }
     }
 }

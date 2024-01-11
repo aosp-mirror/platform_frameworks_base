@@ -665,6 +665,7 @@ java_library {
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+    apex_available: ["com.android.wifi"],
 }
 
 filegroup {

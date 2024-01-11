@@ -45,7 +45,6 @@ import androidx.test.core.app.ApplicationProvider;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
-import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -88,9 +87,9 @@ public class HidlToAidlSensorAdapterTest {
     @Mock
     private IBiometricsFace mDaemon;
     @Mock
-    AidlResponseHandler.AidlResponseHandlerCallback mAidlResponseHandlerCallback;
+    private AidlResponseHandler.AidlResponseHandlerCallback mAidlResponseHandlerCallback;
     @Mock
-    BiometricUtils<Face> mBiometricUtils;
+    private BiometricUtils<Face> mBiometricUtils;
 
     private final TestLooper mLooper = new TestLooper();
     private HidlToAidlSensorAdapter mHidlToAidlSensorAdapter;
@@ -118,20 +117,14 @@ public class HidlToAidlSensorAdapterTest {
         mContext.getOrCreateTestableResources();
 
         final String config = String.format("%d:8:15", SENSOR_ID);
-        final BiometricScheduler scheduler = new BiometricScheduler(TAG,
-                new Handler(mLooper.getLooper()),
-                BiometricScheduler.SENSOR_TYPE_FACE,
-                null /* gestureAvailabilityTracker */,
-                mBiometricService, 10 /* recentOperationsLimit */);
         final HidlFaceSensorConfig faceSensorConfig = new HidlFaceSensorConfig();
         faceSensorConfig.parse(config, mContext);
-        mHidlToAidlSensorAdapter = new HidlToAidlSensorAdapter(TAG, mFaceProvider,
+        mHidlToAidlSensorAdapter = new HidlToAidlSensorAdapter(mFaceProvider,
                 mContext, new Handler(mLooper.getLooper()), faceSensorConfig,
                 mLockoutResetDispatcherForSensor, mBiometricContext,
                 false /* resetLockoutRequiresChallenge */, mInternalCleanupAndGetFeatureRunnable,
                 mAuthSessionCoordinator, mDaemon, mAidlResponseHandlerCallback);
         mHidlToAidlSensorAdapter.init(mLockoutResetDispatcherForSensor, mFaceProvider);
-        mHidlToAidlSensorAdapter.setScheduler(scheduler);
         mHidlToAidlSensorAdapter.handleUserChanged(USER_ID);
     }
 
