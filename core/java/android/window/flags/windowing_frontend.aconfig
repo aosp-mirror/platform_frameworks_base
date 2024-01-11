@@ -72,7 +72,7 @@ flag {
     name: "predictive_back_system_animations"
     namespace: "systemui"
     description: "Predictive back for system animations"
-    bug: "309545085"
+    bug: "319421778"
     is_fixed_read_only: true
 }
 
