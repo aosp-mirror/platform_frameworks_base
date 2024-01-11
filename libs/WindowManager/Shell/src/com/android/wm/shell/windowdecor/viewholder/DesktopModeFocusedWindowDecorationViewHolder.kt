@@ -5,7 +5,6 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.PointF
 import android.view.View
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import android.widget.ImageButton
@@ -45,17 +44,6 @@ internal class DesktopModeFocusedWindowDecorationViewHolder(
 
     override fun onHandleMenuClosed() {
         animateCaptionHandleAlpha(startValue = 0f, endValue = 1f)
-    }
-
-    /**
-     * Returns true if input point is in the caption's view.
-     * @param inputPoint the input point relative to the task in full "focus" (i.e. fullscreen).
-     */
-    fun pointInCaption(inputPoint: PointF, captionX: Int): Boolean {
-        return inputPoint.x >= captionX &&
-                inputPoint.x <= captionX + captionView.width &&
-                inputPoint.y >= 0 &&
-                inputPoint.y <= captionView.height
     }
 
     private fun getCaptionHandleBarColor(taskInfo: RunningTaskInfo): Int {

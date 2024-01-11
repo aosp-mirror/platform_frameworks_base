@@ -22,10 +22,10 @@ import android.content.res.Resources
 import android.graphics.PixelFormat
 import android.graphics.PointF
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.view.SurfaceControlViewHost
-import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
@@ -62,6 +62,8 @@ class MaximizeMenu(
     private val cornerRadius = loadDimensionPixelSize(
             R.dimen.desktop_mode_maximize_menu_corner_radius
     ).toFloat()
+    private val menuWidth = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_width)
+    private val menuHeight = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_height)
 
     /** Position the menu relative to the caption's position. */
     fun positionMenu(position: PointF, t: Transaction) {
@@ -95,8 +97,6 @@ class MaximizeMenu(
                 .setName("Maximize Menu")
                 .setContainerLayer()
                 .build()
-        val menuWidth = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_width)
-        val menuHeight = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_height)
         val lp = WindowManager.LayoutParams(
                 menuWidth,
                 menuHeight,
@@ -160,14 +160,11 @@ class MaximizeMenu(
      *
      * @param inputPoint the input to compare against.
      */
-    fun isValidMenuInput(inputPoint: PointF): Boolean {
-        val menuView = maximizeMenu?.mWindowViewHost?.view ?: return true
-        return !viewsLaidOut() || pointInView(menuView, inputPoint.x - menuPosition.x,
-                inputPoint.y - menuPosition.y)
-    }
-
-    private fun pointInView(v: View, x: Float, y: Float): Boolean {
-        return v.left <= x && v.right >= x && v.top <= y && v.bottom >= y
+    fun isValidMenuInput(ev: MotionEvent): Boolean {
+        val x = ev.rawX
+        val y = ev.rawY
+        return !viewsLaidOut() || (menuPosition.x <= x && menuPosition.x + menuWidth >= x &&
+                menuPosition.y <= y && menuPosition.y + menuHeight >= y)
     }
 
     /**

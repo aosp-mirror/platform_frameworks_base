@@ -421,9 +421,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
             moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
 
-            if (!mHasLongClicked) {
+            if (!mHasLongClicked && id != R.id.maximize_window) {
                 final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
-                decoration.closeMaximizeMenu();
+                decoration.closeMaximizeMenuIfNeeded(e);
             }
 
             final long eventDuration = e.getEventTime() - e.getDownTime();
@@ -643,7 +643,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 handleCaptionThroughStatusBar(ev, relevantDecor);
             }
         }
-        handleEventOutsideFocusedCaption(ev, relevantDecor);
+        handleEventOutsideCaption(ev, relevantDecor);
         // Prevent status bar from reacting to a caption drag.
         if (DesktopModeStatus.isEnabled()) {
             if (mTransitionDragActive) {
@@ -652,11 +652,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
     }
 
-    // If an UP/CANCEL action is received outside of caption bounds, turn off handle menu
-    private void handleEventOutsideFocusedCaption(MotionEvent ev,
+    /**
+     * If an UP/CANCEL action is received outside of the caption bounds, close the handle and
+     * maximize the menu.
+     *
+     * @param relevantDecor the window decoration of the focused task's caption. This method only
+     *                      handles motion events outside this caption's bounds.
+     */
+    private void handleEventOutsideCaption(MotionEvent ev,
             DesktopModeWindowDecoration relevantDecor) {
         // Returns if event occurs within caption
-        if (relevantDecor == null || relevantDecor.checkTouchEventInCaptionHandle(ev)) {
+        if (relevantDecor == null || relevantDecor.checkTouchEventInCaption(ev)) {
             return;
         }
 
@@ -692,7 +698,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     }
 
                     if (dragFromStatusBarAllowed
-                            && relevantDecor.checkTouchEventInCaptionHandle(ev)) {
+                            && relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)) {
                         mTransitionDragActive = true;
                     }
                 }
