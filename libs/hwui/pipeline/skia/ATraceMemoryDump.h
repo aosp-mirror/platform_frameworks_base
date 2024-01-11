@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <GrDirectContext.h>
 #include <SkString.h>
 #include <SkTraceMemoryDump.h>
 
@@ -50,7 +51,7 @@ public:
 
     void startFrame();
 
-    void logTraces();
+    void logTraces(bool gpuMemoryIsAlreadyInDump, GrDirectContext* grContext);
 
 private:
     std::string mLastDumpName;
