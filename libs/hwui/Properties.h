@@ -143,6 +143,15 @@ enum DebugLevel {
 #define PROPERTY_CAPTURE_SKP_ENABLED "debug.hwui.capture_skp_enabled"
 
 /**
+ * Might split Skia's GPU resource utilization into separate tracing tracks (slow).
+ *
+ * Aggregate total and purgeable numbers will still be reported under a "misc" track when this is
+ * disabled, they just won't be split into distinct categories. Results may vary depending on GPU
+ * backend/API, and the category mappings defined in ATraceMemoryDump's hardcoded sResourceMap.
+ */
+#define PROPERTY_TRACE_GPU_RESOURCES "debug.hwui.trace_gpu_resources"
+
+/**
  * Allows broad recording of Skia drawing commands.
  *
  * If disabled, a very minimal set of trace events *may* be recorded.
@@ -254,6 +263,7 @@ public:
 
     static bool debugLayersUpdates;
     static bool debugOverdraw;
+    static bool debugTraceGpuResourceCategories;
     static bool showDirtyRegions;
     // TODO: Remove after stabilization period
     static bool skipEmptyFrames;
