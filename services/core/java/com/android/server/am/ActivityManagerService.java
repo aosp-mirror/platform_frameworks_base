@@ -13737,6 +13737,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         return result;
     }
 
+    boolean isSystemUserOnly(int flags) {
+        return android.multiuser.Flags.enableSystemUserOnlyForServicesAndProviders()
+                && (flags & ServiceInfo.FLAG_SYSTEM_USER_ONLY) != 0;
+    }
+
     /**
      * Checks to see if the caller is in the same app as the singleton
      * component, or the component is in a special app. It allows special apps
