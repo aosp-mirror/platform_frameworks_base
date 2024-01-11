@@ -20,6 +20,7 @@ import static com.android.server.vcn.VcnTestUtils.setupSystemService;
 import static com.android.server.vcn.routeselection.UnderlyingNetworkControllerTest.getLinkPropertiesWithName;
 
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -29,7 +30,12 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.vcn.FeatureFlags;
+import android.os.Handler;
+import android.os.IPowerManager;
+import android.os.IThermalService;
 import android.os.ParcelUuid;
+import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.telephony.TelephonyManager;
 
@@ -90,32 +96,49 @@ public abstract class NetworkEvaluationTestBase {
 
     protected static final LinkProperties LINK_PROPERTIES = getLinkPropertiesWithName("test_iface");
 
+    @Mock protected Context mContext;
     @Mock protected Network mNetwork;
+    @Mock protected FeatureFlags mFeatureFlags;
+    @Mock protected com.android.net.flags.FeatureFlags mCoreNetFeatureFlags;
     @Mock protected TelephonySubscriptionSnapshot mSubscriptionSnapshot;
     @Mock protected TelephonyManager mTelephonyManager;
+    @Mock protected IPowerManager mPowerManagerService;
 
     protected TestLooper mTestLooper;
     protected VcnContext mVcnContext;
+    protected PowerManager mPowerManager;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        final Context mockContext = mock(Context.class);
+        when(mNetwork.getNetId()).thenReturn(-1);
+
         mTestLooper = new TestLooper();
         mVcnContext =
                 spy(
                         new VcnContext(
-                                mockContext,
+                                mContext,
                                 mTestLooper.getLooper(),
                                 mock(VcnNetworkProvider.class),
                                 false /* isInTestMode */));
         doNothing().when(mVcnContext).ensureRunningOnLooperThread();
 
+        doReturn(true).when(mVcnContext).isFlagNetworkMetricMonitorEnabled();
+        doReturn(true).when(mVcnContext).isFlagIpSecTransformStateEnabled();
+
         setupSystemService(
-                mockContext, mTelephonyManager, Context.TELEPHONY_SERVICE, TelephonyManager.class);
+                mContext, mTelephonyManager, Context.TELEPHONY_SERVICE, TelephonyManager.class);
         when(mTelephonyManager.createForSubscriptionId(SUB_ID)).thenReturn(mTelephonyManager);
         when(mTelephonyManager.getNetworkOperator()).thenReturn(PLMN_ID);
         when(mTelephonyManager.getSimSpecificCarrierId()).thenReturn(CARRIER_ID);
+
+        mPowerManager =
+                new PowerManager(
+                        mContext,
+                        mPowerManagerService,
+                        mock(IThermalService.class),
+                        mock(Handler.class));
+        setupSystemService(mContext, mPowerManager, Context.POWER_SERVICE, PowerManager.class);
     }
 }
