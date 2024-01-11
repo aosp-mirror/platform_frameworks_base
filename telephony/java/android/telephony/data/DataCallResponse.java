@@ -451,7 +451,7 @@ public final class DataCallResponse implements Parcelable {
 
     /**
      * Return the network validation status that was initiated by {@link
-     * DataService.DataServiceProvider#requestValidation}
+     * DataService.DataServiceProvider#requestNetworkValidation}
      *
      * @return The network validation status of data connection.
      */
@@ -931,7 +931,7 @@ public final class DataCallResponse implements Parcelable {
 
         /**
          * Set the network validation status that corresponds to the state of the network validation
-         * request started by {@link DataService.DataServiceProvider#requestValidation}
+         * request started by {@link DataService.DataServiceProvider#requestNetworkValidation}
          *
          * @param status The network validation status.
          * @return The same instance of the builder.
