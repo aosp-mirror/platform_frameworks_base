@@ -52,6 +52,7 @@ import static com.android.server.locksettings.SyntheticPasswordManager.TOKEN_TYP
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
@@ -74,6 +75,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
@@ -303,7 +305,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private boolean mThirdPartyAppsStarted;
 
     // Current password metrics for all secured users on the device. Updated when user unlocks the
-    // device or changes password. Removed when user is stopped.
+    // device or changes password. Removed if user is stopped with its CE key evicted.
     @GuardedBy("this")
     private final SparseArray<PasswordMetrics> mUserPasswordMetrics = new SparseArray<>();
     @VisibleForTesting
@@ -793,13 +795,33 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @VisibleForTesting
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     void onUserStopped(int userId) {
         hideEncryptionNotification(new UserHandle(userId));
-        // User is stopped with its CE key evicted. Restore strong auth requirement to the default
-        // flags after boot since stopping and restarting a user later is equivalent to rebooting
-        // the device.
+
+        // Normally, CE storage is locked when a user is stopped, and restarting the user requires
+        // strong auth.  Therefore, reset the user's strong auth flags.  The exception is users that
+        // allow delayed locking; under some circumstances, biometric authentication is allowed to
+        // restart such users.  Don't reset the strong auth flags for such users.
+        //
+        // TODO(b/319142556): It might make more sense to reset the strong auth flags when CE
+        // storage is locked, instead of when the user is stopped.  This would ensure the flags get
+        // reset if CE storage is locked later for a user that allows delayed locking.
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+            UserProperties userProperties = mUserManager.getUserProperties(UserHandle.of(userId));
+            if (userProperties != null && userProperties.getAllowStoppingUserWithDelayedLocking()) {
+                return;
+            }
+        }
         int strongAuthRequired = LockPatternUtils.StrongAuthTracker.getDefaultFlags(mContext);
         requireStrongAuth(strongAuthRequired, userId);
+
+        // Don't keep the password metrics in memory for a stopped user that will require strong
+        // auth to start again, since strong auth will make the password metrics available again.
         synchronized (this) {
             mUserPasswordMetrics.remove(userId);
         }
