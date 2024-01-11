@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.server.wm.CompatScaleProvider.COMPAT_SCALE_MODE_GAME;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -27,6 +28,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 import android.app.GameManagerInternal;
 import android.content.pm.ApplicationInfo;
+import android.content.res.CompatibilityInfo.CompatScale;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -55,6 +58,17 @@ public class CompatModePackagesTests extends SystemServiceTestsBase {
     public void setUp() {
         mAtm = mSystemServicesTestRule.getActivityTaskManagerService();
         mGm = mock(GameManagerInternal.class);
+        mAtm.registerCompatScaleProvider(COMPAT_SCALE_MODE_GAME, new CompatScaleProvider() {
+            @Override
+            public CompatScale getCompatScale(String packageName, int uid) {
+                int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
+                float scalingFactor = mGm.getResolutionScalingFactor(packageName, userId);
+                if (scalingFactor > 0) {
+                    return new CompatScale(1f / scalingFactor);
+                }
+                return null;
+            }
+        });
     }
 
     @After
@@ -67,7 +81,7 @@ public class CompatModePackagesTests extends SystemServiceTestsBase {
         LocalServices.addService(GameManagerInternal.class, mGm);
         float scale = 0.25f;
         doReturn(scale).when(mGm).getResolutionScalingFactor(anyString(), anyInt());
-        assertEquals(mAtm.mCompatModePackages.getCompatScale(TEST_PACKAGE, TEST_USER_ID), 1 / scale,
+        assertEquals(1 / scale, mAtm.mCompatModePackages.getCompatScale(TEST_PACKAGE, TEST_USER_ID),
                 0.01f);
     }
 

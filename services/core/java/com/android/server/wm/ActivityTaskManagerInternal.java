@@ -796,4 +796,17 @@ public abstract class ActivityTaskManagerInternal {
      * @param token The activity token.
      */
     public abstract int getDisplayId(IBinder token);
+
+    /**
+     * Register a {@link CompatScaleProvider}.
+     */
+    public abstract void registerCompatScaleProvider(
+            @CompatScaleProvider.CompatScaleModeOrderId int id,
+            @NonNull CompatScaleProvider provider);
+
+    /**
+     * Unregister a {@link CompatScaleProvider}.
+     */
+    public abstract void unregisterCompatScaleProvider(
+            @CompatScaleProvider.CompatScaleModeOrderId int id);
 }
