@@ -1557,12 +1557,21 @@ public class SubscriptionManager {
      * caller can see all subscription across user profiles as it does today today even if it's
      * {@code false}.
      */
-    private boolean mIsForAllUserProfiles = false;
+    private final boolean mIsForAllUserProfiles;
 
     /** @hide */
     @UnsupportedAppUsage
     public SubscriptionManager(Context context) {
-        if (DBG) logd("SubscriptionManager created");
+        this(context, false /*isForAllUserProfiles*/);
+    }
+
+    /**  Constructor */
+    private SubscriptionManager(Context context, boolean isForAllUserProfiles) {
+        if (DBG) {
+            logd("SubscriptionManager created "
+                    + (isForAllUserProfiles ? "for all user profile" : ""));
+        }
+        mIsForAllUserProfiles = isForAllUserProfiles;
         mContext = context;
     }
 
@@ -1998,7 +2007,7 @@ public class SubscriptionManager {
     }
 
     /**
-     * Convert this subscription manager instance into one that can see all subscriptions across
+     * Create a new subscription manager instance that can see all subscriptions across
      * user profiles.
      *
      * @return a SubscriptionManager that can see all subscriptions regardless its user profile
@@ -2008,13 +2017,12 @@ public class SubscriptionManager {
      * @see #getActiveSubscriptionInfoCount
      * @see UserHandle
      */
-    @FlaggedApi(Flags.FLAG_WORK_PROFILE_API_SPLIT)
+    @FlaggedApi(Flags.FLAG_ENFORCE_SUBSCRIPTION_USER_FILTER)
     // @RequiresPermission(TODO(b/308809058))
     // The permission check for accessing all subscriptions will be enforced upon calling the
     // individual APIs linked above.
     @NonNull public SubscriptionManager createForAllUserProfiles() {
-        mIsForAllUserProfiles = true;
-        return this;
+        return new SubscriptionManager(mContext, true/*isForAllUserProfiles*/);
     }
 
     /**
