@@ -21,6 +21,7 @@ import static com.android.systemui.Flags.screenshareNotificationHiding;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
+import android.os.Trace;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
@@ -43,14 +44,20 @@ public class SensitiveNotificationProtectionControllerImpl
             new MediaProjectionManager.Callback() {
                 @Override
                 public void onStart(MediaProjectionInfo info) {
+                    Trace.beginSection(
+                            "SNPC.onProjectionStart");
                     mProjection = info;
                     mListeners.forEach(Runnable::run);
+                    Trace.endSection();
                 }
 
                 @Override
                 public void onStop(MediaProjectionInfo info) {
+                    Trace.beginSection(
+                            "SNPC.onProjectionStop");
                     mProjection = null;
                     mListeners.forEach(Runnable::run);
+                    Trace.endSection();
                 }
             };
 

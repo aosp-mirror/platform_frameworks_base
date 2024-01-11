@@ -404,6 +404,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     private void updateSensitivenessWithAnimation(boolean animate) {
+        Trace.beginSection("NSSLC.updateSensitivenessWithAnimation");
         if (screenshareNotificationHiding()) {
             boolean isAnyProfilePublic = mLockscreenUserManager.isAnyProfilePublicMode();
             boolean isSensitiveContentProtectionActive =
@@ -416,6 +417,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         } else {
             mView.updateSensitiveness(animate, mLockscreenUserManager.isAnyProfilePublicMode());
         }
+        Trace.endSection();
     }
 
     /**
