@@ -1111,7 +1111,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private boolean canDisplayUserSwitcher() {
-        return mFeatureFlags.isEnabled(Flags.BOUNCER_USER_SWITCHER);
+        return getContext().getResources().getBoolean(R.bool.config_enableBouncerUserSwitcher);
     }
 
     private void configureMode() {

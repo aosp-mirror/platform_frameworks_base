@@ -122,11 +122,6 @@ object Flags {
     val NEW_UNLOCK_SWIPE_ANIMATION = releasedFlag("new_unlock_swipe_animation")
     val CHARGING_RIPPLE = resourceBooleanFlag(R.bool.flag_charging_ripple, "charging_ripple")
 
-    // TODO(b/254512281): Tracking Bug
-    @JvmField
-    val BOUNCER_USER_SWITCHER =
-        resourceBooleanFlag(R.bool.config_enableBouncerUserSwitcher, "bouncer_user_switcher")
-
     // TODO(b/254512676): Tracking Bug
     @JvmField
     val LOCKSCREEN_CUSTOM_CLOCKS =
