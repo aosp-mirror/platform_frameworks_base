@@ -1127,6 +1127,9 @@ public class AuthController implements
         }
 
         mCurrentDialog.dismissFromSystemServer();
+        for (Callback cb : mCallbacks) {
+            cb.onBiometricPromptDismissed();
+        }
 
         // BiometricService will have already sent the callback to the client in this case.
         // This avoids a round trip to SystemUI. So, just dismiss the dialog and we're done.
