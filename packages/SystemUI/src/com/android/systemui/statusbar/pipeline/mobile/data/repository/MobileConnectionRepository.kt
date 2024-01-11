@@ -72,6 +72,9 @@ interface MobileConnectionRepository {
      */
     val isInService: StateFlow<Boolean>
 
+    /** Reflects [android.telephony.ServiceState.isUsingNonTerrestrialNetwork] */
+    val isNonTerrestrial: StateFlow<Boolean>
+
     /** True if [android.telephony.SignalStrength] told us that this connection is using GSM */
     val isGsm: StateFlow<Boolean>
 

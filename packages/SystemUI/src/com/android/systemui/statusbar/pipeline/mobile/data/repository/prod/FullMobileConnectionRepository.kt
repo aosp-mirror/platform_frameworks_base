@@ -175,6 +175,21 @@ class FullMobileConnectionRepository(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.isInService.value)
 
+    override val isNonTerrestrial =
+        activeRepo
+            .flatMapLatest { it.isNonTerrestrial }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = COL_IS_NTN,
+                activeRepo.value.isNonTerrestrial.value
+            )
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                activeRepo.value.isNonTerrestrial.value
+            )
+
     override val isGsm =
         activeRepo
             .flatMapLatest { it.isGsm }
@@ -366,6 +381,7 @@ class FullMobileConnectionRepository(
         const val COL_CARRIER_NETWORK_CHANGE = "carrierNetworkChangeActive"
         const val COL_CDMA_LEVEL = "cdmaLevel"
         const val COL_EMERGENCY = "emergencyOnly"
+        const val COL_IS_NTN = "isNtn"
         const val COL_IS_GSM = "isGsm"
         const val COL_IS_IN_SERVICE = "isInService"
         const val COL_OPERATOR = "operatorName"

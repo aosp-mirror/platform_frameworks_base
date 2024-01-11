@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullM
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_EMERGENCY
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_IS_GSM
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_IS_IN_SERVICE
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_IS_NTN
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_OPERATOR
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_PRIMARY_LEVEL
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_ROAMING
@@ -108,6 +109,17 @@ class DemoMobileConnectionRepository(
                 _isInService.value
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), _isInService.value)
+
+    private val _isNonTerrestrial = MutableStateFlow(false)
+    override val isNonTerrestrial =
+        _isNonTerrestrial
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = COL_IS_NTN,
+                _isNonTerrestrial.value
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), _isNonTerrestrial.value)
 
     private val _isGsm = MutableStateFlow(false)
     override val isGsm =
@@ -227,6 +239,7 @@ class DemoMobileConnectionRepository(
             (event.activity ?: TelephonyManager.DATA_ACTIVITY_NONE).toMobileDataActivityModel()
         _carrierNetworkChangeActive.value = event.carrierNetworkChange
         _resolvedNetworkType.value = resolvedNetworkType
+        _isNonTerrestrial.value = event.ntn
 
         isAllowedDuringAirplaneMode.value = false
         hasPrioritizedNetworkCapabilities.value = event.slice
