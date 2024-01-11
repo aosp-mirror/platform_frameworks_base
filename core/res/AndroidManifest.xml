@@ -7033,12 +7033,16 @@
 
     <!-- Allows the holder to read blocked numbers. See
          {@link android.provider.BlockedNumberContract}.
+         @SystemApi
+         @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies")
          @hide -->
     <permission android:name="android.permission.READ_BLOCKED_NUMBERS"
                 android:protectionLevel="signature" />
 
     <!-- Allows the holder to write blocked numbers. See
          {@link android.provider.BlockedNumberContract}.
+         @SystemApi
+         @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies")
          @hide -->
     <permission android:name="android.permission.WRITE_BLOCKED_NUMBERS"
                 android:protectionLevel="signature" />

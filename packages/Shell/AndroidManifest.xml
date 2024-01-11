@@ -862,6 +862,8 @@
 
     <!-- Permission required for CTS test - CtsTelephonyProviderTestCases -->
     <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_BLOCKED_NUMBERS" />
+    <uses-permission android:name="android.permission.READ_BLOCKED_NUMBERS" />
 
     <uses-permission android:name="android.permission.LOG_FOREGROUND_RESOURCE_USE" />
 
