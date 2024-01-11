@@ -17,6 +17,8 @@
 package com.android.systemui.shade
 
 import android.content.Context
+import android.os.PowerManager
+import android.os.SystemClock
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -44,6 +46,7 @@ constructor(
     private val communalViewModel: CommunalViewModel,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
+    private val powerManager: PowerManager,
 ) {
     /** The container view for the hub. This will not be initialized until [initView] is called. */
     private lateinit var communalContainerView: View
@@ -157,7 +160,7 @@ constructor(
         // If the hub is fully visible, send all touch events to it.
         val communalVisible = hubShowing && !hubOccluded
         if (communalVisible) {
-            communalContainerView.dispatchTouchEvent(ev)
+            dispatchTouchEvent(ev)
             // Return true regardless of dispatch result as some touches at the start of a gesture
             // may return false from dispatchTouchEvent.
             return true
@@ -175,7 +178,7 @@ constructor(
                 x >= communalContainerView.width - edgeSwipeRegionWidth
             if (inOpeningSwipeRegion && !hubOccluded) {
                 isTrackingOpenGesture = true
-                communalContainerView.dispatchTouchEvent(ev)
+                dispatchTouchEvent(ev)
                 // Return true regardless of dispatch result as some touches at the start of a
                 // gesture may return false from dispatchTouchEvent.
                 return true
@@ -184,12 +187,25 @@ constructor(
             if (isUp || isCancel) {
                 isTrackingOpenGesture = false
             }
-            communalContainerView.dispatchTouchEvent(ev)
+            dispatchTouchEvent(ev)
             // Return true regardless of dispatch result as some touches at the start of a gesture
             // may return false from dispatchTouchEvent.
             return true
         }
 
         return false
+    }
+
+    /**
+     * Dispatches the touch event to the communal container and sends a user activity event to reset
+     * the screen timeout.
+     */
+    private fun dispatchTouchEvent(ev: MotionEvent) {
+        communalContainerView.dispatchTouchEvent(ev)
+        powerManager.userActivity(
+            SystemClock.uptimeMillis(),
+            PowerManager.USER_ACTIVITY_EVENT_TOUCH,
+            0
+        )
     }
 }

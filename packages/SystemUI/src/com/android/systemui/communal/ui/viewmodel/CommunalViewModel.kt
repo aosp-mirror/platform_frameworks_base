@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
-import android.os.PowerManager
 import android.widget.RemoteViews
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
@@ -26,10 +25,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.dagger.MediaModule
-import com.android.systemui.shade.ShadeViewController
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -51,10 +48,8 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val interactionHandler: WidgetInteractionHandler,
     tutorialInteractor: CommunalTutorialInteractor,
-    shadeViewController: Provider<ShadeViewController>,
-    powerManager: PowerManager,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
-) : BaseCommunalViewModel(communalInteractor, shadeViewController, powerManager, mediaHost) {
+) : BaseCommunalViewModel(communalInteractor, mediaHost) {
     @OptIn(ExperimentalCoroutinesApi::class)
     override val communalContent: Flow<List<CommunalContentModel>> =
         tutorialInteractor.isTutorialAvailable.flatMapLatest { isTutorialMode ->
