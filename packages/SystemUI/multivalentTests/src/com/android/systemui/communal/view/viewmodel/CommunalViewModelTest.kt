@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
@@ -66,6 +67,7 @@ class CommunalViewModelTest : SysuiTestCase() {
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
     private lateinit var mediaRepository: FakeCommunalMediaRepository
+    private lateinit var communalPrefsRepository: FakeCommunalPrefsRepository
 
     private lateinit var underTest: CommunalViewModel
 
@@ -82,6 +84,7 @@ class CommunalViewModelTest : SysuiTestCase() {
         widgetRepository = withDeps.widgetRepository
         smartspaceRepository = withDeps.smartspaceRepository
         mediaRepository = withDeps.mediaRepository
+        communalPrefsRepository = withDeps.communalPrefsRepository
 
         underTest =
             CommunalViewModel(
@@ -149,9 +152,6 @@ class CommunalViewModelTest : SysuiTestCase() {
             // Media playing.
             mediaRepository.mediaActive()
 
-            // CTA Tile not dismissed.
-            communalRepository.setCtaTileInViewModeVisibility(true)
-
             val communalContent by collectLastValue(underTest.communalContent)
 
             // Order is smart space, then UMO, widget content and cta tile.
@@ -171,7 +171,6 @@ class CommunalViewModelTest : SysuiTestCase() {
     fun dismissCta_hidesCtaTileAndShowsPopup_thenHidesPopupAfterTimeout() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
-            communalRepository.setCtaTileInViewModeVisibility(true)
 
             val communalContent by collectLastValue(underTest.communalContent)
             val isPopupOnDismissCtaShowing by collectLastValue(underTest.isPopupOnDismissCtaShowing)
@@ -195,7 +194,6 @@ class CommunalViewModelTest : SysuiTestCase() {
     fun popup_onDismiss_hidesImmediately() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
-            communalRepository.setCtaTileInViewModeVisibility(true)
 
             val isPopupOnDismissCtaShowing by collectLastValue(underTest.isPopupOnDismissCtaShowing)
 

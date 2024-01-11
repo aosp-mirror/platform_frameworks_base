@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
@@ -65,6 +66,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
+    private lateinit var communalPrefsRepository: FakeCommunalPrefsRepository
     private lateinit var editWidgetsActivityStarter: EditWidgetsActivityStarter
 
     private lateinit var underTest: CommunalInteractor
@@ -84,6 +86,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         smartspaceRepository = withDeps.smartspaceRepository
         keyguardRepository = withDeps.keyguardRepository
         editWidgetsActivityStarter = withDeps.editWidgetsActivityStarter
+        communalPrefsRepository = withDeps.communalPrefsRepository
 
         underTest = withDeps.communalInteractor
     }
@@ -331,10 +334,9 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun cta_visibilityTrue_shows() =
+    fun ctaTile_showsByDefault() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-            communalRepository.setCtaTileInViewModeVisibility(true)
 
             val ctaTileContent by collectLastValue(underTest.ctaTileContent)
 
@@ -346,10 +348,10 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun ctaTile_visibilityFalse_doesNotShow() =
+    fun ctaTile_afterDismiss_doesNotShow() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-            communalRepository.setCtaTileInViewModeVisibility(false)
+            communalPrefsRepository.setCtaDismissedForCurrentUser()
 
             val ctaTileContent by collectLastValue(underTest.ctaTileContent)
 

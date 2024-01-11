@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -52,13 +51,5 @@ class FakeCommunalRepository(
 
     fun setIsCommunalHubShowing(isCommunalHubShowing: Boolean) {
         _isCommunalHubShowing.value = isCommunalHubShowing
-    }
-
-    private val _isCtaTileInViewModeVisible: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    override val isCtaTileInViewModeVisible: Flow<Boolean> =
-        _isCtaTileInViewModeVisible.asStateFlow()
-
-    override fun setCtaTileInViewModeVisibility(isVisible: Boolean) {
-        _isCtaTileInViewModeVisible.value = isVisible
     }
 }
