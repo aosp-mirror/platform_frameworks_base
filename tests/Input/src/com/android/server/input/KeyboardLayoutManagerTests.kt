@@ -16,6 +16,7 @@
 
 package com.android.server.input
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
@@ -129,6 +130,8 @@ class KeyboardLayoutManagerTests {
 
     @Mock
     private lateinit var packageManager: PackageManager
+    @Mock
+    private lateinit var notificationManager: NotificationManager
     private lateinit var keyboardLayoutManager: KeyboardLayoutManager
 
     private lateinit var imeInfo: InputMethodInfo
@@ -163,6 +166,8 @@ class KeyboardLayoutManagerTests {
         keyboardLayoutManager = Mockito.spy(
             KeyboardLayoutManager(context, native, dataStore, testLooper.looper)
         )
+        Mockito.`when`(context.getSystemService(Mockito.eq(Context.NOTIFICATION_SERVICE)))
+                .thenReturn(notificationManager)
         setupInputDevices()
         setupBroadcastReceiver()
         setupIme()
@@ -943,6 +948,48 @@ class KeyboardLayoutManagerTests {
                         ArgumentMatchers.anyInt(),
                 )
             }, Mockito.times(0))
+        }
+    }
+
+    @Test
+    fun testNotificationShown_onInputDeviceChanged() {
+        val imeInfos = listOf(KeyboardLayoutManager.ImeInfo(0, imeInfo, createImeSubtype()))
+        Mockito.doReturn(imeInfos).`when`(keyboardLayoutManager).imeInfoListForLayoutMapping
+        Mockito.doReturn(false).`when`(keyboardLayoutManager).isVirtualDevice(
+            ArgumentMatchers.eq(keyboardDevice.id)
+        )
+        NewSettingsApiFlag(true).use {
+            keyboardLayoutManager.onInputDeviceChanged(keyboardDevice.id)
+            ExtendedMockito.verify(
+                notificationManager,
+                Mockito.times(1)
+            ).notifyAsUser(
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.anyInt(),
+                ArgumentMatchers.any(),
+                ArgumentMatchers.any()
+            )
+        }
+    }
+
+    @Test
+    fun testNotificationNotShown_onInputDeviceChanged_forVirtualDevice() {
+        val imeInfos = listOf(KeyboardLayoutManager.ImeInfo(0, imeInfo, createImeSubtype()))
+        Mockito.doReturn(imeInfos).`when`(keyboardLayoutManager).imeInfoListForLayoutMapping
+        Mockito.doReturn(true).`when`(keyboardLayoutManager).isVirtualDevice(
+            ArgumentMatchers.eq(keyboardDevice.id)
+        )
+        NewSettingsApiFlag(true).use {
+            keyboardLayoutManager.onInputDeviceChanged(keyboardDevice.id)
+            ExtendedMockito.verify(
+                notificationManager,
+                Mockito.never()
+            ).notifyAsUser(
+                ArgumentMatchers.isNull(),
+                ArgumentMatchers.anyInt(),
+                ArgumentMatchers.any(),
+                ArgumentMatchers.any()
+            )
         }
     }
 
