@@ -1148,6 +1148,14 @@ public class SubscriptionManager {
      */
     public static final String SERVICE_CAPABILITIES = SimInfo.COLUMN_SERVICE_CAPABILITIES;
 
+    /**
+     * TelephonyProvider column name to identify eSIM's transfer status.
+     * By default, it's disabled.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String TRANSFER_STATUS = SimInfo.COLUMN_TRANSFER_STATUS;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},
@@ -1452,6 +1460,41 @@ public class SubscriptionManager {
      */
     private static final LruCache<Pair<String, Configuration>, Resources> sResourcesCache =
             new LruCache<>(MAX_RESOURCE_CACHE_ENTRY_COUNT);
+
+
+    /**
+     * The profile has not been transferred or converted to an eSIM.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_PSIM_TO_ESIM_CONVERSION)
+    @SystemApi
+    public static final int TRANSFER_STATUS_NONE = 0;
+
+    /**
+     * The existing profile of the old device has been transferred to an eSIM of the new device.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_PSIM_TO_ESIM_CONVERSION)
+    @SystemApi
+    public static final int TRANSFER_STATUS_TRANSFERRED_OUT = 1;
+
+    /**
+     * The existing profile of the same device has been converted to an eSIM of the same device
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_PSIM_TO_ESIM_CONVERSION)
+    @SystemApi
+    public static final int TRANSFER_STATUS_CONVERTED = 2;
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"TRANSFER_STATUS"},
+            value = {
+                    TRANSFER_STATUS_NONE,
+                    TRANSFER_STATUS_TRANSFERRED_OUT,
+                    TRANSFER_STATUS_CONVERTED,
+            })
+    public @interface TransferStatus {}
+
 
     /**
      * A listener class for monitoring changes to {@link SubscriptionInfo} records.
@@ -4715,5 +4758,28 @@ public class SubscriptionManager {
      */
     public static int serviceCapabilityToBitmask(@ServiceCapability int capability) {
         return 1 << (capability - 1);
+    }
+
+    /**
+     * Set the transfer status of the subscriptionInfo of the subId.
+     * @param subscriptionId The unique SubscriptionInfo key in database.
+     * @param status The transfer status to change.
+     *
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_PSIM_TO_ESIM_CONVERSION)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    public void setTransferStatus(int subscriptionId, @TransferStatus int status) {
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                iSub.setTransferStatus(subscriptionId, status);
+            }
+        } catch (RemoteException ex) {
+            logd("setTransferStatus for subId = " + subscriptionId + " failed.");
+            throw ex.rethrowFromSystemServer();
+        }
     }
 }

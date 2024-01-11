@@ -4943,6 +4943,13 @@ public final class Telephony {
         public static final String COLUMN_IS_NTN = "is_ntn";
 
         /**
+         * TelephonyProvider column name for transferred status
+         *
+         * @hide
+         */
+        public static final String COLUMN_TRANSFER_STATUS = "transfer_status";
+
+        /**
          * TelephonyProvider column name to indicate the service capability bitmasks.
          *
          * @hide
@@ -5021,7 +5028,8 @@ public final class Telephony {
                 COLUMN_SATELLITE_ENABLED,
                 COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER,
                 COLUMN_IS_NTN,
-                COLUMN_SERVICE_CAPABILITIES
+                COLUMN_SERVICE_CAPABILITIES,
+                COLUMN_TRANSFER_STATUS
         );
 
         /**
