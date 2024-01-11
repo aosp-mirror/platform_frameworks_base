@@ -447,6 +447,17 @@ public class FullScreenMagnificationController implements
             }
         }
 
+        void cancelFlingAnimation() {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "cancelFlingAnimation()");
+            }
+            if (Thread.currentThread().getId() == mMainThreadId) {
+                mSpecAnimationBridge.cancelFlingAnimation();
+            } else {
+                mControllerCtx.getHandler().post(mSpecAnimationBridge::cancelFlingAnimation);
+            }
+        }
+
         /**
          * Get the ID of the last service that changed the magnification spec.
          *
@@ -841,6 +852,20 @@ public class FullScreenMagnificationController implements
                             }
                         }
                     });
+        }
+
+
+        @GuardedBy("mLock")
+        void cancelFling(int id) {
+            if (!mRegistered) {
+                return;
+            }
+
+            if (id != INVALID_SERVICE_ID) {
+                mIdOfLastServiceToMagnify = id;
+            }
+
+            cancelFlingAnimation();
         }
 
         boolean updateCurrentSpecWithOffsetsLocked(float nonNormOffsetX, float nonNormOffsetY) {
@@ -1544,6 +1569,22 @@ public class FullScreenMagnificationController implements
     }
 
     /**
+     * Call to cancel the fling animation if it is running. Call this on any ACTION_DOWN event.
+     *
+     * @param displayId The logical display id.
+     * @param id the ID of the service requesting the change
+     */
+    public void cancelFling(int displayId, int id) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return;
+            }
+            display.cancelFling(id);
+        }
+    }
+
+    /**
      * Get the ID of the last service that changed the magnification spec.
      *
      * @param displayId The logical display id.
@@ -2031,11 +2072,16 @@ public class FullScreenMagnificationController implements
         }
 
         @MainThread
-        private void cancelAnimations() {
+        void cancelAnimations() {
             if (mValueAnimator.isRunning()) {
                 mValueAnimator.cancel();
             }
 
+            cancelFlingAnimation();
+        }
+
+        @MainThread
+        void cancelFlingAnimation() {
             if (!Flags.fullscreenFlingGesture()) {
                 return;
             }

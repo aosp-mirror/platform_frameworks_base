@@ -324,6 +324,10 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     @Override
     void onMotionEventInternal(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        if (event.getActionMasked() == ACTION_DOWN) {
+            cancelFling();
+        }
+
         handleEventWith(mCurrentState, event, rawEvent, policyFlags);
     }
 
@@ -1822,6 +1826,16 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                     yPixelsPerSecond,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
         }
+    }
+
+    private void cancelFling() {
+        if (!Flags.fullscreenFlingGesture()) {
+            return;
+        }
+
+        mFullScreenMagnificationController.cancelFling(
+                    mDisplayId,
+                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
     }
 
     final class SinglePanningState extends SimpleOnGestureListener implements State {

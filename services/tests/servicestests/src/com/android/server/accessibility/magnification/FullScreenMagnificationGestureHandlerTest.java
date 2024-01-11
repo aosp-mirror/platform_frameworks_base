@@ -1144,6 +1144,45 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FULLSCREEN_FLING_GESTURE)
+    public void testDownEvent_cancelsFling()
+            throws InterruptedException {
+        goFromStateIdleTo(STATE_ACTIVATED);
+        PointF pointer1 = DEFAULT_POINT;
+        PointF pointer2 = new PointF(DEFAULT_X * 1.5f, DEFAULT_Y);
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, new PointF[] {pointer1, pointer2}, 1));
+
+        // first move triggers the panning state
+        pointer1.offset(100, 0);
+        pointer2.offset(100, 0);
+        fastForward(20);
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 0));
+
+        // second move actually pans
+        pointer1.offset(100, 0);
+        pointer2.offset(100, 0);
+        fastForward(20);
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 0));
+        pointer1.offset(100, 0);
+        pointer2.offset(100, 0);
+        fastForward(20);
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 0));
+
+        assertIn(STATE_PANNING);
+        mHandler.timeAdvance();
+        returnToNormalFrom(STATE_PANNING);
+
+        mHandler.timeAdvance();
+
+        send(downEvent());
+        mHandler.timeAdvance();
+
+        verify(mMockScroller).forceFinished(eq(true));
+    }
+
+    @Test
     public void testShortcutTriggered_invokeShowWindowPromptAction() {
         goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
 
