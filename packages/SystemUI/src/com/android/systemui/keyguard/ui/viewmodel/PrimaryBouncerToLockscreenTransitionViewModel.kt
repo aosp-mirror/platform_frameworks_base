@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
@@ -28,7 +27,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down PRIMARY BOUNCER->LOCKSCREEN transition into discrete steps for corresponding views to
@@ -39,15 +37,14 @@ import kotlinx.coroutines.flow.map
 class PrimaryBouncerToLockscreenTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
-            stepFlow =
-                interactor.transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.LOCKSCREEN),
+            from = KeyguardState.PRIMARY_BOUNCER,
+            to = KeyguardState.LOCKSCREEN,
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
@@ -60,9 +57,10 @@ constructor(
         }
 
     val shortcutsAlpha: Flow<Float> =
-        interactor.transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.LOCKSCREEN).map {
-            it.value
-        }
+        transitionAnimation.sharedFlow(
+            duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
+            onStep = { it }
+        )
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(1f)

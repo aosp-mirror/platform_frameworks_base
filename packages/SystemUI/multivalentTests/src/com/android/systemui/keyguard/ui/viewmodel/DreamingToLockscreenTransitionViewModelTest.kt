@@ -95,7 +95,7 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(6)
+            assertThat(values.size).isEqualTo(7)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 100f)) }
         }
 
@@ -117,7 +117,7 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(3)
+            assertThat(values.size).isEqualTo(4)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
         }
 
@@ -232,7 +232,7 @@ class DreamingToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(4)
+            assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(-100f, 0f)) }
         }
 

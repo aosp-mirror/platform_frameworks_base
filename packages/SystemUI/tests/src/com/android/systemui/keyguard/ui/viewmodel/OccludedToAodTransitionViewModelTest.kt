@@ -30,6 +30,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,6 +52,7 @@ class OccludedToAodTransitionViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val deviceEntryBackgroundViewAlpha by
                 collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
+            runCurrent()
 
             // immediately 0f
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -72,6 +74,7 @@ class OccludedToAodTransitionViewModelTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             // immediately 1f
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -96,6 +99,7 @@ class OccludedToAodTransitionViewModelTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsRearFps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             // no updates
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -120,6 +124,7 @@ class OccludedToAodTransitionViewModelTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             // no updates
             keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))

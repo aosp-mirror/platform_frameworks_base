@@ -20,7 +20,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -28,7 +27,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 var Kosmos.occludedToLockscreenTransitionViewModel by Fixture {
     OccludedToLockscreenTransitionViewModel(
-        interactor = keyguardTransitionInteractor,
         deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,
         configurationInteractor = configurationInteractor,
         animationFlow = keyguardTransitionAnimationFlow,
