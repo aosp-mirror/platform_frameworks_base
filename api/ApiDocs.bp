@@ -171,6 +171,7 @@ doc_defaults {
         "-federationapi AndroidX $(location :current-androidx-api)",
         // doclava contains checks for a few issues that are have been migrated to metalava.
         // disable them in doclava, to avoid mistriggering or double triggering.
+        "-hide 101", // TODO: turn Lint 101 back into an error again
         "-hide 111", // HIDDEN_SUPERCLASS
         "-hide 113", // DEPRECATION_MISMATCH
         "-hide 125", // REQUIRES_PERMISSION
