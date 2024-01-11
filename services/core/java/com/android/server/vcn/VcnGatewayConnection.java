@@ -915,9 +915,11 @@ public class VcnGatewayConnection extends StateMachine {
             // TODO(b/180132994): explore safely removing this Thread check
             mVcnContext.ensureRunningOnLooperThread();
 
-            logInfo(
-                    "Selected underlying network changed: "
-                            + (underlying == null ? null : underlying.network));
+            if (!UnderlyingNetworkRecord.isSameNetwork(mUnderlying, underlying)) {
+                logInfo(
+                        "Selected underlying network changed: "
+                                + (underlying == null ? null : underlying.network));
+            }
 
             // TODO(b/179091925): Move the delayed-message handling to BaseState
 
@@ -1242,9 +1244,28 @@ public class VcnGatewayConnection extends StateMachine {
                 createScheduledAlarm(
                         SAFEMODE_TIMEOUT_ALARM,
                         delayedMessage,
-                        mVcnContext.isInTestMode()
-                                ? TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS_TEST_MODE)
-                                : TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
+                        getSafeModeTimeoutMs(mVcnContext, mLastSnapshot, mSubscriptionGroup));
+    }
+
+    /** Gets the safe mode timeout */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static long getSafeModeTimeoutMs(
+            VcnContext vcnContext, TelephonySubscriptionSnapshot snapshot, ParcelUuid subGrp) {
+        final int defaultSeconds =
+                vcnContext.isInTestMode()
+                        ? SAFEMODE_TIMEOUT_SECONDS_TEST_MODE
+                        : SAFEMODE_TIMEOUT_SECONDS;
+
+        final PersistableBundleWrapper carrierConfig = snapshot.getCarrierConfigForSubGrp(subGrp);
+        int resultSeconds = defaultSeconds;
+
+        if (vcnContext.isFlagSafeModeTimeoutConfigEnabled() && carrierConfig != null) {
+            resultSeconds =
+                    carrierConfig.getInt(
+                            VcnManager.VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY, defaultSeconds);
+        }
+
+        return TimeUnit.SECONDS.toMillis(resultSeconds);
     }
 
     private void cancelSafeModeAlarm() {

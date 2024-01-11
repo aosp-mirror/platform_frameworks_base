@@ -115,6 +115,20 @@ public class VcnManager {
             "vcn_restricted_transports";
 
     /**
+     * Key for number of seconds to wait before entering safe mode
+     *
+     * <p>A VcnGatewayConnection will enter safe mode when it takes over the configured timeout to
+     * enter {@link ConnectedState}.
+     *
+     * <p>Defaults to 30, unless overridden by carrier config
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY =
+            "vcn_safe_mode_timeout_seconds_key";
+
+    /**
      * Key for maximum number of parallel SAs for tunnel aggregation
      *
      * <p>If set to a value > 1, multiple tunnels will be set up, and inbound traffic will be
@@ -135,6 +149,7 @@ public class VcnManager {
                 VCN_NETWORK_SELECTION_WIFI_ENTRY_RSSI_THRESHOLD_KEY,
                 VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY,
                 VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
+                VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY,
                 VCN_TUNNEL_AGGREGATION_SA_COUNT_MAX_KEY,
             };
 
