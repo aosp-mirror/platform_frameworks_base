@@ -47,6 +47,7 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
@@ -1153,6 +1154,15 @@ public class AuthController implements
         }
 
         return mFaceEnrolledForUser.get(userId);
+    }
+
+    /**
+     * Does the provided user have at least one optical udfps fingerprint enrolled?
+     */
+    public boolean isOpticalUdfpsEnrolled(int userId) {
+        return isUdfpsEnrolled(userId)
+                && mUdfpsProps != null
+                && mUdfpsProps.get(0).sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL;
     }
 
     /**
