@@ -32,6 +32,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -76,7 +77,7 @@ public class TestableLooper {
     }
 
     private TestableLooper(TestLooperManager wrapper, Looper l) {
-        mQueueWrapper = wrapper;
+        mQueueWrapper = Objects.requireNonNull(wrapper);
         setupQueue(l);
     }
 
@@ -282,65 +283,94 @@ public class TestableLooper {
         return InstrumentationRegistry.getInstrumentation().acquireLooperManager(l);
     }
 
-    private static final Map<Object, TestableLooper> sLoopers = new ArrayMap<>();
+    private static final Map<Object, TestableLooperHolder> sLoopers = new ArrayMap<>();
 
     /**
      * For use with {@link RunWithLooper}, used to get the TestableLooper that was
      * automatically created for this test.
      */
     public static TestableLooper get(Object test) {
-        return sLoopers.get(test);
+        final TestableLooperHolder looperHolder = sLoopers.get(test);
+        return (looperHolder != null) ? looperHolder.mTestableLooper : null;
     }
 
     public static void remove(Object test) {
         sLoopers.remove(test);
     }
 
-    static class LooperFrameworkMethod extends FrameworkMethod {
+    /**
+     * Holder object that contains {@link TestableLooper} so that its initialization can be
+     * deferred until a test case is actually run, instead of forcing it to be created at
+     * {@link FrameworkMethod} construction time.
+     *
+     * This deferral is important because some test environments may configure
+     * {@link Looper#getMainLooper()} as part of a {@code Rule} instead of assuming it's globally
+     * initialized and unconditionally available.
+     */
+    private static class TestableLooperHolder {
+        private final boolean mSetAsMain;
+        private final Object mTest;
+
+        private TestableLooper mTestableLooper;
+        private Looper mLooper;
+        private Handler mHandler;
         private HandlerThread mHandlerThread;
 
-        private final TestableLooper mTestableLooper;
-        private final Looper mLooper;
-        private final Handler mHandler;
+        public TestableLooperHolder(boolean setAsMain, Object test) {
+            mSetAsMain = setAsMain;
+            mTest = test;
+        }
 
-        public LooperFrameworkMethod(FrameworkMethod base, boolean setAsMain, Object test) {
-            super(base.getMethod());
+        public void ensureInit() {
+            if (mLooper != null) return;
             try {
-                mLooper = setAsMain ? Looper.getMainLooper() : createLooper();
+                mLooper = mSetAsMain ? Looper.getMainLooper() : createLooper();
                 mTestableLooper = new TestableLooper(mLooper, false);
-                if (!setAsMain) {
-                    mTestableLooper.getLooper().getThread().setName(test.getClass().getName());
+                if (!mSetAsMain) {
+                    mTestableLooper.getLooper().getThread().setName(mTest.getClass().getName());
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            sLoopers.put(test, mTestableLooper);
             mHandler = new Handler(mLooper);
         }
 
-        public LooperFrameworkMethod(TestableLooper other, FrameworkMethod base) {
+        private Looper createLooper() {
+            // TODO: Find way to share these.
+            mHandlerThread = new HandlerThread(TestableLooper.class.getSimpleName());
+            mHandlerThread.start();
+            return mHandlerThread.getLooper();
+        }
+    }
+
+    static class LooperFrameworkMethod extends FrameworkMethod {
+        private TestableLooperHolder mLooperHolder;
+
+        public LooperFrameworkMethod(FrameworkMethod base, TestableLooperHolder looperHolder) {
             super(base.getMethod());
-            mLooper = other.mLooper;
-            mTestableLooper = other;
-            mHandler = Handler.createAsync(mLooper);
+            mLooperHolder = looperHolder;
         }
 
         public static FrameworkMethod get(FrameworkMethod base, boolean setAsMain, Object test) {
-            if (sLoopers.containsKey(test)) {
-                return new LooperFrameworkMethod(sLoopers.get(test), base);
+            TestableLooperHolder looperHolder = sLoopers.get(test);
+            if (looperHolder == null) {
+                looperHolder = new TestableLooperHolder(setAsMain, test);
+                sLoopers.put(test, looperHolder);
             }
-            return new LooperFrameworkMethod(base, setAsMain, test);
+            return new LooperFrameworkMethod(base, looperHolder);
         }
 
         @Override
         public Object invokeExplosively(Object target, Object... params) throws Throwable {
-            if (Looper.myLooper() == mLooper) {
+            mLooperHolder.ensureInit();
+            if (Looper.myLooper() == mLooperHolder.mLooper) {
                 // Already on the right thread from another statement, just execute then.
                 return super.invokeExplosively(target, params);
             }
-            boolean set = mTestableLooper.mQueueWrapper == null;
+            boolean set = mLooperHolder.mTestableLooper.mQueueWrapper == null;
             if (set) {
-                mTestableLooper.mQueueWrapper = acquireLooperManager(mLooper);
+                mLooperHolder.mTestableLooper.mQueueWrapper = acquireLooperManager(
+                        mLooperHolder.mLooper);
             }
             try {
                 Object[] ret = new Object[1];
@@ -352,11 +382,11 @@ public class TestableLooper {
                         throw new LooperException(throwable);
                     }
                 };
-                Message m = Message.obtain(mHandler, execute);
+                Message m = Message.obtain(mLooperHolder.mHandler, execute);
 
                 // Dispatch our message.
                 try {
-                    mTestableLooper.mQueueWrapper.execute(m);
+                    mLooperHolder.mTestableLooper.mQueueWrapper.execute(m);
                 } catch (LooperException e) {
                     throw e.getSource();
                 } catch (RuntimeException re) {
@@ -373,27 +403,20 @@ public class TestableLooper {
                 return ret[0];
             } finally {
                 if (set) {
-                    mTestableLooper.mQueueWrapper.release();
-                    mTestableLooper.mQueueWrapper = null;
-                    if (HOLD_MAIN_THREAD && mLooper == Looper.getMainLooper()) {
+                    mLooperHolder.mTestableLooper.mQueueWrapper.release();
+                    mLooperHolder.mTestableLooper.mQueueWrapper = null;
+                    if (HOLD_MAIN_THREAD && mLooperHolder.mLooper == Looper.getMainLooper()) {
                         TestableInstrumentation.releaseMain();
                     }
                 }
             }
         }
 
-        private Looper createLooper() {
-            // TODO: Find way to share these.
-            mHandlerThread = new HandlerThread(TestableLooper.class.getSimpleName());
-            mHandlerThread.start();
-            return mHandlerThread.getLooper();
-        }
-
         @Override
         protected void finalize() throws Throwable {
             super.finalize();
-            if (mHandlerThread != null) {
-                mHandlerThread.quit();
+            if (mLooperHolder.mHandlerThread != null) {
+                mLooperHolder.mHandlerThread.quit();
             }
         }
 
