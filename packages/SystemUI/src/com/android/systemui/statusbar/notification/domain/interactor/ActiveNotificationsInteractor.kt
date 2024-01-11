@@ -61,6 +61,15 @@ constructor(
     val allRepresentativeNotifications: Flow<Map<String, ActiveNotificationModel>> =
         repository.activeNotifications.map { store -> store.individuals }
 
+    /** Size of the flattened list of Notifications actively presented in the stack. */
+    val allNotificationsCount: Flow<Int> =
+        repository.activeNotifications.map { store -> store.individuals.size }
+
+    /**
+     * The same as [allNotificationsCount], but without flows, for easy access in synchronous code.
+     */
+    val allNotificationsCountValue: Int = repository.activeNotifications.value.individuals.size
+
     /** Are any notifications being actively presented in the notification stack? */
     val areAnyNotificationsPresent: Flow<Boolean> =
         repository.activeNotifications
