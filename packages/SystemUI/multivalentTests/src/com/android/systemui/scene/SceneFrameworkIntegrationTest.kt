@@ -51,7 +51,6 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.pipeline.MediaDataManager
-import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
@@ -189,8 +188,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     @Mock private lateinit var mediaDataManager: MediaDataManager
 
-    @Mock private lateinit var mediaHost: MediaHost
-
     private lateinit var emergencyAffordanceManager: EmergencyAffordanceManager
     private lateinit var telecomManager: TelecomManager
 
@@ -239,7 +236,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
                 mediaDataManager = mediaDataManager,
-                mediaHost = mediaHost,
             )
 
         kosmos.fakeDeviceEntryRepository.setUnlocked(false)
