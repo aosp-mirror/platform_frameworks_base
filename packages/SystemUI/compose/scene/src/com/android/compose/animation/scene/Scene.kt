@@ -26,7 +26,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
@@ -138,12 +137,6 @@ internal class SceneScopeImpl(
             topOrLeftBehavior = topBehavior,
             bottomOrRightBehavior = bottomBehavior,
         )
-
-    override fun Modifier.punchHole(
-        element: ElementKey,
-        bounds: ElementKey,
-        shape: Shape
-    ): Modifier = punchHole(layoutImpl, element, bounds, shape)
 
     override fun Modifier.noResizeDuringTransitions(): Modifier {
         return noResizeDuringTransitions(layoutState = layoutImpl.state)

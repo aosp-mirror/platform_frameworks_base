@@ -28,6 +28,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class BatteryUsageStatsQuery implements Parcelable {
 
     @NonNull

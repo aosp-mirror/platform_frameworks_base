@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.Flags.centralizedStatusBarDimensRefactor;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInScale;
 import static com.android.systemui.statusbar.notification.NotificationUtils.interpolate;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.util.MathUtils;
 
@@ -30,6 +32,7 @@ import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.Logger;
 import com.android.systemui.log.dagger.KeyguardClockLog;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
 
@@ -160,14 +163,14 @@ public class KeyguardClockPositionAlgorithm {
         mLogger = new Logger(logBuffer, TAG);
     }
 
-    /**
-     * Refreshes the dimension values.
-     */
-    public void loadDimens(Resources res) {
-        mStatusViewBottomMargin = res.getDimensionPixelSize(
-                R.dimen.keyguard_status_view_bottom_margin);
+    /** Refreshes the dimension values. */
+    public void loadDimens(Context context, Resources res) {
+        mStatusViewBottomMargin =
+                res.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin);
         mSplitShadeTopNotificationsMargin =
-                res.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
+                centralizedStatusBarDimensRefactor()
+                        ? LargeScreenHeaderHelper.getLargeScreenHeaderHeight(context)
+                        : res.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
         mSplitShadeTargetTopMargin =
                 res.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin);
 

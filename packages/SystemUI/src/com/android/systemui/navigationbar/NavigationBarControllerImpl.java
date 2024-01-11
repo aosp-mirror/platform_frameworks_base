@@ -302,9 +302,6 @@ public class NavigationBarControllerImpl implements
             final NavigationBarView navBarView = getNavigationBarView(displayId);
             if (navBarView != null) {
                 navBarView.showPinningEnterExitToast(entering);
-            } else if (displayId == mDisplayTracker.getDefaultDisplayId()
-                    && mTaskbarDelegate.isInitialized()) {
-                mTaskbarDelegate.showPinningEnterExitToast(entering);
             }
         }
 
@@ -314,9 +311,6 @@ public class NavigationBarControllerImpl implements
             final NavigationBarView navBarView = getNavigationBarView(displayId);
             if (navBarView != null) {
                 navBarView.showPinningEscapeToast();
-            } else if (displayId == mDisplayTracker.getDefaultDisplayId()
-                    && mTaskbarDelegate.isInitialized()) {
-                mTaskbarDelegate.showPinningEscapeToast();
             }
         }
     };

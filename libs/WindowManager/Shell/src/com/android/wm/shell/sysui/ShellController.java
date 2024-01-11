@@ -293,11 +293,7 @@ public class ShellController {
     private class ShellInterfaceImpl implements ShellInterface {
         @Override
         public void onInit() {
-            try {
-                mMainExecutor.executeBlocking(() -> ShellController.this.handleInit());
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Failed to initialize the Shell in 2s", e);
-            }
+            mMainExecutor.execute(ShellController.this::handleInit);
         }
 
         @Override

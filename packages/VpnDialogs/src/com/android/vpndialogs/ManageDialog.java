@@ -16,6 +16,8 @@
 
 package com.android.vpndialogs;
 
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
 import android.content.DialogInterface;
 import android.net.VpnManager;
 import android.os.Bundle;
@@ -87,6 +89,7 @@ public class ManageDialog extends AlertActivity implements
             mAlertParams.mNegativeButtonListener = this;
             mAlertParams.mView = view;
             setupAlert();
+            getWindow().addPrivateFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
             if (mHandler == null) {
                 mHandler = new Handler(this);

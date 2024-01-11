@@ -28,6 +28,7 @@ import static android.view.SurfaceControlProto.NAME;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -71,6 +72,7 @@ import android.view.Surface.OutOfResourcesException;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.VirtualRefBasePtr;
+import com.android.window.flags.Flags;
 
 import dalvik.system.CloseGuard;
 
@@ -277,6 +279,8 @@ public final class SurfaceControl implements Parcelable {
     private static native int nativeGetLayerId(long nativeObject);
     private static native void nativeAddTransactionCommittedListener(long nativeObject,
             TransactionCommittedListener listener);
+    private static native void nativeAddTransactionCompletedListener(long nativeObject,
+            Consumer<TransactionStats> listener);
     private static native void nativeSanitize(long transactionObject, int pid, int uid);
     private static native void nativeSetDestinationFrame(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
@@ -290,6 +294,10 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeClearTrustedPresentationCallback(long transactionObj,
             long nativeObject);
     private static native StalledTransactionInfo nativeGetStalledTransactionInfo(int pid);
+    private static native void nativeSetDesiredPresentTime(long transactionObj,
+                                                           long desiredPresentTime);
+    private static native void nativeSetFrameTimeline(long transactionObj,
+                                                           long vsyncId);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -2550,6 +2558,50 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Transaction stats given to the listener registered in
+     * {@link SurfaceControl.Transaction#addTransactionCompletedListener}
+     */
+    @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
+    public static final class TransactionStats {
+        private long mLatchTime;
+        private SyncFence mSyncFence;
+
+        // called from native
+        private TransactionStats(long latchTime, long presentFencePtr) {
+            mLatchTime = latchTime;
+            mSyncFence = new SyncFence(presentFencePtr);
+        }
+
+        /**
+         * Close the TransactionStats. Called by the framework when the listener returns.
+         * @hide
+         */
+        public void close() {
+            mSyncFence.close();
+        }
+
+        /**
+         * Returns the timestamp of when the frame was latched by the framework and queued for
+         * presentation.
+         */
+        @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
+        public long getLatchTime() {
+            return mLatchTime;
+        }
+
+        /**
+         * Returns a new SyncFence that signals when the transaction has been presented.
+         * The caller takes ownership of the fence and is responsible for closing
+         * it by calling {@link SyncFence#close}.
+         * If a device does not support present fences, an empty fence will be returned.
+         */
+        @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
+        public @NonNull SyncFence getPresentFence() {
+            return new SyncFence(mSyncFence);
+        }
+    };
+
+    /**
      * Threshold values that are sent with
      * {@link Transaction#setTrustedPresentationCallback(SurfaceControl,
      * TrustedPresentationThresholds, Executor, Consumer)}
@@ -4185,12 +4237,35 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Sets the frame timeline vsync id received from choreographer
-         * {@link Choreographer#getVsyncId()} that corresponds to the transaction submitted on that
-         * surface control.
+         * Sets the frame timeline to use in SurfaceFlinger.
          *
-         * @hide
+         * A frame timeline should be chosen based on the frame deadline the application
+         * can meet when rendering the frame and the application's desired presentation time.
+         * By setting a frame timeline, SurfaceFlinger tries to present the frame at the
+         * corresponding expected presentation time.
+         *
+         * To receive frame timelines, a callback must be posted to Choreographer using
+         * {@link Choreographer#postVsyncCallback} The vsyncId can then be extracted from the
+         * {@link Choreographer.FrameTimeline#getVsyncId}.
+         *
+         * @param vsyncId The vsync ID received from Choreographer, setting the frame's
+         *                presentation target to the corresponding expected presentation time
+         *                and deadline from the frame to be rendered. A stale or invalid value
+         *                will be ignored.
+         *
          */
+        @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
+        @NonNull
+        public Transaction setFrameTimeline(long vsyncId) {
+            if (!Flags.sdkDesiredPresentTime()) {
+                Log.w(TAG, "addTransactionCompletedListener was called but flag is disabled");
+                return this;
+            }
+            nativeSetFrameTimelineVsync(mNativeObject, vsyncId);
+            return this;
+        }
+
+        /** @hide */
         @NonNull
         public Transaction setFrameTimelineVsync(long frameTimelineVsyncId) {
             nativeSetFrameTimelineVsync(mNativeObject, frameTimelineVsyncId);
@@ -4207,6 +4282,9 @@ public final class SurfaceControl implements Parcelable {
          * to avoid dropping frames (overwriting transactions), and unable to use timestamps (Which
          * provide a more efficient solution), then this method provides a method to pace your
          * transaction application.
+         * The listener is invoked once the transaction is applied, and never again. Multiple
+         * listeners can be added to the same transaction, however the order the listeners will
+         * be called is not guaranteed.
          *
          * @param executor The executor that the callback should be invoked on.
          * @param listener The callback that will be invoked when the transaction has been
@@ -4219,6 +4297,33 @@ public final class SurfaceControl implements Parcelable {
             TransactionCommittedListener listenerInner =
                     () -> executor.execute(listener::onTransactionCommitted);
             nativeAddTransactionCommittedListener(mNativeObject, listenerInner);
+            return this;
+        }
+
+        /**
+         * Request to add a TransactionCompletedListener.
+         *
+         * The listener is invoked when transaction is presented, and never again. Multiple
+         * listeners can be added to the same transaction, however the order the listeners will
+         * be called is not guaranteed.
+         *
+         * @param executor The executor that the callback should be invoked on.
+         * @param listener The callback that will be invoked when the transaction has been
+         *                 completed.
+         */
+        @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
+        @NonNull
+        public Transaction addTransactionCompletedListener(
+                @NonNull @CallbackExecutor Executor executor,
+                @NonNull Consumer<TransactionStats> listener) {
+
+            if (!Flags.sdkDesiredPresentTime()) {
+                Log.w(TAG, "addTransactionCompletedListener was called but flag is disabled");
+                return this;
+            }
+            Consumer<TransactionStats> listenerInner = stats -> executor.execute(
+                                    () -> listener.andThen(TransactionStats::close).accept(stats));
+            nativeAddTransactionCompletedListener(mNativeObject, listenerInner);
             return this;
         }
 
@@ -4320,6 +4425,30 @@ public final class SurfaceControl implements Parcelable {
             return this;
         }
 
+        /**
+         * Specifies a desiredPresentTime for the transaction. The framework will try to present
+         * the transaction at or after the time specified.
+         *
+         * Transactions will not be presented until all of their acquire fences have signaled even
+         * if the app requests an earlier present time.
+         *
+         * If an earlier transaction has a desired present time of x, and a later transaction has
+         * a desired present time that is before x, the later transaction will not preempt the
+         * earlier transaction.
+         *
+         * @param desiredPresentTime The desired time (in CLOCK_MONOTONIC) for the transaction.
+         * @return This transaction
+         */
+        @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
+        @NonNull
+        public Transaction setDesiredPresentTime(long desiredPresentTime) {
+            if (!Flags.sdkDesiredPresentTime()) {
+                Log.w(TAG, "addTransactionCompletedListener was called but flag is disabled");
+                return this;
+            }
+            nativeSetDesiredPresentTime(mNativeObject, desiredPresentTime);
+            return this;
+        }
         /**
          * Writes the transaction to parcel, clearing the transaction as if it had been applied so
          * it can be used to store future transactions. It's the responsibility of the parcel

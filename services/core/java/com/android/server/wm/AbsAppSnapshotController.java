@@ -18,6 +18,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -180,16 +181,8 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         if (snapshot == null) {
             return null;
         }
-        final HardwareBuffer buffer = snapshot.getHardwareBuffer();
-        if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
-            buffer.close();
-            Slog.e(TAG, "Invalid snapshot dimensions " + buffer.getWidth() + "x"
-                    + buffer.getHeight());
-            return null;
-        } else {
-            mCache.putSnapshot(source, snapshot);
-            return snapshot;
-        }
+        mCache.putSnapshot(source, snapshot);
+        return snapshot;
     }
 
     @VisibleForTesting
@@ -210,6 +203,11 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
 
     @Nullable
     TaskSnapshot snapshot(TYPE source) {
+        return snapshot(source, mHighResSnapshotScale);
+    }
+
+    @Nullable
+    TaskSnapshot snapshot(TYPE source, float scale) {
         TaskSnapshot.Builder builder = new TaskSnapshot.Builder();
         final Rect crop = prepareTaskSnapshot(source, builder);
         if (crop == null) {
@@ -218,7 +216,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         }
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "createSnapshot");
         final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer = createSnapshot(source,
-                mHighResSnapshotScale, crop, builder);
+                scale, crop, builder);
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         if (screenshotBuffer == null) {
             // Failed to acquire image. Has been logged.
@@ -227,7 +225,19 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         builder.setCaptureTime(SystemClock.elapsedRealtimeNanos());
         builder.setSnapshot(screenshotBuffer.getHardwareBuffer());
         builder.setColorSpace(screenshotBuffer.getColorSpace());
-        return builder.build();
+        final TaskSnapshot snapshot = builder.build();
+        return validateSnapshot(snapshot);
+    }
+
+    private static TaskSnapshot validateSnapshot(@NonNull TaskSnapshot snapshot) {
+        final HardwareBuffer buffer = snapshot.getHardwareBuffer();
+        if (buffer.getWidth() == 0 || buffer.getHeight() == 0) {
+            buffer.close();
+            Slog.e(TAG, "Invalid snapshot dimensions " + buffer.getWidth() + "x"
+                    + buffer.getHeight());
+            return null;
+        }
+        return snapshot;
     }
 
     @Nullable
@@ -432,7 +442,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
         InsetUtils.addInsets(contentInsets, letterboxInsets);
         // Note, the app theme snapshot is never translucent because we enforce a non-translucent
         // color above
-        return new TaskSnapshot(
+        final TaskSnapshot taskSnapshot = new TaskSnapshot(
                 System.currentTimeMillis() /* id */,
                 SystemClock.elapsedRealtimeNanos() /* captureTime */,
                 topActivity.mActivityComponent, hwBitmap.getHardwareBuffer(),
@@ -441,6 +451,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
                 contentInsets, letterboxInsets, false /* isLowResolution */,
                 false /* isRealSnapshot */, source.getWindowingMode(),
                 getAppearance(source), false /* isTranslucent */, false /* hasImeSurface */);
+        return validateSnapshot(taskSnapshot);
     }
 
     static Rect getSystemBarInsets(Rect frame, InsetsState state) {

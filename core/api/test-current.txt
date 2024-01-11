@@ -3735,6 +3735,7 @@ package android.view.animation {
 
   public class AnimationUtils {
     method @FlaggedApi("android.view.flags.expected_presentation_time_read_only") public static void lockAnimationClock(long, long);
+    method public static void lockAnimationClock(long);
     method public static void unlockAnimationClock();
   }
 

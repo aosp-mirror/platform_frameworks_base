@@ -32,7 +32,7 @@ class ObservableTransitionStateTest {
 
     @Test
     fun testObservableTransitionState() = runTest {
-        val state = SceneTransitionLayoutState(TestScenes.SceneA)
+        lateinit var state: SceneTransitionLayoutState
 
         // Collect the current observable state into [observableState].
         // TODO(b/290184746): Use collectValues {} once it is extracted into a library that can be
@@ -58,12 +58,14 @@ class ObservableTransitionStateTest {
             from = TestScenes.SceneA,
             to = TestScenes.SceneB,
             transitionLayout = { currentScene, onChangeScene ->
-                SceneTransitionLayout(
-                    currentScene,
-                    onChangeScene,
-                    EmptyTestTransitions,
-                    state = state,
-                ) {
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene,
+                        onChangeScene,
+                        EmptyTestTransitions
+                    )
+
+                SceneTransitionLayout(state = state) {
                     scene(TestScenes.SceneA) {}
                     scene(TestScenes.SceneB) {}
                 }

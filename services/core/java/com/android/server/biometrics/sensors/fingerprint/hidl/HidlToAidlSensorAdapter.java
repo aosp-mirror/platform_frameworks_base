@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.Handler;
@@ -39,7 +40,7 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
-import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
+import com.android.server.biometrics.sensors.UserSwitchProvider;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.aidl.AidlResponseHandler;
@@ -71,37 +72,33 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
                 }
             };
 
-    public HidlToAidlSensorAdapter(@NonNull String tag, @NonNull FingerprintProvider provider,
-            @NonNull Context context, @NonNull Handler handler,
+    public HidlToAidlSensorAdapter(@NonNull FingerprintProvider provider,
+            @NonNull Context context,
+            @NonNull Handler handler,
             @NonNull SensorProps prop,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull BiometricContext biometricContext,
             boolean resetLockoutRequiresHardwareAuthToken,
             @NonNull Runnable internalCleanupRunnable) {
-        this(tag, provider, context, handler, prop, lockoutResetDispatcher,
-                gestureAvailabilityDispatcher, biometricContext,
+        this(provider, context, handler, prop, lockoutResetDispatcher, biometricContext,
                 resetLockoutRequiresHardwareAuthToken, internalCleanupRunnable,
                 new AuthSessionCoordinator(), null /* daemon */,
                 null /* onEnrollSuccessCallback */);
     }
 
     @VisibleForTesting
-    HidlToAidlSensorAdapter(@NonNull String tag, @NonNull FingerprintProvider provider,
+    HidlToAidlSensorAdapter(@NonNull FingerprintProvider provider,
             @NonNull Context context, @NonNull Handler handler,
             @NonNull SensorProps prop,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull BiometricContext biometricContext,
             boolean resetLockoutRequiresHardwareAuthToken,
             @NonNull Runnable internalCleanupRunnable,
             @NonNull AuthSessionCoordinator authSessionCoordinator,
             @Nullable IBiometricsFingerprint daemon,
             @Nullable AidlResponseHandler.AidlResponseHandlerCallback aidlResponseHandlerCallback) {
-        super(tag, provider, context, handler, getFingerprintSensorPropertiesInternal(prop,
+        super(provider, context, handler, getFingerprintSensorPropertiesInternal(prop,
                         new ArrayList<>(), resetLockoutRequiresHardwareAuthToken),
-                lockoutResetDispatcher,
-                gestureAvailabilityDispatcher,
                 biometricContext, null /* session */);
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mInternalCleanupRunnable = internalCleanupRunnable;
@@ -127,7 +124,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
 
     @Override
     public void serviceDied(long cookie) {
-        Slog.d(TAG, "HAL died.");
+        Slog.d(TAG, "Fingerprint HAL died.");
         mSession = null;
         mDaemon = null;
     }
@@ -139,12 +136,12 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
     }
 
     @Override
-    public void init(GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
-            LockoutResetDispatcher lockoutResetDispatcher) {
+    public void init(@NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         setLazySession(this::getSession);
-        setScheduler(new UserAwareBiometricScheduler(TAG,
+        setScheduler(new BiometricScheduler<ISession, AidlSession>(getHandler(),
                 BiometricScheduler.sensorTypeFromFingerprintProperties(getSensorProperties()),
-                gestureAvailabilityDispatcher, () -> mCurrentUserId, getUserSwitchCallback()));
+                gestureAvailabilityDispatcher, () -> mCurrentUserId, getUserSwitchProvider()));
         mLockoutTracker = new LockoutFrameworkImpl(getContext(),
                 userId -> mLockoutResetDispatcher.notifyLockoutResetCallbacks(
                         getSensorProperties().sensorId), getHandler());
@@ -152,6 +149,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
 
     @Override
     @Nullable
+    @VisibleForTesting
     protected AidlSession getSessionForUser(int userId) {
         if (mSession != null && mSession.getUserId() == userId) {
             return mSession;
@@ -217,21 +215,18 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
         }
 
         mDaemon.asBinder().linkToDeath(this, 0 /* flags */);
-
-        Slog.d(TAG, "Fingerprint HAL ready");
-
         scheduleLoadAuthenticatorIds();
         mInternalCleanupRunnable.run();
         return mDaemon;
     }
 
-    private UserAwareBiometricScheduler.UserSwitchCallback getUserSwitchCallback() {
-        return new UserAwareBiometricScheduler.UserSwitchCallback() {
+    private UserSwitchProvider<ISession, AidlSession> getUserSwitchProvider() {
+        return new UserSwitchProvider<>() {
             @NonNull
             @Override
-            public StopUserClient<?> getStopUserClient(int userId) {
-                return new StopUserClient<IBiometricsFingerprint>(getContext(),
-                        HidlToAidlSensorAdapter.this::getIBiometricsFingerprint,
+            public StopUserClient<AidlSession> getStopUserClient(int userId) {
+                return new StopUserClient<>(getContext(),
+                        HidlToAidlSensorAdapter.this::getSession,
                         null /* token */, userId, getSensorProperties().sensorId,
                         BiometricLogger.ofUnknown(getContext()), getBiometricContext(),
                         () -> {
@@ -258,7 +253,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
 
             @NonNull
             @Override
-            public StartUserClient<?, ?> getStartUserClient(int newUserId) {
+            public StartUserClient<ISession, AidlSession> getStartUserClient(int newUserId) {
                 return getFingerprintUpdateActiveUserClient(newUserId,
                         false /* forceUpdateAuthenticatorId */);
             }
@@ -268,7 +263,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
     private FingerprintUpdateActiveUserClient getFingerprintUpdateActiveUserClient(int newUserId,
             boolean forceUpdateAuthenticatorIds) {
         return new FingerprintUpdateActiveUserClient(getContext(),
-                this::getIBiometricsFingerprint, newUserId, TAG,
+                () -> getSession().getSession(), newUserId, TAG,
                 getSensorProperties().sensorId, BiometricLogger.ofUnknown(getContext()),
                 getBiometricContext(), () -> mCurrentUserId,
                 !FingerprintUtils.getInstance(getSensorProperties().sensorId)
@@ -290,7 +285,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
     }
 
     @VisibleForTesting void handleUserChanged(int newUserId) {
-        Slog.d(TAG, "User changed. Current user is " + newUserId);
+        Slog.d(TAG, "User changed. Current user for fingerprint sensor is " + newUserId);
         mSession = null;
         mCurrentUserId = newUserId;
     }

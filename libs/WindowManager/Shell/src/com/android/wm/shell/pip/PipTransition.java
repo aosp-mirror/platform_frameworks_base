@@ -987,10 +987,12 @@ public class PipTransition extends PipTransitionController {
                     0 /* startingAngle */, rotationDelta);
             if (sourceHintRect == null) {
                 // We use content overlay when there is no source rect hint to enter PiP use bounds
-                // animation.
+                // animation. We also temporarily disallow app icon overlay and use color overlay
+                // instead when in fixed rotation enter PiP in button nav with no sourceRectHint.
+                // TODO(b/319286295): Fix App Icon Overlay animation in fixed rotation in btn nav.
                 // TODO(b/272819817): cleanup the null-check and extra logging.
                 final boolean hasTopActivityInfo = taskInfo.topActivityInfo != null;
-                if (hasTopActivityInfo) {
+                if (hasTopActivityInfo && mFixedRotationState != FIXED_ROTATION_TRANSITION) {
                     animator.setAppIconContentOverlay(
                             mContext, currentBounds, destinationBounds, taskInfo.topActivityInfo,
                             mPipBoundsState.getLauncherState().getAppIconSizePx());

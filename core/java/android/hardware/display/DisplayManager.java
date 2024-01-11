@@ -1831,15 +1831,6 @@ public final class DisplayManager {
         String KEY_POWER_THROTTLING_DATA = "power_throttling_data";
 
         /**
-         * Key for new power controller feature flag. If enabled new DisplayPowerController will
-         * be used.
-         * Read value via {@link android.provider.DeviceConfig#getBoolean(String, String, boolean)}
-         * with {@link android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER} as the namespace.
-         * @hide
-         */
-        String KEY_NEW_POWER_CONTROLLER = "use_newly_structured_display_power_controller";
-
-        /**
          * Key for normal brightness mode controller feature flag.
          * It enables NormalBrightnessModeController.
          * Read value via {@link android.provider.DeviceConfig#getBoolean(String, String, boolean)}

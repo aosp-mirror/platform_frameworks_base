@@ -101,6 +101,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 
@@ -111,7 +112,9 @@ import com.android.server.wm.WindowProcessController;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
@@ -160,6 +163,9 @@ public class MockingOomAdjusterTests {
     private static Context sContext;
     private static PackageManagerInternal sPackageManagerInternal;
     private static ActivityManagerService sService;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @SuppressWarnings("GuardedBy")
     @BeforeClass
@@ -225,6 +231,11 @@ public class MockingOomAdjusterTests {
         if (sService.mConstants.USE_TIERED_CACHED_ADJ) {
             sFirstCachedAdj = ProcessList.CACHED_APP_MIN_ADJ + 10;
         }
+    }
+
+    @Before
+    public void setUp() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_NEW_FGS_RESTRICTION_LOGIC);
     }
 
     @AfterClass
@@ -540,6 +551,7 @@ public class MockingOomAdjusterTests {
         sService.mConstants.mShortFgsProcStateExtraWaitDuration = 200_000;
 
         ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.appInfo = new ApplicationInfo();
         s.startRequested = true;
         s.isForeground = true;
         s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
@@ -582,6 +594,7 @@ public class MockingOomAdjusterTests {
 
         // SHORT_SERVICE, timed out already.
         s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.appInfo = new ApplicationInfo();
         s.startRequested = true;
         s.isForeground = true;
         s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
@@ -1100,6 +1113,7 @@ public class MockingOomAdjusterTests {
 
         // In order to trick OomAdjuster to think it has a short-service, we need this logic.
         ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.appInfo = new ApplicationInfo();
         s.startRequested = true;
         s.isForeground = true;
         s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
@@ -1130,6 +1144,7 @@ public class MockingOomAdjusterTests {
 
         // In order to trick OomAdjuster to think it has a short-service, we need this logic.
         ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.appInfo = new ApplicationInfo();
         s.startRequested = true;
         s.isForeground = true;
         s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
@@ -1421,6 +1436,7 @@ public class MockingOomAdjusterTests {
 
         // In order to trick OomAdjuster to think it has a short-service, we need this logic.
         ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(sService);
+        s.appInfo = new ApplicationInfo();
         s.startRequested = true;
         s.isForeground = true;
         s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;

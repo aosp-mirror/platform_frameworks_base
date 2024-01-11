@@ -1037,6 +1037,19 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    public void onNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onNavigationBarLumaSamplingEnabled(displayId, enable);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy to enable/disable nav bar luma"
+                        + "sampling");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call onNavigationBarLumaSamplingEnabled()", e);
+        }
+    }
+
     private void updateEnabledState() {
         final int currentUser = mUserTracker.getUserId();
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,

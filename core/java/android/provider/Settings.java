@@ -3622,11 +3622,11 @@ public final class Settings {
                             }
                             if (names.length > 0) {
                                 for (String name : names) {
-                                    String value = mValues.get(name);
-                                    if (value != null) {
+                                    // mValues can contain "null" values, need to use containsKey.
+                                    if (mValues.containsKey(name)) {
                                         keyValues.put(
                                                 name.substring(substringLength),
-                                                value);
+                                                mValues.get(name));
                                     }
                                 }
                             } else {
@@ -3700,11 +3700,11 @@ public final class Settings {
                 // Only the flags requested by the caller
                 if (names.length > 0) {
                     for (String name : names) {
-                        String value = flagsToValues.get(name);
-                        if (value != null) {
+                        // flagsToValues can contain "null" values, need to use containsKey.
+                        if (flagsToValues.containsKey(name)) {
                             keyValues.put(
                                     name.substring(substringLength),
-                                    value);
+                                    flagsToValues.get(name));
                         }
                     }
                 } else {
@@ -10158,8 +10158,12 @@ public final class Settings {
 
         /**
          * The default NFC payment component
+         *
+         * @deprecated please use {@link android.app.role.RoleManager#getRoleHolders(String)}
+         * with {@link android.app.role.RoleManager#ROLE_WALLET} parameter.
          * @hide
          */
+        @Deprecated
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
 
@@ -12175,6 +12179,36 @@ public final class Settings {
          * @hide
          */
         public static final String HIDE_PRIVATESPACE_ENTRY_POINT = "hide_privatespace_entry_point";
+
+        /** @hide */
+        public static final int PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK = 0;
+        /** @hide */
+        public static final int PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY = 1;
+        /** @hide */
+        public static final int PRIVATE_SPACE_AUTO_LOCK_NEVER = 2;
+
+        /**
+         * The different auto lock options for private space.
+         *
+         * @hide
+         */
+        @IntDef(prefix = {"PRIVATE_SPACE_AUTO_LOCK_"}, value = {
+                PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK,
+                PRIVATE_SPACE_AUTO_LOCK_AFTER_INACTIVITY,
+                PRIVATE_SPACE_AUTO_LOCK_NEVER,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface PrivateSpaceAutoLockOption {
+        }
+
+
+        /**
+         *  Store auto lock value for private space.
+         *  The possible values are defined in {@link PrivateSpaceAutoLockOption}.
+         *
+         * @hide
+         */
+        public static final String PRIVATE_SPACE_AUTO_LOCK = "private_space_auto_lock";
 
         /**
          * These entries are considered common between the personal and the managed profile,

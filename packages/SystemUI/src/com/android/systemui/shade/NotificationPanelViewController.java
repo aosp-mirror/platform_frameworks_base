@@ -27,6 +27,7 @@ import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.Flags.keyguardBottomAreaRefactor;
 import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.Flags.predictiveBackAnimateShade;
+import static com.android.systemui.Flags.smartspaceRelocateToBottom;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
@@ -1214,7 +1215,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 .setMaxLengthSeconds(0.4f).build();
         mStatusBarMinHeight = SystemBarUtils.getStatusBarHeight(mView.getContext());
         mStatusBarHeaderHeightKeyguard = Utils.getStatusBarHeaderHeightKeyguard(mView.getContext());
-        mClockPositionAlgorithm.loadDimens(mResources);
+        mClockPositionAlgorithm.loadDimens(mView.getContext(), mResources);
         mIndicationBottomPadding = mResources.getDimensionPixelSize(
                 R.dimen.keyguard_indication_bottom_padding);
         int statusbarHeight = SystemBarUtils.getStatusBarHeight(mView.getContext());
@@ -1428,7 +1429,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             int index = mView.indexOfChild(mKeyguardBottomArea);
             mView.removeView(mKeyguardBottomArea);
             KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
-            setKeyguardBottomArea(mKeyguardBottomAreaViewControllerProvider.get().getView());
+            KeyguardBottomAreaViewController keyguardBottomAreaViewController =
+                    mKeyguardBottomAreaViewControllerProvider.get();
+            if (smartspaceRelocateToBottom()) {
+                keyguardBottomAreaViewController.init();
+            }
+            setKeyguardBottomArea(keyguardBottomAreaViewController.getView());
             mKeyguardBottomArea.initFrom(oldBottomArea);
             mView.addView(mKeyguardBottomArea, index);
 
@@ -1751,14 +1757,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         } else {
             layout = mNotificationContainerParent;
         }
-
-        if (migrateClocksToBlueprint()) {
-            mKeyguardInteractor.setClockShouldBeCentered(mSplitShadeEnabled && shouldBeCentered);
-        } else {
-            mKeyguardStatusViewController.updateAlignment(
-                    layout, mSplitShadeEnabled, shouldBeCentered, animate);
-            mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
-        }
+        mKeyguardStatusViewController.updateAlignment(
+                layout, mSplitShadeEnabled, shouldBeCentered, animate);
+        mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
     }
 
     private boolean shouldKeyguardStatusViewBeCentered() {

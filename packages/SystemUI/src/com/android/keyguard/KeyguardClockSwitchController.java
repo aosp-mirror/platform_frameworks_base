@@ -22,6 +22,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.Flags.migrateClocksToBlueprint;
+import static com.android.systemui.Flags.smartspaceRelocateToBottom;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -418,6 +419,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private void addSmartspaceView() {
         if (migrateClocksToBlueprint()) {
+            return;
+        }
+
+        if (smartspaceRelocateToBottom()) {
             return;
         }
 

@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
  *
  * The [TestCoroutineScheduler] is passed to provide the functionality to wait for idle.
  */
-@ExperimentalTestApi
+@OptIn(ExperimentalTestApi::class)
 fun runMonotonicClockTest(block: suspend MonotonicClockTestScope.() -> Unit) = runTest {
     // We need a CoroutineScope (like a TestScope) to create a TestMonotonicFrameClock.
     withContext(TestMonotonicFrameClock(this)) {

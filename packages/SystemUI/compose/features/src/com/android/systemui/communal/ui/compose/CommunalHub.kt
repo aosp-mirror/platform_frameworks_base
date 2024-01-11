@@ -45,6 +45,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -76,10 +77,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Popup
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
@@ -97,6 +100,8 @@ fun CommunalHub(
     onEditDone: (() -> Unit)? = null,
 ) {
     val communalContent by viewModel.communalContent.collectAsState(initial = emptyList())
+    val isPopupOnDismissCtaShowing by
+        viewModel.isPopupOnDismissCtaShowing.collectAsState(initial = false)
     var removeButtonCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var toolbarSize: IntSize? by remember { mutableStateOf(null) }
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
@@ -131,6 +136,10 @@ fun CommunalHub(
             IconButton(onClick = viewModel::onOpenWidgetEditor) {
                 Icon(Icons.Default.Edit, stringResource(R.string.button_to_open_widget_editor))
             }
+        }
+
+        if (isPopupOnDismissCtaShowing) {
+            PopupOnDismissCtaTile(viewModel::onHidePopupAfterDismissCta)
         }
 
         // This spacer covers the edge of the LazyHorizontalGrid and prevents it from receiving
@@ -172,7 +181,7 @@ private fun BoxScope.CommunalHubLazyGrid(
         gridModifier =
             gridModifier
                 .fillMaxSize()
-                .dragContainer(dragDropState, beforeContentPadding(contentPadding))
+                .dragContainer(dragDropState, beforeContentPadding(contentPadding), viewModel)
                 .onGloballyPositioned { setGridCoordinates(it) }
         // for widgets dropped from other activities
         val dragAndDropTargetState =
@@ -319,8 +328,40 @@ private fun Toolbar(
 }
 
 @Composable
+private fun PopupOnDismissCtaTile(onHidePopupAfterDismissCta: () -> Unit) {
+    Popup(
+        alignment = Alignment.TopCenter,
+        offset = IntOffset(0, 40),
+        onDismissRequest = onHidePopupAfterDismissCta
+    ) {
+        val colors = LocalAndroidColorScheme.current
+        Row(
+            modifier =
+                Modifier.height(56.dp)
+                    .background(colors.secondary, RoundedCornerShape(50.dp))
+                    .padding(16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.TouchApp,
+                contentDescription = stringResource(R.string.popup_on_dismiss_cta_tile_text),
+                tint = colors.onSecondary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = stringResource(R.string.popup_on_dismiss_cta_tile_text),
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.onSecondary,
+            )
+        }
+    }
+}
+
+@Composable
 private fun RemoveButtonContent(spacerModifier: Modifier) {
-    Icon(Icons.Outlined.Delete, stringResource(R.string.button_to_open_widget_editor))
+    Icon(Icons.Outlined.Delete, stringResource(R.string.button_to_remove_widget))
     Spacer(spacerModifier)
     Text(
         text = stringResource(R.string.button_to_remove_widget),

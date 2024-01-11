@@ -30,6 +30,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
+import android.view.View.FocusDirection;
 import android.view.WindowInsets.Type.InsetsType;
 import android.window.ClientWindowFrames;
 import android.window.OnBackInvokedCallbackInfo;
@@ -661,6 +662,13 @@ public class WindowlessWindowManager implements IWindowSession {
     public boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
             IBinder embeddedInputToken) {
         Log.e(TAG, "Received request to transferHostTouchGestureToEmbedded on"
+                + " WindowlessWindowManager. We shouldn't get here!");
+        return false;
+    }
+
+    @Override
+    public boolean moveFocusToAdjacentWindow(IWindow fromWindow, @FocusDirection int direction) {
+        Log.e(TAG, "Received request to moveFocusToAdjacentWindow on"
                 + " WindowlessWindowManager. We shouldn't get here!");
         return false;
     }

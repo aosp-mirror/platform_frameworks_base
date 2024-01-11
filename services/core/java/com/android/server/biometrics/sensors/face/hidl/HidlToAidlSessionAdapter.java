@@ -282,7 +282,7 @@ public class HidlToAidlSessionAdapter implements ISession {
 
     @Override
     public ICancellationSignal enrollWithOptions(FaceEnrollOptions options) {
-        //Unsupported in HIDL
+        Slog.e(TAG, "enrollWithOptions unsupported in HIDL");
         return null;
     }
 

@@ -190,15 +190,11 @@ public class BatteryStatsImpl extends BatteryStats {
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
     // in to one common name.
-    private static final int MAX_WAKELOCKS_PER_UID;
+    private static final int MAX_WAKELOCKS_PER_UID = isLowRamDevice() ? 40 : 200;
 
-    static {
-        if (ActivityManager.isLowRamDeviceStatic()) {
-            MAX_WAKELOCKS_PER_UID = 40;
-        } else {
-            MAX_WAKELOCKS_PER_UID = 200;
-        }
-    }
+    private static final int CELL_SIGNAL_STRENGTH_LEVEL_COUNT = getCellSignalStrengthLevelCount();
+
+    private static final int MODEM_TX_POWER_LEVEL_COUNT = getModemTxPowerLevelCount();
 
     // Number of transmit power states the Wifi controller can be in.
     private static final int NUM_WIFI_TX_LEVELS = 1;
@@ -278,11 +274,9 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     protected KernelSingleUidTimeReader mKernelSingleUidTimeReader;
     @VisibleForTesting
-    protected SystemServerCpuThreadReader mSystemServerCpuThreadReader =
-            SystemServerCpuThreadReader.create();
+    protected SystemServerCpuThreadReader mSystemServerCpuThreadReader;
 
-    private final KernelMemoryBandwidthStats mKernelMemoryBandwidthStats
-            = new KernelMemoryBandwidthStats();
+    private KernelMemoryBandwidthStats mKernelMemoryBandwidthStats;
     private final LongSparseArray<SamplingTimer> mKernelMemoryStats = new LongSparseArray<>();
     private int[] mCpuPowerBracketMap;
     private final CpuPowerStatsCollector mCpuPowerStatsCollector;
@@ -323,7 +317,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private long mLastRpmStatsUpdateTimeMs = -RPM_STATS_UPDATE_FREQ_MS;
 
     /** Container for Rail Energy Data stats. */
-    private final RailStats mTmpRailStats = new RailStats();
+    private RailStats mTmpRailStats;
 
     /**
      * Estimate UID modem power usage based on their estimated mobile radio active time.
@@ -1031,7 +1025,7 @@ public class BatteryStatsImpl extends BatteryStats {
     int mPhoneSignalStrengthBin = -1;
     int mPhoneSignalStrengthBinRaw = -1;
     final StopwatchTimer[] mPhoneSignalStrengthsTimer =
-            new StopwatchTimer[CellSignalStrength.getNumSignalStrengthLevels()];
+            new StopwatchTimer[CELL_SIGNAL_STRENGTH_LEVEL_COUNT];
 
     StopwatchTimer mPhoneSignalScanningTimer;
 
@@ -1723,7 +1717,8 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     public BatteryStatsImpl(Clock clock, File historyDirectory, @NonNull Handler handler,
             @NonNull PowerStatsUidResolver powerStatsUidResolver) {
-        init(clock);
+        mClock = clock;
+        initKernelStatsReaders();
         mBatteryStatsConfig = new BatteryStatsConfig.Builder().build();
         mHandler = handler;
         mPowerStatsUidResolver = powerStatsUidResolver;
@@ -1748,13 +1743,19 @@ public class BatteryStatsImpl extends BatteryStats {
         mCpuPowerStatsCollector = null;
     }
 
-    private void init(Clock clock) {
-        mClock = clock;
-        mCpuUidUserSysTimeReader = new KernelCpuUidUserSysTimeReader(true, clock);
-        mCpuUidFreqTimeReader = new KernelCpuUidFreqTimeReader(true, clock);
-        mCpuUidActiveTimeReader = new KernelCpuUidActiveTimeReader(true, clock);
-        mCpuUidClusterTimeReader = new KernelCpuUidClusterTimeReader(true, clock);
+    private void initKernelStatsReaders() {
+        if (!isKernelStatsAvailable()) {
+            return;
+        }
+
+        mCpuUidUserSysTimeReader = new KernelCpuUidUserSysTimeReader(true, mClock);
+        mCpuUidFreqTimeReader = new KernelCpuUidFreqTimeReader(true, mClock);
+        mCpuUidActiveTimeReader = new KernelCpuUidActiveTimeReader(true, mClock);
+        mCpuUidClusterTimeReader = new KernelCpuUidClusterTimeReader(true, mClock);
         mKernelWakelockReader = new KernelWakelockReader();
+        mSystemServerCpuThreadReader = SystemServerCpuThreadReader.create();
+        mKernelMemoryBandwidthStats = new KernelMemoryBandwidthStats();
+        mTmpRailStats = new RailStats();
     }
 
     /**
@@ -5878,7 +5879,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     void stopAllPhoneSignalStrengthTimersLocked(int except, long elapsedRealtimeMs) {
-        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
+        for (int i = 0; i < CELL_SIGNAL_STRENGTH_LEVEL_COUNT; i++) {
             if (i == except) {
                 continue;
             }
@@ -8450,7 +8451,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public ControllerActivityCounterImpl getOrCreateModemControllerActivityLocked() {
             if (mModemControllerActivity == null) {
                 mModemControllerActivity = new ControllerActivityCounterImpl(mBsi.mClock,
-                        mBsi.mOnBatteryTimeBase, ModemActivityInfo.getNumTxPowerLevels());
+                        mBsi.mOnBatteryTimeBase, mBsi.MODEM_TX_POWER_LEVEL_COUNT);
             }
             return mModemControllerActivity;
         }
@@ -10896,7 +10897,8 @@ public class BatteryStatsImpl extends BatteryStats {
             @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
             @NonNull CpuScalingPolicies cpuScalingPolicies,
             @NonNull PowerStatsUidResolver powerStatsUidResolver) {
-        init(clock);
+        mClock = clock;
+        initKernelStatsReaders();
 
         mBatteryStatsConfig = config;
         mMonotonicClock = monotonicClock;
@@ -10992,7 +10994,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDeviceLightIdlingTimer = new StopwatchTimer(mClock, null, -15, null, mOnBatteryTimeBase);
         mDeviceIdlingTimer = new StopwatchTimer(mClock, null, -12, null, mOnBatteryTimeBase);
         mPhoneOnTimer = new StopwatchTimer(mClock, null, -3, null, mOnBatteryTimeBase);
-        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
+        for (int i = 0; i < CELL_SIGNAL_STRENGTH_LEVEL_COUNT; i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(mClock, null, -200 - i, null,
                     mOnBatteryTimeBase);
         }
@@ -11012,7 +11014,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mBluetoothActivity = new ControllerActivityCounterImpl(mClock, mOnBatteryTimeBase,
                 NUM_BT_TX_LEVELS);
         mModemActivity = new ControllerActivityCounterImpl(mClock, mOnBatteryTimeBase,
-                ModemActivityInfo.getNumTxPowerLevels());
+                MODEM_TX_POWER_LEVEL_COUNT);
         mMobileRadioActiveTimer = new StopwatchTimer(mClock, null, -400, null, mOnBatteryTimeBase);
         mMobileRadioActivePerAppTimer = new StopwatchTimer(mClock, null, -401, null,
                 mOnBatteryTimeBase);
@@ -11611,7 +11613,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mFlashlightOnTimer.reset(false, elapsedRealtimeUs);
         mCameraOnTimer.reset(false, elapsedRealtimeUs);
         mBluetoothScanTimer.reset(false, elapsedRealtimeUs);
-        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
+        for (int i = 0; i < CELL_SIGNAL_STRENGTH_LEVEL_COUNT; i++) {
             mPhoneSignalStrengthsTimer[i].reset(false, elapsedRealtimeUs);
         }
         mPhoneSignalScanningTimer.reset(false, elapsedRealtimeUs);
@@ -11834,7 +11836,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private String[] mWifiIfaces = EmptyArray.STRING;
 
     @GuardedBy("mWifiNetworkLock")
-    private NetworkStats mLastWifiNetworkStats = new NetworkStats(0, -1);
+    private NetworkStats mLastWifiNetworkStats;
 
     private final Object mModemNetworkLock = new Object();
 
@@ -11842,7 +11844,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private String[] mModemIfaces = EmptyArray.STRING;
 
     @GuardedBy("mModemNetworkLock")
-    private NetworkStats mLastModemNetworkStats = new NetworkStats(0, -1);
+    private NetworkStats mLastModemNetworkStats;
 
     @VisibleForTesting
     protected NetworkStats readMobileNetworkStatsLocked(
@@ -11875,7 +11877,9 @@ public class BatteryStatsImpl extends BatteryStats {
         synchronized (mWifiNetworkLock) {
             final NetworkStats latestStats = readWifiNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = latestStats.subtract(mLastWifiNetworkStats);
+                delta = mLastWifiNetworkStats != null
+                        ? latestStats.subtract(mLastWifiNetworkStats)
+                        : latestStats.subtract(new NetworkStats(0, -1));
                 mLastWifiNetworkStats = latestStats;
             }
         }
@@ -12248,7 +12252,9 @@ public class BatteryStatsImpl extends BatteryStats {
         synchronized (mModemNetworkLock) {
             final NetworkStats latestStats = readMobileNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = latestStats.subtract(mLastModemNetworkStats);
+                delta = latestStats.subtract(mLastModemNetworkStats != null
+                        ? mLastModemNetworkStats
+                        : new NetworkStats(0, -1));
                 mLastModemNetworkStats = latestStats;
             }
         }
@@ -12301,7 +12307,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         deltaInfo.getSleepTimeMillis());
                 mModemActivity.getOrCreateRxTimeCounter()
                         .increment(deltaInfo.getReceiveTimeMillis(), elapsedRealtimeMs);
-                for (int lvl = 0; lvl < ModemActivityInfo.getNumTxPowerLevels(); lvl++) {
+                for (int lvl = 0; lvl < MODEM_TX_POWER_LEVEL_COUNT; lvl++) {
                     mModemActivity.getOrCreateTxTimeCounters()[lvl]
                             .increment(deltaInfo.getTransmitDurationMillisAtPowerLevel(lvl),
                                     elapsedRealtimeMs);
@@ -12318,8 +12324,8 @@ public class BatteryStatsImpl extends BatteryStats {
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_IDLE)
                             + deltaInfo.getReceiveTimeMillis() *
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_RX);
-                    for (int i = 0; i < Math.min(ModemActivityInfo.getNumTxPowerLevels(),
-                            CellSignalStrength.getNumSignalStrengthLevels()); i++) {
+                    for (int i = 0; i < Math.min(MODEM_TX_POWER_LEVEL_COUNT,
+                            CELL_SIGNAL_STRENGTH_LEVEL_COUNT); i++) {
                         energyUsed += deltaInfo.getTransmitDurationMillisAtPowerLevel(i)
                                 * mPowerProfile.getAveragePower(
                                         PowerProfile.POWER_MODEM_CONTROLLER_TX, i);
@@ -12441,7 +12447,7 @@ public class BatteryStatsImpl extends BatteryStats {
                             }
 
                             if (totalTxPackets > 0 && entry.getTxPackets() > 0) {
-                                for (int lvl = 0; lvl < ModemActivityInfo.getNumTxPowerLevels();
+                                for (int lvl = 0; lvl < MODEM_TX_POWER_LEVEL_COUNT;
                                         lvl++) {
                                     long txMs = entry.getTxPackets()
                                             * deltaInfo.getTransmitDurationMillisAtPowerLevel(lvl);
@@ -12550,7 +12556,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 && deltaInfo.getSpecificInfoFrequencyRange(0)
                 == ServiceState.FREQUENCY_RANGE_UNKNOWN) {
             // Specific info data unavailable. Proportionally smear Rx and Tx times across each RAT.
-            final int levelCount = CellSignalStrength.getNumSignalStrengthLevels();
+            final int levelCount = CELL_SIGNAL_STRENGTH_LEVEL_COUNT;
             long[] perSignalStrengthActiveTimeMs = new long[levelCount];
             long totalActiveTimeMs = 0;
 
@@ -12726,13 +12732,13 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
         int levelMaxTimeSpent = 0;
-        for (int i = 1; i < ModemActivityInfo.getNumTxPowerLevels(); i++) {
+        for (int i = 1; i < MODEM_TX_POWER_LEVEL_COUNT; i++) {
             if (activityInfo.getTransmitDurationMillisAtPowerLevel(i)
                     > activityInfo.getTransmitDurationMillisAtPowerLevel(levelMaxTimeSpent)) {
                 levelMaxTimeSpent = i;
             }
         }
-        if (levelMaxTimeSpent == ModemActivityInfo.getNumTxPowerLevels() - 1) {
+        if (levelMaxTimeSpent == MODEM_TX_POWER_LEVEL_COUNT - 1) {
             mHistory.recordState2StartEvent(elapsedRealtimeMs, uptimeMs,
                     HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG);
         }
@@ -14821,12 +14827,12 @@ public class BatteryStatsImpl extends BatteryStats {
             timeInRatMs[i] = getPhoneDataConnectionTime(i, rawRealTimeUs, which) / 1000;
         }
         long[] timeInRxSignalStrengthLevelMs =
-                new long[CellSignalStrength.getNumSignalStrengthLevels()];
+                new long[CELL_SIGNAL_STRENGTH_LEVEL_COUNT];
         for (int i = 0; i < timeInRxSignalStrengthLevelMs.length; i++) {
             timeInRxSignalStrengthLevelMs[i] =
                 getPhoneSignalStrengthTime(i, rawRealTimeUs, which) / 1000;
         }
-        long[] txTimeMs = new long[Math.min(ModemActivityInfo.getNumTxPowerLevels(),
+        long[] txTimeMs = new long[Math.min(MODEM_TX_POWER_LEVEL_COUNT,
             counter.getTxTimeCounters().length)];
         long totalTxTimeMs = 0;
         for (int i = 0; i < txTimeMs.length; i++) {
@@ -15458,7 +15464,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public Constants(Handler handler) {
             super(handler);
-            if (ActivityManager.isLowRamDeviceStatic()) {
+            if (isLowRamDevice()) {
                 MAX_HISTORY_FILES = DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE;
                 MAX_HISTORY_BUFFER = DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB * 1024;
             } else {
@@ -15528,12 +15534,10 @@ public class BatteryStatsImpl extends BatteryStats {
                         KEY_PROC_STATE_CHANGE_COLLECTION_DELAY_MS,
                         DEFAULT_PROC_STATE_CHANGE_COLLECTION_DELAY_MS);
                 MAX_HISTORY_FILES = mParser.getInt(KEY_MAX_HISTORY_FILES,
-                        ActivityManager.isLowRamDeviceStatic() ?
-                                DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE
-                        : DEFAULT_MAX_HISTORY_FILES);
+                        isLowRamDevice() ? DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE
+                                : DEFAULT_MAX_HISTORY_FILES);
                 MAX_HISTORY_BUFFER = mParser.getInt(KEY_MAX_HISTORY_BUFFER_KB,
-                        ActivityManager.isLowRamDeviceStatic() ?
-                                DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB
+                        isLowRamDevice() ? DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB
                                 : DEFAULT_MAX_HISTORY_BUFFER_KB)
                         * 1024;
                 final String perUidModemModel = mParser.getString(KEY_PER_UID_MODEM_POWER_MODEL,
@@ -16014,7 +16018,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDeviceLightIdlingTimer.readSummaryFromParcelLocked(in);
         mDeviceIdlingTimer.readSummaryFromParcelLocked(in);
         mPhoneOnTimer.readSummaryFromParcelLocked(in);
-        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
+        for (int i = 0; i < CELL_SIGNAL_STRENGTH_LEVEL_COUNT; i++) {
             mPhoneSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
         }
         mPhoneSignalScanningTimer.readSummaryFromParcelLocked(in);
@@ -16520,7 +16524,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDeviceLightIdlingTimer.writeSummaryFromParcelLocked(out, nowRealtime);
         mDeviceIdlingTimer.writeSummaryFromParcelLocked(out, nowRealtime);
         mPhoneOnTimer.writeSummaryFromParcelLocked(out, nowRealtime);
-        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
+        for (int i = 0; i < CELL_SIGNAL_STRENGTH_LEVEL_COUNT; i++) {
             mPhoneSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, nowRealtime);
         }
         mPhoneSignalScanningTimer.writeSummaryFromParcelLocked(out, nowRealtime);
@@ -17015,7 +17019,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mDeviceIdlingTimer.logState(pr, "  ");
             pr.println("*** Phone timer:");
             mPhoneOnTimer.logState(pr, "  ");
-            for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
+            for (int i = 0; i < CELL_SIGNAL_STRENGTH_LEVEL_COUNT; i++) {
                 pr.println("*** Phone signal strength #" + i + ":");
                 mPhoneSignalStrengthsTimer[i].logState(pr, "  ");
             }

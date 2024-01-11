@@ -98,3 +98,11 @@ flag {
     description: "Guards StrictMode APIs for detecting restricted network access."
     bug: "317250784"
 }
+
+flag {
+    name: "message_queue_tail_tracking"
+    namespace: "system_performance"
+    description: "track tail of message queue."
+    bug: "305311707"
+    is_fixed_read_only: true
+}

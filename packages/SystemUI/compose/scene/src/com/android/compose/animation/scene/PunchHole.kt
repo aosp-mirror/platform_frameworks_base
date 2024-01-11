@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -32,80 +33,95 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.withSaveLayer
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.GlobalPositionAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.toSize
 
-internal fun Modifier.punchHole(
-    layoutImpl: SceneTransitionLayoutImpl,
-    element: ElementKey,
-    bounds: ElementKey,
-    shape: Shape,
-): Modifier = this.then(PunchHoleElement(layoutImpl, element, bounds, shape))
+/**
+ * Punch a hole in this node with the given [size], [offset] and [shape].
+ *
+ * Punching a hole in an element will "remove" any pixel drawn by that element in the hole area.
+ * This can be used to make content drawn below an opaque element visible. For example, if we have
+ * [this lockscreen scene](http://shortn/_VYySFnJDhN) drawn below
+ * [this shade scene](http://shortn/_fpxGUk0Rg7) and punch a hole in the latter using the big clock
+ * time bounds and a RoundedCornerShape(10dp), [this](http://shortn/_qt80IvORFj) would be the
+ * result.
+ */
+@Stable
+fun Modifier.punchHole(
+    size: () -> Size,
+    offset: () -> Offset,
+    shape: Shape = RectangleShape,
+): Modifier = this.then(PunchHoleElement(size, offset, shape))
+
+/**
+ * Punch a hole in this node using the bounds of [coords] and the given [shape].
+ *
+ * You can use [androidx.compose.ui.layout.onGloballyPositioned] to get the last coordinates of a
+ * node.
+ */
+@Stable
+fun Modifier.punchHole(
+    coords: () -> LayoutCoordinates?,
+    shape: Shape = RectangleShape,
+): Modifier = this.then(PunchHoleWithBoundsElement(coords, shape))
 
 private data class PunchHoleElement(
-    private val layoutImpl: SceneTransitionLayoutImpl,
-    private val element: ElementKey,
-    private val bounds: ElementKey,
+    private val size: () -> Size,
+    private val offset: () -> Offset,
     private val shape: Shape,
 ) : ModifierNodeElement<PunchHoleNode>() {
-    override fun create(): PunchHoleNode = PunchHoleNode(layoutImpl, element, bounds, shape)
+    override fun create(): PunchHoleNode = PunchHoleNode(size, offset, { shape })
 
     override fun update(node: PunchHoleNode) {
-        node.layoutImpl = layoutImpl
-        node.element = element
-        node.bounds = bounds
-        node.shape = shape
+        node.size = size
+        node.offset = offset
+        node.shape = { shape }
     }
 }
 
 private class PunchHoleNode(
-    var layoutImpl: SceneTransitionLayoutImpl,
-    var element: ElementKey,
-    var bounds: ElementKey,
-    var shape: Shape,
+    var size: () -> Size,
+    var offset: () -> Offset,
+    var shape: () -> Shape,
 ) : Modifier.Node(), DrawModifierNode {
     private var lastSize: Size = Size.Unspecified
     private var lastLayoutDirection: LayoutDirection = LayoutDirection.Ltr
     private var lastOutline: Outline? = null
 
     override fun ContentDrawScope.draw() {
-        val bounds = layoutImpl.elements[bounds]
-
-        if (
-            bounds == null ||
-                bounds.lastSharedState.size == Element.SizeUnspecified ||
-                bounds.lastSharedState.offset == Offset.Unspecified
-        ) {
+        val holeSize = size()
+        if (holeSize == Size.Zero) {
             drawContent()
             return
         }
 
-        val element = layoutImpl.elements.getValue(element)
         drawIntoCanvas { canvas ->
             canvas.withSaveLayer(size.toRect(), Paint()) {
                 drawContent()
 
-                val offset = bounds.lastSharedState.offset - element.lastSharedState.offset
-                translate(offset.x, offset.y) { drawHole(bounds) }
+                val offset = offset()
+                translate(offset.x, offset.y) { drawHole(holeSize) }
             }
         }
     }
 
-    private fun DrawScope.drawHole(bounds: Element) {
-        val boundsSize = bounds.lastSharedState.size.toSize()
+    private fun DrawScope.drawHole(size: Size) {
         if (shape == RectangleShape) {
-            drawRect(Color.Black, size = boundsSize, blendMode = BlendMode.DstOut)
+            drawRect(Color.Black, size = size, blendMode = BlendMode.DstOut)
             return
         }
 
         val outline =
-            if (boundsSize == lastSize && layoutDirection == lastLayoutDirection) {
+            if (size == lastSize && layoutDirection == lastLayoutDirection) {
                 lastOutline!!
             } else {
-                val newOutline = shape.createOutline(boundsSize, layoutDirection, this)
-                lastSize = boundsSize
+                val newOutline = shape().createOutline(size, layoutDirection, this)
+                lastSize = size
                 lastLayoutDirection = layoutDirection
                 lastOutline = newOutline
                 newOutline
@@ -116,5 +132,41 @@ private class PunchHoleNode(
             Color.Black,
             blendMode = BlendMode.DstOut,
         )
+    }
+}
+
+private data class PunchHoleWithBoundsElement(
+    private val coords: () -> LayoutCoordinates?,
+    private val shape: Shape,
+) : ModifierNodeElement<PunchHoleWithBoundsNode>() {
+    override fun create(): PunchHoleWithBoundsNode = PunchHoleWithBoundsNode(coords, shape)
+
+    override fun update(node: PunchHoleWithBoundsNode) {
+        node.holeCoords = coords
+        node.shape = shape
+    }
+}
+
+private class PunchHoleWithBoundsNode(
+    var holeCoords: () -> LayoutCoordinates?,
+    var shape: Shape,
+) : DelegatingNode(), DrawModifierNode, GlobalPositionAwareModifierNode {
+    private val delegate = delegate(PunchHoleNode(::holeSize, ::holeOffset, ::shape))
+    private var lastCoords: LayoutCoordinates? = null
+
+    override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
+        this.lastCoords = coordinates
+    }
+
+    override fun ContentDrawScope.draw() = with(delegate) { draw() }
+
+    private fun holeSize(): Size {
+        return holeCoords()?.size?.toSize() ?: Size.Zero
+    }
+
+    private fun holeOffset(): Offset {
+        val holeCoords = holeCoords() ?: return Offset.Zero
+        val lastCoords = lastCoords ?: error("draw() was called before onGloballyPositioned()")
+        return lastCoords.localPositionOf(holeCoords, relativeToSource = Offset.Zero)
     }
 }

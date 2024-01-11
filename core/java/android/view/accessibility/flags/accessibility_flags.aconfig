@@ -99,3 +99,10 @@ flag {
     description: "Feature flag for system pinch zoom gesture detector and related opt-out apis"
     bug: "283323770"
 }
+
+flag {
+    name: "support_system_pinch_zoom_opt_out_apis"
+    namespace: "accessibility"
+    description: "Feature flag for declaring system pinch zoom opt-out apis"
+    bug: "315089687"
+}

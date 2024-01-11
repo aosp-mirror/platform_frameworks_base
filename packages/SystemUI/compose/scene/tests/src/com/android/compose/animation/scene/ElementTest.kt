@@ -16,7 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
@@ -35,17 +34,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.intermediateLayout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.compose.test.subjects.DpOffsetSubject
-import com.android.compose.test.subjects.assertThat
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -263,8 +256,11 @@ class ElementTest {
 
         rule.setContent {
             SceneTransitionLayoutForTesting(
-                currentScene = currentScene,
-                onChangeScene = { currentScene = it },
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene = currentScene,
+                        onChangeScene = { currentScene = it }
+                    ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(TestScenes.SceneA) { /* Nothing */}
@@ -428,8 +424,11 @@ class ElementTest {
 
         rule.setContent {
             SceneTransitionLayoutForTesting(
-                currentScene = TestScenes.SceneA,
-                onChangeScene = {},
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene = TestScenes.SceneA,
+                        onChangeScene = {}
+                    ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(TestScenes.SceneA) { Box(Modifier.element(key)) }
@@ -478,8 +477,11 @@ class ElementTest {
             scrollScope = rememberCoroutineScope()
 
             SceneTransitionLayoutForTesting(
-                currentScene = TestScenes.SceneA,
-                onChangeScene = {},
+                state =
+                    updateSceneTransitionLayoutState(
+                        currentScene = TestScenes.SceneA,
+                        onChangeScene = {}
+                    ),
                 onLayoutImpl = { nullableLayoutImpl = it },
             ) {
                 scene(TestScenes.SceneA) {
@@ -563,88 +565,6 @@ class ElementTest {
             at(32) { assertThat(fooCompositions).isEqualTo(1) }
             at(48) { assertThat(fooCompositions).isEqualTo(1) }
             after { assertThat(fooCompositions).isEqualTo(1) }
-        }
-    }
-
-    @Test
-    fun sharedElementOffsetIsUpdatedEvenWhenNotPlaced() {
-        var nullableLayoutImpl: SceneTransitionLayoutImpl? = null
-        var density: Density? = null
-
-        fun layoutImpl() = nullableLayoutImpl ?: error("nullableLayoutImpl was not set")
-
-        fun density() = density ?: error("density was not set")
-
-        fun Offset.toDpOffset() = with(density()) { DpOffset(x.toDp(), y.toDp()) }
-
-        fun foo() = layoutImpl().elements[TestElements.Foo] ?: error("Foo not in elements map")
-
-        fun Element.lastSharedOffset() = lastSharedState.offset.toDpOffset()
-
-        fun Element.lastOffsetIn(scene: SceneKey) =
-            (sceneStates[scene] ?: error("$scene not in sceneValues map"))
-                .lastState
-                .offset
-                .toDpOffset()
-
-        rule.testTransition(
-            from = TestScenes.SceneA,
-            to = TestScenes.SceneB,
-            transitionLayout = { currentScene, onChangeScene ->
-                density = LocalDensity.current
-
-                SceneTransitionLayoutForTesting(
-                    currentScene = currentScene,
-                    onChangeScene = onChangeScene,
-                    onLayoutImpl = { nullableLayoutImpl = it },
-                    transitions =
-                        transitions {
-                            from(TestScenes.SceneA, to = TestScenes.SceneB) {
-                                spec = tween(durationMillis = 4 * 16, easing = LinearEasing)
-                            }
-                        }
-                ) {
-                    scene(TestScenes.SceneA) { Box(Modifier.element(TestElements.Foo)) }
-                    scene(TestScenes.SceneB) {
-                        Box(Modifier.offset(x = 40.dp, y = 80.dp).element(TestElements.Foo))
-                    }
-                }
-            }
-        ) {
-            val tolerance = DpOffsetSubject.DefaultTolerance
-
-            before {
-                val expected = DpOffset(0.dp, 0.dp)
-                assertThat(foo().lastSharedOffset()).isWithin(tolerance).of(expected)
-                assertThat(foo().lastOffsetIn(TestScenes.SceneA)).isWithin(tolerance).of(expected)
-            }
-
-            at(16) {
-                val expected = DpOffset(10.dp, 20.dp)
-                assertThat(foo().lastSharedOffset()).isWithin(tolerance).of(expected)
-                assertThat(foo().lastOffsetIn(TestScenes.SceneA)).isWithin(tolerance).of(expected)
-                assertThat(foo().lastOffsetIn(TestScenes.SceneB)).isWithin(tolerance).of(expected)
-            }
-
-            at(32) {
-                val expected = DpOffset(20.dp, 40.dp)
-                assertThat(foo().lastSharedOffset()).isWithin(tolerance).of(expected)
-                assertThat(foo().lastOffsetIn(TestScenes.SceneA)).isWithin(tolerance).of(expected)
-                assertThat(foo().lastOffsetIn(TestScenes.SceneB)).isWithin(tolerance).of(expected)
-            }
-
-            at(48) {
-                val expected = DpOffset(30.dp, 60.dp)
-                assertThat(foo().lastSharedOffset()).isWithin(tolerance).of(expected)
-                assertThat(foo().lastOffsetIn(TestScenes.SceneA)).isWithin(tolerance).of(expected)
-                assertThat(foo().lastOffsetIn(TestScenes.SceneB)).isWithin(tolerance).of(expected)
-            }
-
-            after {
-                val expected = DpOffset(40.dp, 80.dp)
-                assertThat(foo().lastSharedOffset()).isWithin(tolerance).of(expected)
-                assertThat(foo().lastOffsetIn(TestScenes.SceneB)).isWithin(tolerance).of(expected)
-            }
         }
     }
 }

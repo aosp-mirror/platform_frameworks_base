@@ -23,6 +23,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
@@ -42,6 +43,7 @@ object KeyguardSmartspaceViewBinder {
         keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
+                    if (!migrateClocksToBlueprint()) return@launch
                     clockViewModel.hasCustomWeatherDataDisplay.collect { hasCustomWeatherDataDisplay
                         ->
                         if (hasCustomWeatherDataDisplay) {

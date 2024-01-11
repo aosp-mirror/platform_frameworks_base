@@ -293,8 +293,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     }
 
     /**
-     * Verifies that swiping up when the lock pattern is not secure does not consume the scroll
-     * gesture or expand.
+     * Verifies that swiping up when the lock pattern is not secure dismissed dream and consumes
+     * the gesture.
      */
     @Test
     public void testSwipeUp_keyguardNotSecure_doesNotExpand() {
@@ -314,11 +314,44 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
         reset(mScrimController);
 
-        // Scroll gesture is not consumed.
+        // Scroll gesture is consumed.
         assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
-                .isFalse();
+                .isTrue();
         // We should not expand since the keyguard is not secure
         verify(mScrimController, never()).expand(any());
+        // Since we are swiping up, we should wake from dreams.
+        verify(mCentralSurfaces).awakenDreams();
+    }
+
+    /**
+     * Verifies that swiping down when the lock pattern is not secure does not dismiss the dream.
+     */
+    @Test
+    public void testSwipeDown_keyguardNotSecure_doesNotExpand() {
+        when(mLockPatternUtils.isSecure(CURRENT_USER_INFO.id)).thenReturn(false);
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
+                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
+        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
+
+        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
+
+        final float distanceY = SCREEN_HEIGHT_PX * 0.3f;
+        // Swiping down near the bottom of the screen where the touch initiation region is.
+        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
+        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
+                0, SCREEN_HEIGHT_PX, 0);
+
+        reset(mScrimController);
+
+        // Scroll gesture is not consumed.
+        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY))
+                .isTrue();
+        // We should not expand since the keyguard is not secure
+        verify(mScrimController, never()).expand(any());
+        // Since we are swiping down, we should not dismiss the dream.
+        verify(mCentralSurfaces, never()).awakenDreams();
     }
 
     private void verifyScroll(float percent, Direction direction,

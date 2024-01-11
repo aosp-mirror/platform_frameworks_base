@@ -209,6 +209,14 @@ public class HidlToAidlSessionAdapter implements ISession {
         return null;
     }
 
+    public long getAuthenticatorIdForUpdateClient() throws RemoteException {
+        return mSession.get().getAuthenticatorId();
+    }
+
+    public void setActiveGroup(int userId, String absolutePath) throws RemoteException {
+        mSession.get().setActiveGroup(userId, absolutePath);
+    }
+
     private void setCallback(AidlResponseHandler aidlResponseHandler) {
         mHidlToAidlCallbackConverter = new HidlToAidlCallbackConverter(aidlResponseHandler);
         try {

@@ -82,6 +82,7 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
                 keyguardTransitionInteractor,
                 fakeLightRevealScrimRepository,
                 testScope.backgroundScope,
+                mock(),
                 mock()
             )
     }

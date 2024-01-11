@@ -22,12 +22,15 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.LightRevealScrimRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
@@ -39,6 +42,7 @@ constructor(
     private val lightRevealScrimRepository: LightRevealScrimRepository,
     @Application private val scope: CoroutineScope,
     private val scrimLogger: ScrimLogger,
+    powerInteractor: PowerInteractor,
 ) {
 
     init {
@@ -73,7 +77,16 @@ constructor(
             lightRevealScrimRepository.revealEffect
         )
 
-    val revealAmount = lightRevealScrimRepository.revealAmount
+    val revealAmount =
+        lightRevealScrimRepository.revealAmount.filter {
+            // When the screen is off we do not want to keep producing frames as this is causing
+            // (invisible) jank. However, we need to still pass through 1f and 0f to ensure that the
+            // correct end states are respected even if the screen turned off (or was still off)
+            // when the animation finished
+            powerInteractor.screenPowerState.value != ScreenPowerState.SCREEN_OFF ||
+                it == 1f ||
+                it == 0f
+        }
 
     companion object {
 

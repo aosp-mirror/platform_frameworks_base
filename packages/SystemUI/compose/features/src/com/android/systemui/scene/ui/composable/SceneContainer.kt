@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -38,11 +37,11 @@ import com.android.compose.animation.scene.Edge as SceneTransitionEdge
 import com.android.compose.animation.scene.ObservableTransitionState as SceneTransitionObservableTransitionState
 import com.android.compose.animation.scene.SceneKey as SceneTransitionSceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
-import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction as SceneTransitionUserAction
 import com.android.compose.animation.scene.observableTransitionState
+import com.android.compose.animation.scene.updateSceneTransitionLayoutState
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.Edge
@@ -82,7 +81,12 @@ fun SceneContainer(
     val currentScene = checkNotNull(sceneByKey[currentSceneKey])
     val currentDestinations: Map<UserAction, SceneModel> by
         currentScene.destinationScenes.collectAsState()
-    val state = remember { SceneTransitionLayoutState(currentSceneKey.toTransitionSceneKey()) }
+    val state =
+        updateSceneTransitionLayoutState(
+            currentSceneKey.toTransitionSceneKey(),
+            onChangeScene = viewModel::onSceneChanged,
+            transitions = SceneContainerTransitions,
+        )
 
     DisposableEffect(viewModel, state) {
         viewModel.setTransitionState(state.observableTransitionState().map { it.toModel() })
@@ -93,9 +97,6 @@ fun SceneContainer(
         modifier = Modifier.fillMaxSize(),
     ) {
         SceneTransitionLayout(
-            currentScene = currentSceneKey.toTransitionSceneKey(),
-            onChangeScene = viewModel::onSceneChanged,
-            transitions = SceneContainerTransitions,
             state = state,
             modifier =
                 modifier

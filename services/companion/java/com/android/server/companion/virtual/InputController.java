@@ -245,8 +245,8 @@ class InputController {
         mInputManagerInternal.setPointerIconVisible(visible, displayId);
     }
 
-    void setPointerAcceleration(float pointerAcceleration, int displayId) {
-        mInputManagerInternal.setPointerAcceleration(pointerAcceleration, displayId);
+    void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
+        mInputManagerInternal.setMousePointerAccelerationEnabled(enabled, displayId);
     }
 
     void setDisplayEligibilityForPointerCapture(boolean isEligible, int displayId) {

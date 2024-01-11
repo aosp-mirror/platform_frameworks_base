@@ -28,9 +28,9 @@ import kotlinx.coroutines.launch
  * the currently running transition, if there is one.
  */
 internal fun CoroutineScope.animateToScene(
-    layoutState: SceneTransitionLayoutStateImpl,
+    layoutState: BaseSceneTransitionLayoutState,
     target: SceneKey,
-) {
+): TransitionState.Transition? {
     val transitionState = layoutState.transitionState
     if (transitionState.currentScene == target) {
         // This can happen in 3 different situations, for which there isn't anything else to do:
@@ -41,10 +41,10 @@ internal fun CoroutineScope.animateToScene(
         //     a. didn't release their pointer yet.
         //     b. released their pointer such that the swipe gesture was cancelled and the
         //        transition is currently animating back to [target].
-        return
+        return null
     }
 
-    when (transitionState) {
+    return when (transitionState) {
         is TransitionState.Idle -> animate(layoutState, target)
         is TransitionState.Transition -> {
             // A transition is currently running: first check whether `transition.toScene` or
@@ -62,47 +62,43 @@ internal fun CoroutineScope.animateToScene(
                     // finish the current transition early to make sure that the current state
                     // change is committed.
                     layoutState.finishTransition(transitionState, transitionState.currentScene)
+                    null
                 } else {
                     // The transition is in progress: start the canned animation at the same
                     // progress as it was in.
                     // TODO(b/290184746): Also take the current velocity into account.
                     animate(layoutState, target, startProgress = progress)
                 }
-
-                return
-            }
-
-            if (transitionState.fromScene == target) {
+            } else if (transitionState.fromScene == target) {
                 // There is a transition from [target] to another scene: simply animate the same
                 // transition progress to `0`.
-
                 check(transitionState.toScene == transitionState.currentScene)
+
                 val progress = transitionState.progress
                 if (progress.absoluteValue < ProgressVisibilityThreshold) {
                     // The transition is at progress ~= 0: no need to animate.We finish the current
                     // transition early to make sure that the current state change is committed.
                     layoutState.finishTransition(transitionState, transitionState.currentScene)
+                    null
                 } else {
                     // TODO(b/290184746): Also take the current velocity into account.
                     animate(layoutState, target, startProgress = progress, reversed = true)
                 }
-
-                return
+            } else {
+                // Generic interruption; the current transition is neither from or to [target].
+                // TODO(b/290930950): Better handle interruptions here.
+                animate(layoutState, target)
             }
-
-            // Generic interruption; the current transition is neither from or to [target].
-            // TODO(b/290930950): Better handle interruptions here.
-            animate(layoutState, target)
         }
     }
 }
 
 private fun CoroutineScope.animate(
-    layoutState: SceneTransitionLayoutStateImpl,
+    layoutState: BaseSceneTransitionLayoutState,
     target: SceneKey,
     startProgress: Float = 0f,
     reversed: Boolean = false,
-) {
+): TransitionState.Transition {
     val fromScene = layoutState.transitionState.currentScene
     val isUserInput =
         (layoutState.transitionState as? TransitionState.Transition)?.isInitiatedByUserInput
@@ -143,10 +139,15 @@ private fun CoroutineScope.animate(
         }
 
     // Animate the progress to its target value.
-    launch {
-        animatable.animateTo(targetProgress, animationSpec)
-        layoutState.finishTransition(transition, target)
-    }
+    launch { animatable.animateTo(targetProgress, animationSpec) }
+        .invokeOnCompletion {
+            // Settle the state to Idle(target). Note that this will do nothing if this transition
+            // was replaced/interrupted by another one, and this also runs if this coroutine is
+            // cancelled, i.e. if [this] coroutine scope is cancelled.
+            layoutState.finishTransition(transition, target)
+        }
+
+    return transition
 }
 
 private class OneOffTransition(

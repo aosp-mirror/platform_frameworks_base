@@ -1,0 +1,87 @@
+// Copyright (C) 2024 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "PermissionServicePerfTests",
+
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+
+    static_libs: [
+        "platform-compat-test-rules",
+        "androidx.appcompat_appcompat",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "androidx.annotation_annotation",
+        "apct-perftests-utils",
+        "androidx.benchmark_benchmark-common",
+        "androidx.benchmark_benchmark-junit4",
+        "collector-device-lib-platform",
+        "cts-install-lib-java",
+    ],
+
+    libs: ["android.test.base"],
+
+    platform_apis: true,
+
+    test_suites: ["device-tests"],
+
+    data: [
+        ":UsePermissionApp0",
+        ":UsePermissionApp1",
+        ":UsePermissionApp2",
+        ":UsePermissionApp3",
+        ":UsePermissionApp4",
+        ":UsePermissionApp5",
+        ":UsePermissionApp6",
+        ":UsePermissionApp7",
+        ":UsePermissionApp8",
+        ":UsePermissionApp9",
+        ":UsePermissionApp10",
+        ":UsePermissionApp11",
+        ":UsePermissionApp12",
+        ":UsePermissionApp13",
+        ":UsePermissionApp14",
+        ":UsePermissionApp15",
+        ":UsePermissionApp16",
+        ":UsePermissionApp17",
+        ":UsePermissionApp18",
+        ":UsePermissionApp19",
+        ":UsePermissionApp20",
+        ":UsePermissionApp21",
+        ":UsePermissionApp22",
+        ":UsePermissionApp23",
+        ":UsePermissionApp24",
+        ":UsePermissionApp25",
+        ":UsePermissionApp26",
+        ":UsePermissionApp27",
+        ":UsePermissionApp28",
+        ":UsePermissionApp29",
+        ":perfetto_artifacts",
+    ],
+
+    certificate: "platform",
+
+}

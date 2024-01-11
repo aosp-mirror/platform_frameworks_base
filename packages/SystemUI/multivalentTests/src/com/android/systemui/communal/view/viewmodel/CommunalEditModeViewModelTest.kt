@@ -26,6 +26,7 @@ import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
@@ -33,6 +34,7 @@ import com.android.systemui.communal.data.repository.FakeCommunalTutorialReposit
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
 import com.android.systemui.communal.domain.model.CommunalContentModel
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.coroutines.collectLastValue
@@ -54,6 +56,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -64,6 +67,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var powerManager: PowerManager
     @Mock private lateinit var appWidgetHost: AppWidgetHost
+    @Mock private lateinit var uiEventLogger: UiEventLogger
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -96,6 +100,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                 Provider { shadeViewController },
                 powerManager,
                 mediaHost,
+                uiEventLogger,
             )
     }
 
@@ -203,4 +208,22 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             val providerTwo = ComponentName("pkg.test", "testWidget2")
             underTest.onAddWidget(componentName = providerTwo, priority = 0)
         }
+
+    @Test
+    fun reorderWidget_uiEventLogging_start() {
+        underTest.onReorderWidgetStart()
+        verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_START)
+    }
+
+    @Test
+    fun reorderWidget_uiEventLogging_end() {
+        underTest.onReorderWidgetEnd()
+        verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_FINISH)
+    }
+
+    @Test
+    fun reorderWidget_uiEventLogging_cancel() {
+        underTest.onReorderWidgetCancel()
+        verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_CANCEL)
+    }
 }

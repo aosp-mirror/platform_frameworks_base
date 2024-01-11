@@ -1,0 +1,232 @@
+// Copyright (C) 2024 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp0",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration0",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp1",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration1",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp2",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration2",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp3",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration3",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp4",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration4",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp5",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration5",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp6",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration6",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp7",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration7",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp8",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration8",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp9",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration9",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp10",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration10",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp11",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration11",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp12",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration12",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp13",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration13",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp14",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration14",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp15",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration15",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp16",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration16",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp17",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration17",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp18",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration18",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp19",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration19",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp20",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration20",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp21",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration21",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp22",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration22",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp23",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration23",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp24",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration24",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp25",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration25",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp26",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration26",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp27",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration27",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp28",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration28",
+    ],
+}
+
+android_test_helper_app {
+    name: "UsePermissionApp29",
+    aaptflags: [
+        "--rename-manifest-package android.perftests.appenumeration29",
+    ],
+}

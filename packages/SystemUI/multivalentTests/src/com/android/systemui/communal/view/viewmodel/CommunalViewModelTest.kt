@@ -31,6 +31,7 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.POPUP_AUTO_HIDE_TIMEOUT_MS
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -41,7 +42,9 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import javax.inject.Provider
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -50,6 +53,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalViewModelTest : SysuiTestCase() {
@@ -84,6 +88,7 @@ class CommunalViewModelTest : SysuiTestCase() {
 
         underTest =
             CommunalViewModel(
+                testScope,
                 withDeps.communalInteractor,
                 WidgetInteractionHandler(mock()),
                 withDeps.tutorialInteractor,
@@ -158,5 +163,45 @@ class CommunalViewModelTest : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.Widget::class.java)
             assertThat(communalContent?.get(4))
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
+        }
+
+    @Test
+    fun dismissCta_hidesCtaTileAndShowsPopup_thenHidesPopupAfterTimeout() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
+            communalRepository.setCtaTileInViewModeVisibility(true)
+
+            val communalContent by collectLastValue(underTest.communalContent)
+            val isPopupOnDismissCtaShowing by collectLastValue(underTest.isPopupOnDismissCtaShowing)
+
+            assertThat(communalContent?.size).isEqualTo(1)
+            assertThat(communalContent?.get(0))
+                .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
+
+            underTest.onDismissCtaTile()
+
+            // hide CTA tile and show the popup
+            assertThat(communalContent).isEmpty()
+            assertThat(isPopupOnDismissCtaShowing).isEqualTo(true)
+
+            // hide popup after time elapsed
+            advanceTimeBy(POPUP_AUTO_HIDE_TIMEOUT_MS)
+            assertThat(isPopupOnDismissCtaShowing).isEqualTo(false)
+        }
+
+    @Test
+    fun popup_onDismiss_hidesImmediately() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
+            communalRepository.setCtaTileInViewModeVisibility(true)
+
+            val isPopupOnDismissCtaShowing by collectLastValue(underTest.isPopupOnDismissCtaShowing)
+
+            underTest.onDismissCtaTile()
+            assertThat(isPopupOnDismissCtaShowing).isEqualTo(true)
+
+            // dismiss the popup directly
+            underTest.onHidePopupAfterDismissCta()
+            assertThat(isPopupOnDismissCtaShowing).isEqualTo(false)
         }
 }

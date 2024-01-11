@@ -38,8 +38,10 @@ import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.SensorLocation;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.HidlFingerprintSensorConfig;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -92,13 +94,11 @@ public class FingerprintProviderTest {
     @Mock
     private BiometricContext mBiometricContext;
 
+    private final TestLooper mLooper = new TestLooper();
+
     private SensorProps[] mSensorProps;
     private LockoutResetDispatcher mLockoutResetDispatcher;
     private FingerprintProvider mFingerprintProvider;
-
-    private static void waitForIdle() {
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-    }
 
     @Before
     public void setUp() throws RemoteException {
@@ -126,7 +126,8 @@ public class FingerprintProviderTest {
         mFingerprintProvider = new FingerprintProvider(mContext,
                 mBiometricStateCallback, mAuthenticationStateListeners, mSensorProps, TAG,
                 mLockoutResetDispatcher, mGestureAvailabilityDispatcher, mBiometricContext,
-                mDaemon, false /* resetLockoutRequiresHardwareAuthToken */,
+                mDaemon, new Handler(mLooper.getLooper()),
+                false /* resetLockoutRequiresHardwareAuthToken */,
                 true /* testHalEnabled */);
     }
 
@@ -159,6 +160,7 @@ public class FingerprintProviderTest {
                 mBiometricStateCallback, mAuthenticationStateListeners,
                 hidlFingerprintSensorConfigs, TAG, mLockoutResetDispatcher,
                 mGestureAvailabilityDispatcher, mBiometricContext, mDaemon,
+                new Handler(mLooper.getLooper()),
                 false /* resetLockoutRequiresHardwareAuthToken */,
                 true /* testHalEnabled */);
 
@@ -213,6 +215,14 @@ public class FingerprintProviderTest {
                             .getScheduler();
             assertNull(scheduler.getCurrentClient());
             assertEquals(0, scheduler.getCurrentPendingCount());
+        }
+    }
+
+    private void waitForIdle() {
+        if (Flags.deHidl()) {
+            mLooper.dispatchAll();
+        } else {
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         }
     }
 }

@@ -166,12 +166,7 @@ public class RadioManager {
      * analog handover state managed from the HAL implementation side.
      *
      * <p>Some radio technologies may not support this, i.e. DAB.
-     *
-     * @deprecated Use {@link #CONFIG_FORCE_ANALOG_FM} instead. If {@link #CONFIG_FORCE_ANALOG_FM}
-     * is supported in HAL, {@link RadioTuner#setConfigFlag} and {@link RadioTuner#isConfigFlagSet}
-     * with CONFIG_FORCE_ANALOG will set/get the value of {@link #CONFIG_FORCE_ANALOG_FM}.
      */
-    @Deprecated
     public static final int CONFIG_FORCE_ANALOG = 2;
     /**
      * Forces the digital playback for the supporting radio technology.

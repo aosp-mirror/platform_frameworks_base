@@ -45,7 +45,8 @@ public class BuildTest {
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
+                SetFlagsRule.DefaultInitValueType.NULL_DEFAULT);
 
     /**
      * Asserts that a String is non-null and non-empty.  If it is not,
