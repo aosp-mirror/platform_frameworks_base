@@ -48,7 +48,7 @@ class JavaThread {
 public:
     JavaThread(std::function<void()> f, const char *name)
         : mF{std::move(f)} {
-        createThreadEtc(staticFunction, this, name);
+        createThreadEtc(staticFunction, this, name, ANDROID_PRIORITY_AUDIO);
     }
 
     JavaThread(JavaThread &&) = delete; // uses "this" ptr, not moveable.
