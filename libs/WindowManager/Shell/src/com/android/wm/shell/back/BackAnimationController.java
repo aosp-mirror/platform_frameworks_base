@@ -176,6 +176,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private StatusBarCustomizer mCustomizer;
     private boolean mTrackingLatency;
 
+    // Keep previous navigation type before remove mBackNavigationInfo.
+    @BackNavigationInfo.BackTargetType
+    private int mPreviousNavigationType;
+
     public BackAnimationController(
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
@@ -861,6 +865,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellBackAnimationRegistry.resetDefaultCrossActivity();
         cancelLatencyTracking();
         if (mBackNavigationInfo != null) {
+            mPreviousNavigationType = mBackNavigationInfo.getType();
             mBackNavigationInfo.onBackNavigationFinished(triggerBack);
             mBackNavigationInfo = null;
         }
@@ -965,7 +970,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         mShellExecutor.execute(
                                 () -> {
                                     if (!mShellBackAnimationRegistry.cancel(
-                                            mBackNavigationInfo.getType())) {
+                                            mBackNavigationInfo != null
+                                                    ? mBackNavigationInfo.getType()
+                                                    : mPreviousNavigationType)) {
                                         return;
                                     }
                                     if (!mBackGestureStarted) {

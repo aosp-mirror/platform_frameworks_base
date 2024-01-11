@@ -1594,7 +1594,9 @@ class BackNavigationController {
             // skip commitVisibility call in setVisibility cause the activity won't visible here.
             // Call it again to make sure the activity could be visible while handling the pending
             // animation.
-            activity.commitVisibility(true, true);
+            // Do not performLayout during prepare animation, because it could cause focus window
+            // change. Let that happen after the BackNavigationInfo has returned to shell.
+            activity.commitVisibility(true, false /* performLayout */);
             activity.mTransitionController.mSnapshotController
                     .mActivitySnapshotController.addOnBackPressedActivity(activity);
         }
