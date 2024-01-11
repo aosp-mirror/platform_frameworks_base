@@ -48,6 +48,7 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -141,7 +142,9 @@ public final class MediaRouter2 {
      * dispatch. This is only used to determine what callback a route should be assigned to (added,
      * removed, changed) in {@link #dispatchFilteredRoutesUpdatedOnHandler(List)}.
      */
-    private volatile ArrayMap<String, MediaRoute2Info> mPreviousRoutes = new ArrayMap<>();
+    private volatile ArrayMap<String, MediaRoute2Info> mPreviousFilteredRoutes = new ArrayMap<>();
+
+    private final Map<String, MediaRoute2Info> mPreviousUnfilteredRoutes = new ArrayMap<>();
 
     /**
      * Stores the latest copy of exposed routes after filtering, sorting, and deduplication. Can be
@@ -886,7 +889,7 @@ public final class MediaRouter2 {
                 newRoutes.stream().map(MediaRoute2Info::getId).collect(Collectors.toSet());
 
         for (MediaRoute2Info route : newRoutes) {
-            MediaRoute2Info prevRoute = mPreviousRoutes.get(route.getId());
+            MediaRoute2Info prevRoute = mPreviousFilteredRoutes.get(route.getId());
             if (prevRoute == null) {
                 addedRoutes.add(route);
             } else if (!prevRoute.equals(route)) {
@@ -894,21 +897,21 @@ public final class MediaRouter2 {
             }
         }
 
-        for (int i = 0; i < mPreviousRoutes.size(); i++) {
-            if (!newRouteIds.contains(mPreviousRoutes.keyAt(i))) {
-                removedRoutes.add(mPreviousRoutes.valueAt(i));
+        for (int i = 0; i < mPreviousFilteredRoutes.size(); i++) {
+            if (!newRouteIds.contains(mPreviousFilteredRoutes.keyAt(i))) {
+                removedRoutes.add(mPreviousFilteredRoutes.valueAt(i));
             }
         }
 
         // update previous routes
         for (MediaRoute2Info route : removedRoutes) {
-            mPreviousRoutes.remove(route.getId());
+            mPreviousFilteredRoutes.remove(route.getId());
         }
         for (MediaRoute2Info route : addedRoutes) {
-            mPreviousRoutes.put(route.getId(), route);
+            mPreviousFilteredRoutes.put(route.getId(), route);
         }
         for (MediaRoute2Info route : changedRoutes) {
-            mPreviousRoutes.put(route.getId(), route);
+            mPreviousFilteredRoutes.put(route.getId(), route);
         }
 
         if (!addedRoutes.isEmpty()) {
@@ -925,6 +928,27 @@ public final class MediaRouter2 {
         if (!addedRoutes.isEmpty() || !removedRoutes.isEmpty() || !changedRoutes.isEmpty()) {
             notifyRoutesUpdated(newRoutes);
         }
+    }
+
+    void dispatchControllerUpdatedIfNeededOnHandler(Map<String, MediaRoute2Info> routesMap) {
+        List<RoutingController> controllers = getControllers();
+        for (RoutingController controller : controllers) {
+
+            for (String selectedRoute : controller.getRoutingSessionInfo().getSelectedRoutes()) {
+                if (routesMap.containsKey(selectedRoute)
+                        && mPreviousUnfilteredRoutes.containsKey(selectedRoute)) {
+                    MediaRoute2Info currentRoute = routesMap.get(selectedRoute);
+                    MediaRoute2Info oldRoute = mPreviousUnfilteredRoutes.get(selectedRoute);
+                    if (!currentRoute.equals(oldRoute)) {
+                        notifyControllerUpdated(controller);
+                        break;
+                    }
+                }
+            }
+        }
+
+        mPreviousUnfilteredRoutes.clear();
+        mPreviousUnfilteredRoutes.putAll(routesMap);
     }
 
     void updateRoutesOnHandler(List<MediaRoute2Info> newRoutes) {
@@ -948,6 +972,11 @@ public final class MediaRouter2 {
                         MediaRouter2::dispatchFilteredRoutesUpdatedOnHandler,
                         this,
                         mFilteredRoutes));
+        mHandler.sendMessage(
+                obtainMessage(
+                        MediaRouter2::dispatchControllerUpdatedIfNeededOnHandler,
+                        this,
+                        new HashMap<>(mRoutes)));
     }
 
     /**
