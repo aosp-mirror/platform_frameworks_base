@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.AndroidRuntimeException;
+import android.util.Singleton;
 import android.view.Choreographer;
 
 import com.android.internal.util.Preconditions;
@@ -67,7 +68,12 @@ import java.util.function.Consumer;
 public final class AnimatorTestRule implements TestRule {
 
     private final Object mLock = new Object();
-    private final TestHandler mTestHandler = new TestHandler();
+    private final Singleton<TestHandler> mTestHandler = new Singleton<>() {
+        @Override
+        protected TestHandler create() {
+            return new TestHandler();
+        }
+    };
     private final long mStartTime;
     private long mTotalTimeDelta = 0;
 
@@ -95,16 +101,17 @@ public final class AnimatorTestRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                AnimationHandler objAtStart = AnimationHandler.setTestHandler(mTestHandler);
+                final TestHandler testHandler = mTestHandler.get();
+                AnimationHandler objAtStart = AnimationHandler.setTestHandler(testHandler);
                 try {
                     base.evaluate();
                 } finally {
                     AnimationHandler objAtEnd = AnimationHandler.setTestHandler(objAtStart);
-                    if (mTestHandler != objAtEnd) {
+                    if (testHandler != objAtEnd) {
                         // pass or fail, inner logic not restoring the handler needs to be reported.
                         // noinspection ThrowFromFinallyBlock
                         throw new IllegalStateException("Test handler was altered: expected="
-                                + mTestHandler + " actual=" + objAtEnd);
+                                + testHandler + " actual=" + objAtEnd);
                     }
                 }
             }
@@ -125,8 +132,9 @@ public final class AnimatorTestRule implements TestRule {
     public void initNewAnimators() {
         requireLooper("AnimationTestRule#initNewAnimators()");
         long currentTime = getCurrentTime();
-        List<AnimationFrameCallback> newCallbacks = new ArrayList<>(mTestHandler.mNewCallbacks);
-        mTestHandler.mNewCallbacks.clear();
+        final TestHandler testHandler = mTestHandler.get();
+        List<AnimationFrameCallback> newCallbacks = new ArrayList<>(testHandler.mNewCallbacks);
+        testHandler.mNewCallbacks.clear();
         for (AnimationFrameCallback newCallback : newCallbacks) {
             newCallback.doAnimationFrame(currentTime);
         }
@@ -158,9 +166,10 @@ public final class AnimatorTestRule implements TestRule {
     public void advanceTimeBy(long timeDelta, @Nullable Consumer<Long> preFrameAction) {
         Preconditions.checkArgumentNonnegative(timeDelta, "timeDelta must not be negative");
         requireLooper("AnimationTestRule#advanceTimeBy(long)");
+        final TestHandler testHandler = mTestHandler.get();
         if (timeDelta == 0) {
             // If time is not being advanced, all animators will get a tick; don't double tick these
-            mTestHandler.mNewCallbacks.clear();
+            testHandler.mNewCallbacks.clear();
         } else {
             // before advancing time, start new animators with the current time
             initNewAnimators();
@@ -172,10 +181,10 @@ public final class AnimatorTestRule implements TestRule {
         if (preFrameAction != null) {
             preFrameAction.accept(timeDelta);
             // After letting other code run, clear any new callbacks to avoid double-ticking them
-            mTestHandler.mNewCallbacks.clear();
+            testHandler.mNewCallbacks.clear();
         }
         // produce a frame
-        mTestHandler.doFrame();
+        testHandler.doFrame();
     }
 
     /**
