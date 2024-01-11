@@ -4830,7 +4830,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
             }
-            maybeSendBootCompletedLocked(app);
+
+            // Temporarily disable sending BOOT_COMPLETED to see if this was impacting perf tests
+            if (false) {
+                maybeSendBootCompletedLocked(app);
+            }
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)
             Slog.wtf(TAG, "Exception thrown during bind of " + app, e);
