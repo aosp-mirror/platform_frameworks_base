@@ -52,32 +52,38 @@ public class GroupEntryBuilder {
         return ge;
     }
 
+    /** Sets the group key. */
     public GroupEntryBuilder setKey(String key) {
         mKey = key;
         return this;
     }
 
+    /** Sets the creation time. */
     public GroupEntryBuilder setCreationTime(long creationTime) {
         mCreationTime = creationTime;
         return this;
     }
 
+    /** Sets the parent entry of the group. */
     public GroupEntryBuilder setParent(@Nullable GroupEntry entry) {
         mParent = entry;
         return this;
     }
 
+    /** Sets the section the group belongs to. */
     public GroupEntryBuilder setSection(@Nullable NotifSection section) {
         mNotifSection = section;
         return this;
     }
 
+    /** Sets the group summary. */
     public GroupEntryBuilder setSummary(
             NotificationEntry summary) {
         mSummary = summary;
         return this;
     }
 
+    /** Sets the group children. */
     public GroupEntryBuilder setChildren(List<NotificationEntry> children) {
         mChildren.clear();
         mChildren.addAll(children);
@@ -90,6 +96,7 @@ public class GroupEntryBuilder {
         return this;
     }
 
+    /** Get the group's internal children list. */
     public static List<NotificationEntry> getRawChildren(GroupEntry groupEntry) {
         return groupEntry.getRawChildren();
     }

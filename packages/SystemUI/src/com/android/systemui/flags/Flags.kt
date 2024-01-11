@@ -102,12 +102,6 @@ object Flags {
             default = true
         )
 
-    /** Only notify group expansion listeners when a change happens. */
-    // TODO(b/292213543): Tracking Bug
-    @JvmField
-    val NOTIFICATION_GROUP_EXPANSION_CHANGE =
-            releasedFlag("notification_group_expansion_change")
-
     // TODO(b/301955929)
     @JvmField
     val NOTIF_LS_BACKGROUND_THREAD =

@@ -16,11 +16,10 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -34,18 +33,19 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class GroupExpansionManagerTest : SysuiTestCase() {
-    private lateinit var gem: GroupExpansionManagerImpl
+    private lateinit var underTest: GroupExpansionManagerImpl
 
     private val dumpManager: DumpManager = mock()
     private val groupMembershipManager: GroupMembershipManager = mock()
-    private val featureFlags = FakeFeatureFlagsClassic()
 
     private val pipeline: NotifPipeline = mock()
     private lateinit var beforeRenderListListener: OnBeforeRenderListListener
@@ -85,79 +85,57 @@ class GroupExpansionManagerTest : SysuiTestCase() {
         whenever(groupMembershipManager.getGroupSummary(summary1)).thenReturn(summary1)
         whenever(groupMembershipManager.getGroupSummary(summary2)).thenReturn(summary2)
 
-        gem = GroupExpansionManagerImpl(dumpManager, groupMembershipManager, featureFlags)
+        underTest = GroupExpansionManagerImpl(dumpManager, groupMembershipManager)
     }
 
     @Test
-    fun testNotifyOnlyOnChange_enabled() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
-
+    fun notifyOnlyOnChange() {
         var listenerCalledCount = 0
-        gem.registerGroupExpansionChangeListener { _, _ -> listenerCalledCount++ }
+        underTest.registerGroupExpansionChangeListener { _, _ -> listenerCalledCount++ }
 
-        gem.setGroupExpanded(summary1, false)
+        underTest.setGroupExpanded(summary1, false)
         assertThat(listenerCalledCount).isEqualTo(0)
-        gem.setGroupExpanded(summary1, true)
+        underTest.setGroupExpanded(summary1, true)
         assertThat(listenerCalledCount).isEqualTo(1)
-        gem.setGroupExpanded(summary2, true)
+        underTest.setGroupExpanded(summary2, true)
         assertThat(listenerCalledCount).isEqualTo(2)
-        gem.setGroupExpanded(summary1, true)
+        underTest.setGroupExpanded(summary1, true)
         assertThat(listenerCalledCount).isEqualTo(2)
-        gem.setGroupExpanded(summary2, false)
+        underTest.setGroupExpanded(summary2, false)
         assertThat(listenerCalledCount).isEqualTo(3)
     }
 
     @Test
-    fun testNotifyOnlyOnChange_disabled() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, false)
-
-        var listenerCalledCount = 0
-        gem.registerGroupExpansionChangeListener { _, _ -> listenerCalledCount++ }
-
-        gem.setGroupExpanded(summary1, false)
-        assertThat(listenerCalledCount).isEqualTo(1)
-        gem.setGroupExpanded(summary1, true)
-        assertThat(listenerCalledCount).isEqualTo(2)
-        gem.setGroupExpanded(summary2, true)
-        assertThat(listenerCalledCount).isEqualTo(3)
-        gem.setGroupExpanded(summary1, true)
-        assertThat(listenerCalledCount).isEqualTo(4)
-        gem.setGroupExpanded(summary2, false)
-        assertThat(listenerCalledCount).isEqualTo(5)
-    }
-
-    @Test
-    fun testExpandUnattachedEntry() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
-
+    fun expandUnattachedEntry() {
         // First, expand the entry when it is attached.
-        gem.setGroupExpanded(summary1, true)
-        assertThat(gem.isGroupExpanded(summary1)).isTrue()
+        underTest.setGroupExpanded(summary1, true)
+        assertThat(underTest.isGroupExpanded(summary1)).isTrue()
 
         // Un-attach it, and un-expand it.
         NotificationEntryBuilder.setNewParent(summary1, null)
-        gem.setGroupExpanded(summary1, false)
+        underTest.setGroupExpanded(summary1, false)
 
         // Expanding again should throw.
-        assertThrows(IllegalArgumentException::class.java) { gem.setGroupExpanded(summary1, true) }
+        assertThrows(IllegalArgumentException::class.java) {
+            underTest.setGroupExpanded(summary1, true)
+        }
     }
 
     @Test
-    fun testSyncWithPipeline() {
-        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
-        gem.attach(pipeline)
+    fun syncWithPipeline() {
+        underTest.attach(pipeline)
         beforeRenderListListener = withArgCaptor {
             verify(pipeline).addOnBeforeRenderListListener(capture())
         }
 
         val listener: OnGroupExpansionChangeListener = mock()
-        gem.registerGroupExpansionChangeListener(listener)
+        underTest.registerGroupExpansionChangeListener(listener)
 
         beforeRenderListListener.onBeforeRenderList(entries)
         verify(listener, never()).onGroupExpansionChange(any(), any())
 
         // Expand one of the groups.
-        gem.setGroupExpanded(summary1, true)
+        underTest.setGroupExpanded(summary1, true)
         verify(listener).onGroupExpansionChange(summary1.row, true)
 
         // Empty the pipeline list and verify that the group is no longer expanded.
