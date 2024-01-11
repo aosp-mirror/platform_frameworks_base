@@ -69,7 +69,9 @@ class CommunalSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var controller: CommunalSmartspaceController
 
     // TODO(b/272811280): Remove usage of real view
-    private val fakeParent = FrameLayout(context)
+    private val fakeParent by lazy {
+        FrameLayout(context)
+    }
 
     /**
      * A class which implements SmartspaceView and extends View. This is mocked to provide the right

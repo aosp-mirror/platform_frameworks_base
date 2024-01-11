@@ -38,12 +38,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import org.mockito.Spy
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -51,16 +51,19 @@ import org.mockito.Spy
 class LightRevealScrimInteractorTest : SysuiTestCase() {
     private val fakeKeyguardTransitionRepository = FakeKeyguardTransitionRepository()
 
-    @Spy private val fakeLightRevealScrimRepository = FakeLightRevealScrimRepository()
+    private val fakeLightRevealScrimRepository by lazy {
+        Mockito.spy(FakeLightRevealScrimRepository())
+    }
 
     private val testScope = TestScope()
 
-    private val keyguardTransitionInteractor =
+    private val keyguardTransitionInteractor by lazy {
         KeyguardTransitionInteractorFactory.create(
                 scope = testScope.backgroundScope,
                 repository = fakeKeyguardTransitionRepository,
             )
             .keyguardTransitionInteractor
+    }
 
     private lateinit var underTest: LightRevealScrimInteractor
 

@@ -146,7 +146,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private lateinit var bouncerActionButtonInteractor: BouncerActionButtonInteractor
     private lateinit var bouncerViewModel: BouncerViewModel
 
-    private val lockscreenSceneViewModel =
+    private val lockscreenSceneViewModel by lazy {
         LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
             deviceEntryInteractor = deviceEntryInteractor,
@@ -157,6 +157,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,
         )
+    }
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
 

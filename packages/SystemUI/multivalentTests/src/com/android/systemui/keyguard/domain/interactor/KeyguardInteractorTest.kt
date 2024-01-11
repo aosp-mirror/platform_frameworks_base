@@ -56,13 +56,15 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val repository = kosmos.fakeKeyguardRepository
     private val sceneInteractor = kosmos.sceneInteractor
-    private val commandQueue = FakeCommandQueue()
+    private val commandQueue by lazy {
+        FakeCommandQueue()
+    }
     private val bouncerRepository = FakeKeyguardBouncerRepository()
     private val shadeRepository = FakeShadeRepository()
     private val transitionState: MutableStateFlow<ObservableTransitionState> =
         MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Gone))
 
-    private val underTest =
+    private val underTest by lazy {
         KeyguardInteractor(
             repository = repository,
             commandQueue = commandQueue,
@@ -73,6 +75,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             shadeRepository = shadeRepository,
             sceneInteractorProvider = { sceneInteractor },
         )
+    }
 
     @Before
     fun setUp() {

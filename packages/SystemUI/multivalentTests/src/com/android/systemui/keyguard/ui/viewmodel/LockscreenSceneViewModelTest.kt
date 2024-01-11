@@ -49,7 +49,9 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val sceneInteractor = kosmos.sceneInteractor
 
-    private val underTest = createLockscreenSceneViewModel()
+    private val underTest by lazy {
+        createLockscreenSceneViewModel()
+    }
 
     @Test
     fun upTransitionSceneKey_canSwipeToUnlock_gone() =
