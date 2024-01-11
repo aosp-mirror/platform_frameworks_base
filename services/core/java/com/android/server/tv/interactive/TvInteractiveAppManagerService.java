@@ -40,12 +40,14 @@ import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.ad.ITvAdClient;
 import android.media.tv.ad.ITvAdManager;
+import android.media.tv.ad.ITvAdManagerCallback;
 import android.media.tv.ad.ITvAdService;
 import android.media.tv.ad.ITvAdServiceCallback;
 import android.media.tv.ad.ITvAdSession;
 import android.media.tv.ad.ITvAdSessionCallback;
 import android.media.tv.ad.TvAdService;
 import android.media.tv.ad.TvAdServiceInfo;
+import android.media.tv.flags.Flags;
 import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManager;
@@ -116,6 +118,8 @@ public class TvInteractiveAppManagerService extends SystemService {
     // TODO: remove mGetServiceListCalled if onBootPhrase work correctly
     @GuardedBy("mLock")
     private boolean mGetServiceListCalled = false;
+    @GuardedBy("mLock")
+    private boolean mGetAdServiceListCalled = false;
     @GuardedBy("mLock")
     private boolean mGetAppLinkInfoListCalled = false;
 
@@ -263,6 +267,141 @@ public class TvInteractiveAppManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
+    private void buildTvAdServiceListLocked(int userId, String[] updatedPackages) {
+        if (!Flags.enableAdServiceFw()) {
+            return;
+        }
+        UserState userState = getOrCreateUserStateLocked(userId);
+        userState.mPackageSet.clear();
+
+        if (DEBUG) {
+            Slogf.d(TAG, "buildTvAdServiceListLocked");
+        }
+        PackageManager pm = mContext.getPackageManager();
+        List<ResolveInfo> services = pm.queryIntentServicesAsUser(
+                new Intent(TvAdService.SERVICE_INTERFACE),
+                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
+                userId);
+        List<TvAdServiceInfo> serviceList = new ArrayList<>();
+
+        for (ResolveInfo ri : services) {
+            ServiceInfo si = ri.serviceInfo;
+            if (!android.Manifest.permission.BIND_TV_AD_SERVICE.equals(si.permission)) {
+                Slog.w(TAG, "Skipping TV AD service " + si.name
+                        + ": it does not require the permission "
+                        + android.Manifest.permission.BIND_TV_AD_SERVICE);
+                continue;
+            }
+
+            ComponentName component = new ComponentName(si.packageName, si.name);
+            try {
+                TvAdServiceInfo info = new TvAdServiceInfo(mContext, component);
+                serviceList.add(info);
+            } catch (Exception e) {
+                Slogf.e(TAG, "failed to load TV AD service " + si.name, e);
+                continue;
+            }
+            userState.mPackageSet.add(si.packageName);
+        }
+
+        // sort the service list by service id
+        Collections.sort(serviceList, Comparator.comparing(TvAdServiceInfo::getId));
+        Map<String, TvAdServiceState> adServiceMap = new HashMap<>();
+        for (TvAdServiceInfo info : serviceList) {
+            String serviceId = info.getId();
+            if (DEBUG) {
+                Slogf.d(TAG, "add " + serviceId);
+            }
+            TvAdServiceState adServiceState = userState.mAdServiceMap.get(serviceId);
+            if (adServiceState == null) {
+                adServiceState = new TvAdServiceState();
+            }
+            adServiceState.mInfo = info;
+            adServiceState.mUid = getAdServiceUid(info);
+            adServiceState.mComponentName = info.getComponent();
+            adServiceMap.put(serviceId, adServiceState);
+        }
+
+        for (String serviceId : adServiceMap.keySet()) {
+            if (!userState.mAdServiceMap.containsKey(serviceId)) {
+                notifyAdServiceAddedLocked(userState, serviceId);
+            } else if (updatedPackages != null) {
+                // Notify the package updates
+                ComponentName component = adServiceMap.get(serviceId).mInfo.getComponent();
+                for (String updatedPackage : updatedPackages) {
+                    if (component.getPackageName().equals(updatedPackage)) {
+                        updateAdServiceConnectionLocked(component, userId);
+                        notifyAdServiceUpdatedLocked(userState, serviceId);
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (String serviceId : userState.mAdServiceMap.keySet()) {
+            if (!adServiceMap.containsKey(serviceId)) {
+                TvAdServiceInfo info = userState.mAdServiceMap.get(serviceId).mInfo;
+                AdServiceState serviceState = userState.mAdServiceStateMap.get(info.getComponent());
+                if (serviceState != null) {
+                    abortPendingCreateAdSessionRequestsLocked(serviceState, serviceId, userId);
+                }
+                notifyAdServiceRemovedLocked(userState, serviceId);
+            }
+        }
+
+        userState.mIAppMap.clear();
+        userState.mAdServiceMap = adServiceMap;
+    }
+
+    @GuardedBy("mLock")
+    private void notifyAdServiceAddedLocked(UserState userState, String serviceId) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyAdServiceAddedLocked(serviceId=" + serviceId + ")");
+        }
+        int n = userState.mAdCallbacks.beginBroadcast();
+        for (int i = 0; i < n; ++i) {
+            try {
+                userState.mAdCallbacks.getBroadcastItem(i).onAdServiceAdded(serviceId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "failed to report added AD service to callback", e);
+            }
+        }
+        userState.mAdCallbacks.finishBroadcast();
+    }
+
+    @GuardedBy("mLock")
+    private void notifyAdServiceRemovedLocked(UserState userState, String serviceId) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyAdServiceRemovedLocked(serviceId=" + serviceId + ")");
+        }
+        int n = userState.mAdCallbacks.beginBroadcast();
+        for (int i = 0; i < n; ++i) {
+            try {
+                userState.mAdCallbacks.getBroadcastItem(i).onAdServiceRemoved(serviceId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "failed to report removed AD service to callback", e);
+            }
+        }
+        userState.mAdCallbacks.finishBroadcast();
+    }
+
+    @GuardedBy("mLock")
+    private void notifyAdServiceUpdatedLocked(UserState userState, String serviceId) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyAdServiceUpdatedLocked(serviceId=" + serviceId + ")");
+        }
+        int n = userState.mAdCallbacks.beginBroadcast();
+        for (int i = 0; i < n; ++i) {
+            try {
+                userState.mAdCallbacks.getBroadcastItem(i).onAdServiceUpdated(serviceId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "failed to report updated AD service to callback", e);
+            }
+        }
+        userState.mAdCallbacks.finishBroadcast();
+    }
+
+    @GuardedBy("mLock")
     private void notifyInteractiveAppServiceAddedLocked(UserState userState, String iAppServiceId) {
         if (DEBUG) {
             Slog.d(TAG, "notifyInteractiveAppServiceAddedLocked(iAppServiceId="
@@ -347,6 +486,16 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
     }
 
+    private int getAdServiceUid(TvAdServiceInfo info) {
+        try {
+            return getContext().getPackageManager().getApplicationInfo(
+                    info.getServiceInfo().packageName, 0).uid;
+        } catch (PackageManager.NameNotFoundException e) {
+            Slogf.w(TAG, "Unable to get UID for  " + info, e);
+            return Process.INVALID_UID;
+        }
+    }
+
     @Override
     public void onStart() {
         if (DEBUG) {
@@ -364,6 +513,7 @@ public class TvInteractiveAppManagerService extends SystemService {
             synchronized (mLock) {
                 buildTvInteractiveAppServiceListLocked(mCurrentUserId, null);
                 buildAppLinkInfoLocked(mCurrentUserId);
+                buildTvAdServiceListLocked(mCurrentUserId, null);
             }
         }
     }
@@ -379,6 +529,14 @@ public class TvInteractiveAppManagerService extends SystemService {
                     }
                 }
             }
+            private void buildTvAdServiceList(String[] packages) {
+                int userId = getChangingUserId();
+                synchronized (mLock) {
+                    if (mCurrentUserId == userId || mRunningProfiles.contains(userId)) {
+                        buildTvAdServiceListLocked(userId, packages);
+                    }
+                }
+            }
 
             @Override
             public void onPackageUpdateFinished(String packageName, int uid) {
@@ -386,6 +544,7 @@ public class TvInteractiveAppManagerService extends SystemService {
                 // This callback is invoked when the TV interactive App service is reinstalled.
                 // In this case, isReplacing() always returns true.
                 buildTvInteractiveAppServiceList(new String[] { packageName });
+                buildTvAdServiceList(new String[] { packageName });
             }
 
             @Override
@@ -397,6 +556,7 @@ public class TvInteractiveAppManagerService extends SystemService {
                 // available.
                 if (isReplacing()) {
                     buildTvInteractiveAppServiceList(packages);
+                    buildTvAdServiceList(packages);
                 }
             }
 
@@ -410,6 +570,7 @@ public class TvInteractiveAppManagerService extends SystemService {
                 }
                 if (isReplacing()) {
                     buildTvInteractiveAppServiceList(packages);
+                    buildTvAdServiceList(packages);
                 }
             }
 
@@ -425,6 +586,7 @@ public class TvInteractiveAppManagerService extends SystemService {
                     return;
                 }
                 buildTvInteractiveAppServiceList(null);
+                buildTvAdServiceList(null);
             }
 
             @Override
@@ -483,6 +645,7 @@ public class TvInteractiveAppManagerService extends SystemService {
             mCurrentUserId = userId;
             buildTvInteractiveAppServiceListLocked(userId, null);
             buildAppLinkInfoLocked(userId);
+            buildTvAdServiceListLocked(userId, null);
         }
     }
 
@@ -569,6 +732,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         mRunningProfiles.add(userId);
         buildTvInteractiveAppServiceListLocked(userId, null);
         buildAppLinkInfoLocked(userId);
+        buildTvAdServiceListLocked(userId, null);
     }
 
     @GuardedBy("mLock")
@@ -750,6 +914,29 @@ public class TvInteractiveAppManagerService extends SystemService {
     private final class TvAdBinderService extends ITvAdManager.Stub {
 
         @Override
+        public List<TvAdServiceInfo> getTvAdServiceList(int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "getTvAdServiceList");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    if (!mGetAdServiceListCalled) {
+                        buildTvAdServiceListLocked(userId, null);
+                        mGetAdServiceListCalled = true;
+                    }
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    List<TvAdServiceInfo> adServiceList = new ArrayList<>();
+                    for (TvAdServiceState state : userState.mAdServiceMap.values()) {
+                        adServiceList.add(state.mInfo);
+                    }
+                    return adServiceList;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void createSession(final ITvAdClient client, final String serviceId, String type,
                 int seq, int userId) {
             final int callingUid = Binder.getCallingUid();
@@ -767,7 +954,7 @@ public class TvInteractiveAppManagerService extends SystemService {
                         return;
                     }
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                    TvAdState adState = userState.mAdMap.get(serviceId);
+                    TvAdServiceState adState = userState.mAdMap.get(serviceId);
                     if (adState == null) {
                         Slogf.w(TAG, "Failed to find state for serviceId=" + serviceId);
                         sendAdSessionTokenToClientLocked(client, serviceId, null, null, seq);
@@ -883,6 +1070,40 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         @Override
         public void startAdService(IBinder sessionToken, int userId) {
+        }
+
+        @Override
+        public void registerCallback(final ITvAdManagerCallback callback, int userId) {
+            int callingPid = Binder.getCallingPid();
+            int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "registerCallback");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    final UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    if (!userState.mAdCallbacks.register(callback)) {
+                        Slog.e(TAG, "client process has already died");
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void unregisterCallback(ITvAdManagerCallback callback, int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "unregisterCallback");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    userState.mAdCallbacks.unregister(callback);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
     }
@@ -2637,14 +2858,16 @@ public class TvInteractiveAppManagerService extends SystemService {
 
     private static final class UserState {
         private final int mUserId;
-        // A mapping from the TV AD service ID to its TvAdState.
-        private Map<String, TvAdState> mAdMap = new HashMap<>();
+        // A mapping from the TV AD service ID to its TvAdServiceState.
+        private Map<String, TvAdServiceState> mAdMap = new HashMap<>();
         // A mapping from the name of a TV Interactive App service to its state.
         private final Map<ComponentName, AdServiceState> mAdServiceStateMap = new HashMap<>();
         // A mapping from the token of a TV Interactive App session to its state.
         private final Map<IBinder, AdSessionState> mAdSessionStateMap = new HashMap<>();
         // A mapping from the TV Interactive App ID to its TvInteractiveAppState.
         private Map<String, TvInteractiveAppState> mIAppMap = new HashMap<>();
+        // A mapping from the TV AD service ID to its TvAdServiceState.
+        private Map<String, TvAdServiceState> mAdServiceMap = new HashMap<>();
         // A mapping from the token of a client to its state.
         private final Map<IBinder, ClientState> mClientStateMap = new HashMap<>();
         // A mapping from the name of a TV Interactive App service to its state.
@@ -2656,6 +2879,8 @@ public class TvInteractiveAppManagerService extends SystemService {
         private final Set<String> mPackageSet = new HashSet<>();
         // A list of all app link infos.
         private final List<AppLinkInfo> mAppLinkInfoList = new ArrayList<>();
+        private final RemoteCallbackList<ITvAdManagerCallback> mAdCallbacks =
+                new RemoteCallbackList<>();
 
         // A list of callbacks.
         private final RemoteCallbackList<ITvInteractiveAppManagerCallback> mCallbacks =
@@ -2674,7 +2899,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         private int mIAppNumber;
     }
 
-    private static final class TvAdState {
+    private static final class TvAdServiceState {
         private String mAdServiceId;
         private ComponentName mComponentName;
         private TvAdServiceInfo mInfo;

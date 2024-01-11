@@ -21,4 +21,7 @@ package android.media.tv.ad;
  * @hide
  */
 oneway interface ITvAdManagerCallback {
+    void onAdServiceAdded(in String serviceId);
+    void onAdServiceRemoved(in String serviceId);
+    void onAdServiceUpdated(in String serviceId);
 }

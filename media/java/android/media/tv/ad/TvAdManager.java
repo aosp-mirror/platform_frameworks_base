@@ -121,6 +121,59 @@ public class TvAdManager {
             }
 
         };
+
+        ITvAdManagerCallback managerCallback =
+                new ITvAdManagerCallback.Stub() {
+                    @Override
+                    public void onAdServiceAdded(String serviceId) {
+                        synchronized (mLock) {
+                            for (TvAdServiceCallbackRecord record : mCallbackRecords) {
+                                record.postAdServiceAdded(serviceId);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onAdServiceRemoved(String serviceId) {
+                        synchronized (mLock) {
+                            for (TvAdServiceCallbackRecord record : mCallbackRecords) {
+                                record.postAdServiceRemoved(serviceId);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onAdServiceUpdated(String serviceId) {
+                        synchronized (mLock) {
+                            for (TvAdServiceCallbackRecord record : mCallbackRecords) {
+                                record.postAdServiceUpdated(serviceId);
+                            }
+                        }
+                    }
+                };
+        try {
+            if (mService != null) {
+                mService.registerCallback(managerCallback, mUserId);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the complete list of TV AD service on the system.
+     *
+     * @return List of {@link TvAdServiceInfo} for each TV AD service that describes its meta
+     * information.
+     * @hide
+     */
+    @NonNull
+    public List<TvAdServiceInfo> getTvAdServiceList() {
+        try {
+            return mService.getTvAdServiceList(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -499,6 +552,38 @@ public class TvAdManager {
      * @hide
      */
     public abstract static class TvAdServiceCallback {
+        /**
+         * This is called when a TV AD service is added to the system.
+         *
+         * <p>Normally it happens when the user installs a new TV AD service package that implements
+         * {@link TvAdService} interface.
+         *
+         * @param serviceId The ID of the TV AD service.
+         */
+        public void onAdServiceAdded(@NonNull String serviceId) {
+        }
+
+        /**
+         * This is called when a TV AD service is removed from the system.
+         *
+         * <p>Normally it happens when the user uninstalls the previously installed TV AD service
+         * package.
+         *
+         * @param serviceId The ID of the TV AD service.
+         */
+        public void onAdServiceRemoved(@NonNull String serviceId) {
+        }
+
+        /**
+         * This is called when a TV AD service is updated on the system.
+         *
+         * <p>Normally it happens when a previously installed TV AD service package is re-installed
+         * or a newer version of the package exists becomes available/unavailable.
+         *
+         * @param serviceId The ID of the TV AD service.
+         */
+        public void onAdServiceUpdated(@NonNull String serviceId) {
+        }
 
     }
 
@@ -549,6 +634,37 @@ public class TvAdManager {
         TvAdServiceCallbackRecord(TvAdServiceCallback callback, Executor executor) {
             mCallback = callback;
             mExecutor = executor;
+        }
+
+        public TvAdServiceCallback getCallback() {
+            return mCallback;
+        }
+
+        public void postAdServiceAdded(final String serviceId) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onAdServiceAdded(serviceId);
+                }
+            });
+        }
+
+        public void postAdServiceRemoved(final String serviceId) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onAdServiceRemoved(serviceId);
+                }
+            });
+        }
+
+        public void postAdServiceUpdated(final String serviceId) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onAdServiceUpdated(serviceId);
+                }
+            });
         }
     }
 }

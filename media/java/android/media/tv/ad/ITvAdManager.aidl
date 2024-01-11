@@ -17,6 +17,8 @@
 package android.media.tv.ad;
 
 import android.media.tv.ad.ITvAdClient;
+import android.media.tv.ad.ITvAdManagerCallback;
+import android.media.tv.ad.TvAdServiceInfo;
 import android.view.Surface;
 
 /**
@@ -24,6 +26,7 @@ import android.view.Surface;
  * @hide
  */
 interface ITvAdManager {
+    List<TvAdServiceInfo> getTvAdServiceList(int userId);
     void createSession(
             in ITvAdClient client, in String serviceId, in String type, int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
@@ -31,4 +34,7 @@ interface ITvAdManager {
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);
     void dispatchSurfaceChanged(in IBinder sessionToken, int format, int width, int height,
             int userId);
+
+    void registerCallback(in ITvAdManagerCallback callback, int userId);
+    void unregisterCallback(in ITvAdManagerCallback callback, int userId);
 }
