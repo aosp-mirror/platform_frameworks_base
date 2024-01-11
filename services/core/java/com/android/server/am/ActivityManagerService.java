@@ -1751,7 +1751,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("mProcLock")
     private long mLastBinderHeavyHitterAutoSamplerStart = 0L;
 
-    final AppProfiler mAppProfiler;
+    AppProfiler mAppProfiler;
 
     private static final int INDEX_NATIVE_PSS = 0;
     private static final int INDEX_NATIVE_SWAP_PSS = 1;
@@ -2496,7 +2496,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mInjector = injector;
         mContext = mInjector.getContext();
         mUiContext = null;
-        mAppErrors = null;
+        mAppErrors = injector.getAppErrors();
         mPackageWatchdog = null;
         mAppOpsService = mInjector.getAppOpsService(null /* recentAccessesFile */,
             null /* storageFile */, null /* handler */);
@@ -2514,7 +2514,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? new OomAdjusterModernImpl(this, mProcessList, activeUids, handlerThread)
                 : new OomAdjuster(this, mProcessList, activeUids, handlerThread);
 
-        mIntentFirewall = null;
+        mIntentFirewall = injector.getIntentFirewall();
         mProcessStats = new ProcessStatsService(this, mContext.getCacheDir());
         mCpHelper = new ContentProviderHelper(this, false);
         mServices = mInjector.getActiveServices(this);
@@ -13889,13 +13889,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void serviceDoneExecuting(IBinder token, int type, int startId, int res) {
+    @Override
+    public void serviceDoneExecuting(IBinder token, int type, int startId, int res, Intent intent) {
         synchronized(this) {
             if (!(token instanceof ServiceRecord)) {
                 Slog.e(TAG, "serviceDoneExecuting: Invalid service token=" + token);
                 throw new IllegalArgumentException("Invalid service token");
             }
-            mServices.serviceDoneExecutingLocked((ServiceRecord) token, type, startId, res, false);
+            mServices.serviceDoneExecutingLocked((ServiceRecord) token, type, startId, res, false,
+                    intent);
         }
     }
 
@@ -20235,6 +20237,36 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ProcessList.SCHED_GROUP_BACKGROUND);
             }
             return broadcastQueues;
+        }
+
+        /** @see Binder#getCallingUid */
+        public int getCallingUid() {
+            return Binder.getCallingUid();
+        }
+
+        /** @see Binder#getCallingPid */
+        public int getCallingPid() {
+            return Binder.getCallingUid();
+        }
+
+        /** @see Binder#clearCallingIdentity */
+        public long clearCallingIdentity() {
+            return Binder.clearCallingIdentity();
+        }
+
+        /** @see Binder#clearCallingIdentity */
+        public void restoreCallingIdentity(long ident) {
+            Binder.restoreCallingIdentity(ident);
+        }
+
+        /** @return the default instance of AppErrors */
+        public AppErrors getAppErrors() {
+            return null;
+        }
+
+        /** @return the default instance of intent firewall */
+        public IntentFirewall getIntentFirewall() {
+            return null;
         }
     }
 

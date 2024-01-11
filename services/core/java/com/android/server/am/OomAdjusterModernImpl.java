@@ -1002,7 +1002,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
 
 
             computeServiceHostOomAdjLSP(cr, service, app, now, topApp, fullUpdate, false, false,
-                    oomAdjReason, cachedAdj, false);
+                    oomAdjReason, cachedAdj, false, false);
         }
 
         for (int i = psr.numberOfSdkSandboxConnections() - 1; i >= 0; i--) {
@@ -1018,7 +1018,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
             }
 
             computeServiceHostOomAdjLSP(cr, service, app, now, topApp, fullUpdate, false, false,
-                    oomAdjReason, cachedAdj, false);
+                    oomAdjReason, cachedAdj, false, false);
         }
 
         final ProcessProviderRecord ppr = app.mProviders;
@@ -1035,7 +1035,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
             }
 
             computeProviderHostOomAdjLSP(cpc, provider, app, now, topApp, fullUpdate, false, false,
-                    oomAdjReason, cachedAdj, false);
+                    oomAdjReason, cachedAdj, false, false);
         }
     }
 }

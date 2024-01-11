@@ -35,3 +35,10 @@ flag {
      description: "Enable the new FGS restriction logic"
      bug: "276963716"
 }
+
+flag {
+    name: "service_binding_oom_adj_policy"
+    namespace: "backstage_power"
+    description: "Optimize the service bindings by different policies like skipping oom adjuster"
+    bug: "318717054"
+}
