@@ -62,6 +62,10 @@ class FakeDeviceEntryFingerprintAuthRepository @Inject constructor() :
     fun setAuthenticationStatus(status: FingerprintAuthenticationStatus) {
         _authenticationStatus.value = status
     }
+
+    fun setShouldUpdateIndicatorVisibility(shouldUpdateIndicatorVisibility: Boolean) {
+        _shouldUpdateIndicatorVisibility.value = shouldUpdateIndicatorVisibility
+    }
 }
 
 @Module
