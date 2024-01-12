@@ -132,8 +132,10 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -555,6 +557,86 @@ public class ActivityStarterTests extends WindowTestsBase {
         assertEquals(splitOrg.mPrimary, splitPrimaryActivity.getRootTask());
         assertEquals(splitOrg.mSecondary, splitSecondActivity.getRootTask());
         return Pair.create(splitPrimaryActivity, splitSecondActivity);
+    }
+
+    /**
+     * This test ensures that if the intent is being delivered to a desktop mode unfocused task
+     * while it is already on top, reports it as delivering to top.
+     */
+    @Test
+    public void testDesktopModeDeliverToTop() {
+        final ActivityStarter starter = prepareStarter(
+                FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | FLAG_ACTIVITY_SINGLE_TOP,
+                false /* mockGetRootTask */);
+        final List<ActivityRecord> activities = createActivitiesInDesktopMode();
+
+        // Set focus back to the first task.
+        activities.get(0).moveFocusableActivityToTop("testDesktopModeDeliverToTop");
+
+        // Start activity and delivered new intent.
+        starter.getIntent().setComponent(activities.get(3).mActivityComponent);
+        doReturn(activities.get(3)).when(mRootWindowContainer).findTask(any(), any());
+        final int result = starter.setReason("testDesktopModeDeliverToTop").execute();
+
+        // Ensure result is delivering intent to top.
+        assertEquals(START_DELIVERED_TO_TOP, result);
+    }
+
+    /**
+     * This test ensures that if the intent is being delivered to a desktop mode unfocused task
+     * reports it is brought to front instead of delivering to top.
+     */
+    @Test
+    public void testDesktopModeTaskToFront() {
+        final ActivityStarter starter = prepareStarter(
+                FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | FLAG_ACTIVITY_SINGLE_TOP, false);
+        final List<ActivityRecord> activities = createActivitiesInDesktopMode();
+        final ActivityRecord desktopModeFocusActivity = activities.get(0);
+        final ActivityRecord desktopModeReusableActivity = activities.get(1);
+        final ActivityRecord desktopModeTopActivity = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setParentTask(desktopModeReusableActivity.getRootTask()).build();
+        assertTrue(desktopModeTopActivity.inMultiWindowMode());
+
+        // Let first stack has focus.
+        desktopModeFocusActivity.moveFocusableActivityToTop("testDesktopModeTaskToFront");
+
+        // Start activity and delivered new intent.
+        starter.getIntent().setComponent(desktopModeReusableActivity.mActivityComponent);
+        doReturn(desktopModeReusableActivity).when(mRootWindowContainer).findTask(any(), any());
+        final int result = starter.setReason("testDesktopModeMoveToFront").execute();
+
+        // Ensure result is moving task to front.
+        assertEquals(START_TASK_TO_FRONT, result);
+    }
+
+    /** Returns 4 activities. */
+    private List<ActivityRecord> createActivitiesInDesktopMode() {
+        final TestDesktopOrganizer desktopOrganizer = new TestDesktopOrganizer(mAtm);
+        List<ActivityRecord> activityRecords = new ArrayList<>();
+
+        for (int i = 0; i < 4; i++) {
+            Rect bounds = new Rect(desktopOrganizer.getDefaultDesktopTaskBounds());
+            bounds.offset(20 * i, 20 * i);
+            desktopOrganizer.createTask(bounds);
+        }
+
+        for (int i = 0; i < 4; i++) {
+            activityRecords.add(new TaskBuilder(mSupervisor)
+                    .setParentTask(desktopOrganizer.mTasks.get(i))
+                    .setCreateActivity(true)
+                    .build()
+                    .getTopMostActivity());
+        }
+
+        for (int i = 0; i < 4; i++) {
+            activityRecords.get(i).setVisibleRequested(true);
+        }
+
+        for (int i = 0; i < 4; i++) {
+            assertEquals(desktopOrganizer.mTasks.get(i), activityRecords.get(i).getRootTask());
+        }
+
+        return activityRecords;
     }
 
     @Test

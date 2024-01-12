@@ -20,6 +20,7 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -132,7 +133,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /** Common base class for window manager unit test classes. */
 class WindowTestsBase extends SystemServiceTestsBase {
@@ -1877,6 +1880,55 @@ class WindowTestsBase extends SystemServiceTestsBase {
         public void putTaskToSecondary(Task task, boolean onTop) {
             task.reparent(mSecondary, onTop ? POSITION_TOP : POSITION_BOTTOM);
         }
+    }
+
+    static class TestDesktopOrganizer extends WindowOrganizerTests.StubOrganizer {
+        final int mDesktopModeDefaultWidthDp = 840;
+        final int mDesktopModeDefaultHeightDp = 630;
+        final int mDesktopDensity = 284;
+
+        final ActivityTaskManagerService mService;
+        final TaskDisplayArea mDefaultTDA;
+        List<Task> mTasks;
+        final DisplayContent mDisplay;
+        Rect mStableBounds;
+
+        TestDesktopOrganizer(ActivityTaskManagerService service, DisplayContent display) {
+            mService = service;
+            mDefaultTDA = display.getDefaultTaskDisplayArea();
+            mDisplay = display;
+            mService.mTaskOrganizerController.registerTaskOrganizer(this);
+            mTasks = new ArrayList<>();
+            mStableBounds = display.getBounds();
+        }
+
+        TestDesktopOrganizer(ActivityTaskManagerService service) {
+            this(service, service.mTaskSupervisor.mRootWindowContainer.getDefaultDisplay());
+        }
+
+        public Task createTask(Rect bounds) {
+            Task task = mService.mTaskOrganizerController.createRootTask(
+                    mDisplay, WINDOWING_MODE_FREEFORM, null);
+            task.setBounds(bounds);
+            mTasks.add(task);
+            spyOn(task);
+            return task;
+        }
+
+        public Rect getDefaultDesktopTaskBounds() {
+            int width = (int) (mDesktopModeDefaultWidthDp * mDesktopDensity + 0.5f);
+            int height = (int) (mDesktopModeDefaultHeightDp * mDesktopDensity + 0.5f);
+            Rect outBounds = new Rect();
+
+            outBounds.set(0, 0, width, height);
+            // Center the task in stable bounds
+            outBounds.offset(
+                    mStableBounds.centerX() - outBounds.centerX(),
+                    mStableBounds.centerY() - outBounds.centerY()
+            );
+            return outBounds;
+        }
+
     }
 
     static TestWindowToken createTestWindowToken(int type, DisplayContent dc) {
