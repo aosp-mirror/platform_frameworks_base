@@ -5453,7 +5453,7 @@ public final class ActiveServices {
         // Force an immediate oomAdjUpdate, so the client app could be in the correct process state
         // before doing any service related transactions
         mAm.enqueueOomAdjTargetLocked(app);
-        mAm.updateOomAdjLocked(app, OOM_ADJ_REASON_START_SERVICE);
+        mAm.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_SERVICE);
 
         boolean created = false;
         try {
