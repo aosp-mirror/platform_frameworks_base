@@ -16,6 +16,7 @@
 
 package android.telephony.ims;
 
+import android.annotation.FlaggedApi;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -46,6 +47,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
@@ -152,12 +154,36 @@ public class ImsService extends Service {
     public static final long CAPABILITY_TERMINAL_BASED_CALL_WAITING = 1 << 2;
 
     /**
+     * This ImsService supports the capability to manage calls on multiple subscriptions at the same
+     * time.
+     * <p>
+     * When set, this ImsService supports managing calls on multiple subscriptions at the same time
+     * for all WLAN network configurations. Telephony will allow new outgoing/incoming IMS calls to
+     * be set up on other subscriptions while there is an ongoing call. The ImsService must also
+     * support managing calls on WWAN + WWAN configurations whenever the modem also reports
+     * simultaneous calling availability, which can be listened to using the
+     * {@link android.telephony.TelephonyCallback.SimultaneousCellularCallingSupportListener} API.
+     * Telephony will only allow additional ongoing/incoming IMS calls on another subscription to be
+     * set up on WWAN + WWAN configurations when the modem reports that simultaneous cellular
+     * calling is allowed at the current time on both subscriptions where there are ongoing calls.
+     * <p>
+     * When unset (default), this ImsService can not support calls on multiple subscriptions at the
+     * same time for any WLAN or WWAN configurations, so pending outgoing call placed on another
+     * cellular subscription while there is an ongoing call will be cancelled by Telephony.
+     * Similarly, any incoming call notification on another cellular subscription while there is an
+     * ongoing call will be rejected.
+     * @hide TODO: move this to system API when we have a backing implementation + CTS testing
+     */
+    @FlaggedApi(Flags.FLAG_SIMULTANEOUS_CALLING_INDICATIONS)
+    public static final long CAPABILITY_SUPPORTS_SIMULTANEOUS_CALLING = 1 << 3;
+
+    /**
      * Used for internal correctness checks of capabilities set by the ImsService implementation and
      * tracks the index of the largest defined flag in the capabilities long.
      * @hide
      */
     public static final long CAPABILITY_MAX_INDEX =
-            Long.numberOfTrailingZeros(CAPABILITY_TERMINAL_BASED_CALL_WAITING);
+            Long.numberOfTrailingZeros(CAPABILITY_SUPPORTS_SIMULTANEOUS_CALLING);
 
     /**
      * @hide
