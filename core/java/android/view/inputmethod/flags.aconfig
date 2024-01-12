@@ -47,3 +47,10 @@ flag {
     is_fixed_read_only: true
 }
 
+flag {
+    name: "use_zero_jank_proxy"
+    namespace: "input_method"
+    description: "Feature flag for using a proxy that uses async calls to achieve zero jank for IMMS calls."
+    bug: "293640003"
+    is_fixed_read_only: true
+}
