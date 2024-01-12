@@ -43,10 +43,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.ValueKey
-import com.android.compose.animation.scene.animateElementFloatAsState
 import com.android.systemui.notifications.ui.composable.Notifications.Form
-import com.android.systemui.notifications.ui.composable.Notifications.SharedValues.SharedExpansionValue
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 
 object Notifications {
@@ -54,10 +51,6 @@ object Notifications {
         val NotificationScrim = ElementKey("NotificationScrim")
         val NotificationPlaceholder = ElementKey("NotificationPlaceholder")
         val ShelfSpace = ElementKey("ShelfSpace")
-    }
-
-    object SharedValues {
-        val SharedExpansionValue = ValueKey("SharedExpansionValue")
     }
 
     enum class Form {
@@ -181,13 +174,6 @@ private fun SceneScope.NotificationPlaceholder(
                     )
                 }
     ) {
-        val animatedExpansion by
-            animateElementFloatAsState(
-                value = if (form == Form.HunFromTop) 0f else 1f,
-                key = SharedExpansionValue
-            )
-        debugLog(viewModel) { "STACK composed: expansion=$animatedExpansion" }
-
         content {
             if (viewModel.isPlaceholderTextVisible) {
                 Box(Modifier.fillMaxSize()) {
