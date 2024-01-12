@@ -790,7 +790,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"ਸੱਜਾ"</string>
     <string name="tuner_menu" msgid="363690665924769420">"ਮੀਨੂ"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> ਐਪ"</string>
-    <string name="notification_channel_alerts" msgid="3385787053375150046">"ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"ਅਲਰਟ"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"ਬੈਟਰੀ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
