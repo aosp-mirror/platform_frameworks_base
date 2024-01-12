@@ -1174,23 +1174,12 @@ public class Activity extends ContextThemeWrapper
         return mApplication;
     }
 
-    /**
-     * Whether this is a child {@link Activity} of an {@link ActivityGroup}.
-     *
-     * @deprecated {@link ActivityGroup} is deprecated.
-     */
-    @Deprecated
+    /** Is this activity embedded inside of another activity? */
     public final boolean isChild() {
         return mParent != null;
     }
 
-    /**
-     * Returns the parent {@link Activity} if this is a child {@link Activity} of an
-     * {@link ActivityGroup}.
-     *
-     * @deprecated {@link ActivityGroup} is deprecated.
-     */
-    @Deprecated
+    /** Return the parent activity if this view is an embedded child. */
     public final Activity getParent() {
         return mParent;
     }
