@@ -3258,4 +3258,17 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
         + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
     boolean isNullCipherNotificationsEnabled();
+
+    /**
+     * Get the aggregated satellite plmn list. This API collects plmn data from multiple sources,
+     * including carrier config, entitlement server, and config update.
+     *
+     * @param subId subId The subscription ID of the carrier.
+     *
+     * @return List of plmns for carrier satellite service. If no plmn is available, empty list will
+     * be returned.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    List<String> getAllSatellitePlmnsForCarrier(int subId);
 }

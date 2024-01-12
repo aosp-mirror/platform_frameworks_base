@@ -9683,6 +9683,17 @@ public class CarrierConfigManager {
             "parameters_used_for_ntn_lte_signal_bar_int";
 
     /**
+     * Indicating whether plmns associated with carrier satellite can be exposed to user when
+     * manually scanning available cellular network.
+     * If key is {@code true}, satellite plmn should not be exposed to user and should be
+     * automatically set, {@code false} otherwise. Default value is {@code true}.
+     *
+     * @hide
+     */
+    public static final String KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL =
+            "remove_satellite_plmn_in_manual_network_scan_bool";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -10787,6 +10798,7 @@ public class CarrierConfigManager {
                 });
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
+        sDefaults.putBoolean(KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL, true);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
