@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,16 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.shade.data.repository.shadeRepository
-import dagger.Lazy
 
-val Kosmos.fromLockscreenTransitionInteractor by
+val Kosmos.glanceableHubTransitions by
     Kosmos.Fixture {
-        FromLockscreenTransitionInteractor(
+        GlanceableHubTransitions(
+            scope = applicationCoroutineScope,
             transitionRepository = keyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
-            scope = applicationCoroutineScope,
-            bgDispatcher = testDispatcher,
-            mainDispatcher = testDispatcher,
-            keyguardInteractor = keyguardInteractor,
-            flags = featureFlagsClassic,
-            shadeRepository = shadeRepository,
-            powerInteractor = powerInteractor,
-            glanceableHubTransitions = glanceableHubTransitions,
-            inWindowLauncherUnlockAnimationInteractor =
-                Lazy { inWindowLauncherUnlockAnimationInteractor },
+            communalInteractor = communalInteractor,
         )
     }

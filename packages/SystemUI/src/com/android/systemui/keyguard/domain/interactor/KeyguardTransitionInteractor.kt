@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING_LOCKSCREEN_HOSTED
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
@@ -135,9 +136,17 @@ constructor(
     val lockscreenToDreamingLockscreenHostedTransition: Flow<TransitionStep> =
         repository.transition(LOCKSCREEN, DREAMING_LOCKSCREEN_HOSTED)
 
+    /** LOCKSCREEN->GLANCEABLE_HUB transition information. */
+    val lockscreenToGlanceableHubTransition: Flow<TransitionStep> =
+        repository.transition(LOCKSCREEN, GLANCEABLE_HUB)
+
     /** LOCKSCREEN->OCCLUDED transition information. */
     val lockscreenToOccludedTransition: Flow<TransitionStep> =
         repository.transition(LOCKSCREEN, OCCLUDED)
+
+    /** GLANCEABLE_HUB->LOCKSCREEN transition information. */
+    val glanceableHubToLockscreenTransition: Flow<TransitionStep> =
+        repository.transition(GLANCEABLE_HUB, LOCKSCREEN)
 
     /** OCCLUDED->LOCKSCREEN transition information. */
     val occludedToLockscreenTransition: Flow<TransitionStep> =

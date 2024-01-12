@@ -25,6 +25,7 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.ScreenLifecycle
@@ -111,6 +112,7 @@ data class TestMocksModule(
     @get:Provides val zenModeController: ZenModeController = mock(),
     @get:Provides val systemUIDialogManager: SystemUIDialogManager = mock(),
     @get:Provides val deviceEntryIconTransitions: Set<DeviceEntryIconTransition> = emptySet(),
+    @get:Provides val communalInteractor: CommunalInteractor = mock(),
 
     // log buffers
     @get:[Provides BroadcastDispatcherLog]

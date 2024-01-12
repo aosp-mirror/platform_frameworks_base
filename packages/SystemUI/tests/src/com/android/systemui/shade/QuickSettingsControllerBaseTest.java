@@ -42,6 +42,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
@@ -55,6 +57,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository;
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.GlanceableHubTransitions;
 import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -235,6 +238,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 new ConfigurationInteractor(configurationRepository),
                 mShadeRepository,
                 () -> sceneInteractor);
+        CommunalInteractor communalInteractor =
+                CommunalInteractorFactory.create().getCommunalInteractor();
 
         FakeKeyguardTransitionRepository keyguardTransitionRepository =
                 new FakeKeyguardTransitionRepository();
@@ -257,6 +262,12 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 featureFlags,
                 mShadeRepository,
                 powerInteractor,
+                new GlanceableHubTransitions(
+                        mTestScope,
+                        keyguardTransitionInteractor,
+                        keyguardTransitionRepository,
+                        communalInteractor
+                ),
                 () ->
                         new InWindowLauncherUnlockAnimationInteractor(
                                 new InWindowLauncherUnlockAnimationRepository(),

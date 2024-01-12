@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -58,6 +59,8 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
     aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
+    lockscreenToGlanceableHubTransitionViewModel: LockscreenToGlanceableHubTransitionViewModel,
+    glanceableHubToLockscreenTransitionViewModel: GlanceableHubToLockscreenTransitionViewModel,
     screenOffAnimationController: ScreenOffAnimationController,
     private val aodBurnInViewModel: AodBurnInViewModel,
     aodAlphaViewModel: AodAlphaViewModel,
@@ -78,7 +81,13 @@ constructor(
         keyguardInteractor.notificationContainerBounds
 
     /** An observable for the alpha level for the entire keyguard root view. */
-    val alpha: Flow<Float> = aodAlphaViewModel.alpha
+    val alpha: Flow<Float> =
+        merge(
+                aodAlphaViewModel.alpha,
+                lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
+                glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
+            )
+            .distinctUntilChanged()
 
     /** Specific alpha value for elements visible during [KeyguardState.LOCKSCREEN] */
     val lockscreenStateAlpha: Flow<Float> = aodToLockscreenTransitionViewModel.lockscreenAlpha
