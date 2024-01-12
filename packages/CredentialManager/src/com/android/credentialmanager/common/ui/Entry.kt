@@ -56,9 +56,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.EntryShape
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.ui.theme.Shapes
 
 @Composable
@@ -168,7 +168,7 @@ fun Entry(
                             // Decorative purpose only.
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
-                            tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+                            tint = LocalAndroidColorScheme.current.onSurfaceVariant,
                         )
                     }
                 }
@@ -182,7 +182,7 @@ fun Entry(
                         Icon(
                             modifier = iconSize,
                             bitmap = iconImageBitmap,
-                            tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+                            tint = LocalAndroidColorScheme.current.onSurfaceVariant,
                             // Decorative purpose only.
                             contentDescription = null,
                         )
@@ -206,7 +206,7 @@ fun Entry(
                     Icon(
                         modifier = iconSize,
                         imageVector = iconImageVector,
-                        tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+                        tint = LocalAndroidColorScheme.current.onSurfaceVariant,
                         // Decorative purpose only.
                         contentDescription = null,
                     )
@@ -218,7 +218,7 @@ fun Entry(
                     Icon(
                         modifier = iconSize,
                         painter = iconPainter,
-                        tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+                        tint = LocalAndroidColorScheme.current.onSurfaceVariant,
                         // Decorative purpose only.
                         contentDescription = null,
                     )
@@ -229,9 +229,9 @@ fun Entry(
         },
         border = null,
         colors = SuggestionChipDefaults.suggestionChipColors(
-            containerColor = LocalAndroidColorScheme.current.colorSurfaceContainerHigh,
-            labelColor = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
-            iconContentColor = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+            containerColor = LocalAndroidColorScheme.current.surfaceContainerHigh,
+            labelColor = LocalAndroidColorScheme.current.onSurfaceVariant,
+            iconContentColor = LocalAndroidColorScheme.current.onSurfaceVariant,
         ),
     )
 }
@@ -294,7 +294,7 @@ fun PasskeyBenefitRow(
         Icon(
             modifier = Modifier.size(24.dp),
             painter = leadingIconPainter,
-            tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+            tint = LocalAndroidColorScheme.current.onSurfaceVariant,
             // Decorative purpose only.
             contentDescription = null,
         )
@@ -353,7 +353,7 @@ fun MoreOptionTopAppBar(
                             R.string.accessibility_back_arrow_button
                         ),
                         modifier = Modifier.size(24.dp).autoMirrored(),
-                        tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+                        tint = LocalAndroidColorScheme.current.onSurfaceVariant,
                     )
                 }
             }
