@@ -70,10 +70,8 @@ public abstract class AbstractWifiMacAddressPreferenceController
     @Override
     public void displayPreference(PreferenceScreen screen) {
         super.displayPreference(screen);
-        if (isAvailable()) {
-            mWifiMacAddress = screen.findPreference(KEY_WIFI_MAC_ADDRESS);
-            updateConnectivity();
-        }
+        mWifiMacAddress = screen.findPreference(KEY_WIFI_MAC_ADDRESS);
+        updateConnectivity();
     }
 
     @Override
@@ -84,14 +82,14 @@ public abstract class AbstractWifiMacAddressPreferenceController
     @SuppressLint("HardwareIds")
     @Override
     protected void updateConnectivity() {
+        if (mWifiManager == null || mWifiMacAddress == null) {
+            return;
+        }
+
         final String[] macAddresses = mWifiManager.getFactoryMacAddresses();
         String macAddress = null;
         if (macAddresses != null && macAddresses.length > 0) {
             macAddress = macAddresses[0];
-        }
-
-        if (mWifiMacAddress == null) {
-            return;
         }
 
         if (TextUtils.isEmpty(macAddress) || macAddress.equals(WifiInfo.DEFAULT_MAC_ADDRESS)) {
