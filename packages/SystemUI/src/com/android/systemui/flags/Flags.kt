@@ -348,12 +348,6 @@ object Flags {
     // TODO(b/254512673): Tracking Bug
     @JvmField val DREAM_MEDIA_TAP_TO_OPEN = unreleasedFlag("dream_media_tap_to_open")
 
-    // TODO(b/254513168): Tracking Bug
-    @JvmField val UMO_SURFACE_RIPPLE = releasedFlag("umo_surface_ripple")
-
-    // TODO(b/261734857): Tracking Bug
-    @JvmField val UMO_TURBULENCE_NOISE = releasedFlag("umo_turbulence_noise")
-
     // TODO(b/263272731): Tracking Bug
     val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag("media_ttt_receiver_success_ripple")
 

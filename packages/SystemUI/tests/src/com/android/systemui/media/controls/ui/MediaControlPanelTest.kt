@@ -64,8 +64,6 @@ import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaAction
@@ -227,11 +225,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var recProgressBar2: SeekBar
     @Mock private lateinit var recProgressBar3: SeekBar
     private var shouldShowBroadcastButton: Boolean = false
-    private val fakeFeatureFlag =
-        FakeFeatureFlags().apply {
-            this.set(Flags.UMO_SURFACE_RIPPLE, false)
-            this.set(Flags.UMO_TURBULENCE_NOISE, false)
-        }
     @Mock private lateinit var globalSettings: GlobalSettings
     @Mock private lateinit var mediaFlags: MediaFlags
 
@@ -275,7 +268,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     activityIntentHelper,
                     lockscreenUserManager,
                     broadcastDialogController,
-                    fakeFeatureFlag,
                     globalSettings,
                     mediaFlags,
                 ) {
@@ -2397,8 +2389,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun onButtonClick_touchRippleFlagEnabled_playsTouchRipple() {
-        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, true)
+    fun onButtonClick_playsTouchRipple() {
         val semanticActions =
             MediaButton(
                 playOrPause =
@@ -2419,31 +2410,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun onButtonClick_touchRippleFlagDisabled_doesNotPlayTouchRipple() {
-        fakeFeatureFlag.set(Flags.UMO_SURFACE_RIPPLE, false)
-        val semanticActions =
-            MediaButton(
-                playOrPause =
-                    MediaAction(
-                        icon = null,
-                        action = {},
-                        contentDescription = "play",
-                        background = null
-                    )
-            )
-        val data = mediaData.copy(semanticActions = semanticActions)
-        player.attachPlayer(viewHolder)
-        player.bindPlayer(data, KEY)
-
-        viewHolder.actionPlayPause.callOnClick()
-
-        assertThat(viewHolder.multiRippleView.ripples.size).isEqualTo(0)
-    }
-
-    @Test
     fun playTurbulenceNoise_finishesAfterDuration() {
-        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
-
         val semanticActions =
             MediaButton(
                 playOrPause =
@@ -2474,8 +2441,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun playTurbulenceNoise_whenPlaybackStateIsNotPlaying_doesNotPlayTurbulence() {
-        fakeFeatureFlag.set(Flags.UMO_TURBULENCE_NOISE, true)
-
         val semanticActions =
             MediaButton(
                 custom0 =
