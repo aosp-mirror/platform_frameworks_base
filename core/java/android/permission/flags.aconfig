@@ -45,7 +45,8 @@ flag {
 }
 
 flag {
-    name: "enhanced_confirmation_mode_apis"
+    name: "enhanced_confirmation_mode_apis_enabled"
+    is_fixed_read_only: true
     namespace: "permissions"
     description: "enable enhanced confirmation mode apis"
     bug: "310220212"
