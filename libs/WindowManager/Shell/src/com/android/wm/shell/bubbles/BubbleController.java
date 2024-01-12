@@ -1249,6 +1249,7 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         String appBubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(), user);
+        Log.v(TAG, "showOrHideAppBubble, with key: " + appBubbleKey);
         PackageManager packageManager = getPackageManagerForUser(mContext, user.getIdentifier());
         if (!isResizableActivity(intent, packageManager, appBubbleKey)) return;
 
@@ -1258,18 +1259,22 @@ public class BubbleController implements ConfigurationChangeListener,
             if (isStackExpanded()) {
                 if (selectedBubble != null && appBubbleKey.equals(selectedBubble.getKey())) {
                     // App bubble is expanded, lets collapse
+                    Log.v(TAG, "  showOrHideAppBubble, selected bubble is app bubble, collapsing");
                     collapseStack();
                 } else {
                     // App bubble is not selected, select it
+                    Log.v(TAG, "  showOrHideAppBubble, expanded, selecting existing app bubble");
                     mBubbleData.setSelectedBubble(existingAppBubble);
                 }
             } else {
                 // App bubble is not selected, select it & expand
+                Log.v(TAG, "  showOrHideAppBubble, expand and select existing app bubble");
                 mBubbleData.setSelectedBubble(existingAppBubble);
                 mBubbleData.setExpanded(true);
             }
         } else {
             // App bubble does not exist, lets add and expand it
+            Log.v(TAG, "  showOrHideAppBubble, creating and expanding app bubble");
             Bubble b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);
             b.setShouldAutoExpand(true);
             inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
