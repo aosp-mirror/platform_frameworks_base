@@ -20,7 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.content.Context
 import com.android.settingslib.Utils
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -41,7 +41,7 @@ class DeviceEntryForegroundViewModel
 @Inject
 constructor(
     val context: Context,
-    configurationRepository: ConfigurationRepository, // TODO (b/309655554): create & use interactor
+    configurationInteractor: ConfigurationInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     transitionInteractor: KeyguardTransitionInteractor,
     deviceEntryIconViewModel: DeviceEntryIconViewModel,
@@ -62,7 +62,7 @@ constructor(
 
     private val color: Flow<Int> =
         deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBgProtection ->
-            configurationRepository.onAnyConfigurationChange
+            configurationInteractor.onAnyConfigurationChange
                 .map { getColor(useBgProtection) }
                 .onStart { emit(getColor(useBgProtection)) }
         }
