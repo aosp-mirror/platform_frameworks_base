@@ -434,6 +434,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"\"systemExempted\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ പ്രയോജനപ്പെടുത്താൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"fileManagement\" എന്ന തരത്തിലുള്ള ഫോർഗ്രൗണ്ട് സേവനം റൺ ചെയ്യുക"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"\"fileManagement\" എന്ന തരത്തിലുള്ള ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ പ്രയോജനപ്പെടുത്താൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"\"mediaProcessing\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനം റൺ ചെയ്യുക"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"\"mediaProcessing\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ പ്രയോജനപ്പെടുത്താൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനം റൺ ചെയ്യുക"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"\"specialUse\" എന്ന തരം ഉപയോഗിച്ച് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ പ്രയോജനപ്പെടുത്താൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"അപ്ലിക്കേഷൻ സംഭരണയിടം അളക്കുക"</string>
@@ -632,7 +634,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"തുടരാൻ നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് നൽകുക"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"സെൻസറിൽ നന്നായി അമർത്തുക"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിയാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ഫിംഗർപ്രിന്റ് സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"സെൻസറിൽ നന്നായി അമർത്തുക"</string>
@@ -696,7 +699,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"മുഖം കാണുന്നില്ല. ഫോൺ കണ്ണിന് നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"മുഖം തിരിച്ചറിയാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"നിങ്ങളുടെ തലയുടെ സ്ഥാനം ചെറുതായി മാറ്റുക"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"കൂടുതൽ കൃത്യമായി ഫോണിന് നേരെ നോക്കുക"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"കൂടുതൽ കൃത്യമായി ഫോണിന് നേരെ നോക്കുക"</string>
