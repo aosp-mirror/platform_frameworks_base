@@ -255,14 +255,6 @@ final class InputMethodUtils {
             return SecureSettingsWrapper.getInt(key, defaultValue, mCurrentUserId);
         }
 
-        private void putBoolean(String key, boolean value) {
-            SecureSettingsWrapper.putBoolean(key, value, mCurrentUserId);
-        }
-
-        private boolean getBoolean(String key, boolean defaultValue) {
-            return SecureSettingsWrapper.getBoolean(key, defaultValue, mCurrentUserId);
-        }
-
         ArrayList<InputMethodInfo> getEnabledInputMethodListLocked() {
             return getEnabledInputMethodListWithFilterLocked(null /* matchingCondition */);
         }
