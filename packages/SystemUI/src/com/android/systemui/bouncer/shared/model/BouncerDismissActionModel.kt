@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene
+package com.android.systemui.bouncer.shared.model
 
-import com.android.systemui.bouncer.ui.composable.BouncerScene
-import com.android.systemui.scene.shared.model.Scene
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
+import com.android.systemui.plugins.ActivityStarter
 
-@Module
-interface BouncerSceneModule {
-
-    @Binds @IntoSet fun bouncerScene(scene: BouncerScene): Scene
-}
+/** Represents the action that needs to be performed after bouncer is dismissed. */
+data class BouncerDismissActionModel(
+    /** If the bouncer is unlocked, [onDismissAction] will be run. */
+    val onDismissAction: ActivityStarter.OnDismissAction?,
+    /** If the bouncer is exited before unlocking, [onCancel] will be invoked. */
+    val onCancel: Runnable?
+)

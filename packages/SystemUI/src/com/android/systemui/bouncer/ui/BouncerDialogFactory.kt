@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene
+package com.android.systemui.bouncer.ui
 
-import com.android.systemui.bouncer.ui.composable.BouncerScene
-import com.android.systemui.scene.shared.model.Scene
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
+import android.app.AlertDialog
 
-@Module
-interface BouncerSceneModule {
-
-    @Binds @IntoSet fun bouncerScene(scene: BouncerScene): Scene
+/** Factory to create alert dialogs for use in bouncer component. */
+interface BouncerDialogFactory {
+    operator fun invoke(): AlertDialog
 }

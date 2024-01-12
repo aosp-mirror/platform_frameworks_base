@@ -476,6 +476,13 @@ object Flags {
     // TODO(b/283300105): Tracking Bug
     @JvmField val SCENE_CONTAINER_ENABLED = false
 
+    /**
+     * Whether the compose bouncer is enabled. This ensures ProGuard can
+     * remove unused code from our APK at compile time.
+     */
+    // TODO(b/280877228): Tracking Bug
+    @JvmField val COMPOSE_BOUNCER_ENABLED = false
+
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
 
