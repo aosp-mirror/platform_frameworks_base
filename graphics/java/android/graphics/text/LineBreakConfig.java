@@ -23,9 +23,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.compat.CompatChanges;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.app.ActivityThread;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -43,15 +41,6 @@ import java.util.Objects;
  * line-break property</a> for more information.
  */
 public final class LineBreakConfig implements Parcelable {
-
-    /**
-     * A feature ID for automatic line break word style.
-     * @hide
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    public static final long WORD_STYLE_AUTO = 280005585L;
-
     /**
      * No hyphenation preference is specified.
      *
@@ -487,8 +476,15 @@ public final class LineBreakConfig implements Parcelable {
      * @hide
      */
     public static @LineBreakStyle int getResolvedLineBreakStyle(@Nullable LineBreakConfig config) {
-        final int defaultStyle = CompatChanges.isChangeEnabled(WORD_STYLE_AUTO)
-                ? LINE_BREAK_STYLE_AUTO : LINE_BREAK_STYLE_NONE;
+        final int targetSdkVersion = ActivityThread.currentApplication().getApplicationInfo()
+                .targetSdkVersion;
+        final int defaultStyle;
+        final int vicVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM;
+        if (targetSdkVersion >= vicVersion) {
+            defaultStyle = LINE_BREAK_STYLE_AUTO;
+        } else {
+            defaultStyle = LINE_BREAK_STYLE_NONE;
+        }
         if (config == null) {
             return defaultStyle;
         }
@@ -515,8 +511,15 @@ public final class LineBreakConfig implements Parcelable {
      */
     public static @LineBreakWordStyle int getResolvedLineBreakWordStyle(
             @Nullable LineBreakConfig config) {
-        final int defaultWordStyle = CompatChanges.isChangeEnabled(WORD_STYLE_AUTO)
-                ? LINE_BREAK_WORD_STYLE_AUTO : LINE_BREAK_WORD_STYLE_NONE;
+        final int targetSdkVersion = ActivityThread.currentApplication().getApplicationInfo()
+                .targetSdkVersion;
+        final int defaultWordStyle;
+        final int vicVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM;
+        if (targetSdkVersion >= vicVersion) {
+            defaultWordStyle = LINE_BREAK_WORD_STYLE_AUTO;
+        } else {
+            defaultWordStyle = LINE_BREAK_WORD_STYLE_NONE;
+        }
         if (config == null) {
             return defaultWordStyle;
         }
