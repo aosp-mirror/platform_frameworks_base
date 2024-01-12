@@ -28,7 +28,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
-import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
@@ -81,10 +80,8 @@ public class A11yMenuAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.grid_item, parent, false);
 
-            if (Flags.a11yMenuSettingsBackButtonFixAndLargeButtonSizing()) {
-                configureShortcutSize(convertView,
-                        A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService));
-            }
+            configureShortcutSize(convertView,
+                    A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService));
         }
 
         A11yMenuShortcut shortcutItem = (A11yMenuShortcut) getItem(position);
@@ -146,15 +143,6 @@ public class A11yMenuAdapter extends BaseAdapter {
     private void configureShortcutView(View convertView, A11yMenuShortcut shortcutItem) {
         ImageButton shortcutIconButton = convertView.findViewById(R.id.shortcutIconBtn);
         TextView shortcutLabel = convertView.findViewById(R.id.shortcutLabel);
-
-        if (!Flags.a11yMenuSettingsBackButtonFixAndLargeButtonSizing()) {
-            if (A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService)) {
-                ViewGroup.LayoutParams params = shortcutIconButton.getLayoutParams();
-                params.width = (int) (params.width * LARGE_BUTTON_SCALE);
-                params.height = (int) (params.height * LARGE_BUTTON_SCALE);
-                shortcutLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, mLargeTextSize);
-            }
-        }
 
         if (shortcutItem.getId() == A11yMenuShortcut.ShortcutId.UNSPECIFIED_ID_VALUE.ordinal()) {
             // Sets empty shortcut icon and label when the shortcut is ADD_ITEM.
