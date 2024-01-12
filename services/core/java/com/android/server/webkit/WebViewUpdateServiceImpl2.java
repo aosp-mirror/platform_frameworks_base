@@ -211,14 +211,16 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
             }
 
             if (repairNeeded) {
-                // We didn't find a valid WebView implementation. Try explicitly re-enabling the
-                // default package for all users in case it was disabled, even if we already did the
-                // one-time migration before. If this actually changes the state, we will see the
-                // PackageManager broadcast shortly and try again.
+                // We didn't find a valid WebView implementation. Try explicitly re-installing and
+                // re-enabling the default package for all users in case it was disabled, even if we
+                // already did the one-time migration before. If this actually changes the state, we
+                // will see the PackageManager broadcast shortly and try again.
                 Slog.w(
                         TAG,
-                        "No provider available for all users, trying to enable "
+                        "No provider available for all users, trying to install and enable "
                                 + mDefaultProvider.packageName);
+                mSystemInterface.installExistingPackageForAllUsers(
+                        mContext, mDefaultProvider.packageName);
                 mSystemInterface.enablePackageForAllUsers(
                         mContext, mDefaultProvider.packageName, true);
             }
