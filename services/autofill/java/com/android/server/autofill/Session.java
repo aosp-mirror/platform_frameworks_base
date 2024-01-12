@@ -4271,13 +4271,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (value != null) {
                     viewState.setCurrentValue(value);
                 }
-
+                boolean isCredmanRequested = (flags & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0;
                 if (shouldRequestSecondaryProvider(flags)) {
                     if (requestNewFillResponseOnViewEnteredIfNecessaryLocked(
                             id, viewState, flags)) {
                         Slog.v(TAG, "Started a new fill request for secondary provider.");
                         return;
                     }
+
+                    FillResponse response = viewState.getSecondaryResponse();
+                    if (response != null) {
+                        logPresentationStatsOnViewEntered(response, isCredmanRequested);
+                    }
+
                     // If the ViewState is ready to be displayed, onReady() will be called.
                     viewState.update(value, virtualBounds, flags);
 
@@ -4363,15 +4369,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                if (viewState.getResponse() != null) {
-                    boolean isCredmanRequested = (flags & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0;
-                    FillResponse response = viewState.getResponse();
-                    mPresentationStatsEventLogger.maybeSetRequestId(response.getRequestId());
-                    mPresentationStatsEventLogger.maybeSetIsCredentialRequest(isCredmanRequested);
-                    mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(
-                            mFieldClassificationIdSnapshot);
-                    mPresentationStatsEventLogger.maybeSetAvailableCount(
-                            response.getDatasets(), mCurrentViewId);
+                FillResponse response = viewState.getResponse();
+                if (response != null) {
+                    logPresentationStatsOnViewEntered(response, isCredmanRequested);
                 }
 
                 if (isSameViewEntered) {
@@ -4409,6 +4409,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             default:
                 Slog.w(TAG, "updateLocked(): unknown action: " + action);
         }
+    }
+
+    @GuardedBy("mLock")
+    private void logPresentationStatsOnViewEntered(FillResponse response,
+            boolean isCredmanRequested) {
+        mPresentationStatsEventLogger.maybeSetRequestId(response.getRequestId());
+        mPresentationStatsEventLogger.maybeSetIsCredentialRequest(isCredmanRequested);
+        mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(
+                mFieldClassificationIdSnapshot);
+        mPresentationStatsEventLogger.maybeSetAvailableCount(
+                response.getDatasets(), mCurrentViewId);
     }
 
     @GuardedBy("mLock")
