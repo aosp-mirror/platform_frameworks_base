@@ -18,9 +18,9 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
@@ -39,20 +39,25 @@ import dagger.Lazy
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @SysUISingleton
 class FromLockscreenTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
-    override val transitionInteractor: KeyguardTransitionInteractor,
-    @Application private val scope: CoroutineScope,
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Background private val scope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
+    @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
     private val flags: FeatureFlags,
     private val shadeRepository: ShadeRepository,
@@ -61,6 +66,9 @@ constructor(
 ) :
     TransitionInteractor(
         fromState = KeyguardState.LOCKSCREEN,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
     ) {
 
     override fun start() {
@@ -147,12 +155,12 @@ constructor(
 
     private fun listenForLockscreenToDreaming() {
         val invalidFromStates = setOf(KeyguardState.AOD, KeyguardState.DOZING)
-        scope.launch("$TAG#listenForLockscreenToDreaming") {
+        scope.launch {
             keyguardInteractor.isAbleToDream
                 .sample(
                     combine(
-                        transitionInteractor.startedKeyguardTransitionStep,
-                        transitionInteractor.finishedKeyguardState,
+                        startedKeyguardTransitionStep,
+                        finishedKeyguardState,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
                         ::Triple
                     ),
@@ -180,9 +188,9 @@ constructor(
     }
 
     private fun listenForLockscreenToPrimaryBouncer() {
-        scope.launch("$TAG#listenForLockscreenToPrimaryBouncer") {
+        scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (isBouncerShowing, lastStartedTransitionStep) = pair
                     if (
@@ -195,9 +203,9 @@ constructor(
     }
 
     private fun listenForLockscreenToAlternateBouncer() {
-        scope.launch("$TAG#listenForLockscreenToAlternateBouncer") {
+        scope.launch {
             keyguardInteractor.alternateBouncerShowing
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (isAlternateBouncerShowing, lastStartedTransitionStep) = pair
                     if (
@@ -213,11 +221,11 @@ constructor(
     /* Starts transitions when manually dragging up the bouncer from the lockscreen. */
     private fun listenForLockscreenToPrimaryBouncerDragging() {
         var transitionId: UUID? = null
-        scope.launch("$TAG#listenForLockscreenToPrimaryBouncerDragging") {
+        scope.launch {
             shadeRepository.legacyShadeExpansion
                 .sample(
                     combine(
-                        transitionInteractor.startedKeyguardTransitionStep,
+                        startedKeyguardTransitionStep,
                         keyguardInteractor.statusBarState,
                         keyguardInteractor.isKeyguardUnlocked,
                         ::Triple
@@ -225,64 +233,66 @@ constructor(
                     ::toQuad
                 )
                 .collect { (shadeExpansion, keyguardState, statusBarState, isKeyguardUnlocked) ->
-                    val id = transitionId
-                    if (id != null) {
-                        if (keyguardState.to == KeyguardState.PRIMARY_BOUNCER) {
-                            // An existing `id` means a transition is started, and calls to
-                            // `updateTransition` will control it until FINISHED or CANCELED
-                            var nextState =
-                                if (shadeExpansion == 0f) {
-                                    TransitionState.FINISHED
-                                } else if (shadeExpansion == 1f) {
-                                    TransitionState.CANCELED
-                                } else {
-                                    TransitionState.RUNNING
+                    withContext(mainDispatcher) {
+                        val id = transitionId
+                        if (id != null) {
+                            if (keyguardState.to == KeyguardState.PRIMARY_BOUNCER) {
+                                // An existing `id` means a transition is started, and calls to
+                                // `updateTransition` will control it until FINISHED or CANCELED
+                                var nextState =
+                                    if (shadeExpansion == 0f) {
+                                        TransitionState.FINISHED
+                                    } else if (shadeExpansion == 1f) {
+                                        TransitionState.CANCELED
+                                    } else {
+                                        TransitionState.RUNNING
+                                    }
+                                transitionRepository.updateTransition(
+                                    id,
+                                    1f - shadeExpansion,
+                                    nextState,
+                                )
+
+                                if (
+                                    nextState == TransitionState.CANCELED ||
+                                        nextState == TransitionState.FINISHED
+                                ) {
+                                    transitionId = null
                                 }
-                            transitionRepository.updateTransition(
-                                id,
-                                1f - shadeExpansion,
-                                nextState,
-                            )
 
-                            if (
-                                nextState == TransitionState.CANCELED ||
-                                    nextState == TransitionState.FINISHED
-                            ) {
-                                transitionId = null
-                            }
-
-                            // If canceled, just put the state back
-                            // TODO(b/278086361): This logic should happen in
-                            //  FromPrimaryBouncerInteractor.
-                            if (nextState == TransitionState.CANCELED) {
-                                transitionRepository.startTransition(
-                                    TransitionInfo(
-                                        ownerName = name,
-                                        from = KeyguardState.PRIMARY_BOUNCER,
-                                        to = KeyguardState.LOCKSCREEN,
-                                        animator =
-                                            getDefaultAnimatorForTransitionsToState(
-                                                    KeyguardState.LOCKSCREEN
-                                                )
-                                                .apply { duration = 0 }
+                                // If canceled, just put the state back
+                                // TODO(b/278086361): This logic should happen in
+                                //  FromPrimaryBouncerInteractor.
+                                if (nextState == TransitionState.CANCELED) {
+                                    transitionRepository.startTransition(
+                                        TransitionInfo(
+                                            ownerName = name,
+                                            from = KeyguardState.PRIMARY_BOUNCER,
+                                            to = KeyguardState.LOCKSCREEN,
+                                            animator =
+                                                getDefaultAnimatorForTransitionsToState(
+                                                        KeyguardState.LOCKSCREEN
+                                                    )
+                                                    .apply { duration = 0 }
+                                        )
                                     )
-                                )
+                                }
                             }
-                        }
-                    } else {
-                        // TODO (b/251849525): Remove statusbarstate check when that state is
-                        // integrated into KeyguardTransitionRepository
-                        if (
-                            keyguardState.to == KeyguardState.LOCKSCREEN &&
-                                shadeRepository.legacyShadeTracking.value &&
-                                !isKeyguardUnlocked &&
-                                statusBarState == KEYGUARD
-                        ) {
-                            transitionId =
-                                startTransitionTo(
-                                    toState = KeyguardState.PRIMARY_BOUNCER,
-                                    animator = null, // transition will be manually controlled
-                                )
+                        } else {
+                            // TODO (b/251849525): Remove statusbarstate check when that state is
+                            // integrated into KeyguardTransitionRepository
+                            if (
+                                keyguardState.to == KeyguardState.LOCKSCREEN &&
+                                    shadeRepository.legacyShadeTracking.value &&
+                                    !isKeyguardUnlocked &&
+                                    statusBarState == KEYGUARD
+                            ) {
+                                transitionId =
+                                    startTransitionTo(
+                                        toState = KeyguardState.PRIMARY_BOUNCER,
+                                        animator = null, // transition will be manually controlled
+                                    )
+                            }
                         }
                     }
                 }
@@ -290,7 +300,7 @@ constructor(
     }
 
     fun dismissKeyguard() {
-        startTransitionTo(KeyguardState.GONE)
+        scope.launch { startTransitionTo(KeyguardState.GONE) }
     }
 
     private fun listenForLockscreenToGone() {
@@ -298,9 +308,9 @@ constructor(
             return
         }
 
-        scope.launch("$TAG#listenForLockscreenToGone") {
+        scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (isKeyguardGoingAway, lastStartedStep) = pair
                     if (isKeyguardGoingAway && lastStartedStep.to == KeyguardState.LOCKSCREEN) {
@@ -315,9 +325,9 @@ constructor(
             return
         }
 
-        scope.launch("$TAG#listenForLockscreenToGoneDragging") {
+        scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (isKeyguardGoingAway, lastStartedStep) = pair
                     if (isKeyguardGoingAway && lastStartedStep.to == KeyguardState.LOCKSCREEN) {
@@ -328,23 +338,22 @@ constructor(
     }
 
     private fun listenForLockscreenToOccluded() {
-        scope.launch("$TAG#listenForLockscreenToOccluded") {
-            keyguardInteractor.isKeyguardOccluded
-                .sample(transitionInteractor.startedKeyguardState, ::Pair)
-                .collect { (isOccluded, keyguardState) ->
-                    if (isOccluded && keyguardState == KeyguardState.LOCKSCREEN) {
-                        startTransitionTo(KeyguardState.OCCLUDED)
-                    }
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded.sample(startedKeyguardState, ::Pair).collect {
+                (isOccluded, keyguardState) ->
+                if (isOccluded && keyguardState == KeyguardState.LOCKSCREEN) {
+                    startTransitionTo(KeyguardState.OCCLUDED)
                 }
+            }
         }
     }
 
     private fun listenForLockscreenToAodOrDozing() {
-        scope.launch("$TAG#listenForLockscreenToAodOrDozing") {
+        scope.launch {
             powerInteractor.isAsleep
                 .sample(
                     combine(
-                        transitionInteractor.startedKeyguardTransitionStep,
+                        startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
                         ::Pair
                     ),

@@ -19,7 +19,8 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
@@ -28,6 +29,7 @@ import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -37,12 +39,17 @@ class FromDreamingTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
-    override val transitionInteractor: KeyguardTransitionInteractor,
-    @Application private val scope: CoroutineScope,
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Background private val scope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
+    @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DREAMING,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
     ) {
 
     override fun start() {
@@ -66,7 +73,7 @@ constructor(
     private fun listenForDreamingToOccluded() {
         scope.launch {
             combine(keyguardInteractor.isKeyguardOccluded, keyguardInteractor.isDreaming, ::Pair)
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::toTriple)
+                .sample(startedKeyguardTransitionStep, ::toTriple)
                 .collect { (isOccluded, isDreaming, lastStartedTransition) ->
                     if (
                         isOccluded &&
@@ -82,7 +89,7 @@ constructor(
     private fun listenForDreamingToGone() {
         scope.launch {
             keyguardInteractor.biometricUnlockState
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(startedKeyguardTransitionStep, ::Pair)
                 .collect { (biometricUnlockState, lastStartedTransitionStep) ->
                     if (
                         lastStartedTransitionStep.to == KeyguardState.DREAMING &&
@@ -96,11 +103,7 @@ constructor(
 
     private fun listenForDreamingToAodOrDozing() {
         scope.launch {
-            combine(
-                    keyguardInteractor.dozeTransitionModel,
-                    transitionInteractor.finishedKeyguardState,
-                    ::Pair
-                )
+            combine(keyguardInteractor.dozeTransitionModel, finishedKeyguardState, ::Pair)
                 .collect { (dozeTransitionModel, keyguardState) ->
                     if (keyguardState == KeyguardState.DREAMING) {
                         if (dozeTransitionModel.to == DozeStateModel.DOZE) {
@@ -123,6 +126,7 @@ constructor(
     }
 
     companion object {
+        const val TAG = "FromDreamingTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 1167.milliseconds
     }
