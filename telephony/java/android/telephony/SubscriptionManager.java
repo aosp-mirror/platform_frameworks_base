@@ -1315,7 +1315,7 @@ public class SubscriptionManager {
      * A source of phone number: the EF-MSISDN (see 3GPP TS 31.102),
      * or EF-MDN for CDMA (see 3GPP2 C.P0065-B), from UICC application.
      *
-     * <p>The availability and a of the number depends on the carrier.
+     * <p>The availability and accuracy of the number depends on the carrier.
      * The number may be updated by over-the-air update to UICC applications
      * from the carrier, or by other means with physical access to the SIM.
      */
