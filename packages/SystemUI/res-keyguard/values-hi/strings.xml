@@ -108,7 +108,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM पिन की कार्यवाही विफल रही!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK की कार्यवाही विफल रही!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"इनपुट का तरीका बदलें"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"हवाई जहाज़ मोड"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"फ़्लाइट मोड"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"डिवाइस रीस्टार्ट करने पर, पैटर्न ड्रॉ करना ज़रूरी है"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"डिवाइस रीस्टार्ट करने पर, पिन डालना ज़रूरी है"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"डिवाइस रीस्टार्ट करने पर, पासवर्ड डालना ज़रूरी है"</string>
