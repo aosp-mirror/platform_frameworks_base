@@ -482,8 +482,8 @@ java_aconfig_library {
     apex_available: [
         "//apex_available:platform",
         "com.android.permission",
+        "com.android.nfcservices",
     ],
-
 }
 
 // SQLite
@@ -745,6 +745,11 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.service.chooser.flags-aconfig-java",
     aconfig_declarations: "android.service.chooser.flags-aconfig",
+    min_sdk_version: "34",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+    ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
