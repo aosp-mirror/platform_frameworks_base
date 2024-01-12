@@ -16,17 +16,13 @@
 
 package com.android.systemui.scene.shared.flag
 
+import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.compose.ComposeFacade
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.setFlagValue
-import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
-import com.android.systemui.media.controls.util.MediaInSceneContainerFlag
+import com.android.systemui.flags.EnableSceneContainer
 import com.google.common.truth.Truth
-import org.junit.Assume
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -34,45 +30,17 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class SceneContainerFlagsTest : SysuiTestCase() {
 
-    @Before
-    fun setUp() {
-        // TODO(b/283300105): remove this reflection setting once the hard-coded
-        //  Flags.SCENE_CONTAINER_ENABLED is no longer needed.
-        val field = Flags::class.java.getField("SCENE_CONTAINER_ENABLED")
-        field.isAccessible = true
-        field.set(null, true) // note: this does not work with multivalent tests
-    }
-
-    private fun setAconfigFlagsEnabled(enabled: Boolean) {
-        listOf(
-                com.android.systemui.Flags.FLAG_SCENE_CONTAINER,
-                com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
-                KeyguardShadeMigrationNssl.FLAG_NAME,
-                MediaInSceneContainerFlag.FLAG_NAME,
-            )
-            .forEach { flagName -> mSetFlagsRule.setFlagValue(flagName, enabled) }
-    }
-
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     fun isNotEnabled_withoutAconfigFlags() {
-        setAconfigFlagsEnabled(false)
         Truth.assertThat(SceneContainerFlag.isEnabled).isEqualTo(false)
         Truth.assertThat(SceneContainerFlagsImpl().isEnabled()).isEqualTo(false)
     }
 
     @Test
-    fun isEnabled_withAconfigFlags_withCompose() {
-        Assume.assumeTrue(ComposeFacade.isComposeAvailable())
-        setAconfigFlagsEnabled(true)
+    @EnableSceneContainer
+    fun isEnabled_withAconfigFlags() {
         Truth.assertThat(SceneContainerFlag.isEnabled).isEqualTo(true)
         Truth.assertThat(SceneContainerFlagsImpl().isEnabled()).isEqualTo(true)
-    }
-
-    @Test
-    fun isNotEnabled_withAconfigFlags_withoutCompose() {
-        Assume.assumeFalse(ComposeFacade.isComposeAvailable())
-        setAconfigFlagsEnabled(true)
-        Truth.assertThat(SceneContainerFlag.isEnabled).isEqualTo(false)
-        Truth.assertThat(SceneContainerFlagsImpl().isEnabled()).isEqualTo(false)
     }
 }
