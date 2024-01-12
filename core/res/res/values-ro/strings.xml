@@ -435,6 +435,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Permite aplicației să folosească serviciile în prim-plan cu tipul „systemExempted”"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"să folosească serviciile în prim-plan cu tipul „fileManagement”"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Permite aplicației să folosească serviciile în prim-plan cu tipul „fileManagement”"</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"să folosească serviciile în prim-plan cu tipul „specialUse”"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Permite aplicației să folosească serviciile în prim-plan cu tipul „specialUse”"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"măsurare spațiu de stocare al aplicației"</string>
@@ -633,7 +637,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Folosește blocarea ecranului"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introdu blocarea ecranului pentru a continua"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Apasă ferm pe senzor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Amprenta nu a fost recunoscută. Încearcă din nou."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Curăță senzorul de amprentă și încearcă din nou"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Curăță senzorul și încearcă din nou"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Apasă ferm pe senzor"</string>
@@ -697,7 +702,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nu ți se vede fața. Ține telefonul la nivelul ochilor."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Prea multă mișcare. Ține telefonul nemișcat."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Reînregistrează-ți chipul."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Chipul nu a fost recunoscut. Reîncearcă."</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Schimbă ușor poziția capului"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Privește mai direct spre telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Privește mai direct spre telefon"</string>

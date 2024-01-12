@@ -434,6 +434,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Аппад \"systemExempted\" төрөлтэй нүүрэн талын үйлчилгээнүүдийг ашиглахыг зөвшөөрнө"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"\"FileManagement\" төрөлтэй нүүрэн талын үйлчилгээг ажиллуулах"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Аппад \"fileManagement\" төрөлтэй нүүрэн талын үйлчилгээнүүдийг ашиглахыг зөвшөөрнө"</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"SpecialUse\" төрөлтэй нүүрэн талын үйлчилгээг ажиллуулах"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Аппад \"specialUse\" төрөлтэй нүүрэн талын үйлчилгээнүүдийг ашиглахыг зөвшөөрнө"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"апп сангийн хэмжээг хэмжих"</string>
@@ -632,7 +636,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Дэлгэцийн түгжээг ашиглах"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Үргэлжлүүлэхийн тулд дэлгэцийн түгжээгээ оруулна уу"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Мэдрэгч дээр чанга дарна уу"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Хурууны хээг таних боломжгүй. Дахин оролдоно уу."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Хурууны хээ мэдрэгчийг цэвэрлээд, дахин оролдоно уу"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Мэдрэгчийг цэвэрлээд, дахин оролдоно уу"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Мэдрэгч дээр чанга дарна уу"</string>
@@ -696,7 +701,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Таны царай харагдахгүй байна. Утсаа нүднийхээ түвшинд барина уу."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Хэт их хөдөлгөөнтэй байна. Утсаа хөдөлгөөнгүй барина уу."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Нүүрээ дахин бүртгүүлнэ үү."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Царайг танихгүй байна. Дахин оролдоно уу."</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Толгойныхоо байрлалыг бага зэрэг өөрчилнө үү"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Утас руугаа аль болох эгц харна уу"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Утас руугаа аль болох эгц харна уу"</string>

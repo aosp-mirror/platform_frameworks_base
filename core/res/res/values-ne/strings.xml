@@ -434,6 +434,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"यसले एपलाई \"systemExempted\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"यस प्रकारको \"fileManagement\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू चलाउने अनुमति"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"यसले यो एपलाई यस प्रकारको \"fileManagement\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"\"specialUse\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिनुहोस्"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"यसले एपलाई \"specialUse\" सँग सम्बन्धित फोरग्राउन्ड सेवाहरू प्रयोग गर्ने अनुमति दिन्छ"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"एप भण्डारण ठाउँको मापन गर्नुहोस्"</string>
@@ -632,7 +636,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"स्क्रिन लक प्रयोग गर्नुहोस्"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"जारी राख्न आफ्नो स्क्रिन लक हाल्नुहोस्"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"फिंगरप्रिन्ट पहिचान गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"फिंगरप्रिन्ट सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"सेन्सर सफा गरेर फेरि प्रयास गर्नुहोस्"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"सेन्सरमा बेसरी थिच्नुहोस्"</string>
@@ -696,7 +701,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"तपाईंको अनुहार देखिएन। तपाईंको फोन आफ्नो आँखाअघि राखी समात्नुहोस्।"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"अत्यधिक हल्लियो। फोन स्थिर राख्नुहोस्।"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्।"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"अनुहार पहिचान गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"आफ्नो टाउको थोरै यताउता सार्नुहोस्"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
