@@ -3309,7 +3309,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // keyguard to back to the app, expect IME insets is not frozen
         app.mActivityRecord.commitVisibility(true, false);
         mDisplayContent.updateImeInputAndControlTarget(app);
-        mDisplayContent.mWmService.mRoot.performSurfacePlacement();
+        performSurfacePlacementAndWaitForWindowAnimator();
 
         assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
@@ -3358,7 +3358,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(app2);
         app2.mActivityRecord.commitVisibility(true, false);
         mDisplayContent.updateImeInputAndControlTarget(app2);
-        mDisplayContent.mWmService.mRoot.performSurfacePlacement();
+        performSurfacePlacementAndWaitForWindowAnimator();
 
         // Verify after unfreezing app2's IME insets state, we won't dispatch visible IME insets
         // to client if the app didn't request IME visible.
@@ -3412,7 +3412,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // frozen until the input started.
         mDisplayContent.setImeLayeringTarget(app1);
         mDisplayContent.updateImeInputAndControlTarget(app1);
-        mDisplayContent.mWmService.mRoot.performSurfacePlacement();
+        performSurfacePlacementAndWaitForWindowAnimator();
 
         assertEquals(app1, mDisplayContent.getImeInputTarget());
         assertFalse(activity1.mImeInsetsFrozenUntilStartInput);
