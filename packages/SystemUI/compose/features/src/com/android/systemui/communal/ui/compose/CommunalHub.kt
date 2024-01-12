@@ -610,7 +610,7 @@ private fun WidgetContent(
                 model.appWidgetHost.setInteractionHandler(viewModel.getInteractionHandler())
                 val view =
                     model.appWidgetHost
-                        .createView(context, model.appWidgetId, model.providerInfo)
+                        .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
                         .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
                 model.appWidgetHost.setInteractionHandler(null)
                 view

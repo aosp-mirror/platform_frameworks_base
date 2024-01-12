@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.data.repository
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
@@ -32,6 +31,7 @@ import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
 import com.android.systemui.communal.shared.CommunalWidgetHost
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.FakeLogBuffer
@@ -65,7 +65,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var appWidgetManager: AppWidgetManager
 
-    @Mock private lateinit var appWidgetHost: AppWidgetHost
+    @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
 
     @Mock private lateinit var userManager: UserManager
 

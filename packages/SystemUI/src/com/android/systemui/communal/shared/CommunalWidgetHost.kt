@@ -16,11 +16,11 @@
 
 package com.android.systemui.communal.shared
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -35,7 +35,7 @@ class CommunalWidgetHost
 @Inject
 constructor(
     private val appWidgetManager: Optional<AppWidgetManager>,
-    private val appWidgetHost: AppWidgetHost,
+    private val appWidgetHost: CommunalAppWidgetHost,
     @CommunalLog logBuffer: LogBuffer,
 ) {
     companion object {

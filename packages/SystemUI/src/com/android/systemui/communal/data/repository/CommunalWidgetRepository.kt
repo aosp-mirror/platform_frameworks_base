@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.data.repository
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
@@ -29,6 +28,7 @@ import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
 import com.android.systemui.communal.shared.CommunalWidgetHost
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -83,7 +83,7 @@ class CommunalWidgetRepositoryImpl
 @Inject
 constructor(
     private val appWidgetManager: Optional<AppWidgetManager>,
-    private val appWidgetHost: AppWidgetHost,
+    private val appWidgetHost: CommunalAppWidgetHost,
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
