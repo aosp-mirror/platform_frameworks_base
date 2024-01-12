@@ -1359,6 +1359,15 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public long getInternalStorageBlockDeviceSize() {
+        try {
+            return mStorageManager.getInternalStorageBlockDeviceSize();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
     public void mkdirs(File file) {
         BlockGuard.getVmPolicy().onPathAccess(file.getAbsolutePath());
         try {
