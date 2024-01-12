@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,8 +26,10 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.HardwareRenderer;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -46,6 +50,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -150,6 +155,9 @@ public final class WindowManagerGlobal {
 
     private final TrustedPresentationListener mTrustedPresentationListener =
             new TrustedPresentationListener();
+
+    private final ConcurrentHashMap<IBinder, InputEventReceiver> mSurfaceControlInputReceivers =
+            new ConcurrentHashMap<>();
 
     private WindowManagerGlobal() {
     }
@@ -806,6 +814,74 @@ public final class WindowManagerGlobal {
 
     public void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
         mTrustedPresentationListener.removeListener(listener);
+    }
+
+    IBinder registerBatchedSurfaceControlInputReceiver(int displayId,
+            @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
+        IBinder clientToken = new Binder();
+        InputChannel inputChannel = new InputChannel();
+        try {
+            WindowManagerGlobal.getWindowSession().grantInputChannel(displayId, surfaceControl,
+                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, null,
+                    surfaceControl.getName(), inputChannel);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to create input channel", e);
+            e.rethrowAsRuntimeException();
+        }
+
+        mSurfaceControlInputReceivers.put(clientToken,
+                new BatchedInputEventReceiver(inputChannel, choreographer.getLooper(),
+                        choreographer) {
+                    @Override
+                    public void onInputEvent(InputEvent event) {
+                        boolean handled = receiver.onInputEvent(event);
+                        finishInputEvent(event, handled);
+                    }
+                });
+        return clientToken;
+    }
+
+    IBinder registerUnbatchedSurfaceControlInputReceiver(
+            int displayId, @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
+        IBinder clientToken = new Binder();
+        InputChannel inputChannel = new InputChannel();
+        try {
+            WindowManagerGlobal.getWindowSession().grantInputChannel(displayId, surfaceControl,
+                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, null,
+                    surfaceControl.getName(), inputChannel);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to create input channel", e);
+            e.rethrowAsRuntimeException();
+        }
+
+        mSurfaceControlInputReceivers.put(clientToken,
+                new InputEventReceiver(inputChannel, looper) {
+                    @Override
+                    public void onInputEvent(InputEvent event) {
+                        boolean handled = receiver.onInputEvent(event);
+                        finishInputEvent(event, handled);
+                    }
+                });
+
+        return clientToken;
+    }
+
+    void unregisterSurfaceControlInputReceiver(IBinder token) {
+        InputEventReceiver inputEventReceiver = mSurfaceControlInputReceivers.get(token);
+        if (inputEventReceiver == null) {
+            Log.w(TAG, "No registered input event receiver with token: " + token);
+            return;
+        }
+        try {
+            WindowManagerGlobal.getWindowSession().remove(token);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to remove input channel", e);
+            e.rethrowAsRuntimeException();
+        }
+
+        inputEventReceiver.dispose();
     }
 
     private final class TrustedPresentationListener extends

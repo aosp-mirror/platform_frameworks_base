@@ -32,6 +32,7 @@ import android.graphics.Bitmap;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.util.Log;
@@ -520,6 +521,28 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
         mGlobal.unregisterTrustedPresentationListener(listener);
+    }
 
+    @NonNull
+    @Override
+    public IBinder registerBatchedSurfaceControlInputReceiver(int displayId,
+            @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
+        return mGlobal.registerBatchedSurfaceControlInputReceiver(displayId, hostToken,
+                surfaceControl, choreographer, receiver);
+    }
+
+    @NonNull
+    @Override
+    public IBinder registerUnbatchedSurfaceControlInputReceiver(
+            int displayId, @NonNull IBinder hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
+        return mGlobal.registerUnbatchedSurfaceControlInputReceiver(displayId, hostToken,
+                surfaceControl, looper, receiver);
+    }
+
+    @Override
+    public void unregisterSurfaceControlInputReceiver(@NonNull IBinder token) {
+        mGlobal.unregisterSurfaceControlInputReceiver(token);
     }
 }

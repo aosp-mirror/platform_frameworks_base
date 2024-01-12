@@ -19,8 +19,11 @@ package com.android.test.viewembed;
 import android.os.IBinder;
 import com.android.test.viewembed.IAttachEmbeddedWindowCallback;
 import android.view.WindowManager.LayoutParams;
+import android.view.SurfaceControl;
 
 interface IAttachEmbeddedWindow {
     void attachEmbedded(IBinder hostToken, int width, int height, in IAttachEmbeddedWindowCallback callback);
     void relayout(in LayoutParams lp);
+    oneway void attachEmbeddedSurfaceControl(in SurfaceControl parentSurfaceControl, int displayId, IBinder hostToken);
+    oneway void tearDownEmbeddedSurfaceControl();
 }
