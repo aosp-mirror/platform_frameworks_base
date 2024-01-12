@@ -801,6 +801,20 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnBiometricPromptDismissedCallback_hideAuthenticationDialog() {
+        // GIVEN a callback is registered
+        AuthController.Callback callback = mock(AuthController.Callback.class);
+        mAuthController.addCallback(callback);
+
+        // WHEN dialog is shown and then dismissed
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+        mAuthController.hideAuthenticationDialog(mAuthController.mCurrentDialog.getRequestId());
+
+        // THEN callback should be received
+        verify(callback).onBiometricPromptDismissed();
+    }
+
+    @Test
     public void testSubscribesToLogContext() {
         mAuthController.setBiometricContextListener(mContextListener);
         verify(mLogContextInteractor).addBiometricContextListener(same(mContextListener));
