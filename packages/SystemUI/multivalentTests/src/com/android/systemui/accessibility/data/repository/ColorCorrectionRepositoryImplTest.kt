@@ -37,11 +37,9 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ColorCorrectionRepositoryImplTest : SysuiTestCase() {
-    companion object {
-        val TEST_USER_1 = UserHandle.of(1)!!
-        val TEST_USER_2 = UserHandle.of(2)!!
-    }
 
+    private val testUser1 = UserHandle.of(1)!!
+    private val testUser2 = UserHandle.of(2)!!
     private val testDispatcher = StandardTestDispatcher()
     private val scope = TestScope(testDispatcher)
     private val settings: FakeSettings = FakeSettings()
@@ -63,7 +61,7 @@ class ColorCorrectionRepositoryImplTest : SysuiTestCase() {
             settings.putIntForUser(
                 ColorCorrectionRepositoryImpl.SETTING_NAME,
                 1,
-                TEST_USER_1.identifier
+                testUser1.identifier
             )
 
             underTest =
@@ -72,84 +70,84 @@ class ColorCorrectionRepositoryImplTest : SysuiTestCase() {
                     settings,
                 )
 
-            underTest.isEnabled(TEST_USER_1).launchIn(backgroundScope)
+            underTest.isEnabled(testUser1).launchIn(backgroundScope)
             runCurrent()
 
-            val actualValue: Boolean = underTest.isEnabled(TEST_USER_1).first()
+            val actualValue: Boolean = underTest.isEnabled(testUser1).first()
             Truth.assertThat(actualValue).isTrue()
         }
 
     @Test
     fun isEnabled_settingUpdated_valueUpdated() =
         scope.runTest {
-            underTest.isEnabled(TEST_USER_1).launchIn(backgroundScope)
+            underTest.isEnabled(testUser1).launchIn(backgroundScope)
 
             settings.putIntForUser(
                 ColorCorrectionRepositoryImpl.SETTING_NAME,
                 ColorCorrectionRepositoryImpl.DISABLED,
-                TEST_USER_1.identifier
+                testUser1.identifier
             )
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(TEST_USER_1).first()).isFalse()
+            Truth.assertThat(underTest.isEnabled(testUser1).first()).isFalse()
 
             settings.putIntForUser(
                 ColorCorrectionRepositoryImpl.SETTING_NAME,
                 ColorCorrectionRepositoryImpl.ENABLED,
-                TEST_USER_1.identifier
+                testUser1.identifier
             )
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(TEST_USER_1).first()).isTrue()
+            Truth.assertThat(underTest.isEnabled(testUser1).first()).isTrue()
 
             settings.putIntForUser(
                 ColorCorrectionRepositoryImpl.SETTING_NAME,
                 ColorCorrectionRepositoryImpl.DISABLED,
-                TEST_USER_1.identifier
+                testUser1.identifier
             )
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(TEST_USER_1).first()).isFalse()
+            Truth.assertThat(underTest.isEnabled(testUser1).first()).isFalse()
         }
 
     @Test
     fun isEnabled_settingForUserOneOnly_valueUpdatedForUserOneOnly() =
         scope.runTest {
-            underTest.isEnabled(TEST_USER_1).launchIn(backgroundScope)
+            underTest.isEnabled(testUser1).launchIn(backgroundScope)
             settings.putIntForUser(
                 ColorCorrectionRepositoryImpl.SETTING_NAME,
                 ColorCorrectionRepositoryImpl.DISABLED,
-                TEST_USER_1.identifier
+                testUser1.identifier
             )
-            underTest.isEnabled(TEST_USER_2).launchIn(backgroundScope)
+            underTest.isEnabled(testUser2).launchIn(backgroundScope)
             settings.putIntForUser(
                 ColorCorrectionRepositoryImpl.SETTING_NAME,
                 ColorCorrectionRepositoryImpl.DISABLED,
-                TEST_USER_2.identifier
+                testUser2.identifier
             )
 
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(TEST_USER_1).first()).isFalse()
-            Truth.assertThat(underTest.isEnabled(TEST_USER_2).first()).isFalse()
+            Truth.assertThat(underTest.isEnabled(testUser1).first()).isFalse()
+            Truth.assertThat(underTest.isEnabled(testUser2).first()).isFalse()
 
             settings.putIntForUser(
                 ColorCorrectionRepositoryImpl.SETTING_NAME,
                 ColorCorrectionRepositoryImpl.ENABLED,
-                TEST_USER_1.identifier
+                testUser1.identifier
             )
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(TEST_USER_1).first()).isTrue()
-            Truth.assertThat(underTest.isEnabled(TEST_USER_2).first()).isFalse()
+            Truth.assertThat(underTest.isEnabled(testUser1).first()).isTrue()
+            Truth.assertThat(underTest.isEnabled(testUser2).first()).isFalse()
         }
 
     @Test
     fun setEnabled() =
         scope.runTest {
-            val success = underTest.setIsEnabled(true, TEST_USER_1)
+            val success = underTest.setIsEnabled(true, testUser1)
             runCurrent()
             Truth.assertThat(success).isTrue()
 
             val actualValue =
                 settings.getIntForUser(
                     ColorCorrectionRepositoryImpl.SETTING_NAME,
-                    TEST_USER_1.identifier
+                    testUser1.identifier
                 )
             Truth.assertThat(actualValue).isEqualTo(ColorCorrectionRepositoryImpl.ENABLED)
         }
@@ -157,14 +155,14 @@ class ColorCorrectionRepositoryImplTest : SysuiTestCase() {
     @Test
     fun setDisabled() =
         scope.runTest {
-            val success = underTest.setIsEnabled(false, TEST_USER_1)
+            val success = underTest.setIsEnabled(false, testUser1)
             runCurrent()
             Truth.assertThat(success).isTrue()
 
             val actualValue =
                 settings.getIntForUser(
                     ColorCorrectionRepositoryImpl.SETTING_NAME,
-                    TEST_USER_1.identifier
+                    testUser1.identifier
                 )
             Truth.assertThat(actualValue).isEqualTo(ColorCorrectionRepositoryImpl.DISABLED)
         }
