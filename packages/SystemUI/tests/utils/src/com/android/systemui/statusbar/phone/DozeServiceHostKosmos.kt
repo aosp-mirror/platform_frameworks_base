@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.statusbar.phone
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.mockito.Mockito.mock
 
-val Kosmos.fakeDeviceEntryFingerprintAuthRepository by Fixture {
-    FakeDeviceEntryFingerprintAuthRepository()
-}
-
-val Kosmos.deviceEntryFingerprintAuthRepository by Fixture {
-    fakeDeviceEntryFingerprintAuthRepository
-}
+@OptIn(ExperimentalCoroutinesApi::class)
+val Kosmos.dozeServiceHost: DozeServiceHost by Kosmos.Fixture { mock(DozeServiceHost::class.java) }
