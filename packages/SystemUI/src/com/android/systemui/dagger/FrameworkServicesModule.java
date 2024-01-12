@@ -556,7 +556,7 @@ public class FrameworkServicesModule {
     @Provides
     @Singleton
     static SubscriptionManager provideSubscriptionManager(Context context) {
-        return context.getSystemService(SubscriptionManager.class);
+        return context.getSystemService(SubscriptionManager.class).createForAllUserProfiles();
     }
 
     @Provides
