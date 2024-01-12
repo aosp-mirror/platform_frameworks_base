@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.data.repository
+package com.android.systemui.statusbar.policy.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
@@ -26,10 +26,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SysUISingleton
 class FakeUserSetupRepository @Inject constructor() : UserSetupRepository {
     private val _isUserSetup: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    override val isUserSetupFlow = _isUserSetup
+    override val isUserSetUp = _isUserSetup
 
-    fun setUserSetup(setup: Boolean) {
-        _isUserSetup.value = setup
+    fun setUserSetUp(isSetUp: Boolean) {
+        _isUserSetup.value = isSetUp
     }
 }
 

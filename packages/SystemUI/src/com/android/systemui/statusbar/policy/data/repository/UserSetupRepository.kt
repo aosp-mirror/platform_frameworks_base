@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.data.repository
+package com.android.systemui.statusbar.policy.data.repository
 
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -34,15 +34,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 /**
- * Repository to observe the state of [DeviceProvisionedController.isUserSetup]. This information
- * can change some policy related to display
+ * Repository to observe whether the user has completed the setup steps. This information can change
+ * some policy related to display.
  */
 interface UserSetupRepository {
-    /** Observable tracking [DeviceProvisionedController.isUserSetup] */
-    val isUserSetupFlow: StateFlow<Boolean>
+    /** Whether the user has completed the setup steps. */
+    val isUserSetUp: StateFlow<Boolean>
 }
 
-@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class UserSetupRepositoryImpl
@@ -52,8 +51,7 @@ constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application scope: CoroutineScope,
 ) : UserSetupRepository {
-    /** State flow that tracks [DeviceProvisionedController.isUserSetup] */
-    override val isUserSetupFlow: StateFlow<Boolean> =
+    override val isUserSetUp: StateFlow<Boolean> =
         conflatedCallbackFlow {
                 val callback =
                     object : DeviceProvisionedController.DeviceProvisionedListener {

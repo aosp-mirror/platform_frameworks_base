@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.pipeline.mobile.data
 
-import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepositoryModule
-import dagger.Module
+package com.android.systemui.statusbar.policy.data.repository
 
-@Module(includes = [FakeUserSetupRepositoryModule::class])
-object FakeStatusBarPipelineMobileDataLayerModule
+import com.android.systemui.kosmos.Kosmos
+
+var Kosmos.userSetupRepository: UserSetupRepository by Kosmos.Fixture { fakeUserSetupRepository }
+val Kosmos.fakeUserSetupRepository by Kosmos.Fixture { FakeUserSetupRepository() }

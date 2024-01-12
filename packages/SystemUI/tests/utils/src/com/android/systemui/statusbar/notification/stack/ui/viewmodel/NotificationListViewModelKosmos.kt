@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.activeNotif
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.footerViewModel
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.notificationShelfViewModel
+import com.android.systemui.statusbar.policy.domain.interactor.userSetupInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import java.util.Optional
 

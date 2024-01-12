@@ -76,8 +76,8 @@ class FakeMobileIconsInteractor(
     private val _defaultMobileIconGroup = MutableStateFlow(DEFAULT_ICON)
     override val defaultMobileIconGroup = _defaultMobileIconGroup
 
-    private val _isUserSetup = MutableStateFlow(true)
-    override val isUserSetup = _isUserSetup
+    private val _isUserSetUp = MutableStateFlow(true)
+    override val isUserSetUp = _isUserSetUp
 
     override val isForceHidden = MutableStateFlow(false)
 
