@@ -136,6 +136,9 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         mStartTaskRect.set(mClosingTarget.windowConfiguration.getBounds());
         mStartTaskRect.offsetTo(0, 0);
 
+        // inset bottom in case of pinned taskbar being present
+        mStartTaskRect.inset(0, 0, 0, mClosingTarget.contentInsets.bottom);
+
         // Draw background.
         mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
                 BACKGROUNDCOLOR, mTransaction);

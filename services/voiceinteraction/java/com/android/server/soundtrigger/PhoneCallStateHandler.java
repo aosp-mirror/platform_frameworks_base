@@ -24,6 +24,7 @@ import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,12 +118,28 @@ public class PhoneCallStateHandler {
     private boolean checkCallStatus() {
         List<SubscriptionInfo> infoList = mSubscriptionManager.getActiveSubscriptionInfoList();
         if (infoList == null) return false;
-        return infoList.stream()
-                .filter(s -> (s.getSubscriptionId() != SubscriptionManager.INVALID_SUBSCRIPTION_ID))
-                .anyMatch(s -> isCallOngoingFromState(
-                                        mTelephonyManager
-                                                .createForSubscriptionId(s.getSubscriptionId())
-                                                .getCallStateForSubscription()));
+        if (!Flags.enforceTelephonyFeatureMapping()) {
+            return infoList.stream()
+                    .filter(s -> (s.getSubscriptionId()
+                            != SubscriptionManager.INVALID_SUBSCRIPTION_ID))
+                    .anyMatch(s -> isCallOngoingFromState(
+                            mTelephonyManager
+                                    .createForSubscriptionId(s.getSubscriptionId())
+                                    .getCallStateForSubscription()));
+        } else {
+            return infoList.stream()
+                    .filter(s -> (s.getSubscriptionId()
+                            != SubscriptionManager.INVALID_SUBSCRIPTION_ID))
+                    .anyMatch(s -> {
+                        try {
+                            return isCallOngoingFromState(mTelephonyManager
+                                    .createForSubscriptionId(s.getSubscriptionId())
+                                    .getCallStateForSubscription());
+                        } catch (UnsupportedOperationException e) {
+                            return false;
+                        }
+                    });
+        }
     }
 
     private void updateTelephonyListeners() {

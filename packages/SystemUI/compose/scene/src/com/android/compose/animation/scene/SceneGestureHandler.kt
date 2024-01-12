@@ -315,10 +315,13 @@ internal class SceneGestureHandler(
                 with(layoutImpl.state) { coroutineScope.onChangeScene(targetScene.key) }
             }
 
-            animateOffset(
+            swipeTransition.animateOffset(
+                coroutineScope = coroutineScope,
                 initialVelocity = velocity,
                 targetOffset = targetOffset,
-                targetScene = targetScene.key
+                onAnimationCompleted = {
+                    layoutState.finishTransition(swipeTransition, idleScene = targetScene.key)
+                }
             )
         }
 
@@ -410,34 +413,6 @@ internal class SceneGestureHandler(
         }
     }
 
-    private fun animateOffset(
-        initialVelocity: Float,
-        targetOffset: Float,
-        targetScene: SceneKey,
-    ) {
-        swipeTransition.startOffsetAnimation {
-            coroutineScope.launch {
-                if (!swipeTransition.isAnimatingOffset) {
-                    swipeTransition.offsetAnimatable.snapTo(swipeTransition.dragOffset)
-                }
-                swipeTransition.isAnimatingOffset = true
-
-                swipeTransition.offsetAnimatable.animateTo(
-                    targetOffset,
-                    // TODO(b/290184746): Make this spring spec configurable.
-                    spring(
-                        stiffness = Spring.StiffnessMediumLow,
-                        visibilityThreshold = OffsetVisibilityThreshold
-                    ),
-                    initialVelocity = initialVelocity,
-                )
-
-                swipeTransition.finishOffsetAnimation()
-                layoutState.finishTransition(swipeTransition, targetScene)
-            }
-        }
-    }
-
     internal class SwipeTransition(
         val _fromScene: Scene,
         val _toScene: Scene,
@@ -479,12 +454,14 @@ internal class SceneGestureHandler(
         private var offsetAnimationJob: Job? = null
 
         /** Ends any previous [offsetAnimationJob] and runs the new [job]. */
-        fun startOffsetAnimation(job: () -> Job) {
+        private fun startOffsetAnimation(job: () -> Job) {
             cancelOffsetAnimation()
             offsetAnimationJob = job()
         }
 
         /** Cancel any ongoing offset animation. */
+        // TODO(b/317063114) This should be a suspended function to avoid multiple jobs running at
+        // the same time.
         fun cancelOffsetAnimation() {
             offsetAnimationJob?.cancel()
             finishOffsetAnimation()
@@ -495,6 +472,43 @@ internal class SceneGestureHandler(
                 isAnimatingOffset = false
                 dragOffset = offsetAnimatable.value
             }
+        }
+
+        // TODO(b/290184746): Make this spring spec configurable.
+        private val animationSpec =
+            spring(
+                stiffness = Spring.StiffnessMediumLow,
+                visibilityThreshold = OffsetVisibilityThreshold
+            )
+
+        fun animateOffset(
+            // TODO(b/317063114) The CoroutineScope should be removed.
+            coroutineScope: CoroutineScope,
+            initialVelocity: Float,
+            targetOffset: Float,
+            onAnimationCompleted: () -> Unit,
+        ) {
+            startOffsetAnimation {
+                coroutineScope.launch {
+                    animateOffset(targetOffset, initialVelocity)
+                    onAnimationCompleted()
+                }
+            }
+        }
+
+        private suspend fun animateOffset(targetOffset: Float, initialVelocity: Float) {
+            if (!isAnimatingOffset) {
+                offsetAnimatable.snapTo(dragOffset)
+            }
+            isAnimatingOffset = true
+
+            offsetAnimatable.animateTo(
+                targetValue = targetOffset,
+                animationSpec = animationSpec,
+                initialVelocity = initialVelocity,
+            )
+
+            finishOffsetAnimation()
         }
     }
 

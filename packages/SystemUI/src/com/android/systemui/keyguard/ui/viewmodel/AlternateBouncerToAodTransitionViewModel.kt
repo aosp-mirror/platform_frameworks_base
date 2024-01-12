@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
@@ -38,14 +37,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 class AlternateBouncerToAodTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromAlternateBouncerTransitionInteractor.TO_AOD_DURATION,
-            stepFlow = interactor.transition(KeyguardState.ALTERNATE_BOUNCER, KeyguardState.AOD),
+            from = KeyguardState.ALTERNATE_BOUNCER,
+            to = KeyguardState.AOD,
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =

@@ -5214,6 +5214,14 @@
     <permission android:name="android.permission.BIND_REMOTE_DISPLAY"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a android.media.tv.ad.TvAdService to ensure that only the system can
+         bind to it.
+         <p>Protection level: signature|privileged
+         @FlaggedApi("android.media.tv.flags.enable_ad_service_fw")
+    -->
+    <permission android:name="android.permission.BIND_TV_AD_SERVICE"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Must be required by a {@link android.media.tv.TvInputService}
          to ensure that only the system can bind to it.
          <p>Protection level: signature|privileged

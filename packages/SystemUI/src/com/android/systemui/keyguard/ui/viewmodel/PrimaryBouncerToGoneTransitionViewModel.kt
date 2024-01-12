@@ -22,7 +22,6 @@ import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
@@ -44,7 +43,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 class PrimaryBouncerToGoneTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     keyguardDismissActionInteractor: Lazy<KeyguardDismissActionInteractor>,
@@ -55,7 +53,8 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_GONE_DURATION,
-            stepFlow = interactor.transition(PRIMARY_BOUNCER, GONE)
+            from = PRIMARY_BOUNCER,
+            to = GONE,
         )
 
     private var leaveShadeOpen: Boolean = false

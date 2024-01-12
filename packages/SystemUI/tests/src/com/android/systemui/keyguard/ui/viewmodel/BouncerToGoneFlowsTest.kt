@@ -39,6 +39,7 @@ import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -78,6 +79,8 @@ class BouncerToGoneFlowsTest : SysuiTestCase() {
     fun scrimAlpha_runDimissFromKeyguard_shadeExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.scrimAlpha(500.milliseconds, PRIMARY_BOUNCER))
+            runCurrent()
+
             shadeRepository.setLockscreenShadeExpansion(1f)
             whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(true)
 
@@ -101,6 +104,8 @@ class BouncerToGoneFlowsTest : SysuiTestCase() {
     fun scrimAlpha_runDimissFromKeyguard_shadeNotExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.scrimAlpha(500.milliseconds, PRIMARY_BOUNCER))
+            runCurrent()
+
             shadeRepository.setLockscreenShadeExpansion(0f)
 
             whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(true)
@@ -123,6 +128,7 @@ class BouncerToGoneFlowsTest : SysuiTestCase() {
     fun scrimBehindAlpha_leaveShadeOpen() =
         testScope.runTest {
             val values by collectValues(underTest.scrimAlpha(500.milliseconds, PRIMARY_BOUNCER))
+            runCurrent()
 
             sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
 
@@ -146,6 +152,8 @@ class BouncerToGoneFlowsTest : SysuiTestCase() {
     fun scrimBehindAlpha_doNotLeaveShadeOpen() =
         testScope.runTest {
             val values by collectValues(underTest.scrimAlpha(500.milliseconds, PRIMARY_BOUNCER))
+            runCurrent()
+
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
                     step(0f, TransitionState.STARTED),

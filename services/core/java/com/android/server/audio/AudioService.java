@@ -8835,6 +8835,8 @@ public class AudioService extends IAudioService.Stub
                 synchronized (VolumeStreamState.class) {
                     oldIndex = getIndex(device);
                     index = getValidIndex(index, hasModifyAudioSettings);
+                    // for STREAM_SYSTEM_ENFORCED, do not sync aliased streams on the enforced index
+                    int aliasIndex = index;
                     if ((mStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED) && mCameraSoundForced) {
                         index = mIndexMax;
                     }
@@ -8853,7 +8855,8 @@ public class AudioService extends IAudioService.Stub
                         if (streamType != mStreamType &&
                                 mStreamVolumeAlias[streamType] == mStreamType &&
                                 (changed || !aliasStreamState.hasIndexForDevice(device))) {
-                            final int scaledIndex = rescaleIndex(index, mStreamType, streamType);
+                            final int scaledIndex =
+                                    rescaleIndex(aliasIndex, mStreamType, streamType);
                             aliasStreamState.setIndex(scaledIndex, device, caller,
                                     hasModifyAudioSettings);
                             if (isCurrentDevice) {
@@ -9373,6 +9376,14 @@ public class AudioService extends IAudioService.Stub
                 return;
             }
             if (mIsSingleVolume && (streamState.mStreamType != AudioSystem.STREAM_MUSIC)) {
+                return;
+            }
+
+            // Persisting STREAM_SYSTEM_ENFORCED index is not needed as its alias (STREAM_RING)
+            // is persisted. This can also be problematic when the enforcement is active as it will
+            // override current SYSTEM_RING persisted value given they share the same settings name
+            // (due to aliasing).
+            if (streamState.mStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED) {
                 return;
             }
             if (streamState.hasValidSettingsName()) {

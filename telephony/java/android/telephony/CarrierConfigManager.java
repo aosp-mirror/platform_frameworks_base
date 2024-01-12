@@ -10955,6 +10955,9 @@ public class CarrierConfigManager {
      * @return A {@link PersistableBundle} containing the config for the given subId, or default
      *         values for an invalid subId.
      *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *
      * @deprecated Use {@link #getConfigForSubId(int, String...)} instead.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
@@ -11002,6 +11005,9 @@ public class CarrierConfigManager {
      * @return A {@link PersistableBundle} with key/value mapping for the specified configuration
      * on success, or an empty (but never null) bundle on failure (for example, when the calling app
      * has no permission).
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PHONE_STATE,
@@ -11047,6 +11053,9 @@ public class CarrierConfigManager {
      * @param overrideValues Key-value pairs of the values that are to be overridden. If set to
      *                       {@code null}, this will remove all previous overrides and set the
      *                       carrier configuration back to production values.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -11104,6 +11113,10 @@ public class CarrierConfigManager {
      *
      * @see #getConfigForSubId
      * @see #getConfig(String...)
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *
      * @deprecated use {@link #getConfig(String...)} instead.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
@@ -11138,6 +11151,9 @@ public class CarrierConfigManager {
      * configs on success, or an empty (but never null) bundle on failure.
      * @see #getConfigForSubId(int, String...)
      * @see SubscriptionManager#getDefaultSubscriptionId()
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresPermission(anyOf = {
             Manifest.permission.READ_PHONE_STATE,
@@ -11189,6 +11205,9 @@ public class CarrierConfigManager {
      *
      * <p>This method returns before the reload has completed, and {@link
      * android.service.carrier.CarrierService#onLoadConfig} will be called from an arbitrary thread.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -11212,6 +11231,8 @@ public class CarrierConfigManager {
      * <p>Depending on simState, the config may be cleared or loaded from config app. This is only
      * used by SubscriptionInfoUpdater.
      *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      * @hide
      */
     @SystemApi
@@ -11234,6 +11255,8 @@ public class CarrierConfigManager {
      * Gets the package name for a default carrier service.
      * @return the package name for a default carrier service; empty string if not available.
      *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      * @hide
      */
     @NonNull
@@ -11287,6 +11310,9 @@ public class CarrierConfigManager {
      * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
      *
      * @see #getConfigForSubId
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)

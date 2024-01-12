@@ -481,18 +481,20 @@ class SplitScreenTransitions {
     private void startFadeAnimation(@NonNull SurfaceControl leash, boolean show) {
         final float end = show ? 1.f : 0.f;
         final float start = 1.f - end;
-        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
         final ValueAnimator va = ValueAnimator.ofFloat(start, end);
         va.setDuration(FADE_DURATION);
         va.setInterpolator(show ? ALPHA_IN : ALPHA_OUT);
         va.addUpdateListener(animation -> {
             float fraction = animation.getAnimatedFraction();
+            final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
             transaction.setAlpha(leash, start * (1.f - fraction) + end * fraction);
             transaction.apply();
+            mTransactionPool.release(transaction);
         });
         va.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+                final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
                 transaction.setAlpha(leash, end);
                 transaction.apply();
                 mTransactionPool.release(transaction);

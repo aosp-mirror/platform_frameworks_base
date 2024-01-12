@@ -38,6 +38,7 @@ import dalvik.system.PathClassLoader;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -57,7 +58,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
     private final PluginFactory<T> mPluginFactory;
     private final String mTag;
 
-    private boolean mIsDebug = false;
+    private BiConsumer<String, String> mLogConsumer = null;
     private Context mPluginContext;
     private T mPlugin;
 
@@ -86,17 +87,13 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
         return mTag;
     }
 
-    public boolean getIsDebug() {
-        return mIsDebug;
+    public void setLogFunc(BiConsumer logConsumer) {
+        mLogConsumer = logConsumer;
     }
 
-    public void setIsDebug(boolean debug) {
-        mIsDebug = debug;
-    }
-
-    private void logDebug(String message) {
-        if (mIsDebug) {
-            Log.i(mTag, message);
+    private void log(String message) {
+        if (mLogConsumer != null) {
+            mLogConsumer.accept(mTag, message);
         }
     }
 
@@ -105,19 +102,19 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
         boolean loadPlugin = mListener.onPluginAttached(this);
         if (!loadPlugin) {
             if (mPlugin != null) {
-                logDebug("onCreate: auto-unload");
+                log("onCreate: auto-unload");
                 unloadPlugin();
             }
             return;
         }
 
         if (mPlugin == null) {
-            logDebug("onCreate auto-load");
+            log("onCreate auto-load");
             loadPlugin();
             return;
         }
 
-        logDebug("onCreate: load callbacks");
+        log("onCreate: load callbacks");
         mPluginFactory.checkVersion(mPlugin);
         if (!(mPlugin instanceof PluginFragment)) {
             // Only call onCreate for plugins that aren't fragments, as fragments
@@ -129,7 +126,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
 
     /** Alerts listener and plugin that the plugin is being shutdown. */
     public synchronized void onDestroy() {
-        logDebug("onDestroy");
+        log("onDestroy");
         unloadPlugin();
         mListener.onPluginDetached(this);
     }
@@ -145,7 +142,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
      */
     public synchronized void loadPlugin() {
         if (mPlugin != null) {
-            logDebug("Load request when already loaded");
+            log("Load request when already loaded");
             return;
         }
 
@@ -157,7 +154,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
             return;
         }
 
-        logDebug("Loaded plugin; running callbacks");
+        log("Loaded plugin; running callbacks");
         mPluginFactory.checkVersion(mPlugin);
         if (!(mPlugin instanceof PluginFragment)) {
             // Only call onCreate for plugins that aren't fragments, as fragments
@@ -174,11 +171,11 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
      */
     public synchronized void unloadPlugin() {
         if (mPlugin == null) {
-            logDebug("Unload request when already unloaded");
+            log("Unload request when already unloaded");
             return;
         }
 
-        logDebug("Unloading plugin, running callbacks");
+        log("Unloading plugin, running callbacks");
         mListener.onPluginUnloaded(mPlugin, this);
         if (!(mPlugin instanceof PluginFragment)) {
             // Only call onDestroy for plugins that aren't fragments, as fragments

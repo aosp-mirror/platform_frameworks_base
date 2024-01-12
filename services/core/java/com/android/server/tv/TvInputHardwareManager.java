@@ -1339,16 +1339,22 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     String inputId = mHardwareInputIdMap.get(deviceId);
 
                     if (inputId != null) {
-                        if (connection.updateCableConnectionStatusLocked(cableConnectionStatus)) {
-                            if (previousCableConnectionStatus != connection.getInputStateLocked()) {
-                                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
-                            }
-                        } else {
-                            if ((previousConfigsLength == 0)
-                                    != (connection.getConfigsLengthLocked() == 0)) {
-                                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                                    connection.getInputStateLocked(), 0, inputId).sendToTarget();
+                        synchronized (mLock) {
+                            if (connection.updateCableConnectionStatusLocked(
+                                        cableConnectionStatus)) {
+                                if (previousCableConnectionStatus
+                                        != connection.getInputStateLocked()) {
+                                    mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                                                    connection.getInputStateLocked(), 0, inputId)
+                                            .sendToTarget();
+                                }
+                            } else {
+                                if ((previousConfigsLength == 0)
+                                        != (connection.getConfigsLengthLocked() == 0)) {
+                                    mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                                                    connection.getInputStateLocked(), 0, inputId)
+                                            .sendToTarget();
+                                }
                             }
                         }
                     }

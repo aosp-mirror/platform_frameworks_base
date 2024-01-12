@@ -1825,7 +1825,7 @@
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_partial">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
-    <string name="fingerprint_acquired_insufficient">Can\u2019t recognize fingerprint. Try again.</string>
+    <string name="fingerprint_acquired_insufficient">Fingerprint not recognized. Try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
     <string name="fingerprint_acquired_imager_dirty">Clean fingerprint sensor and try again</string>
     <string name="fingerprint_acquired_imager_dirty_alt">Clean sensor and try again</string>
@@ -1959,7 +1959,7 @@
     <!-- Message shown during face acquisition when the sensor needs to be recalibrated [CHAR LIMIT=50] -->
     <string name="face_acquired_recalibrate">Please re-enroll your face.</string>
     <!-- Message shown during face enrollment when a different person's face is detected [CHAR LIMIT=50] -->
-    <string name="face_acquired_too_different">Can\u2019t recognize face. Try again.</string>
+    <string name="face_acquired_too_different">Face not recognized. Try again.</string>
     <!-- Message shown during face enrollment when the face is too similar to a previous acquisition [CHAR LIMIT=50] -->
     <string name="face_acquired_too_similar">Change the position of your head slightly</string>
     <!-- Message shown during acqusition when the user's face is turned too far left or right [CHAR LIMIT=50] -->

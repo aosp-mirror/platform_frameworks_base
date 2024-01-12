@@ -57,6 +57,7 @@ import com.android.credentialmanager.common.ui.RemoteViewsFactory
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
 import com.android.credentialmanager.getflow.toProviderDisplayInfo
 import com.android.credentialmanager.ktx.credentialEntry
+import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.model.get.ProviderInfo
 import org.json.JSONException
@@ -313,12 +314,14 @@ class CredentialAutofillService : AutofillService() {
         var i = 0
         var datasetAdded = false
 
-        val duplicateDisplayNames: MutableMap<String, Boolean> = mutableMapOf()
+        val duplicateDisplayNamesForPasskeys: MutableMap<String, Boolean> = mutableMapOf()
         providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach {
             val credentialEntry = it.sortedCredentialEntryList.first()
-            credentialEntry.displayName?.let {displayName ->
-                val duplicateEntry = duplicateDisplayNames.contains(displayName)
-                duplicateDisplayNames[displayName] = duplicateEntry
+            if (credentialEntry.credentialType == CredentialType.PASSKEY) {
+                credentialEntry.displayName?.let { displayName ->
+                    val duplicateEntry = duplicateDisplayNamesForPasskeys.contains(displayName)
+                    duplicateDisplayNamesForPasskeys[displayName] = duplicateEntry
+                }
             }
         }
         providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach usernameLoop@{
@@ -355,12 +358,19 @@ class CredentialAutofillService : AutofillService() {
                 } else {
                     spec = inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
                 }
-                val displayName : String = primaryEntry.displayName ?: primaryEntry.userName
+                val displayName: String = if (primaryEntry.credentialType == CredentialType.PASSKEY
+                        && primaryEntry.displayName != null) {
+                    primaryEntry.displayName!!
+                } else {
+                    primaryEntry.userName
+                }
                 val sliceBuilder = InlineSuggestionUi
                         .newContentBuilder(pendingIntent)
                         .setTitle(displayName)
                 sliceBuilder.setStartIcon(icon)
-                if (duplicateDisplayNames[displayName] == true) {
+                if (primaryEntry.credentialType ==
+                        CredentialType.PASSKEY && duplicateDisplayNamesForPasskeys[displayName]
+                        == true) {
                     sliceBuilder.setSubtitle(primaryEntry.userName)
                 }
                 inlinePresentation = InlinePresentation(

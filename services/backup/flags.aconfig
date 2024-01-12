@@ -8,3 +8,11 @@ flag {
     bug: "308401499"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_max_size_writes_to_pipes"
+    namespace: "onboarding"
+    description: "Enables the write buffer to pipes to be of maximum size."
+    bug: "265976737"
+    is_fixed_read_only: true
+}

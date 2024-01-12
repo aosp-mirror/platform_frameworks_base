@@ -50,8 +50,16 @@ public final class BluetoothMidiDevice {
     private static final String TAG = "BluetoothMidiDevice";
     private static final boolean DEBUG = false;
 
-    private static final int DEFAULT_PACKET_SIZE = 20;
-    private static final int MAX_PACKET_SIZE = 512;
+    // Bluetooth services should subtract 5 bytes from the MTU for headers.
+    private static final int HEADER_SIZE = 5;
+    // Min MTU size for BLE
+    private static final int MIN_L2CAP_MTU = 23;
+    // 23 (min L2CAP MTU) - 5 (header size)
+    private static final int DEFAULT_PACKET_SIZE = MIN_L2CAP_MTU - HEADER_SIZE;
+    // Max MTU size on Android
+    private static final int MAX_ANDROID_MTU = 517;
+    // 517 (max Android MTU) - 5 (header size)
+    private static final int MAX_PACKET_SIZE = MAX_ANDROID_MTU - HEADER_SIZE;
 
     //  Bluetooth MIDI Gatt service UUID
     private static final UUID MIDI_SERVICE = UUID.fromString(
@@ -135,8 +143,8 @@ public final class BluetoothMidiDevice {
                         // switch to receiving notifications
                         mBluetoothGatt.readCharacteristic(characteristic);
 
-                        // Request higher MTU size
-                        if (!gatt.requestMtu(MAX_PACKET_SIZE)) {
+                        // Request max MTU size
+                        if (!gatt.requestMtu(MAX_ANDROID_MTU)) {
                             Log.e(TAG, "request mtu failed");
                             mPacketEncoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
                             mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
@@ -204,8 +212,15 @@ public final class BluetoothMidiDevice {
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             Log.d(TAG, "onMtuChanged callback received. mtu: " + mtu + ", status: " + status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                mPacketEncoder.setMaxPacketSize(Math.min(mtu, MAX_PACKET_SIZE));
-                mPacketDecoder.setMaxPacketSize(Math.min(mtu, MAX_PACKET_SIZE));
+                int packetSize = Math.min(mtu - HEADER_SIZE, MAX_PACKET_SIZE);
+                if (packetSize <= 0) {
+                    Log.e(TAG, "onMtuChanged non-positive packet size: " + packetSize);
+                    packetSize = DEFAULT_PACKET_SIZE;
+                } else if (packetSize < DEFAULT_PACKET_SIZE) {
+                    Log.w(TAG, "onMtuChanged small packet size: " + packetSize);
+                }
+                mPacketEncoder.setMaxPacketSize(packetSize);
+                mPacketDecoder.setMaxPacketSize(packetSize);
             } else {
                 mPacketEncoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);
                 mPacketDecoder.setMaxPacketSize(DEFAULT_PACKET_SIZE);

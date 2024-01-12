@@ -18923,6 +18923,62 @@ public class TelephonyManager {
     }
 
     /**
+     * Enables or disables notifications sent when cellular null cipher or integrity algorithms
+     * are in use by the cellular modem.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support reporting on ciphering
+     * and integrity algorithms in use
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_MODEM_CIPHER_TRANSPARENCY)
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public void setEnableNullCipherNotifications(boolean enable) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setEnableNullCipherNotifications(enable);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setEnableNullCipherNotifications RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get whether notifications are enabled for null cipher or integrity algorithms in use by the
+     * cellular modem.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support reporting on ciphering
+     * and integrity algorithms in use
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_MODEM_CIPHER_TRANSPARENCY)
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public boolean isNullCipherNotificationsEnabled() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isNullCipherNotificationsEnabled();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "isNullCipherNotificationsEnabled RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+
+    /**
      * Get current cell broadcast message identifier ranges.
      *
      * @throws SecurityException if the caller does not have the required permission

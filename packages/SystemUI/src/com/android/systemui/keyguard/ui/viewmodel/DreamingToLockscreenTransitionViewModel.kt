@@ -22,6 +22,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsIntera
 import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
@@ -52,7 +53,8 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_LOCKSCREEN_DURATION,
-            stepFlow = keyguardTransitionInteractor.dreamingToLockscreenTransition,
+            from = KeyguardState.DREAMING,
+            to = KeyguardState.LOCKSCREEN,
         )
 
     val transitionEnded =
