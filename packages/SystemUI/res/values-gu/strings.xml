@@ -188,10 +188,12 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ફેસ અનલૉક સુવિધાનું સેટઅપ કરી શક્યા નથી. ફરી પ્રયાસ કરવા માટે સેટિંગ પર જાઓ."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ફિંગરપ્રિન્ટના સેન્સરને સ્પર્શ કરો"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ચાલુ રાખવા \'અનલૉક કરો\' આઇકન દબાવો"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ચહેરો ઓળખી શકતા નથી. તેને બદલે ફિંગરપ્રિન્ટ વાપરો."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
+    <skip />
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <string name="keyguard_face_failed" msgid="9044619102286917151">"ચહેરો ઓળખાતો નથી"</string>
+    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
+    <skip />
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"તો ફિંગરપ્રિન્ટ વાપરો"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ફેસ અનલૉક સુવિધા ઉપલબ્ધ નથી"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"બ્લૂટૂથ કનેક્ટ થયું."</string>
@@ -413,6 +415,16 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ચાર્જ થઈ રહ્યું છે • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>માં પૂરું ચાર્જ થઈ જશે"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"કૉમ્યુનલ ટ્યૂટૉરિઅલ શરૂ કરવા માટે ડાબે સ્વાઇપ કરો"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"વિજેટ એડિટર ખોલો"</string>
+    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
+    <skip />
+    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
+    <skip />
+    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
+    <skip />
+    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
+    <skip />
+    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
+    <skip />
     <string name="button_to_remove_widget" msgid="3948204829181214098">"કાઢી નાખો"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"વિજેટ ઉમેરો"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"થઈ ગયું"</string>
@@ -834,6 +846,8 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"સેટઅપ કરો"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"સ્ટોરેજ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"હિન્ટ"</string>
+    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
+    <skip />
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ચાલી રહી છે"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે."</string>
@@ -929,6 +943,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ઍક્સેસિબિલિટી સુવિધાઓ ખોલવા માટે ટૅપ કરો. સેટિંગમાં આ બટનને કસ્ટમાઇઝ કરો અથવા બદલો.\n\n"<annotation id="link">"સેટિંગ જુઓ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"તેને હંગામી રૂપે ખસેડવા માટે બટનને કિનારી પર ખસેડો"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"છેલ્લો ફેરફાર રદ કરો"</string>
+    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
+    <skip />
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> શૉર્ટકટ કાઢી નાખ્યો"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# શૉર્ટકટ કાઢી નાખ્યો}one{# શૉર્ટકટ કાઢી નાખ્યો}other{# શૉર્ટકટ કાઢી નાખ્યા}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ઉપર ડાબે ખસેડો"</string>
@@ -1207,6 +1225,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"વપરાશકર્તાની હાજરીની ભાળ મળી છે"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"સેટિંગમાં નોંધની ડિફૉલ્ટ ઍપ સેટ કરો"</string>
     <string name="install_app" msgid="5066668100199613936">"ઍપ ઇન્સ્ટૉલ કરો"</string>
+    <string name="dismissible_keyguard_swipe" msgid="2213369651289613196">"ચાલુ રાખવા સ્વાઇપ કરો"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"શું બાહ્ય ડિસ્પ્લે પર મિરર કરીએ?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"તમારું ઇનર ડિસ્પ્લે મિરર કરવામાં આવશે. તમારું ફ્રન્ટ ડિસ્પ્લે બંધ કરવામાં આવશે."</string>
     <string name="mirror_display" msgid="2515262008898122928">"મિરર ડિસ્પ્લે"</string>
