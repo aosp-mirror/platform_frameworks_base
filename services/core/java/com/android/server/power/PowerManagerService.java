@@ -139,6 +139,7 @@ import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
 import com.android.server.power.batterysaver.BatterySavingStats;
+import com.android.server.power.feature.PowerManagerFlags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -328,6 +329,8 @@ public final class PowerManagerService extends SystemService
     private final DeviceConfigParameterProvider mDeviceConfigProvider;
     // True if battery saver is supported on this device.
     private final boolean mBatterySaverSupported;
+
+    private final PowerManagerFlags mFeatureFlags;
 
     private boolean mDisableScreenWakeLocksWhileCached;
 
@@ -1079,6 +1082,10 @@ public final class PowerManagerService extends SystemService
         DeviceConfigParameterProvider createDeviceConfigParameterProvider() {
             return new DeviceConfigParameterProvider(DeviceConfigInterface.REAL);
         }
+
+        PowerManagerFlags getFlags() {
+            return new PowerManagerFlags();
+        }
     }
 
     /** Interface for checking an app op permission */
@@ -1145,6 +1152,7 @@ public final class PowerManagerService extends SystemService
         mNativeWrapper = injector.createNativeWrapper();
         mSystemProperties = injector.createSystemPropertiesWrapper();
         mClock = injector.createClock();
+        mFeatureFlags = injector.getFlags();
         mInjector = injector;
 
         mHandlerThread = new ServiceThread(TAG,
@@ -4802,6 +4810,7 @@ public final class PowerManagerService extends SystemService
         mAmbientDisplaySuppressionController.dump(pw);
 
         mLowPowerStandbyController.dump(pw);
+        mFeatureFlags.dump(pw);
     }
 
     private void dumpProto(FileDescriptor fd) {

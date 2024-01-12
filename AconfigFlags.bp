@@ -73,6 +73,7 @@ aconfig_srcjars = [
     ":android.provider.flags-aconfig-java{.generated_srcjars}",
     ":android.chre.flags-aconfig-java{.generated_srcjars}",
     ":android.speech.flags-aconfig-java{.generated_srcjars}",
+    ":power_flags_lib{.generated_srcjars}",
 ]
 
 filegroup {
@@ -930,5 +931,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.speech.flags-aconfig-java",
     aconfig_declarations: "android.speech.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Power
+java_aconfig_library {
+    name: "power_flags_lib",
+    aconfig_declarations: "power_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
