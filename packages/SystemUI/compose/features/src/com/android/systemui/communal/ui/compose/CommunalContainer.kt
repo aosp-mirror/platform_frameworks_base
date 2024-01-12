@@ -1,27 +1,13 @@
 package com.android.systemui.communal.ui.compose
 
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
@@ -82,9 +68,7 @@ fun CommunalContainer(
     // shade, which can be opened from many locations.
     val isKeyguardShowing by viewModel.isKeyguardVisible.collectAsState(initial = false)
 
-    // Failsafe to hide the whole SceneTransitionLayout in case of bugginess.
-    var showSceneTransitionLayout by remember { mutableStateOf(true) }
-    if (!showSceneTransitionLayout || !isKeyguardShowing) {
+    if (!isKeyguardShowing) {
         return
     }
 
@@ -109,7 +93,8 @@ fun CommunalContainer(
                     Swipe(SwipeDirection.Left, fromEdge = Edge.Right) to TransitionSceneKey.Communal
                 )
         ) {
-            BlankScene { showSceneTransitionLayout = false }
+            // This scene shows nothing only allowing for transitions to the communal scene.
+            Box(modifier = Modifier.fillMaxSize())
         }
 
         scene(
@@ -120,31 +105,6 @@ fun CommunalContainer(
                 ),
         ) {
             CommunalScene(viewModel, modifier = modifier)
-        }
-    }
-}
-
-/**
- * Blank scene that shows over keyguard/dream. This scene will eventually show nothing at all and is
- * only used to allow for transitions to the communal scene.
- */
-@Composable
-private fun BlankScene(
-    modifier: Modifier = Modifier,
-    hideSceneTransitionLayout: () -> Unit,
-) {
-    Box(modifier.fillMaxSize()) {
-        Column(
-            Modifier.fillMaxHeight()
-                .width(ContainerDimensions.EdgeSwipeSize)
-                .align(Alignment.CenterEnd)
-                .background(Color(0x55e9f2eb)),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            IconButton(onClick = hideSceneTransitionLayout) {
-                Icon(Icons.Filled.Close, contentDescription = "Close button")
-            }
         }
     }
 }
