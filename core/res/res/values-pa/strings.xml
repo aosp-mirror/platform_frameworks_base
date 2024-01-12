@@ -85,7 +85,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਨੂੰ ਬਦਲ ਕੇ ਦੇਖੋ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਉਪਲਬਧ ਨਹੀਂ"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ਵਾਈ-ਫਾਈ ਰਾਹੀਂ ਸੰਕਟਕਾਲੀਨ ਕਾਲਾਂ ਨਹੀਂ ਕਰ ਸਕਦੇ"</string>
-    <string name="notification_channel_network_alert" msgid="4788053066033851841">"ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_channel_network_alert" msgid="4788053066033851841">"ਅਲਰਟ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ਕਾਲ ਫਾਰਵਰਡਿੰਗ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਬੈਕ ਮੋਡ"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"ਮੋਬਾਈਲ ਡਾਟੇ ਦੀ ਸਥਿਤੀ"</string>
@@ -279,11 +279,11 @@
     <string name="notification_channel_developer_important" msgid="7197281908918789589">"ਮਹੱਤਵਪੂਰਨ ਵਿਕਾਸਕਾਰ ਸੁਨੇਹੇ"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"ਅੱਪਡੇਟ"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"ਨੈੱਟਵਰਕ ਅਵਸਥਾ"</string>
-    <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ਨੈੱਟਵਰਕ ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ਨੈੱਟਵਰਕ ਅਲਰਟ"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"ਨੈੱਟਵਰਕ ਉਪਲਬਧ ਹੈ"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN ਅਵਸਥਾ"</string>
-    <string name="notification_channel_device_admin" msgid="6384932669406095506">"ਤੁਹਾਡੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਸੁਚੇਤਨਾਵਾਂ"</string>
-    <string name="notification_channel_alerts" msgid="5070241039583668427">"ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_channel_device_admin" msgid="6384932669406095506">"ਤੁਹਾਡੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅਲਰਟ"</string>
+    <string name="notification_channel_alerts" msgid="5070241039583668427">"ਅਲਰਟ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"ਪ੍ਰਚੂਨ ਸਟੋਰਾਂ ਲਈ ਡੈਮੋ"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB ਕਨੈਕਸ਼ਨ"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ਚੱਲ ਰਹੀ ਐਪ"</string>
@@ -366,7 +366,7 @@
     <string name="permlab_receiveMms" msgid="4000650116674380275">"ਲਿਖਤ ਸੁਨੇਹੇ (MMS) ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"ਐਪ ਨੂੰ MMS ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦਾ ਮਤਲਬ ਹੈ ਕਿ ਐਪ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਤੇ ਭੇਜੇ ਗਏ ਸੁਨੇਹਿਆਂ ਨੂੰ ਤੁਹਾਨੂੰ ਦਿਖਾਏ ਬਿਨਾਂ ਨਿਰੀਖਣ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਮਿਟਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹਿਆਂ ਨੂੰ ਅੱਗੇ ਭੇਜੋ"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"ਐਪ ਨੂੰ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹਿਆਂ ਦੇ ਪ੍ਰਾਪਤ ਹੁੰਦੇ ਹੀ ਉਹਨਾਂ ਨੂੰ ਅੱਗੇ ਭੇਜਣ ਲਈ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਮਾਡਿਊਲ ਨਾਲ ਜੋੜਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਚੇਤਨਾਵਾਂ ਤੁਹਾਨੂੰ ਸੰਕਟਕਾਲੀ ਸਥਿਤੀਆਂ ਦੀ ਚਿਤਾਵਨੀ ਦੇਣ ਲਈ ਕੁਝ ਟਿਕਾਣਿਆਂ \'ਤੇ ਪ੍ਰਦਾਨ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਭੈੜੀਆਂ ਐਪਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਕਾਰਗੁਜ਼ਾਰੀ ਜਾਂ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੀਆਂ ਹਨ ਜਦੋਂ ਇੱਕ ਸੰਕਟਕਾਲੀ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"ਐਪ ਨੂੰ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹਿਆਂ ਦੇ ਪ੍ਰਾਪਤ ਹੁੰਦੇ ਹੀ ਉਨ੍ਹਾਂ ਨੂੰ ਅੱਗੇ ਭੇਜਣ ਲਈ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਮਾਡਿਊਲ ਨਾਲ ਜੋੜਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਅਲਰਟ ਤੁਹਾਨੂੰ ਐਮਰਜੈਂਸੀ ਸਥਿਤੀਆਂ ਦੀ ਚਿਤਾਵਨੀ ਦੇਣ ਲਈ ਕੁਝ ਟਿਕਾਣਿਆਂ \'ਤੇ ਪ੍ਰਦਾਨ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਭੈੜੀਆਂ ਐਪਾਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦੀ ਕਾਰਗੁਜ਼ਾਰੀ ਜਾਂ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੀਆਂ ਹਨ ਜਦੋਂ ਇੱਕ ਐਮਰਜੈਂਸੀ ਸੈੱਲ ਪ੍ਰਸਾਰਨ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"ਜਾਰੀ ਕਾਲਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"ਐਪ ਨੂੰ ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਜਾਰੀ ਕਾਲਾਂ ਬਾਰੇ ਵੇਰਵੇ ਦੇਖਣ ਅਤੇ ਇਹਨਾਂ ਕਾਲਾਂ ਨੂੰ ਕੰਟਰੋਲ ਕਰਨ ਦਿਓ।"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"ਸੈਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹੇ ਪੜ੍ਹੋ"</string>
@@ -1911,7 +1911,7 @@
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"ਨਵੀਂ SS ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ਫ਼ਿਸ਼ਿੰਗ ਸੰਬੰਧੀ ਅਲਰਟ"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
-    <string name="notification_alerted_content_description" msgid="6139691253611265992">"ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_alerted_content_description" msgid="6139691253611265992">"ਅਲਰਟ"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"ਪੁਸ਼ਟੀਕਿਰਤ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"ਸਮੇਟੋ"</string>

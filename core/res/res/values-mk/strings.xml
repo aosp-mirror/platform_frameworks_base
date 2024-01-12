@@ -1950,7 +1950,7 @@
     <string name="locale_search_menu" msgid="6258090710176422934">"Пребарај"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"Апликацијата не е достапна"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
-    <string name="app_suspended_more_details" msgid="211260942831587014">"Дознај повеќе"</string>
+    <string name="app_suspended_more_details" msgid="211260942831587014">"Дознајте повеќе"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Прекини ја паузата"</string>
     <string name="work_mode_off_title" msgid="6367463960165135829">"Да се актив. работните аплик.?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Прекини ја паузата"</string>
