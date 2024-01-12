@@ -1011,7 +1011,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Lupa corak?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Buka kunci akaun"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Nama Pengguna (E-mel)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Kata laluan"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Log masuk"</string>
@@ -1662,7 +1662,7 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Masukkan semula kod PIN yang betul. Percubaan berulang akan melumpuhkan SIM secara kekal."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"Kod PIN tidak sepadan"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nama Pengguna (E-mel)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Kata laluan"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Log masuk"</string>
