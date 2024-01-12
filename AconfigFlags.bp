@@ -72,6 +72,7 @@ aconfig_srcjars = [
     ":android.webkit.flags-aconfig-java{.generated_srcjars}",
     ":android.provider.flags-aconfig-java{.generated_srcjars}",
     ":android.chre.flags-aconfig-java{.generated_srcjars}",
+    ":android.speech.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -911,5 +912,18 @@ java_aconfig_library {
 java_aconfig_library {
     name: "android.chre.flags-aconfig-java",
     aconfig_declarations: "chre_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Speech
+aconfig_declarations {
+    name: "android.speech.flags-aconfig",
+    package: "android.speech.flags",
+    srcs: ["core/java/android/speech/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.speech.flags-aconfig-java",
+    aconfig_declarations: "android.speech.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
