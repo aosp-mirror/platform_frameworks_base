@@ -20,18 +20,29 @@ import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 
 @SysUISingleton
 class FromGlanceableHubTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
-    override val transitionInteractor: KeyguardTransitionInteractor,
-) : TransitionInteractor(fromState = KeyguardState.GLANCEABLE_HUB) {
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Main mainDispatcher: CoroutineDispatcher,
+    @Background bgDispatcher: CoroutineDispatcher,
+) :
+    TransitionInteractor(
+        fromState = KeyguardState.GLANCEABLE_HUB,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
+    ) {
     override fun start() {
         if (!Flags.communalHub()) {
             return

@@ -20,7 +20,6 @@ import android.app.StatusBarManager
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
-import com.android.keyguard.TestScopeProvider
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.flags.FakeFeatureFlags
@@ -51,6 +50,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -109,7 +109,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        testScope = TestScopeProvider.getTestScope()
+        val testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
 
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
@@ -139,6 +140,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                     scope = testScope,
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -160,6 +163,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromPrimaryBouncerTransitionInteractor =
             FromPrimaryBouncerTransitionInteractor(
                     scope = testScope,
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -173,6 +178,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDreamingTransitionInteractor =
             FromDreamingTransitionInteractor(
                     scope = testScope,
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -182,6 +189,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDreamingLockscreenHostedTransitionInteractor =
             FromDreamingLockscreenHostedTransitionInteractor(
                     scope = testScope,
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -191,6 +200,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromAodTransitionInteractor =
             FromAodTransitionInteractor(
                     scope = testScope,
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -200,6 +211,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromGoneTransitionInteractor =
             FromGoneTransitionInteractor(
                     scope = testScope,
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -210,6 +223,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDozingTransitionInteractor =
             FromDozingTransitionInteractor(
                     scope = testScope,
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -220,6 +235,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromOccludedTransitionInteractor =
             FromOccludedTransitionInteractor(
                     scope = testScope,
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
@@ -230,6 +247,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromAlternateBouncerTransitionInteractor =
             FromAlternateBouncerTransitionInteractor(
                     scope = testScope,
+                    bgDispatcher = testDispatcher,
+                    mainDispatcher = testDispatcher,
                     keyguardInteractor = keyguardInteractor,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,

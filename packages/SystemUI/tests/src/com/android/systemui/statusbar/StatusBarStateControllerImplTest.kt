@@ -79,6 +79,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
+    private val testDispatcher = utils.testDispatcher
     private lateinit var shadeInteractor: ShadeInteractor
     private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
     private lateinit var fromPrimaryBouncerTransitionInteractor:
@@ -143,6 +144,8 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 keyguardTransitionRepository,
                 keyguardTransitionInteractor,
                 testScope.backgroundScope,
+                testDispatcher,
+                testDispatcher,
                 keyguardInteractor,
                 featureFlags,
                 shadeRepository,
@@ -162,6 +165,8 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 keyguardTransitionRepository,
                 keyguardTransitionInteractor,
                 testScope.backgroundScope,
+                testDispatcher,
+                testDispatcher,
                 keyguardInteractor,
                 featureFlags,
                 mock(),

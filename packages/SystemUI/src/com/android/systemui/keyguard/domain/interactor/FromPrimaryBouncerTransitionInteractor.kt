@@ -19,7 +19,8 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
@@ -35,6 +36,7 @@ import com.android.systemui.util.kotlin.sample
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -47,8 +49,10 @@ class FromPrimaryBouncerTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
-    override val transitionInteractor: KeyguardTransitionInteractor,
-    @Application private val scope: CoroutineScope,
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Background private val scope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
+    @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
     private val flags: FeatureFlags,
     private val keyguardSecurityModel: KeyguardSecurityModel,
@@ -57,6 +61,9 @@ constructor(
 ) :
     TransitionInteractor(
         fromState = KeyguardState.PRIMARY_BOUNCER,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
     ) {
 
     override fun start() {
@@ -115,7 +122,7 @@ constructor(
             .distinctUntilChanged()
 
     fun dismissPrimaryBouncer() {
-        startTransitionTo(KeyguardState.GONE)
+        scope.launch { startTransitionTo(KeyguardState.GONE) }
     }
 
     private fun listenForPrimaryBouncerToLockscreenOrOccluded() {
@@ -124,7 +131,7 @@ constructor(
                 .sample(
                     combine(
                         powerInteractor.isAwake,
-                        transitionInteractor.startedKeyguardTransitionStep,
+                        startedKeyguardTransitionStep,
                         keyguardInteractor.isKeyguardOccluded,
                         keyguardInteractor.isActiveDreamLockscreenHosted,
                         ::toQuad
@@ -158,7 +165,7 @@ constructor(
                 .sample(
                     combine(
                         powerInteractor.isAsleep,
-                        transitionInteractor.startedKeyguardTransitionStep,
+                        startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
                         ::Triple
                     ),
@@ -185,7 +192,7 @@ constructor(
                 .sample(
                     combine(
                         keyguardInteractor.isActiveDreamLockscreenHosted,
-                        transitionInteractor.startedKeyguardTransitionStep,
+                        startedKeyguardTransitionStep,
                         ::Pair
                     ),
                     ::toTriple
@@ -213,7 +220,7 @@ constructor(
 
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(startedKeyguardTransitionStep, ::Pair)
                 .collect { (isKeyguardGoingAway, lastStartedTransitionStep) ->
                     if (
                         isKeyguardGoingAway &&
