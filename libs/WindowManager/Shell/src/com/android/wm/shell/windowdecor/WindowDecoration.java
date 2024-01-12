@@ -279,11 +279,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         outResult.mCaptionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
-        final int captionWidth = params.mCaptionWidthId != Resources.ID_NULL
+        outResult.mCaptionWidth = params.mCaptionWidthId != Resources.ID_NULL
                 ? loadDimensionPixelSize(resources, params.mCaptionWidthId) : taskBounds.width();
-        outResult.mCaptionX = (outResult.mWidth - captionWidth) / 2;
+        outResult.mCaptionX = (outResult.mWidth - outResult.mCaptionWidth) / 2;
 
-        startT.setWindowCrop(mCaptionContainerSurface, captionWidth, outResult.mCaptionHeight)
+        startT.setWindowCrop(mCaptionContainerSurface, outResult.mCaptionWidth,
+                        outResult.mCaptionHeight)
                 .setPosition(mCaptionContainerSurface, outResult.mCaptionX, 0 /* y */)
                 .setLayer(mCaptionContainerSurface, CAPTION_LAYER_Z_ORDER)
                 .show(mCaptionContainerSurface);
@@ -356,7 +357,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         // Caption view
         mCaptionWindowManager.setConfiguration(taskConfig);
         final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(captionWidth, outResult.mCaptionHeight,
+                new WindowManager.LayoutParams(outResult.mCaptionWidth, outResult.mCaptionHeight,
                         WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
@@ -578,6 +579,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     static class RelayoutResult<T extends View & TaskFocusStateConsumer> {
         int mCaptionHeight;
+        int mCaptionWidth;
         int mCaptionX;
         int mWidth;
         int mHeight;
@@ -587,6 +589,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mWidth = 0;
             mHeight = 0;
             mCaptionHeight = 0;
+            mCaptionWidth = 0;
             mCaptionX = 0;
             mRootView = null;
         }
