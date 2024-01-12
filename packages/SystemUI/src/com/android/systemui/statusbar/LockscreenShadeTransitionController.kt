@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll
 import com.android.systemui.plugins.ActivityStarter
@@ -888,6 +889,9 @@ class DragDownHelper(
                     isDraggingDown = false
                     isTrackpadReverseScroll = false
                     shadeRepository.setLegacyLockscreenShadeTracking(false)
+                    if (KeyguardShadeMigrationNssl.isEnabled) {
+                        return true
+                    }
                 } else {
                     stopDragging()
                     return false
