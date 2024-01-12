@@ -71,3 +71,10 @@ flag {
     description: "Add support for Private Space in resolver sheet"
     bug: "307515485"
 }
+flag {
+    name: "enable_system_user_only_for_services_and_providers"
+    namespace: "multiuser"
+    description: "Enable systemUserOnly manifest attribute for services and providers."
+    bug: "302354856"
+    is_fixed_read_only: true
+}
