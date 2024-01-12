@@ -34,6 +34,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.postDelayed
 import androidx.core.view.isVisible
 import androidx.dynamicanimation.animation.DynamicAnimation
+import com.android.internal.jank.Cuj.CUJ_BACK_PANEL_ARROW
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
@@ -86,6 +88,7 @@ internal constructor(
     private val vibratorHelper: VibratorHelper,
     private val configurationController: ConfigurationController,
     private val latencyTracker: LatencyTracker,
+    private val interactionJankMonitor: InteractionJankMonitor,
 ) : ViewController<BackPanel>(BackPanel(context, latencyTracker)), NavigationEdgeBackPlugin {
 
     /**
@@ -103,6 +106,7 @@ internal constructor(
         private val vibratorHelper: VibratorHelper,
         private val configurationController: ConfigurationController,
         private val latencyTracker: LatencyTracker,
+        private val interactionJankMonitor: InteractionJankMonitor,
     ) {
         /** Construct a [BackPanelController]. */
         fun create(context: Context): BackPanelController {
@@ -115,6 +119,7 @@ internal constructor(
                     vibratorHelper,
                     configurationController,
                     latencyTracker,
+                    interactionJankMonitor
                 )
             backPanelController.init()
             return backPanelController
@@ -183,7 +188,7 @@ internal constructor(
         /* Arrow is animating in */
         ENTRY,
 
-        /* could be entry, neutral, or stretched, releasing will commit back */
+        /* releasing will commit back */
         ACTIVE,
 
         /* releasing will cancel back */
@@ -366,6 +371,7 @@ internal constructor(
                 // Receiving a CANCEL implies that something else intercepted
                 // the gesture, i.e., the user did not cancel their gesture.
                 // Therefore, disappear immediately, with minimum fanfare.
+                interactionJankMonitor.cancel(CUJ_BACK_PANEL_ARROW)
                 updateArrowState(GestureState.GONE)
                 velocityTracker = null
             }
@@ -813,7 +819,7 @@ internal constructor(
                     scale =
                         when (currentState) {
                             GestureState.ACTIVE,
-                            GestureState.FLUNG, -> params.activeIndicator.scale
+                            GestureState.FLUNG -> params.activeIndicator.scale
                             GestureState.COMMITTED -> params.committedIndicator.scale
                             else -> params.preThresholdIndicator.scale
                         },
@@ -876,6 +882,16 @@ internal constructor(
 
         previousState = currentState
         currentState = newState
+
+        // First, update the jank tracker
+        when (currentState) {
+            GestureState.ENTRY -> {
+                interactionJankMonitor.cancel(CUJ_BACK_PANEL_ARROW)
+                interactionJankMonitor.begin(mView, CUJ_BACK_PANEL_ARROW)
+            }
+            GestureState.GONE -> interactionJankMonitor.end(CUJ_BACK_PANEL_ARROW)
+            else -> {}
+        }
 
         when (currentState) {
             GestureState.CANCELLED -> {
