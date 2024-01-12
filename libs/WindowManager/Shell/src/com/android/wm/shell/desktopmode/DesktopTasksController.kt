@@ -57,7 +57,6 @@ import com.android.wm.shell.common.annotations.ShellMainThread
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
-import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.TO_DESKTOP_INDICATOR
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.recents.RecentsTransitionHandler
@@ -871,31 +870,34 @@ class DesktopTasksController(
      *
      * @param taskInfo the task being dragged.
      * @param taskSurface SurfaceControl of dragged task.
-     * @param inputCoordinate coordinates of input. Used for checks against left/right edge of screen.
+     * @param inputX x coordinate of input. Used for checks against left/right edge of screen.
      * @param taskBounds bounds of dragged task. Used for checks against status bar height.
      */
     fun onDragPositioningMove(
         taskInfo: RunningTaskInfo,
         taskSurface: SurfaceControl,
-        inputCoordinate: PointF,
+        inputX: Float,
         taskBounds: Rect
     ) {
-        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
         if (taskInfo.windowingMode != WINDOWING_MODE_FREEFORM) return
-        var type = DesktopModeVisualIndicator.determineIndicatorType(inputCoordinate,
-            taskBounds, displayLayout, context)
-        if (type != DesktopModeVisualIndicator.INVALID_INDICATOR && visualIndicator == null) {
+        updateVisualIndicator(taskInfo, taskSurface, inputX, taskBounds.top.toFloat())
+    }
+
+    fun updateVisualIndicator(
+        taskInfo: RunningTaskInfo,
+        taskSurface: SurfaceControl,
+        inputX: Float,
+        taskTop: Float
+    ) {
+        // If the visual indicator does not exist, create it.
+        if (visualIndicator == null) {
             visualIndicator = DesktopModeVisualIndicator(
-                syncQueue, taskInfo,
-                displayController, context, taskSurface, shellTaskOrganizer,
-                rootTaskDisplayAreaOrganizer, type)
-            visualIndicator?.createIndicatorWithAnimatedBounds()
-            return
+                syncQueue, taskInfo, displayController, context, taskSurface,
+                rootTaskDisplayAreaOrganizer)
         }
-        if (visualIndicator?.eventOutsideRange(inputCoordinate.x,
-                taskBounds.top.toFloat()) == true) {
-            releaseVisualIndicator()
-        }
+        // Then, update the indicator type.
+        val indicator = visualIndicator ?: return
+        indicator.updateIndicatorType(PointF(inputX, taskTop))
     }
 
     /**
@@ -936,45 +938,6 @@ class DesktopTasksController(
     }
 
     /**
-     * Perform checks required on drag move. Create/release fullscreen indicator and transitions
-     * indicator to freeform or fullscreen dimensions as needed.
-     *
-     * @param taskInfo the task being dragged.
-     * @param taskSurface SurfaceControl of dragged task.
-     * @param y coordinate of dragged task. Used for checks against status bar height.
-     */
-    fun onDragPositioningMoveThroughStatusBar(
-            taskInfo: RunningTaskInfo,
-            taskSurface: SurfaceControl,
-            y: Float
-    ) {
-        // If the motion event is above the status bar and the visual indicator is not yet visible,
-        // return since we do not need to show the visual indicator at this point.
-        if (y < getStatusBarHeight(taskInfo) && visualIndicator == null) {
-            return
-        }
-        if (visualIndicator == null) {
-            visualIndicator = DesktopModeVisualIndicator(syncQueue, taskInfo,
-                    displayController, context, taskSurface, shellTaskOrganizer,
-                    rootTaskDisplayAreaOrganizer, TO_DESKTOP_INDICATOR)
-            // TODO(b/301106941): don't show the indicator until the drag-to-desktop animation has
-            // started, or it'll be visible too early on top of the task surface, especially in
-            // the cancel-early case. Also because it shouldn't even be shown in the cancel-early
-            // case since its dismissal is tied to the cancel animation end, which doesn't even run
-            // in cancel-early.
-            visualIndicator?.createIndicatorWithAnimatedBounds()
-        }
-        val indicator = visualIndicator ?: return
-        if (y >= getFreeformTransitionStatusBarDragThreshold(taskInfo)) {
-            if (indicator.isFullscreen) {
-                indicator.transitionFullscreenIndicatorToFreeform()
-            }
-        } else if (!indicator.isFullscreen) {
-            indicator.transitionFreeformIndicatorToFullscreen()
-        }
-    }
-
-    /**
      * Perform checks required when drag ends under status bar area.
      *
      * @param taskInfo the task being dragged.
@@ -989,14 +952,6 @@ class DesktopTasksController(
 
     private fun getStatusBarHeight(taskInfo: RunningTaskInfo): Int {
         return displayController.getDisplayLayout(taskInfo.displayId)?.stableInsets()?.top ?: 0
-    }
-
-    /**
-     * Returns the threshold at which we transition a task into freeform when dragging a
-     * fullscreen task down from the status bar
-     */
-    private fun getFreeformTransitionStatusBarDragThreshold(taskInfo: RunningTaskInfo): Int {
-        return 2 * getStatusBarHeight(taskInfo)
     }
 
     /**
