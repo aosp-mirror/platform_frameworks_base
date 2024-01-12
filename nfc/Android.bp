@@ -70,6 +70,10 @@ java_sdk_library {
     lint: {
         strict_updatability_linting: true,
     },
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+    ],
 }
 
 filegroup {
