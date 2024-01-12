@@ -204,7 +204,7 @@ public final class PerformanceHintManager {
         }
 
         /**
-         * Updates this session's target duration for each cycle of work.
+         * Updates this session's target total duration for each cycle of work.
          *
          * @param targetDurationNanos the new desired duration in nanoseconds
          */
