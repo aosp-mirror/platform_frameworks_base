@@ -22,13 +22,15 @@
 
 namespace android {
 
+using namespace ::android::bpf::memevents;
+
 // Used to cache the results of the JNI name lookup
 static struct {
     jclass clazz;
     jmethodID ctor;
 } sOomKillRecordInfo;
 
-static memevents::MemEventListener memevent_listener;
+static MemEventListener memevent_listener(MemEventClient::AMS);
 
 /**
  * Initialize listening and waiting for new out-of-memory (OOM) events to occur.
@@ -42,25 +44,20 @@ static memevents::MemEventListener memevent_listener;
  * @throws java.lang.RuntimeException
  */
 static jobjectArray android_server_am_OomConnection_waitOom(JNIEnv* env, jobject) {
-    const memevents::MemEvent oom_event = memevents::MemEvent::OOM_KILL;
-    if (!memevent_listener.registerEvent(oom_event)) {
+    if (!memevent_listener.registerEvent(MEM_EVENT_OOM_KILL)) {
         memevent_listener.deregisterAllEvents();
         jniThrowRuntimeException(env, "listener failed to register to OOM events");
         return nullptr;
     }
 
-    memevents::MemEvent event_received;
-    do {
-        event_received = memevent_listener.listen();
-        if (event_received == memevents::MemEvent::ERROR) {
-            memevent_listener.deregisterAllEvents();
-            jniThrowRuntimeException(env, "listener received error event");
-            return nullptr;
-        }
-    } while (event_received != oom_event);
+    if (!memevent_listener.listen()) {
+        memevent_listener.deregisterAllEvents();
+        jniThrowRuntimeException(env, "listener failed waiting for OOM event");
+        return nullptr;
+    }
 
-    std::vector<memevents::OomKill> oom_events;
-    if (!memevent_listener.getOomEvents(oom_events)) {
+    std::vector<mem_event_t> oom_events;
+    if (!memevent_listener.getMemEvents(oom_events)) {
         memevent_listener.deregisterAllEvents();
         jniThrowRuntimeException(env, "Failed to get OOM events");
         return nullptr;
@@ -75,15 +72,23 @@ static jobjectArray android_server_am_OomConnection_waitOom(JNIEnv* env, jobject
     }
 
     for (int i = 0; i < oom_events.size(); i++) {
-        const memevents::OomKill oom_event = oom_events[i];
-        jstring process_name = env->NewStringUTF(oom_event.process_name);
+        const mem_event_t mem_event = oom_events[i];
+        if (mem_event.type != MEM_EVENT_OOM_KILL) {
+            memevent_listener.deregisterAllEvents();
+            jniThrowRuntimeException(env, "Received invalid memory event");
+            return java_oom_array;
+        }
+
+        const auto oom_kill = mem_event.event_data.oom_kill;
+
+        jstring process_name = env->NewStringUTF(oom_kill.process_name);
         if (process_name == NULL) {
             memevent_listener.deregisterAllEvents();
             jniThrowRuntimeException(env, "Failed creating java string for process name");
         }
         jobject java_oom_kill = env->NewObject(sOomKillRecordInfo.clazz, sOomKillRecordInfo.ctor,
-                                               oom_event.timestamp_ms, oom_event.pid, oom_event.uid,
-                                               process_name, oom_event.oom_score_adj);
+                                               oom_kill.timestamp_ms, oom_kill.pid, oom_kill.uid,
+                                               process_name, oom_kill.oom_score_adj);
         if (java_oom_kill == NULL) {
             memevent_listener.deregisterAllEvents();
             jniThrowRuntimeException(env, "Failed to create OomKillRecord object");
