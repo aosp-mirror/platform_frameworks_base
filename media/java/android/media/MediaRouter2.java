@@ -719,7 +719,7 @@ public final class MediaRouter2 {
         mImpl.transfer(
                 controller.getRoutingSessionInfo(),
                 route,
-                android.os.Process.myUserHandle(),
+                Process.myUserHandle(),
                 mContext.getPackageName());
     }
 
@@ -1560,7 +1560,7 @@ public final class MediaRouter2 {
             UserHandle transferInitiatorUserHandle = sessionInfo.getTransferInitiatorUserHandle();
             String transferInitiatorPackageName = sessionInfo.getTransferInitiatorPackageName();
 
-            return Objects.equals(android.os.Process.myUserHandle(), transferInitiatorUserHandle)
+            return Objects.equals(Process.myUserHandle(), transferInitiatorUserHandle)
                     && Objects.equals(mContext.getPackageName(), transferInitiatorPackageName);
         }
 
@@ -2327,11 +2327,7 @@ public final class MediaRouter2 {
 
             List<RoutingSessionInfo> sessionInfos = getRoutingSessions();
             RoutingSessionInfo targetSession = sessionInfos.get(sessionInfos.size() - 1);
-            transfer(
-                    targetSession,
-                    route,
-                    android.os.Process.myUserHandle(),
-                    mContext.getPackageName());
+            transfer(targetSession, route, Process.myUserHandle(), mContext.getPackageName());
         }
 
         @Override
@@ -3198,8 +3194,12 @@ public final class MediaRouter2 {
                 return;
             }
 
-            requestCreateController(controller, route, MANAGER_REQUEST_ID_NONE,
-                    android.os.Process.myUserHandle(), mContext.getPackageName());
+            requestCreateController(
+                    controller,
+                    route,
+                    MANAGER_REQUEST_ID_NONE,
+                    Process.myUserHandle(),
+                    mContext.getPackageName());
         }
 
         @Override
