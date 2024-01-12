@@ -16,13 +16,14 @@
 
 package android.tracing.perfetto;
 
+import static android.internal.perfetto.protos.PerfettoTrace.TestEvent.PAYLOAD;
+import static android.internal.perfetto.protos.PerfettoTrace.TestEvent.TestPayload.SINGLE_INT;
+import static android.internal.perfetto.protos.PerfettoTrace.TracePacket.FOR_TESTING;
+
 import static java.io.File.createTempFile;
 import static java.nio.file.Files.createTempDirectory;
 
-import static perfetto.protos.PerfettoTrace.TestEvent.PAYLOAD;
-import static perfetto.protos.PerfettoTrace.TestEvent.TestPayload.SINGLE_INT;
-import static perfetto.protos.PerfettoTrace.TracePacket.FOR_TESTING;
-
+import android.internal.perfetto.protos.PerfettoTrace;
 import android.tools.common.ScenarioBuilder;
 import android.tools.common.Tag;
 import android.tools.common.io.TraceType;
@@ -56,7 +57,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import perfetto.protos.PerfettoConfig;
-import perfetto.protos.PerfettoTrace;
 import perfetto.protos.TracePacketOuterClass;
 
 @RunWith(AndroidJUnit4.class)
