@@ -626,8 +626,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testClearNotifications_clearAllInProgress() {
-        mFeatureFlags.set(Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE, false);
-
         ExpandableNotificationRow row = createClearableRow();
         when(row.getEntry().hasFinishedInitialization()).thenReturn(true);
         doReturn(true).when(mStackScroller).isVisible(row);
@@ -672,8 +670,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testAddNotificationUpdatesSpeedBumpIndex() {
-        mFeatureFlags.set(Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE, false);
-
         // initial state calculated == 0
         assertEquals(0, mStackScroller.getSpeedBumpIndex());
 
@@ -690,8 +686,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testAddAmbientNotificationNoSpeedBumpUpdate() {
-        mFeatureFlags.set(Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE, false);
-
         // initial state calculated  == 0
         assertEquals(0, mStackScroller.getSpeedBumpIndex());
 
@@ -708,8 +702,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     public void testRemoveNotificationUpdatesSpeedBump() {
-        mFeatureFlags.set(Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE, false);
-
         // initial state calculated == 0
         assertEquals(0, mStackScroller.getSpeedBumpIndex());
 

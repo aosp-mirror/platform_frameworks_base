@@ -273,12 +273,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private final RefactorFlag mInlineReplyAnimation =
             RefactorFlag.forView(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION);
 
-    private static final boolean mSimulateSlowMeasure = Compile.IS_DEBUG && RefactorFlag.forView(
-            Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE).isEnabled();
+    private static boolean shouldSimulateSlowMeasure() {
+        return Compile.IS_DEBUG && RefactorFlag.forView(
+                Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE).isEnabled();
+    }
+
     private static final String SLOW_MEASURE_SIMULATE_DELAY_PROPERTY =
             "persist.notifications.extra_measure_delay_ms";
-    private static final int SLOW_MEASURE_SIMULATE_DELAY_MS = mSimulateSlowMeasure ?
-            SystemProperties.getInt(SLOW_MEASURE_SIMULATE_DELAY_PROPERTY, 150) : 0;
+    private static final int SLOW_MEASURE_SIMULATE_DELAY_MS =
+            SystemProperties.getInt(SLOW_MEASURE_SIMULATE_DELAY_PROPERTY, 150);
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -1886,7 +1889,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        if (Compile.IS_DEBUG && mSimulateSlowMeasure) {
+        if (shouldSimulateSlowMeasure()) {
             simulateExtraMeasureDelay();
         }
         Trace.endSection();
