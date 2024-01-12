@@ -1673,7 +1673,11 @@ class ProcessRecord implements WindowProcessListener {
                 final ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(j);
                 for (int k = clist.size() - 1; k >= 0; k--) {
                     final ConnectionRecord cr = clist.get(k);
-                    consumer.accept(cr.binding.client);
+                    if (isSdkSandbox && cr.binding.attributedClient != null) {
+                        consumer.accept(cr.binding.attributedClient);
+                    } else {
+                        consumer.accept(cr.binding.client);
+                    }
                 }
             }
         }
@@ -1682,26 +1686,6 @@ class ProcessRecord implements WindowProcessListener {
             for (int j = cpr.connections.size() - 1; j >= 0; j--) {
                 final ContentProviderConnection conn = cpr.connections.get(j);
                 consumer.accept(conn.client);
-            }
-        }
-        // If this process is a sandbox itself, also add the app on whose behalf
-        // its running
-        if (isSdkSandbox) {
-            for (int is = mServices.numberOfRunningServices() - 1; is >= 0; is--) {
-                ServiceRecord s = mServices.getRunningServiceAt(is);
-                ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections =
-                        s.getConnections();
-                for (int conni = serviceConnections.size() - 1; conni >= 0; conni--) {
-                    ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(conni);
-                    for (int i = clist.size() - 1; i >= 0; i--) {
-                        ConnectionRecord cr = clist.get(i);
-                        ProcessRecord attributedApp = cr.binding.attributedClient;
-                        if (attributedApp == null || attributedApp == this) {
-                            continue;
-                        }
-                        consumer.accept(attributedApp);
-                    }
-                }
             }
         }
     }
