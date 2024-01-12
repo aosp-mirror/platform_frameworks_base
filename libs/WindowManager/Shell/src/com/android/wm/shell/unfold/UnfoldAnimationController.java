@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.unfold;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
@@ -28,10 +30,10 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener;
 import com.android.wm.shell.unfold.animation.UnfoldTaskAnimator;
 
+import dagger.Lazy;
+
 import java.util.List;
 import java.util.Optional;
-
-import dagger.Lazy;
 
 /**
  * Manages fold/unfold animations of tasks on foldable devices.
@@ -228,7 +230,8 @@ public class UnfoldAnimationController implements UnfoldListener {
     }
 
     private void maybeResetTask(UnfoldTaskAnimator animator, TaskInfo taskInfo) {
-        if (!mIsInStageChange) {
+        // TODO(b/311084698): the windowing mode check is added here as a work around.
+        if (!mIsInStageChange || taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
             // No need to resetTask if there is no ongoing state change.
             return;
         }
