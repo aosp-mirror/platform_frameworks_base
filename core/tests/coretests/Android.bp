@@ -30,6 +30,8 @@ filegroup {
 
 android_test {
     name: "FrameworksCoreTests",
+    // FrameworksCoreTestsRavenwood references the .aapt.srcjar
+    use_resource_processor: false,
 
     srcs: [
         "src/**/*.java",
