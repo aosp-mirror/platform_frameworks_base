@@ -36,6 +36,9 @@
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 
+#include <com_android_server_backup.h>
+namespace backup_flags = com::android::server::backup;
+
 namespace android {
 
 #define MAGIC0 0x70616e53 // Snap
@@ -214,7 +217,7 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
 {
     LOGP("write_update_file %s (%s) : mode 0%o\n", realFilename, key.c_str(), mode);
 
-    const int bufsize = 4*1024;
+    const int bufsize = backup_flags::enable_max_size_writes_to_pipes() ? (64*1024) : (4*1024);
     int err;
     int amt;
     int fileSize;
@@ -550,7 +553,8 @@ int write_tarfile(const String8& packageName, const String8& domain,
     }
 
     // read/write up to this much at a time.
-    const size_t BUFSIZE = 32 * 1024;
+    const size_t BUFSIZE = backup_flags::enable_max_size_writes_to_pipes() ? (64*1024) : (32*1024);
+
     char* buf = (char *)calloc(1,BUFSIZE);
     const size_t PAXHEADER_OFFSET = 512;
     const size_t PAXHEADER_SIZE = 512;
@@ -726,7 +730,7 @@ done:
 
 
 
-#define RESTORE_BUF_SIZE (8*1024)
+const size_t RESTORE_BUF_SIZE = backup_flags::enable_max_size_writes_to_pipes() ? 64*1024 : 8*1024;
 
 RestoreHelperBase::RestoreHelperBase()
 {

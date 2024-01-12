@@ -20,18 +20,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -39,29 +36,10 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class DozingToLockscreenTransitionViewModelTest : SysuiTestCase() {
-    private lateinit var testScope: TestScope
-    private lateinit var underTest: DozingToLockscreenTransitionViewModel
-    private lateinit var repository: FakeKeyguardTransitionRepository
-
-    @Before
-    fun setUp() {
-        testScope = TestScope()
-        repository = FakeKeyguardTransitionRepository()
-        underTest =
-            DozingToLockscreenTransitionViewModel(
-                interactor =
-                    KeyguardTransitionInteractorFactory.create(
-                            scope = testScope.backgroundScope,
-                            repository = repository,
-                        )
-                        .keyguardTransitionInteractor,
-                animationFlow =
-                    KeyguardTransitionAnimationFlow(
-                        scope = testScope.backgroundScope,
-                        logger = mock()
-                    ),
-            )
-    }
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val repository = kosmos.fakeKeyguardTransitionRepository
+    val underTest = kosmos.dozingToLockscreenTransitionViewModel
 
     @Test
     fun deviceEntryParentViewShows() =

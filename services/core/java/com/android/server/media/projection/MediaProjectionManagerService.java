@@ -653,14 +653,14 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override // Binder call
-        public boolean hasProjectionPermission(int uid, String packageName) {
+        public boolean hasProjectionPermission(int processUid, String packageName) {
             final long token = Binder.clearCallingIdentity();
             boolean hasPermission = false;
             try {
                 hasPermission |= checkPermission(packageName,
                         android.Manifest.permission.CAPTURE_VIDEO_OUTPUT)
                         || mAppOps.noteOpNoThrow(
-                                AppOpsManager.OP_PROJECT_MEDIA, uid, packageName)
+                                AppOpsManager.OP_PROJECT_MEDIA, processUid, packageName)
                         == AppOpsManager.MODE_ALLOWED;
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -669,7 +669,7 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override // Binder call
-        public IMediaProjection createProjection(int uid, String packageName, int type,
+        public IMediaProjection createProjection(int processUid, String packageName, int type,
                 boolean isPermanentGrant) {
             if (mContext.checkCallingPermission(MANAGE_MEDIA_PROJECTION)
                         != PackageManager.PERMISSION_GRANTED) {
@@ -680,13 +680,13 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new IllegalArgumentException("package name must not be empty");
             }
             final UserHandle callingUser = Binder.getCallingUserHandle();
-            return createProjectionInternal(uid, packageName, type, isPermanentGrant,
+            return createProjectionInternal(processUid, packageName, type, isPermanentGrant,
                     callingUser);
         }
 
         @Override // Binder call
         @EnforcePermission(MANAGE_MEDIA_PROJECTION)
-        public IMediaProjection getProjection(int uid, String packageName) {
+        public IMediaProjection getProjection(int processUid, String packageName) {
             getProjection_enforcePermission();
             if (packageName == null || packageName.isEmpty()) {
                 throw new IllegalArgumentException("package name must not be empty");
@@ -695,7 +695,7 @@ public final class MediaProjectionManagerService extends SystemService
             MediaProjection projection;
             final long callingToken = Binder.clearCallingIdentity();
             try {
-                projection = getProjectionInternal(uid, packageName);
+                projection = getProjectionInternal(processUid, packageName);
             } finally {
                 Binder.restoreCallingIdentity(callingToken);
             }
@@ -869,12 +869,13 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         @EnforcePermission(MANAGE_MEDIA_PROJECTION)
-        public void notifyPermissionRequestInitiated(int hostUid, int sessionCreationSource) {
+        public void notifyPermissionRequestInitiated(
+                int hostProcessUid, int sessionCreationSource) {
             notifyPermissionRequestInitiated_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaProjectionManagerService.this.notifyPermissionRequestInitiated(
-                        hostUid, sessionCreationSource);
+                        hostProcessUid, sessionCreationSource);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -882,11 +883,11 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         @EnforcePermission(MANAGE_MEDIA_PROJECTION)
-        public void notifyPermissionRequestDisplayed(int hostUid) {
+        public void notifyPermissionRequestDisplayed(int hostProcessUid) {
             notifyPermissionRequestDisplayed_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaProjectionManagerService.this.notifyPermissionRequestDisplayed(hostUid);
+                MediaProjectionManagerService.this.notifyPermissionRequestDisplayed(hostProcessUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -894,11 +895,11 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         @EnforcePermission(MANAGE_MEDIA_PROJECTION)
-        public void notifyPermissionRequestCancelled(int hostUid) {
+        public void notifyPermissionRequestCancelled(int hostProcessUid) {
             notifyPermissionRequestCancelled_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaProjectionManagerService.this.notifyPermissionRequestCancelled(hostUid);
+                MediaProjectionManagerService.this.notifyPermissionRequestCancelled(hostProcessUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -906,11 +907,11 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         @EnforcePermission(MANAGE_MEDIA_PROJECTION)
-        public void notifyAppSelectorDisplayed(int hostUid) {
+        public void notifyAppSelectorDisplayed(int hostProcessUid) {
             notifyAppSelectorDisplayed_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaProjectionManagerService.this.notifyAppSelectorDisplayed(hostUid);
+                MediaProjectionManagerService.this.notifyAppSelectorDisplayed(hostProcessUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -919,12 +920,12 @@ public final class MediaProjectionManagerService extends SystemService
         @Override // Binder call
         @EnforcePermission(MANAGE_MEDIA_PROJECTION)
         public void notifyWindowingModeChanged(
-                int contentToRecord, int targetUid, int windowingMode) {
+                int contentToRecord, int targetProcessUid, int windowingMode) {
             notifyWindowingModeChanged_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaProjectionManagerService.this.notifyWindowingModeChanged(
-                        contentToRecord, targetUid, windowingMode);
+                        contentToRecord, targetProcessUid, windowingMode);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

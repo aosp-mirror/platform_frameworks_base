@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -108,11 +109,19 @@ public final class PointingInfo implements Parcelable {
         return sb.toString();
     }
 
+    /**
+     * Returns the azimuth of the satellite, in degrees.
+     */
+    @FloatRange(from = -180, to = 180)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public float getSatelliteAzimuthDegrees() {
         return mSatelliteAzimuthDegrees;
     }
 
+    /**
+     * Returns the elevation of the satellite, in degrees.
+     */
+    @FloatRange(from = -90, to = 90)
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public float getSatelliteElevationDegrees() {
         return mSatelliteElevationDegrees;

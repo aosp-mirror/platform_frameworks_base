@@ -32,6 +32,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -143,6 +144,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         channel.enableVibration(true);
         mNotificationManager.createNotificationChannel(channel);
 
+        int currentUid = Process.myUid();
         int currentUserId = mUserContextTracker.getUserContext().getUserId();
         UserHandle currentUser = new UserHandle(currentUserId);
         switch (action) {
@@ -166,7 +168,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 mRecorder = new ScreenMediaRecorder(
                         mUserContextTracker.getUserContext(),
                         mMainHandler,
-                        currentUserId,
+                        currentUid,
                         mAudioSource,
                         captureTarget,
                         this

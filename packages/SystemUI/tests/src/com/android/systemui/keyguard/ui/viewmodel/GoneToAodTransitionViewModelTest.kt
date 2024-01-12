@@ -31,6 +31,7 @@ import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,6 +53,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             val pixels = -100f
             val enterFromTopTranslationY by
                 collectLastValue(underTest.enterFromTopTranslationY(pixels.toInt()))
+            runCurrent()
 
             // The animation should only start > .4f way through
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -72,6 +74,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
     fun enterFromTopAnimationAlpha() =
         testScope.runTest {
             val enterFromTopAnimationAlpha by collectLastValue(underTest.enterFromTopAnimationAlpha)
+            runCurrent()
 
             // The animation should only start > .4f way through
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -92,6 +95,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val deviceEntryBackgroundViewAlpha by
                 collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
+            runCurrent()
 
             // immediately 0f
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -113,6 +117,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             // animation doesn't start until the end
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -137,6 +142,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsRearFps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             // animation doesn't start until the end
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
@@ -161,6 +167,7 @@ class GoneToAodTransitionViewModelTest : SysuiTestCase() {
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
             val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             // animation doesn't start until the end
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))

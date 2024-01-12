@@ -22,6 +22,7 @@ import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.OpenForTesting
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.LogcatOnlyMessageBuffer
 import com.android.systemui.log.core.Logger
@@ -120,8 +121,9 @@ open class ClockRegistry(
             override fun onPluginAttached(
                 manager: PluginLifecycleManager<ClockProviderPlugin>
             ): Boolean {
-                manager.isDebug = !keepAllLoaded
-
+                manager.setLogFunc({ tag, msg ->
+                    (clockBuffers?.infraMessageBuffer as LogBuffer?)?.log(tag, LogLevel.DEBUG, msg)
+                })
                 if (keepAllLoaded) {
                     // Always load new plugins if requested
                     return true

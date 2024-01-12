@@ -197,7 +197,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         whenever(deviceProvisionedController.isUserSetup(anyInt())).thenReturn(true)
 
         featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.BOUNCER_USER_SWITCHER, false)
         featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
         featureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
         featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)

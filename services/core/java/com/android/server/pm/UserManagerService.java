@@ -2337,8 +2337,18 @@ public class UserManagerService extends IUserManager.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             final TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
-            if (telecomManager != null && telecomManager.isInCall()) {
-                flags |= UserManager.SWITCHABILITY_STATUS_USER_IN_CALL;
+            if (com.android.internal.telephony.flags
+                    .Flags.enforceTelephonyFeatureMappingForPublicApis()) {
+                if (mContext.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_TELECOM)) {
+                    if (telecomManager != null && telecomManager.isInCall()) {
+                        flags |= UserManager.SWITCHABILITY_STATUS_USER_IN_CALL;
+                    }
+                }
+            } else {
+                if (telecomManager != null && telecomManager.isInCall()) {
+                    flags |= UserManager.SWITCHABILITY_STATUS_USER_IN_CALL;
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(identity);

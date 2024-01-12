@@ -21,6 +21,7 @@ import android.content.res.Configuration
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.model.CredentialType
 import android.graphics.drawable.Icon
 
 class RemoteViewsFactory {
@@ -29,60 +30,93 @@ class RemoteViewsFactory {
         private const val setAdjustViewBoundsMethodName = "setAdjustViewBounds"
         private const val setMaxHeightMethodName = "setMaxHeight"
         private const val setBackgroundResourceMethodName = "setBackgroundResource"
+        private const val bulletPoint = "\u2022"
+        private const val passwordCharacterLength = 15
 
         fun createDropdownPresentation(
                 context: Context,
                 icon: Icon,
                 credentialEntryInfo: CredentialEntryInfo
         ): RemoteViews {
-            val padding = context.resources.getDimensionPixelSize(com.android
-                    .credentialmanager.R.dimen.autofill_view_padding)
             var layoutId: Int = com.android.credentialmanager.R.layout
-                    .autofill_dataset_left_with_item_tag_hint
+                    .credman_dropdown_presentation_layout
             val remoteViews = RemoteViews(context.packageName, layoutId)
-            setRemoteViewsPaddings(remoteViews, padding)
-            val textColorPrimary = getTextColorPrimary(isDarkMode(context), context);
-            remoteViews.setTextColor(android.R.id.text1, textColorPrimary);
-            remoteViews.setTextViewText(android.R.id.text1, credentialEntryInfo.userName)
-
+            if (credentialEntryInfo.credentialType == CredentialType.UNKNOWN) {
+                return remoteViews
+            }
+            setRemoteViewsPaddings(remoteViews, context)
+            if (credentialEntryInfo.credentialType == CredentialType.PASSKEY) {
+                val displayName = credentialEntryInfo.displayName ?: credentialEntryInfo.userName
+                remoteViews.setTextViewText(android.R.id.text1, displayName)
+                val secondaryText = if (credentialEntryInfo.displayName != null)
+                    (credentialEntryInfo.userName + " " + bulletPoint + " "
+                            + credentialEntryInfo.credentialTypeDisplayName
+                            + " " + bulletPoint + " " + credentialEntryInfo.providerDisplayName)
+                else (credentialEntryInfo.credentialTypeDisplayName + " " + bulletPoint + " "
+                        + credentialEntryInfo.providerDisplayName)
+                remoteViews.setTextViewText(android.R.id.text2, secondaryText)
+            } else {
+                remoteViews.setTextViewText(android.R.id.text1, credentialEntryInfo.userName)
+                remoteViews.setTextViewText(android.R.id.text2,
+                        bulletPoint.repeat(passwordCharacterLength))
+            }
+            val textColorPrimary = ContextCompat.getColor(context,
+                    com.android.credentialmanager.R.color.text_primary)
+            remoteViews.setTextColor(android.R.id.text1, textColorPrimary)
+            val textColorSecondary = ContextCompat.getColor(context, com.android
+                    .credentialmanager.R.color.text_secondary)
+            remoteViews.setTextColor(android.R.id.text2, textColorSecondary)
             remoteViews.setImageViewIcon(android.R.id.icon1, icon);
             remoteViews.setBoolean(
                     android.R.id.icon1, setAdjustViewBoundsMethodName, true);
             remoteViews.setInt(
                     android.R.id.icon1,
-                     setMaxHeightMethodName,
+                    setMaxHeightMethodName,
                     context.resources.getDimensionPixelSize(
                             com.android.credentialmanager.R.dimen.autofill_icon_size));
-            val drawableId = if (isDarkMode(context))
-                com.android.credentialmanager.R.drawable.fill_dialog_dynamic_list_item_one_dark
-            else com.android.credentialmanager.R.drawable.fill_dialog_dynamic_list_item_one
+            val drawableId =
+                    com.android.credentialmanager.R.drawable.fill_dialog_dynamic_list_item_one
             remoteViews.setInt(
                     android.R.id.content, setBackgroundResourceMethodName, drawableId);
             return remoteViews
         }
 
         private fun setRemoteViewsPaddings(
-                remoteViews: RemoteViews,
-                padding: Int) {
-            val halfPadding = padding / 2
+                remoteViews: RemoteViews, context: Context) {
+            val leftPadding = context.resources.getDimensionPixelSize(
+                    com.android.credentialmanager.R.dimen.autofill_view_left_padding)
+            val iconToTextPadding = context.resources.getDimensionPixelSize(
+                    com.android.credentialmanager.R.dimen.autofill_view_icon_to_text_padding)
+            val rightPadding = context.resources.getDimensionPixelSize(
+                    com.android.credentialmanager.R.dimen.autofill_view_right_padding)
+            val topPadding = context.resources.getDimensionPixelSize(
+                    com.android.credentialmanager.R.dimen.autofill_view_top_padding)
+            val bottomPadding = context.resources.getDimensionPixelSize(
+                    com.android.credentialmanager.R.dimen.autofill_view_bottom_padding)
+            remoteViews.setViewPadding(
+                    android.R.id.icon1,
+                    leftPadding,
+                    /* top=*/0,
+                    /* right=*/0,
+                    /* bottom=*/0)
             remoteViews.setViewPadding(
                     android.R.id.text1,
-                    halfPadding,
-                    halfPadding,
-                    halfPadding,
-                    halfPadding)
+                    iconToTextPadding,
+                    /* top=*/topPadding,
+                    /* right=*/rightPadding,
+                    /* bottom=*/0)
+            remoteViews.setViewPadding(
+                    android.R.id.text2,
+                    iconToTextPadding,
+                    /* top=*/0,
+                    /* right=*/rightPadding,
+                    /* bottom=*/bottomPadding)
         }
 
         private fun isDarkMode(context: Context): Boolean {
             val currentNightMode = context.resources.configuration.uiMode and
                     Configuration.UI_MODE_NIGHT_MASK
             return currentNightMode == Configuration.UI_MODE_NIGHT_YES
-        }
-
-        private fun getTextColorPrimary(darkMode: Boolean, context: Context): Int {
-            return if (darkMode) ContextCompat.getColor(
-                    context, com.android.credentialmanager.R.color.text_primary_dark_mode)
-            else ContextCompat.getColor(context, com.android.credentialmanager.R.color.text_primary)
         }
     }
 }

@@ -33,6 +33,7 @@ import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,6 +55,7 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     fun lockscreenFadeIn() =
         testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
+            runCurrent()
 
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
@@ -83,6 +85,7 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 100
             )
             val values by collectValues(underTest.lockscreenTranslationY)
+            runCurrent()
 
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
@@ -95,7 +98,7 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(4)
+            assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(-100f, 0f)) }
         }
 
@@ -107,6 +110,7 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 100
             )
             val values by collectValues(underTest.lockscreenTranslationY)
+            runCurrent()
 
             keyguardTransitionRepository.sendTransitionStep(step(0.5f, TransitionState.CANCELED))
 
@@ -117,6 +121,7 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     fun deviceEntryParentViewFadeIn() =
         testScope.runTest {
             val values by collectValues(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(

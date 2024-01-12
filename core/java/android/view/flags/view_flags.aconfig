@@ -1,6 +1,13 @@
 package: "android.view.flags"
 
 flag {
+     name: "enable_surface_native_alloc_registration"
+     namespace: "toolkit"
+     description: "Feature flag for registering surfaces with the VM for faster cleanup"
+     bug: "306193257"
+}
+
+flag {
     name: "enable_use_measure_cache_during_force_layout"
     namespace: "toolkit"
     description: "Enables using the measure cache during a view force layout from the second "

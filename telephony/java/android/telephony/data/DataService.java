@@ -415,13 +415,13 @@ public abstract class DataService extends Service {
          *     request validation to the DataService and checks if the request has been submitted.
          */
         @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
-        public void requestValidation(int cid,
+        public void requestNetworkValidation(int cid,
                 @NonNull @CallbackExecutor Executor executor,
                 @NonNull @DataServiceCallback.ResultCode Consumer<Integer> resultCodeCallback) {
             Objects.requireNonNull(executor, "executor cannot be null");
             Objects.requireNonNull(resultCodeCallback, "resultCodeCallback cannot be null");
 
-            Log.d(TAG, "requestValidation: " + cid);
+            Log.d(TAG, "requestNetworkValidation: " + cid);
 
             // The default implementation is to return unsupported.
             executor.execute(() -> resultCodeCallback
@@ -741,7 +741,7 @@ public abstract class DataService extends Service {
                 case DATA_SERVICE_REQUEST_VALIDATION:
                     if (serviceProvider == null) break;
                     ValidationRequest validationRequest = (ValidationRequest) message.obj;
-                    serviceProvider.requestValidation(
+                    serviceProvider.requestNetworkValidation(
                             validationRequest.cid,
                             validationRequest.executor,
                             FunctionalUtils
@@ -924,9 +924,10 @@ public abstract class DataService extends Service {
         }
 
         @Override
-        public void requestValidation(int slotIndex, int cid, IIntegerConsumer resultCodeCallback) {
+        public void requestNetworkValidation(int slotIndex, int cid,
+                IIntegerConsumer resultCodeCallback) {
             if (resultCodeCallback == null) {
-                loge("requestValidation: resultCodeCallback is null");
+                loge("requestNetworkValidation: resultCodeCallback is null");
                 return;
             }
             ValidationRequest validationRequest =

@@ -102,6 +102,24 @@ public class VcnManager {
     public static final String VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY =
             "vcn_network_selection_wifi_exit_rssi_threshold";
 
+    /**
+     * Key for the interval to poll IpSecTransformState for packet loss monitoring
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_NETWORK_SELECTION_POLL_IPSEC_STATE_INTERVAL_SECONDS_KEY =
+            "vcn_network_selection_poll_ipsec_state_interval_seconds";
+
+    /**
+     * Key for the threshold of IPSec packet loss rate
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY =
+            "vcn_network_selection_ipsec_packet_loss_percent_threshold";
+
     // TODO: Add separate signal strength thresholds for 2.4 GHz and 5GHz
 
     /**
@@ -113,6 +131,20 @@ public class VcnManager {
      */
     public static final String VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY =
             "vcn_restricted_transports";
+
+    /**
+     * Key for number of seconds to wait before entering safe mode
+     *
+     * <p>A VcnGatewayConnection will enter safe mode when it takes over the configured timeout to
+     * enter {@link ConnectedState}.
+     *
+     * <p>Defaults to 30, unless overridden by carrier config
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY =
+            "vcn_safe_mode_timeout_seconds_key";
 
     /**
      * Key for maximum number of parallel SAs for tunnel aggregation
@@ -134,7 +166,10 @@ public class VcnManager {
             new String[] {
                 VCN_NETWORK_SELECTION_WIFI_ENTRY_RSSI_THRESHOLD_KEY,
                 VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY,
+                VCN_NETWORK_SELECTION_POLL_IPSEC_STATE_INTERVAL_SECONDS_KEY,
+                VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY,
                 VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
+                VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY,
                 VCN_TUNNEL_AGGREGATION_SA_COUNT_MAX_KEY,
             };
 

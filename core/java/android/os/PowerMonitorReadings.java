@@ -71,7 +71,7 @@ public final class PowerMonitorReadings {
      */
     @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
     @ElapsedRealtimeLong
-    public long getTimestamp(@NonNull PowerMonitor powerMonitor) {
+    public long getTimestampMillis(@NonNull PowerMonitor powerMonitor) {
         int offset = Arrays.binarySearch(mPowerMonitors, powerMonitor, POWER_MONITOR_COMPARATOR);
         if (offset >= 0) {
             return mTimestampsMs[offset];

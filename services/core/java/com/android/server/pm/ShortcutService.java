@@ -77,6 +77,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -113,7 +114,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -485,7 +485,14 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     public ShortcutService(Context context) {
-        this(context, BackgroundThread.get().getLooper(), /*onyForPackgeManagerApis*/ false);
+        this(context, getBgLooper(), /*onyForPackgeManagerApis*/ false);
+    }
+
+    private static Looper getBgLooper() {
+        final HandlerThread handlerThread = new HandlerThread("shortcut",
+                android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        handlerThread.start();
+        return handlerThread.getLooper();
     }
 
     @VisibleForTesting

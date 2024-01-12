@@ -31,7 +31,7 @@ import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_OFF
 import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNAVAILABLE
 import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_UNKNOWN
 import android.telephony.satellite.SatelliteManager.SatelliteException
-import android.telephony.satellite.SatelliteStateCallback
+import android.telephony.satellite.SatelliteModemStateCallback
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -106,7 +106,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.connectionState)
             runCurrent()
             val callback =
-                withArgCaptor<SatelliteStateCallback> {
+                withArgCaptor<SatelliteModemStateCallback> {
                     verify(satelliteManager).registerForSatelliteModemStateChanged(any(), capture())
                 }
 

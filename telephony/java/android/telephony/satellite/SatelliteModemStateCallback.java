@@ -28,7 +28,7 @@ import com.android.internal.telephony.flags.Flags;
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-public interface SatelliteStateCallback {
+public interface SatelliteModemStateCallback {
     /**
      * Called when satellite modem state changes.
      * @param state The new satellite modem state.

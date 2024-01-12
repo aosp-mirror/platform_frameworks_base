@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor.Companion.TO_GONE_DURATION
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
@@ -37,14 +36,14 @@ import kotlinx.coroutines.flow.Flow
 class AlternateBouncerToGoneTransitionViewModel
 @Inject
 constructor(
-    interactor: KeyguardTransitionInteractor,
     bouncerToGoneFlows: BouncerToGoneFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_GONE_DURATION,
-            stepFlow = interactor.transition(ALTERNATE_BOUNCER, KeyguardState.GONE),
+            from = ALTERNATE_BOUNCER,
+            to = KeyguardState.GONE,
         )
 
     /** Scrim alpha values */

@@ -183,7 +183,6 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         assertThat(mHistoryManager.doesHistoryExistForUser(mProfileId)).isFalse();
         verify(mDb, times(2)).disableHistory();
     }
-
     @Test
     public void testAddProfile_historyEnabledInPrimary() {
         // create a history
@@ -609,5 +608,15 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
 
         assertThat(mHistoryManager.isHistoryEnabled(USER_SYSTEM)).isFalse();
+    }
+    @Test
+    public void testDelayedPackageRemoval_userLocked() {
+        String pkg = "pkg";
+        mHistoryManager.onPackageRemoved(USER_SYSTEM, pkg);
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        mHistoryManager.onUserStopped(USER_SYSTEM);
+        mHistoryManager.onPackageRemoved(USER_SYSTEM, pkg);
+
+        // no exception, yay
     }
 }

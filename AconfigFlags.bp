@@ -71,6 +71,7 @@ aconfig_srcjars = [
     ":android.appwidget.flags-aconfig-java{.generated_srcjars}",
     ":android.webkit.flags-aconfig-java{.generated_srcjars}",
     ":android.provider.flags-aconfig-java{.generated_srcjars}",
+    ":android.chre.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -903,5 +904,12 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.provider.flags-aconfig-java",
     aconfig_declarations: "android.provider.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// ContextHub
+java_aconfig_library {
+    name: "android.chre.flags-aconfig-java",
+    aconfig_declarations: "chre_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

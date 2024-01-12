@@ -101,6 +101,7 @@ import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -2678,6 +2679,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public void notifyEmergencyNumberList(int phoneId, int subId) {
         if (!checkNotifyPermission("notifyEmergencyNumberList()")) {
             return;
+        }
+        if (Flags.enforceTelephonyFeatureMappingForPublicApis()) {
+            if (!mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_TELEPHONY_CALLING)) {
+                // TelephonyManager.getEmergencyNumberList() throws an exception if
+                // FEATURE_TELEPHONY_CALLING is not defined.
+                return;
+            }
         }
 
         synchronized (mRecords) {

@@ -23,7 +23,6 @@ import android.app.ActivityOptions
 import android.appwidget.AppWidgetHost
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
-import android.os.PowerManager
 import android.widget.RemoteViews
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -32,11 +31,9 @@ import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.dagger.MediaModule
-import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.util.nullableAtomicReference
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -49,11 +46,9 @@ class CommunalEditModeViewModel
 constructor(
     private val communalInteractor: CommunalInteractor,
     private val appWidgetHost: AppWidgetHost,
-    shadeViewController: Provider<ShadeViewController>,
-    powerManager: PowerManager,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     private val uiEventLogger: UiEventLogger,
-) : BaseCommunalViewModel(communalInteractor, shadeViewController, powerManager, mediaHost) {
+) : BaseCommunalViewModel(communalInteractor, mediaHost) {
 
     private companion object {
         private const val KEY_SPLASH_SCREEN_STYLE = "android.activity.splashScreenStyle"

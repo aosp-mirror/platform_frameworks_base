@@ -2359,8 +2359,8 @@ UnflaggedApi: android.telephony.satellite.SatelliteManager#provisionSatelliteSer
     New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.provisionSatelliteService(String,byte[],android.os.CancellationSignal,java.util.concurrent.Executor,java.util.function.Consumer<java.lang.Integer>)
 UnflaggedApi: android.telephony.satellite.SatelliteManager#registerForSatelliteDatagram(java.util.concurrent.Executor, android.telephony.satellite.SatelliteDatagramCallback):
     New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.registerForSatelliteDatagram(java.util.concurrent.Executor,android.telephony.satellite.SatelliteDatagramCallback)
-UnflaggedApi: android.telephony.satellite.SatelliteManager#registerForSatelliteModemStateChanged(java.util.concurrent.Executor, android.telephony.satellite.SatelliteStateCallback):
-    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.registerForSatelliteModemStateChanged(java.util.concurrent.Executor,android.telephony.satellite.SatelliteStateCallback)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#registerForSatelliteModemStateChanged(java.util.concurrent.Executor, android.telephony.satellite.SatelliteModemStateCallback):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.registerForSatelliteModemStateChanged(java.util.concurrent.Executor,android.telephony.satellite.SatelliteModemStateCallback)
 UnflaggedApi: android.telephony.satellite.SatelliteManager#registerForSatelliteProvisionStateChanged(java.util.concurrent.Executor, android.telephony.satellite.SatelliteProvisionStateCallback):
     New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.registerForSatelliteProvisionStateChanged(java.util.concurrent.Executor,android.telephony.satellite.SatelliteProvisionStateCallback)
 UnflaggedApi: android.telephony.satellite.SatelliteManager#requestIsDemoModeEnabled(java.util.concurrent.Executor, android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>):
@@ -2389,8 +2389,8 @@ UnflaggedApi: android.telephony.satellite.SatelliteManager#stopSatelliteTransmis
     New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.stopSatelliteTransmissionUpdates(android.telephony.satellite.SatelliteTransmissionUpdateCallback,java.util.concurrent.Executor,java.util.function.Consumer<java.lang.Integer>)
 UnflaggedApi: android.telephony.satellite.SatelliteManager#unregisterForSatelliteDatagram(android.telephony.satellite.SatelliteDatagramCallback):
     New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.unregisterForSatelliteDatagram(android.telephony.satellite.SatelliteDatagramCallback)
-UnflaggedApi: android.telephony.satellite.SatelliteManager#unregisterForSatelliteModemStateChanged(android.telephony.satellite.SatelliteStateCallback):
-    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.unregisterForSatelliteModemStateChanged(android.telephony.satellite.SatelliteStateCallback)
+UnflaggedApi: android.telephony.satellite.SatelliteManager#unregisterForSatelliteModemStateChanged(android.telephony.satellite.SatelliteModemStateCallback):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.unregisterForSatelliteModemStateChanged(android.telephony.satellite.SatelliteModemStateCallback)
 UnflaggedApi: android.telephony.satellite.SatelliteManager#unregisterForSatelliteProvisionStateChanged(android.telephony.satellite.SatelliteProvisionStateCallback):
     New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteManager.unregisterForSatelliteProvisionStateChanged(android.telephony.satellite.SatelliteProvisionStateCallback)
 UnflaggedApi: android.telephony.satellite.SatelliteManager.SatelliteException:
@@ -2403,10 +2403,10 @@ UnflaggedApi: android.telephony.satellite.SatelliteProvisionStateCallback:
     New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteProvisionStateCallback
 UnflaggedApi: android.telephony.satellite.SatelliteProvisionStateCallback#onSatelliteProvisionStateChanged(boolean):
     New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteProvisionStateCallback.onSatelliteProvisionStateChanged(boolean)
-UnflaggedApi: android.telephony.satellite.SatelliteStateCallback:
-    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteStateCallback
-UnflaggedApi: android.telephony.satellite.SatelliteStateCallback#onSatelliteModemStateChanged(int):
-    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteStateCallback.onSatelliteModemStateChanged(int)
+UnflaggedApi: android.telephony.satellite.SatelliteModemStateCallback:
+    New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteModemStateCallback
+UnflaggedApi: android.telephony.satellite.SatelliteModemStateCallback#onSatelliteModemStateChanged(int):
+    New API must be flagged with @FlaggedApi: method android.telephony.satellite.SatelliteModemStateCallback.onSatelliteModemStateChanged(int)
 UnflaggedApi: android.telephony.satellite.SatelliteTransmissionUpdateCallback:
     New API must be flagged with @FlaggedApi: class android.telephony.satellite.SatelliteTransmissionUpdateCallback
 UnflaggedApi: android.telephony.satellite.SatelliteTransmissionUpdateCallback#onReceiveDatagramStateChanged(int, int, int):

@@ -35,6 +35,7 @@ import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
+import java.util.function.BiConsumer
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.fail
 import kotlinx.coroutines.CoroutineDispatcher
@@ -100,10 +101,7 @@ class ClockRegistryTest : SysuiTestCase() {
         override fun toString() = "Manager[$tag]"
         override fun getPackage(): String = mComponentName.getPackageName()
         override fun getComponentName(): ComponentName = mComponentName
-
-        private var isDebug: Boolean = false
-        override fun getIsDebug(): Boolean = isDebug
-        override fun setIsDebug(value: Boolean) { isDebug = value }
+        override fun setLogFunc(func: BiConsumer<String, String>) { }
 
         override fun loadPlugin() {
             if (!mIsLoaded) {

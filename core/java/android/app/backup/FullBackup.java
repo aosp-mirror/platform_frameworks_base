@@ -239,7 +239,7 @@ public class FullBackup {
                 Log.e(TAG, "Unable to create/open file " + outFile.getPath(), e);
             }
 
-            byte[] buffer = new byte[32 * 1024];
+            byte[] buffer = new byte[64 * 1024];
             final long origSize = size;
             FileInputStream in = new FileInputStream(data.getFileDescriptor());
             while (size > 0) {

@@ -20,24 +20,26 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.withSaveLayer
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.GlobalPositionAwareModifierNode
+import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.toSize
 
@@ -88,10 +90,21 @@ private class PunchHoleNode(
     var size: () -> Size,
     var offset: () -> Offset,
     var shape: () -> Shape,
-) : Modifier.Node(), DrawModifierNode {
+) : Modifier.Node(), DrawModifierNode, LayoutModifierNode {
     private var lastSize: Size = Size.Unspecified
     private var lastLayoutDirection: LayoutDirection = LayoutDirection.Ltr
     private var lastOutline: Outline? = null
+
+    override fun MeasureScope.measure(
+        measurable: Measurable,
+        constraints: Constraints
+    ): MeasureResult {
+        return measurable.measure(constraints).run {
+            layout(width, height) {
+                placeWithLayer(0, 0) { compositingStrategy = CompositingStrategy.Offscreen }
+            }
+        }
+    }
 
     override fun ContentDrawScope.draw() {
         val holeSize = size()
@@ -100,14 +113,10 @@ private class PunchHoleNode(
             return
         }
 
-        drawIntoCanvas { canvas ->
-            canvas.withSaveLayer(size.toRect(), Paint()) {
-                drawContent()
+        drawContent()
 
-                val offset = offset()
-                translate(offset.x, offset.y) { drawHole(holeSize) }
-            }
-        }
+        val offset = offset()
+        translate(offset.x, offset.y) { drawHole(holeSize) }
     }
 
     private fun DrawScope.drawHole(size: Size) {

@@ -21,9 +21,6 @@
         <uses-library android:name="android.test.runner" />
     </application>
 
-    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
         android:label="APCT tests for background install control service"
         android:targetPackage="com.android.server.pm.test.app" />
