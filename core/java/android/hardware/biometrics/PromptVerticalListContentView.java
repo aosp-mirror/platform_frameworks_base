@@ -1,0 +1,205 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.hardware.biometrics;
+
+import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
+
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+/**
+ * Contains the information of the template of vertical list content view for Biometric Prompt. Note
+ * that there are limits on the item count and the number of characters allowed for each item's
+ * text.
+ * <p>
+ * Here's how you'd set a <code>PromptVerticalListContentView</code> on a Biometric Prompt:
+ * <pre class="prettyprint">
+ * BiometricPrompt biometricPrompt = new BiometricPrompt.Builder(...)
+ *     .setTitle(...)
+ *     .setSubTitle(...)
+ *     .setContentView(new PromptVerticalListContentView.Builder()
+ *         .setDescription("test description")
+ *         .addListItem(new PromptContentListItemPlainText("test item 1"))
+ *         .addListItem(new PromptContentListItemPlainText("test item 2"))
+ *         .addListItem(new PromptContentListItemBulletedText("test item 3"))
+ *         .build())
+ *     .build();
+ * </pre>
+ */
+@FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+public final class PromptVerticalListContentView implements PromptContentViewParcelable {
+    private static final int MAX_ITEM_NUMBER = 20;
+    private static final int MAX_EACH_ITEM_CHARACTER_NUMBER = 640;
+    private final List<PromptContentListItemParcelable> mContentList;
+    private final CharSequence mDescription;
+
+    private PromptVerticalListContentView(
+            @NonNull List<PromptContentListItemParcelable> contentList,
+            @NonNull CharSequence description) {
+        mContentList = contentList;
+        mDescription = description;
+    }
+
+    private PromptVerticalListContentView(Parcel in) {
+        mContentList = in.readArrayList(
+                PromptContentListItemParcelable.class.getClassLoader(),
+                PromptContentListItemParcelable.class);
+        mDescription = in.readCharSequence();
+    }
+
+    /**
+     * Returns the maximum count of the list items.
+     */
+    public static int getMaxItemCount() {
+        return MAX_ITEM_NUMBER;
+    }
+
+    /**
+     * Returns the maximum number of characters allowed for each item's text.
+     */
+    public static int getMaxEachItemCharacterNumber() {
+        return MAX_EACH_ITEM_CHARACTER_NUMBER;
+    }
+
+    /**
+     * Gets the description for the content view, as set by
+     * {@link PromptVerticalListContentView.Builder#setDescription(CharSequence)}.
+     *
+     * @return The description for the content view, or null if the content view has no description.
+     */
+    @Nullable
+    public CharSequence getDescription() {
+        return mDescription;
+    }
+
+    /**
+     * Gets the list of ListItem on the content view, as set by
+     * {@link PromptVerticalListContentView.Builder#addListItem(PromptContentListItem)}.
+     *
+     * @return The item list on the content view.
+     */
+    @NonNull
+    public List<PromptContentListItem> getListItems() {
+        return new ArrayList<>(mContentList);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeToParcel(@androidx.annotation.NonNull Parcel dest, int flags) {
+        dest.writeList(mContentList);
+        dest.writeCharSequence(mDescription);
+    }
+
+    /**
+     * @see Parcelable.Creator
+     */
+    @NonNull
+    public static final Creator<PromptVerticalListContentView> CREATOR = new Creator<>() {
+        @Override
+        public PromptVerticalListContentView createFromParcel(Parcel in) {
+            return new PromptVerticalListContentView(in);
+        }
+
+        @Override
+        public PromptVerticalListContentView[] newArray(int size) {
+            return new PromptVerticalListContentView[size];
+        }
+    };
+
+
+    /**
+     * A builder that collects arguments to be shown on the vertical list view.
+     */
+    public static final class Builder {
+        private final List<PromptContentListItemParcelable> mContentList = new ArrayList<>();
+        private CharSequence mDescription;
+
+        /**
+         * Optional: Sets a description that will be shown on the content view.
+         *
+         * @param description The description to display.
+         * @return This builder.
+         */
+        @NonNull
+        public Builder setDescription(@NonNull CharSequence description) {
+            mDescription = description;
+            return this;
+        }
+
+        /**
+         * Optional: Adds a list item in the current row. Maximum {@value MAX_ITEM_NUMBER} items in
+         * total.
+         *
+         * @param listItem The list item view to display
+         * @return This builder.
+         */
+        @NonNull
+        public Builder addListItem(@NonNull PromptContentListItem listItem) {
+            if (doesListItemExceedsCharLimit(listItem)) {
+                throw new IllegalStateException(
+                        "The character number of list item exceeds "
+                                + MAX_EACH_ITEM_CHARACTER_NUMBER);
+            }
+            mContentList.add((PromptContentListItemParcelable) listItem);
+            return this;
+        }
+
+        private boolean doesListItemExceedsCharLimit(PromptContentListItem listItem) {
+            if (listItem instanceof PromptContentListItemPlainText) {
+                return ((PromptContentListItemPlainText) listItem).getText().length()
+                        > MAX_EACH_ITEM_CHARACTER_NUMBER;
+            } else if (listItem instanceof PromptContentListItemBulletedText) {
+                return ((PromptContentListItemBulletedText) listItem).getText().length()
+                        > MAX_EACH_ITEM_CHARACTER_NUMBER;
+            } else {
+                return false;
+            }
+        }
+
+
+        /**
+         * Creates a {@link PromptVerticalListContentView}.
+         *
+         * @return An instance of {@link PromptVerticalListContentView}.
+         */
+        @NonNull
+        public PromptVerticalListContentView build() {
+            if (mContentList.size() > MAX_ITEM_NUMBER) {
+                throw new IllegalStateException(
+                        "The number of list items exceeds " + MAX_ITEM_NUMBER);
+            }
+            return new PromptVerticalListContentView(mContentList, mDescription);
+        }
+    }
+}
