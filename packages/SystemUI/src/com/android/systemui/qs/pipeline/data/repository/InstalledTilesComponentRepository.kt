@@ -18,23 +18,21 @@ package com.android.systemui.qs.pipeline.data.repository
 
 import android.Manifest.permission.BIND_QUICK_SETTINGS_TILE
 import android.annotation.WorkerThread
-import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ResolveInfoFlags
 import android.os.UserHandle
 import android.service.quicksettings.TileService
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.common.data.repository.PackageChangeRepository
+import com.android.systemui.common.data.shared.model.PackageChangeModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.kotlin.isComponentActuallyEnabled
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
@@ -52,6 +50,7 @@ class InstalledTilesComponentRepositoryImpl
 constructor(
     @Application private val applicationContext: Context,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val packageChangeRepository: PackageChangeRepository
 ) : InstalledTilesComponentRepository {
 
     override fun getInstalledTilesComponents(userId: Int): Flow<Set<ComponentName>> {
@@ -70,24 +69,9 @@ constructor(
                     )
                     .packageManager
             }
-        return conflatedCallbackFlow {
-                val receiver =
-                    object : BroadcastReceiver() {
-                        override fun onReceive(context: Context?, intent: Intent?) {
-                            trySend(Unit)
-                        }
-                    }
-                applicationContext.registerReceiverAsUser(
-                    receiver,
-                    UserHandle.of(userId),
-                    INTENT_FILTER,
-                    /* broadcastPermission = */ null,
-                    /* scheduler = */ null
-                )
-
-                awaitClose { applicationContext.unregisterReceiver(receiver) }
-            }
-            .onStart { emit(Unit) }
+        return packageChangeRepository
+            .packageChanged(UserHandle.of(userId))
+            .onStart { emit(PackageChangeModel.Empty) }
             .map { reloadComponents(userId, packageManager) }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
@@ -104,14 +88,6 @@ constructor(
     }
 
     companion object {
-        private val INTENT_FILTER =
-            IntentFilter().apply {
-                addAction(Intent.ACTION_PACKAGE_ADDED)
-                addAction(Intent.ACTION_PACKAGE_CHANGED)
-                addAction(Intent.ACTION_PACKAGE_REMOVED)
-                addAction(Intent.ACTION_PACKAGE_REPLACED)
-                addDataScheme("package")
-            }
         private val INTENT = Intent(TileService.ACTION_QS_TILE)
         private val FLAGS =
             ResolveInfoFlags.of(
