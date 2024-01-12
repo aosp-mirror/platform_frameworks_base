@@ -398,6 +398,9 @@ cc_library_shared {
     cflags: [
         "-Wno-unused-parameter",
     ],
+    strip: {
+        keep_symbols: true,
+    },
     target: {
         darwin: {
             host_ldlibs: [
@@ -428,10 +431,10 @@ cc_library_shared {
                 "android_database_SQLiteConnection.cpp",
                 "android_database_SQLiteGlobal.cpp",
                 "android_database_SQLiteDebug.cpp",
-              ],
+            ],
         },
         windows: {
-          enabled: true,
+            enabled: true,
         },
         host: {
             cflags: [
