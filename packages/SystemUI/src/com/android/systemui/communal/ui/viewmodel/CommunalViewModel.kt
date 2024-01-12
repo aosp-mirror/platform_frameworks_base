@@ -23,7 +23,9 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
 import javax.inject.Inject
 import javax.inject.Named
@@ -69,6 +71,17 @@ constructor(
     private val _isPopupOnDismissCtaShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isPopupOnDismissCtaShowing: Flow<Boolean> =
         _isPopupOnDismissCtaShowing.asStateFlow()
+
+    init {
+        // Initialize our media host for the UMO. This only needs to happen once and must be done
+        // before the MediaHierarchyManager attempts to move the UMO to the hub.
+        with(mediaHost) {
+            expansion = MediaHostState.EXPANDED
+            showsOnlyActiveMedia = false
+            falsingProtectionNeeded = false
+            init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
+        }
+    }
 
     override fun onOpenWidgetEditor() = communalInteractor.showWidgetEditor()
 

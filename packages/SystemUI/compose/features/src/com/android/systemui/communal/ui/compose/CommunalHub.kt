@@ -88,8 +88,6 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
-import com.android.systemui.media.controls.ui.MediaHierarchyManager
-import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.res.R
 
 @Composable
@@ -576,10 +574,6 @@ private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier)
     AndroidView(
         modifier = modifier,
         factory = {
-            viewModel.mediaHost.expansion = MediaHostState.EXPANDED
-            viewModel.mediaHost.showsOnlyActiveMedia = false
-            viewModel.mediaHost.falsingProtectionNeeded = false
-            viewModel.mediaHost.init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
             viewModel.mediaHost.hostView.layoutParams =
                 FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
