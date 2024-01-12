@@ -56,6 +56,7 @@ std::optional<std::int32_t> render_ahead() {
 
 bool Properties::debugLayersUpdates = false;
 bool Properties::debugOverdraw = false;
+bool Properties::debugTraceGpuResourceCategories = false;
 bool Properties::showDirtyRegions = false;
 bool Properties::skipEmptyFrames = true;
 bool Properties::useBufferAge = true;
@@ -151,10 +152,12 @@ bool Properties::load() {
 
     skpCaptureEnabled = debuggingEnabled && base::GetBoolProperty(PROPERTY_CAPTURE_SKP_ENABLED, false);
 
-    SkAndroidFrameworkTraceUtil::setEnableTracing(
-            base::GetBoolProperty(PROPERTY_SKIA_TRACING_ENABLED, false));
+    bool skiaBroadTracing = base::GetBoolProperty(PROPERTY_SKIA_TRACING_ENABLED, false);
+    SkAndroidFrameworkTraceUtil::setEnableTracing(skiaBroadTracing);
     SkAndroidFrameworkTraceUtil::setUsePerfettoTrackEvents(
             base::GetBoolProperty(PROPERTY_SKIA_USE_PERFETTO_TRACK_EVENTS, false));
+    debugTraceGpuResourceCategories =
+            base::GetBoolProperty(PROPERTY_TRACE_GPU_RESOURCES, skiaBroadTracing);
 
     runningInEmulator = base::GetBoolProperty(PROPERTY_IS_EMULATOR, false);
 
