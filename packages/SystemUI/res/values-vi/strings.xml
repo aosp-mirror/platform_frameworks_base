@@ -188,10 +188,12 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Không thiết lập được tính năng Mở khoá bằng khuôn mặt. Hãy chuyển đến phần Cài đặt để thử lại."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Chạm vào cảm biến vân tay"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Nhấn vào biểu tượng mở khoá để tiếp tục"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Không thể nhận dạng khuôn mặt. Hãy dùng vân tay."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
+    <skip />
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <string name="keyguard_face_failed" msgid="9044619102286917151">"Không nhận ra khuôn mặt"</string>
+    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
+    <skip />
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Hãy dùng vân tay"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Không dùng được tính năng Mở khoá bằng khuôn mặt"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Đã kết nối bluetooth."</string>
@@ -413,6 +415,16 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Đang sạc • Sẽ đầy sau <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Vuốt sang trái để bắt đầu xem hướng dẫn chung"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Mở trình chỉnh sửa tiện ích"</string>
+    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
+    <skip />
+    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
+    <skip />
+    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
+    <skip />
+    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
+    <skip />
+    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
+    <skip />
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Xoá"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Thêm tiện ích"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Xong"</string>
@@ -834,6 +846,8 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Thiết lập"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Bộ nhớ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Gợi ý"</string>
+    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
+    <skip />
     <string name="instant_apps" msgid="8337185853050247304">"Ứng dụng tức thì"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> đang chạy"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Ứng dụng được mở mà không cần cài đặt."</string>
@@ -929,6 +943,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Nhấn để mở bộ tính năng hỗ trợ tiếp cận. Tuỳ chỉnh/thay thế nút này trong phần Cài đặt.\n\n"<annotation id="link">"Xem chế độ cài đặt"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Di chuyển nút sang cạnh để ẩn nút tạm thời"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Huỷ"</string>
+    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
+    <skip />
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Đã xoá phím tắt dành cho <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Đã xoá # lối tắt}other{Đã xoá # lối tắt}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Chuyển lên trên cùng bên trái"</string>
@@ -1207,6 +1225,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Phát hiện thấy người dùng đang hiện diện"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Đặt ứng dụng ghi chú mặc định trong phần Cài đặt"</string>
     <string name="install_app" msgid="5066668100199613936">"Cài đặt ứng dụng"</string>
+    <string name="dismissible_keyguard_swipe" msgid="2213369651289613196">"Vuốt để tiếp tục"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Phản chiếu sang màn hình ngoài?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"Màn hình trong của bạn sẽ được phản chiếu. Màn hình ngoài của bạn sẽ tắt."</string>
     <string name="mirror_display" msgid="2515262008898122928">"Phản chiếu màn hình"</string>

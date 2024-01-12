@@ -188,10 +188,12 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Nevarēja iestatīt autorizāciju pēc sejas. Atveriet iestatījumus, lai mēģinātu vēlreiz."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Pieskarieties pirksta nospieduma sensoram"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Lai turpinātu, nospiediet atbloķēšanas ikonu."</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Nevar atpazīt seju. Lietojiet pirksta nospiedumu."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
+    <skip />
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <string name="keyguard_face_failed" msgid="9044619102286917151">"Nevar atpazīt seju"</string>
+    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
+    <skip />
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Lietot pirksta nospiedumu"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Autorizācija pēc sejas nav pieejama"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth savienojums ir izveidots."</string>
@@ -413,6 +415,16 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Notiek uzlāde • Laiks līdz pilnai uzlādei: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Velciet pa kreisi, lai palaistu kopienas pamācību."</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Atvērt logrīku redaktoru"</string>
+    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
+    <skip />
+    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
+    <skip />
+    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
+    <skip />
+    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
+    <skip />
+    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
+    <skip />
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Noņemt"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Pievienot logrīku"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Gatavs"</string>
@@ -834,6 +846,8 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Iestatīšana"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Krātuve"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Padomi"</string>
+    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
+    <skip />
     <string name="instant_apps" msgid="8337185853050247304">"Tūlītējās lietotnes"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Lietotne <xliff:g id="APP">%1$s</xliff:g> darbojas"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Lai atvērtu šo lietotni, tā nav jāinstalē."</string>
@@ -929,6 +943,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Atveriet pieejamības funkcijas. Pielāgojiet vai aizstājiet šo pogu iestatījumos.\n\n"<annotation id="link">"Skatīt iestatījumus"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Lai īslaicīgi paslēptu pogu, pārvietojiet to uz malu"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Atsaukt"</string>
+    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
+    <skip />
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Noņemts īsinājumtaustiņš <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Noņemts # īsinājumtaustiņš}zero{Noņemti # īsinājumtaustiņi}one{Noņemts # īsinājumtaustiņš}other{Noņemti # īsinājumtaustiņi}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Pārvietot augšpusē pa kreisi"</string>
@@ -1207,6 +1225,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Konstatēta lietotāja klātbūtne"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Iestatījumos iestatiet noklusējuma piezīmju lietotni."</string>
     <string name="install_app" msgid="5066668100199613936">"Instalēt lietotni"</string>
+    <string name="dismissible_keyguard_swipe" msgid="2213369651289613196">"Velciet, lai turpinātu"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Vai spoguļot ārējā displejā?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"Jūsu iekšējais displejs tiks spoguļots. Jūsu priekšējais displejs tiks izslēgts."</string>
     <string name="mirror_display" msgid="2515262008898122928">"Spoguļot displeju"</string>
