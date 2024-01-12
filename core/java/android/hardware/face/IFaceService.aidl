@@ -45,7 +45,7 @@ interface IFaceService {
     byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer);
 
     // Retrieve static sensor properties for all face sensors
-    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    @EnforcePermission(anyOf = {"USE_BIOMETRIC_INTERNAL", "USE_BACKGROUND_FACE_AUTHENTICATION"})
     List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
 
     // Retrieve static sensor properties for the specified sensor
@@ -55,6 +55,11 @@ interface IFaceService {
     // Authenticate with a face. A requestId is returned that can be used to cancel this operation.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     long authenticate(IBinder token, long operationId, IFaceServiceReceiver receiver,
+            in FaceAuthenticateOptions options);
+
+    // Authenticate with a face. A requestId is returned that can be used to cancel this operation.
+    @EnforcePermission("USE_BACKGROUND_FACE_AUTHENTICATION")
+    long authenticateInBackground(IBinder token, long operationId, IFaceServiceReceiver receiver,
             in FaceAuthenticateOptions options);
 
     // Uses the face hardware to detect for the presence of a face, without giving details
@@ -131,7 +136,7 @@ interface IFaceService {
     void revokeChallenge(IBinder token, int sensorId, int userId, String opPackageName, long challenge);
 
     // Determine if a user has at least one enrolled face
-    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
+    @EnforcePermission(anyOf = {"USE_BIOMETRIC_INTERNAL", "USE_BACKGROUND_FACE_AUTHENTICATION"})
     boolean hasEnrolledFaces(int sensorId, int userId, String opPackageName);
 
     // Return the LockoutTracker status for the specified user

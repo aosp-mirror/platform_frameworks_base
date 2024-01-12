@@ -390,6 +390,7 @@ package android {
     field @Deprecated public static final String UPDATE_TIME_ZONE_RULES = "android.permission.UPDATE_TIME_ZONE_RULES";
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
     field public static final String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
+    field @FlaggedApi("android.hardware.biometrics.face_background_authentication") public static final String USE_BACKGROUND_FACE_AUTHENTICATION = "android.permission.USE_BACKGROUND_FACE_AUTHENTICATION";
     field public static final String USE_COLORIZED_NOTIFICATIONS = "android.permission.USE_COLORIZED_NOTIFICATIONS";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
     field public static final String UWB_PRIVILEGED = "android.permission.UWB_PRIVILEGED";
@@ -3546,6 +3547,7 @@ package android.content {
     field @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") public static final String ECM_ENHANCED_CONFIRMATION_SERVICE = "ecm_enhanced_confirmation";
     field public static final String ETHERNET_SERVICE = "ethernet";
     field public static final String EUICC_CARD_SERVICE = "euicc_card";
+    field @FlaggedApi("android.hardware.biometrics.face_background_authentication") public static final String FACE_SERVICE = "face";
     field public static final String FONT_SERVICE = "font";
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
@@ -4722,6 +4724,15 @@ package android.hardware.display {
 
   public static final class VirtualDisplayConfig.Builder {
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.hardware.display.VirtualDisplayConfig.Builder setHomeSupported(boolean);
+  }
+
+}
+
+package android.hardware.face {
+
+  @FlaggedApi("android.hardware.biometrics.face_background_authentication") public class FaceManager {
+    method @FlaggedApi("android.hardware.biometrics.face_background_authentication") @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_FACE_AUTHENTICATION) public void authenticateInBackground(@Nullable java.util.concurrent.Executor, @Nullable android.hardware.biometrics.BiometricPrompt.CryptoObject, @Nullable android.os.CancellationSignal, @NonNull android.hardware.biometrics.BiometricPrompt.AuthenticationCallback);
+    method @FlaggedApi("android.hardware.biometrics.face_background_authentication") @RequiresPermission(anyOf={"android.permission.USE_BIOMETRIC_INTERNAL", android.Manifest.permission.USE_BACKGROUND_FACE_AUTHENTICATION}) public boolean hasEnrolledTemplates();
   }
 
 }
