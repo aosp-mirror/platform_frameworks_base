@@ -861,10 +861,10 @@
     <string name="accessibility_control_move_down" msgid="5390922476900974512">"Premakni navzdol"</string>
     <string name="accessibility_control_move_left" msgid="8156206978511401995">"Premakni levo"</string>
     <string name="accessibility_control_move_right" msgid="8926821093629582888">"Premakni desno"</string>
-    <string name="accessibility_control_increase_window_width" msgid="6992249470832493283">"Povečanje širine povečevalnika"</string>
-    <string name="accessibility_control_decrease_window_width" msgid="5740401560105929681">"Zmanjšanje širine povečevalnika"</string>
-    <string name="accessibility_control_increase_window_height" msgid="2200966116612324260">"Povečanje višine povečevalnika"</string>
-    <string name="accessibility_control_decrease_window_height" msgid="2054479949445332761">"Zmanjšanje višine povečevalnika"</string>
+    <string name="accessibility_control_increase_window_width" msgid="6992249470832493283">"Povečanje širine lupe"</string>
+    <string name="accessibility_control_decrease_window_width" msgid="5740401560105929681">"Zmanjšanje širine lupe"</string>
+    <string name="accessibility_control_increase_window_height" msgid="2200966116612324260">"Povečanje višine lupe"</string>
+    <string name="accessibility_control_decrease_window_height" msgid="2054479949445332761">"Zmanjšanje višine lupe"</string>
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Stikalo za povečavo"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Povečanje celotnega zaslona"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Povečava dela zaslona"</string>
@@ -881,7 +881,7 @@
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Ročica desno"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Ročica spodaj"</string>
     <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Nastavitve povečave"</string>
-    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Velikost povečevalnika"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Velikost lupe"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Povečava/pomanjšava"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Srednja"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Majhna"</string>
@@ -889,7 +889,7 @@
     <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Celozaslonski način"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Končano"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Uredi"</string>
-    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Nastavitve okna povečevalnika"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Nastavitve okna lupe"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dotaknite se za funkcije dostopnosti. Ta gumb lahko prilagodite ali zamenjate v nastavitvah.\n\n"<annotation id="link">"Ogled nastavitev"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Če želite gumb začasno skriti, ga premaknite ob rob."</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Razveljavi"</string>
