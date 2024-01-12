@@ -1187,16 +1187,23 @@ final class LetterboxUiController {
                 && mUserAspectRatio != USER_MIN_ASPECT_RATIO_FULLSCREEN;
     }
 
-    boolean shouldApplyUserFullscreenOverride() {
+    boolean isUserFullscreenOverrideEnabled() {
         if (FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
                 || FALSE.equals(mBooleanPropertyAllowUserAspectRatioFullscreenOverride)
                 || !mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled()) {
             return false;
         }
+        return true;
+    }
 
-        mUserAspectRatio = getUserMinAspectRatioOverrideCode();
+    boolean shouldApplyUserFullscreenOverride() {
+        if (isUserFullscreenOverrideEnabled()) {
+            mUserAspectRatio = getUserMinAspectRatioOverrideCode();
 
-        return mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN;
+            return mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN;
+        }
+
+        return false;
     }
 
     boolean isSystemOverrideToFullscreenEnabled() {
