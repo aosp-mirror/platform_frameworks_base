@@ -239,6 +239,10 @@ java_defaults {
     name: "android-non-updatable_from_source_defaults",
     libs: ["stub-annotations"],
     static_libs: ["framework-res-package-jar"], // Export package of framework-res
+}
+
+java_defaults {
+    name: "android-non-updatable_exportable_from_source_defaults",
     dist: {
         targets: ["sdk"],
         tag: ".jar",
@@ -265,6 +269,14 @@ java_library {
 }
 
 java_library {
+    name: "android-non-updatable.stubs.exportable",
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.exportable.from-source",
+    ],
+}
+
+java_library {
     name: "android-non-updatable.stubs.system",
     defaults: ["android-non-updatable_defaults"],
     static_libs: [
@@ -280,6 +292,14 @@ java_library {
             ],
         },
     },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.exportable.system",
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.exportable.system.from-source",
+    ],
 }
 
 java_library {
@@ -301,6 +321,14 @@ java_library {
 }
 
 java_library {
+    name: "android-non-updatable.stubs.exportable.module_lib",
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.exportable.module_lib.from-source",
+    ],
+}
+
+java_library {
     name: "android-non-updatable.stubs.test",
     defaults: ["android-non-updatable_defaults"],
     static_libs: [
@@ -319,12 +347,31 @@ java_library {
 }
 
 java_library {
+    name: "android-non-updatable.stubs.exportable.test",
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.exportable.test.from-source",
+    ],
+}
+
+java_library {
     name: "android-non-updatable.stubs.from-source",
     defaults: [
         "android-non-updatable_defaults",
         "android-non-updatable_from_source_defaults",
     ],
     srcs: [":api-stubs-docs-non-updatable"],
+    libs: ["all-modules-public-stubs"],
+}
+
+java_library {
+    name: "android-non-updatable.stubs.exportable.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+        "android-non-updatable_exportable_from_source_defaults",
+    ],
+    srcs: [":api-stubs-docs-non-updatable{.exportable}"],
     libs: ["all-modules-public-stubs"],
     dist: {
         dir: "apistubs/android/public",
@@ -339,6 +386,17 @@ java_library {
     ],
     srcs: [":system-api-stubs-docs-non-updatable"],
     libs: ["all-modules-system-stubs"],
+}
+
+java_library {
+    name: "android-non-updatable.stubs.exportable.system.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+        "android-non-updatable_exportable_from_source_defaults",
+    ],
+    srcs: [":system-api-stubs-docs-non-updatable{.exportable}"],
+    libs: ["all-modules-system-stubs"],
     dist: {
         dir: "apistubs/android/system",
     },
@@ -352,6 +410,17 @@ java_library {
     ],
     srcs: [":module-lib-api-stubs-docs-non-updatable"],
     libs: non_updatable_api_deps_on_modules,
+}
+
+java_library {
+    name: "android-non-updatable.stubs.exportable.module_lib.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+        "android-non-updatable_exportable_from_source_defaults",
+    ],
+    srcs: [":module-lib-api-stubs-docs-non-updatable{.exportable}"],
+    libs: non_updatable_api_deps_on_modules,
     dist: {
         dir: "apistubs/android/module-lib",
     },
@@ -364,6 +433,17 @@ java_library {
         "android-non-updatable_from_source_defaults",
     ],
     srcs: [":test-api-stubs-docs-non-updatable"],
+    libs: ["all-modules-system-stubs"],
+}
+
+java_library {
+    name: "android-non-updatable.stubs.exportable.test.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+        "android-non-updatable_exportable_from_source_defaults",
+    ],
+    srcs: [":test-api-stubs-docs-non-updatable{.exportable}"],
     libs: ["all-modules-system-stubs"],
     dist: {
         dir: "apistubs/android/test",
@@ -462,10 +542,33 @@ java_library {
 }
 
 java_library {
+    name: "android_stubs_current_exportable.from-source",
+    static_libs: [
+        "all-modules-public-stubs-exportable",
+        "android-non-updatable.stubs.exportable",
+        "private-stub-annotations-jar",
+    ],
+    defaults: ["android.jar_defaults"],
+}
+
+java_library {
     name: "android_system_stubs_current.from-source",
     static_libs: [
         "all-modules-system-stubs",
         "android-non-updatable.stubs.system",
+        "private-stub-annotations-jar",
+    ],
+    defaults: [
+        "android.jar_defaults",
+    ],
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library {
+    name: "android_system_stubs_current_exportable.from-source",
+    static_libs: [
+        "all-modules-system-stubs-exportable",
+        "android-non-updatable.stubs.exportable.system",
         "private-stub-annotations-jar",
     ],
     defaults: [
@@ -498,6 +601,23 @@ java_library {
     ],
     defaults: [
         "android.jar_defaults",
+    ],
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library {
+    name: "android_test_stubs_current_exportable.from-source",
+    static_libs: [
+        // Updatable modules do not have test APIs, but we want to include their SystemApis, like we
+        // include the SystemApi of framework-non-updatable-sources.
+        "all-updatable-modules-system-stubs-exportable",
+        // Non-updatable modules on the other hand can have test APIs, so include their test-stubs.
+        "all-non-updatable-modules-test-stubs-exportable",
+        "android-non-updatable.stubs.exportable.test",
+        "private-stub-annotations-jar",
+    ],
+    defaults: [
+        "android.jar_defaults",
         "android_stubs_dists_default",
     ],
     dist: {
@@ -505,6 +625,7 @@ java_library {
     },
 }
 
+// This module does not need to be copied to dist
 java_library {
     name: "android_test_frameworks_core_stubs_current.from-source",
     static_libs: [
@@ -513,23 +634,33 @@ java_library {
     ],
     defaults: [
         "android.jar_defaults",
-        "android_stubs_dists_default",
     ],
-    dist: {
-        dir: "apistubs/android/test-core",
-    },
+    visibility: ["//frameworks/base/services"],
 }
 
 java_library {
     name: "android_module_lib_stubs_current.from-source",
     defaults: [
         "android.jar_defaults",
-        "android_stubs_dists_default",
     ],
     static_libs: [
         "android-non-updatable.stubs.module_lib",
         "art.module.public.api.stubs.module_lib",
         "i18n.module.public.api.stubs",
+    ],
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library {
+    name: "android_module_lib_stubs_current_exportable.from-source",
+    defaults: [
+        "android.jar_defaults",
+        "android_stubs_dists_default",
+    ],
+    static_libs: [
+        "android-non-updatable.stubs.exportable.module_lib",
+        "art.module.public.api.stubs.exportable.module_lib",
+        "i18n.module.public.api.stubs.exportable",
     ],
     dist: {
         dir: "apistubs/android/module-lib",
@@ -540,12 +671,25 @@ java_library {
     name: "android_system_server_stubs_current.from-source",
     defaults: [
         "android.jar_defaults",
-        "android_stubs_dists_default",
     ],
     srcs: [":services-non-updatable-stubs"],
     installable: false,
     static_libs: [
         "android_module_lib_stubs_current.from-source",
+    ],
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library {
+    name: "android_system_server_stubs_current_exportable.from-source",
+    defaults: [
+        "android.jar_defaults",
+        "android_stubs_dists_default",
+    ],
+    srcs: [":services-non-updatable-stubs{.exportable}"],
+    installable: false,
+    static_libs: [
+        "android_module_lib_stubs_current_exportable.from-source",
     ],
     dist: {
         dir: "apistubs/android/system-server",
