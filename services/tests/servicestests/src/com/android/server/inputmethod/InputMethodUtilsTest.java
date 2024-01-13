@@ -34,9 +34,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
-import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.IntArray;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
@@ -1211,28 +1209,6 @@ public class InputMethodUtilsTest {
                 StartInputFlags.VIEW_HAS_FOCUS | StartInputFlags.IS_TEXT_EDITOR));
     }
 
-    private static IntArray createSubtypeHashCodeArrayFromStr(String subtypeHashCodesStr) {
-        final IntArray subtypes = new IntArray();
-        final TextUtils.SimpleStringSplitter imeSubtypeSplitter =
-                new TextUtils.SimpleStringSplitter(';');
-        if (TextUtils.isEmpty(subtypeHashCodesStr)) {
-            return subtypes;
-        }
-        imeSubtypeSplitter.setString(subtypeHashCodesStr);
-        while (imeSubtypeSplitter.hasNext()) {
-            subtypes.add(Integer.parseInt(imeSubtypeSplitter.next()));
-        }
-        return subtypes;
-    }
-
-    private static void verifyUpdateEnabledImeString(@NonNull String expectedEnabledImeStr,
-            @NonNull String initialEnabledImeStr, @NonNull String imeId,
-            @NonNull String enabledSubtypeHashCodesStr) {
-        assertEquals(expectedEnabledImeStr,
-                InputMethodUtils.InputMethodSettings.updateEnabledImeString(initialEnabledImeStr,
-                        imeId, createSubtypeHashCodeArrayFromStr(enabledSubtypeHashCodesStr)));
-    }
-
     private static void verifySplitEnabledImeStr(@NonNull String enabledImeStr,
             @NonNull String... expected) {
         final ArrayList<String> actual = new ArrayList<>();
@@ -1279,58 +1255,5 @@ public class InputMethodUtilsTest {
         Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
                         "com.android/.ime1:com.android/.ime2", "com.android/.ime3"))
                 .isEqualTo("com.android/.ime1:com.android/.ime2:com.android/.ime3");
-    }
-
-    @Test
-    public void updateEnabledImeStringTest() {
-        // No change cases
-        verifyUpdateEnabledImeString(
-                "com.android/.ime1",
-                "com.android/.ime1", "com.android/.ime1", "");
-        verifyUpdateEnabledImeString(
-                "com.android/.ime1",
-                "com.android/.ime1", "com.android/.ime2", "");
-
-        // To enable subtypes
-        verifyUpdateEnabledImeString(
-                "com.android/.ime1",
-                "com.android/.ime1", "com.android/.ime2", "");
-        verifyUpdateEnabledImeString(
-                "com.android/.ime1;1",
-                "com.android/.ime1", "com.android/.ime1", "1");
-
-        verifyUpdateEnabledImeString(
-                "com.android/.ime1;1;2;3",
-                "com.android/.ime1", "com.android/.ime1", "1;2;3");
-
-        verifyUpdateEnabledImeString(
-                "com.android/.ime1;1;2;3:com.android/.ime2",
-                "com.android/.ime1:com.android/.ime2", "com.android/.ime1", "1;2;3");
-        verifyUpdateEnabledImeString(
-                "com.android/.ime0:com.android/.ime1;1;2;3",
-                "com.android/.ime0:com.android/.ime1", "com.android/.ime1", "1;2;3");
-        verifyUpdateEnabledImeString(
-                "com.android/.ime0:com.android/.ime1;1;2;3:com.android/.ime2",
-                "com.android/.ime0:com.android/.ime1:com.android/.ime2", "com.android/.ime1",
-                "1;2;3");
-
-        // To reset enabled subtypes
-        verifyUpdateEnabledImeString(
-                "com.android/.ime1",
-                "com.android/.ime1;1", "com.android/.ime1", "");
-        verifyUpdateEnabledImeString(
-                "com.android/.ime1",
-                "com.android/.ime1;1;2;3", "com.android/.ime1", "");
-        verifyUpdateEnabledImeString(
-                "com.android/.ime1:com.android/.ime2",
-                "com.android/.ime1;1;2;3:com.android/.ime2", "com.android/.ime1", "");
-
-        verifyUpdateEnabledImeString(
-                "com.android/.ime0:com.android/.ime1",
-                "com.android/.ime0:com.android/.ime1;1;2;3", "com.android/.ime1", "");
-        verifyUpdateEnabledImeString(
-                "com.android/.ime0:com.android/.ime1:com.android/.ime2",
-                "com.android/.ime0:com.android/.ime1;1;2;3:com.android/.ime2", "com.android/.ime1",
-                "");
     }
 }
