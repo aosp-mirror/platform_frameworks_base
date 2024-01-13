@@ -28,6 +28,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -37,8 +38,14 @@ class SceneInteractorTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val repository = utils.fakeSceneContainerRepository()
-    private val underTest = utils.sceneInteractor(repository = repository)
+
+    private lateinit var underTest: SceneInteractor
+
+    @Before
+    fun setUp() {
+        utils.fakeSceneContainerFlags.enabled = true
+        underTest = utils.sceneInteractor()
+    }
 
     @Test
     fun allSceneKeys() {

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar
 
-import android.content.testableContext
+import android.content.applicationContext
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.policy.splitShadeStateController
 val Kosmos.lockscreenShadeScrimTransitionController by Fixture {
     LockscreenShadeScrimTransitionController(
         scrimController = scrimController,
-        context = testableContext,
+        context = applicationContext,
         configurationController = configurationController,
         dumpManager = dumpManager,
         splitShadeStateController = splitShadeStateController,

@@ -166,7 +166,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKeyguardRepository,
                 mCommandQueue,
                 PowerInteractorFactory.create().getPowerInteractor(),
-                mSceneTestUtils.getSceneContainerFlags(),
+                mSceneTestUtils.getFakeSceneContainerFlags(),
                 new FakeKeyguardBouncerRepository(),
                 new ConfigurationInteractor(new FakeConfigurationRepository()),
                 new FakeShadeRepository(),

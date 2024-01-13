@@ -17,6 +17,8 @@
 package com.android.systemui.smartspace.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 
-var Kosmos.smartspaceRepository: SmartspaceRepository by Kosmos.Fixture { fakeSmartspaceRepository }
-val Kosmos.fakeSmartspaceRepository by Kosmos.Fixture { FakeSmartspaceRepository() }
+val Kosmos.fakeSmartspaceRepository by Fixture { FakeSmartspaceRepository() }
+
+val Kosmos.smartspaceRepository by Fixture<SmartspaceRepository> { fakeSmartspaceRepository }
