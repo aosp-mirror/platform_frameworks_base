@@ -26,6 +26,7 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -167,10 +168,15 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLargeScreen_updateResources_splitShadeHeightIsSet() {
+    fun testLargeScreen_updateResources_refactorFlagOff_splitShadeHeightIsSetBasedOnResource() {
+        val headerResourceHeight = 20
+        val headerHelperHeight = 30
+        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
+            .thenReturn(headerHelperHeight)
         overrideResource(R.bool.config_use_large_screen_shade_header, true)
         overrideResource(R.dimen.qs_header_height, 10)
-        overrideResource(R.dimen.large_screen_shade_header_height, 20)
+        overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
 
         // ensure the estimated height (would be 3 here) wouldn't impact this test case
         overrideResource(R.dimen.large_screen_shade_header_min_height, 1)
@@ -180,7 +186,31 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
         val captor = ArgumentCaptor.forClass(ConstraintSet::class.java)
         verify(view).applyConstraints(capture(captor))
-        assertThat(captor.value.getHeight(R.id.split_shade_status_bar)).isEqualTo(20)
+        assertThat(captor.value.getHeight(R.id.split_shade_status_bar))
+            .isEqualTo(headerResourceHeight)
+    }
+
+    @Test
+    fun testLargeScreen_updateResources_refactorFlagOn_splitShadeHeightIsSetBasedOnHelper() {
+        val headerResourceHeight = 20
+        val headerHelperHeight = 30
+        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
+            .thenReturn(headerHelperHeight)
+        overrideResource(R.bool.config_use_large_screen_shade_header, true)
+        overrideResource(R.dimen.qs_header_height, 10)
+        overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
+
+        // ensure the estimated height (would be 3 here) wouldn't impact this test case
+        overrideResource(R.dimen.large_screen_shade_header_min_height, 1)
+        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 1)
+
+        underTest.updateResources()
+
+        val captor = ArgumentCaptor.forClass(ConstraintSet::class.java)
+        verify(view).applyConstraints(capture(captor))
+        assertThat(captor.value.getHeight(R.id.split_shade_status_bar))
+            .isEqualTo(headerHelperHeight)
     }
 
     @Test
@@ -416,10 +446,14 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLargeScreenLayout_qsAndNotifsTopMarginIsOfHeaderHeight() {
+    fun testLargeScreenLayout_refactorFlagOff_qsAndNotifsTopMarginIsOfHeaderHeightResource() {
+        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
         setLargeScreen()
-        val largeScreenHeaderHeight = 100
-        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderHeight)
+        val largeScreenHeaderResourceHeight = 100
+        val largeScreenHeaderHelperHeight = 200
+        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
+            .thenReturn(largeScreenHeaderHelperHeight)
+        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderResourceHeight)
 
         // ensure the estimated height (would be 30 here) wouldn't impact this test case
         overrideResource(R.dimen.large_screen_shade_header_min_height, 10)
@@ -428,9 +462,31 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
         underTest.updateResources()
 
         assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin)
-            .isEqualTo(largeScreenHeaderHeight)
+            .isEqualTo(largeScreenHeaderResourceHeight)
         assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).topMargin)
-            .isEqualTo(largeScreenHeaderHeight)
+            .isEqualTo(largeScreenHeaderResourceHeight)
+    }
+
+    @Test
+    fun testLargeScreenLayout_refactorFlagOn_qsAndNotifsTopMarginIsOfHeaderHeightHelper() {
+        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+        setLargeScreen()
+        val largeScreenHeaderResourceHeight = 100
+        val largeScreenHeaderHelperHeight = 200
+        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
+            .thenReturn(largeScreenHeaderHelperHeight)
+        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderResourceHeight)
+
+        // ensure the estimated height (would be 30 here) wouldn't impact this test case
+        overrideResource(R.dimen.large_screen_shade_header_min_height, 10)
+        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 10)
+
+        underTest.updateResources()
+
+        assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin)
+            .isEqualTo(largeScreenHeaderHelperHeight)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).topMargin)
+            .isEqualTo(largeScreenHeaderHelperHeight)
     }
 
     @Test
