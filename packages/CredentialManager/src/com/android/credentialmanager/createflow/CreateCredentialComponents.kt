@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.model.EntryInfo
@@ -70,7 +71,6 @@ import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.logging.CreateCredentialEvent
 import com.android.credentialmanager.model.creation.CreateOptionInfo
 import com.android.credentialmanager.model.creation.RemoteInfo
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
 @Composable
@@ -460,7 +460,7 @@ fun CreationSelectionCard(
             item {
                 Divider(
                     thickness = 1.dp,
-                    color = LocalAndroidColorScheme.current.colorOutlineVariant,
+                    color = LocalAndroidColorScheme.current.outlineVariant,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
