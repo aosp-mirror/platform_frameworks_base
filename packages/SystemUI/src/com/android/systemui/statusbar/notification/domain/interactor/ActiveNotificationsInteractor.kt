@@ -33,7 +33,10 @@ constructor(
     private val repository: ActiveNotificationListRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
-    /** Notifications actively presented to the user in the notification stack, in order. */
+    /**
+     * Top level list of Notifications actively presented to the user in the notification stack, in
+     * order.
+     */
     val topLevelRepresentativeNotifications: Flow<List<ActiveNotificationModel>> =
         repository.activeNotifications
             .map { store ->
@@ -51,6 +54,13 @@ constructor(
             }
             .flowOn(backgroundDispatcher)
 
+    /**
+     * Flattened list of Notifications actively presented to the user in the notification stack, in
+     * order.
+     */
+    val allRepresentativeNotifications: Flow<Map<String, ActiveNotificationModel>> =
+        repository.activeNotifications.map { store -> store.individuals }
+
     /** Are any notifications being actively presented in the notification stack? */
     val areAnyNotificationsPresent: Flow<Boolean> =
         repository.activeNotifications
@@ -64,6 +74,16 @@ constructor(
      */
     val areAnyNotificationsPresentValue: Boolean
         get() = repository.activeNotifications.value.renderList.isNotEmpty()
+
+    /**
+     * Map of notification key to rank, where rank is the 0-based index of the notification in the
+     * system server, meaning that in the unfiltered flattened list of notification entries. Used
+     * for logging purposes.
+     *
+     * @see [com.android.systemui.statusbar.notification.stack.ui.view.NotificationStatsLogger].
+     */
+    val activeNotificationRanks: Flow<Map<String, Int>> =
+        repository.activeNotifications.map { store -> store.rankingsMap }
 
     /** Are there are any notifications that can be cleared by the "Clear all" button? */
     val hasClearableNotifications: Flow<Boolean> =

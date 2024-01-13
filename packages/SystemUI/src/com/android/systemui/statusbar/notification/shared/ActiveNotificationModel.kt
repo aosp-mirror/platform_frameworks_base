@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.shared
 
 import android.graphics.drawable.Icon
+import com.android.systemui.statusbar.notification.stack.PriorityBucket
 
 /**
  * Model for a top-level "entry" in the notification list, either an
@@ -55,6 +56,16 @@ data class ActiveNotificationModel(
     val shelfIcon: Icon?,
     /** Icon to display in the status bar. */
     val statusBarIcon: Icon?,
+    /** The notifying app's [packageName]'s uid. */
+    val uid: Int,
+    /** The notifying app's packageName. */
+    val packageName: String,
+    /** A small per-notification ID, used for statsd logging. */
+    val instanceId: Int?,
+    /** If this notification is the group summary for a group of notifications. */
+    val isGroupSummary: Boolean,
+    /** Indicates in which section the notification is displayed in. @see [PriorityBucket]. */
+    @PriorityBucket val bucket: Int,
 ) : ActiveNotificationEntryModel()
 
 /** Model for a group of notifications. */

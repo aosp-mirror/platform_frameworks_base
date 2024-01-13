@@ -33,13 +33,16 @@ import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefac
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerShelfViewBinder
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinder
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStatsLogger
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.util.kotlin.getOrNull
+import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.combine
@@ -49,13 +52,14 @@ import kotlinx.coroutines.launch
 class NotificationListViewBinder
 @Inject
 constructor(
-    private val viewModel: NotificationListViewModel,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val configuration: ConfigurationState,
     private val falsingManager: FalsingManager,
     private val iconAreaController: NotificationIconAreaController,
     private val metricsLogger: MetricsLogger,
     private val nicBinder: NotificationIconContainerShelfViewBinder,
+    private val loggerOptional: Optional<NotificationStatsLogger>,
+    private val viewModel: NotificationListViewModel,
 ) {
 
     fun bindWhileAttached(
@@ -75,10 +79,15 @@ constructor(
                 if (FooterViewRefactor.isEnabled) {
                     launch { bindFooter(view) }
                     launch { bindEmptyShade(view) }
-                    viewModel.isImportantForAccessibility.collect { isImportantForAccessibility ->
-                        view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
+                    launch {
+                        viewModel.isImportantForAccessibility.collect { isImportantForAccessibility
+                            ->
+                            view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
+                        }
                     }
                 }
+
+                launch { bindLogger(view) }
             }
         }
     }
@@ -135,5 +144,19 @@ constructor(
                     hasFilteredNotifs,
                 )
             }
+    }
+
+    private suspend fun bindLogger(view: NotificationStackScrollLayout) {
+        if (NotificationsLiveDataStoreRefactor.isEnabled) {
+            viewModel.logger.getOrNull()?.let { viewModel ->
+                loggerOptional.getOrNull()?.let { logger ->
+                    NotificationStatsLoggerBinder.bindLogger(
+                        view,
+                        logger,
+                        viewModel,
+                    )
+                }
+            }
+        }
     }
 }

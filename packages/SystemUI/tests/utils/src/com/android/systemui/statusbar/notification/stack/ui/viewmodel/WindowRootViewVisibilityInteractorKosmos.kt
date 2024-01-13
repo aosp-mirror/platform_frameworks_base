@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.data.repository.windowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.policy.headsUpManager
 
 val Kosmos.windowRootViewVisibilityInteractor by Fixture {
     WindowRootViewVisibilityInteractor(
-        scope = testScope,
+        scope = applicationCoroutineScope,
         windowRootViewVisibilityRepository = windowRootViewVisibilityRepository,
         keyguardRepository = keyguardRepository,
         headsUpManager = headsUpManager,
