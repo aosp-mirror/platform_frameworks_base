@@ -269,13 +269,14 @@ void CacheManager::onFrameCompleted() {
     cancelDestroyContext();
     mFrameCompletions.next() = systemTime(CLOCK_MONOTONIC);
     if (ATRACE_ENABLED()) {
+        ATRACE_NAME("dumpingMemoryStatistics");
         static skiapipeline::ATraceMemoryDump tracer;
         tracer.startFrame();
         SkGraphics::DumpMemoryStatistics(&tracer);
-        if (mGrContext) {
+        if (mGrContext && Properties::debugTraceGpuResourceCategories) {
             mGrContext->dumpMemoryStatistics(&tracer);
         }
-        tracer.logTraces();
+        tracer.logTraces(Properties::debugTraceGpuResourceCategories, mGrContext.get());
     }
 }
 

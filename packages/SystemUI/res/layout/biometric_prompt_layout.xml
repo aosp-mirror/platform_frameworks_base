@@ -48,6 +48,23 @@
         android:importantForAccessibility="no"
         style="@style/TextAppearance.AuthCredential.Description"/>
 
+    <Space
+        android:id="@+id/space_above_content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/biometric_prompt_space_above_content"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:id="@+id/customized_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fadeScrollbars="false"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/biometric_prompt_content_container_padding_horizontal"
+        android:scrollbars="vertical"
+        android:visibility="gone" />
+
     <Space android:id="@+id/space_above_icon"
         android:layout_width="match_parent"
         android:layout_height="48dp" />

@@ -195,9 +195,30 @@ public class PerformanceHintManagerTest {
         Session s = createSession();
         assumeNotNull(s);
         s.updateTargetWorkDuration(16);
-        s.reportActualWorkDuration(new WorkDuration(1, 12, 8, 6));
-        s.reportActualWorkDuration(new WorkDuration(1, 33, 14, 20));
-        s.reportActualWorkDuration(new WorkDuration(1, 14, 10, 6));
+        {
+            WorkDuration workDuration = new WorkDuration();
+            workDuration.setWorkPeriodStartTimestampNanos(1);
+            workDuration.setActualTotalDurationNanos(12);
+            workDuration.setActualCpuDurationNanos(8);
+            workDuration.setActualGpuDurationNanos(6);
+            s.reportActualWorkDuration(workDuration);
+        }
+        {
+            WorkDuration workDuration = new WorkDuration();
+            workDuration.setWorkPeriodStartTimestampNanos(1);
+            workDuration.setActualTotalDurationNanos(33);
+            workDuration.setActualCpuDurationNanos(14);
+            workDuration.setActualGpuDurationNanos(20);
+            s.reportActualWorkDuration(workDuration);
+        }
+        {
+            WorkDuration workDuration = new WorkDuration();
+            workDuration.setWorkPeriodStartTimestampNanos(1);
+            workDuration.setActualTotalDurationNanos(14);
+            workDuration.setActualCpuDurationNanos(10);
+            workDuration.setActualGpuDurationNanos(6);
+            s.reportActualWorkDuration(workDuration);
+        }
     }
 
     @Test
@@ -206,25 +227,25 @@ public class PerformanceHintManagerTest {
         assumeNotNull(s);
         s.updateTargetWorkDuration(16);
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(-1, 12, 8, 6));
+            s.reportActualWorkDuration(new WorkDuration(-1, 12, 8, 6, 1));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(0, 12, 8, 6));
+            s.reportActualWorkDuration(new WorkDuration(0, 12, 8, 6, 1));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, -1, 8, 6));
+            s.reportActualWorkDuration(new WorkDuration(1, -1, 8, 6, 1));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, 0, 8, 6));
+            s.reportActualWorkDuration(new WorkDuration(1, 0, 8, 6, 1));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, 12, -1, 6));
+            s.reportActualWorkDuration(new WorkDuration(1, 12, -1, 6, 1));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, 12, 0, 6));
+            s.reportActualWorkDuration(new WorkDuration(1, 12, 0, 6, 1));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, 12, 8, -1));
+            s.reportActualWorkDuration(new WorkDuration(1, 12, 8, -1, 1));
         });
     }
 }

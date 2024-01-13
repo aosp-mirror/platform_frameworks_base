@@ -37,6 +37,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
@@ -76,6 +78,29 @@ constructor(
     fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?) {
         communalRepository.setTransitionState(transitionState)
     }
+
+    /** Returns a flow that tracks the progress of transitions to the given scene from 0-1. */
+    fun transitionProgressToScene(targetScene: CommunalSceneKey) =
+        transitionState
+            .flatMapLatest { state ->
+                when (state) {
+                    is ObservableCommunalTransitionState.Idle ->
+                        flowOf(CommunalTransitionProgress.Idle(state.scene))
+                    is ObservableCommunalTransitionState.Transition ->
+                        if (state.toScene == targetScene) {
+                            state.progress.map {
+                                CommunalTransitionProgress.Transition(
+                                    // Clamp the progress values between 0 and 1 as actual progress
+                                    // values can be higher than 0 or lower than 1 due to a fling.
+                                    progress = it.coerceIn(0.0f, 1.0f)
+                                )
+                            }
+                        } else {
+                            flowOf(CommunalTransitionProgress.OtherTransition)
+                        }
+                }
+            }
+            .distinctUntilChanged()
 
     /**
      * Flow that emits a boolean if the communal UI is showing, ie. the [desiredScene] is the
@@ -231,4 +256,18 @@ constructor(
             )
         }
     }
+}
+
+/** Simplified transition progress data class for tracking a single transition between scenes. */
+sealed class CommunalTransitionProgress {
+    /** No transition/animation is currently running. */
+    data class Idle(val scene: CommunalSceneKey) : CommunalTransitionProgress()
+
+    /** There is a transition animating to the expected scene. */
+    data class Transition(
+        val progress: Float,
+    ) : CommunalTransitionProgress()
+
+    /** There is a transition animating to a scene other than the expected scene. */
+    data object OtherTransition : CommunalTransitionProgress()
 }

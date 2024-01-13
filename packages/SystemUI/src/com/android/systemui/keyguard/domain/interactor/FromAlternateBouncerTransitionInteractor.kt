@@ -18,7 +18,8 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -28,6 +29,7 @@ import com.android.systemui.util.kotlin.sample
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
@@ -39,13 +41,18 @@ class FromAlternateBouncerTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
-    override val transitionInteractor: KeyguardTransitionInteractor,
-    @Application private val scope: CoroutineScope,
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Background private val scope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
+    @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
     private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.ALTERNATE_BOUNCER,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
     ) {
 
     override fun start() {
@@ -65,7 +72,7 @@ constructor(
                 .sample(
                     combine(
                         keyguardInteractor.primaryBouncerShowing,
-                        transitionInteractor.startedKeyguardTransitionStep,
+                        startedKeyguardTransitionStep,
                         powerInteractor.isAwake,
                         keyguardInteractor.isAodAvailable,
                         ::toQuad
@@ -102,20 +109,19 @@ constructor(
 
     private fun listenForAlternateBouncerToGone() {
         scope.launch {
-            keyguardInteractor.isKeyguardGoingAway
-                .sample(transitionInteractor.finishedKeyguardState, ::Pair)
-                .collect { (isKeyguardGoingAway, keyguardState) ->
-                    if (isKeyguardGoingAway && keyguardState == KeyguardState.ALTERNATE_BOUNCER) {
-                        startTransitionTo(KeyguardState.GONE)
-                    }
+            keyguardInteractor.isKeyguardGoingAway.sample(finishedKeyguardState, ::Pair).collect {
+                (isKeyguardGoingAway, keyguardState) ->
+                if (isKeyguardGoingAway && keyguardState == KeyguardState.ALTERNATE_BOUNCER) {
+                    startTransitionTo(KeyguardState.GONE)
                 }
+            }
         }
     }
 
     private fun listenForAlternateBouncerToPrimaryBouncer() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .sample(startedKeyguardTransitionStep, ::Pair)
                 .collect { (isPrimaryBouncerShowing, startedKeyguardState) ->
                     if (
                         isPrimaryBouncerShowing &&
@@ -139,8 +145,10 @@ constructor(
     }
 
     companion object {
+        const val TAG = "FromAlternateBouncerTransitionInteractor"
         val TRANSITION_DURATION_MS = 300.milliseconds
         val TO_GONE_DURATION = 500.milliseconds
         val TO_AOD_DURATION = TRANSITION_DURATION_MS
+        val TO_PRIMARY_BOUNCER_DURATION = TRANSITION_DURATION_MS
     }
 }

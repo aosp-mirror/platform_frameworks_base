@@ -1,5 +1,6 @@
 package com.android.systemui.biometrics.domain.model
 
+import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
@@ -34,6 +35,7 @@ sealed class BiometricPromptRequest(
             operationInfo = operationInfo,
             showEmergencyCallButton = info.isShowEmergencyCallButton
         ) {
+        val contentView: PromptContentView? = info.contentView
         val negativeButtonText: String = info.negativeButtonText?.toString() ?: ""
     }
 

@@ -125,7 +125,7 @@ public class CompanionTransportManager {
      * Send a message to remote devices through the transports
      */
     public void sendMessage(int message, byte[] data, int[] associationIds) {
-        Slog.i(TAG, "Sending message 0x" + Integer.toHexString(message)
+        Slog.d(TAG, "Sending message 0x" + Integer.toHexString(message)
                 + " data length " + data.length);
         synchronized (mTransports) {
             for (int i = 0; i < associationIds.length; i++) {

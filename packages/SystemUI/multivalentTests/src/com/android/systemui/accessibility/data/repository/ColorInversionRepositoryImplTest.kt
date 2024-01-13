@@ -39,6 +39,8 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ColorInversionRepositoryImplTest : SysuiTestCase() {
 
+    private val testUser1 = UserHandle.of(1)!!
+    private val testUser2 = UserHandle.of(2)!!
     private val testDispatcher = StandardTestDispatcher()
     private val scope = TestScope(testDispatcher)
     private val settings: FakeSettings = FakeSettings()
@@ -57,7 +59,7 @@ class ColorInversionRepositoryImplTest : SysuiTestCase() {
     @Test
     fun isEnabled_initiallyGetsSettingsValue() =
         scope.runTest {
-            settings.putIntForUser(SETTING_NAME, 1, TEST_USER_1.identifier)
+            settings.putIntForUser(SETTING_NAME, 1, testUser1.identifier)
 
             underTest =
                 ColorInversionRepositoryImpl(
@@ -65,68 +67,68 @@ class ColorInversionRepositoryImplTest : SysuiTestCase() {
                     settings,
                 )
 
-            underTest.isEnabled(TEST_USER_1).launchIn(backgroundScope)
+            underTest.isEnabled(testUser1).launchIn(backgroundScope)
             runCurrent()
 
-            val actualValue: Boolean = underTest.isEnabled(TEST_USER_1).first()
+            val actualValue: Boolean = underTest.isEnabled(testUser1).first()
             assertThat(actualValue).isTrue()
         }
 
     @Test
     fun isEnabled_settingUpdated_valueUpdated() =
         scope.runTest {
-            underTest.isEnabled(TEST_USER_1).launchIn(backgroundScope)
+            underTest.isEnabled(testUser1).launchIn(backgroundScope)
 
-            settings.putIntForUser(SETTING_NAME, DISABLED, TEST_USER_1.identifier)
+            settings.putIntForUser(SETTING_NAME, DISABLED, testUser1.identifier)
             runCurrent()
-            assertThat(underTest.isEnabled(TEST_USER_1).first()).isFalse()
+            assertThat(underTest.isEnabled(testUser1).first()).isFalse()
 
-            settings.putIntForUser(SETTING_NAME, ENABLED, TEST_USER_1.identifier)
+            settings.putIntForUser(SETTING_NAME, ENABLED, testUser1.identifier)
             runCurrent()
-            assertThat(underTest.isEnabled(TEST_USER_1).first()).isTrue()
+            assertThat(underTest.isEnabled(testUser1).first()).isTrue()
 
-            settings.putIntForUser(SETTING_NAME, DISABLED, TEST_USER_1.identifier)
+            settings.putIntForUser(SETTING_NAME, DISABLED, testUser1.identifier)
             runCurrent()
-            assertThat(underTest.isEnabled(TEST_USER_1).first()).isFalse()
+            assertThat(underTest.isEnabled(testUser1).first()).isFalse()
         }
 
     @Test
     fun isEnabled_settingForUserOneOnly_valueUpdatedForUserOneOnly() =
         scope.runTest {
-            underTest.isEnabled(TEST_USER_1).launchIn(backgroundScope)
-            settings.putIntForUser(SETTING_NAME, DISABLED, TEST_USER_1.identifier)
-            underTest.isEnabled(TEST_USER_2).launchIn(backgroundScope)
-            settings.putIntForUser(SETTING_NAME, DISABLED, TEST_USER_2.identifier)
+            underTest.isEnabled(testUser1).launchIn(backgroundScope)
+            settings.putIntForUser(SETTING_NAME, DISABLED, testUser1.identifier)
+            underTest.isEnabled(testUser2).launchIn(backgroundScope)
+            settings.putIntForUser(SETTING_NAME, DISABLED, testUser2.identifier)
 
             runCurrent()
-            assertThat(underTest.isEnabled(TEST_USER_1).first()).isFalse()
-            assertThat(underTest.isEnabled(TEST_USER_2).first()).isFalse()
+            assertThat(underTest.isEnabled(testUser1).first()).isFalse()
+            assertThat(underTest.isEnabled(testUser2).first()).isFalse()
 
-            settings.putIntForUser(SETTING_NAME, ENABLED, TEST_USER_1.identifier)
+            settings.putIntForUser(SETTING_NAME, ENABLED, testUser1.identifier)
             runCurrent()
-            assertThat(underTest.isEnabled(TEST_USER_1).first()).isTrue()
-            assertThat(underTest.isEnabled(TEST_USER_2).first()).isFalse()
+            assertThat(underTest.isEnabled(testUser1).first()).isTrue()
+            assertThat(underTest.isEnabled(testUser2).first()).isFalse()
         }
 
     @Test
     fun setEnabled() =
         scope.runTest {
-            val success = underTest.setIsEnabled(true, TEST_USER_1)
+            val success = underTest.setIsEnabled(true, testUser1)
             runCurrent()
             assertThat(success).isTrue()
 
-            val actualValue = settings.getIntForUser(SETTING_NAME, TEST_USER_1.identifier)
+            val actualValue = settings.getIntForUser(SETTING_NAME, testUser1.identifier)
             assertThat(actualValue).isEqualTo(ENABLED)
         }
 
     @Test
     fun setDisabled() =
         scope.runTest {
-            val success = underTest.setIsEnabled(false, TEST_USER_1)
+            val success = underTest.setIsEnabled(false, testUser1)
             runCurrent()
             assertThat(success).isTrue()
 
-            val actualValue = settings.getIntForUser(SETTING_NAME, TEST_USER_1.identifier)
+            val actualValue = settings.getIntForUser(SETTING_NAME, testUser1.identifier)
             assertThat(actualValue).isEqualTo(DISABLED)
         }
 
@@ -134,7 +136,5 @@ class ColorInversionRepositoryImplTest : SysuiTestCase() {
         private const val SETTING_NAME = ACCESSIBILITY_DISPLAY_INVERSION_ENABLED
         private const val DISABLED = 0
         private const val ENABLED = 1
-        private val TEST_USER_1 = UserHandle.of(1)!!
-        private val TEST_USER_2 = UserHandle.of(2)!!
     }
 }

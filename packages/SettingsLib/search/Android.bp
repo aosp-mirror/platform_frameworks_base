@@ -12,9 +12,6 @@ java_library {
     visibility: ["//visibility:private"],
     srcs: ["interface-src/**/*.java"],
     host_supported: true,
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 android_library {

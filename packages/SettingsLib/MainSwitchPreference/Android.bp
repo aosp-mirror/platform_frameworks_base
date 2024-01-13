@@ -28,7 +28,4 @@ android_library {
         "com.android.extservices",
         "com.android.healthfitness",
     ],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }

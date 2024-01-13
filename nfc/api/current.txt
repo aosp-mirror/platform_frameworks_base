@@ -1,1 +1,455 @@
 // Signature format: 2.0
+package android.nfc {
+
+  public final class AvailableNfcAntenna implements android.os.Parcelable {
+    ctor public AvailableNfcAntenna(int, int);
+    method public int describeContents();
+    method public int getLocationX();
+    method public int getLocationY();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.AvailableNfcAntenna> CREATOR;
+  }
+
+  public class FormatException extends java.lang.Exception {
+    ctor public FormatException();
+    ctor public FormatException(String);
+    ctor public FormatException(String, Throwable);
+  }
+
+  public final class NdefMessage implements android.os.Parcelable {
+    ctor public NdefMessage(byte[]) throws android.nfc.FormatException;
+    ctor public NdefMessage(android.nfc.NdefRecord, android.nfc.NdefRecord...);
+    ctor public NdefMessage(android.nfc.NdefRecord[]);
+    method public int describeContents();
+    method public int getByteArrayLength();
+    method public android.nfc.NdefRecord[] getRecords();
+    method public byte[] toByteArray();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.NdefMessage> CREATOR;
+  }
+
+  public final class NdefRecord implements android.os.Parcelable {
+    ctor public NdefRecord(short, byte[], byte[], byte[]);
+    ctor @Deprecated public NdefRecord(byte[]) throws android.nfc.FormatException;
+    method public static android.nfc.NdefRecord createApplicationRecord(String);
+    method public static android.nfc.NdefRecord createExternal(String, String, byte[]);
+    method public static android.nfc.NdefRecord createMime(String, byte[]);
+    method public static android.nfc.NdefRecord createTextRecord(String, String);
+    method public static android.nfc.NdefRecord createUri(android.net.Uri);
+    method public static android.nfc.NdefRecord createUri(String);
+    method public int describeContents();
+    method public byte[] getId();
+    method public byte[] getPayload();
+    method public short getTnf();
+    method public byte[] getType();
+    method @Deprecated public byte[] toByteArray();
+    method public String toMimeType();
+    method public android.net.Uri toUri();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.NdefRecord> CREATOR;
+    field public static final byte[] RTD_ALTERNATIVE_CARRIER;
+    field public static final byte[] RTD_HANDOVER_CARRIER;
+    field public static final byte[] RTD_HANDOVER_REQUEST;
+    field public static final byte[] RTD_HANDOVER_SELECT;
+    field public static final byte[] RTD_SMART_POSTER;
+    field public static final byte[] RTD_TEXT;
+    field public static final byte[] RTD_URI;
+    field public static final short TNF_ABSOLUTE_URI = 3; // 0x3
+    field public static final short TNF_EMPTY = 0; // 0x0
+    field public static final short TNF_EXTERNAL_TYPE = 4; // 0x4
+    field public static final short TNF_MIME_MEDIA = 2; // 0x2
+    field public static final short TNF_UNCHANGED = 6; // 0x6
+    field public static final short TNF_UNKNOWN = 5; // 0x5
+    field public static final short TNF_WELL_KNOWN = 1; // 0x1
+  }
+
+  public final class NfcAdapter {
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean allowTransaction();
+    method public void disableForegroundDispatch(android.app.Activity);
+    method public void disableReaderMode(android.app.Activity);
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean disallowTransaction();
+    method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]);
+    method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
+    method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
+    method @Nullable public android.nfc.NfcAntennaInfo getNfcAntennaInfo();
+    method @FlaggedApi("android.nfc.enable_nfc_charging") @Nullable public android.nfc.WlcLDeviceInfo getWlcLDeviceInfo();
+    method public boolean ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler);
+    method public boolean isEnabled();
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean isObserveModeSupported();
+    method @FlaggedApi("android.nfc.enable_nfc_reader_option") public boolean isReaderOptionEnabled();
+    method @FlaggedApi("android.nfc.enable_nfc_reader_option") public boolean isReaderOptionSupported();
+    method public boolean isSecureNfcEnabled();
+    method public boolean isSecureNfcSupported();
+    method @FlaggedApi("android.nfc.enable_nfc_charging") public boolean isWlcEnabled();
+    method @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public void resetDiscoveryTechnology(@NonNull android.app.Activity);
+    method @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public void setDiscoveryTechnology(@NonNull android.app.Activity, int, int);
+    field public static final String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";
+    field public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
+    field @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static final String ACTION_PREFERRED_PAYMENT_CHANGED = "android.nfc.action.PREFERRED_PAYMENT_CHANGED";
+    field public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
+    field public static final String ACTION_TECH_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
+    field @RequiresPermission(android.Manifest.permission.NFC_TRANSACTION_EVENT) public static final String ACTION_TRANSACTION_DETECTED = "android.nfc.action.TRANSACTION_DETECTED";
+    field public static final String EXTRA_ADAPTER_STATE = "android.nfc.extra.ADAPTER_STATE";
+    field public static final String EXTRA_AID = "android.nfc.extra.AID";
+    field public static final String EXTRA_DATA = "android.nfc.extra.DATA";
+    field public static final String EXTRA_ID = "android.nfc.extra.ID";
+    field public static final String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
+    field public static final String EXTRA_PREFERRED_PAYMENT_CHANGED_REASON = "android.nfc.extra.PREFERRED_PAYMENT_CHANGED_REASON";
+    field public static final String EXTRA_READER_PRESENCE_CHECK_DELAY = "presence";
+    field public static final String EXTRA_SECURE_ELEMENT_NAME = "android.nfc.extra.SECURE_ELEMENT_NAME";
+    field public static final String EXTRA_TAG = "android.nfc.extra.TAG";
+    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_DISABLE = 0; // 0x0
+    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_KEEP = -1; // 0xffffffff
+    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_NFC_PASSIVE_A = 1; // 0x1
+    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_NFC_PASSIVE_B = 2; // 0x2
+    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_LISTEN_NFC_PASSIVE_F = 4; // 0x4
+    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_READER_DISABLE = 0; // 0x0
+    field @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public static final int FLAG_READER_KEEP = -1; // 0xffffffff
+    field public static final int FLAG_READER_NFC_A = 1; // 0x1
+    field public static final int FLAG_READER_NFC_B = 2; // 0x2
+    field public static final int FLAG_READER_NFC_BARCODE = 16; // 0x10
+    field public static final int FLAG_READER_NFC_F = 4; // 0x4
+    field public static final int FLAG_READER_NFC_V = 8; // 0x8
+    field public static final int FLAG_READER_NO_PLATFORM_SOUNDS = 256; // 0x100
+    field public static final int FLAG_READER_SKIP_NDEF_CHECK = 128; // 0x80
+    field public static final int PREFERRED_PAYMENT_CHANGED = 2; // 0x2
+    field public static final int PREFERRED_PAYMENT_LOADED = 1; // 0x1
+    field public static final int PREFERRED_PAYMENT_UPDATED = 3; // 0x3
+    field public static final int STATE_OFF = 1; // 0x1
+    field public static final int STATE_ON = 3; // 0x3
+    field public static final int STATE_TURNING_OFF = 4; // 0x4
+    field public static final int STATE_TURNING_ON = 2; // 0x2
+  }
+
+  @Deprecated public static interface NfcAdapter.CreateBeamUrisCallback {
+    method @Deprecated public android.net.Uri[] createBeamUris(android.nfc.NfcEvent);
+  }
+
+  @Deprecated public static interface NfcAdapter.CreateNdefMessageCallback {
+    method @Deprecated public android.nfc.NdefMessage createNdefMessage(android.nfc.NfcEvent);
+  }
+
+  @Deprecated public static interface NfcAdapter.OnNdefPushCompleteCallback {
+    method @Deprecated public void onNdefPushComplete(android.nfc.NfcEvent);
+  }
+
+  public static interface NfcAdapter.OnTagRemovedListener {
+    method public void onTagRemoved();
+  }
+
+  public static interface NfcAdapter.ReaderCallback {
+    method public void onTagDiscovered(android.nfc.Tag);
+  }
+
+  public final class NfcAntennaInfo implements android.os.Parcelable {
+    ctor public NfcAntennaInfo(int, int, boolean, @NonNull java.util.List<android.nfc.AvailableNfcAntenna>);
+    method public int describeContents();
+    method @NonNull public java.util.List<android.nfc.AvailableNfcAntenna> getAvailableNfcAntennas();
+    method public int getDeviceHeight();
+    method public int getDeviceWidth();
+    method public boolean isDeviceFoldable();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.NfcAntennaInfo> CREATOR;
+  }
+
+  public final class NfcEvent {
+    field public final android.nfc.NfcAdapter nfcAdapter;
+    field public final int peerLlcpMajorVersion;
+    field public final int peerLlcpMinorVersion;
+  }
+
+  public final class NfcManager {
+    method public android.nfc.NfcAdapter getDefaultAdapter();
+  }
+
+  public final class Tag implements android.os.Parcelable {
+    method public int describeContents();
+    method public byte[] getId();
+    method public String[] getTechList();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.Tag> CREATOR;
+  }
+
+  public class TagLostException extends java.io.IOException {
+    ctor public TagLostException();
+    ctor public TagLostException(String);
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_charging") public final class WlcLDeviceInfo implements android.os.Parcelable {
+    ctor public WlcLDeviceInfo(double, double, double, int);
+    method public int describeContents();
+    method public double getBatteryLevel();
+    method public double getProductId();
+    method public int getState();
+    method public double getTemperature();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONNECTED_CHARGING = 2; // 0x2
+    field public static final int CONNECTED_DISCHARGING = 3; // 0x3
+    field @NonNull public static final android.os.Parcelable.Creator<android.nfc.WlcLDeviceInfo> CREATOR;
+    field public static final int DISCONNECTED = 1; // 0x1
+  }
+
+}
+
+package android.nfc.cardemulation {
+
+  public final class CardEmulation {
+    method public boolean categoryAllowsForegroundPreference(String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public java.util.List<java.lang.String> getAidsForPreferredPaymentService();
+    method public java.util.List<java.lang.String> getAidsForService(android.content.ComponentName, String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public CharSequence getDescriptionForPreferredPaymentService();
+    method public static android.nfc.cardemulation.CardEmulation getInstance(android.nfc.NfcAdapter);
+    method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public String getRouteDestinationForPreferredPaymentService();
+    method public int getSelectionModeForCategory(String);
+    method public boolean isDefaultServiceForAid(android.content.ComponentName, String);
+    method public boolean isDefaultServiceForCategory(android.content.ComponentName, String);
+    method public boolean registerAidsForService(android.content.ComponentName, String, java.util.List<java.lang.String>);
+    method public boolean removeAidsForService(android.content.ComponentName, String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.NFC) public boolean setOffHostForService(@NonNull android.content.ComponentName, @NonNull String);
+    method public boolean setPreferredService(android.app.Activity, android.content.ComponentName);
+    method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean setServiceObserveModeDefault(@NonNull android.content.ComponentName, boolean);
+    method public boolean supportsAidPrefixRegistration();
+    method @NonNull @RequiresPermission(android.Manifest.permission.NFC) public boolean unsetOffHostForService(@NonNull android.content.ComponentName);
+    method public boolean unsetPreferredService(android.app.Activity);
+    field @Deprecated public static final String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
+    field public static final String CATEGORY_OTHER = "other";
+    field public static final String CATEGORY_PAYMENT = "payment";
+    field public static final String EXTRA_CATEGORY = "category";
+    field public static final String EXTRA_SERVICE_COMPONENT = "component";
+    field public static final int SELECTION_MODE_ALWAYS_ASK = 1; // 0x1
+    field public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2; // 0x2
+    field public static final int SELECTION_MODE_PREFER_DEFAULT = 0; // 0x0
+  }
+
+  public abstract class HostApduService extends android.app.Service {
+    ctor public HostApduService();
+    method public final void notifyUnhandled();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onDeactivated(int);
+    method public abstract byte[] processCommandApdu(byte[], android.os.Bundle);
+    method @FlaggedApi("android.nfc.nfc_read_polling_loop") public void processPollingFrames(@NonNull java.util.List<android.os.Bundle>);
+    method public final void sendResponseApdu(byte[]);
+    field public static final int DEACTIVATION_DESELECTED = 1; // 0x1
+    field public static final int DEACTIVATION_LINK_LOSS = 0; // 0x0
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String POLLING_LOOP_DATA_KEY = "android.nfc.cardemulation.DATA";
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String POLLING_LOOP_GAIN_KEY = "android.nfc.cardemulation.GAIN";
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String POLLING_LOOP_TIMESTAMP_KEY = "android.nfc.cardemulation.TIMESTAMP";
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_A = 65; // 0x0041 'A'
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_B = 66; // 0x0042 'B'
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_F = 70; // 0x0046 'F'
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final String POLLING_LOOP_TYPE_KEY = "android.nfc.cardemulation.TYPE";
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_OFF = 88; // 0x0058 'X'
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_ON = 79; // 0x004f 'O'
+    field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final char POLLING_LOOP_TYPE_UNKNOWN = 85; // 0x0055 'U'
+    field public static final String SERVICE_INTERFACE = "android.nfc.cardemulation.action.HOST_APDU_SERVICE";
+    field public static final String SERVICE_META_DATA = "android.nfc.cardemulation.host_apdu_service";
+  }
+
+  public abstract class HostNfcFService extends android.app.Service {
+    ctor public HostNfcFService();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onDeactivated(int);
+    method public abstract byte[] processNfcFPacket(byte[], android.os.Bundle);
+    method public final void sendResponsePacket(byte[]);
+    field public static final int DEACTIVATION_LINK_LOSS = 0; // 0x0
+    field public static final String SERVICE_INTERFACE = "android.nfc.cardemulation.action.HOST_NFCF_SERVICE";
+    field public static final String SERVICE_META_DATA = "android.nfc.cardemulation.host_nfcf_service";
+  }
+
+  public final class NfcFCardEmulation {
+    method public boolean disableService(android.app.Activity) throws java.lang.RuntimeException;
+    method public boolean enableService(android.app.Activity, android.content.ComponentName) throws java.lang.RuntimeException;
+    method public static android.nfc.cardemulation.NfcFCardEmulation getInstance(android.nfc.NfcAdapter);
+    method public String getNfcid2ForService(android.content.ComponentName) throws java.lang.RuntimeException;
+    method public String getSystemCodeForService(android.content.ComponentName) throws java.lang.RuntimeException;
+    method public boolean registerSystemCodeForService(android.content.ComponentName, String) throws java.lang.RuntimeException;
+    method public boolean setNfcid2ForService(android.content.ComponentName, String) throws java.lang.RuntimeException;
+    method public boolean unregisterSystemCodeForService(android.content.ComponentName) throws java.lang.RuntimeException;
+  }
+
+  public abstract class OffHostApduService extends android.app.Service {
+    ctor public OffHostApduService();
+    field public static final String SERVICE_INTERFACE = "android.nfc.cardemulation.action.OFF_HOST_APDU_SERVICE";
+    field public static final String SERVICE_META_DATA = "android.nfc.cardemulation.off_host_apdu_service";
+  }
+
+}
+
+package android.nfc.tech {
+
+  public final class IsoDep implements android.nfc.tech.TagTechnology {
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public static android.nfc.tech.IsoDep get(android.nfc.Tag);
+    method public byte[] getHiLayerResponse();
+    method public byte[] getHistoricalBytes();
+    method public int getMaxTransceiveLength();
+    method public android.nfc.Tag getTag();
+    method public int getTimeout();
+    method public boolean isConnected();
+    method public boolean isExtendedLengthApduSupported();
+    method public void setTimeout(int);
+    method public byte[] transceive(byte[]) throws java.io.IOException;
+  }
+
+  public final class MifareClassic implements android.nfc.tech.TagTechnology {
+    method public boolean authenticateSectorWithKeyA(int, byte[]) throws java.io.IOException;
+    method public boolean authenticateSectorWithKeyB(int, byte[]) throws java.io.IOException;
+    method public int blockToSector(int);
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public void decrement(int, int) throws java.io.IOException;
+    method public static android.nfc.tech.MifareClassic get(android.nfc.Tag);
+    method public int getBlockCount();
+    method public int getBlockCountInSector(int);
+    method public int getMaxTransceiveLength();
+    method public int getSectorCount();
+    method public int getSize();
+    method public android.nfc.Tag getTag();
+    method public int getTimeout();
+    method public int getType();
+    method public void increment(int, int) throws java.io.IOException;
+    method public boolean isConnected();
+    method public byte[] readBlock(int) throws java.io.IOException;
+    method public void restore(int) throws java.io.IOException;
+    method public int sectorToBlock(int);
+    method public void setTimeout(int);
+    method public byte[] transceive(byte[]) throws java.io.IOException;
+    method public void transfer(int) throws java.io.IOException;
+    method public void writeBlock(int, byte[]) throws java.io.IOException;
+    field public static final int BLOCK_SIZE = 16; // 0x10
+    field public static final byte[] KEY_DEFAULT;
+    field public static final byte[] KEY_MIFARE_APPLICATION_DIRECTORY;
+    field public static final byte[] KEY_NFC_FORUM;
+    field public static final int SIZE_1K = 1024; // 0x400
+    field public static final int SIZE_2K = 2048; // 0x800
+    field public static final int SIZE_4K = 4096; // 0x1000
+    field public static final int SIZE_MINI = 320; // 0x140
+    field public static final int TYPE_CLASSIC = 0; // 0x0
+    field public static final int TYPE_PLUS = 1; // 0x1
+    field public static final int TYPE_PRO = 2; // 0x2
+    field public static final int TYPE_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public final class MifareUltralight implements android.nfc.tech.TagTechnology {
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public static android.nfc.tech.MifareUltralight get(android.nfc.Tag);
+    method public int getMaxTransceiveLength();
+    method public android.nfc.Tag getTag();
+    method public int getTimeout();
+    method public int getType();
+    method public boolean isConnected();
+    method public byte[] readPages(int) throws java.io.IOException;
+    method public void setTimeout(int);
+    method public byte[] transceive(byte[]) throws java.io.IOException;
+    method public void writePage(int, byte[]) throws java.io.IOException;
+    field public static final int PAGE_SIZE = 4; // 0x4
+    field public static final int TYPE_ULTRALIGHT = 1; // 0x1
+    field public static final int TYPE_ULTRALIGHT_C = 2; // 0x2
+    field public static final int TYPE_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public final class Ndef implements android.nfc.tech.TagTechnology {
+    method public boolean canMakeReadOnly();
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public static android.nfc.tech.Ndef get(android.nfc.Tag);
+    method public android.nfc.NdefMessage getCachedNdefMessage();
+    method public int getMaxSize();
+    method public android.nfc.NdefMessage getNdefMessage() throws android.nfc.FormatException, java.io.IOException;
+    method public android.nfc.Tag getTag();
+    method public String getType();
+    method public boolean isConnected();
+    method public boolean isWritable();
+    method public boolean makeReadOnly() throws java.io.IOException;
+    method public void writeNdefMessage(android.nfc.NdefMessage) throws android.nfc.FormatException, java.io.IOException;
+    field public static final String MIFARE_CLASSIC = "com.nxp.ndef.mifareclassic";
+    field public static final String NFC_FORUM_TYPE_1 = "org.nfcforum.ndef.type1";
+    field public static final String NFC_FORUM_TYPE_2 = "org.nfcforum.ndef.type2";
+    field public static final String NFC_FORUM_TYPE_3 = "org.nfcforum.ndef.type3";
+    field public static final String NFC_FORUM_TYPE_4 = "org.nfcforum.ndef.type4";
+  }
+
+  public final class NdefFormatable implements android.nfc.tech.TagTechnology {
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public void format(android.nfc.NdefMessage) throws android.nfc.FormatException, java.io.IOException;
+    method public void formatReadOnly(android.nfc.NdefMessage) throws android.nfc.FormatException, java.io.IOException;
+    method public static android.nfc.tech.NdefFormatable get(android.nfc.Tag);
+    method public android.nfc.Tag getTag();
+    method public boolean isConnected();
+  }
+
+  public final class NfcA implements android.nfc.tech.TagTechnology {
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public static android.nfc.tech.NfcA get(android.nfc.Tag);
+    method public byte[] getAtqa();
+    method public int getMaxTransceiveLength();
+    method public short getSak();
+    method public android.nfc.Tag getTag();
+    method public int getTimeout();
+    method public boolean isConnected();
+    method public void setTimeout(int);
+    method public byte[] transceive(byte[]) throws java.io.IOException;
+  }
+
+  public final class NfcB implements android.nfc.tech.TagTechnology {
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public static android.nfc.tech.NfcB get(android.nfc.Tag);
+    method public byte[] getApplicationData();
+    method public int getMaxTransceiveLength();
+    method public byte[] getProtocolInfo();
+    method public android.nfc.Tag getTag();
+    method public boolean isConnected();
+    method public byte[] transceive(byte[]) throws java.io.IOException;
+  }
+
+  public final class NfcBarcode implements android.nfc.tech.TagTechnology {
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public static android.nfc.tech.NfcBarcode get(android.nfc.Tag);
+    method public byte[] getBarcode();
+    method public android.nfc.Tag getTag();
+    method public int getType();
+    method public boolean isConnected();
+    field public static final int TYPE_KOVIO = 1; // 0x1
+    field public static final int TYPE_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public final class NfcF implements android.nfc.tech.TagTechnology {
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public static android.nfc.tech.NfcF get(android.nfc.Tag);
+    method public byte[] getManufacturer();
+    method public int getMaxTransceiveLength();
+    method public byte[] getSystemCode();
+    method public android.nfc.Tag getTag();
+    method public int getTimeout();
+    method public boolean isConnected();
+    method public void setTimeout(int);
+    method public byte[] transceive(byte[]) throws java.io.IOException;
+  }
+
+  public final class NfcV implements android.nfc.tech.TagTechnology {
+    method public void close() throws java.io.IOException;
+    method public void connect() throws java.io.IOException;
+    method public static android.nfc.tech.NfcV get(android.nfc.Tag);
+    method public byte getDsfId();
+    method public int getMaxTransceiveLength();
+    method public byte getResponseFlags();
+    method public android.nfc.Tag getTag();
+    method public boolean isConnected();
+    method public byte[] transceive(byte[]) throws java.io.IOException;
+  }
+
+  public interface TagTechnology extends java.io.Closeable {
+    method public void connect() throws java.io.IOException;
+    method public android.nfc.Tag getTag();
+    method public boolean isConnected();
+  }
+
+}
+

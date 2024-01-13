@@ -188,10 +188,12 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ਫ਼ੇਸ ਅਣਲਾਕ ਦਾ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ਜਾਰੀ ਰੱਖਣ ਲਈ \'ਅਣਲਾਕ ਕਰੋ\' ਪ੍ਰਤੀਕ ਨੂੰ ਦਬਾਓ"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ਚਿਹਰਾ ਨਹੀਂ ਪਛਾਣ ਸਕਦੇ। ਇਸਦੀ ਬਜਾਏ ਫਿੰਗਰਪ੍ਰਿੰਟ ਵਰਤੋ।"</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
+    <skip />
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <string name="keyguard_face_failed" msgid="9044619102286917151">"ਚਿਹਰੇ ਦੀ ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
+    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
+    <skip />
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ਇਸਦੀ ਬਜਾਏ ਫਿੰਗਰਪ੍ਰਿੰਟ ਵਰਤੋ"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ਫ਼ੇਸ ਅਣਲਾਕ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth ਕਨੈਕਟ ਕੀਤੀ।"</string>
@@ -413,6 +415,16 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"ਭਾਈਚਾਰਕ ਟਿਊਟੋਰੀਅਲ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਖੱਬੇ ਪਾਸੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"ਵਿਜੇਟ ਸੰਪਾਦਕ ਖੋਲ੍ਹੋ"</string>
+    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
+    <skip />
+    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
+    <skip />
+    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
+    <skip />
+    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
+    <skip />
+    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
+    <skip />
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ਹਟਾਓ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ਵਿਜੇਟ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ਹੋ ਗਿਆ"</string>
@@ -827,13 +839,15 @@
     <string name="tuner_right" msgid="8247571132790812149">"ਸੱਜਾ"</string>
     <string name="tuner_menu" msgid="363690665924769420">"ਮੀਨੂ"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> ਐਪ"</string>
-    <string name="notification_channel_alerts" msgid="3385787053375150046">"ਸੁਚੇਤਨਾਵਾਂ"</string>
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"ਅਲਰਟ"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"ਬੈਟਰੀ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ਸਟੋਰੇਜ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ਸੰਕੇਤ"</string>
+    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
+    <skip />
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ਚੱਲ ਰਹੀ ਹੈ"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ਸਥਾਪਤ ਕੀਤੇ ਬਿਨਾਂ ਐਪ ਖੋਲ੍ਹੀ ਗਈ।"</string>
@@ -929,6 +943,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ। ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਇਹ ਬਟਨ ਵਿਉਂਤਬੱਧ ਕਰੋ ਜਾਂ ਬਦਲੋ।\n\n"<annotation id="link">"ਸੈਟਿੰਗਾਂ ਦੇਖੋ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ਬਟਨ ਨੂੰ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਲੁਕਾਉਣ ਲਈ ਕਿਨਾਰੇ \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"ਅਣਕੀਤਾ ਕਰੋ"</string>
+    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
+    <skip />
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> ਸ਼ਾਰਟਕੱਟ ਨੂੰ ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# ਸ਼ਾਰਟਕੱਟ ਨੂੰ ਹਟਾਇਆ ਗਿਆ}one{# ਸ਼ਾਰਟਕੱਟ ਨੂੰ ਹਟਾਇਆ ਗਿਆ}other{# ਸ਼ਾਰਟਕੱਟਾਂ ਨੂੰ ਹਟਾਇਆ ਗਿਆ}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ਉੱਪਰ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
@@ -1207,6 +1225,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"ਵਰਤੋਂਕਾਰ ਦੀ ਮੌਜੂਦਗੀ ਦਾ ਪਤਾ ਲਗਾਇਆ ਜਾਂਦਾ ਹੈ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਨੋਟ ਐਪ ਨੂੰ ਸੈੱਟ ਕਰੋ"</string>
     <string name="install_app" msgid="5066668100199613936">"ਐਪ ਸਥਾਪਤ ਕਰੋ"</string>
+    <string name="dismissible_keyguard_swipe" msgid="2213369651289613196">"ਜਾਰੀ ਰੱਖਣ ਲਈ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ਕੀ ਬਾਹਰੀ ਡਿਸਪਲੇ \'ਤੇ ਪ੍ਰਤਿਬਿੰਬਿਤ ਕਰਨਾ ਹੈ?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"ਤੁਹਾਡੀ ਅੰਦਰੂਨੀ ਡਿਸਪਲੇ ਪ੍ਰਤੀਬਿੰਬਤ ਕੀਤੀ ਜਾਵੇਗੀ। ਤੁਹਾਡੀ ਅਗਲੀ ਡਿਸਪਲੇ ਬੰਦ ਕਰ ਦਿੱਤੀ ਜਾਵੇਗੀ।"</string>
     <string name="mirror_display" msgid="2515262008898122928">"ਡਿਸਪਲੇ ਨੂੰ ਪ੍ਰਤਿਬਿੰਬਿਤ ਕਰੋ"</string>

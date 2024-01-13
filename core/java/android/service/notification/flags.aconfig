@@ -21,3 +21,11 @@ flag {
   description: "This flag controls the redacting of sensitive notifications from untrusted NotificationListenerServices"
   bug: "306271190"
 }
+
+flag {
+  name: "callstyle_callback_api"
+  namespace: "systemui"
+  description: "Guards the new CallStyleNotificationEventsCallback"
+  bug: "305095040"
+  is_fixed_read_only: true
+}

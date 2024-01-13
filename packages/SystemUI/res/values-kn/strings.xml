@@ -74,7 +74,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ಗೆ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="screenshot_saved_title" msgid="8893267638659083153">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಅನ್ನು ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="screenshot_saved_title" msgid="8893267638659083153">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಅನ್ನು ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"ಬಾಹ್ಯ ಡಿಸ್‌ಪ್ಲೇ"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸುವ ಮೊದಲು ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಬೇಕು"</string>
@@ -116,7 +116,7 @@
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"ಸ್ಪರ್ಶಗಳನ್ನು ಸ್ಕ್ರೀನ್ ಮೇಲೆ ತೋರಿಸಿ"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
-    <string name="screenrecord_save_title" msgid="1886652605520893850">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="screenrecord_save_title" msgid="1886652605520893850">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೇವ್‌ ಮಾಡುವಾಗ ದೋಷ ಎದುರಾಗಿದೆ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ"</string>
@@ -188,10 +188,12 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ಮುಂದುವರಿಯಲು ಅನ್‌ಲಾಕ್ ಐಕಾನ್ ಅನ್ನು ಒತ್ತಿರಿ"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ಮುಖ ಗುರುತಿಸಲಾಗುತ್ತಿಲ್ಲ ಬದಲಿಗೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸಿ."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
+    <skip />
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <string name="keyguard_face_failed" msgid="9044619102286917151">"ಮುಖ ಗುರುತಿಸಲಾಗುತ್ತಿಲ್ಲ"</string>
+    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
+    <skip />
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ಬದಲಿಗೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸಿ"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ಬ್ಲೂಟೂತ್‌‌ ಸಂಪರ್ಕಗೊಂಡಿದೆ."</string>
@@ -413,6 +415,16 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"ಸಮುದಾಯದ ಟ್ಯುಟೋರಿಯಲ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು ಎಡಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"ವಿಜೆಟ್ ಎಡಿಟರ್ ಅನ್ನು ತೆರೆಯಿರಿ"</string>
+    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
+    <skip />
+    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
+    <skip />
+    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
+    <skip />
+    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
+    <skip />
+    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
+    <skip />
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ವಿಜೆಟ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ಮುಗಿದಿದೆ"</string>
@@ -834,6 +846,8 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"ಸೆಟಪ್"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ಸಂಗ್ರಹಣೆ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ಸುಳಿವುಗಳು"</string>
+    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
+    <skip />
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ರನ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡದೆ ಆ್ಯಪ್‌ ತೆರೆಯಲಾಗಿದೆ."</string>
@@ -929,6 +943,10 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ತೆರೆಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಈ ಬಟನ್ ಅನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ ಅಥವಾ ಬದಲಾಯಿಸಿ.\n\n"<annotation id="link">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ಅದನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ಮರೆಮಾಡಲು ಅಂಚಿಗೆ ಬಟನ್ ಸರಿಸಿ"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"ರದ್ದುಗೊಳಿಸಿ"</string>
+    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
+    <skip />
+    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
+    <skip />
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> ಶಾರ್ಟ್‌ಕಟ್ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# ಶಾರ್ಟ್‌ಕಟ್ ತೆಗೆದುಹಾಕಲಾಗಿದೆ}one{# ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ}other{# ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ಎಡ ಮೇಲ್ಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
@@ -1207,6 +1225,7 @@
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"ಬಳಕೆದಾರರ ಉಪಸ್ಥಿತಿಯನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಅನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="install_app" msgid="5066668100199613936">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="dismissible_keyguard_swipe" msgid="2213369651289613196">"ಮುಂದುವರಿಯಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"ಬಾಹ್ಯ ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಬೇಕೆ?"</string>
     <string name="connected_display_dialog_dual_display_stop_warning" msgid="4174707498892447947">"ನಿಮ್ಮ ಒಳಗಿನ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಪ್ರತಿಬಿಂಬಿಸಲಾಗುತ್ತದೆ. ನಿಮ್ಮ ಫ್ರಂಟ್ ಡಿಸ್‌ಪ್ಲೇ ಅನ್ನು ಆಫ್ ಮಾಡಲಾಗುತ್ತದೆ."</string>
     <string name="mirror_display" msgid="2515262008898122928">"ಮಿರರ್ ಡಿಸ್‌ಪ್ಲೇ"</string>

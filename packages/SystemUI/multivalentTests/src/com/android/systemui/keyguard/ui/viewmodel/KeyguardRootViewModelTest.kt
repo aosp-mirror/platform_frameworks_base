@@ -203,4 +203,38 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
 
             assertThat(isVisible?.isAnimating).isEqualTo(false)
         }
+
+    @Test
+    fun alpha_glanceableHubOpen_isZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope,
+            )
+
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun alpha_glanceableHubClosed_isOne() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha)
+
+            // Transition to the glanceable hub and back.
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope,
+            )
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            assertThat(alpha).isEqualTo(1.0f)
+        }
 }

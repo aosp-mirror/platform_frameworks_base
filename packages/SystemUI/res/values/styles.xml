@@ -195,6 +195,24 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="TextAppearance.AuthCredential.ContentViewTitle">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingHorizontal">24dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:gravity">start</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.ContentViewListItem">
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingHorizontal">
+            @dimen/biometric_prompt_content_list_item_padding_horizontal
+        </item>
+        <item name="android:textSize">@dimen/biometric_prompt_content_list_item_text_size</item>
+        <item name="android:gravity">start</item>
+    </style>
+
     <style name="TextAppearance.AuthCredential.Error">
         <item name="android:paddingTop">6dp</item>
         <item name="android:paddingHorizontal">24dp</item>
@@ -292,6 +310,11 @@
         <item name="android:paddingLeft">30dp</item>
         <item name="android:paddingRight">30dp</item>
         <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="AuthCredentialContentLayoutStyle">
+        <item name="android:background">@color/biometric_prompt_content_background_color</item>
+        <item name="android:paddingHorizontal">@dimen/biometric_prompt_content_padding_horizontal</item>
     </style>
 
     <style name="DeviceManagementDialogTitle">

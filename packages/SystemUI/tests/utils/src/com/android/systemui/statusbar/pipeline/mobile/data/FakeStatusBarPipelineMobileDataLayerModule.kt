@@ -15,7 +15,7 @@
  */
 package com.android.systemui.statusbar.pipeline.mobile.data
 
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepositoryModule
+import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepositoryModule
 import dagger.Module
 
 @Module(includes = [FakeUserSetupRepositoryModule::class])

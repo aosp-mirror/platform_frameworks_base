@@ -434,6 +434,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"允許應用程式配搭「systemExempted」類型使用前景服務"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"配搭「fileManagement」類型執行前景服務"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"允許應用程式配搭「fileManagement」類型使用前景服務"</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"配搭「specialUse」類型執行前景服務"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"允許應用程式配搭「specialUse」類型使用前景服務"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"測量應用程式儲存空間"</string>
@@ -632,7 +636,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"使用螢幕鎖定"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"如要繼續操作，請輸入螢幕鎖定解鎖憑證"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"請用力按住感應器"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"無法辨識指紋，請再試一次。"</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"請清潔指紋感應器，然後再試一次"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"請清潔感應器，然後再試一次"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"請用力按住感應器"</string>
@@ -696,7 +701,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到面孔，請將手機放在視線水平。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"裝置不夠穩定。請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊面孔。"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"無法辨識面孔，請再試一次。"</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"請稍為轉換頭部的位置"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"正面望向手機"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"正面望向手機"</string>

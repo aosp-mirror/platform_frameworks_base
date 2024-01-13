@@ -170,7 +170,11 @@ public class BatteryUsageStatsProvider {
         final double minConsumedPowerThreshold = query.getMinConsumedPowerThreshold();
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder;
+        long monotonicStartTime, monotonicEndTime;
         synchronized (stats) {
+            monotonicStartTime = stats.getMonotonicStartTime();
+            monotonicEndTime = stats.getMonotonicEndTime();
+
             batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
                     stats.getCustomEnergyConsumerNames(), includePowerModels,
                     includeProcessStateData, minConsumedPowerThreshold);
@@ -195,35 +199,36 @@ public class BatteryUsageStatsProvider {
                                 UidBatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
                                 getProcessForegroundServiceTimeMs(uid, realtimeUs));
             }
-        }
 
-        final int[] powerComponents = query.getPowerComponents();
-        final List<PowerCalculator> powerCalculators = getPowerCalculators();
-        for (int i = 0, count = powerCalculators.size(); i < count; i++) {
-            PowerCalculator powerCalculator = powerCalculators.get(i);
-            if (powerComponents != null) {
-                boolean include = false;
-                for (int powerComponent : powerComponents) {
-                    if (powerCalculator.isPowerComponentSupported(powerComponent)) {
-                        include = true;
-                        break;
+            final int[] powerComponents = query.getPowerComponents();
+            final List<PowerCalculator> powerCalculators = getPowerCalculators();
+            for (int i = 0, count = powerCalculators.size(); i < count; i++) {
+                PowerCalculator powerCalculator = powerCalculators.get(i);
+                if (powerComponents != null) {
+                    boolean include = false;
+                    for (int powerComponent : powerComponents) {
+                        if (powerCalculator.isPowerComponentSupported(powerComponent)) {
+                            include = true;
+                            break;
+                        }
+                    }
+                    if (!include) {
+                        continue;
                     }
                 }
-                if (!include) {
-                    continue;
-                }
+                powerCalculator.calculate(batteryUsageStatsBuilder, stats, realtimeUs, uptimeUs,
+                        query);
             }
-            powerCalculator.calculate(batteryUsageStatsBuilder, stats, realtimeUs, uptimeUs, query);
+
+            if ((query.getFlags()
+                    & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY) != 0) {
+                batteryUsageStatsBuilder.setBatteryHistory(stats.copyHistory());
+            }
         }
 
         if (mPowerStatsExporterEnabled) {
             mPowerStatsExporter.exportAggregatedPowerStats(batteryUsageStatsBuilder,
-                    stats.getMonotonicStartTime(), stats.getMonotonicEndTime());
-        }
-
-        if ((query.getFlags()
-                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY) != 0) {
-            batteryUsageStatsBuilder.setBatteryHistory(stats.copyHistory());
+                    monotonicStartTime, monotonicEndTime);
         }
 
         BatteryUsageStats batteryUsageStats = batteryUsageStatsBuilder.build();

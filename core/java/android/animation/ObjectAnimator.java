@@ -25,8 +25,6 @@ import android.util.Log;
 import android.util.Property;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
-import java.lang.ref.WeakReference;
-
 /**
  * This subclass of {@link ValueAnimator} provides support for animating properties on target objects.
  * The constructors of this class take parameters to define the target object that will be animated
@@ -73,11 +71,7 @@ public final class ObjectAnimator extends ValueAnimator {
 
     private static final boolean DBG = false;
 
-    /**
-     * A weak reference to the target object on which the property exists, set
-     * in the constructor. We'll cancel the animation if this goes away.
-     */
-    private WeakReference<Object> mTarget;
+    private Object mTarget;
 
     private String mPropertyName;
 
@@ -919,7 +913,7 @@ public final class ObjectAnimator extends ValueAnimator {
      */
     @Nullable
     public Object getTarget() {
-        return mTarget == null ? null : mTarget.get();
+        return mTarget;
     }
 
     @Override
@@ -929,7 +923,7 @@ public final class ObjectAnimator extends ValueAnimator {
             if (isStarted()) {
                 cancel();
             }
-            mTarget = target == null ? null : new WeakReference<Object>(target);
+            mTarget = target;
             // New target should cause re-initialization prior to starting
             mInitialized = false;
         }
@@ -977,13 +971,6 @@ public final class ObjectAnimator extends ValueAnimator {
     @Override
     void animateValue(float fraction) {
         final Object target = getTarget();
-        if (mTarget != null && target == null) {
-            // We lost the target reference, cancel and clean up. Note: we allow null target if the
-            /// target has never been set.
-            cancel();
-            return;
-        }
-
         super.animateValue(fraction);
         int numValues = mValues.length;
         for (int i = 0; i < numValues; ++i) {

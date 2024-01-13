@@ -13476,6 +13476,16 @@ public final class Settings {
         @Readable
         public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
 
+
+        /**
+         * Whether to boot with 16K page size compatible kernel
+         * 1 = Boot with 16K kernel
+         * 0 = Boot with 4K kernel (default)
+         * @hide
+         */
+        @Readable
+        public static final String ENABLE_16K_PAGES = "enable_16k_pages";
+
         /** Timeout for package verification.
         * @hide */
         @Readable

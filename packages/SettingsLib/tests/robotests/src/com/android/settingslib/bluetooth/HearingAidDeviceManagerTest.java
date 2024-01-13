@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -73,13 +74,13 @@ public class HearingAidDeviceManagerTest {
     private final static String DEVICE_ADDRESS_2 = "AA:BB:CC:DD:EE:22";
     private final BluetoothClass DEVICE_CLASS =
             createBtClass(BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE);
+    private final Context mContext = ApplicationProvider.getApplicationContext();
 
     private CachedBluetoothDevice mCachedDevice1;
     private CachedBluetoothDevice mCachedDevice2;
     private CachedBluetoothDeviceManager mCachedDeviceManager;
     private HearingAidDeviceManager mHearingAidDeviceManager;
     private AudioDeviceAttributes mHearingDeviceAttribute;
-    private final Context mContext = ApplicationProvider.getApplicationContext();
     @Spy
     private HearingAidAudioRoutingHelper mHelper = new HearingAidAudioRoutingHelper(mContext);
     @Mock
@@ -517,6 +518,8 @@ public class HearingAidDeviceManagerTest {
         when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(
                 mHearingDeviceAttribute);
         when(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(true);
+        doReturn(true).when(mHelper).setPreferredDeviceRoutingStrategies(anyList(),
+                eq(mHearingDeviceAttribute), anyInt());
 
         mHearingAidDeviceManager.onActiveDeviceChanged(mCachedDevice1);
 
@@ -529,6 +532,8 @@ public class HearingAidDeviceManagerTest {
         when(mHelper.getMatchedHearingDeviceAttributes(mCachedDevice1)).thenReturn(
                 mHearingDeviceAttribute);
         when(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(false);
+        doReturn(true).when(mHelper).setPreferredDeviceRoutingStrategies(anyList(), any(),
+                anyInt());
 
         mHearingAidDeviceManager.onActiveDeviceChanged(mCachedDevice1);
 

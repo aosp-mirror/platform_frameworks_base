@@ -16,34 +16,14 @@
 
 package com.android.systemui.scene
 
-import android.app.AlertDialog
-import android.content.Context
-import com.android.systemui.bouncer.ui.composable.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.composable.BouncerScene
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.Scene
-import com.android.systemui.statusbar.phone.SystemUIDialog
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoSet
 
 @Module
 interface BouncerSceneModule {
 
     @Binds @IntoSet fun bouncerScene(scene: BouncerScene): Scene
-
-    companion object {
-
-        @Provides
-        @SysUISingleton
-        fun bouncerSceneDialogFactory(@Application context: Context): BouncerDialogFactory {
-            return object : BouncerDialogFactory {
-                override fun invoke(): AlertDialog {
-                    return SystemUIDialog(context)
-                }
-            }
-        }
-    }
 }

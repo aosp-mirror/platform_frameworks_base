@@ -107,16 +107,13 @@ private class PunchHoleNode(
     }
 
     override fun ContentDrawScope.draw() {
-        val holeSize = size()
-        if (holeSize == Size.Zero) {
-            drawContent()
-            return
-        }
-
         drawContent()
 
-        val offset = offset()
-        translate(offset.x, offset.y) { drawHole(holeSize) }
+        val holeSize = size()
+        if (holeSize != Size.Zero) {
+            val offset = offset()
+            translate(offset.x, offset.y) { drawHole(holeSize) }
+        }
     }
 
     private fun DrawScope.drawHole(size: Size) {

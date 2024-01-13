@@ -18,7 +18,10 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.res.Configuration
 import android.graphics.Point
+import android.hardware.biometrics.PromptContentListItemBulletedText
+import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
+import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
@@ -60,7 +63,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -69,7 +71,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.mockito.Mock
-import org.mockito.Mockito.times
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 4
@@ -101,6 +102,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
     private lateinit var iconViewModel: PromptIconViewModel
+    private lateinit var promptContentView: PromptContentView
 
     @Before
     fun setup() {
@@ -136,6 +138,10 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         selector =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
+        promptContentView =
+            PromptVerticalListContentView.Builder()
+                .addListItem(PromptContentListItemBulletedText("test"))
+                .build()
 
         viewModel =
             PromptViewModel(
@@ -1200,6 +1206,26 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
     }
 
+    @Test
+    fun descriptionOverriddenByContentView() =
+        runGenericTest(contentView = promptContentView, description = "test description") {
+            val contentView by collectLastValue(viewModel.contentView)
+            val description by collectLastValue(viewModel.description)
+
+            assertThat(description).isEqualTo("")
+            assertThat(contentView).isEqualTo(promptContentView)
+        }
+
+    @Test
+    fun descriptionWithoutContentView() =
+        runGenericTest(description = "test description") {
+            val contentView by collectLastValue(viewModel.contentView)
+            val description by collectLastValue(viewModel.description)
+
+            assertThat(description).isEqualTo("test description")
+            assertThat(contentView).isNull()
+        }
+
     /** Asserts that the selected buttons are visible now. */
     private suspend fun TestScope.assertButtonsVisible(
         tryAgain: Boolean = false,
@@ -1219,6 +1245,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private fun runGenericTest(
         doNotStart: Boolean = false,
         allowCredentialFallback: Boolean = false,
+        description: String? = null,
+        contentView: PromptContentView? = null,
         block: suspend TestScope.() -> Unit
     ) {
         selector.initializePrompt(
@@ -1226,6 +1254,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             allowCredentialFallback = allowCredentialFallback,
             fingerprint = testCase.fingerprint,
             face = testCase.face,
+            descriptionFromApp = description,
+            contentViewFromApp = contentView,
         )
 
         // put the view model in the initial authenticating state, unless explicitly skipped
@@ -1401,11 +1431,15 @@ private fun PromptSelectorInteractor.initializePrompt(
     face: FaceSensorPropertiesInternal? = null,
     requireConfirmation: Boolean = false,
     allowCredentialFallback: Boolean = false,
+    descriptionFromApp: String? = null,
+    contentViewFromApp: PromptContentView? = null,
 ) {
     val info =
         PromptInfo().apply {
             title = "t"
             subtitle = "s"
+            description = descriptionFromApp
+            contentView = contentViewFromApp
             authenticators = listOf(face, fingerprint).extractAuthenticatorTypes()
             isDeviceCredentialAllowed = allowCredentialFallback
             isConfirmationRequested = requireConfirmation

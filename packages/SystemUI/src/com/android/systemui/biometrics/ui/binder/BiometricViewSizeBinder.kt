@@ -55,7 +55,7 @@ object BiometricViewSizeBinder {
     fun bind(
         view: BiometricPromptLayout,
         viewModel: PromptViewModel,
-        viewsToHideWhenSmall: List<TextView>,
+        viewsToHideWhenSmall: List<View>,
         viewsToFadeInOnSizeChange: List<View>,
         panelViewController: AuthPanelController,
         jankListener: BiometricJankListener,
@@ -110,7 +110,7 @@ object BiometricViewSizeBinder {
 
                         // prepare for animated size transitions
                         for (v in viewsToHideWhenSmall) {
-                            v.showTextOrHide(forceHide = size.isSmall)
+                            v.showContentOrHide(forceHide = size.isSmall)
                         }
                         if (currentSize == null && size.isSmall) {
                             iconHolderView.alpha = 0f
@@ -119,6 +119,10 @@ object BiometricViewSizeBinder {
                             viewsToFadeInOnSizeChange.forEach { it.alpha = 0f }
                         }
 
+                        // TODO(b/302735104): Fix wrong height due to the delay of
+                        // PromptContentView. addOnLayoutChangeListener() will cause crash when
+                        // showing credential view, since |PromptIconViewModel| won't release the
+                        // flow.
                         // propagate size changes to legacy panel controller and animate transitions
                         view.doOnLayout {
                             val width = view.measuredWidth
@@ -228,8 +232,9 @@ private fun View.isLandscape(): Boolean {
     return r == Surface.ROTATION_90 || r == Surface.ROTATION_270
 }
 
-private fun TextView.showTextOrHide(forceHide: Boolean = false) {
-    visibility = if (forceHide || text.isBlank()) View.GONE else View.VISIBLE
+private fun View.showContentOrHide(forceHide: Boolean = false) {
+    val isTextViewWithBlankText = this is TextView && this.text.isBlank()
+    visibility = if (forceHide || isTextViewWithBlankText) View.GONE else View.VISIBLE
 }
 
 private fun View.asVerticalAnimator(

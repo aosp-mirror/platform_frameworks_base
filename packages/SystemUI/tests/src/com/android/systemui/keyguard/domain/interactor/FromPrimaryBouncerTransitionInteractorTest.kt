@@ -63,6 +63,8 @@ class FromPrimaryBouncerTransitionInteractorTest : KeyguardTransitionInteractorT
                 transitionRepository = super.transitionRepository,
                 transitionInteractor = super.transitionInteractor,
                 scope = super.testScope.backgroundScope,
+                bgDispatcher = super.testDispatcher,
+                mainDispatcher = super.testDispatcher,
                 keyguardInteractor = super.keyguardInteractor,
                 flags = FakeFeatureFlags(),
                 keyguardSecurityModel = mock(),

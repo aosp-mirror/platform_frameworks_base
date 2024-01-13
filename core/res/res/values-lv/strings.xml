@@ -435,6 +435,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Ļauj lietotnei izmantot šāda veida priekšplāna pakalpojumus: systemExempted"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"izpildīt šāda veida priekšplāna pakalpojumu: fileManagement"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Ļauj lietotnei izmantot šāda veida priekšplāna pakalpojumus: fileManagement"</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"izpildīt šāda veida priekšplāna pakalpojumu: specialUse"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Ļauj lietotnei izmantot šāda veida priekšplāna pakalpojumus: specialUse"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"noteikt vietas apjomu lietotnes atmiņā"</string>
@@ -633,7 +637,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekrāna bloķēšanas metodes izmantošana"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Lai turpinātu, ievadiet ekrāna bloķēšanas informāciju"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Stingri spiediet pirkstu pie sensora"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Nevar atpazīt pirksta nospiedumu. Mēģiniet vēlreiz."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Notīriet pirkstu nospiedumu sensoru un mēģiniet vēlreiz"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Notīriet sensoru un mēģiniet vēlreiz"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Stingri spiediet pirkstu pie sensora"</string>
@@ -697,7 +702,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Seja nav redzama. Turiet tālruni acu līmenī."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Pārāk daudz kustību. Nekustīgi turiet tālruni."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Lūdzu, atkārtoti reģistrējiet savu seju."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Nevar atpazīt seju. Mēģiniet vēlreiz."</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Nedaudz mainiet galvas pozīciju."</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Skatieties tieši uz tālruni"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Skatieties tieši uz tālruni"</string>

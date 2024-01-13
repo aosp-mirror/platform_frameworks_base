@@ -60,6 +60,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -407,6 +408,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.userModifiedFields = 16;
         rule.iconResName = ICON_RES_NAME;
         rule.triggerDescription = TRIGGER_DESC;
+        rule.deletionInstant = Instant.ofEpochMilli(1701790147000L);
 
         Parcel parcel = Parcel.obtain();
         rule.writeToParcel(parcel, 0);
@@ -432,9 +434,10 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.userModifiedFields, parceled.userModifiedFields);
         assertEquals(rule.triggerDescription, parceled.triggerDescription);
         assertEquals(rule.zenPolicy, parceled.zenPolicy);
+        assertEquals(rule.deletionInstant, parceled.deletionInstant);
+
         assertEquals(rule, parceled);
         assertEquals(rule.hashCode(), parceled.hashCode());
-
     }
 
     @Test
@@ -510,6 +513,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.userModifiedFields = 4;
         rule.iconResName = ICON_RES_NAME;
         rule.triggerDescription = TRIGGER_DESC;
+        rule.deletionInstant = Instant.ofEpochMilli(1701790147000L);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         writeRuleXml(rule, baos);
@@ -539,6 +543,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.userModifiedFields, fromXml.userModifiedFields);
         assertEquals(rule.triggerDescription, fromXml.triggerDescription);
         assertEquals(rule.iconResName, fromXml.iconResName);
+        assertEquals(rule.deletionInstant, fromXml.deletionInstant);
     }
 
     @Test

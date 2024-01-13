@@ -17,14 +17,12 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
-import android.hardware.biometrics.SensorLocationInternal
 import com.android.settingslib.Utils
-import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
+import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
-import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -44,21 +42,24 @@ constructor(
     configurationInteractor: ConfigurationInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     deviceEntryBackgroundViewModel: DeviceEntryBackgroundViewModel,
-    fingerprintPropertyRepository: FingerprintPropertyRepository,
+    fingerprintPropertyInteractor: FingerprintPropertyInteractor,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
     private val isSupported: Flow<Boolean> = deviceEntryUdfpsInteractor.isUdfpsSupported
+
+    /**
+     * UDFPS icon location in pixels for the current display and screen resolution, in natural
+     * orientation.
+     */
     val iconLocation: Flow<IconLocation> =
         isSupported.flatMapLatest { supportsUI ->
             if (supportsUI) {
-                fingerprintPropertyRepository.sensorLocations.map { sensorLocations ->
-                    val sensorLocation =
-                        sensorLocations.getOrDefault("", SensorLocationInternal.DEFAULT)
+                fingerprintPropertyInteractor.sensorLocation.map { sensorLocation ->
                     IconLocation(
-                        left = sensorLocation.sensorLocationX - sensorLocation.sensorRadius,
-                        top = sensorLocation.sensorLocationY - sensorLocation.sensorRadius,
-                        right = sensorLocation.sensorLocationX + sensorLocation.sensorRadius,
-                        bottom = sensorLocation.sensorLocationY + sensorLocation.sensorRadius,
+                        left = (sensorLocation.centerX - sensorLocation.radius).toInt(),
+                        top = (sensorLocation.centerY - sensorLocation.radius).toInt(),
+                        right = (sensorLocation.centerX + sensorLocation.radius).toInt(),
+                        bottom = (sensorLocation.centerY + sensorLocation.radius).toInt(),
                     )
                 }
             } else {

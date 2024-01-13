@@ -434,6 +434,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"អនុញ្ញាតឱ្យកម្មវិធីប្រើប្រាស់សេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"systemExempted\""</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"ដំណើរការសេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"fileManagement\""</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"អនុញ្ញាតឱ្យកម្មវិធីប្រើប្រាស់សេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"fileManagement\""</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"ដំណើរការសេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"អនុញ្ញាតឱ្យកម្មវិធីប្រើប្រាស់សេវាកម្មផ្ទៃខាងមុខជាមួយនឹងប្រភេទ \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"វាស់​ទំហំ​ការ​ផ្ទុក​​កម្មវិធី"</string>
@@ -632,7 +636,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ប្រើ​ការ​ចាក់​សោ​អេក្រង់"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"បញ្ចូលការចាក់សោអេក្រង់របស់អ្នក ដើម្បីបន្ត"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"សង្កត់លើ​សេនស័រឱ្យណែន"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"មិនអាចសម្គាល់​ស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"សម្អាត​ឧបករណ៍​ចាប់ស្នាមម្រាមដៃ រួចព្យាយាម​ម្ដងទៀត"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"សម្អាត​ឧបករណ៍​ចាប់សញ្ញា រួចព្យាយាម​ម្ដងទៀត"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"សង្កត់លើ​សេនស័រឱ្យណែន"</string>
@@ -696,7 +701,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"មើលមិនឃើញ​មុខរបស់អ្នកទេ។ កាន់ទូរសព្ទរបស់អ្នក​ដាក់ត្រឹមភ្នែក។"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"មាន​ចលនា​ខ្លាំងពេក។ សូមកាន់​ទូរសព្ទ​ឱ្យនឹង។"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"សូម​​ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត។"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"មិនអាចសម្គាល់មុខបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"ប្ដូរទីតាំងក្បាល​របស់អ្នកតិចៗ"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"មើល​ទូរសព្ទ​របស់អ្នក​ឱ្យចំជាងនេះ"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"មើល​ទូរសព្ទ​របស់អ្នក​ឱ្យចំជាងនេះ"</string>

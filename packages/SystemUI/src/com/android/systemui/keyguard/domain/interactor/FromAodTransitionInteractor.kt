@@ -19,7 +19,8 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.DozeStateModel
@@ -29,6 +30,7 @@ import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -38,12 +40,17 @@ class FromAodTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
-    override val transitionInteractor: KeyguardTransitionInteractor,
-    @Application private val scope: CoroutineScope,
+    transitionInteractor: KeyguardTransitionInteractor,
+    @Background private val scope: CoroutineScope,
+    @Background bgDispatcher: CoroutineDispatcher,
+    @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
+        transitionInteractor = transitionInteractor,
+        mainDispatcher = mainDispatcher,
+        bgDispatcher = bgDispatcher,
     ) {
 
     override fun start() {
@@ -58,7 +65,7 @@ constructor(
                 .dozeTransitionTo(DozeStateModel.FINISH)
                 .sample(
                     combine(
-                        transitionInteractor.startedKeyguardTransitionStep,
+                        startedKeyguardTransitionStep,
                         keyguardInteractor.isKeyguardOccluded,
                         ::Pair
                     ),
@@ -77,7 +84,6 @@ constructor(
                             } else {
                                 TransitionModeOnCanceled.LAST_VALUE
                             }
-
                         startTransitionTo(
                             toState = toState,
                             modeOnCanceled = modeOnCanceled,
@@ -89,16 +95,13 @@ constructor(
 
     private fun listenForAodToGone() {
         scope.launch {
-            keyguardInteractor.biometricUnlockState
-                .sample(transitionInteractor.finishedKeyguardState, ::Pair)
-                .collect { pair ->
-                    val (biometricUnlockState, keyguardState) = pair
-                    if (
-                        keyguardState == KeyguardState.AOD && isWakeAndUnlock(biometricUnlockState)
-                    ) {
-                        startTransitionTo(KeyguardState.GONE)
-                    }
+            keyguardInteractor.biometricUnlockState.sample(finishedKeyguardState, ::Pair).collect {
+                pair ->
+                val (biometricUnlockState, keyguardState) = pair
+                if (keyguardState == KeyguardState.AOD && isWakeAndUnlock(biometricUnlockState)) {
+                    startTransitionTo(KeyguardState.GONE)
                 }
+            }
         }
     }
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -113,6 +116,7 @@ constructor(
     }
 
     companion object {
+        const val TAG = "FromAodTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 500.milliseconds
         val TO_GONE_DURATION = DEFAULT_DURATION

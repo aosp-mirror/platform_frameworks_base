@@ -18,9 +18,7 @@ package com.android.systemui.qs.tiles.impl.alarm.domain.interactor
 
 import android.content.Intent
 import android.provider.AlarmClock
-import com.android.internal.jank.InteractionJankMonitor
-import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.alarm.domain.model.AlarmTileModel
@@ -31,34 +29,20 @@ import javax.inject.Inject
 class AlarmTileUserActionInteractor
 @Inject
 constructor(
-    private val activityStarter: ActivityStarter,
+    private val inputHandler: QSTileIntentUserInputHandler,
 ) : QSTileUserActionInteractor<AlarmTileModel> {
     override suspend fun handleInput(input: QSTileInput<AlarmTileModel>): Unit =
         with(input) {
             when (action) {
                 is QSTileUserAction.Click -> {
-                    val animationController =
-                        action.view?.let {
-                            ActivityLaunchAnimator.Controller.fromView(
-                                it,
-                                InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE
-                            )
-                        }
                     if (
                         data is AlarmTileModel.NextAlarmSet &&
                             data.alarmClockInfo.showIntent != null
                     ) {
                         val pendingIndent = data.alarmClockInfo.showIntent
-                        activityStarter.postStartActivityDismissingKeyguard(
-                            pendingIndent,
-                            animationController
-                        )
+                        inputHandler.handle(action.view, pendingIndent, true)
                     } else {
-                        activityStarter.postStartActivityDismissingKeyguard(
-                            Intent(AlarmClock.ACTION_SHOW_ALARMS),
-                            0,
-                            animationController
-                        )
+                        inputHandler.handle(action.view, Intent(AlarmClock.ACTION_SHOW_ALARMS))
                     }
                 }
                 is QSTileUserAction.LongClick -> {}

@@ -72,6 +72,8 @@ aconfig_srcjars = [
     ":android.webkit.flags-aconfig-java{.generated_srcjars}",
     ":android.provider.flags-aconfig-java{.generated_srcjars}",
     ":android.chre.flags-aconfig-java{.generated_srcjars}",
+    ":android.speech.flags-aconfig-java{.generated_srcjars}",
+    ":power_flags_lib{.generated_srcjars}",
 ]
 
 filegroup {
@@ -197,7 +199,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "android.nfc.flags-aconfig",
     package: "android.nfc",
-    srcs: ["core/java/android/nfc/*.aconfig"],
+    srcs: ["nfc/java/android/nfc/*.aconfig"],
 }
 
 cc_aconfig_library {
@@ -215,7 +217,7 @@ cc_aconfig_library {
 java_aconfig_library {
     name: "android.nfc.flags-aconfig-java",
     aconfig_declarations: "android.nfc.flags-aconfig",
-    min_sdk_version: "VanillaIceCream",
+    min_sdk_version: "34",
     apex_available: [
         "//apex_available:platform",
         "com.android.nfcservices",
@@ -481,8 +483,8 @@ java_aconfig_library {
     apex_available: [
         "//apex_available:platform",
         "com.android.permission",
+        "com.android.nfcservices",
     ],
-
 }
 
 // SQLite
@@ -744,6 +746,11 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.service.chooser.flags-aconfig-java",
     aconfig_declarations: "android.service.chooser.flags-aconfig",
+    min_sdk_version: "34",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+    ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -911,5 +918,25 @@ java_aconfig_library {
 java_aconfig_library {
     name: "android.chre.flags-aconfig-java",
     aconfig_declarations: "chre_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Speech
+aconfig_declarations {
+    name: "android.speech.flags-aconfig",
+    package: "android.speech.flags",
+    srcs: ["core/java/android/speech/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.speech.flags-aconfig-java",
+    aconfig_declarations: "android.speech.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Power
+java_aconfig_library {
+    name: "power_flags_lib",
+    aconfig_declarations: "power_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

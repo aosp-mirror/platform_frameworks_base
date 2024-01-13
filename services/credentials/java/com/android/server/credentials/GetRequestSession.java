@@ -57,7 +57,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 getRequestInfoFromRequest(request), callingAppInfo, enabledProviders,
-                cancellationSignal, startedTimestamp);
+                cancellationSignal, startedTimestamp, /*shouldBindClientToDeath=*/ true);
         mRequestSessionMetric.collectGetFlowInitialMetricInfo(request);
     }
 

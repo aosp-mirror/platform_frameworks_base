@@ -44,8 +44,10 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
+import android.os.BadParcelableException;
 import android.os.Binder;
 import android.os.Build;
+import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -95,6 +97,20 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertNotNull(service.getActiveNotifications(NotificationListenerService.TRIM_FULL));
         assertNotNull(service.getActiveNotifications(new String[0]));
         assertNotNull(service.getActiveNotifications(
+                new String[0], NotificationListenerService.TRIM_LIGHT));
+    }
+
+    @Test
+    public void testGetActiveNotifications_handlesBinderErrors() throws RemoteException {
+        TestListenerService service = new TestListenerService();
+        INotificationManager noMan = service.getNoMan();
+        when(noMan.getActiveNotificationsFromListener(any(), any(), anyInt()))
+                .thenThrow(new BadParcelableException("oops", new DeadObjectException("")));
+
+        assertNotNull(service.getActiveNotifications());
+        assertNotNull(service.getActiveNotifications(NotificationListenerService.TRIM_FULL));
+        assertNotNull(service.getActiveNotifications(new String[0]));
+        assertNull(service.getActiveNotifications(
                 new String[0], NotificationListenerService.TRIM_LIGHT));
     }
 

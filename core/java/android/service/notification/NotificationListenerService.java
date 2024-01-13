@@ -42,6 +42,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1056,7 +1057,7 @@ public abstract class NotificationListenerService extends Service {
             ParceledListSlice<StatusBarNotification> parceledList = getNotificationInterface()
                     .getActiveNotificationsFromListener(mWrapper, keys, trim);
             return cleanUpNotificationList(parceledList);
-        } catch (android.os.RemoteException ex) {
+        } catch (android.os.RemoteException | BadParcelableException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
         return null;

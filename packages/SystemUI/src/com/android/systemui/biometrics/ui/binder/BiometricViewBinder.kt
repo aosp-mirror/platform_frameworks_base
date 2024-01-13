@@ -31,6 +31,7 @@ import android.view.View
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -94,6 +95,8 @@ object BiometricViewBinder {
         val titleView = view.requireViewById<TextView>(R.id.title)
         val subtitleView = view.requireViewById<TextView>(R.id.subtitle)
         val descriptionView = view.requireViewById<TextView>(R.id.description)
+        val customizedViewContainer =
+            view.requireViewById<ScrollView>(R.id.customized_view_container)
 
         // set selected to enable marquee unless a screen reader is enabled
         titleView.isSelected =
@@ -150,8 +153,13 @@ object BiometricViewBinder {
             }
 
             titleView.text = viewModel.title.first()
-            descriptionView.text = viewModel.description.first()
             subtitleView.text = viewModel.subtitle.first()
+            descriptionView.text = viewModel.description.first()
+            BiometricCustomizedViewBinder.bind(
+                customizedViewContainer,
+                view.requireViewById(R.id.space_above_content),
+                viewModel
+            )
 
             // set button listeners
             negativeButton.setOnClickListener { legacyCallback.onButtonNegative() }
@@ -178,12 +186,14 @@ object BiometricViewBinder {
                             titleView,
                             subtitleView,
                             descriptionView,
+                            customizedViewContainer,
                         ),
                     viewsToFadeInOnSizeChange =
                         listOf(
                             titleView,
                             subtitleView,
                             descriptionView,
+                            customizedViewContainer,
                             indicatorMessageView,
                             negativeButton,
                             cancelButton,

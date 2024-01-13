@@ -434,6 +434,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Membenarkan apl menggunakan perkhidmatan latar depan dengan jenis \"systemExempted\""</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"jalankan perkhidmatan latar depan dengan jenis \"fileManagement\""</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Benarkan apl menggunakan perkhidmatan latar depan dengan jenis \"fileManagement\""</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"jalankan perkhidmatan latar depan dengan jenis \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Membenarkan apl menggunakan perkhidmatan latar depan dengan jenis \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ukur ruang storan apl"</string>
@@ -632,7 +636,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gunakan kunci skrin"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Masukkan kunci skrin untuk teruskan"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tekan penderia dengan kuat"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Tidak dapat mengecam cap jari. Cuba lagi."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Bersihkan penderia cap jari dan cuba lagi"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Bersihkan penderia dan cuba lagi"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tekan penderia dengan kuat"</string>
@@ -696,7 +701,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Wajah tidak kelihatan. Pegang telefon pada paras mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Terlalu bnyk gerakan. Pegang telefon dgn stabil."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Sila daftarkan semula wajah anda."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Tidak dapat mengecam wajah. Cuba lagi."</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Tukar sedikit kedudukan kepala anda"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Lihat lebih lurus pada telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Lihat lebih lurus pada telefon"</string>
@@ -1016,7 +1022,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Lupa corak?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Buka kunci akaun"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"Nama Pengguna (E-mel)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Kata laluan"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Log masuk"</string>
@@ -1667,7 +1673,7 @@
     <string name="kg_invalid_puk" msgid="4809502818518963344">"Masukkan semula kod PIN yang betul. Percubaan berulang akan melumpuhkan SIM secara kekal."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="4705368340409816254">"Kod PIN tidak sepadan"</string>
     <string name="kg_login_too_many_attempts" msgid="699292728290654121">"Terlalu banyak percubaan melukis corak"</string>
-    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan akaun Google anda."</string>
+    <string name="kg_login_instructions" msgid="3619844310339066827">"Untuk membuka kunci, log masuk dengan Google Account anda."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"Nama Pengguna (E-mel)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Kata laluan"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Log masuk"</string>

@@ -16,7 +16,6 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
-import android.os.PowerManager
 import android.widget.RemoteViews
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
@@ -24,12 +23,12 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
-import com.android.systemui.shade.ShadeViewController
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -51,10 +50,8 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val interactionHandler: WidgetInteractionHandler,
     tutorialInteractor: CommunalTutorialInteractor,
-    shadeViewController: Provider<ShadeViewController>,
-    powerManager: PowerManager,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
-) : BaseCommunalViewModel(communalInteractor, shadeViewController, powerManager, mediaHost) {
+) : BaseCommunalViewModel(communalInteractor, mediaHost) {
     @OptIn(ExperimentalCoroutinesApi::class)
     override val communalContent: Flow<List<CommunalContentModel>> =
         tutorialInteractor.isTutorialAvailable.flatMapLatest { isTutorialMode ->
@@ -74,6 +71,17 @@ constructor(
     private val _isPopupOnDismissCtaShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isPopupOnDismissCtaShowing: Flow<Boolean> =
         _isPopupOnDismissCtaShowing.asStateFlow()
+
+    init {
+        // Initialize our media host for the UMO. This only needs to happen once and must be done
+        // before the MediaHierarchyManager attempts to move the UMO to the hub.
+        with(mediaHost) {
+            expansion = MediaHostState.EXPANDED
+            showsOnlyActiveMedia = false
+            falsingProtectionNeeded = false
+            init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
+        }
+    }
 
     override fun onOpenWidgetEditor() = communalInteractor.showWidgetEditor()
 

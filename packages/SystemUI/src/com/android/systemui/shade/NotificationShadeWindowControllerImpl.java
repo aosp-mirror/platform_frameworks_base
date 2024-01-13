@@ -373,7 +373,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             boolean onKeyguard = state.statusBarState == StatusBarState.KEYGUARD
                     && !state.keyguardFadingAway && !state.keyguardGoingAway;
             if (onKeyguard
-                    && mAuthController.isUdfpsEnrolled(mUserInteractor.get().getSelectedUserId())) {
+                    && mAuthController.isOpticalUdfpsEnrolled(
+                            mUserInteractor.get().getSelectedUserId())
+            ) {
                 // Requests the max refresh rate (ie: for smooth display). Note: By setting
                 // the preferred refresh rates below, the refresh rate will not override the max
                 // refresh rate in settings (ie: if smooth display is OFF).
@@ -892,6 +894,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         pw.println(TAG + ":");
         pw.println("  mKeyguardMaxRefreshRate=" + mKeyguardMaxRefreshRate);
         pw.println("  mKeyguardPreferredRefreshRate=" + mKeyguardPreferredRefreshRate);
+        pw.println("  preferredMinDisplayRefreshRate=" + mLpChanged.preferredMinDisplayRefreshRate);
+        pw.println("  preferredMaxDisplayRefreshRate=" + mLpChanged.preferredMaxDisplayRefreshRate);
         pw.println("  mDeferWindowLayoutParams=" + mDeferWindowLayoutParams);
         pw.println(mCurrentState);
         if (mWindowRootView != null && mWindowRootView.getViewRootImpl() != null) {

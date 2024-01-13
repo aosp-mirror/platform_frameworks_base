@@ -16,6 +16,9 @@
 
 package android.speech;
 
+import static android.speech.flags.Flags.FLAG_MULTILANG_EXTRA_LAUNCH;
+
+import android.annotation.FlaggedApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -653,4 +656,30 @@ public class RecognizerIntent {
      */
     public static final String EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES =
             "android.speech.extra.LANGUAGE_SWITCH_ALLOWED_LANGUAGES";
+
+    /**
+     * Optional integer to use for {@link #EXTRA_ENABLE_LANGUAGE_SWITCH}. If set, the language
+     * switch will be deactivated when LANGUAGE_SWITCH_MAX_SWITCHES reached.
+     *
+     * <p> Depending on the recognizer implementation, this flag may have no effect.
+     *
+     * @see #EXTRA_ENABLE_LANGUAGE_SWITCH
+     */
+    @FlaggedApi(FLAG_MULTILANG_EXTRA_LAUNCH)
+    public static final String EXTRA_LANGUAGE_SWITCH_MAX_SWITCHES =
+            "android.speech.extra.LANGUAGE_SWITCH_MAX_SWITCHES";
+
+    /**
+     * Optional integer to use for {@link #EXTRA_ENABLE_LANGUAGE_SWITCH}. If set, the language
+     * switch will only be activated for this value of ms of audio since the START_OF_SPEECH. This
+     * could provide a more stable recognition result when the language switch is only required in
+     * the beginning of the session.
+     *
+     * <p> Depending on the recognizer implementation, this flag may have no effect.
+     *
+     * @see #EXTRA_ENABLE_LANGUAGE_SWITCH
+     */
+    @FlaggedApi(FLAG_MULTILANG_EXTRA_LAUNCH)
+    public static final String EXTRA_LANGUAGE_SWITCH_INITIAL_ACTIVE_DURATION_TIME_MILLIS =
+            "android.speech.extra.LANGUAGE_SWITCH_INITIAL_ACTIVE_DURATION_TIME_MILLIS";
 }

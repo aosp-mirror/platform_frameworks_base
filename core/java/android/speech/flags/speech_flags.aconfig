@@ -1,0 +1,8 @@
+package: "android.speech.flags"
+
+flag {
+    name: "multilang_extra_launch"
+    namespace: "machine_learning"
+    description: "Feature flag for adding new extra for multi-lang feature"
+    bug: "312489931"
+}

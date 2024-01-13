@@ -1153,7 +1153,7 @@ constructor(
                 qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
                 onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
                 onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
-                // TODO(b/308813166): revisit logic once interactions between the hub and
+                // TODO(b/311234666): revisit logic once interactions between the hub and
                 //  shade/keyguard state are finalized
                 isCommunalShowing && communalInteractor.isCommunalEnabled -> LOCATION_COMMUNAL_HUB
                 onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN

@@ -175,9 +175,6 @@ java_library {
         // and remove this line.
         "//frameworks/base/tools/hoststubgen:__subpackages__",
     ],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 // AIDL files under these paths are mixture of public and private ones.
@@ -270,9 +267,6 @@ java_library {
     ],
     sdk_version: "core_platform",
     installable: false,
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 // NOTE: This filegroup is exposed for vendor libraries to depend on and is referenced in
@@ -437,13 +431,9 @@ java_library {
     name: "framework-non-updatable-unbundled-impl-libs",
     static_libs: [
         "framework-location.impl",
-        "framework-nfc.impl",
     ],
     sdk_version: "core_platform",
     installable: false,
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 // Separated so framework-minus-apex-defaults can be used without the libs dependency
@@ -487,9 +477,6 @@ java_library {
     ],
     compile_dex: false,
     headers_only: true,
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 java_library {
@@ -534,7 +521,7 @@ java_library {
     },
     lint: {
         enabled: false,
-        baseline_filename: "lint-baseline.xml",
+
     },
 }
 
@@ -559,9 +546,6 @@ java_library {
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 java_library {
@@ -577,9 +561,6 @@ java_library {
         "calendar-provider-compat-config",
         "contacts-provider-platform-compat-config",
     ],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 platform_compat_config {
@@ -634,9 +615,6 @@ java_library {
         "rappor",
     ],
     dxflags: ["--core-library"],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 // utility classes statically linked into framework-wifi and dynamically linked

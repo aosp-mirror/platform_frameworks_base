@@ -17,7 +17,6 @@
 package com.android.systemui.communal.view.viewmodel
 
 import android.app.smartspace.SmartspaceTarget
-import android.os.PowerManager
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -35,13 +34,12 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.PO
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHost
-import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -51,6 +49,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -58,8 +57,6 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class CommunalViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
-    @Mock private lateinit var shadeViewController: ShadeViewController
-    @Mock private lateinit var powerManager: PowerManager
 
     private lateinit var testScope: TestScope
 
@@ -92,11 +89,16 @@ class CommunalViewModelTest : SysuiTestCase() {
                 withDeps.communalInteractor,
                 WidgetInteractionHandler(mock()),
                 withDeps.tutorialInteractor,
-                Provider { shadeViewController },
-                powerManager,
                 mediaHost,
             )
     }
+
+    @Test
+    fun init_initsMediaHost() =
+        testScope.runTest {
+            // MediaHost is initialized as soon as the class is created.
+            verify(mediaHost).init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
+        }
 
     @Test
     fun tutorial_tutorialNotCompletedAndKeyguardVisible_showTutorialContent() =

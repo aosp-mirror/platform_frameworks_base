@@ -34,8 +34,6 @@ import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistr
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigCoreStartable
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileRepositorySwitcher
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractorImpl
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter
@@ -62,6 +60,8 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRep
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryViaTrackerLib
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
+import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
+import com.android.systemui.statusbar.policy.data.repository.UserSetupRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

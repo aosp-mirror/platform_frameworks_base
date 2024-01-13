@@ -4869,8 +4869,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                     final List<ImeSubtypeListItem> imList = InputMethodSubtypeSwitchingController
                             .getSortedInputMethodAndSubtypeList(
-                                    showAuxSubtypes, isScreenLocked, false, mContext,
-                                    mMethodMap, mSettings.getCurrentUserId());
+                                    showAuxSubtypes, isScreenLocked, true /* forImeMenu */,
+                                    mContext, mMethodMap, mSettings.getCurrentUserId());
                     mMenuController.showInputMethodMenuLocked(showAuxSubtypes, displayId,
                             lastInputMethodId, lastInputMethodSubtypeId, imList);
                 }

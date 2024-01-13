@@ -122,7 +122,8 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             @NonNull String requestType,
             CallingAppInfo callingAppInfo,
             Set<ComponentName> enabledProviders,
-            CancellationSignal cancellationSignal, long timestampStarted) {
+            CancellationSignal cancellationSignal, long timestampStarted,
+            boolean shouldBindClientToDeath) {
         mContext = context;
         mLock = lock;
         mSessionCallback = sessionCallback;
@@ -146,16 +147,18 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         mRequestSessionMetric.collectInitialPhaseMetricInfo(timestampStarted,
                 mCallingUid, ApiName.getMetricCodeFromRequestInfo(mRequestType));
         setCancellationListener();
-        if (Flags.clearSessionEnabled()) {
-            setUpClientCallbackListener();
+        if (shouldBindClientToDeath && Flags.clearSessionEnabled()) {
+            if (mClientCallback != null && mClientCallback instanceof IInterface) {
+                setUpClientCallbackListener(((IInterface) mClientCallback).asBinder());
+            }
         }
     }
 
-    private void setUpClientCallbackListener() {
+    protected void setUpClientCallbackListener(IBinder clientBinder) {
         if (mClientCallback != null && mClientCallback instanceof IInterface) {
             IInterface callback = (IInterface) mClientCallback;
             try {
-                callback.asBinder().linkToDeath(mDeathRecipient, 0);
+                clientBinder.linkToDeath(mDeathRecipient, 0);
             } catch (RemoteException e) {
                 Slog.e(TAG, e.getMessage());
             }

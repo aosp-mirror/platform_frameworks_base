@@ -397,6 +397,8 @@ message ActivityRecordProto {
     optional bool should_override_min_aspect_ratio = 42;
     optional bool should_ignore_orientation_request_loop = 43;
     optional bool should_override_force_resize_app = 44;
+    optional bool should_enable_user_aspect_ratio_settings = 45;
+    optional bool is_user_fullscreen_override_enabled = 46;
 }
 
 /* represents WindowToken */

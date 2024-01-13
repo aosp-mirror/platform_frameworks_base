@@ -63,7 +63,8 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_CREATE,
-                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp,
+                /*shouldBindClientToDeath=*/ true);
         mRequestSessionMetric.collectCreateFlowInitialMetricInfo(
                 /*origin=*/request.getOrigin() != null, request);
         mPrimaryProviders = primaryProviders;

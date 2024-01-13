@@ -117,6 +117,9 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -130,9 +133,12 @@ public class ZenModeHelper {
     static final String TAG = "ZenModeHelper";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private static final String PACKAGE_ANDROID = "android";
+
     // The amount of time rules instances can exist without their owning app being installed.
     private static final int RULE_INSTANCE_GRACE_PERIOD = 1000 * 60 * 60 * 72;
     static final int RULE_LIMIT_PER_PACKAGE = 100;
+    private static final Duration DELETED_RULE_KEPT_FOR = Duration.ofDays(30);
 
     private static final String IMPLICIT_RULE_ID_PREFIX = "implicit_"; // + pkg_name
 
@@ -148,6 +154,7 @@ public class ZenModeHelper {
 
     private final Context mContext;
     private final H mHandler;
+    private final Clock mClock;
     private final SettingsObserver mSettingsObserver;
     private final AppOpsManager mAppOps;
     private final NotificationManager mNotificationManager;
@@ -189,11 +196,13 @@ public class ZenModeHelper {
 
     private String[] mPriorityOnlyDndExemptPackages;
 
-    public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders,
+    public ZenModeHelper(Context context, Looper looper, Clock clock,
+            ConditionProviders conditionProviders,
             SystemUiSystemPropertiesFlags.FlagResolver flagResolver,
             ZenModeEventLogger zenModeEventLogger) {
         mContext = context;
         mHandler = new H(looper);
+        mClock = clock;
         addCallback(mMetrics);
         mAppOps = context.getSystemService(AppOpsManager.class);
         mNotificationManager = context.getSystemService(NotificationManager.class);
@@ -452,6 +461,7 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             ZenRule rule = new ZenRule();
             populateZenRule(pkg, automaticZenRule, rule, origin, /* isNew= */ true);
+            rule = maybeRestoreRemovedRule(newConfig, rule, automaticZenRule, origin);
             newConfig.automaticRules.put(rule.id, rule);
             maybeReplaceDefaultRule(newConfig, automaticZenRule);
 
@@ -461,6 +471,37 @@ public class ZenModeHelper {
                 throw new AndroidRuntimeException("Could not create rule");
             }
         }
+    }
+
+    private ZenRule maybeRestoreRemovedRule(ZenModeConfig config, ZenRule ruleToAdd,
+            AutomaticZenRule azrToAdd, @ConfigChangeOrigin int origin) {
+        if (!Flags.modesApi()) {
+            return ruleToAdd;
+        }
+        String deletedKey = ZenModeConfig.deletedRuleKey(ruleToAdd);
+        if (deletedKey == null) {
+            // Couldn't calculate the deletedRuleKey (condition or pkg null?). This should
+            // never happen for an app-provided rule because NMS validates both.
+            return ruleToAdd;
+        }
+        ZenRule ruleToRestore = config.deletedRules.get(deletedKey);
+        if (ruleToRestore == null) {
+            return ruleToAdd; // Cannot restore.
+        }
+
+        // We have found a previous rule to maybe restore. Whether we do that or not, we don't need
+        // to keep it around (if not restored now, it won't be in future calls either).
+        config.deletedRules.remove(deletedKey);
+        ruleToRestore.deletionInstant = null;
+
+        if (origin != UPDATE_ORIGIN_APP) {
+            return ruleToAdd; // Okay to create anew.
+        }
+
+        // "Preserve" the previous rule by considering the azrToAdd an update instead.
+        // Only app-modifiable fields will actually be modified.
+        populateZenRule(ruleToRestore.pkg, azrToAdd, ruleToRestore, origin, /* isNew= */ false);
+        return ruleToRestore;
     }
 
     private static void maybeReplaceDefaultRule(ZenModeConfig config, AutomaticZenRule addedRule) {
@@ -644,7 +685,7 @@ public class ZenModeHelper {
         ZenRule rule = new ZenRule();
         rule.id = implicitRuleId(pkg);
         rule.pkg = pkg;
-        rule.creationTime = System.currentTimeMillis();
+        rule.creationTime = mClock.millis();
 
         Binder.withCleanCallingIdentity(() -> {
             try {
@@ -664,7 +705,7 @@ public class ZenModeHelper {
         rule.condition = null;
         rule.conditionId = new Uri.Builder()
                 .scheme(Condition.SCHEME)
-                .authority("android")
+                .authority(PACKAGE_ANDROID)
                 .appendPath("implicit")
                 .appendPath(pkg)
                 .build();
@@ -693,7 +734,9 @@ public class ZenModeHelper {
             if (ruleToRemove == null) return false;
             if (canManageAutomaticZenRule(ruleToRemove)) {
                 newConfig.automaticRules.remove(id);
-                if (ruleToRemove.getPkg() != null && !"android".equals(ruleToRemove.getPkg())) {
+                maybePreserveRemovedRule(newConfig, ruleToRemove, origin);
+                if (ruleToRemove.getPkg() != null
+                        && !PACKAGE_ANDROID.equals(ruleToRemove.getPkg())) {
                     for (ZenRule currRule : newConfig.automaticRules.values()) {
                         if (currRule.getPkg() != null
                                 && currRule.getPkg().equals(ruleToRemove.getPkg())) {
@@ -723,9 +766,41 @@ public class ZenModeHelper {
                 ZenRule rule = newConfig.automaticRules.get(newConfig.automaticRules.keyAt(i));
                 if (Objects.equals(rule.getPkg(), packageName) && canManageAutomaticZenRule(rule)) {
                     newConfig.automaticRules.removeAt(i);
+                    maybePreserveRemovedRule(newConfig, rule, origin);
+                }
+            }
+            // If the system is clearing all rules this means DND access is revoked or the package
+            // was uninstalled, so also clear the preserved-deleted rules.
+            if (origin == UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI) {
+                for (int i = newConfig.deletedRules.size() - 1; i >= 0; i--) {
+                    ZenRule rule = newConfig.deletedRules.get(newConfig.deletedRules.keyAt(i));
+                    if (Objects.equals(rule.getPkg(), packageName)) {
+                        newConfig.deletedRules.removeAt(i);
+                    }
                 }
             }
             return setConfigLocked(newConfig, origin, reason, null, true, callingUid);
+        }
+    }
+
+    private void maybePreserveRemovedRule(ZenModeConfig config, ZenRule ruleToRemove,
+            @ConfigChangeOrigin int origin) {
+        if (!Flags.modesApi()) {
+            return;
+        }
+        // If an app deletes a previously customized rule, keep it around to preserve
+        // the user's customization when/if it's recreated later.
+        // We don't try to preserve system-owned rules because their conditionIds (used as
+        // deletedRuleKey) are not stable. This is almost moot anyway because an app cannot
+        // delete a system-owned rule.
+        if (origin == UPDATE_ORIGIN_APP && !ruleToRemove.canBeUpdatedByApp()
+                && !PACKAGE_ANDROID.equals(ruleToRemove.pkg)) {
+            String deletedKey = ZenModeConfig.deletedRuleKey(ruleToRemove);
+            if (deletedKey != null) {
+                ruleToRemove.deletionInstant = Instant.now(mClock);
+                // Overwrites a previously-deleted rule with the same conditionId, but that's okay.
+                config.deletedRules.put(deletedKey, ruleToRemove);
+            }
         }
     }
 
@@ -919,7 +994,7 @@ public class ZenModeHelper {
             // These values can always be edited by the app, so we apply changes immediately.
             if (isNew) {
                 rule.id = ZenModeConfig.newRuleId();
-                rule.creationTime = System.currentTimeMillis();
+                rule.creationTime = mClock.millis();
                 rule.component = automaticZenRule.getOwner();
                 rule.pkg = pkg;
             }
@@ -1379,7 +1454,7 @@ public class ZenModeHelper {
             boolean hasDefaultRules = config.automaticRules.containsAll(
                     ZenModeConfig.DEFAULT_RULE_IDS);
 
-            long time = System.currentTimeMillis();
+            long time = Flags.modesApi() ? mClock.millis() : System.currentTimeMillis();
             if (config.automaticRules != null && config.automaticRules.size() > 0) {
                 for (ZenRule automaticRule : config.automaticRules.values()) {
                     if (forRestore) {
@@ -1419,6 +1494,12 @@ public class ZenModeHelper {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.ZEN_SETTINGS_UPDATED, 1, userId);
             }
+
+            if (Flags.modesApi() && forRestore) {
+                // Note: forBackup doesn't write deletedRules, but just in case.
+                config.deletedRules.clear();
+            }
+
             if (DEBUG) Log.d(TAG, reason);
             synchronized (mConfigLock) {
                 setConfigLocked(config, null,
@@ -1436,7 +1517,7 @@ public class ZenModeHelper {
                 if (forBackup && mConfigs.keyAt(i) != userId) {
                     continue;
                 }
-                mConfigs.valueAt(i).writeXml(out, version);
+                mConfigs.valueAt(i).writeXml(out, version, forBackup);
             }
         }
     }
@@ -1468,28 +1549,51 @@ public class ZenModeHelper {
     }
 
     /**
-     * Removes old rule instances whose owner is not installed.
+     * Cleans up obsolete rules:
+     * <ul>
+     *     <li>Rule instances whose owner is not installed.
+     *     <li>Deleted rules that were deleted more than 30 days ago.
+     * </ul>
      */
     private void cleanUpZenRules() {
-        long currentTime = System.currentTimeMillis();
+        Instant keptRuleThreshold = mClock.instant().minus(DELETED_RULE_KEPT_FOR);
         synchronized (mConfigLock) {
             final ZenModeConfig newConfig = mConfig.copy();
-            if (newConfig.automaticRules != null) {
-                for (int i = newConfig.automaticRules.size() - 1; i >= 0; i--) {
-                    ZenRule rule = newConfig.automaticRules.get(newConfig.automaticRules.keyAt(i));
-                    if (RULE_INSTANCE_GRACE_PERIOD < (currentTime - rule.creationTime)) {
-                        try {
-                            if (rule.getPkg() != null) {
-                                mPm.getPackageInfo(rule.getPkg(), PackageManager.MATCH_ANY_USER);
-                            }
-                        } catch (PackageManager.NameNotFoundException e) {
-                            newConfig.automaticRules.removeAt(i);
-                        }
+
+            deleteRulesWithoutOwner(newConfig.automaticRules);
+            if (Flags.modesApi()) {
+                deleteRulesWithoutOwner(newConfig.deletedRules);
+                for (int i = newConfig.deletedRules.size() - 1; i >= 0; i--) {
+                    ZenRule deletedRule = newConfig.deletedRules.valueAt(i);
+                    if (deletedRule.deletionInstant == null
+                            || deletedRule.deletionInstant.isBefore(keptRuleThreshold)) {
+                        newConfig.deletedRules.removeAt(i);
                     }
                 }
             }
-            setConfigLocked(newConfig, null, UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "cleanUpZenRules",
-                    Process.SYSTEM_UID);
+
+            if (!newConfig.equals(mConfig)) {
+                setConfigLocked(newConfig, null, UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI,
+                        "cleanUpZenRules", Process.SYSTEM_UID);
+            }
+        }
+    }
+
+    private void deleteRulesWithoutOwner(ArrayMap<String, ZenRule> ruleList) {
+        long currentTime = Flags.modesApi() ? mClock.millis() : System.currentTimeMillis();
+        if (ruleList != null) {
+            for (int i = ruleList.size() - 1; i >= 0; i--) {
+                ZenRule rule = ruleList.valueAt(i);
+                if (RULE_INSTANCE_GRACE_PERIOD < (currentTime - rule.creationTime)) {
+                    try {
+                        if (rule.getPkg() != null) {
+                            mPm.getPackageInfo(rule.getPkg(), PackageManager.MATCH_ANY_USER);
+                        }
+                    } catch (PackageManager.NameNotFoundException e) {
+                        ruleList.removeAt(i);
+                    }
+                }
+            }
         }
     }
 

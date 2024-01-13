@@ -35,6 +35,7 @@ public class PromptInfo implements Parcelable {
     @Nullable private CharSequence mSubtitle;
     private boolean mUseDefaultSubtitle;
     @Nullable private CharSequence mDescription;
+    @Nullable private PromptContentViewParcelable mContentView;
     @Nullable private CharSequence mDeviceCredentialTitle;
     @Nullable private CharSequence mDeviceCredentialSubtitle;
     @Nullable private CharSequence mDeviceCredentialDescription;
@@ -60,6 +61,8 @@ public class PromptInfo implements Parcelable {
         mSubtitle = in.readCharSequence();
         mUseDefaultSubtitle = in.readBoolean();
         mDescription = in.readCharSequence();
+        mContentView = in.readParcelable(PromptContentViewParcelable.class.getClassLoader(),
+                PromptContentViewParcelable.class);
         mDeviceCredentialTitle = in.readCharSequence();
         mDeviceCredentialSubtitle = in.readCharSequence();
         mDeviceCredentialDescription = in.readCharSequence();
@@ -100,6 +103,7 @@ public class PromptInfo implements Parcelable {
         dest.writeCharSequence(mSubtitle);
         dest.writeBoolean(mUseDefaultSubtitle);
         dest.writeCharSequence(mDescription);
+        dest.writeParcelable(mContentView, 0);
         dest.writeCharSequence(mDeviceCredentialTitle);
         dest.writeCharSequence(mDeviceCredentialSubtitle);
         dest.writeCharSequence(mDeviceCredentialDescription);
@@ -174,6 +178,10 @@ public class PromptInfo implements Parcelable {
 
     public void setDescription(CharSequence description) {
         mDescription = description;
+    }
+
+    public void setContentView(PromptContentView view) {
+        mContentView = (PromptContentViewParcelable) view;
     }
 
     public void setDeviceCredentialTitle(CharSequence deviceCredentialTitle) {
@@ -255,6 +263,15 @@ public class PromptInfo implements Parcelable {
 
     public CharSequence getDescription() {
         return mDescription;
+    }
+
+    /**
+     * Gets the content view for the prompt.
+     *
+     * @return The content view for the prompt, or null if the prompt has no content view.
+     */
+    public PromptContentView getContentView() {
+        return mContentView;
     }
 
     public CharSequence getDeviceCredentialTitle() {

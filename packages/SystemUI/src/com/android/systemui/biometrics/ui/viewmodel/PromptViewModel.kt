@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.Context
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.PromptContentView
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -239,9 +241,20 @@ constructor(
     val subtitle: Flow<String> =
         promptSelectorInteractor.prompt.map { it?.subtitle ?: "" }.distinctUntilChanged()
 
-    /** Description for the prompt. */
-    val description: Flow<String> =
+    /** Custom content view for the prompt. */
+    val contentView: Flow<PromptContentView?> =
+        promptSelectorInteractor.prompt.map { it?.contentView }.distinctUntilChanged()
+
+    private val originalDescription =
         promptSelectorInteractor.prompt.map { it?.description ?: "" }.distinctUntilChanged()
+    /**
+     * Description for the prompt. Description view and contentView is mutually exclusive. Pass
+     * description down only when contentView is null.
+     */
+    val description: Flow<String> =
+        combine(contentView, originalDescription) { contentView, description ->
+            if (contentView == null) description else ""
+        }
 
     /** If the indicator (help, error) message should be shown. */
     val isIndicatorMessageVisible: Flow<Boolean> =

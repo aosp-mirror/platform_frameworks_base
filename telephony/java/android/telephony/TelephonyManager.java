@@ -6445,10 +6445,6 @@ public class TelephonyManager {
      * targeting API level 31+.
      *
      * @return the current call state.
-     *
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELECOM}.
-     *
      * @deprecated Use {@link #getCallStateForSubscription} to retrieve the call state for a
      * specific telephony subscription (which allows carrier privileged apps),
      * {@link TelephonyCallback.CallStateListener} for real-time call state updates, or
@@ -6456,7 +6452,6 @@ public class TelephonyManager {
      * device.
      */
     @RequiresPermission(value = android.Manifest.permission.READ_PHONE_STATE, conditional = true)
-    @RequiresFeature(PackageManager.FEATURE_TELECOM)
     @Deprecated
     public @CallState int getCallState() {
         if (mContext != null) {
@@ -10782,9 +10777,7 @@ public class TelephonyManager {
     }
 
     /**
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELECOM}.
-     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
+   * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
      * @hide
      */
     @Deprecated
@@ -10793,15 +10786,12 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
     })
-    @RequiresFeature(PackageManager.FEATURE_TELECOM)
     public boolean isOffhook() {
         TelecomManager tm = (TelecomManager) mContext.getSystemService(TELECOM_SERVICE);
         return tm.isInCall();
     }
 
     /**
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELECOM}.
      * @deprecated Use {@link android.telecom.TelecomManager#isRinging} instead
      * @hide
      */
@@ -10811,15 +10801,12 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
     })
-    @RequiresFeature(PackageManager.FEATURE_TELECOM)
     public boolean isRinging() {
         TelecomManager tm = (TelecomManager) mContext.getSystemService(TELECOM_SERVICE);
         return tm.isRinging();
     }
 
     /**
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELECOM}.
      * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
      * @hide
      */
@@ -10829,7 +10816,6 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
     })
-    @RequiresFeature(PackageManager.FEATURE_TELECOM)
     public boolean isIdle() {
         TelecomManager tm = (TelecomManager) mContext.getSystemService(TELECOM_SERVICE);
         return !tm.isInCall();
@@ -12044,11 +12030,8 @@ public class TelephonyManager {
      *
      * @return {@code true} if the device supports TTY mode, and {@code false} otherwise.
      *
-     * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELECOM}.
      */
     @Deprecated
-    @RequiresFeature(PackageManager.FEATURE_TELECOM)
     public boolean isTtyModeSupported() {
         try {
             TelecomManager telecomManager = null;

@@ -27,6 +27,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
@@ -36,6 +37,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.GlanceableHubTransitions
 import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -51,9 +53,9 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Assert.assertEquals
@@ -69,8 +71,8 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -79,6 +81,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
+    private val testDispatcher = utils.testDispatcher
     private lateinit var shadeInteractor: ShadeInteractor
     private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
     private lateinit var fromPrimaryBouncerTransitionInteractor:
@@ -138,15 +141,24 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 { fromLockscreenTransitionInteractor },
                 { fromPrimaryBouncerTransitionInteractor }
             )
+        val communalInteractor = CommunalInteractorFactory.create().communalInteractor
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                 keyguardTransitionRepository,
                 keyguardTransitionInteractor,
                 testScope.backgroundScope,
+                testDispatcher,
+                testDispatcher,
                 keyguardInteractor,
                 featureFlags,
                 shadeRepository,
                 powerInteractor,
+                GlanceableHubTransitions(
+                    testScope,
+                    keyguardTransitionInteractor,
+                    keyguardTransitionRepository,
+                    communalInteractor
+                ),
                 {
                     InWindowLauncherUnlockAnimationInteractor(
                         InWindowLauncherUnlockAnimationRepository(),
@@ -162,6 +174,8 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 keyguardTransitionRepository,
                 keyguardTransitionInteractor,
                 testScope.backgroundScope,
+                testDispatcher,
+                testDispatcher,
                 keyguardInteractor,
                 featureFlags,
                 mock(),

@@ -231,6 +231,7 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT,
                     Settings.Global.ENABLE_MULTI_SLOT_TIMEOUT_MILLIS,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
+                    Settings.Global.ENABLE_16K_PAGES, // Added for 16K developer option
                     Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
                     Settings.Global.ERROR_LOGCAT_PREFIX,
                     Settings.Global.EUICC_PROVISIONED,
