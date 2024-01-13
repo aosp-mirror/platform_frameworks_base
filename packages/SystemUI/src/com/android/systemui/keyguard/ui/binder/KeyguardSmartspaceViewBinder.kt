@@ -49,14 +49,15 @@ object KeyguardSmartspaceViewBinder {
                             clockViewModel,
                             smartspaceViewModel
                         )
-                        blueprintInteractor.refreshBlueprint()
+                        blueprintInteractor.refreshBlueprintWithTransition()
                     }
                 }
 
                 launch {
+                    if (!migrateClocksToBlueprint()) return@launch
                     smartspaceViewModel.bcSmartspaceVisibility.collect {
                         updateBCSmartspaceInBurnInLayer(keyguardRootView, clockViewModel)
-                        blueprintInteractor.refreshBlueprint()
+                        blueprintInteractor.refreshBlueprintWithTransition()
                     }
                 }
             }
