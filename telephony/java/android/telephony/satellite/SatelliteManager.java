@@ -49,8 +49,10 @@ import com.android.telephony.Rlog;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -2140,6 +2142,35 @@ public final class SatelliteManager {
             loge("unregisterForSatelliteCapabilitiesChanged() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Get all satellite PLMNs for which attach is enable for carrier.
+     *
+     * @param subId subId The subscription ID of the carrier.
+     *
+     * @return List of plmn for carrier satellite service. If no plmn is available, empty list will
+     * be returned.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @NonNull public List<String> getAllSatellitePlmnsForCarrier(int subId) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid subscription ID");
+        }
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getAllSatellitePlmnsForCarrier(subId);
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("getAllSatellitePlmnsForCarrier() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return new ArrayList<>();
     }
 
     private static ITelephony getITelephony() {

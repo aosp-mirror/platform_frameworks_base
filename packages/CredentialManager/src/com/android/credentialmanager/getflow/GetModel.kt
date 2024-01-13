@@ -26,7 +26,7 @@ import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.internal.util.Preconditions
 
 data class GetCredentialUiState(
-        val isRequestForAllOptions: Boolean,
+    val isRequestForAllOptions: Boolean,
     val providerInfoList: List<ProviderInfo>,
     val requestDisplayInfo: RequestDisplayInfo,
     val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerInfoList),
@@ -165,7 +165,7 @@ fun toProviderDisplayInfo(
     )
 }
 
-private fun toActiveEntry(
+fun toActiveEntry(
     providerDisplayInfo: ProviderDisplayInfo,
 ): EntryInfo? {
     val sortedUserNameToCredentialEntryList =

@@ -21,6 +21,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
@@ -39,8 +40,11 @@ import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.largeScreenHeaderHelper
+import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -66,6 +70,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     val shadeRepository = kosmos.shadeRepository
     val sharedNotificationContainerInteractor = kosmos.sharedNotificationContainerInteractor
+    val largeScreenHeaderHelper = kosmos.mockLargeScreenHeaderHelper
 
     val underTest = kosmos.sharedNotificationContainerViewModel
 
@@ -101,8 +106,10 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun validatePaddingTopInSplitShade() =
+    fun validatePaddingTopInSplitShade_refactorFlagOff_usesLargeHeaderResource() =
         testScope.runTest {
+            mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
             overrideResource(R.bool.config_use_split_notification_shade, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -112,6 +119,22 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             configurationRepository.onAnyConfigurationChange()
 
             assertThat(dimens!!.paddingTop).isEqualTo(30)
+        }
+
+    @Test
+    fun validatePaddingTopInSplitShade_refactorFlagOn_usesLargeHeaderHelper() =
+        testScope.runTest {
+            mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
+            overrideResource(R.bool.config_use_split_notification_shade, true)
+            overrideResource(R.dimen.large_screen_shade_header_height, 10)
+            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+
+            configurationRepository.onAnyConfigurationChange()
+
+            assertThat(dimens!!.paddingTop).isEqualTo(40)
         }
 
     @Test
@@ -153,17 +176,41 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun validateMarginTopWithLargeScreenHeader() =
+    fun validateMarginTopWithLargeScreenHeader_refactorFlagOff_usesResource() =
         testScope.runTest {
+            mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            val headerResourceHeight = 50
+            val headerHelperHeight = 100
+            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
+                .thenReturn(headerHelperHeight)
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
-            overrideResource(R.dimen.large_screen_shade_header_height, 50)
+            overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
             overrideResource(R.dimen.notification_panel_margin_top, 0)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
 
             configurationRepository.onAnyConfigurationChange()
 
-            assertThat(dimens!!.marginTop).isEqualTo(50)
+            assertThat(dimens!!.marginTop).isEqualTo(headerResourceHeight)
+        }
+
+    @Test
+    fun validateMarginTopWithLargeScreenHeader_refactorFlagOn_usesHelper() =
+        testScope.runTest {
+            mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            val headerResourceHeight = 50
+            val headerHelperHeight = 100
+            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
+                .thenReturn(headerHelperHeight)
+            overrideResource(R.bool.config_use_large_screen_shade_header, true)
+            overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
+            overrideResource(R.dimen.notification_panel_margin_top, 0)
+
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+
+            configurationRepository.onAnyConfigurationChange()
+
+            assertThat(dimens!!.marginTop).isEqualTo(headerHelperHeight)
         }
 
     @Test
@@ -275,11 +322,13 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun boundsOnLockscreenInSplitShade() =
+    fun boundsOnLockscreenInSplitShade_refactorFlagOff_usesLargeHeaderResource() =
         testScope.runTest {
+            mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
             val bounds by collectLastValue(underTest.bounds)
 
             // When in split shade
+            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
             overrideResource(R.bool.config_use_split_notification_shade, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 10)
             overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
@@ -297,6 +346,33 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             // Top should be equal to bounds (1) + padding adjustment (30)
             assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 31f, bottom = 2f))
+        }
+
+    @Test
+    fun boundsOnLockscreenInSplitShade_refactorFlagOn_usesLargeHeaderHelper() =
+        testScope.runTest {
+            mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR)
+            val bounds by collectLastValue(underTest.bounds)
+
+            // When in split shade
+            whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight()).thenReturn(5)
+            overrideResource(R.bool.config_use_split_notification_shade, true)
+            overrideResource(R.dimen.large_screen_shade_header_height, 10)
+            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+
+            configurationRepository.onAnyConfigurationChange()
+            runCurrent()
+
+            // Start on lockscreen
+            showLockscreen()
+
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 1f, bottom = 2f)
+            )
+            runCurrent()
+
+            // Top should be equal to bounds (1) + padding adjustment (40)
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 41f, bottom = 2f))
         }
 
     @Test

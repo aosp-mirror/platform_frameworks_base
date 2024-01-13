@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.graphics.drawable.Icon
+import android.util.ArrayMap
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -46,6 +47,7 @@ constructor(
         repository.activeNotifications.update { existingModels ->
             buildActiveNotificationsStore(existingModels, sectionStyleProvider) {
                 entries.forEach(::addListEntry)
+                setRankingsMap(entries)
             }
         }
     }
@@ -94,6 +96,27 @@ private class ActiveNotificationsStoreBuilder(
         }
     }
 
+    fun setRankingsMap(entries: List<ListEntry>) {
+        builder.setRankingsMap(flatMapToRankingsMap(entries))
+    }
+
+    fun flatMapToRankingsMap(entries: List<ListEntry>): Map<String, Int> {
+        val result = ArrayMap<String, Int>()
+        for (entry in entries) {
+            if (entry is NotificationEntry) {
+                entry.representativeEntry?.let { representativeEntry ->
+                    result[representativeEntry.key] = representativeEntry.ranking.rank
+                }
+            } else if (entry is GroupEntry) {
+                entry.summary?.let { summary -> result[summary.key] = summary.ranking.rank }
+                for (child in entry.children) {
+                    result[child.key] = child.ranking.rank
+                }
+            }
+        }
+        return result
+    }
+
     private fun NotificationEntry.toModel(): ActiveNotificationModel =
         existingModels.createOrReuse(
             key = key,
@@ -107,6 +130,11 @@ private class ActiveNotificationsStoreBuilder(
             aodIcon = icons.aodIcon?.sourceIcon,
             shelfIcon = icons.shelfIcon?.sourceIcon,
             statusBarIcon = icons.statusBarIcon?.sourceIcon,
+            uid = sbn.uid,
+            packageName = sbn.packageName,
+            instanceId = sbn.instanceId?.id,
+            isGroupSummary = sbn.notification.isGroupSummary,
+            bucket = bucket,
         )
 }
 
@@ -121,7 +149,12 @@ private fun ActiveNotificationsStore.createOrReuse(
     isPulsing: Boolean,
     aodIcon: Icon?,
     shelfIcon: Icon?,
-    statusBarIcon: Icon?
+    statusBarIcon: Icon?,
+    uid: Int,
+    packageName: String,
+    instanceId: Int?,
+    isGroupSummary: Boolean,
+    bucket: Int,
 ): ActiveNotificationModel {
     return individuals[key]?.takeIf {
         it.isCurrent(
@@ -135,7 +168,12 @@ private fun ActiveNotificationsStore.createOrReuse(
             isPulsing = isPulsing,
             aodIcon = aodIcon,
             shelfIcon = shelfIcon,
-            statusBarIcon = statusBarIcon
+            statusBarIcon = statusBarIcon,
+            uid = uid,
+            instanceId = instanceId,
+            isGroupSummary = isGroupSummary,
+            packageName = packageName,
+            bucket = bucket,
         )
     }
         ?: ActiveNotificationModel(
@@ -150,6 +188,11 @@ private fun ActiveNotificationsStore.createOrReuse(
             aodIcon = aodIcon,
             shelfIcon = shelfIcon,
             statusBarIcon = statusBarIcon,
+            uid = uid,
+            instanceId = instanceId,
+            isGroupSummary = isGroupSummary,
+            packageName = packageName,
+            bucket = bucket,
         )
 }
 
@@ -164,7 +207,12 @@ private fun ActiveNotificationModel.isCurrent(
     isPulsing: Boolean,
     aodIcon: Icon?,
     shelfIcon: Icon?,
-    statusBarIcon: Icon?
+    statusBarIcon: Icon?,
+    uid: Int,
+    packageName: String,
+    instanceId: Int?,
+    isGroupSummary: Boolean,
+    bucket: Int,
 ): Boolean {
     return when {
         key != this.key -> false
@@ -178,6 +226,11 @@ private fun ActiveNotificationModel.isCurrent(
         aodIcon != this.aodIcon -> false
         shelfIcon != this.shelfIcon -> false
         statusBarIcon != this.statusBarIcon -> false
+        uid != this.uid -> false
+        instanceId != this.instanceId -> false
+        isGroupSummary != this.isGroupSummary -> false
+        packageName != this.packageName -> false
+        bucket != this.bucket -> false
         else -> true
     }
 }

@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricRequestConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.common.OperationState;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
@@ -122,6 +123,12 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
             getBiometricContext().subscribe(opContext, ctx -> {
                 try {
                     session.getSession().onContextChanged(ctx);
+                    // TODO(b/317414324): Deprecate setIgnoreDisplayTouches
+                    if (ctx.operationState != null && ctx.operationState.getTag()
+                            == OperationState.fingerprintOperationState) {
+                        session.getSession().setIgnoreDisplayTouches(
+                                ctx.operationState.getFingerprintOperationState().isHardwareIgnoringTouches);
+                    }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to notify context changed", e);
                 }

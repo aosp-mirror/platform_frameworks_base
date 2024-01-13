@@ -28,6 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import com.android.compose.theme.PlatformTheme
 import com.android.compose.ui.platform.DensityAwareComposeView
+import com.android.systemui.bouncer.ui.BouncerDialogFactory
+import com.android.systemui.bouncer.ui.composable.BouncerContent
+import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.DisplayCutoutProvider
@@ -170,5 +173,15 @@ object ComposeFacade : BaseComposeFacade {
     // TODO(b/298525212): remove once Compose exposes window inset bounds.
     private fun Int.toDp(context: Context): Dp {
         return (this.toFloat() / context.resources.displayMetrics.density).dp
+    }
+
+    override fun createBouncer(
+        context: Context,
+        viewModel: BouncerViewModel,
+        dialogFactory: BouncerDialogFactory,
+    ): View {
+        return ComposeView(context).apply {
+            setContent { PlatformTheme { BouncerContent(viewModel, dialogFactory) } }
+        }
     }
 }

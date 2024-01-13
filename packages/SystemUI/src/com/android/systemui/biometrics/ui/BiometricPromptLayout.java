@@ -101,6 +101,7 @@ public class BiometricPromptLayout extends LinearLayout {
             final View child = getChildAt(i);
 
             if (child.getId() == R.id.space_above_icon
+                    || child.getId() == R.id.space_above_content
                     || child.getId() == R.id.space_below_icon
                     || child.getId() == R.id.button_bar) {
                 child.measure(

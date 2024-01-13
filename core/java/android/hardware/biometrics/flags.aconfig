@@ -21,3 +21,10 @@ flag {
   bug: "307601768"
 }
 
+flag {
+  name: "custom_biometric_prompt"
+  namespace: "biometrics_framework"
+  description: "Feature flag for adding a custom content view API to BiometricPrompt.Builder."
+  bug: "302735104"
+}
+

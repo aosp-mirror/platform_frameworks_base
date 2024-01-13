@@ -40,6 +40,7 @@ constructor(
     val shelf: NotificationShelfViewModel,
     val hideListViewModel: HideListViewModel,
     val footer: Optional<FooterViewModel>,
+    val logger: Optional<NotificationLoggerViewModel>,
     activeNotificationsInteractor: ActiveNotificationsInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,

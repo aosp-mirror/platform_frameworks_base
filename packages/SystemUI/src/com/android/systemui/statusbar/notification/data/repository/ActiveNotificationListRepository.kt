@@ -55,6 +55,12 @@ data class ActiveNotificationsStore(
      * invoking [get].
      */
     val renderList: List<Key> = emptyList(),
+
+    /**
+     * Map of notification key to rank, where rank is the 0-based index of the notification on the
+     * system server, meaning that in the unfiltered flattened list of notification entries.
+     */
+    val rankingsMap: Map<String, Int> = emptyMap()
 ) {
     operator fun get(key: Key): ActiveNotificationEntryModel? {
         return when (key) {
@@ -74,8 +80,9 @@ data class ActiveNotificationsStore(
         private val groups = mutableMapOf<String, ActiveNotificationGroupModel>()
         private val individuals = mutableMapOf<String, ActiveNotificationModel>()
         private val renderList = mutableListOf<Key>()
+        private var rankingsMap: Map<String, Int> = emptyMap()
 
-        fun build() = ActiveNotificationsStore(groups, individuals, renderList)
+        fun build() = ActiveNotificationsStore(groups, individuals, renderList, rankingsMap)
 
         fun addEntry(entry: ActiveNotificationEntryModel) {
             when (entry) {
@@ -94,6 +101,10 @@ data class ActiveNotificationsStore(
             groups[group.key] = group
             individuals[group.summary.key] = group.summary
             group.children.forEach { individuals[it.key] = it }
+        }
+
+        fun setRankingsMap(map: Map<String, Int>) {
+            rankingsMap = map.toMap()
         }
     }
 }

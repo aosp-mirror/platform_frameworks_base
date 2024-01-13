@@ -15,6 +15,7 @@
  */
 package com.android.systemui.biometrics
 
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -28,13 +29,15 @@ class UdfpsBpViewController(
     statusBarStateController: StatusBarStateController,
     shadeInteractor: ShadeInteractor,
     systemUIDialogManager: SystemUIDialogManager,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) : UdfpsAnimationViewController<UdfpsBpView>(
     view,
     statusBarStateController,
     shadeInteractor,
     systemUIDialogManager,
-    dumpManager
+    dumpManager,
+    udfpsOverlayInteractor,
 ) {
     override val tag = "UdfpsBpViewController"
 

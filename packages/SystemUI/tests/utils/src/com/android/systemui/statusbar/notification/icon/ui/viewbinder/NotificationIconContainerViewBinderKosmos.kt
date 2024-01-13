@@ -19,8 +19,8 @@ package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 import com.android.systemui.common.ui.configurationState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.statusbar.notification.collection.notifCollection
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.notificationIconContainerShelfViewModel
-import com.android.systemui.statusbar.notification.stack.ui.viewbinder.notifCollection
 import com.android.systemui.statusbar.ui.systemBarUtilsState
 
 val Kosmos.notificationIconContainerShelfViewBinder by Fixture {

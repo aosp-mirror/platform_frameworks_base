@@ -31,16 +31,12 @@ import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
-import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.LockIconViewController;
-import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
-import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
-import com.android.systemui.bouncer.ui.binder.KeyguardBouncerViewBinder;
-import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
+import com.android.systemui.bouncer.ui.binder.BouncerViewBinder;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
@@ -56,8 +52,6 @@ import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies;
-import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
-import com.android.systemui.log.BouncerLogger;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -77,7 +71,6 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
-import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.SystemClock;
 
@@ -183,24 +176,18 @@ public class NotificationShadeWindowViewController implements Dumpable {
             DumpManager dumpManager,
             PulsingGestureListener pulsingGestureListener,
             LockscreenHostedDreamGestureListener lockscreenHostedDreamGestureListener,
-            KeyguardBouncerViewModel keyguardBouncerViewModel,
-            KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory,
-            KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
-            PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             GlanceableHubContainerController glanceableHubContainerController,
             NotificationLaunchAnimationInteractor notificationLaunchAnimationInteractor,
             FeatureFlagsClassic featureFlagsClassic,
             SystemClock clock,
-            BouncerMessageInteractor bouncerMessageInteractor,
-            BouncerLogger bouncerLogger,
             SysUIKeyEventHandler sysUIKeyEventHandler,
             QuickSettingsController quickSettingsController,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            SelectedUserInteractor selectedUserInteractor,
             Lazy<JavaAdapter> javaAdapter,
-            Lazy<AlternateBouncerDependencies> alternateBouncerDependencies) {
+            Lazy<AlternateBouncerDependencies> alternateBouncerDependencies,
+            BouncerViewBinder bouncerViewBinder) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -234,15 +221,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
         mDisableSubpixelTextTransitionListener = new DisableSubpixelTextTransitionListener(mView);
-        KeyguardBouncerViewBinder.bind(
-                mView.findViewById(R.id.keyguard_bouncer_container),
-                keyguardBouncerViewModel,
-                primaryBouncerToGoneTransitionViewModel,
-                keyguardBouncerComponentFactory,
-                messageAreaControllerFactory,
-                bouncerMessageInteractor,
-                bouncerLogger,
-                selectedUserInteractor);
+        bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
 
         if (DeviceEntryUdfpsRefactor.isEnabled()) {
             AlternateBouncerViewBinder.bind(

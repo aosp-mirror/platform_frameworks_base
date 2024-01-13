@@ -612,8 +612,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     void closeMaximizeMenuIfNeeded(MotionEvent ev) {
         if (!isMaximizeMenuActive()) return;
 
-        final PointF inputPoint = offsetCaptionLocation(ev);
-        if (!mMaximizeMenu.isValidMenuInput(inputPoint)) {
+        if (!mMaximizeMenu.isValidMenuInput(ev)) {
             closeMaximizeMenu();
         }
     }
@@ -639,20 +638,34 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
-     * Checks if motion event occurs in the caption handle area. This should be used in cases where
+     * Checks if motion event occurs in the caption handle area of a focused caption (the caption on
+     * a task in fullscreen or in multi-windowing mode). This should be used in cases where
      * onTouchListener will not work (i.e. when caption is in status bar area).
      *
      * @param ev       the {@link MotionEvent} to check
-     * @return {@code true} if event is inside the specified view, {@code false} if not
+     * @return {@code true} if event is inside caption handle view, {@code false} if not
      */
-    boolean checkTouchEventInCaptionHandle(MotionEvent ev) {
+    boolean checkTouchEventInFocusedCaptionHandle(MotionEvent ev) {
         if (isHandleMenuActive() || !(mWindowDecorViewHolder
                 instanceof DesktopModeFocusedWindowDecorationViewHolder)) {
             return false;
         }
+
+        return checkTouchEventInCaption(ev);
+    }
+
+    /**
+     * Checks if touch event occurs in caption.
+     *
+     * @param ev       the {@link MotionEvent} to check
+     * @return {@code true} if event is inside caption view, {@code false} if not
+     */
+    boolean checkTouchEventInCaption(MotionEvent ev) {
         final PointF inputPoint = offsetCaptionLocation(ev);
-        return ((DesktopModeFocusedWindowDecorationViewHolder) mWindowDecorViewHolder)
-                .pointInCaption(inputPoint, mResult.mCaptionX);
+        return inputPoint.x >= mResult.mCaptionX
+                && inputPoint.x <= mResult.mCaptionX + mResult.mCaptionWidth
+                && inputPoint.y >= 0
+                && inputPoint.y <= mResult.mCaptionHeight;
     }
 
     /**
@@ -668,7 +681,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             // Click if point in caption handle view
             final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
             final View handle = caption.findViewById(R.id.caption_handle);
-            if (checkTouchEventInCaptionHandle(ev)) {
+            if (checkTouchEventInFocusedCaptionHandle(ev)) {
                 mOnCaptionButtonClickListener.onClick(handle);
             }
         } else {

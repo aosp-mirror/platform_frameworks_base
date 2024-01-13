@@ -40,12 +40,12 @@ import com.android.systemui.statusbar.notification.collection.provider.Notificat
 import com.android.systemui.statusbar.notification.collection.render.FakeNodeController
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
-import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController.BUBBLES_SETTING_URI
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationRowStatsLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.SmartReplyConstants
@@ -92,7 +92,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val groupMembershipManager: GroupMembershipManager = mock()
     private val groupExpansionManager: GroupExpansionManager = mock()
     private val rowContentBindStage: RowContentBindStage = mock()
-    private val notifLogger: NotificationLogger = mock()
+    private val notifLogger: NotificationRowStatsLogger = mock()
     private val headsUpManager: HeadsUpManager = mock()
     private val onExpandClickListener: ExpandableNotificationRow.OnExpandClickListener = mock()
     private val statusBarStateController: StatusBarStateController = mock()

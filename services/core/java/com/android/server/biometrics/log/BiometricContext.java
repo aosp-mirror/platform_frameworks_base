@@ -77,6 +77,9 @@ public interface BiometricContext {
     @AuthenticateOptions.DisplayState
     int getDisplayState();
 
+    /** Gets whether touches on sensor are ignored by HAL */
+    boolean isHardwareIgnoringTouches();
+
     /**
      * Subscribe to context changes.
      *

@@ -34,6 +34,7 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.PO
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.util.mockito.mock
@@ -48,6 +49,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -90,6 +92,13 @@ class CommunalViewModelTest : SysuiTestCase() {
                 mediaHost,
             )
     }
+
+    @Test
+    fun init_initsMediaHost() =
+        testScope.runTest {
+            // MediaHost is initialized as soon as the class is created.
+            verify(mediaHost).init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
+        }
 
     @Test
     fun tutorial_tutorialNotCompletedAndKeyguardVisible_showTutorialContent() =

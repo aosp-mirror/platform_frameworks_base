@@ -1092,6 +1092,16 @@
     <dimen name="biometric_dialog_width">240dp</dimen>
     <dimen name="biometric_dialog_height">240dp</dimen>
 
+    <!-- Dimensions for biometric prompt content view. -->
+    <dimen name="biometric_prompt_space_above_content">48dp</dimen>
+    <dimen name="biometric_prompt_content_container_padding_horizontal">24dp</dimen>
+    <dimen name="biometric_prompt_content_padding_horizontal">10dp</dimen>
+    <dimen name="biometric_prompt_content_list_row_height">24dp</dimen>
+    <dimen name="biometric_prompt_content_list_item_padding_horizontal">10dp</dimen>
+    <dimen name="biometric_prompt_content_list_item_text_size">14sp</dimen>
+    <dimen name="biometric_prompt_content_list_item_bullet_gap_width">10dp</dimen>
+    <dimen name="biometric_prompt_content_list_item_bullet_radius">5dp</dimen>
+
     <!-- Biometric Auth Credential values -->
     <dimen name="biometric_auth_icon_size">48dp</dimen>
 

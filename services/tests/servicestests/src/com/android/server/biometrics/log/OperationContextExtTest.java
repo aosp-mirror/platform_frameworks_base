@@ -18,16 +18,18 @@ package com.android.server.biometrics.log;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.when;
+
 import android.content.Intent;
 import android.hardware.biometrics.AuthenticateOptions;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.common.DisplayState;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
+import android.hardware.biometrics.common.OperationState;
 import android.platform.test.annotations.Presubmit;
 import android.view.Surface;
-
-import static org.mockito.Mockito.when;
 
 import androidx.test.filters.SmallTest;
 
@@ -58,7 +60,7 @@ public class OperationContextExtTest {
 
         final OperationContext aidlContext = newAidlContext();
 
-        context = new OperationContextExt(aidlContext, false);
+        context = new OperationContextExt(aidlContext, false, BiometricAuthenticator.TYPE_NONE);
         assertThat(context.toAidlContext()).isSameInstanceAs(aidlContext);
 
         final int id = 5;
@@ -96,7 +98,8 @@ public class OperationContextExtTest {
         );
 
         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            final OperationContextExt context = new OperationContextExt(newAidlContext(), true);
+            final OperationContextExt context = new OperationContextExt(newAidlContext(), true,
+                    BiometricAuthenticator.TYPE_NONE);
             when(mBiometricContext.getDisplayState()).thenReturn(entry.getKey());
             assertThat(context.update(mBiometricContext, context.isCrypto()).getDisplayState())
                     .isEqualTo(entry.getValue());
@@ -124,7 +127,7 @@ public class OperationContextExtTest {
         updatesFromSource(null, OperationReason.UNKNOWN);
     }
 
-    private  void updatesFromSource(BiometricContextSessionInfo sessionInfo, int sessionType) {
+    private void updatesFromSource(BiometricContextSessionInfo sessionInfo, int sessionType) {
         final int rotation = Surface.ROTATION_270;
         final int foldState = IBiometricContextListener.FoldState.HALF_OPENED;
         final int dockState = Intent.EXTRA_DOCK_STATE_CAR;
@@ -135,9 +138,11 @@ public class OperationContextExtTest {
         when(mBiometricContext.getDockedState()).thenReturn(dockState);
         when(mBiometricContext.isDisplayOn()).thenReturn(true);
         when(mBiometricContext.getDisplayState()).thenReturn(displayState);
+        when(mBiometricContext.isHardwareIgnoringTouches()).thenReturn(true);
 
         final OperationContextExt context = new OperationContextExt(newAidlContext(),
-                sessionType == OperationReason.BIOMETRIC_PROMPT);
+                sessionType == OperationReason.BIOMETRIC_PROMPT,
+                BiometricAuthenticator.TYPE_FINGERPRINT);
 
         assertThat(context.update(mBiometricContext, context.isCrypto())).isSameInstanceAs(context);
 
@@ -154,6 +159,46 @@ public class OperationContextExtTest {
         assertThat(context.getOrientation()).isEqualTo(rotation);
         assertThat(context.isDisplayOn()).isTrue();
         assertThat(context.getDisplayState()).isEqualTo(DisplayState.AOD);
+        assertThat(
+            context.getOperationState().getFingerprintOperationState().isHardwareIgnoringTouches
+        ).isTrue();
+    }
+
+    @Test
+    public void hasNullOperationState() {
+        OperationContextExt context = new OperationContextExt(false);
+        assertThat(context.toAidlContext()).isNotNull();
+
+        final OperationContext aidlContext = newAidlContext();
+
+        context = new OperationContextExt(aidlContext, false, BiometricAuthenticator.TYPE_NONE);
+        assertThat(context.getOperationState()).isNull();
+    }
+
+    @Test
+    public void hasFaceOperationState() {
+        OperationContextExt context = new OperationContextExt(false);
+        assertThat(context.toAidlContext()).isNotNull();
+
+        final OperationContext aidlContext = newAidlContext();
+
+        context = new OperationContextExt(aidlContext, false,
+                BiometricAuthenticator.TYPE_FACE);
+        assertThat(context.getOperationState().getTag()).isEqualTo(
+                OperationState.faceOperationState);
+    }
+
+    @Test
+    public void hasFingerprintOperationState() {
+        OperationContextExt context = new OperationContextExt(false);
+        assertThat(context.toAidlContext()).isNotNull();
+
+        final OperationContext aidlContext = newAidlContext();
+
+        context = new OperationContextExt(aidlContext, false,
+                BiometricAuthenticator.TYPE_FINGERPRINT);
+        assertThat(context.getOperationState().getTag()).isEqualTo(
+                OperationState.fingerprintOperationState);
     }
 
     private static OperationContext newAidlContext() {

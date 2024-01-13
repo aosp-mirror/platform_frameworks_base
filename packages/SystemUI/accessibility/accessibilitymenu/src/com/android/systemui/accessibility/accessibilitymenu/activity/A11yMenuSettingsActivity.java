@@ -35,7 +35,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 
 /**
@@ -56,28 +55,17 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayShowCustomEnabled(true);
-
-        if (Flags.a11yMenuSettingsBackButtonFixAndLargeButtonSizing()) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setCustomView(R.layout.preferences_action_bar);
         ((TextView) findViewById(R.id.action_bar_title)).setText(
                 getResources().getString(R.string.accessibility_menu_settings_name)
         );
-        actionBar.setDisplayOptions(
-                ActionBar.DISPLAY_TITLE_MULTIPLE_LINES
-                        | ActionBar.DISPLAY_SHOW_TITLE
-                        | ActionBar.DISPLAY_HOME_AS_UP);
     }
 
     @Override
     public boolean onNavigateUp() {
-        if (Flags.a11yMenuSettingsBackButtonFixAndLargeButtonSizing()) {
-            mCallback.onBackInvoked();
-            return true;
-        } else {
-            return false;
-        }
+        mCallback.onBackInvoked();
+        return true;
     }
 
     /**

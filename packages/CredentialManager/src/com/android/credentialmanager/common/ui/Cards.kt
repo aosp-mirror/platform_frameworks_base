@@ -30,8 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.ui.theme.Shapes
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 /**
  * Container card for the whole sheet.
@@ -50,7 +50,7 @@ fun SheetContainerCard(
         modifier = modifier.fillMaxWidth().wrapContentHeight(),
         border = null,
         colors = CardDefaults.cardColors(
-            containerColor = LocalAndroidColorScheme.current.colorSurfaceBright,
+            containerColor = LocalAndroidColorScheme.current.surfaceBright,
         ),
     ) {
         if (topAppBar != null) {
