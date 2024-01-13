@@ -434,6 +434,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"‏ایپ کو \"systemExempted\" کی قسم کے ساتھ پیش منظر کی سروسز کے استعمال کی اجازت دیتی ہے"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"‏\"fileManagement\" کی قسم کے ساتھ پیش منظر کی سروس چلائیں"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"‏ایپ کو \"fileManagement\" کی قسم کے ساتھ پیش منظر کی سروسز کے استعمال کی اجازت دیتی ہے"</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"‏\"specialUse\" کی قسم کے ساتھ پیش منظر کی سروس چلائیں"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"‏ایپ کو \"specialUse\" کی قسم کے ساتھ پیش منظر کی سروسز کے استعمال کی اجازت دیتی ہے"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ایپ اسٹوریج کی جگہ کی پیمائش کریں"</string>
@@ -632,7 +636,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"اسکرین لاک استعمال کریں"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"جاری رکھنے کے لیے اپنا اسکرین لاک درج کریں"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"سینسر پر اچھی طرح دبائیں"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"فنگر پرنٹ کی شناخت نہیں کی جا سکی۔ دوبارہ کوشش کریں۔"</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"فنگر پرنٹ سینسر صاف کریں اور دوبارہ کوشش کریں"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"سینسر صاف کریں اور دوبارہ کوشش کریں"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"سینسر پر اچھی طرح دبائیں"</string>
@@ -696,7 +701,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"آپ کا چہرہ دکھائی نہیں دے رہا۔ اپنے فون کو آنکھ کی سطح پر پکڑیں۔"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"کافی حرکت ہو رہی ہے۔ فون کو مضبوطی سے پکڑیں۔"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"براہ کرم اپنے چہرے کو دوبارہ مندرج کریں۔"</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"چہرے کی شناخت نہیں ہو سکی۔ پھر کوشش کریں۔"</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"اپنے سر کی پوزیشن کو تھوڑا تبدیل کریں"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"اپنے فون کی طرف چہرے کو سیدھا رکھیں"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"اپنے فون کی طرف چہرے کو سیدھا رکھیں"</string>

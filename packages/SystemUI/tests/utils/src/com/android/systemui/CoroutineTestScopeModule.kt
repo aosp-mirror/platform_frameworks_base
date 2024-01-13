@@ -48,6 +48,9 @@ private constructor(
     @get:[Provides Application]
     val appScope: CoroutineScope = scope.backgroundScope
 
+    @get:[Provides Background]
+    val bgScope: CoroutineScope = scope.backgroundScope
+
     @Module
     interface Bindings {
         @Binds @Main fun bindMainContext(dispatcher: TestDispatcher): CoroutineContext

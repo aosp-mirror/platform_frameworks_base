@@ -109,7 +109,7 @@ flag {
     name: "back_up_smooth_display_and_force_peak_refresh_rate"
     namespace: "display_manager"
     description: "Feature flag for backing up Smooth Display and Force Peak Refresh Rate"
-    bug: "211737588"
+    bug: "299552529"
     is_fixed_read_only: true
 }
 
@@ -125,7 +125,7 @@ flag {
     name: "brightness_int_range_user_perception"
     namespace: "display_manager"
     description: "Feature flag for converting the brightness integer range to the user perception scale"
-    bug: "183655602"
+    bug: "319236956"
     is_fixed_read_only: true
 }
 

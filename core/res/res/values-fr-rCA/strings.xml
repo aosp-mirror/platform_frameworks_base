@@ -435,6 +435,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « système exempté »"</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"exécuter le service d\'avant-plan avec le type « fileManagement »"</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Autorise l\'application à utiliser les services d\'avant-plan avec le type « fileManagement »"</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"exécuter le service d\'avant-plan avec le type « usage spécial »"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Autoriser l\'application à utiliser les services d\'avant-plan avec le type « usage spécial »"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"évaluer l\'espace de stockage de l\'application"</string>
@@ -633,7 +637,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utiliser le verrouillage de l\'écran"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Entrez votre verrouillage d\'écran pour continuer"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Appuyez fermement sur le capteur"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Empreinte digitale non reconnue. Réessayez."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nettoyez le capteur d\'empreintes digitales et réessayez"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nettoyez le capteur et réessayez"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Appuyez fermement sur le capteur"</string>
@@ -697,7 +702,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Visage non détecté. Tenez votre téléphone à hauteur des yeux."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Trop de mouvement. Tenez le téléphone immobile."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Veuillez inscrire votre visage à nouveau."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"Visage non reconnu. Réessayez."</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Modifiez légèrement la position de votre tête"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez droit dans le téléphone"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Regardez droit dans le téléphone"</string>

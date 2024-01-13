@@ -50,8 +50,8 @@ import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.UserDomainLayerModule
@@ -163,7 +163,7 @@ class ShadeInteractorImplTest : SysuiTestCase() {
         testComponent.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
 
-            userSetupRepository.setUserSetup(false)
+            userSetupRepository.setUserSetUp(false)
             userRepository.setSettings(UserSwitcherSettingsModel(isSimpleUserSwitcher = true))
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
@@ -175,7 +175,7 @@ class ShadeInteractorImplTest : SysuiTestCase() {
     fun isExpandToQsEnabled_shadeNotEnabled_false() =
         testComponent.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
-            userSetupRepository.setUserSetup(true)
+            userSetupRepository.setUserSetUp(true)
 
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
@@ -191,7 +191,7 @@ class ShadeInteractorImplTest : SysuiTestCase() {
     fun isExpandToQsEnabled_quickSettingsNotEnabled_false() =
         testComponent.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
-            userSetupRepository.setUserSetup(true)
+            userSetupRepository.setUserSetUp(true)
 
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
@@ -206,7 +206,7 @@ class ShadeInteractorImplTest : SysuiTestCase() {
     fun isExpandToQsEnabled_dozing_false() =
         testComponent.runTest {
             deviceProvisioningRepository.setDeviceProvisioned(true)
-            userSetupRepository.setUserSetup(true)
+            userSetupRepository.setUserSetUp(true)
             disableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
                     disable2 = DISABLE2_NONE,
@@ -229,7 +229,7 @@ class ShadeInteractorImplTest : SysuiTestCase() {
                     disable2 = DISABLE2_NONE,
                 )
 
-            userSetupRepository.setUserSetup(true)
+            userSetupRepository.setUserSetUp(true)
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
 
@@ -262,7 +262,7 @@ class ShadeInteractorImplTest : SysuiTestCase() {
                 DisableFlagsModel(
                     disable2 = DISABLE2_NONE,
                 )
-            userSetupRepository.setUserSetup(true)
+            userSetupRepository.setUserSetUp(true)
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
 
@@ -290,7 +290,7 @@ class ShadeInteractorImplTest : SysuiTestCase() {
                 DisableFlagsModel(
                     disable2 = DISABLE2_NONE,
                 )
-            userSetupRepository.setUserSetup(true)
+            userSetupRepository.setUserSetUp(true)
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
 
@@ -322,21 +322,21 @@ class ShadeInteractorImplTest : SysuiTestCase() {
                 DisableFlagsModel(
                     disable2 = DISABLE2_NONE,
                 )
-            userSetupRepository.setUserSetup(true)
+            userSetupRepository.setUserSetUp(true)
 
             val actual by collectLastValue(underTest.isExpandToQsEnabled)
 
             assertThat(actual).isTrue()
 
             // WHEN the user is no longer setup
-            userSetupRepository.setUserSetup(false)
+            userSetupRepository.setUserSetUp(false)
             userRepository.setSettings(UserSwitcherSettingsModel(isSimpleUserSwitcher = true))
 
             // THEN expand is disabled
             assertThat(actual).isFalse()
 
             // WHEN the user is setup again
-            userSetupRepository.setUserSetup(true)
+            userSetupRepository.setUserSetUp(true)
 
             // THEN expand is enabled
             assertThat(actual).isTrue()

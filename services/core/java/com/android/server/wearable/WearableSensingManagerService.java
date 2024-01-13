@@ -218,7 +218,7 @@ public class WearableSensingManagerService extends
                 PersistableBundle data,
                 SharedMemory sharedMemory,
                 RemoteCallback callback) {
-            Slog.i(TAG, "WearableSensingManagerInternal provideData.");
+            Slog.d(TAG, "WearableSensingManagerInternal provideData.");
             Objects.requireNonNull(data);
             Objects.requireNonNull(callback);
             mContext.enforceCallingOrSelfPermission(

@@ -48,6 +48,7 @@
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.READ_SEARCH_INDEXABLES"/>
         <permission name="android.permission.REBOOT"/>
+        <permission name="android.permission.RECOVERY"/>
         <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.SUGGEST_MANUAL_TIME_AND_ZONE"/>
         <permission name="android.permission.TETHER_PRIVILEGED"/>

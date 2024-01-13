@@ -234,9 +234,6 @@ java_genrule {
 java_library {
     name: "services.core",
     static_libs: ["services.core.priorityboosted"],
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-    },
 }
 
 java_library_host {

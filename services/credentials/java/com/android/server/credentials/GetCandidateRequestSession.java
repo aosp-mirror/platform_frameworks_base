@@ -65,10 +65,13 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
             IAutoFillManagerClient autoFillCallback) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_GET, callingAppInfo, enabledProviders,
-                cancellationSignal, 0L);
+                cancellationSignal, 0L, /*shouldBindClientToDeath=*/ false);
         mAutoFillCallback = autoFillCallback;
         mAutofillSessionId = request.getData().getInt(SESSION_ID_KEY, -1);
         mAutofillRequestId = request.getData().getInt(REQUEST_ID_KEY, -1);
+        if (mAutoFillCallback != null) {
+            setUpClientCallbackListener(mAutoFillCallback.asBinder());
+        }
     }
 
     /**
@@ -144,17 +147,27 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
     @Override
     public void onFinalErrorReceived(ComponentName componentName, String errorType,
             String message) {
-        // Not applicable for session without UI
+        respondToClientWithErrorAndFinish(errorType, message);
     }
 
     @Override
     public void onUiCancellation(boolean isUserCancellation) {
-        // Not applicable for session without UI
+        String exception = GetCandidateCredentialsException.TYPE_USER_CANCELED;
+        String message = "User cancelled the selector";
+        if (!isUserCancellation) {
+            exception = GetCandidateCredentialsException.TYPE_INTERRUPTED;
+            message = "The UI was interrupted - please try again.";
+        }
+        mRequestSessionMetric.collectFrameworkException(exception);
+        respondToClientWithErrorAndFinish(exception, message);
     }
 
     @Override
     public void onUiSelectorInvocationFailure() {
-        // Not applicable for session without UI
+        String exception = GetCandidateCredentialsException.TYPE_NO_CREDENTIAL;
+        mRequestSessionMetric.collectFrameworkException(exception);
+        respondToClientWithErrorAndFinish(exception,
+                "No credentials available.");
     }
 
     @Override

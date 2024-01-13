@@ -284,7 +284,7 @@ public abstract class Transport {
         if (mListeners.containsKey(message)) {
             try {
                 mListeners.get(message).onMessageReceived(getAssociationId(), data);
-                Slog.i(TAG, "Message 0x" + Integer.toHexString(message)
+                Slog.d(TAG, "Message 0x" + Integer.toHexString(message)
                         + " is received from associationId " + mAssociationId
                         + ", sending data length " + data.length + " to the listener.");
             } catch (RemoteException ignored) {

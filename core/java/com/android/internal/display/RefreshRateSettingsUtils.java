@@ -33,13 +33,14 @@ public class RefreshRateSettingsUtils {
     /**
      * Find the highest refresh rate among all the modes of the default display.
      *
+     * This method will acquire DisplayManager.mLock, so calling it while holding other locks
+     * should be done with care.
      * @param context The context
      * @return The highest refresh rate
      */
     public static float findHighestRefreshRateForDefaultDisplay(Context context) {
         final DisplayManager dm = context.getSystemService(DisplayManager.class);
         final Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
-
         if (display == null) {
             Log.w(TAG, "No valid default display device");
             return DEFAULT_REFRESH_RATE;

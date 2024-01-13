@@ -30,6 +30,11 @@ import java.util.Set;
 /**
  * ZenModeDiff is a utility class meant to encapsulate the diff between ZenModeConfigs and their
  * subcomponents (automatic and manual ZenRules).
+ *
+ * <p>Note that this class is intended to detect <em>meaningful</em> differences, so objects that
+ * are not identical (as per their {@code equals()} implementation) can still produce an empty diff
+ * if only "metadata" fields are updated.
+ *
  * @hide
  */
 public class ZenModeDiff {
@@ -467,7 +472,6 @@ public class ZenModeDiff {
         public static final String FIELD_ICON_RES = "iconResName";
         public static final String FIELD_TRIGGER_DESCRIPTION = "triggerDescription";
         public static final String FIELD_TYPE = "type";
-        public static final String FIELD_USER_MODIFIED_FIELDS = "userModifiedFields";
         // NOTE: new field strings must match the variable names in ZenModeConfig.ZenRule
 
         // Special field to track whether this rule became active or inactive
@@ -562,10 +566,6 @@ public class ZenModeDiff {
                 }
                 if (!Objects.equals(from.iconResName, to.iconResName)) {
                     addField(FIELD_ICON_RES, new FieldDiff<>(from.iconResName, to.iconResName));
-                }
-                if (from.userModifiedFields != to.userModifiedFields) {
-                    addField(FIELD_USER_MODIFIED_FIELDS,
-                            new FieldDiff<>(from.userModifiedFields, to.userModifiedFields));
                 }
             }
         }

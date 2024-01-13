@@ -1034,8 +1034,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 final SafeActivityOptions safeOptions =
                         SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
+                if (transition != null) {
+                    transition.deferTransitionReady();
+                }
                 waitAsyncStart(() -> mService.mTaskSupervisor.startActivityFromRecents(
                         caller.mPid, caller.mUid, taskId, safeOptions));
+                if (transition != null) {
+                    transition.continueTransitionReady();
+                }
                 break;
             }
             case HIERARCHY_OP_TYPE_REORDER:
@@ -1113,11 +1119,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
                 }
                 final Bundle options = activityOptions != null ? activityOptions.toBundle() : null;
+                if (transition != null) {
+                    transition.deferTransitionReady();
+                }
                 int res = waitAsyncStart(() -> mService.mAmInternal.sendIntentSender(
                         hop.getPendingIntent().getTarget(),
                         hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
                         hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
                         null /* requiredPermission */, options));
+                if (transition != null) {
+                    transition.continueTransitionReady();
+                }
                 if (ActivityManager.isStartResultSuccessful(res)) {
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }

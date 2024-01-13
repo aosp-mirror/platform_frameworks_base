@@ -25,25 +25,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.IContentProvider;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
-import android.os.UserHandle;
-import android.provider.Settings;
-import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.IntArray;
@@ -1241,63 +1231,6 @@ public class InputMethodUtilsTest {
         assertEquals(expectedEnabledImeStr,
                 InputMethodUtils.InputMethodSettings.updateEnabledImeString(initialEnabledImeStr,
                         imeId, createSubtypeHashCodeArrayFromStr(enabledSubtypeHashCodesStr)));
-    }
-
-    private static TestContext createMockContext(int userId) {
-        return new TestContext(InstrumentationRegistry.getInstrumentation()
-                .getTargetContext(), userId);
-    }
-
-    private static class TestContext extends ContextWrapper {
-        private int mUserId;
-        private ContentResolver mResolver;
-        private Resources mResources;
-
-        private static TestContext sSecondaryUserContext;
-
-        TestContext(@NonNull Context context, int userId) {
-            super(context);
-            mUserId = userId;
-            mResolver = mock(MockContentResolver.class);
-            when(mResolver.acquireProvider(Settings.Secure.CONTENT_URI)).thenReturn(
-                    mock(IContentProvider.class));
-            mResources = mock(Resources.class);
-
-            final Configuration configuration = new Configuration();
-            if (userId == 0) {
-                configuration.setLocale(LOCALE_EN_US);
-            } else {
-                configuration.setLocale(LOCALE_FR_CA);
-            }
-            doReturn(configuration).when(mResources).getConfiguration();
-        }
-
-        @Override
-        public Context createContextAsUser(UserHandle user, int flags) {
-            if (user.getIdentifier() != UserHandle.USER_SYSTEM) {
-                return sSecondaryUserContext = new TestContext(this, user.getIdentifier());
-            }
-            return this;
-        }
-
-        @Override
-        public int getUserId() {
-            return mUserId;
-        }
-
-        @Override
-        public ContentResolver getContentResolver() {
-            return mResolver;
-        }
-
-        @Override
-        public Resources getResources() {
-            return mResources;
-        }
-
-        static Context getSecondaryUserContext() {
-            return sSecondaryUserContext;
-        }
     }
 
     private static void verifySplitEnabledImeStr(@NonNull String enabledImeStr,

@@ -1610,19 +1610,115 @@ public class LauncherAppsService extends SystemService {
                     "Can't access AppMarketActivity for another user")) {
                 return null;
             }
+            final int callingUser = getCallingUserId();
             final long identity = Binder.clearCallingIdentity();
+
             try {
-                // TODO(b/316118005): Add code to launch the app installer for the packageName.
-                Intent appMarketIntent = new Intent(Intent.ACTION_MAIN);
-                appMarketIntent.addCategory(Intent.CATEGORY_APP_MARKET);
-                final PendingIntent pi = PendingIntent.getActivityAsUser(
-                        mContext, /* requestCode */ 0, appMarketIntent, PendingIntent.FLAG_ONE_SHOT
-                                | PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT,
-                        /* options */ null, user);
-                return pi == null ? null : pi.getIntentSender();
+                if (packageName == null) {
+                    return buildAppMarketIntentSenderForUser(user);
+                }
+
+                String installerPackageName = getInstallerPackage(packageName, callingUser);
+                if (installerPackageName == null
+                        || mPackageManagerInternal.getPackageUid(
+                                        installerPackageName, /* flags= */ 0, user.getIdentifier())
+                                < 0) {
+                    if (DEBUG) {
+                        Log.d(
+                                TAG,
+                                "Can't find installer for "
+                                        + packageName
+                                        + " in user: "
+                                        + user.getIdentifier());
+                    }
+                    return buildAppMarketIntentSenderForUser(user);
+                }
+
+                Intent packageInfoIntent =
+                        buildMarketPackageInfoIntent(
+                                packageName, installerPackageName, callingPackage);
+                if (mPackageManagerInternal
+                        .queryIntentActivities(
+                                packageInfoIntent,
+                                packageInfoIntent.resolveTypeIfNeeded(
+                                        mContext.getContentResolver()),
+                                PackageManager.MATCH_ALL,
+                                Process.myUid(),
+                                user.getIdentifier())
+                        .isEmpty()) {
+                    if (DEBUG) {
+                        Log.d(
+                                TAG,
+                                "Can't resolve package info intent for package "
+                                        + packageName
+                                        + " and installer:  "
+                                        + installerPackageName);
+                    }
+                    return buildAppMarketIntentSenderForUser(user);
+                }
+
+                return buildIntentSenderForUser(packageInfoIntent, user);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        @Nullable
+        private IntentSender buildAppMarketIntentSenderForUser(@NonNull UserHandle user) {
+            Intent appMarketIntent = new Intent(Intent.ACTION_MAIN);
+            appMarketIntent.addCategory(Intent.CATEGORY_APP_MARKET);
+            return buildIntentSenderForUser(appMarketIntent, user);
+        }
+
+        @Nullable
+        private IntentSender buildIntentSenderForUser(
+                @NonNull Intent intent, @NonNull UserHandle user) {
+            final PendingIntent pi =
+                    PendingIntent.getActivityAsUser(
+                            mContext,
+                            /* requestCode */ 0,
+                            intent,
+                            PendingIntent.FLAG_ONE_SHOT
+                                    | PendingIntent.FLAG_IMMUTABLE
+                                    | PendingIntent.FLAG_CANCEL_CURRENT,
+                            /* options */ null,
+                            user);
+            return pi == null ? null : pi.getIntentSender();
+        }
+
+        @Nullable
+        private String getInstallerPackage(@NonNull String packageName, int callingUserId) {
+            String installerPackageName = null;
+            try {
+                installerPackageName =
+                        mIPM.getInstallSourceInfo(packageName, callingUserId)
+                                .getInstallingPackageName();
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Couldn't find installer for " + packageName, re);
+            }
+
+            return installerPackageName;
+        }
+
+        @NonNull
+        private Intent buildMarketPackageInfoIntent(
+                @NonNull String packageName,
+                @NonNull String installerPackageName,
+                @NonNull String callingPackage) {
+            return new Intent(Intent.ACTION_VIEW)
+                    .setData(
+                            new Uri.Builder()
+                                    .scheme("market")
+                                    .authority("details")
+                                    .appendQueryParameter("id", packageName)
+                                    .build())
+                    .putExtra(
+                            Intent.EXTRA_REFERRER,
+                            new Uri.Builder()
+                                    .scheme("android-app")
+                                    .authority(callingPackage)
+                                    .build())
+                    .setPackage(installerPackageName);
         }
 
         @Override

@@ -14,20 +14,12 @@ aidl_library {
     hdrs: ["android/hardware/HardwareBuffer.aidl"],
 }
 
-// TODO (b/303286040): Remove this once |ENABLE_NFC_MAINLINE_FLAG| is rolled out
-filegroup {
-    name: "framework-core-nfc-infcadapter-sources",
-    srcs: [
-        "android/nfc/INfcAdapter.aidl",
-    ],
-    visibility: ["//frameworks/base/services/core"],
-}
-
 filegroup {
     name: "framework-core-sources",
     srcs: [
         "**/*.java",
         "**/*.aidl",
+        ":framework-nfc-non-updatable-sources",
     ],
     visibility: ["//frameworks/base"],
 }

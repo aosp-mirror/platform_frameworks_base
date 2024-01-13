@@ -215,7 +215,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -373,6 +372,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2466,8 +2466,8 @@ public class NotificationManagerService extends SystemService {
         mMetricsLogger = new MetricsLogger();
         mRankingHandler = rankingHandler;
         mConditionProviders = conditionProviders;
-        mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders,
-                flagResolver, new ZenModeEventLogger(mPackageManagerClient));
+        mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), Clock.systemUTC(),
+                mConditionProviders, flagResolver, new ZenModeEventLogger(mPackageManagerClient));
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
             @Override
             public void onConfigChanged() {

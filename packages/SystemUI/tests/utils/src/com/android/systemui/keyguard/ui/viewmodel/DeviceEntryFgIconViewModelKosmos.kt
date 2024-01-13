@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.applicationContext
 import com.android.systemui.biometrics.domain.interactor.udfpsOverlayInteractor
-import com.android.systemui.common.ui.data.repository.configurationRepository
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
@@ -29,7 +29,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 val Kosmos.deviceEntryForegroundIconViewModel by Fixture {
     DeviceEntryForegroundViewModel(
         context = applicationContext,
-        configurationRepository = configurationRepository,
+        configurationInteractor = configurationInteractor,
         deviceEntryUdfpsInteractor = deviceEntryUdfpsInteractor,
         transitionInteractor = keyguardTransitionInteractor,
         deviceEntryIconViewModel = deviceEntryIconViewModel,

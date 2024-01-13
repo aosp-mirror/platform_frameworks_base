@@ -69,6 +69,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
@@ -1957,18 +1958,34 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                     mView.dispatchDownEventToScroller(ev);
                 }
             }
-            boolean scrollerWantsIt = false;
-            if (mLongPressedView == null && mView.isExpanded() && !mSwipeHelper.isSwiping()
-                    && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
-                scrollerWantsIt = mView.onScrollTouch(ev);
-            }
             boolean horizontalSwipeWantsIt = false;
-            if (mLongPressedView == null && !mView.isBeingDragged()
-                    && !expandingNotification
-                    && !mView.getExpandedInThisMotion()
-                    && !onlyScrollingInThisMotion
-                    && !mView.getDisallowDismissInThisMotion()) {
-                horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
+            boolean scrollerWantsIt = false;
+            if (KeyguardShadeMigrationNssl.isEnabled()) {
+                // Reverse the order relative to the else statement. onScrollTouch will reset on an
+                // UP event, causing horizontalSwipeWantsIt to be set to true on vertical swipes.
+                if (mLongPressedView == null && !mView.isBeingDragged()
+                        && !expandingNotification
+                        && !mView.getExpandedInThisMotion()
+                        && !onlyScrollingInThisMotion
+                        && !mView.getDisallowDismissInThisMotion()) {
+                    horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
+                }
+                if (mLongPressedView == null && mView.isExpanded() && !mSwipeHelper.isSwiping()
+                        && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
+                    scrollerWantsIt = mView.onScrollTouch(ev);
+                }
+            } else {
+                if (mLongPressedView == null && mView.isExpanded() && !mSwipeHelper.isSwiping()
+                        && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
+                    scrollerWantsIt = mView.onScrollTouch(ev);
+                }
+                if (mLongPressedView == null && !mView.isBeingDragged()
+                        && !expandingNotification
+                        && !mView.getExpandedInThisMotion()
+                        && !onlyScrollingInThisMotion
+                        && !mView.getDisallowDismissInThisMotion()) {
+                    horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
+                }
             }
 
             // Check if we need to clear any snooze leavebehinds

@@ -24,8 +24,11 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Each TransitionInteractor is responsible for determining under which conditions to notify
@@ -40,14 +43,25 @@ import kotlinx.coroutines.launch
  */
 sealed class TransitionInteractor(
     val fromState: KeyguardState,
+    val transitionInteractor: KeyguardTransitionInteractor,
+    val mainDispatcher: CoroutineDispatcher,
+    val bgDispatcher: CoroutineDispatcher,
 ) {
     val name = this::class.simpleName ?: "UnknownTransitionInteractor"
-
     abstract val transitionRepository: KeyguardTransitionRepository
-    abstract val transitionInteractor: KeyguardTransitionInteractor
     abstract fun start()
 
-    fun startTransitionTo(
+    /* Use background dispatcher for all [KeyguardTransitionInteractor] flows. Necessary because
+     * the [sample] utility internally runs a collect on the Unconfined dispatcher, resulting
+     * in continuations on the main thread. We don't want that for classes that inherit from this.
+     */
+    val startedKeyguardTransitionStep =
+        transitionInteractor.startedKeyguardTransitionStep.flowOn(bgDispatcher)
+    // The following are MutableSharedFlows, and do not require flowOn
+    val startedKeyguardState = transitionInteractor.startedKeyguardState
+    val finishedKeyguardState = transitionInteractor.finishedKeyguardState
+
+    suspend fun startTransitionTo(
         toState: KeyguardState,
         animator: ValueAnimator? = getDefaultAnimatorForTransitionsToState(toState),
         modeOnCanceled: TransitionModeOnCanceled = TransitionModeOnCanceled.LAST_VALUE
@@ -67,16 +81,17 @@ sealed class TransitionInteractor(
             )
             return null
         }
-
-        return transitionRepository.startTransition(
-            TransitionInfo(
-                name,
-                fromState,
-                toState,
-                animator,
-                modeOnCanceled,
+        return withContext(mainDispatcher) {
+            transitionRepository.startTransition(
+                TransitionInfo(
+                    name,
+                    fromState,
+                    toState,
+                    animator,
+                    modeOnCanceled,
+                )
             )
-        )
+        }
     }
 
     /** This signal may come in before the occlusion signal, and can provide a custom transition */

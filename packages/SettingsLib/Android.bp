@@ -61,7 +61,6 @@ android_library {
         "src/**/*.kt",
     ],
     lint: {
-        baseline_filename: "lint-baseline.xml",
         extra_check_modules: ["SettingsLibLintChecker"],
     },
 }

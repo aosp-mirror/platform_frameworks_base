@@ -774,7 +774,7 @@ class MediaRouter2ServiceImpl {
                                 .generateDeviceRouteSelectedSessionInfo(packageName);
                     } else {
                         sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
-                        if (sessionInfos != null && !sessionInfos.isEmpty()) {
+                        if (!sessionInfos.isEmpty()) {
                             // Return a copy of the current system session with no modification,
                             // except setting the client package name.
                             return new RoutingSessionInfo.Builder(sessionInfos.get(0))
@@ -1158,14 +1158,7 @@ class MediaRouter2ServiceImpl {
         } else {
             if (route.isSystemRoute()
                     && !routerRecord.hasSystemRoutingPermission()
-                    && !TextUtils.equals(
-                            route.getId(),
-                            routerRecord
-                                    .mUserRecord
-                                    .mHandler
-                                    .mSystemProvider
-                                    .getDefaultRoute()
-                                    .getId())) {
+                    && !TextUtils.equals(route.getId(), MediaRoute2Info.ROUTE_ID_DEFAULT)) {
                 Slog.w(TAG, "MODIFY_AUDIO_ROUTING permission is required to transfer to"
                         + route);
                 routerRecord.mUserRecord.mHandler.notifySessionCreationFailedToRouter(
@@ -1252,11 +1245,9 @@ class MediaRouter2ServiceImpl {
                         "transferToRouteWithRouter2 | router: %s(id: %d), route: %s",
                         routerRecord.mPackageName, routerRecord.mRouterId, route.getId()));
 
-        String defaultRouteId =
-                routerRecord.mUserRecord.mHandler.mSystemProvider.getDefaultRoute().getId();
         if (route.isSystemRoute()
                 && !routerRecord.hasSystemRoutingPermission()
-                && !TextUtils.equals(route.getId(), defaultRouteId)) {
+                && !TextUtils.equals(route.getId(), MediaRoute2Info.ROUTE_ID_DEFAULT)) {
             routerRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::notifySessionCreationFailedToRouter,
                             routerRecord.mUserRecord.mHandler,
@@ -2761,11 +2752,10 @@ class MediaRouter2ServiceImpl {
             if (manager != null) {
                 notifyRequestFailedToManager(
                         manager.mManager, toOriginalRequestId(uniqueRequestId), reason);
-                return;
             }
 
-            // Currently, only the manager can get notified of failures.
-            // TODO: Notify router too when the related callback is introduced.
+            // Currently, only manager records can get notified of failures.
+            // TODO(b/282936553): Notify regular routers of request failures.
         }
 
         private boolean handleSessionCreationRequestFailed(@NonNull MediaRoute2Provider provider,
@@ -2909,11 +2899,9 @@ class MediaRouter2ServiceImpl {
                 currentSystemSessionInfo = mSystemProvider.getDefaultSessionInfo();
             }
 
-            if (currentRoutes.size() == 0) {
-                return;
+            if (!currentRoutes.isEmpty()) {
+                routerRecord.notifyRegistered(currentRoutes, currentSystemSessionInfo);
             }
-
-            routerRecord.notifyRegistered(currentRoutes, currentSystemSessionInfo);
         }
 
         private static void notifyRoutesUpdatedToRouterRecords(

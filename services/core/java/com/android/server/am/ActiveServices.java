@@ -4464,6 +4464,12 @@ public final class ActiveServices {
                     }
                 }
                 if (userId > 0) {
+                    if (mAm.isSystemUserOnly(sInfo.flags)) {
+                        Slog.w(TAG_SERVICE, service + " is only available for the SYSTEM user,"
+                                + " calling userId is: " + userId);
+                        return null;
+                    }
+
                     if (mAm.isSingleton(sInfo.processName, sInfo.applicationInfo,
                             sInfo.name, sInfo.flags)
                             && mAm.isValidSingletonCall(callingUid, sInfo.applicationInfo.uid)) {
@@ -5453,7 +5459,7 @@ public final class ActiveServices {
         // Force an immediate oomAdjUpdate, so the client app could be in the correct process state
         // before doing any service related transactions
         mAm.enqueueOomAdjTargetLocked(app);
-        mAm.updateOomAdjLocked(app, OOM_ADJ_REASON_START_SERVICE);
+        mAm.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_SERVICE);
 
         boolean created = false;
         try {

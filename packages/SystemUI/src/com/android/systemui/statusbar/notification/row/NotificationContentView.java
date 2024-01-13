@@ -37,6 +37,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,8 +46,8 @@ import androidx.annotation.MainThread;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
@@ -898,6 +899,7 @@ public class NotificationContentView extends FrameLayout implements Notification
         // forceUpdateVisibilities cancels outstanding animations without updating the
         // mAnimationStartVisibleType. Do so here instead.
         mAnimationStartVisibleType = VISIBLE_TYPE_NONE;
+        notifySubtreeForAccessibilityContentChange();
     }
 
     private void fireExpandedVisibleListenerIfVisible() {
@@ -980,6 +982,7 @@ public class NotificationContentView extends FrameLayout implements Notification
         // updateViewVisibilities cancels outstanding animations without updating the
         // mAnimationStartVisibleType. Do so here instead.
         mAnimationStartVisibleType = VISIBLE_TYPE_NONE;
+        notifySubtreeForAccessibilityContentChange();
     }
 
     private void updateViewVisibility(int visibleType, int type, View view,
@@ -1029,6 +1032,7 @@ public class NotificationContentView extends FrameLayout implements Notification
                     hiddenView.setVisible(false);
                 }
                 mAnimationStartVisibleType = VISIBLE_TYPE_NONE;
+                notifySubtreeForAccessibilityContentChange();
             }
         });
         fireExpandedVisibleListenerIfVisible();
@@ -1046,6 +1050,22 @@ public class NotificationContentView extends FrameLayout implements Notification
                 && mHeadsUpRemoteInputController != null
                 && mHeadsUpRemoteInputController.isActive()) {
             mExpandedRemoteInputController.stealFocusFrom(mHeadsUpRemoteInputController);
+        }
+    }
+
+    @Override
+    public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType) {
+        if (isAnimatingVisibleType()) {
+            // Don't send A11y events while animating to reduce Jank.
+            return;
+        }
+        super.notifySubtreeAccessibilityStateChanged(child, source, changeType);
+    }
+
+    private void notifySubtreeForAccessibilityContentChange() {
+        if (mParent != null) {
+            mParent.notifySubtreeAccessibilityStateChanged(this, this,
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
         }
     }
 
@@ -2275,6 +2295,11 @@ public class NotificationContentView extends FrameLayout implements Notification
     @VisibleForTesting
     protected void setHeadsUpWrapper(NotificationViewWrapper headsUpWrapper) {
         mHeadsUpWrapper = headsUpWrapper;
+    }
+
+    @VisibleForTesting
+    protected void setAnimationStartVisibleType(int animationStartVisibleType) {
+        mAnimationStartVisibleType = animationStartVisibleType;
     }
 
     @Override

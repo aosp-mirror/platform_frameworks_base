@@ -29,6 +29,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
@@ -69,6 +70,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
 
     private val bouncerRepository = FakeKeyguardBouncerRepository()
     private val biometricSettingsRepository = FakeBiometricSettingsRepository()
+    private val deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
 
     private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
@@ -112,7 +114,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             DeviceEntrySideFpsOverlayInteractor(
                 testScope.backgroundScope,
                 mContext,
-                FakeDeviceEntryFingerprintAuthRepository(),
+                deviceEntryFingerprintAuthRepository,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 keyguardUpdateMonitor
@@ -214,6 +216,30 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
 
             bouncerRepository.setAlternateVisible(false)
             assertThat(showIndicatorForDeviceEntry).isEqualTo(false)
+        }
+
+    @Test
+    fun ignoresDuplicateRequestsToShowIndicatorForDeviceEntry() =
+        testScope.runTest {
+            val showIndicatorForDeviceEntry by collectValues(underTest.showIndicatorForDeviceEntry)
+            runCurrent()
+
+            // Request to show indicator for primary bouncer showing
+            updatePrimaryBouncer(
+                isShowing = true,
+                isAnimatingAway = false,
+                fpsDetectionRunning = true,
+                isUnlockingWithFpAllowed = true
+            )
+
+            // Another request to show indicator for deviceEntryFingerprintAuthRepository update
+            deviceEntryFingerprintAuthRepository.setShouldUpdateIndicatorVisibility(true)
+
+            // Request to show indicator for alternate bouncer showing
+            bouncerRepository.setAlternateVisible(true)
+
+            // Ensure only one show request is sent
+            assertThat(showIndicatorForDeviceEntry).containsExactly(false, true)
         }
 
     private fun updatePrimaryBouncer(

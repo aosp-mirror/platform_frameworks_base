@@ -1054,6 +1054,19 @@ class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     /**
+     * Performs surface placement and waits for WindowAnimator to complete the frame. It is used
+     * to execute the callbacks if the surface placement is expected to add some callbacks via
+     * {@link WindowAnimator#addAfterPrepareSurfacesRunnable}.
+     */
+    void performSurfacePlacementAndWaitForWindowAnimator() {
+        mWm.mAnimator.ready();
+        if (!mWm.mWindowPlacerLocked.isTraversalScheduled()) {
+            mRootWindowContainer.performSurfacePlacement();
+        }
+        waitUntilWindowAnimatorIdle();
+    }
+
+    /**
      * Avoids rotating screen disturbed by some conditions. It is usually used for the default
      * display that is not the instance of {@link TestDisplayContent} (it bypasses the conditions).
      *

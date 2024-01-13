@@ -22,6 +22,7 @@ import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.companion.CompanionDeviceManager.REASON_INTERNAL_ERROR;
 import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
 import static android.content.ComponentName.createRelative;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
 
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
 import static com.android.server.companion.MetricUtils.logCreateAssociation;
@@ -169,13 +170,26 @@ class AssociationRequestsProcessor {
         enforcePermissionsForAssociation(mContext, request, packageUid);
         enforceUsesCompanionDeviceFeature(mContext, userId, packageName);
 
-        // 2. Check if association can be created without launching UI (i.e. CDM needs NEITHER
+        // 2a. Check if association can be created without launching UI (i.e. CDM needs NEITHER
         // to perform discovery NOR to collect user consent).
         if (request.isSelfManaged() && !request.isForceConfirmation()
                 && !willAddRoleHolder(request, packageName, userId)) {
-            // 2a. Create association right away.
+            // 2a.1. Create association right away.
             createAssociationAndNotifyApplication(request, packageName, userId,
                     /* macAddress */ null, callback, /* resultReceiver */ null);
+            return;
+        }
+
+        // 2a.2. Report an error if a 3p app tries to create a non-self-managed association and
+        //       launch UI on watch.
+        if (mContext.getPackageManager().hasSystemFeature(FEATURE_WATCH)) {
+            String errorMessage = "3p apps are not allowed to create associations on watch.";
+            Slog.e(TAG, errorMessage);
+            try {
+                callback.onFailure(errorMessage);
+            } catch (RemoteException e) {
+                // ignored
+            }
             return;
         }
 

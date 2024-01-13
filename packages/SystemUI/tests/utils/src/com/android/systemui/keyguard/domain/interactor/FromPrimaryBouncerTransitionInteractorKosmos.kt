@@ -21,6 +21,7 @@ import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 
@@ -30,6 +31,8 @@ val Kosmos.fromPrimaryBouncerTransitionInteractor by
             transitionRepository = keyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
             scope = applicationCoroutineScope,
+            bgDispatcher = testDispatcher,
+            mainDispatcher = testDispatcher,
             keyguardInteractor = keyguardInteractor,
             flags = featureFlagsClassic,
             keyguardSecurityModel = keyguardSecurityModel,

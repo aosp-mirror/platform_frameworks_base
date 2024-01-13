@@ -1,0 +1,11 @@
+package: "com.android.server.power.feature.flags"
+
+# Important: Flags must be accessed through PowerManagerFlags.
+
+flag {
+    name: "enable_early_screen_timeout_detector"
+    namespace: "power_manager"
+    description: "Feature flag for Early Screen Timeout detector"
+    bug: "309861917"
+    is_fixed_read_only: true
+}

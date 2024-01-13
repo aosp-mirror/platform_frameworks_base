@@ -435,6 +435,10 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Permite que la aplicación use servicios en primer plano con el tipo \"systemExempted\""</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"ejecutar un servicio en primer plano con el tipo \"fileManagement\""</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Permite que la aplicación use servicios en primer plano con el tipo \"fileManagement\""</string>
+    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
+    <skip />
+    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
+    <skip />
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"ejecutar un servicio en primer plano con el tipo \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Permite que la aplicación use servicios en primer plano con el tipo \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"medir el espacio de almacenamiento de la aplicación"</string>
@@ -633,7 +637,8 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar bloqueo de pantalla"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduce tu bloqueo de pantalla para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pulsa firmemente el sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"No se puede reconocer la huella digital. Inténtalo de nuevo."</string>
+    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
+    <skip />
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Limpia el sensor de huellas digitales e inténtalo de nuevo"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Limpia el sensor e inténtalo de nuevo"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pulsa firmemente el sensor"</string>
@@ -697,7 +702,8 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"No se detecta tu cara. Sujeta el teléfono a la altura de los ojos."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"El teléfono se mueve demasiado. Mantenlo quieto."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vuelve a registrar tu cara."</string>
-    <string name="face_acquired_too_different" msgid="2520389515612972889">"No se reconoce la cara. Inténtalo de nuevo."</string>
+    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
+    <skip />
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Cambia ligeramente la posición de tu cabeza"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mira al teléfono de forma más directa"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mira al teléfono de forma más directa"</string>

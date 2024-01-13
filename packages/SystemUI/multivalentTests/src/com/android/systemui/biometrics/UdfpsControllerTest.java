@@ -1219,6 +1219,40 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onDownTouchReceivedWithoutPreviousUp() throws RemoteException {
+        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
+                0L);
+        final TouchProcessorResult processorResultDown =
+                new TouchProcessorResult.ProcessedTouch(InteractionEvent.DOWN,
+                        -1 /* pointerId */, touchData);
+
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricRequestConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+
+        // WHEN ACTION_DOWN is received and touch is within sensor
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultDown);
+        MotionEvent firstDownEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, firstDownEvent);
+        mBiometricExecutor.runAllReady();
+        firstDownEvent.recycle();
+
+        // And another ACTION_DOWN is received without an ACTION_UP before
+        MotionEvent secondDownEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, secondDownEvent);
+        mBiometricExecutor.runAllReady();
+        secondDownEvent.recycle();
+
+        // THEN the touch is still processed
+        verify(mFingerprintManager, times(2)).onPointerDown(anyLong(), anyInt(), anyInt(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
+                anyBoolean());
+    }
+
+    @Test
     public void onTouch_pilferPointerWhenAltBouncerShowing()
             throws RemoteException {
         final Pair<TouchProcessorResult, TouchProcessorResult> touchProcessorResult =

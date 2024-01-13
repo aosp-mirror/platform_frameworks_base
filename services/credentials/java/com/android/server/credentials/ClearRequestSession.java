@@ -50,7 +50,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_UNDEFINED,
-                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp);
+                callingAppInfo, enabledProviders, cancellationSignal, startedTimestamp,
+                /*shouldBindClientToDeath=*/ true);
     }
 
     /**
