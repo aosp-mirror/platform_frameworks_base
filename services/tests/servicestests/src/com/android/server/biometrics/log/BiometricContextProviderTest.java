@@ -153,6 +153,15 @@ public class BiometricContextProviderTest {
     }
 
     @Test
+    public void testGetIsHardwareIgnoringTouches() throws RemoteException {
+        mListener.onHardwareIgnoreTouchesChanged(true);
+        assertThat(mProvider.isHardwareIgnoringTouches()).isTrue();
+
+        mListener.onHardwareIgnoreTouchesChanged(false);
+        assertThat(mProvider.isHardwareIgnoringTouches()).isFalse();
+    }
+
+    @Test
     public void testGetDockedState() {
         final List<Integer> states = List.of(Intent.EXTRA_DOCK_STATE_DESK,
                 Intent.EXTRA_DOCK_STATE_CAR, Intent.EXTRA_DOCK_STATE_UNDOCKED);

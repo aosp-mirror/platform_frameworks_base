@@ -68,6 +68,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.biometrics.dagger.BiometricsBackground;
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.udfps.InteractionEvent;
 import com.android.systemui.biometrics.udfps.NormalizedTouchData;
@@ -171,6 +172,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final Lazy<DefaultUdfpsTouchOverlayViewModel>
             mDefaultUdfpsTouchOverlayViewModel;
     @NonNull private final AlternateBouncerInteractor mAlternateBouncerInteractor;
+    @NonNull private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
     @NonNull private final InputManager mInputManager;
     @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     @NonNull private final SelectedUserInteractor mSelectedUserInteractor;
@@ -293,7 +295,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         mSelectedUserInteractor,
                         mDeviceEntryUdfpsTouchOverlayViewModel,
                         mDefaultUdfpsTouchOverlayViewModel,
-                        mShadeInteractor
+                        mShadeInteractor,
+                        mUdfpsOverlayInteractor
                     )));
         }
 
@@ -674,7 +677,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull FpsUnlockTracker fpsUnlockTracker,
             @NonNull KeyguardTransitionInteractor keyguardTransitionInteractor,
             Lazy<DeviceEntryUdfpsTouchOverlayViewModel> deviceEntryUdfpsTouchOverlayViewModel,
-            Lazy<DefaultUdfpsTouchOverlayViewModel> defaultUdfpsTouchOverlayViewModel) {
+            Lazy<DefaultUdfpsTouchOverlayViewModel> defaultUdfpsTouchOverlayViewModel,
+            @NonNull UdfpsOverlayInteractor udfpsOverlayInteractor) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -715,6 +719,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mShadeInteractor = shadeInteractor;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
+        mUdfpsOverlayInteractor = udfpsOverlayInteractor;
         mInputManager = inputManager;
         mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;
         mSelectedUserInteractor = selectedUserInteractor;
