@@ -97,6 +97,10 @@ object SceneWindowRootViewBinder {
                     val legacyView = view.requireViewById<View>(R.id.legacy_window_root)
                     view.addView(createVisibilityToggleView(legacyView))
 
+                    // This moves the SharedNotificationContainer to the WindowRootView just after
+                    //  the SceneContainerView. This SharedNotificationContainer should contain NSSL
+                    //  due to the NotificationStackScrollLayoutSection (legacy) or
+                    //  NotificationSection (scene container) moving it there.
                     if (flags.flexiNotifsEnabled()) {
                         (sharedNotificationContainer.parent as? ViewGroup)?.removeView(
                             sharedNotificationContainer
