@@ -8,10 +8,3 @@ flag {
     description: "Hides the AccessibilityMenuService UI before taking action instead of after."
     bug: "292020123"
 }
-
-flag {
-    name: "a11y_menu_settings_back_button_fix_and_large_button_sizing"
-    namespace: "accessibility"
-    description: "Provides/restores back button functionality for the a11yMenu settings page. Also, fixes sizing problems with large shortcut buttons."
-    bug: "298467628"
-}
