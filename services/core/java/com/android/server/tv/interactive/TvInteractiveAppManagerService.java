@@ -1471,6 +1471,32 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void sendSelectedTrackInfo(IBinder sessionToken, List<TvTrackInfo> tracks,
+                int userId) {
+            if (DEBUG) {
+                Slogf.d(TAG, "sendSelectedTrackInfo(tracks=%s)", tracks.toString());
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "sendSelectedTrackInfo");
+            SessionState sessionState = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).sendSelectedTrackInfo(tracks);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in sendSelectedTrackInfo", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void sendCurrentTvInputId(IBinder sessionToken, String inputId, int userId) {
             if (DEBUG) {
                 Slogf.d(TAG, "sendCurrentTvInputId(inputId=%s)", inputId);
@@ -2793,6 +2819,23 @@ public class TvInteractiveAppManagerService extends SystemService {
                     mSessionState.mClient.onRequestTrackInfoList(mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onRequestTrackInfoList", e);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestSelectedTrackInfo() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRequestSelectedTrackInfo");
+                }
+                if (mSessionState.mSession == null || mSessionState.mClient == null) {
+                    return;
+                }
+                try {
+                    mSessionState.mClient.onRequestSelectedTrackInfo(mSessionState.mSeq);
+                } catch (RemoteException e) {
+                    Slogf.e(TAG, "error in onRequestSelectedTrackInfo", e);
                 }
             }
         }

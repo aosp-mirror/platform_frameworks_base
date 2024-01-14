@@ -33,7 +33,6 @@ import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
 import android.media.tv.TvTrackInfo;
-import android.media.tv.interactive.TvInteractiveAppService.Session;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -502,6 +501,18 @@ public final class TvInteractiveAppManager {
                         return;
                     }
                     record.postRequestTrackInfoList();
+                }
+            }
+
+            @Override
+            public void onRequestSelectedTrackInfo(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestSelectedTrackInfo();
                 }
             }
 
@@ -1204,6 +1215,18 @@ public final class TvInteractiveAppManager {
             }
             try {
                 mService.sendTrackInfoList(mToken, tracks, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendSelectedTrackInfo(@NonNull List<TvTrackInfo> tracks) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendSelectedTrackInfo(mToken, tracks, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2108,6 +2131,15 @@ public final class TvInteractiveAppManager {
             });
         }
 
+        void postRequestSelectedTrackInfo() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRequestSelectedTrackInfo(mSession);
+                }
+            });
+        }
+
         void postRequestCurrentTvInputId() {
             mHandler.post(new Runnable() {
                 @Override
@@ -2375,6 +2407,15 @@ public final class TvInteractiveAppManager {
          * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
          */
         public void onRequestTrackInfoList(Session session) {
+        }
+
+        /**
+         * This is called when {@link TvInteractiveAppService.Session#requestSelectedTrackInfo()} is
+         * called.
+         *
+         * @param session A {@link TvInteractiveAppManager.Session} associated with this callback.
+         */
+        public void onRequestSelectedTrackInfo(Session session) {
         }
 
         /**

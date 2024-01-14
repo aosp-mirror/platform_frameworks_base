@@ -50,6 +50,7 @@ oneway interface ITvInteractiveAppSessionCallback {
     void onRequestCurrentTvInputId();
     void onRequestTimeShiftMode();
     void onRequestAvailableSpeeds();
+    void onRequestSelectedTrackInfo();
     void onRequestStartRecording(in String requestId, in Uri programUri);
     void onRequestStopRecording(in String recordingId);
     void onRequestScheduleRecording(in String requestId, in String inputId, in Uri channelUri,
