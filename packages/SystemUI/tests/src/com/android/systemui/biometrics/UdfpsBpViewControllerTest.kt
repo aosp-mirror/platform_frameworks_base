@@ -20,6 +20,7 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -44,6 +45,7 @@ class UdfpsBpViewControllerTest : SysuiTestCase() {
     @Mock lateinit var shadeInteractor: ShadeInteractor
     @Mock lateinit var systemUIDialogManager: SystemUIDialogManager
     @Mock lateinit var dumpManager: DumpManager
+    @Mock lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
 
     private lateinit var udfpsBpViewController: UdfpsBpViewController
 
@@ -55,7 +57,8 @@ class UdfpsBpViewControllerTest : SysuiTestCase() {
                 statusBarStateController,
                 shadeInteractor,
                 systemUIDialogManager,
-                dumpManager
+                dumpManager,
+                udfpsOverlayInteractor,
             )
     }
 

@@ -31,7 +31,6 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.inputmethod.InputMethodUtils.InputMethodSettings;
 
 import java.util.ArrayList;
 import java.util.Collections;

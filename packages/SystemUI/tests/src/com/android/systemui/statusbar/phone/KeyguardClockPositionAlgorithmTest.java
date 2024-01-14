@@ -30,11 +30,13 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.LargeScreenHeaderHelper;
 
 import org.junit.After;
 import org.junit.Before;
@@ -79,6 +81,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mStaticMockSession = mockitoSession()
                 .mockStatic(BurnInHelperKt.class)
+                .mockStatic(LargeScreenHeaderHelper.class)
                 .startMocking();
 
         LogBuffer logBuffer = FakeLogBuffer.Factory.Companion.create();
@@ -292,18 +295,44 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
-    public void notifPaddingMakesUpToFullMarginInSplitShade() {
+    public void notifPaddingMakesUpToFullMarginInSplitShade_refactorFlagOff_usesResource() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR);
+        int keyguardSplitShadeTopMargin = 100;
+        int largeScreenHeaderHeightResource = 70;
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
-                .thenReturn(100);
+                .thenReturn(keyguardSplitShadeTopMargin);
         when(mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height))
-                .thenReturn(70);
+                .thenReturn(largeScreenHeaderHeightResource);
         mClockPositionAlgorithm.loadDimens(mContext, mResources);
         givenLockScreen();
         mIsSplitShade = true;
         // WHEN the position algorithm is run
         positionClock();
-        // THEN the notif padding makes up lacking margin (margin - header height = 30).
-        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(30);
+        // THEN the notif padding makes up lacking margin (margin - header height).
+        int expectedPadding = keyguardSplitShadeTopMargin - largeScreenHeaderHeightResource;
+        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(expectedPadding);
+    }
+
+    @Test
+    public void notifPaddingMakesUpToFullMarginInSplitShade_refactorFlagOn_usesHelper() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_DIMENS_REFACTOR);
+        int keyguardSplitShadeTopMargin = 100;
+        int largeScreenHeaderHeightHelper = 50;
+        int largeScreenHeaderHeightResource = 70;
+        when(LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext))
+                .thenReturn(largeScreenHeaderHeightHelper);
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
+                .thenReturn(keyguardSplitShadeTopMargin);
+        when(mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height))
+                .thenReturn(largeScreenHeaderHeightResource);
+        mClockPositionAlgorithm.loadDimens(mContext, mResources);
+        givenLockScreen();
+        mIsSplitShade = true;
+        // WHEN the position algorithm is run
+        positionClock();
+        // THEN the notif padding makes up lacking margin (margin - header height).
+        int expectedPadding = keyguardSplitShadeTopMargin - largeScreenHeaderHeightHelper;
+        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(expectedPadding);
     }
 
     @Test

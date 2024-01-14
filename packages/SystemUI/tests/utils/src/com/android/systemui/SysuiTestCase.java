@@ -39,6 +39,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
 import com.android.systemui.broadcast.FakeBroadcastDispatcher;
+import com.android.systemui.flags.SceneContainerRule;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -67,6 +68,9 @@ public abstract class SysuiTestCase {
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+
+    @Rule(order = 10)
+    public final SceneContainerRule mSceneContainerRule = new SceneContainerRule();
 
     @Rule
     public SysuiTestableContext mContext = createTestableContext();

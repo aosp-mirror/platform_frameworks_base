@@ -24,6 +24,7 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF
 import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
@@ -32,6 +33,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
@@ -45,9 +47,11 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -130,6 +134,13 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                     repository = transitionRepository,
                 )
                 .keyguardTransitionInteractor
+        mUdfpsOverlayInteractor =
+            UdfpsOverlayInteractor(
+                context,
+                mock(AuthController::class.java),
+                mock(SelectedUserInteractor::class.java),
+                testScope.backgroundScope,
+            )
         return createUdfpsKeyguardViewController(/* useModernBouncer */ true)
     }
 
@@ -234,6 +245,31 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
 
             // THEN UDFPS shouldPauseAuth == true
             assertTrue(mController.shouldPauseAuth())
+
+            job.cancel()
+        }
+
+    @Test
+    fun shouldHandleTouchesChange() =
+        testScope.runTest {
+            val shouldHandleTouches by collectLastValue(mUdfpsOverlayInteractor.shouldHandleTouches)
+
+            // GIVEN view is attached + on the keyguard
+            mController.onViewAttached()
+            captureStatusBarStateListeners()
+            sendStatusBarStateChanged(StatusBarState.KEYGUARD)
+            whenever(mView.setPauseAuth(true)).thenReturn(true)
+            whenever(mView.unpausedAlpha).thenReturn(0)
+
+            // WHEN panelViewExpansion changes to expanded
+            val job = mController.listenForBouncerExpansion(this)
+            keyguardBouncerRepository.setPrimaryShow(true)
+            keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
+            runCurrent()
+
+            // THEN UDFPS auth is paused and should not handle touches
+            assertThat(mController.shouldPauseAuth()).isTrue()
+            assertThat(shouldHandleTouches!!).isFalse()
 
             job.cancel()
         }

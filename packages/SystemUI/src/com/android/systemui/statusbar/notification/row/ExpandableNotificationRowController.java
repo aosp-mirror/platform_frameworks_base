@@ -48,13 +48,13 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewController;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.dagger.AppName;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationKey;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationRowStatsLogger;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
@@ -90,7 +90,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final GroupMembershipManager mGroupMembershipManager;
     private final GroupExpansionManager mGroupExpansionManager;
     private final RowContentBindStage mRowContentBindStage;
-    private final NotificationLogger mNotificationLogger;
+    private final NotificationRowStatsLogger mStatsLogger;
     private final NotificationRowLogger mLogBufferLogger;
     private final HeadsUpManager mHeadsUpManager;
     private final ExpandableNotificationRow.OnExpandClickListener mOnExpandClickListener;
@@ -130,9 +130,10 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final ExpandableNotificationRow.ExpandableNotificationRowLogger mLoggerCallback =
             new ExpandableNotificationRow.ExpandableNotificationRowLogger() {
                 @Override
-                public void logNotificationExpansion(String key, boolean userAction,
+                public void logNotificationExpansion(String key, int location, boolean userAction,
                         boolean expanded) {
-                    mNotificationLogger.onExpansionChanged(key, userAction, expanded);
+                    mStatsLogger.onNotificationExpansionChanged(key, expanded, location,
+                            userAction);
                 }
 
                 @Override
@@ -212,7 +213,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
             RowContentBindStage rowContentBindStage,
-            NotificationLogger notificationLogger,
+            NotificationRowStatsLogger statsLogger,
             HeadsUpManager headsUpManager,
             ExpandableNotificationRow.OnExpandClickListener onExpandClickListener,
             StatusBarStateController statusBarStateController,
@@ -239,7 +240,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mGroupMembershipManager = groupMembershipManager;
         mGroupExpansionManager = groupExpansionManager;
         mRowContentBindStage = rowContentBindStage;
-        mNotificationLogger = notificationLogger;
+        mStatsLogger = statsLogger;
         mHeadsUpManager = headsUpManager;
         mOnExpandClickListener = onExpandClickListener;
         mStatusBarStateController = statusBarStateController;

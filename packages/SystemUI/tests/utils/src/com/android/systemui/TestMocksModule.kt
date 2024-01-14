@@ -18,9 +18,11 @@ package com.android.systemui
 import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
 import android.os.UserManager
+import android.service.notification.NotificationListenerService
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.statusbar.IStatusBarService
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardViewController
@@ -49,9 +51,11 @@ import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.NotifCollection
+import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStatsLogger
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
@@ -59,6 +63,7 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
@@ -80,6 +85,7 @@ data class TestMocksModule(
     @get:Provides val deviceProvisionedController: DeviceProvisionedController = mock(),
     @get:Provides val dozeParameters: DozeParameters = mock(),
     @get:Provides val dumpManager: DumpManager = mock(),
+    @get:Provides val headsUpManager: HeadsUpManager = mock(),
     @get:Provides val guestResumeSessionReceiver: GuestResumeSessionReceiver = mock(),
     @get:Provides val keyguardBypassController: KeyguardBypassController = mock(),
     @get:Provides val keyguardSecurityModel: KeyguardSecurityModel = mock(),
@@ -89,8 +95,10 @@ data class TestMocksModule(
     val lockscreenShadeTransitionController: LockscreenShadeTransitionController = mock(),
     @get:Provides val mediaHierarchyManager: MediaHierarchyManager = mock(),
     @get:Provides val notifCollection: NotifCollection = mock(),
+    @get:Provides val notificationListLogger: NotificationStatsLogger = mock(),
     @get:Provides val notificationListener: NotificationListener = mock(),
     @get:Provides val notificationLockscreenUserManager: NotificationLockscreenUserManager = mock(),
+    @get:Provides val notificationPanelLogger: NotificationPanelLogger = mock(),
     @get:Provides val notificationMediaManager: NotificationMediaManager = mock(),
     @get:Provides val notificationShadeDepthController: NotificationShadeDepthController = mock(),
     @get:Provides
@@ -129,6 +137,10 @@ data class TestMocksModule(
     @get:Provides val displayMetrics: DisplayMetrics = mock(),
     @get:Provides val metricsLogger: MetricsLogger = mock(),
     @get:Provides val userManager: UserManager = mock(),
+
+    // system server mocks
+    @get:Provides val mockStatusBarService: IStatusBarService = mock(),
+    @get:Provides val mockNotificationListenerService: NotificationListenerService = mock(),
 ) {
     @Module
     interface Bindings {

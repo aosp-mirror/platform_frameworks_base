@@ -63,6 +63,9 @@ interface LogContextInteractor {
     /** Current display state, defined as [AuthenticateOptions.DisplayState] */
     val displayState: Flow<Int>
 
+    /** If touches on the fingerprint sensor should be ignored by the HAL. */
+    val isHardwareIgnoringTouches: Flow<Boolean>
+
     /**
      * Add a permanent context listener.
      *
@@ -79,12 +82,11 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val foldProvider: FoldStateProvider,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) : LogContextInteractor {
 
     init {
-        applicationScope.launch {
-            foldProvider.start()
-        }
+        applicationScope.launch { foldProvider.start() }
     }
 
     override val displayState =
@@ -101,6 +103,9 @@ constructor(
                 else -> AuthenticateOptions.DISPLAY_STATE_UNKNOWN
             }
         }
+
+    override val isHardwareIgnoringTouches: Flow<Boolean> =
+        udfpsOverlayInteractor.shouldHandleTouches.map { shouldHandle -> !shouldHandle }
 
     override val isAod =
         displayState.map { it == AuthenticateOptions.DISPLAY_STATE_AOD }.distinctUntilChanged()
@@ -157,6 +162,12 @@ constructor(
                 .distinctUntilChanged()
                 .onEach { state -> listener.onDisplayStateChanged(state) }
                 .catch { t -> Log.w(TAG, "failed to notify new display state", t) }
+                .launchIn(this)
+
+            isHardwareIgnoringTouches
+                .distinctUntilChanged()
+                .onEach { state -> listener.onHardwareIgnoreTouchesChanged(state) }
+                .catch { t -> Log.w(TAG, "failed to notify new set ignore state", t) }
                 .launchIn(this)
 
             listener.asBinder().linkToDeath({ cancel() }, 0)

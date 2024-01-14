@@ -44,6 +44,7 @@ object SceneContainerFlag {
                 keyguardBottomAreaRefactor() &&
                 KeyguardShadeMigrationNssl.isEnabled &&
                 MediaInSceneContainerFlag.isEnabled &&
+                // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
                 ComposeFacade.isComposeAvailable()
 
     /**
@@ -63,6 +64,7 @@ object SceneContainerFlag {
             FlagToken(FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR, keyguardBottomAreaRefactor()),
             KeyguardShadeMigrationNssl.token,
             MediaInSceneContainerFlag.token,
+            // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer
         )
 
     /** The full set of requirements for SceneContainer */

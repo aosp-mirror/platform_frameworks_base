@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.android.compose.theme.PlatformTheme
 import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
@@ -43,7 +44,6 @@ import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.createflow.hasContentToDisplay
 import com.android.credentialmanager.getflow.GetCredentialScreen
 import com.android.credentialmanager.getflow.hasContentToDisplay
-import com.android.credentialmanager.ui.theme.PlatformTheme
 
 @ExperimentalMaterialApi
 class CredentialSelectorActivity : ComponentActivity() {

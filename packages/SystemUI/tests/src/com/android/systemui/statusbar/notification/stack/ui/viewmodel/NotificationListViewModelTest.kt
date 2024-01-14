@@ -38,6 +38,7 @@ import com.android.systemui.res.R
 import com.android.systemui.runCurrent
 import com.android.systemui.runTest
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.notification.dagger.NotificationStatsLoggerModule
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
@@ -71,6 +72,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
                 FooterViewModelModule::class,
                 HeadlessSystemUserModeModule::class,
                 UnfoldTransitionModule.Bindings::class,
+                NotificationStatsLoggerModule::class,
             ]
     )
     interface TestComponent : SysUITestComponent<NotificationListViewModel> {

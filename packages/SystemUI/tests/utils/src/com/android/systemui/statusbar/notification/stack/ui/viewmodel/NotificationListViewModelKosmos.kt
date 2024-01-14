@@ -33,6 +33,7 @@ val Kosmos.notificationListViewModel by Fixture {
         shelf = notificationShelfViewModel,
         hideListViewModel = hideListViewModel,
         footer = Optional.of(footerViewModel),
+        logger = Optional.of(notificationListLoggerViewModel),
         activeNotificationsInteractor = activeNotificationsInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         seenNotificationsInteractor = seenNotificationsInteractor,

@@ -138,14 +138,15 @@
     }
   ],
   "postsubmit-ravenwood": [
-    {
-      "name": "CtsUtilTestCasesRavenwood",
-      "host": true,
-      "file_patterns": [
-        "*Ravenwood*",
-        "*ravenwood*"
-      ]
-    }
+    // TODO(ravenwood) promote it to presubmit
+    // TODO: Enable it once the infra knows how to run it.
+//    {
+//      "name": "CtsUtilTestCasesRavenwood",
+//      "file_patterns": [
+//        "*Ravenwood*",
+//        "*ravenwood*"
+//      ]
+//    }
   ],
   "postsubmit-managedprofile-stress": [
     {

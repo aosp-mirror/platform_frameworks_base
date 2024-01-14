@@ -74,6 +74,18 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun testActiveNotificationRanks_sizeMatches() {
+        testComponent.runTest {
+            val activeNotificationRanks by collectLastValue(underTest.activeNotificationRanks)
+
+            activeNotificationListRepository.setActiveNotifs(5)
+            runCurrent()
+
+            assertThat(activeNotificationRanks!!.size).isEqualTo(5)
+        }
+    }
+
+    @Test
     fun testHasClearableNotifications_whenHasClearableAlertingNotifs() =
         testComponent.runTest {
             val hasClearable by collectLastValue(underTest.hasClearableNotifications)

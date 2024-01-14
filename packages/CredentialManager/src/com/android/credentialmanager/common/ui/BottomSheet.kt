@@ -24,11 +24,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.android.compose.rememberSystemUiController
+import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.ui.theme.EntryShape
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import kotlinx.coroutines.launch
 
 
@@ -54,7 +54,7 @@ fun ModalBottomSheet(
         setBottomSheetSystemBarsColor(sysUiController)
     }
     ModalBottomSheetLayout(
-        sheetBackgroundColor = LocalAndroidColorScheme.current.colorSurfaceBright,
+        sheetBackgroundColor = LocalAndroidColorScheme.current.surfaceBright,
         modifier = Modifier.background(Color.Transparent),
         sheetState = state,
         sheetContent = sheetContent,

@@ -53,8 +53,7 @@ final class HardwareKeyboardShortcutController {
     @GuardedBy("ImfLock.class")
     void reset(@NonNull ArrayMap<String, InputMethodInfo> methodMap) {
         mSubtypeHandles.clear();
-        final InputMethodUtils.InputMethodSettings settings =
-                new InputMethodUtils.InputMethodSettings(methodMap, mUserId);
+        final InputMethodSettings settings = new InputMethodSettings(methodMap, mUserId);
         for (final InputMethodInfo imi : settings.getEnabledInputMethodListLocked()) {
             if (!imi.shouldShowInInputMethodPicker()) {
                 continue;
