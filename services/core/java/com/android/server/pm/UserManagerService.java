@@ -180,6 +180,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -332,6 +334,8 @@ public class UserManagerService extends IUserManager.Stub {
     private final Object mAppRestrictionsLock = new Object();
 
     private final Handler mHandler;
+
+    private final ThreadPoolExecutor mInternalExecutor;
 
     private final File mUsersDir;
     private final File mUserListFile;
@@ -722,11 +726,20 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     void setQuietModeEnabledAsync(@UserIdInt int userId, boolean enableQuietMode,
             IntentSender target, @Nullable String callingPackage) {
-        // Call setQuietModeEnabled on bg thread to avoid ANR
-        BackgroundThread.getHandler().post(
-                () -> setQuietModeEnabled(userId, enableQuietMode, target,
-                        callingPackage)
-        );
+        if (android.multiuser.Flags.moveQuietModeOperationsToSeparateThread()) {
+            // Call setQuietModeEnabled on a separate thread. Calling this operation on the main
+            // thread can cause ANRs, posting on a BackgroundThread can result in delays
+            Slog.d(LOG_TAG, "Calling setQuietModeEnabled for user " + userId
+                    + " on a separate thread");
+            mInternalExecutor.execute(() -> setQuietModeEnabled(userId, enableQuietMode, target,
+                    callingPackage));
+        } else {
+            // Call setQuietModeEnabled on bg thread to avoid ANR
+            BackgroundThread.getHandler().post(
+                    () -> setQuietModeEnabled(userId, enableQuietMode, target,
+                            callingPackage)
+            );
+        }
     }
 
     /**
@@ -952,6 +965,8 @@ public class UserManagerService extends IUserManager.Stub {
         mPackagesLock = packagesLock;
         mUsers = users != null ? users : new SparseArray<>();
         mHandler = new MainHandler();
+        mInternalExecutor = new ThreadPoolExecutor(/* corePoolSize */ 0, /* maximumPoolSize */ 1,
+                /* keepAliveTime */ 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
         mUserVisibilityMediator = new UserVisibilityMediator(mHandler);
         mUserDataPreparer = userDataPreparer;
         mUserTypes = UserTypeFactory.getUserTypes();
