@@ -844,6 +844,7 @@ public class Activity extends ContextThemeWrapper
     private IBinder mToken;
     private IBinder mAssistToken;
     private IBinder mShareableActivityToken;
+    private ComponentCaller mInitialCaller;
     @UnsupportedAppUsage
     private int mIdent;
     @UnsupportedAppUsage
@@ -7031,6 +7032,20 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Returns the ComponentCaller instance of the app that initially launched this activity.
+     *
+     * <p>Note that calls to {@link #onNewIntent} have no effect on the returned value of this
+     * method.
+     *
+     * @return {@link ComponentCaller} instance
+     * @see ComponentCaller
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    public @NonNull ComponentCaller getInitialCaller() {
+        return mInitialCaller;
+    }
+
+    /**
      * Control whether this activity's main window is visible.  This is intended
      * only for the special case of an activity that is not going to show a
      * UI itself, but can't just finish prior to onResume() because it needs
@@ -8647,6 +8662,19 @@ public class Activity extends ContextThemeWrapper
             Configuration config, String referrer, IVoiceInteractor voiceInteractor,
             Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken,
             IBinder shareableActivityToken) {
+        attach(context, aThread, instr, token, ident, application, intent, info, title, parent, id,
+                lastNonConfigurationInstances, config, referrer, voiceInteractor, window,
+                activityConfigCallback, assistToken, shareableActivityToken, null);
+    }
+
+    final void attach(Context context, ActivityThread aThread,
+            Instrumentation instr, IBinder token, int ident,
+            Application application, Intent intent, ActivityInfo info,
+            CharSequence title, Activity parent, String id,
+            NonConfigurationInstances lastNonConfigurationInstances,
+            Configuration config, String referrer, IVoiceInteractor voiceInteractor,
+            Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken,
+            IBinder shareableActivityToken, IBinder initialCallerInfoAccessToken) {
         if (sandboxActivitySdkBasedContext()) {
             // Sandbox activities extract a token from the intent's extra to identify the related
             // SDK as part of overriding attachBaseContext, then it wraps the passed context in an
@@ -8711,6 +8739,10 @@ public class Activity extends ContextThemeWrapper
 
         getAutofillClientController().onActivityAttached(application);
         setContentCaptureOptions(application.getContentCaptureOptions());
+
+        if (android.security.Flags.contentUriPermissionApis()) {
+            mInitialCaller = new ComponentCaller(getActivityToken(), initialCallerInfoAccessToken);
+        }
     }
 
     /** @hide */

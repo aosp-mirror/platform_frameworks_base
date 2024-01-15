@@ -132,6 +132,8 @@ class TestUtils {
         private boolean mLaunchedFromBubble;
         @Nullable
         private IBinder mTaskFragmentToken;
+        @Nullable
+        private IBinder mInitialCallerInfoAccessToken;
 
         LaunchActivityItemBuilder(@NonNull IBinder activityToken, @NonNull Intent intent,
                 @NonNull ActivityInfo info) {
@@ -251,13 +253,21 @@ class TestUtils {
         }
 
         @NonNull
+        LaunchActivityItemBuilder setInitialCallerInfoAccessToken(
+                @Nullable IBinder initialCallerInfoAccessToken) {
+            mInitialCallerInfoAccessToken = initialCallerInfoAccessToken;
+            return this;
+        }
+
+        @NonNull
         LaunchActivityItem build() {
             return LaunchActivityItem.obtain(mActivityToken, mIntent, mIdent, mInfo,
                     mCurConfig, mOverrideConfig, mDeviceId, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
                     mActivityOptions != null ? mActivityOptions.getSceneTransitionInfo() : null,
                     mIsForward, mProfilerInfo, mAssistToken, null /* activityClientController */,
-                    mShareableActivityToken, mLaunchedFromBubble, mTaskFragmentToken);
+                    mShareableActivityToken, mLaunchedFromBubble, mTaskFragmentToken,
+                    mInitialCallerInfoAccessToken);
         }
     }
 }
