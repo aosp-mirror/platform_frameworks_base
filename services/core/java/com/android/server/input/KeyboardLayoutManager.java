@@ -76,6 +76,8 @@ import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.XmlUtils;
+import com.android.server.LocalServices;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.input.KeyboardMetricsCollector.KeyboardConfigurationEvent;
 import com.android.server.input.KeyboardMetricsCollector.LayoutSelectionCriteria;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -197,7 +199,7 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         final KeyboardIdentifier keyboardIdentifier = new KeyboardIdentifier(inputDevice);
         KeyboardConfiguration config = mConfiguredKeyboards.get(deviceId);
         if (config == null) {
-            config = new KeyboardConfiguration();
+            config = new KeyboardConfiguration(deviceId);
             mConfiguredKeyboards.put(deviceId, config);
         }
 
@@ -1093,19 +1095,26 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
     @MainThread
     private void maybeUpdateNotification() {
-        if (mConfiguredKeyboards.size() == 0) {
-            hideKeyboardLayoutNotification();
-            return;
-        }
+        List<KeyboardConfiguration> configurations = new ArrayList<>();
         for (int i = 0; i < mConfiguredKeyboards.size(); i++) {
+            int deviceId = mConfiguredKeyboards.keyAt(i);
+            KeyboardConfiguration config = mConfiguredKeyboards.valueAt(i);
+            if (isVirtualDevice(deviceId)) {
+                continue;
+            }
             // If we have a keyboard with no selected layouts, we should always show missing
             // layout notification even if there are other keyboards that are configured properly.
-            if (!mConfiguredKeyboards.valueAt(i).hasConfiguredLayouts()) {
+            if (!config.hasConfiguredLayouts()) {
                 showMissingKeyboardLayoutNotification();
                 return;
             }
+            configurations.add(config);
         }
-        showConfiguredKeyboardLayoutNotification();
+        if (configurations.size() == 0) {
+            hideKeyboardLayoutNotification();
+            return;
+        }
+        showConfiguredKeyboardLayoutNotification(configurations);
     }
 
     @MainThread
@@ -1185,10 +1194,11 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     @MainThread
-    private void showConfiguredKeyboardLayoutNotification() {
+    private void showConfiguredKeyboardLayoutNotification(
+            List<KeyboardConfiguration> configurations) {
         final Resources r = mContext.getResources();
 
-        if (mConfiguredKeyboards.size() != 1) {
+        if (configurations.size() != 1) {
             showKeyboardLayoutNotification(
                     r.getString(R.string.keyboard_layout_notification_multiple_selected_title),
                     r.getString(R.string.keyboard_layout_notification_multiple_selected_message),
@@ -1196,8 +1206,8 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
             return;
         }
 
-        final InputDevice inputDevice = getInputDevice(mConfiguredKeyboards.keyAt(0));
-        final KeyboardConfiguration config = mConfiguredKeyboards.valueAt(0);
+        final KeyboardConfiguration config = configurations.get(0);
+        final InputDevice inputDevice = getInputDevice(config.getDeviceId());
         if (inputDevice == null || !config.hasConfiguredLayouts()) {
             return;
         }
@@ -1356,6 +1366,13 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         return false;
     }
 
+    @VisibleForTesting
+    public boolean isVirtualDevice(int deviceId) {
+        VirtualDeviceManagerInternal vdm = LocalServices.getService(
+                VirtualDeviceManagerInternal.class);
+        return vdm == null || vdm.isInputDeviceOwnedByVirtualDevice(deviceId);
+    }
+
     private static int[] getScriptCodes(@Nullable Locale locale) {
         if (locale == null) {
             return new int[0];
@@ -1430,10 +1447,21 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     private static class KeyboardConfiguration {
+
         // If null or empty, it means no layout is configured for the device. And user needs to
         // manually set up the device.
         @Nullable
         private Set<String> mConfiguredLayouts;
+
+        private final int mDeviceId;
+
+        private KeyboardConfiguration(int deviceId) {
+            mDeviceId = deviceId;
+        }
+
+        private int getDeviceId() {
+            return mDeviceId;
+        }
 
         private boolean hasConfiguredLayouts() {
             return mConfiguredLayouts != null && !mConfiguredLayouts.isEmpty();
