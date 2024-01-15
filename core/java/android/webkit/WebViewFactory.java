@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import static android.webkit.Flags.updateServiceV2;
+
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UptimeMillisLong;
@@ -33,6 +35,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -410,6 +413,21 @@ public final class WebViewFactory {
         }
     }
 
+    // Returns whether the given package is enabled.
+    // This state can be changed by the user from Settings->Apps
+    private static boolean isEnabledPackage(PackageInfo packageInfo) {
+        if (packageInfo == null) return false;
+        return packageInfo.applicationInfo.enabled;
+    }
+
+    // Return {@code true} if the package is installed and not hidden
+    private static boolean isInstalledPackage(PackageInfo packageInfo) {
+        if (packageInfo == null) return false;
+        return (((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0)
+                && ((packageInfo.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HIDDEN)
+                        == 0));
+    }
+
     @UnsupportedAppUsage
     private static Context getWebViewContextAndSetProvider() throws MissingWebViewPackageException {
         Application initialApplication = AppGlobals.getInitialApplication();
@@ -454,6 +472,21 @@ public final class WebViewFactory {
                     | PackageManager.GET_META_DATA);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+            }
+
+            if (updateServiceV2() && !isInstalledPackage(newPackageInfo)) {
+                throw new MissingWebViewPackageException(
+                        TextUtils.formatSimple(
+                                "Current WebView Package (%s) is not installed for the current "
+                                + "user",
+                                newPackageInfo.packageName));
+            }
+
+            if (updateServiceV2() && !isEnabledPackage(newPackageInfo)) {
+                throw new MissingWebViewPackageException(
+                        TextUtils.formatSimple(
+                                "Current WebView Package (%s) is not enabled for the current user",
+                                newPackageInfo.packageName));
             }
 
             // Validate the newly fetched package info, throws MissingWebViewPackageException on
