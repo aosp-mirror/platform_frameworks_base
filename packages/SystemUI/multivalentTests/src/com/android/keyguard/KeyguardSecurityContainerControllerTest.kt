@@ -230,11 +230,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         sceneTransitionStateFlow =
             MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Lockscreen))
         sceneInteractor.setTransitionState(sceneTransitionStateFlow)
-        deviceEntryInteractor =
-            sceneTestUtils.deviceEntryInteractor(
-                authenticationInteractor = sceneTestUtils.authenticationInteractor(),
-                sceneInteractor = sceneInteractor,
-            )
+        deviceEntryInteractor = sceneTestUtils.deviceEntryInteractor()
 
         mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         underTest =
@@ -253,7 +249,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 falsingManager,
                 userSwitcherController,
                 featureFlags,
-                sceneTestUtils.sceneContainerFlags,
+                sceneTestUtils.fakeSceneContainerFlags,
                 globalSettings,
                 sessionTracker,
                 Optional.of(sideFpsController),
@@ -791,6 +787,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Test
     fun dismissesKeyguard_whenSceneChangesToGone() =
         sceneTestUtils.testScope.runTest {
+            sceneTestUtils.fakeSceneContainerFlags.enabled = true
             // Upon init, we have never dismisses the keyguard.
             underTest.onInit()
             runCurrent()

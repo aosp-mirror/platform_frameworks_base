@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.model
+package com.android.systemui.user.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.user.domain.interactor.guestUserInteractor
+import com.android.systemui.user.domain.interactor.userSwitcherInteractor
 
-val Kosmos.sceneContainerConfig by
-    Kosmos.Fixture { FakeSceneContainerConfigModule().sceneContainerConfig }
+val Kosmos.userSwitcherViewModel by Fixture {
+    UserSwitcherViewModel(
+        userSwitcherInteractor = userSwitcherInteractor,
+        guestUserInteractor = guestUserInteractor,
+    )
+}

@@ -18,6 +18,7 @@ package com.android.systemui.communal.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-var Kosmos.communalMediaRepository: CommunalMediaRepository by
-    Kosmos.Fixture { fakeCommunalMediaRepository }
 val Kosmos.fakeCommunalMediaRepository by Kosmos.Fixture { FakeCommunalMediaRepository() }
+
+val Kosmos.communalMediaRepository by
+    Kosmos.Fixture<CommunalMediaRepository> { fakeCommunalMediaRepository }

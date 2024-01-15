@@ -83,7 +83,7 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
             AuthenticationRepositoryImpl(
                 applicationScope = testScope.backgroundScope,
                 backgroundDispatcher = testUtils.testDispatcher,
-                flags = testUtils.sceneContainerFlags,
+                flags = testUtils.fakeSceneContainerFlags,
                 clock = clock,
                 getSecurityMode = getSecurityMode,
                 userRepository = userRepository,

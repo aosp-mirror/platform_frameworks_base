@@ -55,7 +55,7 @@ class KeyguardStatusBarViewModelTest : SysuiTestCase() {
             keyguardRepository,
             mock<CommandQueue>(),
             PowerInteractorFactory.create().powerInteractor,
-            sceneTestUtils.sceneContainerFlags,
+            sceneTestUtils.fakeSceneContainerFlags,
             FakeKeyguardBouncerRepository(),
             ConfigurationInteractor(FakeConfigurationRepository()),
             FakeShadeRepository(),

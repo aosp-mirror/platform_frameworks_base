@@ -87,11 +87,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
         return LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
-            deviceEntryInteractor =
-                utils.deviceEntryInteractor(
-                    authenticationInteractor = utils.authenticationInteractor(),
-                    sceneInteractor = utils.sceneInteractor(),
-                ),
+            deviceEntryInteractor = utils.deviceEntryInteractor(),
             communalInteractor = utils.communalInteractor(),
             longPress =
                 KeyguardLongPressViewModel(

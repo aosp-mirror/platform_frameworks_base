@@ -18,4 +18,5 @@ package com.android.systemui.scene.shared.flag
 
 import com.android.systemui.kosmos.Kosmos
 
-var Kosmos.sceneContainerFlags by Kosmos.Fixture { FakeSceneContainerFlags() }
+var Kosmos.fakeSceneContainerFlags by Kosmos.Fixture { FakeSceneContainerFlags() }
+val Kosmos.sceneContainerFlags by Kosmos.Fixture<SceneContainerFlags> { fakeSceneContainerFlags }

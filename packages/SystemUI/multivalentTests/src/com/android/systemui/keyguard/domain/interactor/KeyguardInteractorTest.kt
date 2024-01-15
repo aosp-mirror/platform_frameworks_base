@@ -63,7 +63,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             repository = repository,
             commandQueue = commandQueue,
             powerInteractor = PowerInteractorFactory.create().powerInteractor,
-            sceneContainerFlags = testUtils.sceneContainerFlags,
+            sceneContainerFlags = testUtils.fakeSceneContainerFlags,
             bouncerRepository = bouncerRepository,
             configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
             shadeRepository = shadeRepository,
@@ -183,6 +183,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     @Test
     fun animationDozingTransitions() =
         testScope.runTest {
+            testUtils.fakeSceneContainerFlags.enabled = true
             val isAnimate by collectLastValue(underTest.animateDozingTransitions)
 
             underTest.setAnimateDozingTransitions(true)

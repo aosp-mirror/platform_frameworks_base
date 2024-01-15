@@ -25,7 +25,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateControllerImpl
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.time.fakeSystemClock
+import com.android.systemui.util.time.systemClock
 
 var Kosmos.alternateBouncerInteractor by
     Kosmos.Fixture {
@@ -35,7 +35,7 @@ var Kosmos.alternateBouncerInteractor by
             bouncerRepository = keyguardBouncerRepository,
             fingerprintPropertyRepository = fingerprintPropertyRepository,
             biometricSettingsRepository = biometricSettingsRepository,
-            systemClock = fakeSystemClock,
+            systemClock = systemClock,
             keyguardUpdateMonitor = keyguardUpdateMonitor,
             scope = testScope.backgroundScope,
         )

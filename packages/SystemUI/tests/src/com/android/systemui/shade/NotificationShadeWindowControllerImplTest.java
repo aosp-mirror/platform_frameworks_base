@@ -131,7 +131,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Spy private final NotificationShadeWindowView mNotificationShadeWindowView = spy(
             new NotificationShadeWindowView(mContext, null));
     @Mock private IActivityManager mActivityManager;
-    @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private KeyguardBypassController mKeyguardBypassController;
@@ -140,7 +139,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private DumpManager mDumpManager;
     @Mock private KeyguardSecurityModel mKeyguardSecurityModel;
     @Mock private KeyguardStateController mKeyguardStateController;
-    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock private AuthController mAuthController;
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
@@ -160,6 +158,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     private float mPreferredRefreshRate = -1;
     private FromLockscreenTransitionInteractor mFromLockscreenTransitionInteractor;
     private FromPrimaryBouncerTransitionInteractor mFromPrimaryBouncerTransitionInteractor;
+    private ScreenOffAnimationController mScreenOffAnimationController;
+    private SysuiStatusBarStateController mStatusBarStateController;
 
     @Before
     public void setUp() {
@@ -178,11 +178,9 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
         FakeShadeRepository shadeRepository = new FakeShadeRepository();
 
-        PowerInteractor powerInteractor = mUtils.powerInteractor(
-                mUtils.getPowerRepository(),
-                mUtils.falsingCollector(),
-                mScreenOffAnimationController,
-                mStatusBarStateController);
+        mScreenOffAnimationController = mUtils.getScreenOffAnimationController();
+        mStatusBarStateController = spy(mUtils.getStatusBarStateController());
+        PowerInteractor powerInteractor = mUtils.powerInteractor();
 
         SceneInteractor sceneInteractor = new SceneInteractor(
                 mTestScope.getBackgroundScope(),

@@ -23,9 +23,8 @@ import com.android.systemui.authentication.data.repository.FakeAuthenticationRep
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
-import com.android.systemui.keyguard.data.repository.FakeTrustRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -33,6 +32,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -43,19 +43,17 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val repository: FakeDeviceEntryRepository = utils.deviceEntryRepository
-    private val faceAuthRepository = FakeDeviceEntryFaceAuthRepository()
-    private val trustRepository = FakeTrustRepository()
+    private val faceAuthRepository = utils.kosmos.fakeDeviceEntryFaceAuthRepository
+    private val trustRepository = utils.kosmos.fakeTrustRepository
     private val sceneInteractor = utils.sceneInteractor()
     private val authenticationInteractor = utils.authenticationInteractor()
-    private val underTest =
-        utils.deviceEntryInteractor(
-            repository = repository,
-            authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
-            faceAuthRepository = faceAuthRepository,
-            trustRepository = trustRepository,
-        )
+    private lateinit var underTest: DeviceEntryInteractor
+
+    @Before
+    fun setUp() {
+        utils.fakeSceneContainerFlags.enabled = true
+        underTest = utils.deviceEntryInteractor()
+    }
 
     @Test
     fun canSwipeToEnter_startsNull() =
