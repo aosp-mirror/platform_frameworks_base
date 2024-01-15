@@ -135,7 +135,6 @@ public class TaskSnapshotWindow {
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
         }
-        window.setOuter(snapshotSurface);
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
             session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
@@ -161,7 +160,7 @@ public class TaskSnapshotWindow {
             ShellExecutor splashScreenExecutor) {
         mSplashScreenExecutor = splashScreenExecutor;
         mSession = WindowManagerGlobal.getWindowSession();
-        mWindow = new Window();
+        mWindow = new Window(this);
         mWindow.setSession(mSession);
         int backgroundColor = taskDescription.getBackgroundColor();
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
@@ -204,9 +203,9 @@ public class TaskSnapshotWindow {
     }
 
     static class Window extends BaseIWindow {
-        private WeakReference<TaskSnapshotWindow> mOuter;
+        private final WeakReference<TaskSnapshotWindow> mOuter;
 
-        public void setOuter(TaskSnapshotWindow outer) {
+        Window(TaskSnapshotWindow outer) {
             mOuter = new WeakReference<>(outer);
         }
 
