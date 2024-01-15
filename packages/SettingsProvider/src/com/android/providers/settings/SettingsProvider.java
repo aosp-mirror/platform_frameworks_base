@@ -3812,7 +3812,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 224;
+            private static final int SETTINGS_VERSION = 225;
 
             private final int mUserId;
 
@@ -6004,6 +6004,13 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 224;
                 }
 
+                // Version 224: Update the default font scale depending on the
+                //              R.dimen.def_device_font_scale configuration property.
+                if (currentVersion == 224) {
+                    handleDefaultFontScale(getSystemSettingsLocked(userId));
+                    currentVersion = 225;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {
@@ -6019,6 +6026,32 @@ public class SettingsProvider extends ContentProvider {
 
                 // Return the current version.
                 return currentVersion;
+            }
+
+            @SuppressWarnings("GuardedBy")
+            @GuardedBy("mLock")
+            private void handleDefaultFontScale(@NonNull SettingsState systemSettings) {
+                final float defaultFontScale = getContext().getResources()
+                        .getFloat(R.dimen.def_device_font_scale);
+                // Persist the value for future use (e.g. Reset Settings option)
+                systemSettings.insertSettingLocked(
+                        Settings.System.DEFAULT_DEVICE_FONT_SCALE,
+                        String.valueOf(defaultFontScale),
+                        /* tag= */ null,
+                        /* makeDefault= */ false,
+                        SettingsState.SYSTEM_PACKAGE_NAME);
+                // We verify if there is a pre existing value for font_scale.
+                final Setting existingFontScale = systemSettings.getSettingLocked(
+                        Settings.System.FONT_SCALE);
+                if (existingFontScale == null || existingFontScale.isNull()) {
+                    // Set the default value only if it didn't exist before
+                    systemSettings.insertSettingLocked(
+                            Settings.System.FONT_SCALE,
+                            String.valueOf(defaultFontScale),
+                            /* tag= */ null,
+                            /* makeDefault= */ false,
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+                }
             }
 
             @GuardedBy("mLock")

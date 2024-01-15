@@ -4499,10 +4499,11 @@ public final class Settings {
         /** @hide */
         public static void adjustConfigurationForUser(ContentResolver cr, Configuration outConfig,
                 int userHandle, boolean updateSettingsIfEmpty) {
+            final float defaultFontScale = getDefaultFontScale(cr, userHandle);
             outConfig.fontScale = Settings.System.getFloatForUser(
-                    cr, FONT_SCALE, DEFAULT_FONT_SCALE, userHandle);
+                    cr, FONT_SCALE, defaultFontScale, userHandle);
             if (outConfig.fontScale < 0) {
-                outConfig.fontScale = DEFAULT_FONT_SCALE;
+                outConfig.fontScale = defaultFontScale;
             }
             outConfig.fontWeightAdjustment = Settings.Secure.getIntForUser(
                     cr, Settings.Secure.FONT_WEIGHT_ADJUSTMENT, DEFAULT_FONT_WEIGHT, userHandle);
@@ -4525,6 +4526,12 @@ public final class Settings {
                             userHandle, DEFAULT_OVERRIDEABLE_BY_RESTORE);
                 }
             }
+        }
+
+        private static float getDefaultFontScale(ContentResolver cr, int userHandle) {
+            return com.android.window.flags.Flags.configurableFontScaleDefault()
+                    ? Settings.System.getFloatForUser(cr, DEFAULT_DEVICE_FONT_SCALE,
+                    DEFAULT_FONT_SCALE, userHandle) : DEFAULT_FONT_SCALE;
         }
 
         /**
@@ -4891,6 +4898,15 @@ public final class Settings {
          */
         @Readable
         public static final String FONT_SCALE = "font_scale";
+
+        /**
+         * Default scaling factor for fonts for the specific device, float.
+         * The value is read from the {@link R.dimen.def_device_font_scale}
+         * configuration property.
+         *
+         * @hide
+         */
+        public static final String DEFAULT_DEVICE_FONT_SCALE = "device_font_scale";
 
         /**
          * The serialized system locale value.
@@ -6231,6 +6247,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);
+            PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
         }
 
         /**

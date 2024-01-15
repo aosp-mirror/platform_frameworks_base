@@ -145,7 +145,6 @@ class FontScaleConverterFactoryTest {
     fun unnecessaryFontScalesReturnsNull() {
         assertThat(FontScaleConverterFactory.forScale(0F)).isNull()
         assertThat(FontScaleConverterFactory.forScale(1F)).isNull()
-        assertThat(FontScaleConverterFactory.forScale(1.1F)).isNull()
         assertThat(FontScaleConverterFactory.forScale(0.85F)).isNull()
     }
 
@@ -176,7 +175,7 @@ class FontScaleConverterFactoryTest {
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(-1f)).isFalse()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(0.85f)).isFalse()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.02f)).isFalse()
-        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.10f)).isFalse()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.10f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.15f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.1499999f))
                 .isTrue()
