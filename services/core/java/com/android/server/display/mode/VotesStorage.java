@@ -117,19 +117,10 @@ class VotesStorage {
             Slog.i(TAG, "Updated votes for display=" + displayId + " votes=" + votes);
         }
         if (changed) {
-            reportVoteStats(displayId, priority, vote);
+            if (mVotesStatsReporter != null) {
+                mVotesStatsReporter.reportVoteChanged(displayId, priority, vote);
+            }
             mListener.onChanged();
-        }
-    }
-
-    private void reportVoteStats(int displayId, int priority, @Nullable Vote vote) {
-        if (mVotesStatsReporter == null) {
-            return;
-        }
-        if (vote == null) {
-            mVotesStatsReporter.reportVoteRemoved(displayId, priority);
-        } else {
-            mVotesStatsReporter.reportVoteAdded(displayId, priority, vote);
         }
     }
 
