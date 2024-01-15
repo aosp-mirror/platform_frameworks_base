@@ -1443,8 +1443,13 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "startScan | manager: %d", managerRecord.mManagerId));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "startScan | manager: %d, ownerPackageName: %s, targetPackageName: %s",
+                        managerRecord.mManagerId,
+                        managerRecord.mOwnerPackageName,
+                        managerRecord.mTargetPackageName));
 
         managerRecord.startScan();
     }
@@ -1457,8 +1462,13 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
-        Slog.i(TAG, TextUtils.formatSimple(
-                "stopScan | manager: %d", managerRecord.mManagerId));
+        Slog.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "stopScan | manager: %d, ownerPackageName: %s, targetPackageName: %s",
+                        managerRecord.mManagerId,
+                        managerRecord.mOwnerPackageName,
+                        managerRecord.mTargetPackageName));
 
         managerRecord.stopScan();
     }
