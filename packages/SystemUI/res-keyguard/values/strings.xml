@@ -62,7 +62,7 @@
     <string name="keyguard_plugged_in_charging_slowly"><xliff:g id="percentage">%s</xliff:g> • Charging slowly</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the defend mode is triggered, say that charging is temporarily limited.  -->
-    <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging optimized to protect battery</string>
+    <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging on hold to protect battery</string>
 
     <!-- When the lock screen is showing and the phone plugged in with incompatible charger. -->
     <string name="keyguard_plugged_in_incompatible_charger"><xliff:g id="percentage">%s</xliff:g> • Issue with charging accessory</string>
