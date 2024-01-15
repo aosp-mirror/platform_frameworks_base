@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1624,7 +1625,51 @@ public class Instrumentation {
      * @param intent The new intent being received.
      */
     public void callActivityOnNewIntent(Activity activity, Intent intent) {
-        activity.performNewIntent(intent);
+        if (android.security.Flags.contentUriPermissionApis()) {
+            activity.performNewIntent(intent, new ComponentCaller(activity.getActivityToken(),
+                    /* callerToken */ null));
+        } else {
+            activity.performNewIntent(intent);
+        }
+    }
+
+    /**
+     * Same as {@link #callActivityOnNewIntent(Activity, Intent)}, but with an extra parameter for
+     * the {@link ComponentCaller} instance associated with the app that sent the intent.
+     *
+     * @param activity The activity receiving a new Intent.
+     * @param intent The new intent being received.
+     * @param caller The {@link ComponentCaller} instance that launched the activity with the new
+     *               intent.
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    public void callActivityOnNewIntent(@NonNull Activity activity, @NonNull Intent intent,
+            @NonNull ComponentCaller caller) {
+        activity.performNewIntent(intent, caller);
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    public void callActivityOnNewIntent(Activity activity, ReferrerIntent intent,
+            @NonNull ComponentCaller caller) {
+        internalCallActivityOnNewIntent(activity, intent, caller);
+    }
+
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    private void internalCallActivityOnNewIntent(Activity activity, ReferrerIntent intent,
+            @NonNull ComponentCaller caller) {
+        final String oldReferrer = activity.mReferrer;
+        try {
+            if (intent != null) {
+                activity.mReferrer = intent.mReferrer;
+            }
+            Intent newIntent = intent != null ? new Intent(intent) : null;
+            callActivityOnNewIntent(activity, newIntent, caller);
+        } finally {
+            activity.mReferrer = oldReferrer;
+        }
     }
 
     /**
@@ -1632,14 +1677,19 @@ public class Instrumentation {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void callActivityOnNewIntent(Activity activity, ReferrerIntent intent) {
-        final String oldReferrer = activity.mReferrer;
-        try {
-            if (intent != null) {
-                activity.mReferrer = intent.mReferrer;
+        if (android.security.Flags.contentUriPermissionApis()) {
+            internalCallActivityOnNewIntent(activity, intent, new ComponentCaller(
+                    activity.getActivityToken(), /* callerToken */ null));
+        } else {
+            final String oldReferrer = activity.mReferrer;
+            try {
+                if (intent != null) {
+                    activity.mReferrer = intent.mReferrer;
+                }
+                callActivityOnNewIntent(activity, intent != null ? new Intent(intent) : null);
+            } finally {
+                activity.mReferrer = oldReferrer;
             }
-            callActivityOnNewIntent(activity, intent != null ? new Intent(intent) : null);
-        } finally {
-            activity.mReferrer = oldReferrer;
         }
     }
 

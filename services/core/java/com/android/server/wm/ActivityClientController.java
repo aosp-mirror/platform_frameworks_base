@@ -695,28 +695,55 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public int getLaunchedFromUid(IBinder token) {
+        return getUid(token, /* callerToken */ null, /* isActivityCallerCall */ false);
+    }
+
+    @Override
+    public String getLaunchedFromPackage(IBinder token) {
+        return getPackage(token, /* callerToken */ null, /* isActivityCallerCall */ false);
+    }
+
+    @Override
+    public int getActivityCallerUid(IBinder activityToken, IBinder callerToken) {
+        return getUid(activityToken, callerToken, /* isActivityCallerCall */ true);
+    }
+
+    @Override
+    public String getActivityCallerPackage(IBinder activityToken, IBinder callerToken) {
+        return getPackage(activityToken, callerToken, /* isActivityCallerCall */ true);
+    }
+
+    private int getUid(IBinder activityToken, IBinder callerToken, boolean isActivityCallerCall) {
         final int uid = Binder.getCallingUid();
         final boolean isInternalCaller = isInternalCallerGetLaunchedFrom(uid);
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r))) {
-                return r.launchedFromUid;
+            final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r, callerToken,
+                    isActivityCallerCall)) && isValidCaller(r, callerToken, isActivityCallerCall)) {
+                return isActivityCallerCall ? r.getCallerUid(callerToken) : r.launchedFromUid;
             }
         }
         return INVALID_UID;
     }
 
-    @Override
-    public String getLaunchedFromPackage(IBinder token) {
+    private String getPackage(IBinder activityToken, IBinder callerToken,
+            boolean isActivityCallerCall) {
         final int uid = Binder.getCallingUid();
         final boolean isInternalCaller = isInternalCallerGetLaunchedFrom(uid);
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r))) {
-                return r.launchedFromPackage;
+            final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+            if (r != null && (isInternalCaller || canGetLaunchedFromLocked(uid, r, callerToken,
+                    isActivityCallerCall)) && isValidCaller(r, callerToken, isActivityCallerCall)) {
+                return isActivityCallerCall
+                        ? r.getCallerPackage(callerToken) : r.launchedFromPackage;
             }
         }
         return null;
+    }
+
+    private boolean isValidCaller(ActivityRecord r, IBinder callerToken,
+            boolean isActivityCallerCall) {
+        return isActivityCallerCall ? r.hasCaller(callerToken) : callerToken == null;
     }
 
     /**
@@ -768,9 +795,13 @@ class ActivityClientController extends IActivityClientController.Stub {
      * verifying whether the provided {@code ActivityRecord r} has opted in to sharing its
      * identity or if the uid of the activity matches that of the launching app.
      */
-    private static boolean canGetLaunchedFromLocked(int uid, ActivityRecord r) {
+    private static boolean canGetLaunchedFromLocked(int uid, ActivityRecord r,
+            IBinder callerToken, boolean isActivityCallerCall) {
         if (CompatChanges.isChangeEnabled(ACCESS_SHARED_IDENTITY, uid)) {
-            return r.mShareIdentity || r.launchedFromUid == uid;
+            boolean isShareIdentityEnabled = isActivityCallerCall
+                    ? r.isCallerShareIdentityEnabled(callerToken) : r.mShareIdentity;
+            int callerUid = isActivityCallerCall ? r.getCallerUid(callerToken) : r.launchedFromUid;
+            return isShareIdentityEnabled || callerUid == uid;
         }
         return false;
     }

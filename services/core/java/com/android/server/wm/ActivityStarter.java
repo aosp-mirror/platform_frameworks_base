@@ -2909,7 +2909,7 @@ class ActivityStarter {
 
         activity.logStartActivity(EventLogTags.WM_NEW_INTENT, activity.getTask());
         activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, intentGrants,
-                mStartActivity.launchedFromPackage);
+                mStartActivity.launchedFromPackage, mStartActivity.mShareIdentity);
         mIntentDelivered = true;
     }
 

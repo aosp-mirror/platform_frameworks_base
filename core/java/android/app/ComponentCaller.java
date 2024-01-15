@@ -17,14 +17,13 @@
 package android.app;
 
 import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.Process;
-
-import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
@@ -45,7 +44,7 @@ public final class ComponentCaller {
     /**
      * @hide
      */
-    public ComponentCaller(@NonNull IBinder activityToken, @Nullable IBinder callerToken) {
+    public ComponentCaller(@Nullable IBinder activityToken, @Nullable IBinder callerToken) {
         mActivityToken = activityToken;
         mCallerToken = callerToken;
     }
@@ -83,7 +82,7 @@ public final class ComponentCaller {
      * @see Activity#getLaunchedFromUid()
      */
     public int getUid() {
-        return ActivityClient.getInstance().getLaunchedFromUid(mActivityToken);
+        return ActivityClient.getInstance().getActivityCallerUid(mActivityToken, mCallerToken);
     }
 
     /**
@@ -121,7 +120,7 @@ public final class ComponentCaller {
      */
     @Nullable
     public String getPackage() {
-        return ActivityClient.getInstance().getLaunchedFromPackage(mActivityToken);
+        return ActivityClient.getInstance().getActivityCallerPackage(mActivityToken, mCallerToken);
     }
 
     /**
