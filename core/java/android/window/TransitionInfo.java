@@ -421,8 +421,11 @@ public final class TransitionInfo implements Parcelable {
         final String perChangeLineStart = shouldPrettyPrint ? "\n" + innerPrefix : "";
         StringBuilder sb = new StringBuilder();
         sb.append("{id=").append(mDebugId).append(" t=").append(transitTypeToString(mType))
-                .append(" f=0x").append(Integer.toHexString(mFlags)).append(" trk=").append(mTrack)
-                .append(" r=[");
+                .append(" f=0x").append(Integer.toHexString(mFlags)).append(" trk=").append(mTrack);
+        if (mOptions != null) {
+            sb.append(" opt=").append(mOptions);
+        }
+        sb.append(" r=[");
         for (int i = 0; i < mRoots.size(); ++i) {
             if (i > 0) {
                 sb.append(',');
@@ -1211,21 +1214,31 @@ public final class TransitionInfo implements Parcelable {
 
         @NonNull
         private static String typeToString(int mode) {
-            switch(mode) {
-                case ANIM_CUSTOM: return "ANIM_CUSTOM";
-                case ANIM_CLIP_REVEAL: return "ANIM_CLIP_REVEAL";
-                case ANIM_SCALE_UP: return "ANIM_SCALE_UP";
-                case ANIM_THUMBNAIL_SCALE_UP: return "ANIM_THUMBNAIL_SCALE_UP";
-                case ANIM_THUMBNAIL_SCALE_DOWN: return "ANIM_THUMBNAIL_SCALE_DOWN";
-                case ANIM_OPEN_CROSS_PROFILE_APPS: return "ANIM_OPEN_CROSS_PROFILE_APPS";
-                default: return "<unknown:" + mode + ">";
-            }
+            return switch (mode) {
+                case ANIM_CUSTOM -> "CUSTOM";
+                case ANIM_SCALE_UP -> "SCALE_UP";
+                case ANIM_THUMBNAIL_SCALE_UP -> "THUMBNAIL_SCALE_UP";
+                case ANIM_THUMBNAIL_SCALE_DOWN -> "THUMBNAIL_SCALE_DOWN";
+                case ANIM_SCENE_TRANSITION -> "SCENE_TRANSITION";
+                case ANIM_CLIP_REVEAL -> "CLIP_REVEAL";
+                case ANIM_OPEN_CROSS_PROFILE_APPS -> "OPEN_CROSS_PROFILE_APPS";
+                case ANIM_FROM_STYLE -> "FROM_STYLE";
+                default -> "<" + mode + ">";
+            };
         }
 
         @Override
         public String toString() {
-            return "{ AnimationOptions type= " + typeToString(mType) + " package=" + mPackageName
-                    + " override=" + mOverrideTaskTransition + " b=" + mTransitionBounds + "}";
+            final StringBuilder sb = new StringBuilder(32);
+            sb.append("{t=").append(typeToString(mType));
+            if (mOverrideTaskTransition) {
+                sb.append(" overrideTask=true");
+            }
+            if (!mTransitionBounds.isEmpty()) {
+                sb.append(" bounds=").append(mTransitionBounds);
+            }
+            sb.append('}');
+            return sb.toString();
         }
 
         /** Customized activity transition. */
