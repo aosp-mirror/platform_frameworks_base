@@ -1737,6 +1737,17 @@ class JobConcurrencyManager {
                     continue;
                 }
 
+                if (!nextPending.isReady()) {
+                    // This could happen when the job count reached its quota, the constrains
+                    // for the job has been updated but hasn't been removed from the pending
+                    // queue yet.
+                    if (DEBUG) {
+                        Slog.w(TAG, "Pending+not ready job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
                 if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
                     Slog.w(TAG, "Already running similar job to: " + nextPending);
                 }
