@@ -1,0 +1,8 @@
+package: "com.android.egg.flags"
+
+flag {
+    name: "flag_flag"
+    namespace: "systemui"
+    description: "Flags are planted on planets when you land. Yes, it's a flag for flags."
+    bug: "320150798"
+}
