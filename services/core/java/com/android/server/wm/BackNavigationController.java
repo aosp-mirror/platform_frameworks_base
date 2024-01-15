@@ -1591,7 +1591,6 @@ class BackNavigationController {
 
     private static void setLaunchBehind(@NonNull ActivityRecord activity) {
         if (!activity.isVisibleRequested()) {
-            activity.setVisibility(true);
             // The transition could commit the visibility and in the finishing state, that could
             // skip commitVisibility call in setVisibility cause the activity won't visible here.
             // Call it again to make sure the activity could be visible while handling the pending
@@ -1669,10 +1668,14 @@ class BackNavigationController {
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "onBackNavigationDone backType=%s, "
                 + "triggerBack=%b", backType, triggerBack);
 
-        mNavigationMonitor.stopMonitorForRemote();
-        mBackAnimationInProgress = false;
-        mShowWallpaper = false;
-        mPendingAnimationBuilder = null;
+        synchronized (mWindowManagerService.mGlobalLock) {
+            mNavigationMonitor.stopMonitorForRemote();
+            mBackAnimationInProgress = false;
+            mShowWallpaper = false;
+            // All animation should be done, clear any un-send animation.
+            mPendingAnimation = null;
+            mPendingAnimationBuilder = null;
+        }
     }
 
     static TaskSnapshot getSnapshot(@NonNull WindowContainer w,
