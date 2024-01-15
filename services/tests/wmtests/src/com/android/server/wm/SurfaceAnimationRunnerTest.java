@@ -150,6 +150,8 @@ public class SurfaceAnimationRunnerTest {
     @FlakyTest(bugId = 71719744)
     @Test
     public void testCancel_sneakyCancelBeforeUpdate() throws Exception {
+        final CountDownLatch animationCancelled = new CountDownLatch(1);
+
         mSurfaceAnimationRunner = new SurfaceAnimationRunner(null, () -> new ValueAnimator() {
             {
                 setFloatValues(0f, 1f);
@@ -162,6 +164,7 @@ public class SurfaceAnimationRunnerTest {
                     // interleaving of multiple threads. Muahahaha
                     if (animation.getCurrentPlayTime() > 0) {
                         mSurfaceAnimationRunner.onAnimationCancelled(mMockSurface);
+                        animationCancelled.countDown();
                     }
                     listener.onAnimationUpdate(animation);
                 });
@@ -170,11 +173,7 @@ public class SurfaceAnimationRunnerTest {
         when(mMockAnimationSpec.getDuration()).thenReturn(200L);
         mSurfaceAnimationRunner.startAnimation(mMockAnimationSpec, mMockSurface, mMockTransaction,
                 this::finishedCallback);
-
-        // We need to wait for two frames: The first frame starts the animation, the second frame
-        // actually cancels the animation.
-        waitUntilNextFrame();
-        waitUntilNextFrame();
+        assertTrue(animationCancelled.await(1, SECONDS));
         assertTrue(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
         verify(mMockAnimationSpec, atLeastOnce()).apply(any(), any(), eq(0L));
     }
