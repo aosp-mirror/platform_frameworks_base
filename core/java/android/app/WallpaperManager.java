@@ -255,6 +255,13 @@ public class WallpaperManager {
     public static final String COMMAND_GOING_TO_SLEEP = "android.wallpaper.goingtosleep";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported when a physical display switch event
+     * happens, e.g. fold and unfold.
+     * @hide
+     */
+    public static final String COMMAND_DISPLAY_SWITCH = "android.wallpaper.displayswitch";
+
+    /**
      * Command for {@link #sendWallpaperCommand}: reported when the wallpaper that was already
      * set is re-applied by the user.
      * @hide
