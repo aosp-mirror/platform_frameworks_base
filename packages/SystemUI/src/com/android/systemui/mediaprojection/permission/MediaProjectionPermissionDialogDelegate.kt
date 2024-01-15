@@ -30,11 +30,12 @@ class MediaProjectionPermissionDialogDelegate(
     private val onStartRecordingClicked: Consumer<MediaProjectionPermissionDialogDelegate>,
     private val onCancelClicked: Runnable,
     private val appName: String?,
+    forceShowPartialScreenshare: Boolean,
     hostUid: Int,
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
 ) :
     BaseMediaProjectionPermissionDialogDelegate<AlertDialog>(
-        createOptionList(context, appName, mediaProjectionConfig),
+        createOptionList(context, appName, mediaProjectionConfig, forceShowPartialScreenshare),
         appName,
         hostUid,
         mediaProjectionMetricsLogger
@@ -65,7 +66,8 @@ class MediaProjectionPermissionDialogDelegate(
         private fun createOptionList(
             context: Context,
             appName: String?,
-            mediaProjectionConfig: MediaProjectionConfig?
+            mediaProjectionConfig: MediaProjectionConfig?,
+            overrideDisableSingleAppOption: Boolean = false,
         ): List<ScreenShareOption> {
             val singleAppWarningText =
                 if (appName == null) {
@@ -80,8 +82,13 @@ class MediaProjectionPermissionDialogDelegate(
                     R.string.media_projection_entry_app_permission_dialog_warning_entire_screen
                 }
 
+            // The single app option should only be disabled if there is an app name provided,
+            // the client has setup a MediaProjection with
+            // MediaProjectionConfig#createConfigForDefaultDisplay, AND it hasn't been overridden by
+            // the OVERRIDE_DISABLE_SINGLE_APP_OPTION per-app override.
             val singleAppOptionDisabled =
                 appName != null &&
+                    !overrideDisableSingleAppOption &&
                     mediaProjectionConfig?.regionToCapture ==
                         MediaProjectionConfig.CAPTURE_REGION_FIXED_DISPLAY
 
