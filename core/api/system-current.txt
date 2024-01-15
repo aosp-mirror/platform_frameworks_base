@@ -3229,6 +3229,7 @@ package android.companion.virtual {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.input.VirtualMouseConfig);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualNavigationTouchpad createVirtualNavigationTouchpad(@NonNull android.hardware.input.VirtualNavigationTouchpadConfig);
+    method @FlaggedApi("android.companion.virtual.flags.virtual_stylus") @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualStylus createVirtualStylus(@NonNull android.hardware.input.VirtualStylusConfig);
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.input.VirtualTouchscreenConfig);
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method public int getDeviceId();
@@ -5302,6 +5303,78 @@ package android.hardware.input {
   public static final class VirtualNavigationTouchpadConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualNavigationTouchpadConfig.Builder> {
     ctor public VirtualNavigationTouchpadConfig.Builder(@IntRange(from=1) int, @IntRange(from=1) int);
     method @NonNull public android.hardware.input.VirtualNavigationTouchpadConfig build();
+  }
+
+  @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public class VirtualStylus implements java.io.Closeable {
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendButtonEvent(@NonNull android.hardware.input.VirtualStylusButtonEvent);
+    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendMotionEvent(@NonNull android.hardware.input.VirtualStylusMotionEvent);
+  }
+
+  @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public final class VirtualStylusButtonEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAction();
+    method public int getButtonCode();
+    method public long getEventTimeNanos();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTION_BUTTON_PRESS = 11; // 0xb
+    field public static final int ACTION_BUTTON_RELEASE = 12; // 0xc
+    field public static final int BUTTON_PRIMARY = 32; // 0x20
+    field public static final int BUTTON_SECONDARY = 64; // 0x40
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualStylusButtonEvent> CREATOR;
+  }
+
+  @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public static final class VirtualStylusButtonEvent.Builder {
+    ctor public VirtualStylusButtonEvent.Builder();
+    method @NonNull public android.hardware.input.VirtualStylusButtonEvent build();
+    method @NonNull public android.hardware.input.VirtualStylusButtonEvent.Builder setAction(int);
+    method @NonNull public android.hardware.input.VirtualStylusButtonEvent.Builder setButtonCode(int);
+    method @NonNull public android.hardware.input.VirtualStylusButtonEvent.Builder setEventTimeNanos(long);
+  }
+
+  @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public final class VirtualStylusConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getHeight();
+    method public int getWidth();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualStylusConfig> CREATOR;
+  }
+
+  @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public static final class VirtualStylusConfig.Builder extends android.hardware.input.VirtualInputDeviceConfig.Builder<android.hardware.input.VirtualStylusConfig.Builder> {
+    ctor public VirtualStylusConfig.Builder(@IntRange(from=1) int, @IntRange(from=1) int);
+    method @NonNull public android.hardware.input.VirtualStylusConfig build();
+  }
+
+  @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public final class VirtualStylusMotionEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAction();
+    method public long getEventTimeNanos();
+    method public int getPressure();
+    method public int getTiltX();
+    method public int getTiltY();
+    method public int getToolType();
+    method public int getX();
+    method public int getY();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTION_DOWN = 0; // 0x0
+    field public static final int ACTION_MOVE = 2; // 0x2
+    field public static final int ACTION_UP = 1; // 0x1
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualStylusMotionEvent> CREATOR;
+    field public static final int TOOL_TYPE_ERASER = 4; // 0x4
+    field public static final int TOOL_TYPE_STYLUS = 2; // 0x2
+  }
+
+  @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public static final class VirtualStylusMotionEvent.Builder {
+    ctor public VirtualStylusMotionEvent.Builder();
+    method @NonNull public android.hardware.input.VirtualStylusMotionEvent build();
+    method @NonNull public android.hardware.input.VirtualStylusMotionEvent.Builder setAction(int);
+    method @NonNull public android.hardware.input.VirtualStylusMotionEvent.Builder setEventTimeNanos(long);
+    method @NonNull public android.hardware.input.VirtualStylusMotionEvent.Builder setPressure(@IntRange(from=0x0, to=0xff) int);
+    method @NonNull public android.hardware.input.VirtualStylusMotionEvent.Builder setTiltX(@IntRange(from=0xffffffa6, to=0x5a) int);
+    method @NonNull public android.hardware.input.VirtualStylusMotionEvent.Builder setTiltY(@IntRange(from=0xffffffa6, to=0x5a) int);
+    method @NonNull public android.hardware.input.VirtualStylusMotionEvent.Builder setToolType(int);
+    method @NonNull public android.hardware.input.VirtualStylusMotionEvent.Builder setX(int);
+    method @NonNull public android.hardware.input.VirtualStylusMotionEvent.Builder setY(int);
   }
 
   public final class VirtualTouchEvent implements android.os.Parcelable {

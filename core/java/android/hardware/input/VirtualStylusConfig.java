@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,28 @@
 
 package android.hardware.input;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.companion.virtual.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Configurations to create a virtual touchscreen.
+ * Configurations to create a virtual stylus.
  *
  * @hide
  */
+@FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
 @SystemApi
-public final class VirtualTouchscreenConfig extends VirtualTouchDeviceConfig implements Parcelable {
+public final class VirtualStylusConfig extends VirtualTouchDeviceConfig implements Parcelable {
 
-    private VirtualTouchscreenConfig(@NonNull Builder builder) {
+    private VirtualStylusConfig(@NonNull Builder builder) {
         super(builder);
     }
 
-    private VirtualTouchscreenConfig(@NonNull Parcel in) {
+    private VirtualStylusConfig(@NonNull Parcel in) {
         super(in);
     }
 
@@ -49,45 +52,47 @@ public final class VirtualTouchscreenConfig extends VirtualTouchDeviceConfig imp
     }
 
     @NonNull
-    public static final Creator<VirtualTouchscreenConfig> CREATOR =
+    public static final Creator<VirtualStylusConfig> CREATOR =
             new Creator<>() {
                 @Override
-                public VirtualTouchscreenConfig createFromParcel(Parcel in) {
-                    return new VirtualTouchscreenConfig(in);
+                public VirtualStylusConfig createFromParcel(Parcel in) {
+                    return new VirtualStylusConfig(in);
                 }
 
                 @Override
-                public VirtualTouchscreenConfig[] newArray(int size) {
-                    return new VirtualTouchscreenConfig[size];
+                public VirtualStylusConfig[] newArray(int size) {
+                    return new VirtualStylusConfig[size];
                 }
             };
 
     /**
-     * Builder for creating a {@link VirtualTouchscreenConfig}.
+     * Builder for creating a {@link VirtualStylusConfig}.
      */
+    @FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
     public static final class Builder extends VirtualTouchDeviceConfig.Builder<Builder> {
 
         /**
-         * Creates a new instance for the given dimensions of the {@link VirtualTouchscreen}.
+         * Creates a new instance for the given dimensions of the screen targeted by the
+         * {@link VirtualStylus}.
          *
-         * <p>The dimensions are not pixels but in the touchscreens raw coordinate space. They do
+         * <p>The dimensions are not pixels but in the screen's raw coordinate space. They do
          * not necessarily have to correspond to the display size or aspect ratio. In this case the
          * framework will handle the scaling appropriately.
          *
-         * @param touchscreenWidth The width of the touchscreen.
-         * @param touchscreenHeight The height of the touchscreen.
+         * @param screenWidth The width of the targeted screen.
+         * @param screenHeight The height of the targeted screen.
          */
-        public Builder(@IntRange(from = 1) int touchscreenWidth,
-                @IntRange(from = 1) int touchscreenHeight) {
-            super(touchscreenWidth, touchscreenHeight);
+        public Builder(@IntRange(from = 1) int screenWidth,
+                @IntRange(from = 1) int screenHeight) {
+            super(screenWidth, screenHeight);
         }
 
         /**
-         * Builds the {@link VirtualTouchscreenConfig} instance.
+         * Builds the {@link VirtualStylusConfig} instance.
          */
         @NonNull
-        public VirtualTouchscreenConfig build() {
-            return new VirtualTouchscreenConfig(this);
+        public VirtualStylusConfig build() {
+            return new VirtualStylusConfig(this);
         }
     }
 }
