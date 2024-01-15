@@ -1931,9 +1931,7 @@ public final class Settings {
      * A matching Activity will only be found if
      * {@link NotificationManager#areAutomaticZenRulesUserManaged()} is true.
      * <p>
-     * Input: Intent's data URI set with an application name, using the "package" schema (like
-     * "package:com.my.app").
-     * Input: The id of the rule, provided in {@link #EXTRA_AUTOMATIC_ZEN_RULE_ID}.
+     * Input: The id of the rule, provided in the {@link #EXTRA_AUTOMATIC_ZEN_RULE_ID} extra.
      * <p>
      * Output: Nothing.
      */
