@@ -26,9 +26,10 @@ package {
 soong_config_module_type {
     name: "custom_platform_bootclasspath",
     module_type: "platform_bootclasspath",
-    config_namespace: "AUTO",
+    config_namespace: "bootclasspath",
     bool_variables: [
         "car_bootclasspath_fragment",
+        "nfc_apex_bootclasspath_fragment",
     ],
     properties: [
         "fragments",
@@ -152,6 +153,15 @@ custom_platform_bootclasspath {
                 {
                     apex: "com.android.car.framework",
                     module: "com.android.car.framework-bootclasspath-fragment",
+                },
+            ],
+        },
+        nfc_apex_bootclasspath_fragment: {
+            fragments: [
+                // only used if NFC mainline is enabled.
+                {
+                    apex: "com.android.nfcservices",
+                    module: "com.android.nfcservices-bootclasspath-fragment",
                 },
             ],
         },
