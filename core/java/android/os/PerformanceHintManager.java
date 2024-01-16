@@ -183,13 +183,14 @@ public final class PerformanceHintManager {
 
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(prefix = {"CPU_LOAD_"}, value = {
+        @IntDef(prefix = {"CPU_LOAD_", "GPU_LOAD_"}, value = {
             CPU_LOAD_UP,
             CPU_LOAD_DOWN,
             CPU_LOAD_RESET,
             CPU_LOAD_RESUME,
             GPU_LOAD_UP,
-            GPU_LOAD_DOWN
+            GPU_LOAD_DOWN,
+            GPU_LOAD_RESET
         })
         public @interface Hint {}
 
