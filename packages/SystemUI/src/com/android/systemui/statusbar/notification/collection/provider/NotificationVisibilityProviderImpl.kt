@@ -22,12 +22,17 @@ import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import javax.inject.Inject
 
 /** pipeline-agnostic implementation for getting [NotificationVisibility]. */
 @SysUISingleton
-class NotificationVisibilityProviderImpl @Inject constructor(
+class NotificationVisibilityProviderImpl
+@Inject
+constructor(
+    private val activeNotificationsInteractor: ActiveNotificationsInteractor,
     private val notifDataStore: NotifLiveDataStore,
     private val notifCollection: CommonNotifCollection
 ) : NotificationVisibilityProvider {
@@ -47,5 +52,10 @@ class NotificationVisibilityProviderImpl @Inject constructor(
     override fun getLocation(key: String): NotificationVisibility.NotificationLocation =
         NotificationLogger.getNotificationLocation(notifCollection.getEntry(key))
 
-    private fun getCount() = notifDataStore.activeNotifCount.value
+    private fun getCount() =
+        if (NotificationsLiveDataStoreRefactor.isEnabled) {
+            activeNotificationsInteractor.allNotificationsCountValue
+        } else {
+            notifDataStore.activeNotifCount.value
+        }
 }
