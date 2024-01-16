@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
+import android.view.Gravity;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -73,10 +74,6 @@ public class BubbleBarLayerView extends FrameLayout
     private BubbleBarExpandedViewDragController mDragController;
     private DismissView mDismissView;
     private @Nullable Consumer<String> mUnBubbleConversationCallback;
-
-    // TODO(b/273310265) - currently the view is always on the right, need to update for RTL.
-    /** Whether the expanded view is displaying on the left of the screen or not. */
-    private boolean mOnLeft = false;
 
     /** Whether a bubble is expanded. */
     private boolean mIsExpanded = false;
@@ -154,10 +151,10 @@ public class BubbleBarLayerView extends FrameLayout
         return mIsExpanded;
     }
 
-    // (TODO: b/273310265): BubblePositioner should be source of truth when this work is done.
+    // TODO(b/313661121) - when dragging is implemented, check user setting first
     /** Whether the expanded view is positioned on the left or right side of the screen. */
     public boolean isOnLeft() {
-        return mOnLeft;
+        return getLayoutDirection() == LAYOUT_DIRECTION_RTL;
     }
 
     /** Shows the expanded view of the provided bubble. */
@@ -216,7 +213,7 @@ public class BubbleBarLayerView extends FrameLayout
                         return Unit.INSTANCE;
                     });
 
-            addView(mExpandedView, new FrameLayout.LayoutParams(width, height));
+            addView(mExpandedView, new LayoutParams(width, height, Gravity.LEFT));
         }
 
         if (mEducationViewController.isEducationVisible()) {
@@ -311,7 +308,7 @@ public class BubbleBarLayerView extends FrameLayout
         lp.width = width;
         lp.height = height;
         mExpandedView.setLayoutParams(lp);
-        if (mOnLeft) {
+        if (isOnLeft()) {
             mExpandedView.setX(mPositioner.getInsets().left + padding);
         } else {
             mExpandedView.setX(mPositioner.getAvailableRect().width() - width - padding);
