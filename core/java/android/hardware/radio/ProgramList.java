@@ -304,7 +304,11 @@ public final class ProgramList implements AutoCloseable {
      *
      * @param id primary identifier of a program to fetch
      * @return the program info, or null if there is no such program on the list
+     *
+     * @deprecated Use {@link #getProgramInfos(ProgramSelector.Identifier)} to get all programs
+     * with the given primary identifier
      */
+    @Deprecated
     public @Nullable RadioManager.ProgramInfo get(@NonNull ProgramSelector.Identifier id) {
         Map<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries;
         synchronized (mLock) {
