@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.internal.logging
+package com.android.systemui.statusbar.notification.stack
 
-import com.android.internal.logging.testing.FakeMetricsLogger
-import com.android.internal.util.LatencyTracker
+import com.android.internal.logging.latencyTracker
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 
-val Kosmos.fakeMetricsLogger by Fixture { FakeMetricsLogger() }
-val Kosmos.metricsLogger by Fixture<MetricsLogger> { fakeMetricsLogger }
-val Kosmos.latencyTracker by Fixture { mock<LatencyTracker>() }
+val Kosmos.displaySwitchNotificationsHiderTracker by Fixture {
+    DisplaySwitchNotificationsHiderTracker(shadeInteractor, latencyTracker)
+}

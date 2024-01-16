@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterVi
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerShelfViewBinder
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinder
+import com.android.systemui.statusbar.notification.stack.DisplaySwitchNotificationsHiderTracker
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStatsLogger
@@ -53,6 +54,7 @@ class NotificationListViewBinder
 @Inject
 constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val hiderTracker: DisplaySwitchNotificationsHiderTracker,
     private val configuration: ConfigurationState,
     private val falsingManager: FalsingManager,
     private val iconAreaController: NotificationIconAreaController,
@@ -74,7 +76,7 @@ constructor(
         view.repeatWhenAttached {
             lifecycleScope.launch {
                 launch { bindShelf(shelf) }
-                launch { bindHideList(viewController, viewModel) }
+                bindHideList(viewController, viewModel, hiderTracker)
 
                 if (FooterViewRefactor.isEnabled) {
                     launch { bindFooter(view) }
