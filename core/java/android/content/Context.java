@@ -16,6 +16,8 @@
 
 package android.content;
 
+import static android.content.flags.Flags.FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS;
+
 import android.annotation.AttrRes;
 import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
@@ -296,6 +298,7 @@ public abstract class Context {
             BIND_ALLOW_ACTIVITY_STARTS,
             BIND_INCLUDE_CAPABILITIES,
             BIND_SHARED_ISOLATED_PROCESS,
+            BIND_PACKAGE_ISOLATED_PROCESS,
             BIND_EXTERNAL_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -318,6 +321,7 @@ public abstract class Context {
             BIND_ALLOW_ACTIVITY_STARTS,
             BIND_INCLUDE_CAPABILITIES,
             BIND_SHARED_ISOLATED_PROCESS,
+            BIND_PACKAGE_ISOLATED_PROCESS,
             // Intentionally not include BIND_EXTERNAL_SERVICE, because it'd cause sign-extension.
             // This would allow Android Studio to show a warning, if someone tries to use
             // BIND_EXTERNAL_SERVICE BindServiceFlags.
@@ -510,6 +514,26 @@ public abstract class Context {
      *
      */
     public static final int BIND_SHARED_ISOLATED_PROCESS = 0x00002000;
+
+    /**
+     * Flag for {@link #bindIsolatedService}: Bind the service into a shared isolated process,
+     * but only with other isolated services from the same package that declare the same process
+     * name.
+     *
+     * <p>Specifying this flag allows multiple isolated services defined in the same package to be
+     * running in a single shared isolated process. This shared isolated process must be specified
+     * since this flag will not work with the default application process.
+     *
+     * <p>This flag is different from {@link #BIND_SHARED_ISOLATED_PROCESS} since it only
+     * allows binding services from the same package in the same shared isolated process. This also
+     * means the shared package isolated process is global, and not scoped to each potential
+     * calling app.
+     *
+     * <p>The shared isolated process instance is identified by the "android:process" attribute
+     * defined by the service. This flag cannot be used without this attribute set.
+     */
+    @FlaggedApi(FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS)
+    public static final int BIND_PACKAGE_ISOLATED_PROCESS = 1 << 14;
 
     /***********    Public flags above this line ***********/
     /***********    Hidden flags below this line ***********/
