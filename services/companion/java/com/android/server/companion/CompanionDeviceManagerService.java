@@ -21,6 +21,7 @@ import static android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES;
 import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE;
+import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.Manifest.permission.USE_COMPANION_TRANSPORTS;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
@@ -82,6 +83,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.hardware.power.Mode;
 import android.net.MacAddress;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
@@ -90,6 +92,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManagerInternal;
 import android.os.PowerWhitelistManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -175,6 +178,7 @@ public class CompanionDeviceManagerService extends SystemService {
     private final PowerWhitelistManager mPowerWhitelistManager;
     private final UserManager mUserManager;
     final PackageManagerInternal mPackageManagerInternal;
+    private final PowerManagerInternal mPowerManagerInternal;
 
     /**
      * A structure that consists of two nested maps, and effectively maps (userId + packageName) to
@@ -235,6 +239,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         mOnPackageVisibilityChangeListener =
                 new OnPackageVisibilityChangeListener(mActivityManager);
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
     }
 
     @Override
@@ -949,6 +954,10 @@ public class CompanionDeviceManagerService extends SystemService {
             mAssociationStore.updateAssociation(association);
 
             mDevicePresenceMonitor.onSelfManagedDeviceConnected(associationId);
+
+            if (association.getDeviceProfile() == REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION) {
+                mPowerManagerInternal.setPowerMode(Mode.AUTOMOTIVE_PROJECTION, true);
+            }
         }
 
         @Override
@@ -963,6 +972,10 @@ public class CompanionDeviceManagerService extends SystemService {
             }
 
             mDevicePresenceMonitor.onSelfManagedDeviceDisconnected(associationId);
+
+            if (association.getDeviceProfile() == REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION) {
+                mPowerManagerInternal.setPowerMode(Mode.AUTOMOTIVE_PROJECTION, false);
+            }
         }
 
         @Override
