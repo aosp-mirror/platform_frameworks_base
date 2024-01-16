@@ -715,7 +715,7 @@ interface IActivityManager {
      * @param listener    A listener to for the callback upon completion of startup data collection.
      * @param userId      The userId in the multi-user environment.
      */
-    void setApplicationStartInfoCompleteListener(IApplicationStartInfoCompleteListener listener,
+    void addApplicationStartInfoCompleteListener(IApplicationStartInfoCompleteListener listener,
             int userId);
 
 
@@ -724,7 +724,8 @@ interface IActivityManager {
      *
      * @param userId      The userId in the multi-user environment.
      */
-    void clearApplicationStartInfoCompleteListener(int userId);
+    void removeApplicationStartInfoCompleteListener(IApplicationStartInfoCompleteListener listener,
+            int userId);
 
 
     /**

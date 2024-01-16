@@ -9858,7 +9858,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
     @Override
-    public void setApplicationStartInfoCompleteListener(
+    public void addApplicationStartInfoCompleteListener(
             IApplicationStartInfoCompleteListener listener, int userId) {
         enforceNotIsolatedCaller("setApplicationStartInfoCompleteListener");
 
@@ -9873,7 +9873,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
     @Override
-    public void clearApplicationStartInfoCompleteListener(int userId) {
+    public void removeApplicationStartInfoCompleteListener(
+            IApplicationStartInfoCompleteListener listener, int userId) {
         enforceNotIsolatedCaller("clearApplicationStartInfoCompleteListener");
 
         // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
@@ -9882,7 +9883,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final int callingUid = Binder.getCallingUid();
-        mProcessList.getAppStartInfoTracker().clearStartInfoCompleteListener(callingUid, true);
+        mProcessList.getAppStartInfoTracker().removeStartInfoCompleteListener(listener, callingUid,
+                true);
     }
 
     @Override
