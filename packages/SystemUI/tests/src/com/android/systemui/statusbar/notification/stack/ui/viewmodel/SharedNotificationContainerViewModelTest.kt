@@ -484,6 +484,46 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun translationYUpdatesOnKeyguard() =
+        testScope.runTest {
+            val translationY by collectLastValue(underTest.translationY)
+
+            configurationRepository.setDimensionPixelSize(
+                R.dimen.keyguard_translate_distance_on_swipe_up,
+                -100
+            )
+            configurationRepository.onAnyConfigurationChange()
+
+            // legacy expansion means the user is swiping up, usually for the bouncer
+            shadeRepository.setLegacyShadeExpansion(0.5f)
+
+            showLockscreen()
+
+            // The translation values are negative
+            assertThat(translationY).isLessThan(0f)
+        }
+
+    @Test
+    fun translationYDoesNotUpdateWhenShadeIsExpanded() =
+        testScope.runTest {
+            val translationY by collectLastValue(underTest.translationY)
+
+            configurationRepository.setDimensionPixelSize(
+                R.dimen.keyguard_translate_distance_on_swipe_up,
+                -100
+            )
+            configurationRepository.onAnyConfigurationChange()
+
+            // legacy expansion means the user is swiping up, usually for the bouncer but also for
+            // shade collapsing
+            shadeRepository.setLegacyShadeExpansion(0.5f)
+
+            showLockscreenWithShadeExpanded()
+
+            assertThat(translationY).isEqualTo(0f)
+        }
+
+    @Test
     fun updateBounds_fromKeyguardRoot() =
         testScope.runTest {
             val bounds by collectLastValue(underTest.bounds)
