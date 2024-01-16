@@ -44,7 +44,6 @@ import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.AnimationThread;
@@ -147,7 +146,6 @@ public class SurfaceAnimationRunnerTest {
         assertFinishCallbackNotCalled();
     }
 
-    @FlakyTest(bugId = 71719744)
     @Test
     public void testCancel_sneakyCancelBeforeUpdate() throws Exception {
         final CountDownLatch animationCancelled = new CountDownLatch(1);
