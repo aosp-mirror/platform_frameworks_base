@@ -193,7 +193,7 @@ public abstract class StorageManagerInternal {
      * @see com.android.server.pm.Installer#createFsveritySetupAuthToken()
      */
     public abstract IInstalld.IFsveritySetupAuthToken createFsveritySetupAuthToken(
-            ParcelFileDescriptor authFd, int appUid, @UserIdInt int userId) throws IOException;
+            ParcelFileDescriptor authFd, int uid) throws IOException;
 
     /**
      * A proxy call to the corresponding method in Installer.

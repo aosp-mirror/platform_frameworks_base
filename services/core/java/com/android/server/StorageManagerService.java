@@ -5040,9 +5040,9 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public IFsveritySetupAuthToken createFsveritySetupAuthToken(ParcelFileDescriptor authFd,
-                int appUid, @UserIdInt int userId) throws IOException {
+                int uid) throws IOException {
             try {
-                return mInstaller.createFsveritySetupAuthToken(authFd, appUid, userId);
+                return mInstaller.createFsveritySetupAuthToken(authFd, uid);
             } catch (Installer.InstallerException e) {
                 throw new IOException(e);
             }
