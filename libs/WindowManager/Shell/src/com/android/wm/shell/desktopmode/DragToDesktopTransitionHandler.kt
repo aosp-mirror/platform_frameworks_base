@@ -99,7 +99,11 @@ class DragToDesktopTransitionHandler(
             windowDecoration: DesktopModeWindowDecoration
     ) {
         if (inProgress) {
-            error("A drag to desktop is already in progress")
+            KtProtoLog.v(
+                    ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                    "DragToDesktop: Drag to desktop transition already in progress."
+            )
+            return
         }
 
         val options = ActivityOptions.makeBasic().apply {
@@ -144,6 +148,12 @@ class DragToDesktopTransitionHandler(
      * inside the desktop drop zone.
      */
     fun finishDragToDesktopTransition(wct: WindowContainerTransaction) {
+        if (!inProgress) {
+            // Don't attempt to finish a drag to desktop transition since there is no transition in
+            // progress which means that the drag to desktop transition was never successfully
+            // started.
+            return
+        }
         if (requireTransitionState().startAborted) {
             // Don't attempt to complete the drag-to-desktop since the start transition didn't
             // succeed as expected. Just reset the state as if nothing happened.
@@ -161,6 +171,12 @@ class DragToDesktopTransitionHandler(
      * means the user wants to remain in their current windowing mode.
      */
     fun cancelDragToDesktopTransition() {
+        if (!inProgress) {
+            // Don't attempt to cancel a drag to desktop transition since there is no transition in
+            // progress which means that the drag to desktop transition was never successfully
+            // started.
+            return
+        }
         val state = requireTransitionState()
         if (state.startAborted) {
             // Don't attempt to cancel the drag-to-desktop since the start transition didn't
