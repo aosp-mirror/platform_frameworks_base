@@ -363,6 +363,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     private boolean mIsolatedNav;
 
+    /**
+     * Whether the TaskFragment should move to bottom of task when any activity below it is
+     * launched in clear top mode.
+     */
+    private boolean mMoveToBottomIfClearWhenLaunch;
+
     /** When set, will force the task to report as invisible. */
     static final int FLAG_FORCE_HIDDEN_FOR_PINNED_TASK = 1;
     static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
@@ -3043,6 +3049,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     void setEmbeddedDimArea(@EmbeddedDimArea int embeddedDimArea) {
         mEmbeddedDimArea = embeddedDimArea;
+    }
+
+    void setMoveToBottomIfClearWhenLaunch(boolean moveToBottomIfClearWhenLaunch) {
+        mMoveToBottomIfClearWhenLaunch = moveToBottomIfClearWhenLaunch;
+    }
+
+    boolean isMoveToBottomIfClearWhenLaunch() {
+        return mMoveToBottomIfClearWhenLaunch;
     }
 
     @VisibleForTesting
