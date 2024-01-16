@@ -22,24 +22,25 @@ package {
 }
 
 filegroup {
-  name: "services.profcollect-javasources",
-  srcs: ["src/**/*.java"],
-  path: "src",
-  visibility: ["//frameworks/base/services"],
+    name: "services.profcollect-javasources",
+    srcs: ["src/**/*.java"],
+    path: "src",
+    visibility: ["//frameworks/base/services"],
 }
 
 filegroup {
-  name: "services.profcollect-sources",
-  srcs: [
-    ":services.profcollect-javasources",
-    ":profcollectd_aidl",
-  ],
-  visibility: ["//frameworks/base/services:__subpackages__"],
+    name: "services.profcollect-sources",
+    srcs: [
+        ":services.profcollect-javasources",
+        ":profcollectd_aidl",
+    ],
+    visibility: ["//frameworks/base/services:__subpackages__"],
 }
 
 java_library_static {
-  name: "services.profcollect",
-  defaults: ["platform_service_defaults"],
-  srcs: [":services.profcollect-sources"],
-  libs: ["services.core"],
+    name: "services.profcollect",
+    defaults: ["platform_service_defaults"],
+    srcs: [":services.profcollect-sources"],
+    static_libs: ["services.core"],
+    libs: ["service-art.stubs.system_server"],
 }
