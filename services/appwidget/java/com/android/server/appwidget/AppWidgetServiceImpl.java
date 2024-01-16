@@ -327,10 +327,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         synchronized (mLock) {
             // No need to enforce unlocked state when there is no caller. User can be in the
             // stopping state or removed by the time the message is processed
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "convert_state_to_bytes");
             ensureGroupStateLoadedLocked(userId, false /* enforceUserUnlockingOrUnlocked */);
             userIdToBytesMapping = saveStateToByteArrayLocked(userId);
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "byte_to_disk_io");
         for (int i = 0; i < userIdToBytesMapping.size(); i++) {
             int currentProfileId = userIdToBytesMapping.keyAt(i);
             byte[] currentStateByteArray = userIdToBytesMapping.valueAt(i);
@@ -351,6 +354,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 currentFile.failWrite(fileStream);
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         return true;
     }
@@ -4585,8 +4589,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             synchronized (mLock) {
                 // No need to enforce unlocked state when there is no caller. User can be in the
                 // stopping state or removed by the time the message is processed
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "convert_state_and_io");
                 ensureGroupStateLoadedLocked(mUserId, false /* enforceUserUnlockingOrUnlocked */ );
                 saveStateLocked(mUserId);
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
     }
