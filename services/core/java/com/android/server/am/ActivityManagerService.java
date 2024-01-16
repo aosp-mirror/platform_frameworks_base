@@ -6529,7 +6529,24 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid,
             final int modeFlags, int userId, IBinder callerToken) {
-        enforceNotIsolatedCaller("checkUriPermission");
+        return checkUriPermission(uri, pid, uid, modeFlags, userId,
+                /* isFullAccessForContentUri */ false, "checkUriPermission");
+    }
+
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
+    @Override
+    public int checkContentUriPermissionFull(Uri uri, int pid, int uid,
+            final int modeFlags, int userId) {
+        return checkUriPermission(uri, pid, uid, modeFlags, userId,
+                /* isFullAccessForContentUri */ true, "checkContentUriPermissionFull");
+    }
+
+    private int checkUriPermission(Uri uri, int pid, int uid,
+            final int modeFlags, int userId, boolean isFullAccessForContentUri, String methodName) {
+        enforceNotIsolatedCaller(methodName);
 
         // Our own process gets to do everything.
         if (pid == MY_PID) {
@@ -6540,8 +6557,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return PackageManager.PERMISSION_DENIED;
             }
         }
-        return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
-                ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
+        boolean granted = mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid,
+                modeFlags, isFullAccessForContentUri);
+
+        return granted ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
     }
 
     @Override
