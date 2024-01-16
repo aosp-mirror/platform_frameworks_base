@@ -49,7 +49,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
@@ -60,6 +59,7 @@ import java.lang.annotation.Retention;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -164,17 +164,12 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         boolean cancellable();
     }
 
-    @GuardedBy("mLock")
-    @Nullable
-    private InputConnection mInputConnection;
+    @NonNull
+    private final AtomicReference<InputConnection> mInputConnectionRef;
 
     @NonNull
     private final Looper mLooper;
     private final Handler mH;
-
-    private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    private boolean mFinished = false;
 
     private final InputMethodManager mParentInputMethodManager;
     private final WeakReference<View> mServedView;
@@ -193,7 +188,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
             @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
-        mInputConnection = inputConnection;
+        mInputConnectionRef = new AtomicReference<>(inputConnection);
         mLooper = looper;
         mH = new Handler(mLooper);
         mParentInputMethodManager = inputMethodManager;
@@ -211,9 +206,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
      */
     @Nullable
     public InputConnection getInputConnection() {
-        synchronized (mLock) {
-            return mInputConnection;
-        }
+        return mInputConnectionRef.get();
     }
 
     /**
@@ -229,9 +222,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
      * {@link InputConnection#closeConnection()} as a result of {@link #deactivate()}.
      */
     private boolean isFinished() {
-        synchronized (mLock) {
-            return mFinished;
-        }
+        return mInputConnectionRef.get() == null;
     }
 
     private boolean isActive() {
@@ -403,10 +394,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                     // TODO(b/199934664): See if we can remove this by providing a default impl.
                 }
             } finally {
-                synchronized (mLock) {
-                    mInputConnection = null;
-                    mFinished = true;
-                }
+                mInputConnectionRef.set(null);
                 Trace.traceEnd(Trace.TRACE_TAG_INPUT);
             }
 
@@ -460,7 +448,6 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     public String toString() {
         return "RemoteInputConnectionImpl{"
                 + "connection=" + getInputConnection()
-                + " finished=" + isFinished()
                 + " mParentInputMethodManager.isActive()=" + mParentInputMethodManager.isActive()
                 + " mServedView=" + mServedView.get()
                 + "}";
@@ -474,16 +461,14 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
      *                {@link DumpableInputConnection#dumpDebug(ProtoOutputStream, long)}.
      */
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        synchronized (mLock) {
-            // Check that the call is initiated in the target thread of the current InputConnection
-            // {@link InputConnection#getHandler} since the messages to IInputConnectionWrapper are
-            // executed on this thread. Otherwise the messages are dispatched to the correct thread
-            // in IInputConnectionWrapper, but this is not wanted while dumpng, for performance
-            // reasons.
-            if ((mInputConnection instanceof DumpableInputConnection)
-                    && mLooper.isCurrentThread()) {
-                ((DumpableInputConnection) mInputConnection).dumpDebug(proto, fieldId);
-            }
+        final InputConnection ic = mInputConnectionRef.get();
+        // Check that the call is initiated in the target thread of the current InputConnection
+        // {@link InputConnection#getHandler} since the messages to IInputConnectionWrapper are
+        // executed on this thread. Otherwise the messages are dispatched to the correct thread
+        // in IInputConnectionWrapper, but this is not wanted while dumping, for performance
+        // reasons.
+        if ((ic instanceof DumpableInputConnection) && mLooper.isCurrentThread()) {
+            ((DumpableInputConnection) ic).dumpDebug(proto, fieldId);
         }
     }
 
