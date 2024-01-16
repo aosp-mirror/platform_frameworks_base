@@ -769,8 +769,10 @@ public class StackAnimationController extends
         boolean swapped = false;
         for (int newIndex = 0; newIndex < bubbleViews.size(); newIndex++) {
             View view = bubbleViews.get(newIndex);
-            final int oldIndex = mLayout.indexOfChild(view);
-            swapped |= animateSwap(view, oldIndex, newIndex, updateAllIcons, after);
+            if (view != null) {
+                final int oldIndex = mLayout.indexOfChild(view);
+                swapped |= animateSwap(view, oldIndex, newIndex, updateAllIcons, after);
+            }
         }
         if (!swapped) {
             // All bubbles were at the right position. Make sure badges and z order is correct.
