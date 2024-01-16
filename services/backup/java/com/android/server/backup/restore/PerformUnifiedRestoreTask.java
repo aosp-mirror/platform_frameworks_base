@@ -1331,13 +1331,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
 
         // Tell the observer we're done
-        if (mObserver != null) {
-            try {
-                mObserver.restoreFinished(mStatus);
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Restore observer died at restoreFinished");
-            }
-        }
+        sendEndRestore();
 
         // Clear any ongoing session timeout.
         backupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
