@@ -244,11 +244,11 @@ public abstract class HostApduService extends Service {
     public static final String KEY_DATA = "data";
 
     /**
-     * POLLING_LOOP_TYPE_KEY is the Bundle key for the type of
+     * KEY_POLLING_LOOP_TYPE is the Bundle key for the type of
      * polling loop frame in the Bundle passed to {@link #processPollingFrames(List)}
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String POLLING_LOOP_TYPE_KEY = "android.nfc.cardemulation.TYPE";
+    public static final String KEY_POLLING_LOOP_TYPE = "android.nfc.cardemulation.TYPE";
 
     /**
      * POLLING_LOOP_TYPE_A is the value associated with the key
@@ -299,33 +299,33 @@ public abstract class HostApduService extends Service {
     public static final char POLLING_LOOP_TYPE_UNKNOWN = 'U';
 
     /**
-     * POLLING_LOOP_DATA is the Bundle key for the raw data of captured from
+     * KEY_POLLING_LOOP_DATA is the Bundle key for the raw data of captured from
      * the polling loop frame in the Bundle passed to {@link #processPollingFrames(List)}
      * when the frame type isn't recognized.
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String POLLING_LOOP_DATA_KEY = "android.nfc.cardemulation.DATA";
+    public static final String KEY_POLLING_LOOP_DATA = "android.nfc.cardemulation.DATA";
 
     /**
-     * POLLING_LOOP_GAIN_KEY is the Bundle key for the field strength of
+     * KEY_POLLING_LOOP_GAIN is the Bundle key for the field strength of
      * the polling loop frame in the Bundle passed to {@link #processPollingFrames(List)}
      * when the frame type isn't recognized.
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String POLLING_LOOP_GAIN_KEY = "android.nfc.cardemulation.GAIN";
+    public static final String KEY_POLLING_LOOP_GAIN = "android.nfc.cardemulation.GAIN";
 
     /**
-     * POLLING_LOOP_TIMESTAMP_KEY is the Bundle key for the timestamp of
+     * KEY_POLLING_LOOP_TIMESTAMP is the Bundle key for the timestamp of
      * the polling loop frame in the Bundle passed to {@link #processPollingFrames(List)}
      * when the frame type isn't recognized.
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
-    public static final String POLLING_LOOP_TIMESTAMP_KEY = "android.nfc.cardemulation.TIMESTAMP";
+    public static final String KEY_POLLING_LOOP_TIMESTAMP = "android.nfc.cardemulation.TIMESTAMP";
 
     /**
      * @hide
      */
-    public static final String POLLING_LOOP_FRAMES_BUNDLE_KEY =
+    public static final String KEY_POLLING_LOOP_FRAMES_BUNDLE =
             "android.nfc.cardemulation.POLLING_FRAMES";
 
     /**
@@ -405,7 +405,7 @@ public abstract class HostApduService extends Service {
                 break;
                 case MSG_POLLING_LOOP:
                     ArrayList<Bundle> frames =
-                            msg.getData().getParcelableArrayList(POLLING_LOOP_FRAMES_BUNDLE_KEY,
+                            msg.getData().getParcelableArrayList(KEY_POLLING_LOOP_FRAMES_BUNDLE,
                             Bundle.class);
                     processPollingFrames(frames);
                     break;
