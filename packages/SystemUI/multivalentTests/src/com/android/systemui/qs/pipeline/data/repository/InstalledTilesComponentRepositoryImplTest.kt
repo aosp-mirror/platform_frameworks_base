@@ -17,11 +17,9 @@
 package com.android.systemui.qs.pipeline.data.repository
 
 import android.Manifest.permission.BIND_QUICK_SETTINGS_TILE
-import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ResolveInfoFlags
@@ -33,44 +31,36 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.data.repository.fakePackageChangeRepository
+import com.android.systemui.common.data.repository.packageChangeRepository
+import com.android.systemui.common.data.shared.model.PackageChangeModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argThat
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     @Mock private lateinit var context: Context
     @Mock private lateinit var packageManager: PackageManager
-    @Captor private lateinit var receiverCaptor: ArgumentCaptor<BroadcastReceiver>
 
     private lateinit var underTest: InstalledTilesComponentRepositoryImpl
 
@@ -92,61 +82,10 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
         underTest =
             InstalledTilesComponentRepositoryImpl(
                 context,
-                testDispatcher,
+                kosmos.testDispatcher,
+                kosmos.packageChangeRepository
             )
     }
-
-    @Test
-    fun registersAndUnregistersBroadcastReceiver() =
-        testScope.runTest {
-            val user = 10
-            val job = launch { underTest.getInstalledTilesComponents(user).collect {} }
-            runCurrent()
-
-            verify(context)
-                .registerReceiverAsUser(
-                    capture(receiverCaptor),
-                    eq(UserHandle.of(user)),
-                    any(),
-                    nullable(),
-                    nullable(),
-                )
-
-            verify(context, never()).unregisterReceiver(receiverCaptor.value)
-
-            job.cancel()
-            runCurrent()
-            verify(context).unregisterReceiver(receiverCaptor.value)
-        }
-
-    @Test
-    fun intentFilterForCorrectActionsAndScheme() =
-        testScope.runTest {
-            val filterCaptor = argumentCaptor<IntentFilter>()
-
-            backgroundScope.launch { underTest.getInstalledTilesComponents(0).collect {} }
-            runCurrent()
-
-            verify(context)
-                .registerReceiverAsUser(
-                    any(),
-                    any(),
-                    capture(filterCaptor),
-                    nullable(),
-                    nullable(),
-                )
-
-            with(filterCaptor.value) {
-                assertThat(matchAction(Intent.ACTION_PACKAGE_CHANGED)).isTrue()
-                assertThat(matchAction(Intent.ACTION_PACKAGE_ADDED)).isTrue()
-                assertThat(matchAction(Intent.ACTION_PACKAGE_REMOVED)).isTrue()
-                assertThat(matchAction(Intent.ACTION_PACKAGE_REPLACED)).isTrue()
-                assertThat(countActions()).isEqualTo(4)
-
-                assertThat(hasDataScheme("package")).isTrue()
-                assertThat(countDataSchemes()).isEqualTo(1)
-            }
-        }
 
     @Test
     fun componentsLoadedOnStart() =
@@ -169,7 +108,7 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun componentAdded_foundAfterBroadcast() =
+    fun componentAdded_foundAfterPackageChange() =
         testScope.runTest {
             val userId = 0
             val resolveInfo =
@@ -186,7 +125,7 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                     )
                 )
                 .thenReturn(listOf(resolveInfo))
-            getRegisteredReceiver().onReceive(context, Intent(Intent.ACTION_PACKAGE_ADDED))
+            kosmos.fakePackageChangeRepository.notifyChange(PackageChangeModel.Empty)
 
             assertThat(componentNames).containsExactly(TEST_COMPONENT)
         }
@@ -274,19 +213,6 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
 
             assertThat(componentNames).containsExactly(TEST_COMPONENT)
         }
-
-    private fun getRegisteredReceiver(): BroadcastReceiver {
-        verify(context)
-            .registerReceiverAsUser(
-                capture(receiverCaptor),
-                any(),
-                any(),
-                nullable(),
-                nullable(),
-            )
-
-        return receiverCaptor.value
-    }
 
     companion object {
         private val INTENT = Intent(TileService.ACTION_QS_TILE)

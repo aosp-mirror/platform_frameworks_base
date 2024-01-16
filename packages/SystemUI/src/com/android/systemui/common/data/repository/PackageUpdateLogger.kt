@@ -31,6 +31,7 @@ private fun getChangeString(model: PackageChangeModel) =
         is PackageChangeModel.UpdateStarted -> "started updating"
         is PackageChangeModel.UpdateFinished -> "finished updating"
         is PackageChangeModel.Changed -> "changed"
+        is PackageChangeModel.Empty -> throw IllegalStateException("Unexpected empty value: $model")
     }
 
 /** A debug logger for [PackageChangeRepository]. */

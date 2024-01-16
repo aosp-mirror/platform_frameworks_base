@@ -23,6 +23,14 @@ sealed interface PackageChangeModel {
     val packageName: String
     val packageUid: Int
 
+    /** Empty change, provided for convenience when a sensible default value is needed. */
+    data object Empty : PackageChangeModel {
+        override val packageName: String
+            get() = ""
+        override val packageUid: Int
+            get() = 0
+    }
+
     /**
      * An existing application package was uninstalled.
      *
