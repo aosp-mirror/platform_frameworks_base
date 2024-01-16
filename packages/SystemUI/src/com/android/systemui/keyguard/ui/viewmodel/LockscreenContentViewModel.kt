@@ -16,9 +16,13 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.res.Resources
+import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,12 +35,28 @@ import kotlinx.coroutines.flow.stateIn
 class LockscreenContentViewModel
 @Inject
 constructor(
+    clockInteractor: KeyguardClockInteractor,
     private val interactor: KeyguardBlueprintInteractor,
     private val authController: AuthController,
     val longPress: KeyguardLongPressViewModel,
 ) {
+    private val clockSize = clockInteractor.clockSize
+
     val isUdfpsVisible: Boolean
         get() = authController.isUdfpsSupported
+    val isLargeClockVisible: Boolean
+        get() = clockSize.value == KeyguardClockSwitch.LARGE
+    val areNotificationsVisible: Boolean
+        get() = !isLargeClockVisible
+
+    fun getSmartSpacePaddingTop(resources: Resources): Int {
+        return if (isLargeClockVisible) {
+            resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset) +
+                resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin)
+        } else {
+            0
+        }
+    }
 
     fun blueprintId(scope: CoroutineScope): StateFlow<String> {
         return interactor.blueprint

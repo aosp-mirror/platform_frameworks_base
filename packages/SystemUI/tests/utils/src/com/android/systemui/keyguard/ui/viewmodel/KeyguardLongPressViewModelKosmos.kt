@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package android.view.accessibility
+package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.keyguard.domain.interactor.keyguardLongPressInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
-import com.android.systemui.util.mockito.mock
 
-var Kosmos.accessibilityManager by Fixture { mock<AccessibilityManager>() }
-
-var Kosmos.accessibilityManagerWrapper by Fixture {
-    AccessibilityManagerWrapper(accessibilityManager)
-}
+val Kosmos.keyguardLongPressViewModel by
+    Kosmos.Fixture {
+        KeyguardLongPressViewModel(
+            interactor = keyguardLongPressInteractor,
+        )
+    }
