@@ -30,6 +30,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SettingsStateTest extends AndroidTestCase {
     public static final String CRAZY_STRING =
@@ -93,7 +95,6 @@ public class SettingsStateTest extends AndroidTestCase {
         SettingsState settingsState = new SettingsState(
                 getContext(), lock, mSettingsFile, configKey,
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
-
         parsed_flags flags = parsed_flags
                 .newBuilder()
                 .addParsedFlag(parsed_flag
@@ -117,18 +118,13 @@ public class SettingsStateTest extends AndroidTestCase {
                 .build();
 
         synchronized (lock) {
-            settingsState.loadAconfigDefaultValues(flags.toByteArray());
-            settingsState.persistSettingsLocked();
-        }
-        settingsState.waitForHandler();
+            Map<String, Map<String, String>> defaults = new HashMap<>();
+            settingsState.loadAconfigDefaultValues(flags.toByteArray(), defaults);
+            Map<String, String> namespaceDefaults = defaults.get("test_namespace");
+            assertEquals(2, namespaceDefaults.keySet().size());
 
-        synchronized (lock) {
-            assertEquals("false",
-                    settingsState.getSettingLocked(
-                        "test_namespace/com.android.flags.flag1").getValue());
-            assertEquals("true",
-                    settingsState.getSettingLocked(
-                        "test_namespace/com.android.flags.flag2").getValue());
+            assertEquals("false", namespaceDefaults.get("test_namespace/com.android.flags.flag1"));
+            assertEquals("true", namespaceDefaults.get("test_namespace/com.android.flags.flag2"));
         }
     }
 
@@ -150,21 +146,18 @@ public class SettingsStateTest extends AndroidTestCase {
                 .build();
 
         synchronized (lock) {
-            settingsState.loadAconfigDefaultValues(flags.toByteArray());
-            settingsState.persistSettingsLocked();
-        }
-        settingsState.waitForHandler();
+            Map<String, Map<String, String>> defaults = new HashMap<>();
+            settingsState.loadAconfigDefaultValues(flags.toByteArray(), defaults);
 
-        synchronized (lock) {
-            assertEquals(null,
-                    settingsState.getSettingLocked(
-                        "test_namespace/com.android.flags.flag1").getValue());
+            Map<String, String> namespaceDefaults = defaults.get("test_namespace");
+            assertEquals(null, namespaceDefaults);
         }
     }
 
     public void testInvalidAconfigProtoDoesNotCrash() {
+        Map<String, Map<String, String>> defaults = new HashMap<>();
         SettingsState settingsState = getSettingStateObject();
-        settingsState.loadAconfigDefaultValues("invalid protobuf".getBytes());
+        settingsState.loadAconfigDefaultValues("invalid protobuf".getBytes(), defaults);
     }
 
     public void testIsBinary() {
