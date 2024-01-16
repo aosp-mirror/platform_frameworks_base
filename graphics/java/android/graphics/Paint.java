@@ -65,8 +65,6 @@ public class Paint {
     private long mNativeShader;
     private long mNativeColorFilter;
 
-    private static boolean sIsRobolectric = Build.FINGERPRINT.equals("robolectric");
-
     // Use a Holder to allow static initialization of Paint in the boot image.
     private static class NoImagePreloadHolder {
         public static final NativeAllocationRegistry sRegistry =
@@ -3393,13 +3391,8 @@ public class Paint {
             return 0.0f;
         }
 
-        if (sIsRobolectric) {
-            return nGetRunCharacterAdvance(mNativePaint, text, start, end,
-                    contextStart, contextEnd, isRtl, offset, advances, advancesIndex, drawBounds);
-        } else {
-            return nGetRunCharacterAdvance(mNativePaint, text, start, end, contextStart, contextEnd,
-                    isRtl, offset, advances, advancesIndex, drawBounds, runInfo);
-        }
+        return nGetRunCharacterAdvance(mNativePaint, text, start, end, contextStart, contextEnd,
+                isRtl, offset, advances, advancesIndex, drawBounds, runInfo);
     }
 
     /**
