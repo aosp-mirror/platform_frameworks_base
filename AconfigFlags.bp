@@ -456,6 +456,13 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+java_aconfig_library {
+    name: "com.android.media.flags.bettertogether-aconfig-java-host",
+    aconfig_declarations: "com.android.media.flags.bettertogether-aconfig",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Media TV
 aconfig_declarations {
     name: "android.media.tv.flags-aconfig",
