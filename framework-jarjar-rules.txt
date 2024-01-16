@@ -8,3 +8,6 @@ rule com.android.server.vcn.util.** com.android.server.vcn.repackaged.util.@1
 
 # for modules-utils-build dependency
 rule com.android.modules.utils.build.** android.internal.modules.utils.build.@1
+
+# For Perfetto proto dependencies
+rule perfetto.protos.** android.internal.perfetto.protos.@1

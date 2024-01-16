@@ -33,12 +33,12 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.os.Binder;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
 import android.provider.DeviceConfig;
 import android.util.Log;
-import android.view.autofill.IAutoFillManagerClient;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -138,7 +138,7 @@ public final class CredentialManager {
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<GetCandidateCredentialsResponse,
                     GetCandidateCredentialsException> callback,
-            @NonNull IAutoFillManagerClient clientCallback
+            @NonNull IBinder clientCallback
     ) {
         requireNonNull(request, "request must not be null");
         requireNonNull(callingPackage, "callingPackage must not be null");

@@ -85,7 +85,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.QsFrameTranslateController;
-import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository;
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
@@ -99,7 +98,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
@@ -172,7 +170,6 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     @Mock protected LockscreenGestureLogger mLockscreenGestureLogger;
     @Mock protected MetricsLogger mMetricsLogger;
     @Mock protected FeatureFlags mFeatureFlags;
-    @Mock protected InteractionJankMonitor mInteractionJankMonitor;
     @Mock protected ShadeLogger mShadeLogger;
     @Mock protected DumpManager mDumpManager;
     @Mock protected UiEventLogger mUiEventLogger;
@@ -186,6 +183,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     protected FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     protected FakeShadeRepository mShadeRepository = new FakeShadeRepository();
 
+    protected InteractionJankMonitor mInteractionJankMonitor;
     protected SysuiStatusBarStateController mStatusBarStateController;
     protected ShadeInteractor mShadeInteractor;
 
@@ -205,8 +203,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mPanelViewControllerLazy.get()).thenReturn(mNotificationPanelViewController);
-        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger,
-                mInteractionJankMonitor, mock(JavaAdapter.class), () -> mShadeInteractor);
+        mStatusBarStateController = mUtils.getStatusBarStateController();
+        mInteractionJankMonitor = mUtils.getInteractionJankMonitor();
 
         FakeDeviceProvisioningRepository deviceProvisioningRepository =
                 new FakeDeviceProvisioningRepository();
@@ -214,11 +212,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
         FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
         FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
 
-        PowerInteractor powerInteractor = mUtils.powerInteractor(
-                mUtils.getPowerRepository(),
-                mUtils.falsingCollector(),
-                mock(ScreenOffAnimationController.class),
-                mStatusBarStateController);
+        PowerInteractor powerInteractor = mUtils.powerInteractor();
 
         SceneInteractor sceneInteractor = new SceneInteractor(
                 mTestScope.getBackgroundScope(),

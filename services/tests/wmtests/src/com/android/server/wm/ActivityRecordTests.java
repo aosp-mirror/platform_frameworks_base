@@ -3365,7 +3365,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         if (Flags.bundleClientTransactionFlag()) {
-            verify(app2.getProcess()).scheduleClientTransactionItem(
+            verify(app2.getProcess(), atLeastOnce()).scheduleClientTransactionItem(
                     isA(WindowStateResizeItem.class));
         } else {
             verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),

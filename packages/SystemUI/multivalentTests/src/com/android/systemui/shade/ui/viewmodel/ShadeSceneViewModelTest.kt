@@ -56,12 +56,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
-    private val authenticationInteractor = utils.authenticationInteractor()
-    private val deviceEntryInteractor =
-        utils.deviceEntryInteractor(
-            authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
-        )
+    private val deviceEntryInteractor = utils.deviceEntryInteractor()
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }

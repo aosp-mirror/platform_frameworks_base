@@ -27,8 +27,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -50,7 +49,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
 
     private val kosmos =
         testKosmos().apply {
-            sceneContainerFlags = FakeSceneContainerFlags(enabled = true)
+            fakeSceneContainerFlags.enabled = true
             fakeFeatureFlagsClassic.apply {
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
                 set(Flags.NSSL_DEBUG_LINES, false)

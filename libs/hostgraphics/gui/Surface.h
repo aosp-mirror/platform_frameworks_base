@@ -50,6 +50,8 @@ public:
     virtual int unlockAndPost() { return 0; }
     virtual int query(int what, int* value) const { return 0; }
 
+    virtual void destroy() {}
+
 protected:
     virtual ~Surface() {}
 

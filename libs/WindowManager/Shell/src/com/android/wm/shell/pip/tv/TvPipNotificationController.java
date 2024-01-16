@@ -54,6 +54,7 @@ public class TvPipNotificationController implements TvPipActionsProvider.Listene
     // Referenced in com.android.systemui.util.NotificationChannels.
     public static final String NOTIFICATION_CHANNEL = "TVPIP";
     private static final String NOTIFICATION_TAG = "TvPip";
+    private static final String EXTRA_COMPONENT_NAME = "TvPipComponentName";
 
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -176,6 +177,7 @@ public class TvPipNotificationController implements TvPipActionsProvider.Listene
 
         Bundle extras = new Bundle();
         extras.putParcelable(Notification.EXTRA_MEDIA_SESSION, mMediaSessionToken);
+        extras.putParcelable(EXTRA_COMPONENT_NAME, PipUtils.getTopPipActivity(mContext).first);
         mNotificationBuilder.setExtras(extras);
 
         PendingIntent closeIntent = mTvPipActionsProvider.getCloseAction().getPendingIntent();

@@ -173,7 +173,7 @@ class CredentialAutofillService : AutofillService() {
                 CancellationSignal(),
                 Executors.newSingleThreadExecutor(),
                 outcome,
-                autofillCallback
+                autofillCallback.asBinder()
         )
     }
 
@@ -358,8 +358,8 @@ class CredentialAutofillService : AutofillService() {
                 } else {
                     spec = inlinePresentationSpecs[inlinePresentationSpecsCount - 1]
                 }
-                val displayName: String = if (primaryEntry.credentialType == CredentialType.PASSKEY
-                        && primaryEntry.displayName != null) {
+                val displayName: String = if (primaryEntry.credentialType ==
+                        CredentialType.PASSKEY && primaryEntry.displayName != null) {
                     primaryEntry.displayName!!
                 } else {
                     primaryEntry.userName

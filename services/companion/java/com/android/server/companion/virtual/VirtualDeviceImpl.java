@@ -75,6 +75,9 @@ import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualStylusButtonEvent;
+import android.hardware.input.VirtualStylusConfig;
+import android.hardware.input.VirtualStylusMotionEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.os.Binder;
@@ -776,6 +779,26 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void createVirtualStylus(@NonNull VirtualStylusConfig config,
+            @NonNull IBinder deviceToken) {
+        super.createVirtualStylus_enforcePermission();
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(deviceToken);
+        checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInputController.createStylus(config.getInputDeviceName(), config.getVendorId(),
+                    config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
+                    config.getHeight(), config.getWidth());
+        } catch (InputController.DeviceCreationException e) {
+            throw new IllegalArgumentException(e);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void unregisterInputDevice(IBinder token) {
         super.unregisterInputDevice_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
@@ -874,6 +897,36 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.getCursorPosition(token);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public boolean sendStylusMotionEvent(@NonNull IBinder token,
+            @NonNull VirtualStylusMotionEvent event) {
+        super.sendStylusMotionEvent_enforcePermission();
+        Objects.requireNonNull(token);
+        Objects.requireNonNull(event);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mInputController.sendStylusMotionEvent(token, event);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public boolean sendStylusButtonEvent(@NonNull IBinder token,
+            @NonNull VirtualStylusButtonEvent event) {
+        super.sendStylusButtonEvent_enforcePermission();
+        Objects.requireNonNull(token);
+        Objects.requireNonNull(event);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mInputController.sendStylusButtonEvent(token, event);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1335,6 +1388,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         synchronized (mVirtualDeviceLock) {
             return mVirtualDisplays.contains(displayId);
         }
+    }
+
+    boolean isInputDeviceOwnedByVirtualDevice(int inputDeviceId) {
+        return mInputController.getInputDeviceDescriptors().values().stream().anyMatch(
+                inputDeviceDescriptor -> inputDeviceDescriptor.getInputDeviceId() == inputDeviceId);
     }
 
     void onEnteringPipBlocked(int uid) {

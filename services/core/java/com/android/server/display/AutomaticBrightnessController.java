@@ -624,10 +624,10 @@ public class AutomaticBrightnessController {
         pw.println("  Current mode="
                 + autoBrightnessModeToString(mCurrentBrightnessMapper.getMode()));
 
-        pw.println();
         for (int i = 0; i < mBrightnessMappingStrategyMap.size(); i++) {
+            pw.println();
             pw.println("  Mapper for mode "
-                    + autoBrightnessModeToString(mBrightnessMappingStrategyMap.keyAt(i)) + "=");
+                    + autoBrightnessModeToString(mBrightnessMappingStrategyMap.keyAt(i)) + ":");
             mBrightnessMappingStrategyMap.valueAt(i).dump(pw,
                     mBrightnessRangeController.getNormalBrightnessMax());
         }
@@ -1159,7 +1159,7 @@ public class AutomaticBrightnessController {
         if (mCurrentBrightnessMapper.getMode() == mode) {
             return;
         }
-        Slog.i(TAG, "Switching to mode " + mode);
+        Slog.i(TAG, "Switching to mode " + autoBrightnessModeToString(mode));
         if (mode == AUTO_BRIGHTNESS_MODE_IDLE
                 || mCurrentBrightnessMapper.getMode() == AUTO_BRIGHTNESS_MODE_IDLE) {
             switchModeAndShortTermModels(mode);

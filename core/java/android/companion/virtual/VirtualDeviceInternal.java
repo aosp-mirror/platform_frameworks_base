@@ -42,6 +42,8 @@ import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualStylus;
+import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualTouchscreen;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.media.AudioManager;
@@ -311,6 +313,19 @@ public class VirtualDeviceInternal {
                     "android.hardware.input.VirtualTouchscreen:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualTouchscreen(config, token);
             return new VirtualTouchscreen(config, mVirtualDevice, token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    @NonNull
+    VirtualStylus createVirtualStylus(@NonNull VirtualStylusConfig config) {
+        try {
+            final IBinder token = new Binder(
+                    "android.hardware.input.VirtualStylus:" + config.getInputDeviceName());
+            mVirtualDevice.createVirtualStylus(config, token);
+            return new VirtualStylus(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

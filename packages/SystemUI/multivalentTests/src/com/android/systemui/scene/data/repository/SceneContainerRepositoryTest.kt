@@ -39,7 +39,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SceneContainerRepositoryTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
+    private val utils = SceneTestUtils(this).apply { fakeSceneContainerFlags.enabled = true }
     private val testScope = utils.testScope
 
     @Test
@@ -72,7 +72,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
     @Test(expected = IllegalStateException::class)
     fun setDesiredScene_noSuchSceneInContainer_throws() {
         utils.kosmos.sceneKeys = listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
-        val underTest = utils.fakeSceneContainerRepository(utils.fakeSceneContainerConfig())
+        val underTest = utils.fakeSceneContainerRepository()
         underTest.setDesiredScene(SceneModel(SceneKey.Shade))
     }
 

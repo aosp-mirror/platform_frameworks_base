@@ -149,6 +149,7 @@ filegroup {
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
         ":audio_policy_configuration_V7_0",
+        ":perfetto_trace_javastream_protos",
     ],
 }
 

@@ -21,10 +21,12 @@ import static com.android.server.devicestate.DeviceState.FLAG_CANCEL_WHEN_REQUES
 import static com.android.server.devicestate.DeviceState.FLAG_EMULATED_ONLY;
 import static com.android.server.devicestate.DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE;
 import static com.android.server.devicestate.DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL;
+import static com.android.server.policy.BookStyleStateTransitions.DEFAULT_STATE_TRANSITIONS;
 import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration.createConfig;
 import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration.createTentModeClosedState;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -39,12 +41,15 @@ import com.android.server.policy.feature.flags.FeatureFlagsImpl;
 import java.util.function.Predicate;
 
 /**
- * Device state policy for a foldable device that supports tent mode: a mode when the device
- * keeps the outer display on until reaching a certain hinge angle threshold.
+ * Device state policy for a foldable device with two screens in a book style, where the hinge is
+ * located on the left side of the device when in folded posture.
+ * The policy supports tent/wedge mode: a mode when the device keeps the outer display on
+ * until reaching certain conditions like hinge angle threshold.
  *
  * Contains configuration for {@link FoldableDeviceStateProvider}.
  */
-public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
+public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
+        BookStyleClosedStatePredicate.ClosedStateUpdatesListener {
 
     private static final int DEVICE_STATE_CLOSED = 0;
     private static final int DEVICE_STATE_HALF_OPENED = 1;
@@ -57,9 +62,10 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
     private static final int MIN_CLOSED_ANGLE_DEGREES = 0;
     private static final int MAX_CLOSED_ANGLE_DEGREES = 5;
 
-    private final DeviceStateProvider mProvider;
+    private final FoldableDeviceStateProvider mProvider;
 
     private final boolean mIsDualDisplayBlockingEnabled;
+    private final boolean mEnablePostureBasedClosedState;
     private static final Predicate<FoldableDeviceStateProvider> ALLOWED = p -> true;
     private static final Predicate<FoldableDeviceStateProvider> NOT_ALLOWED = p -> false;
 
@@ -73,30 +79,30 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
      *                          between folded and unfolded modes, otherwise when folding the
      *                          display switch will happen at 0 degrees
      */
-    public TentModeDeviceStatePolicy(@NonNull Context context,
-            @NonNull Sensor hingeAngleSensor, @NonNull Sensor hallSensor, int closeAngleDegrees) {
-        this(new FeatureFlagsImpl(), context, hingeAngleSensor, hallSensor, closeAngleDegrees);
-    }
-
-    public TentModeDeviceStatePolicy(@NonNull FeatureFlags featureFlags, @NonNull Context context,
-                                     @NonNull Sensor hingeAngleSensor, @NonNull Sensor hallSensor,
-                                     int closeAngleDegrees) {
+    public BookStyleDeviceStatePolicy(@NonNull FeatureFlags featureFlags, @NonNull Context context,
+            @NonNull Sensor hingeAngleSensor, @NonNull Sensor hallSensor,
+            @Nullable Sensor leftAccelerometerSensor, @Nullable Sensor rightAccelerometerSensor,
+            Integer closeAngleDegrees) {
         super(context);
 
         final SensorManager sensorManager = mContext.getSystemService(SensorManager.class);
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
 
-        final DeviceStateConfiguration[] configuration = createConfiguration(closeAngleDegrees);
-
+        mEnablePostureBasedClosedState = featureFlags.enableFoldablesPostureBasedClosedState();
         mIsDualDisplayBlockingEnabled = featureFlags.enableDualDisplayBlocking();
+
+        final DeviceStateConfiguration[] configuration = createConfiguration(
+                leftAccelerometerSensor, rightAccelerometerSensor, closeAngleDegrees);
 
         mProvider = new FoldableDeviceStateProvider(mContext, sensorManager,
                 hingeAngleSensor, hallSensor, displayManager, configuration);
     }
 
-    private DeviceStateConfiguration[] createConfiguration(int closeAngleDegrees) {
+    private DeviceStateConfiguration[] createConfiguration(@Nullable Sensor leftAccelerometerSensor,
+            @Nullable Sensor rightAccelerometerSensor, Integer closeAngleDegrees) {
         return new DeviceStateConfiguration[]{
-                createClosedConfiguration(closeAngleDegrees),
+                createClosedConfiguration(leftAccelerometerSensor, rightAccelerometerSensor,
+                        closeAngleDegrees),
                 createConfig(DEVICE_STATE_HALF_OPENED,
                         /* name= */ "HALF_OPENED",
                         /* activeStatePredicate= */ (provider) -> {
@@ -123,8 +129,10 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
         };
     }
 
-    private DeviceStateConfiguration createClosedConfiguration(int closeAngleDegrees) {
-        if (closeAngleDegrees > 0) {
+    private DeviceStateConfiguration createClosedConfiguration(
+            @Nullable Sensor leftAccelerometerSensor, @Nullable Sensor rightAccelerometerSensor,
+            @Nullable Integer closeAngleDegrees) {
+        if (closeAngleDegrees != null) {
             // Switch displays at closeAngleDegrees in both ways (folding and unfolding)
             return createConfig(
                     DEVICE_STATE_CLOSED,
@@ -137,6 +145,19 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
             );
         }
 
+        if (mEnablePostureBasedClosedState) {
+            // Use smart closed state predicate that will use different switch angles
+            // based on the device posture (e.g. wedge mode, tent mode, reverse wedge mode)
+            return createConfig(
+                    DEVICE_STATE_CLOSED,
+                    /* name= */ "CLOSED",
+                    /* flags= */ FLAG_CANCEL_OVERRIDE_REQUESTS,
+                    /* activeStatePredicate= */ new BookStyleClosedStatePredicate(mContext,
+                            this, leftAccelerometerSensor, rightAccelerometerSensor,
+                            DEFAULT_STATE_TRANSITIONS)
+            );
+        }
+
         // Switch to the outer display only at 0 degrees but use TENT_MODE_SWITCH_ANGLE_DEGREES
         // angle when switching to the inner display
         return createTentModeClosedState(DEVICE_STATE_CLOSED,
@@ -145,6 +166,11 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
                 MIN_CLOSED_ANGLE_DEGREES,
                 MAX_CLOSED_ANGLE_DEGREES,
                 TENT_MODE_SWITCH_ANGLE_DEGREES);
+    }
+
+    @Override
+    public void onClosedStateUpdated() {
+        mProvider.notifyDeviceStateChangedIfNeeded();
     }
 
     @Override

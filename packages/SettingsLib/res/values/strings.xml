@@ -1079,6 +1079,8 @@
 
     <!-- [CHAR_LIMIT=NONE] Label for battery on main page of settings -->
     <string name="power_remaining_settings_home_page"><xliff:g id="percentage" example="10%">%1$s</xliff:g> - <xliff:g id="time_string" example="1 hour left based on your usage">%2$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=NONE] Label for charging on hold on main page of settings -->
+    <string name="power_charging_on_hold_settings_home_page"><xliff:g id="level">%1$s</xliff:g> - Charging on hold to protect battery</string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
     <string name="power_remaining_duration_only">About <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
@@ -1144,6 +1146,8 @@
     <string name="battery_info_status_full">Charged</string>
     <!-- [CHAR_LIMIT=40] Battery Info screen. Value for a status item. A state which device is fully charged -->
     <string name="battery_info_status_full_charged">Fully Charged</string>
+    <!-- [CHAR_LIMIT=None] Battery Info screen. Value for a status item. A state which device charging on hold -->
+    <string name="battery_info_status_charging_on_hold">Charging on hold</string>
 
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>

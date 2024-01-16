@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.internal.util.EmergencyAffordanceManager
+import com.android.internal.util.emergencyAffordanceManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -35,13 +36,11 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
-import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.ObservableTransitionState
@@ -61,6 +60,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnec
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.telecom.telecomManager
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -101,27 +101,12 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
-    @Mock private lateinit var emergencyAffordanceManager: EmergencyAffordanceManager
-    @Mock private lateinit var tableLogger: TableLogBuffer
-    @Mock private lateinit var telecomManager: TelecomManager
-
-    private val utils = SceneTestUtils(this)
+    private val utils = SceneTestUtils(this).apply { fakeSceneContainerFlags.enabled = true }
     private val testScope = utils.testScope
     private val sceneContainerConfig = utils.fakeSceneContainerConfig()
-    private val sceneRepository =
-        utils.fakeSceneContainerRepository(
-            containerConfig = sceneContainerConfig,
-        )
-    private val sceneInteractor =
-        utils.sceneInteractor(
-            repository = sceneRepository,
-        )
+    private val sceneInteractor = utils.sceneInteractor()
     private val authenticationInteractor = utils.authenticationInteractor()
-    private val deviceEntryInteractor =
-        utils.deviceEntryInteractor(
-            authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
-        )
+    private val deviceEntryInteractor = utils.deviceEntryInteractor()
     private val communalInteractor = utils.communalInteractor()
 
     private val transitionState =
@@ -135,10 +120,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             )
             .apply { setTransitionState(transitionState) }
 
-    private val bouncerInteractor =
-        utils.bouncerInteractor(
-            authenticationInteractor = authenticationInteractor,
-        )
+    private val bouncerInteractor = utils.bouncerInteractor()
 
     private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
     private lateinit var bouncerActionButtonInteractor: BouncerActionButtonInteractor
@@ -170,19 +152,15 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                     FakeMobileConnectionsRepository(),
                 ),
             constants = mock(),
-            utils.featureFlags,
+            utils.fakeFeatureFlags,
             scope = testScope.backgroundScope,
         )
 
     private lateinit var shadeHeaderViewModel: ShadeHeaderViewModel
     private lateinit var shadeSceneViewModel: ShadeSceneViewModel
 
-    private val keyguardRepository = utils.keyguardRepository
-    private val keyguardInteractor =
-        utils.keyguardInteractor(
-            repository = keyguardRepository,
-        )
-    private val powerInteractor = PowerInteractorFactory.create().powerInteractor
+    private val keyguardInteractor = utils.keyguardInteractor()
+    private val powerInteractor = utils.powerInteractor()
 
     private var bouncerSceneJob: Job? = null
 
@@ -191,21 +169,26 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var mediaHost: MediaHost
 
+    private lateinit var emergencyAffordanceManager: EmergencyAffordanceManager
+    private lateinit var telecomManager: TelecomManager
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
         overrideResource(R.bool.config_enable_emergency_call_while_sim_locked, true)
+        telecomManager = checkNotNull(utils.kosmos.telecomManager)
         whenever(telecomManager.isInCall).thenReturn(false)
+        emergencyAffordanceManager = utils.kosmos.emergencyAffordanceManager
         whenever(emergencyAffordanceManager.needsEmergencyAffordance()).thenReturn(true)
 
-        utils.featureFlags.apply {
+        utils.fakeFeatureFlags.apply {
             set(Flags.NEW_NETWORK_SLICE_UI, false)
             set(Flags.REFACTOR_GETCURRENTUSER, true)
         }
 
-        mobileConnectionsRepository =
-            FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), tableLogger)
-        mobileConnectionsRepository.isAnySimSecure.value = true
+        mobileConnectionsRepository = utils.mobileConnectionsRepository
+        mobileConnectionsRepository.isAnySimSecure.value = false
 
         utils.telephonyRepository.apply {
             setHasTelephonyRadio(true)
@@ -213,18 +196,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             setIsInCall(false)
         }
 
-        bouncerActionButtonInteractor =
-            utils.bouncerActionButtonInteractor(
-                mobileConnectionsRepository = mobileConnectionsRepository,
-                telecomManager = telecomManager,
-                emergencyAffordanceManager = emergencyAffordanceManager,
-            )
-        bouncerViewModel =
-            utils.bouncerViewModel(
-                bouncerInteractor = bouncerInteractor,
-                authenticationInteractor = authenticationInteractor,
-                actionButtonInteractor = bouncerActionButtonInteractor,
-            )
+        bouncerActionButtonInteractor = utils.bouncerActionButtonInteractor()
+        bouncerViewModel = utils.bouncerViewModel()
 
         shadeHeaderViewModel =
             ShadeHeaderViewModel(
@@ -257,7 +230,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 deviceEntryInteractor = deviceEntryInteractor,
                 keyguardInteractor = keyguardInteractor,
-                flags = utils.sceneContainerFlags,
+                flags = utils.fakeSceneContainerFlags,
                 sysUiState = sysUiState,
                 displayId = displayTracker.defaultDisplayId,
                 sceneLogger = mock(),

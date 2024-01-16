@@ -17,6 +17,8 @@
 package com.android.systemui.communal.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 
-var Kosmos.communalRepository: CommunalRepository by Kosmos.Fixture { fakeCommunalRepository }
-val Kosmos.fakeCommunalRepository by Kosmos.Fixture { FakeCommunalRepository() }
+val Kosmos.fakeCommunalRepository by Fixture { FakeCommunalRepository() }
+
+val Kosmos.communalRepository by Fixture<CommunalRepository> { fakeCommunalRepository }

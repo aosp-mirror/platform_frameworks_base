@@ -1,6 +1,7 @@
 package com.android.settingslib;
 
 import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_USER_LABEL;
+import static android.webkit.Flags.updateServiceV2;
 
 import android.annotation.ColorInt;
 import android.app.admin.DevicePolicyManager;
@@ -34,6 +35,7 @@ import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -44,6 +46,9 @@ import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.webkit.IWebViewUpdateService;
+import android.webkit.WebViewFactory;
+import android.webkit.WebViewProviderInfo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -65,6 +70,8 @@ import java.util.List;
 
 public class Utils {
 
+    private static final String TAG = "Utils";
+
     @VisibleForTesting
     static final String STORAGE_MANAGER_ENABLED_PROPERTY =
             "ro.storage_manager.enabled";
@@ -76,6 +83,7 @@ public class Utils {
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
     private static String sSharedSystemSharedLibPackageName;
+    private static String sDefaultWebViewPackageName;
 
     static final int[] WIFI_PIE = {
         com.android.internal.R.drawable.ic_wifi_signal_0,
@@ -445,6 +453,7 @@ public class Utils {
                 || packageName.equals(sServicesSystemSharedLibPackageName)
                 || packageName.equals(sSharedSystemSharedLibPackageName)
                 || packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || (updateServiceV2() && packageName.equals(getDefaultWebViewPackageName()))
                 || isDeviceProvisioningPackage(resources, packageName);
     }
 
@@ -456,6 +465,29 @@ public class Utils {
         String deviceProvisioningPackage = resources.getString(
                 com.android.internal.R.string.config_deviceProvisioningPackage);
         return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
+    }
+
+    /**
+     * Fetch the package name of the default WebView provider.
+     */
+    @Nullable
+    private static String getDefaultWebViewPackageName() {
+        if (sDefaultWebViewPackageName != null) {
+            return sDefaultWebViewPackageName;
+        }
+
+        try {
+            IWebViewUpdateService service = WebViewFactory.getUpdateService();
+            if (service != null) {
+                WebViewProviderInfo provider = service.getDefaultWebViewPackage();
+                if (provider != null) {
+                    sDefaultWebViewPackageName = provider.packageName;
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException when trying to fetch default WebView package Name", e);
+        }
+        return sDefaultWebViewPackageName;
     }
 
     /**

@@ -30,11 +30,11 @@ import android.credentials.ui.GetCredentialProviderData;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.PermissionUtils;
 import android.util.Slog;
-import android.view.autofill.IAutoFillManagerClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
     private static final String SESSION_ID_KEY = "autofill_session_id";
     private static final String REQUEST_ID_KEY = "autofill_request_id";
 
-    private final IAutoFillManagerClient mAutoFillCallback;
+    private final IBinder mClientBinder;
     private final int mAutofillSessionId;
     private final int mAutofillRequestId;
 
@@ -62,15 +62,15 @@ public class GetCandidateRequestSession extends RequestSession<GetCredentialRequ
             IGetCandidateCredentialsCallback callback, GetCredentialRequest request,
             CallingAppInfo callingAppInfo, Set<ComponentName> enabledProviders,
             CancellationSignal cancellationSignal,
-            IAutoFillManagerClient autoFillCallback) {
+            IBinder clientBinder) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
                 RequestInfo.TYPE_GET, callingAppInfo, enabledProviders,
                 cancellationSignal, 0L, /*shouldBindClientToDeath=*/ false);
-        mAutoFillCallback = autoFillCallback;
+        mClientBinder = clientBinder;
         mAutofillSessionId = request.getData().getInt(SESSION_ID_KEY, -1);
         mAutofillRequestId = request.getData().getInt(REQUEST_ID_KEY, -1);
-        if (mAutoFillCallback != null) {
-            setUpClientCallbackListener(mAutoFillCallback.asBinder());
+        if (mClientBinder != null) {
+            setUpClientCallbackListener(mClientBinder);
         }
     }
 

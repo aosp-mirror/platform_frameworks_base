@@ -608,6 +608,20 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void testIsInputDeviceOwnedByVirtualDevice() {
+        assertThat(mLocalService.isInputDeviceOwnedByVirtualDevice(INPUT_DEVICE_ID)).isFalse();
+
+        final int fd = 1;
+        mInputController.addDeviceForTesting(BINDER, fd,
+                InputController.InputDeviceDescriptor.TYPE_KEYBOARD, DISPLAY_ID_1, PHYS,
+                DEVICE_NAME_1, INPUT_DEVICE_ID);
+        assertThat(mLocalService.isInputDeviceOwnedByVirtualDevice(INPUT_DEVICE_ID)).isTrue();
+
+        mInputController.unregisterInputDevice(BINDER);
+        assertThat(mLocalService.isInputDeviceOwnedByVirtualDevice(INPUT_DEVICE_ID)).isFalse();
+    }
+
+    @Test
     public void getDeviceIdsForUid_noRunningApps_returnsNull() {
         assertThat(mLocalService.getDeviceIdsForUid(UID_1)).isEmpty();
         assertThat(mVdmNative.getDeviceIdsForUid(UID_1)).isEmpty();
