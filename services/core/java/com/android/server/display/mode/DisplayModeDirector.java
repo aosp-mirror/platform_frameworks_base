@@ -988,10 +988,10 @@ public class DisplayModeDirector {
                     Settings.Global.LOW_POWER_MODE, 0 /*default*/) != 0;
             final Vote vote;
             if (inLowPowerMode && mVsynLowPowerVoteEnabled) {
-                vote = Vote.forSupportedModes(List.of(
-                        new SupportedModesVote.SupportedMode(/* peakRefreshRate= */ 60f,
+                vote = Vote.forSupportedRefreshRates(List.of(
+                        new SupportedRefreshRatesVote.RefreshRates(/* peakRefreshRate= */ 60f,
                                 /* vsyncRate= */ 240f),
-                        new SupportedModesVote.SupportedMode(/* peakRefreshRate= */ 60f,
+                        new SupportedRefreshRatesVote.RefreshRates(/* peakRefreshRate= */ 60f,
                                 /* vsyncRate= */ 60f)
                 ));
             } else if (inLowPowerMode) {
@@ -2176,11 +2176,11 @@ public class DisplayModeDirector {
                 }
 
                 if (mVsyncLowLightBlockingVoteEnabled) {
-                    refreshRateSwitchingVote = Vote.forSupportedModesAndDisableRefreshRateSwitching(
+                    refreshRateSwitchingVote = Vote.forSupportedRefreshRatesAndDisableSwitching(
                             List.of(
-                                    new SupportedModesVote.SupportedMode(
+                                    new SupportedRefreshRatesVote.RefreshRates(
                                             /* peakRefreshRate= */ 60f, /* vsyncRate= */ 60f),
-                                    new SupportedModesVote.SupportedMode(
+                                    new SupportedRefreshRatesVote.RefreshRates(
                                             /* peakRefreshRate= */120f, /* vsyncRate= */ 120f)));
                 } else {
                     refreshRateSwitchingVote = Vote.forDisableRefreshRateSwitching();

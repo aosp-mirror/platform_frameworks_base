@@ -18,10 +18,10 @@ package com.android.server.display.mode
 
 internal fun createVotesSummary(
         isDisplayResolutionRangeVotingEnabled: Boolean = true,
-        vsyncProximityVoteEnabled: Boolean = true,
+        supportedModesVoteEnabled: Boolean = true,
         loggingEnabled: Boolean = true,
         supportsFrameRateOverride: Boolean = true
 ): VoteSummary {
-    return VoteSummary(isDisplayResolutionRangeVotingEnabled, vsyncProximityVoteEnabled,
+    return VoteSummary(isDisplayResolutionRangeVotingEnabled, supportedModesVoteEnabled,
             loggingEnabled, supportsFrameRateOverride)
 }

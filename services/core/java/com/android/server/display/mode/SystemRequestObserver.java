@@ -16,16 +16,17 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
 
-import androidx.annotation.NonNull;
-
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,8 +34,6 @@ import java.util.Map;
  * modes
  */
 class SystemRequestObserver {
-    private static final String TAG = "SystemRequestObserver";
-
     private final VotesStorage mVotesStorage;
 
     private final IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
@@ -51,7 +50,7 @@ class SystemRequestObserver {
 
     private final Object mLock = new Object();
     @GuardedBy("mLock")
-    private final Map<IBinder, SparseArray<int[]>> mDisplaysRestrictions = new HashMap<>();
+    private final Map<IBinder, SparseArray<List<Integer>>> mDisplaysRestrictions = new HashMap<>();
 
     SystemRequestObserver(VotesStorage storage) {
         mVotesStorage = storage;
@@ -65,19 +64,23 @@ class SystemRequestObserver {
         }
     }
 
-    private void addSystemRequestedVote(IBinder token, int displayId, int[] modeIds) {
+    private void addSystemRequestedVote(IBinder token, int displayId, @NonNull int[] modeIds) {
         try {
             boolean needLinkToDeath = false;
+            List<Integer> modeIdsList = new ArrayList<>();
+            for (int mode: modeIds) {
+                modeIdsList.add(mode);
+            }
             synchronized (mLock) {
-                SparseArray<int[]> existingRestrictionForBinder = mDisplaysRestrictions.get(token);
-                if (existingRestrictionForBinder == null) {
+                SparseArray<List<Integer>> modesByDisplay = mDisplaysRestrictions.get(token);
+                if (modesByDisplay == null) {
                     needLinkToDeath = true;
-                    existingRestrictionForBinder = new SparseArray<>();
-                    mDisplaysRestrictions.put(token, existingRestrictionForBinder);
+                    modesByDisplay = new SparseArray<>();
+                    mDisplaysRestrictions.put(token, modesByDisplay);
                 }
-                existingRestrictionForBinder.put(displayId, modeIds);
 
-                // aggregate modes for display and update vote storage
+                modesByDisplay.put(displayId, modeIdsList);
+                updateStorageLocked(displayId);
             }
             if (needLinkToDeath) {
                 token.linkToDeath(mDeathRecipient, 0);
@@ -90,12 +93,11 @@ class SystemRequestObserver {
     private void removeSystemRequestedVote(IBinder token, int displayId) {
         boolean needToUnlink = false;
         synchronized (mLock) {
-            SparseArray<int[]> existingRestrictionForBinder = mDisplaysRestrictions.get(token);
-            if (existingRestrictionForBinder != null) {
-                existingRestrictionForBinder.remove(displayId);
-                needToUnlink = existingRestrictionForBinder.size() == 0;
-
-                // aggregate modes for display and update vote storage
+            SparseArray<List<Integer>> modesByDisplay = mDisplaysRestrictions.get(token);
+            if (modesByDisplay != null) {
+                modesByDisplay.remove(displayId);
+                needToUnlink = modesByDisplay.size() == 0;
+                updateStorageLocked(displayId);
             }
         }
         if (needToUnlink) {
@@ -105,9 +107,33 @@ class SystemRequestObserver {
 
     private void removeSystemRequestedVotes(IBinder token) {
         synchronized (mLock) {
-            mDisplaysRestrictions.remove(token);
-
-            // aggregate modes for display and update vote storage
+            SparseArray<List<Integer>> removed = mDisplaysRestrictions.remove(token);
+            if (removed != null) {
+                for (int i = 0; i < removed.size(); i++) {
+                    updateStorageLocked(removed.keyAt(i));
+                }
+            }
         }
+    }
+
+    @GuardedBy("mLock")
+    private void updateStorageLocked(int displayId) {
+        List<Integer> modeIds = new ArrayList<>();
+        boolean[] modesFound = new boolean[1];
+
+        mDisplaysRestrictions.forEach((key, value) -> {
+            List<Integer> modesForDisplay = value.get(displayId);
+            if (modesForDisplay != null) {
+                if (!modesFound[0]) {
+                    modeIds.addAll(modesForDisplay);
+                    modesFound[0] = true;
+                } else {
+                    modeIds.retainAll(modesForDisplay);
+                }
+            }
+        });
+
+        mVotesStorage.updateVote(displayId, Vote.PRIORITY_SYSTEM_REQUESTED_MODES,
+                modesFound[0] ? Vote.forSupportedModes(modeIds) : null);
     }
 }
