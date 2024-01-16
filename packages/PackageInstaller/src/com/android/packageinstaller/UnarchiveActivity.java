@@ -31,7 +31,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -105,7 +105,7 @@ public class UnarchiveActivity extends Activity {
         }
     }
 
-    @Nullable
+    @NonNull
     private String[] getRequestedPermissions(String callingPackage) {
         String[] requestedPermissions = null;
         try {
@@ -115,7 +115,7 @@ public class UnarchiveActivity extends Activity {
             // Should be unreachable because we've just fetched the packageName above.
             Log.e(TAG, "Package not found for " + callingPackage);
         }
-        return requestedPermissions;
+        return requestedPermissions == null ? new String[]{} : requestedPermissions;
     }
 
     void startUnarchive() {
