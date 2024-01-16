@@ -64,7 +64,7 @@ public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
     /** A string suffix used in app bubbles' {@link #mKey}. */
-    private static final String KEY_APP_BUBBLE = "key_app_bubble";
+    public static final String KEY_APP_BUBBLE = "key_app_bubble";
 
     /** Whether the bubble is an app bubble. */
     private final boolean mIsAppBubble;
