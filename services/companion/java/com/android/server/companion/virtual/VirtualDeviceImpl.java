@@ -23,6 +23,7 @@ import static android.companion.virtual.VirtualDeviceParams.ACTIVITY_POLICY_DEFA
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
@@ -261,7 +262,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 runningAppsChangedCallback,
                 params,
                 DisplayManagerGlobal.getInstance(),
-                Flags.virtualCamera() ? new VirtualCameraController() : null);
+                Flags.virtualCamera()
+                        ? new VirtualCameraController(params.getDevicePolicy(POLICY_TYPE_CAMERA))
+                        : null);
     }
 
     @VisibleForTesting
