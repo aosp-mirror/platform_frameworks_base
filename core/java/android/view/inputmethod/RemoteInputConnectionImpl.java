@@ -830,11 +830,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            // Note we do NOT check isActive() here, because this is safe
-            // for an IME to call at any time, and we need to allow it
-            // through to clean up our state after the IME has switched to
-            // another client.
-            if (ic == null) {
+            if (ic == null || !isActive()) {
                 Log.w(TAG, "finishComposingTextFromImm on inactive InputConnection");
                 return;
             }
@@ -858,11 +854,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;  // cancelled
             }
             InputConnection ic = getInputConnection();
-            // Note we do NOT check isActive() here, because this is safe
-            // for an IME to call at any time, and we need to allow it
-            // through to clean up our state after the IME has switched to
-            // another client.
-            if (ic == null) {
+            if (ic == null && !isActive()) {
                 Log.w(TAG, "finishComposingText on inactive InputConnection");
                 return;
             }
