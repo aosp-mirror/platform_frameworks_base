@@ -33,10 +33,13 @@ import com.android.systemui.communal.shared.CommunalWidgetHost
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.core.FakeLogBuffer
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -44,8 +47,6 @@ import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -81,13 +82,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var communalWidgetDao: CommunalWidgetDao
 
+    private val kosmos = testKosmos()
+
+    private val testScope = kosmos.testScope
+
     private lateinit var communalRepository: FakeCommunalRepository
 
     private lateinit var logBuffer: LogBuffer
-
-    private val testDispatcher = StandardTestDispatcher()
-
-    private val testScope = TestScope(testDispatcher)
 
     private val fakeAllowlist =
         listOf(
@@ -100,8 +101,8 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        logBuffer = FakeLogBuffer.Factory.create()
-        communalRepository = FakeCommunalRepository()
+        logBuffer = logcatLogBuffer(name = "CommunalWidgetRepoImplTest")
+        communalRepository = kosmos.fakeCommunalRepository
 
         communalEnabled(true)
         setAppWidgetIds(emptyList())
@@ -355,7 +356,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             appWidgetManagerOptional,
             appWidgetHost,
             testScope.backgroundScope,
-            testDispatcher,
+            kosmos.testDispatcher,
             fakeBroadcastDispatcher,
             communalRepository,
             communalWidgetHost,

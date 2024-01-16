@@ -37,6 +37,9 @@ val Kosmos.communalInteractor by
             smartspaceRepository = smartspaceRepository,
             keyguardInteractor = keyguardInteractor,
             appWidgetHost = mock(CommunalAppWidgetHost::class.java),
-            editWidgetsActivityStarter = mock(EditWidgetsActivityStarter::class.java),
+            editWidgetsActivityStarter = editWidgetsActivityStarter,
         )
     }
+
+val Kosmos.editWidgetsActivityStarter by
+    Kosmos.Fixture<EditWidgetsActivityStarter> { mock(EditWidgetsActivityStarter::class.java) }
