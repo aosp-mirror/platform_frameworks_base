@@ -179,6 +179,11 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
 
     @Override
+    public void addQsTileToFrontOrEnd(ComponentName tile, boolean end) {
+        mQSHost.addTile(tile, end);
+    }
+
+    @Override
     public void remQsTile(ComponentName tile) {
         mQSHost.removeTileByUser(tile);
     }
