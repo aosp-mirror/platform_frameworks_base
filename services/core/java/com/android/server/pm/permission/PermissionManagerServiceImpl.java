@@ -279,7 +279,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     @NonNull
     private final int[] mGlobalGids;
 
-    private final HandlerThread mHandlerThread;
     private final Handler mHandler;
     private final Context mContext;
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
@@ -432,10 +431,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             }
         }
 
-        mHandlerThread = new ServiceThread(TAG,
+        HandlerThread handlerThread = new ServiceThread(TAG,
                 Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        handlerThread.start();
+        mHandler = new Handler(handlerThread.getLooper());
         Watchdog.getInstance().addThread(mHandler);
 
         SystemConfig systemConfig = SystemConfig.getInstance();
