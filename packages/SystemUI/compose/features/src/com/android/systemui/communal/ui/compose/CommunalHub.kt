@@ -20,7 +20,10 @@ import android.appwidget.AppWidgetHostView
 import android.os.Bundle
 import android.util.SizeF
 import android.widget.FrameLayout
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -47,6 +50,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material3.Button
@@ -54,8 +58,10 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -66,6 +72,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -99,12 +106,15 @@ import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.observeTapsWithoutConsuming
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun CommunalHub(
     modifier: Modifier = Modifier,
     viewModel: BaseCommunalViewModel,
+    widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
     onEditDone: (() -> Unit)? = null,
 ) {
@@ -116,7 +126,7 @@ fun CommunalHub(
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var isDraggingToRemove by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
-    val contentListState = rememberContentListState(communalContent, viewModel)
+    val contentListState = rememberContentListState(widgetConfigurator, communalContent, viewModel)
     val reorderingWidgets by viewModel.reorderingWidgets.collectAsState()
     val selectedIndex = viewModel.selectedIndex.collectAsState()
     val removeButtonEnabled by remember {
@@ -167,7 +177,8 @@ fun CommunalHub(
             onOpenWidgetPicker = onOpenWidgetPicker,
             gridState = gridState,
             contentListState = contentListState,
-            selectedIndex = selectedIndex
+            selectedIndex = selectedIndex,
+            widgetConfigurator = widgetConfigurator,
         )
 
         if (viewModel.isEditMode && onOpenWidgetPicker != null && onEditDone != null) {
@@ -221,6 +232,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
     onOpenWidgetPicker: (() -> Unit)? = null,
+    widgetConfigurator: WidgetConfigurator?,
 ) {
     var gridModifier = Modifier.align(Alignment.CenterStart)
     var list = communalContent
@@ -283,21 +295,24 @@ private fun BoxScope.CommunalHubLazyGrid(
                     enabled = list[index] is CommunalContentModel.Widget,
                     index = index,
                     size = size
-                ) { _ ->
+                ) { isDragging ->
                     CommunalContent(
                         modifier = cardModifier,
                         model = list[index],
                         viewModel = viewModel,
                         size = size,
                         onOpenWidgetPicker = onOpenWidgetPicker,
+                        selected = selected && !isDragging,
+                        widgetConfigurator = widgetConfigurator,
                     )
                 }
             } else {
                 CommunalContent(
-                    modifier = cardModifier,
                     model = list[index],
                     viewModel = viewModel,
                     size = size,
+                    selected = false,
+                    modifier = cardModifier,
                 )
             }
         }
@@ -453,11 +468,14 @@ private fun CommunalContent(
     model: CommunalContentModel,
     viewModel: BaseCommunalViewModel,
     size: SizeF,
+    selected: Boolean,
     modifier: Modifier = Modifier,
     onOpenWidgetPicker: (() -> Unit)? = null,
+    widgetConfigurator: WidgetConfigurator? = null,
 ) {
     when (model) {
-        is CommunalContentModel.Widget -> WidgetContent(viewModel, model, size, modifier)
+        is CommunalContentModel.Widget ->
+            WidgetContent(viewModel, model, size, selected, widgetConfigurator, modifier)
         is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(size)
         is CommunalContentModel.CtaTileInViewMode ->
             CtaTileInViewModeContent(viewModel, size, modifier)
@@ -594,15 +612,17 @@ private fun WidgetContent(
     viewModel: BaseCommunalViewModel,
     model: CommunalContentModel.Widget,
     size: SizeF,
+    selected: Boolean,
+    widgetConfigurator: WidgetConfigurator?,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier.height(size.height.dp),
-        contentAlignment = Alignment.Center,
     ) {
         val paddingInPx = with(LocalDensity.current) { CardOutlineWidth.toPx().toInt() }
         AndroidView(
-            modifier = modifier.allowGestures(allowed = !viewModel.isEditMode),
+            modifier =
+                modifier.align(Alignment.Center).allowGestures(allowed = !viewModel.isEditMode),
             factory = { context ->
                 // The AppWidgetHostView will inherit the interaction handler from the
                 // AppWidgetHost. So set the interaction handler here before creating the view, and
@@ -624,6 +644,55 @@ private fun WidgetContent(
             // For reusing composition in lazy lists.
             onReset = {},
         )
+        if (
+            viewModel is CommunalEditModeViewModel &&
+                model.reconfigurable &&
+                widgetConfigurator != null
+        ) {
+            WidgetConfigureButton(
+                visible = selected,
+                model = model,
+                widgetConfigurator = widgetConfigurator,
+                modifier = Modifier.align(Alignment.BottomEnd)
+            )
+        }
+    }
+}
+
+@Composable
+fun WidgetConfigureButton(
+    visible: Boolean,
+    model: CommunalContentModel.Widget,
+    modifier: Modifier = Modifier,
+    widgetConfigurator: WidgetConfigurator,
+) {
+    val colors = LocalAndroidColorScheme.current
+    val scope = rememberCoroutineScope()
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = modifier.padding(16.dp),
+    ) {
+        FilledIconButton(
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.size(48.dp),
+            colors =
+                IconButtonColors(
+                    containerColor = colors.primary,
+                    contentColor = colors.onPrimary,
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = Color.Transparent
+                ),
+            onClick = { scope.launch { widgetConfigurator.configureWidget(model.appWidgetId) } },
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Edit,
+                contentDescription = stringResource(id = R.string.edit_widget),
+                modifier = Modifier.padding(12.dp)
+            )
+        }
     }
 }
 

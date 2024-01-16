@@ -31,6 +31,7 @@ import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
+import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -148,17 +149,12 @@ constructor(
     /** Dismiss the CTA tile from the hub in view mode. */
     suspend fun dismissCtaTile() = communalPrefsRepository.setCtaDismissedForCurrentUser()
 
-    /**
-     * Add a widget at the specified position.
-     *
-     * @param configureWidget The callback to trigger if widget configuration is needed. Should
-     *   return whether configuration was successful.
-     */
+    /** Add a widget at the specified position. */
     fun addWidget(
         componentName: ComponentName,
         priority: Int,
-        configureWidget: suspend (id: Int) -> Boolean
-    ) = widgetRepository.addWidget(componentName, priority, configureWidget)
+        configurator: WidgetConfigurator?,
+    ) = widgetRepository.addWidget(componentName, priority, configurator)
 
     /** Delete a widget by id. */
     fun deleteWidget(id: Int) = widgetRepository.deleteWidget(id)
