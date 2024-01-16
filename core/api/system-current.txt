@@ -14554,6 +14554,7 @@ package android.telephony {
     field public static final int EVENT_SERVICE_STATE_CHANGED = 1; // 0x1
     field public static final int EVENT_SIGNAL_STRENGTHS_CHANGED = 9; // 0x9
     field public static final int EVENT_SIGNAL_STRENGTH_CHANGED = 2; // 0x2
+    field @FlaggedApi("com.android.internal.telephony.flags.simultaneous_calling_indications") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED = 41; // 0x29
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_SRVCC_STATE_CHANGED = 16; // 0x10
     field public static final int EVENT_USER_MOBILE_DATA_STATE_CHANGED = 20; // 0x14
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_VOICE_ACTIVATION_STATE_CHANGED = 18; // 0x12
@@ -14598,6 +14599,10 @@ package android.telephony {
 
   public static interface TelephonyCallback.RadioPowerStateListener {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onRadioPowerStateChanged(int);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.simultaneous_calling_indications") public static interface TelephonyCallback.SimultaneousCellularCallingSupportListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onSimultaneousCellularCallingSubscriptionsChanged(@NonNull java.util.Set<java.lang.Integer>);
   }
 
   public static interface TelephonyCallback.SrvccStateListener {
