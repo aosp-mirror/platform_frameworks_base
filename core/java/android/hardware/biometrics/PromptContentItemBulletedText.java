@@ -24,18 +24,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A list item with plain text shown on {@link PromptVerticalListContentView}.
+ * A list item with bulleted text shown on {@link PromptVerticalListContentView}.
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-public final class PromptContentListItemPlainText implements PromptContentListItemParcelable {
+public final class PromptContentItemBulletedText implements PromptContentItemParcelable {
     private final CharSequence mText;
 
     /**
-     * A list item with plain text shown on {@link PromptVerticalListContentView}.
+     * A list item with bulleted text shown on {@link PromptVerticalListContentView}.
      *
      * @param text The text of this list item.
      */
-    public PromptContentListItemPlainText(@NonNull CharSequence text) {
+    public PromptContentItemBulletedText(@NonNull CharSequence text) {
         mText = text;
     }
 
@@ -67,15 +67,15 @@ public final class PromptContentListItemPlainText implements PromptContentListIt
      * @see Parcelable.Creator
      */
     @NonNull
-    public static final Creator<PromptContentListItemPlainText> CREATOR = new Creator<>() {
+    public static final Creator<PromptContentItemBulletedText> CREATOR = new Creator<>() {
         @Override
-        public PromptContentListItemPlainText createFromParcel(Parcel in) {
-            return new PromptContentListItemPlainText(in.readCharSequence());
+        public PromptContentItemBulletedText createFromParcel(Parcel in) {
+            return new PromptContentItemBulletedText(in.readCharSequence());
         }
 
         @Override
-        public PromptContentListItemPlainText[] newArray(int size) {
-            return new PromptContentListItemPlainText[size];
+        public PromptContentItemBulletedText[] newArray(int size) {
+            return new PromptContentItemBulletedText[size];
         }
     };
 }

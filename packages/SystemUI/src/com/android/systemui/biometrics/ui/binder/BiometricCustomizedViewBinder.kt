@@ -20,9 +20,9 @@ import android.content.Context
 import android.content.res.Resources
 import android.content.res.Resources.Theme
 import android.graphics.Paint
-import android.hardware.biometrics.PromptContentListItem
-import android.hardware.biometrics.PromptContentListItemBulletedText
-import android.hardware.biometrics.PromptContentListItemPlainText
+import android.hardware.biometrics.PromptContentItem
+import android.hardware.biometrics.PromptContentItemBulletedText
+import android.hardware.biometrics.PromptContentItemPlainText
 import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptVerticalListContentView
 import android.text.SpannableString
@@ -111,21 +111,21 @@ private fun createNewRowLayout(inflater: LayoutInflater): LinearLayout {
     return inflater.inflate(R.layout.biometric_prompt_content_row_layout, null) as LinearLayout
 }
 
-private fun PromptContentListItem.doesExceedMaxLinesIfTwoColumn(
+private fun PromptContentItem.doesExceedMaxLinesIfTwoColumn(
     resources: Resources,
 ): Boolean {
     val passedInText: CharSequence =
         when (this) {
-            is PromptContentListItemPlainText -> text
-            is PromptContentListItemBulletedText -> text
+            is PromptContentItemPlainText -> text
+            is PromptContentItemBulletedText -> text
             else -> {
-                throw IllegalStateException("No such ListItem: $this")
+                throw IllegalStateException("No such PromptContentItem: $this")
             }
         }
 
     when (this) {
-        is PromptContentListItemPlainText,
-        is PromptContentListItemBulletedText -> {
+        is PromptContentItemPlainText,
+        is PromptContentItemBulletedText -> {
             val dialogMargin =
                 resources.getDimensionPixelSize(R.dimen.biometric_dialog_border_padding)
             val halfDialogWidth =
@@ -155,12 +155,12 @@ private fun PromptContentListItem.doesExceedMaxLinesIfTwoColumn(
             return numLines > maxLines
         }
         else -> {
-            throw IllegalStateException("No such ListItem: $this")
+            throw IllegalStateException("No such PromptContentItem: $this")
         }
     }
 }
 
-private fun PromptContentListItem.toView(
+private fun PromptContentItem.toView(
     resources: Resources,
     inflater: LayoutInflater,
     theme: Theme,
@@ -171,10 +171,10 @@ private fun PromptContentListItem.toView(
     textView.layoutParams = lp
 
     when (this) {
-        is PromptContentListItemPlainText -> {
+        is PromptContentItemPlainText -> {
             textView.text = text
         }
-        is PromptContentListItemBulletedText -> {
+        is PromptContentItemBulletedText -> {
             val bulletedText = SpannableString(text)
             val span =
                 BulletSpan(
@@ -186,25 +186,25 @@ private fun PromptContentListItem.toView(
             textView.text = bulletedText
         }
         else -> {
-            throw IllegalStateException("No such ListItem: $this")
+            throw IllegalStateException("No such PromptContentItem: $this")
         }
     }
     return textView
 }
 
-private fun PromptContentListItem.getListItemPadding(resources: Resources): Int {
+private fun PromptContentItem.getListItemPadding(resources: Resources): Int {
     var listItemPadding =
         resources.getDimensionPixelSize(
             R.dimen.biometric_prompt_content_list_item_padding_horizontal
         ) * 2
     when (this) {
-        is PromptContentListItemPlainText -> {}
-        is PromptContentListItemBulletedText -> {
+        is PromptContentItemPlainText -> {}
+        is PromptContentItemBulletedText -> {
             listItemPadding +=
                 getListItemBulletRadius(resources) * 2 + getListItemBulletGapWidth(resources)
         }
         else -> {
-            throw IllegalStateException("No such ListItem: $this")
+            throw IllegalStateException("No such PromptContentItem: $this")
         }
     }
     return listItemPadding

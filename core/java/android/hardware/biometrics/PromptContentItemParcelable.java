@@ -22,9 +22,9 @@ import android.annotation.FlaggedApi;
 import android.os.Parcelable;
 
 /**
- * A parcelable {@link PromptContentListItem}.
+ * A parcelable {@link PromptContentItem}.
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-sealed interface PromptContentListItemParcelable extends PromptContentListItem, Parcelable
-        permits PromptContentListItemPlainText, PromptContentListItemBulletedText {
+sealed interface PromptContentItemParcelable extends PromptContentItem, Parcelable
+        permits PromptContentItemPlainText, PromptContentItemBulletedText {
 }
