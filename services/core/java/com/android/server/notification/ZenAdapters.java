@@ -59,9 +59,7 @@ class ZenAdapters {
         }
 
         if (Flags.modesApi()) {
-            zenPolicyBuilder.allowChannels(
-                    policy.allowPriorityChannels()
-                            ? ZenPolicy.CHANNEL_TYPE_PRIORITY : ZenPolicy.CHANNEL_TYPE_NONE);
+            zenPolicyBuilder.allowPriorityChannels(policy.allowPriorityChannels());
         }
 
         return zenPolicyBuilder.build();

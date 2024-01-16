@@ -360,7 +360,7 @@ message DNDPolicyProto {
 
     optional ConversationType allow_conversations_from = 19;
 
-    optional ChannelType allow_channels = 20;
+    optional ChannelPolicy allow_channels = 20;
 }
 
 // Enum identifying the type of rule that changed; values set to match ones used in the
@@ -373,8 +373,8 @@ enum RuleType {
 
 // Enum used in DNDPolicyProto to indicate the type of channels permitted to
 // break through DND. Mirrors values in ZenPolicy.
-enum ChannelType {
-    CHANNEL_TYPE_UNSET = 0;
-    CHANNEL_TYPE_PRIORITY = 1;
-    CHANNEL_TYPE_NONE = 2;
+enum ChannelPolicy {
+    CHANNEL_POLICY_UNSET = 0;
+    CHANNEL_POLICY_PRIORITY = 1;
+    CHANNEL_POLICY_NONE = 2;
 }
