@@ -494,7 +494,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             boolean shouldBeCentered,
             boolean animate) {
         if (migrateClocksToBlueprint()) {
-            mKeyguardInteractor.setClockShouldBeCentered(mSplitShadeEnabled && shouldBeCentered);
+            mKeyguardInteractor.setClockShouldBeCentered(shouldBeCentered);
         } else {
             mKeyguardClockSwitchController.setSplitShadeCentered(
                     splitShadeEnabled && shouldBeCentered);

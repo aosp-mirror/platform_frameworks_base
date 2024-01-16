@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +34,7 @@ constructor(
     @Application applicationScope: CoroutineScope,
     smartspaceController: LockscreenSmartspaceController,
     keyguardClockViewModel: KeyguardClockViewModel,
+    smartspaceInteractor: KeyguardSmartspaceInteractor,
 ) {
     /** Whether the smartspace section is available in the build. */
     val isSmartspaceEnabled: Boolean = smartspaceController.isEnabled()
@@ -78,4 +80,7 @@ constructor(
     ): Boolean {
         return !clockIncludesCustomWeatherDisplay && isWeatherEnabled
     }
+
+    /* trigger clock and smartspace constraints change when smartspace appears */
+    var bcSmartspaceVisibility: StateFlow<Int> = smartspaceInteractor.bcSmartspaceVisibility
 }
