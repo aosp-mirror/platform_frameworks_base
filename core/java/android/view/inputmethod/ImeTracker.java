@@ -335,15 +335,6 @@ public interface ImeTracker {
             @SoftInputShowHideReason int reason, boolean fromUser);
 
     /**
-     * Alias for {@link #onRequestShow(String, int, int, int, boolean)} with
-     * {@code fromUser} set to {@code false}.
-     */
-    default Token onRequestShow(@Nullable String component, int uid, @Origin int origin,
-            @SoftInputShowHideReason int reason) {
-        return onRequestShow(component, uid, origin, reason, false /* fromUser */);
-    }
-
-    /**
      * Creates an IME hide request tracking token.
      *
      * @param component the name of the component that created the IME request, or {@code null}
@@ -358,15 +349,6 @@ public interface ImeTracker {
     @NonNull
     Token onRequestHide(@Nullable String component, int uid, @Origin int origin,
             @SoftInputShowHideReason int reason, boolean fromUser);
-
-    /**
-     * Alias for {@link #onRequestHide(String, int, int, int, boolean)} with
-     * {@code fromUser} set to {@code false}.
-     */
-    default Token onRequestHide(@Nullable String component, int uid, @Origin int origin,
-            @SoftInputShowHideReason int reason) {
-        return onRequestHide(component, uid, origin, reason, false /* fromUser */);
-    }
 
     /**
      * Called when an IME request progresses to a further phase.

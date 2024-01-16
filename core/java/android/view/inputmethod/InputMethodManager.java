@@ -2199,7 +2199,7 @@ public final class InputMethodManager {
         synchronized (mH) {
             final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestShow(
                     null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_SHOW_SOFT_INPUT,
-                    SoftInputShowHideReason.SHOW_SOFT_INPUT);
+                    SoftInputShowHideReason.SHOW_SOFT_INPUT, false /* fromUser */);
 
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be"
                     + " removed soon. If you are using androidx.appcompat.widget.SearchView,"
@@ -3138,7 +3138,7 @@ public final class InputMethodManager {
     void closeCurrentInput() {
         final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
                 null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION);
+                SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION, false /* fromUser */);
         ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                 SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION,
                 ActivityThread::currentApplication);
@@ -3238,7 +3238,7 @@ public final class InputMethodManager {
         if (statsToken == null) {
             statsToken = ImeTracker.forLogging().onRequestHide(null /* component */,
                     Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API);
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API, false /* fromUser */);
         }
         ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
                 SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API,
