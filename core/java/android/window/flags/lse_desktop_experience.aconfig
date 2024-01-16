@@ -1,0 +1,9 @@
+package: "com.android.window.flags"
+
+flag {
+    name: "enable_scaled_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Enable the resizing of un-resizable apps through scaling their bounds up/down"
+    bug: "320350734"
+    is_fixed_read_only: true
+}
