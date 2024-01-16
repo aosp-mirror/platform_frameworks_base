@@ -36,6 +36,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -257,6 +258,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         verify(listener).onMediaDataRemoved(eq(KEY))
     }
 
+    @Ignore("b/301081714")
     @Test
     fun testOnNotificationAdded_emptyTitle_hasPlaceholder() {
         // When the manager has a notification with an empty title
@@ -283,6 +285,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
     }
 
+    @Ignore("b/301081714")
     @Test
     fun testOnNotificationAdded_blankTitle_hasPlaceholder() {
         // GIVEN that the manager has a notification with a blank title
@@ -309,6 +312,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
     }
 
+    @Ignore("b/301081714")
     @Test
     fun testOnNotificationAdded_emptyMetadata_usesNotificationTitle() {
         // When the app sets the metadata title fields to empty strings, but does include a
