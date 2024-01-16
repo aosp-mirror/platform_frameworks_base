@@ -379,7 +379,7 @@ static FormatInfo determineFormat(const SkBitmap& skBitmap, bool usingGL) {
         case kAlpha_8_SkColorType:
             formatInfo.isSupported = HardwareBitmapUploader::hasAlpha8Support();
             formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8_UNORM;
-            formatInfo.format = GL_R8;
+            formatInfo.format = GL_RED;
             formatInfo.type = GL_UNSIGNED_BYTE;
             formatInfo.vkFormat = VK_FORMAT_R8_UNORM;
             break;
