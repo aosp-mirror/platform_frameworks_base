@@ -25,8 +25,12 @@ import android.util.SparseArray;
 import android.view.inputmethod.InputBinding;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteInputConnection;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Store and manage {@link InputMethodManagerService} clients. This class was designed to be a
@@ -37,9 +41,7 @@ import com.android.internal.inputmethod.IRemoteInputConnection;
  * As part of the re-architecture plan (described in go/imms-rearchitecture-plan), the following
  * fields and methods will be moved out from IMMS and placed here:
  * <ul>
- * <li>mCurClient (ClientState)</li>
  * <li>mClients (ArrayMap of ClientState indexed by IBinder)</li>
- * <li>mLastSwitchUserId</li>
  * </ul>
  * <p>
  * Nested Classes (to move from IMMS):
@@ -54,7 +56,6 @@ import com.android.internal.inputmethod.IRemoteInputConnection;
  * <li>removeClient</li>
  * <li>verifyClientAndPackageMatch</li>
  * <li>setImeTraceEnabledForAllClients (make it reactive)</li>
- * <li>unbindCurrentClient</li>
  * </ul>
  */
 // TODO(b/314150112): Update the Javadoc above, by removing the re-architecture steps, once this
@@ -65,18 +66,32 @@ final class ClientController {
     @GuardedBy("ImfLock.class")
     final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 
+    @GuardedBy("ImfLock.class")
+    private final List<ClientControllerCallback> mCallbacks = new ArrayList<>();
+
     private final PackageManagerInternal mPackageManagerInternal;
+
+    interface ClientControllerCallback {
+
+        void onClientRemoved(ClientState client);
+    }
 
     ClientController(PackageManagerInternal packageManagerInternal) {
         mPackageManagerInternal = packageManagerInternal;
     }
 
     @GuardedBy("ImfLock.class")
-    void addClient(IInputMethodClientInvoker clientInvoker,
-            IRemoteInputConnection inputConnection,
-            int selfReportedDisplayId, IBinder.DeathRecipient deathRecipient, int callerUid,
+    ClientState addClient(IInputMethodClientInvoker clientInvoker,
+            IRemoteInputConnection inputConnection, int selfReportedDisplayId, int callerUid,
             int callerPid) {
-        // TODO: Optimize this linear search.
+        final IBinder.DeathRecipient deathRecipient = () -> {
+            // Exceptionally holding ImfLock here since this is a internal lambda expression.
+            synchronized (ImfLock.class) {
+                removeClientAsBinder(clientInvoker.asBinder());
+            }
+        };
+
+        // TODO(b/319457906): Optimize this linear search.
         final int numClients = mClients.size();
         for (int i = 0; i < numClients; ++i) {
             final ClientState state = mClients.valueAt(i);
@@ -101,14 +116,40 @@ final class ClientController {
         // have the client crash.  Thus we do not verify the display ID at all here.  Instead we
         // later check the display ID every time the client needs to interact with the specified
         // display.
-        mClients.put(clientInvoker.asBinder(), new ClientState(clientInvoker, inputConnection,
-                callerUid, callerPid, selfReportedDisplayId, deathRecipient));
+        final ClientState cs = new ClientState(clientInvoker, inputConnection,
+                callerUid, callerPid, selfReportedDisplayId, deathRecipient);
+        mClients.put(clientInvoker.asBinder(), cs);
+        return cs;
+    }
+
+    @VisibleForTesting
+    @GuardedBy("ImfLock.class")
+    boolean removeClient(IInputMethodClient client) {
+        return removeClientAsBinder(client.asBinder());
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean removeClientAsBinder(IBinder binder) {
+        final ClientState cs = mClients.remove(binder);
+        if (cs == null) {
+            return false;
+        }
+        binder.unlinkToDeath(cs.mClientDeathRecipient, 0 /* flags */);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onClientRemoved(cs);
+        }
+        return true;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void addClientControllerCallback(ClientControllerCallback callback) {
+        mCallbacks.add(callback);
     }
 
     @GuardedBy("ImfLock.class")
     boolean verifyClientAndPackageMatch(
             @NonNull IInputMethodClient client, @NonNull String packageName) {
-        ClientState cs = mClients.get(client.asBinder());
+        final ClientState cs = mClients.get(client.asBinder());
         if (cs == null) {
             throw new IllegalArgumentException("unknown client " + client.asBinder());
         }
