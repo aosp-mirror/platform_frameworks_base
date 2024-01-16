@@ -12103,6 +12103,7 @@ public class NotificationManagerService extends SystemService {
                 return true;
             }
 
+            long token = Binder.clearCallingIdentity();
             try {
                 if (mPackageManager.checkUidPermission(RECEIVE_SENSITIVE_NOTIFICATIONS, uid)
                         == PERMISSION_GRANTED || mPackageManagerInternal.isPlatformSigned(pkg)) {
@@ -12129,6 +12130,8 @@ public class NotificationManagerService extends SystemService {
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to check trusted status of listener", e);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
             return false;
         }
