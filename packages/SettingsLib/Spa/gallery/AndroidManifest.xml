@@ -74,8 +74,7 @@
             android:exported="false">
         </provider>
         <activity
-            android:name="com.android.settingslib.spa.gallery.SpaDialogActivity"
-            android:excludeFromRecents="true"
+            android:name="com.android.settingslib.spa.gallery.GalleryDialogActivity"
             android:exported="true"
             android:theme="@style/Theme.SpaLib.Dialog">
         </activity>
