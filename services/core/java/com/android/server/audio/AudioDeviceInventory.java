@@ -764,7 +764,7 @@ public class AudioDeviceInventory {
     /** only public for mocking/spying, do not call outside of AudioService */
     // @GuardedBy("mDeviceBroker.mSetModeLock")
     @VisibleForTesting
-    @GuardedBy("mDeviceBroker.mDeviceStateLock")
+    //@GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
     public void onSetBtActiveDevice(@NonNull AudioDeviceBroker.BtDeviceInfo btInfo,
                                     @AudioSystem.AudioFormatNativeEnumForBtCodec int codec,
                                     int streamType) {
