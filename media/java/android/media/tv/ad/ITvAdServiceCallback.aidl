@@ -16,15 +16,9 @@
 
 package android.media.tv.ad;
 
-import android.view.Surface;
-
 /**
- * Sub-interface of ITvAdService.aidl which is created per session and has its own context.
+ * Helper interface for ITvAdService to allow the TvAdService to notify the TvAdManagerService.
  * @hide
  */
-oneway interface ITvAdSession {
-    void release();
-    void startAdService();
-    void setSurface(in Surface surface);
-    void dispatchSurfaceChanged(int format, int width, int height);
+oneway interface ITvAdServiceCallback {
 }

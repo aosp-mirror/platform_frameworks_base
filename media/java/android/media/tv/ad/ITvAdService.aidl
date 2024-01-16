@@ -16,15 +16,20 @@
 
 package android.media.tv.ad;
 
-import android.view.Surface;
+import android.media.tv.ad.ITvAdServiceCallback;
+import android.media.tv.ad.ITvAdSessionCallback;
+import android.os.Bundle;
+import android.view.InputChannel;
 
 /**
- * Sub-interface of ITvAdService.aidl which is created per session and has its own context.
+ * Top-level interface to a TV AD component (implemented in a Service). It's used for
+ * TvAdManagerService to communicate with TvAdService.
  * @hide
  */
-oneway interface ITvAdSession {
-    void release();
-    void startAdService();
-    void setSurface(in Surface surface);
-    void dispatchSurfaceChanged(int format, int width, int height);
+oneway interface ITvAdService {
+    void registerCallback(in ITvAdServiceCallback callback);
+    void unregisterCallback(in ITvAdServiceCallback callback);
+    void createSession(in InputChannel channel, in ITvAdSessionCallback callback,
+            in String serviceId, in String type);
+    void sendAppLinkCommand(in Bundle command);
 }

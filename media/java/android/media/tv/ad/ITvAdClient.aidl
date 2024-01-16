@@ -16,15 +16,15 @@
 
 package android.media.tv.ad;
 
-import android.view.Surface;
+import android.view.InputChannel;
 
 /**
- * Sub-interface of ITvAdService.aidl which is created per session and has its own context.
+ * Interface a client of the ITvAdManager implements, to identify itself and receive
+ * information about changes to the state of each TV AD service.
  * @hide
  */
-oneway interface ITvAdSession {
-    void release();
-    void startAdService();
-    void setSurface(in Surface surface);
-    void dispatchSurfaceChanged(int format, int width, int height);
+oneway interface ITvAdClient {
+    void onSessionCreated(in String serviceId, IBinder token, in InputChannel channel, int seq);
+    void onSessionReleased(int seq);
+    void onLayoutSurface(int left, int top, int right, int bottom, int seq);
 }
