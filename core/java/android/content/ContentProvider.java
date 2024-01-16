@@ -41,7 +41,6 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.SQLException;
-import android.multiuser.Flags;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -147,7 +146,6 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     private boolean mExported;
     private boolean mNoPerms;
     private boolean mSingleUser;
-    private boolean mSystemUserOnly;
     private SparseBooleanArray mUsersRedirectedToOwnerForMedia = new SparseBooleanArray();
 
     private ThreadLocal<AttributionSource> mCallingAttributionSource;
@@ -379,9 +377,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                             != PermissionChecker.PERMISSION_GRANTED
                             && getContext().checkUriPermission(userUri, Binder.getCallingPid(),
                             callingUid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            != PackageManager.PERMISSION_GRANTED
-                            && !deniedAccessSystemUserOnlyProvider(callingUserId,
-                            mSystemUserOnly)) {
+                            != PackageManager.PERMISSION_GRANTED) {
                         FrameworkStatsLog.write(GET_TYPE_ACCESSED_WITHOUT_PERMISSION,
                                 enumCheckUriPermission,
                                 callingUid, uri.getAuthority(), type);
@@ -869,10 +865,6 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     boolean checkUser(int pid, int uid, Context context) {
         final int callingUserId = UserHandle.getUserId(uid);
 
-        if (deniedAccessSystemUserOnlyProvider(callingUserId, mSystemUserOnly)) {
-            return false;
-        }
-
         if (callingUserId == context.getUserId() || mSingleUser) {
             return true;
         }
@@ -995,9 +987,6 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
         // last chance, check against any uri grants
         final int callingUserId = UserHandle.getUserId(uid);
-        if (deniedAccessSystemUserOnlyProvider(callingUserId, mSystemUserOnly)) {
-            return PermissionChecker.PERMISSION_HARD_DENIED;
-        }
         final Uri userUri = (mSingleUser && !UserHandle.isSameUser(mMyUid, uid))
                 ? maybeAddUserId(uri, callingUserId) : uri;
         if (context.checkUriPermission(userUri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -2634,7 +2623,6 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 setPathPermissions(info.pathPermissions);
                 mExported = info.exported;
                 mSingleUser = (info.flags & ProviderInfo.FLAG_SINGLE_USER) != 0;
-                mSystemUserOnly = (info.flags & ProviderInfo.FLAG_SYSTEM_USER_ONLY) != 0;
                 setAuthorities(info.authority);
             }
             if (Build.IS_DEBUGGABLE) {
@@ -2768,11 +2756,6 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         String auth = uri.getAuthority();
         if (!mSingleUser) {
             int userId = getUserIdFromAuthority(auth, UserHandle.USER_CURRENT);
-            if (deniedAccessSystemUserOnlyProvider(mContext.getUserId(),
-                    mSystemUserOnly)) {
-                throw new SecurityException("Trying to query a SYSTEM user only content"
-                        + " provider from user:" + mContext.getUserId());
-            }
             if (userId != UserHandle.USER_CURRENT
                     && userId != mContext.getUserId()
                     // Since userId specified in content uri, the provider userId would be
@@ -2945,17 +2928,5 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         if (Trace.isTagEnabled(traceTag)) {
             Trace.traceBegin(traceTag, methodName + subInfo);
         }
-    }
-    /**
-     * Return true if access to content provider is denied because it's a SYSTEM user only
-     * provider and the calling user is not the SYSTEM user.
-     *
-     * @param callingUserId UserId of the caller accessing the content provider.
-     * @param systemUserOnly true when the content provider is only available for the SYSTEM user.
-     */
-    private static boolean deniedAccessSystemUserOnlyProvider(int callingUserId,
-            boolean systemUserOnly) {
-        return Flags.enableSystemUserOnlyForServicesAndProviders()
-                && (callingUserId != UserHandle.USER_SYSTEM && systemUserOnly);
     }
 }

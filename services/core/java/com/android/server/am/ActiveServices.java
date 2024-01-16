@@ -4491,12 +4491,6 @@ public final class ActiveServices {
                     }
                 }
                 if (userId > 0) {
-                    if (mAm.isSystemUserOnly(sInfo.flags)) {
-                        Slog.w(TAG_SERVICE, service + " is only available for the SYSTEM user,"
-                                + " calling userId is: " + userId);
-                        return null;
-                    }
-
                     if (mAm.isSingleton(sInfo.processName, sInfo.applicationInfo,
                             sInfo.name, sInfo.flags)
                             && mAm.isValidSingletonCall(callingUid, sInfo.applicationInfo.uid)) {

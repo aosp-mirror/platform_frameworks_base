@@ -1249,9 +1249,9 @@ public class ContentProviderHelper {
             ProviderInfo cpi = providers.get(i);
             boolean singleton = mService.isSingleton(cpi.processName, cpi.applicationInfo,
                     cpi.name, cpi.flags);
-            if (isSingletonOrSystemUserOnly(cpi) && app.userId != UserHandle.USER_SYSTEM) {
-                // This is a singleton or a SYSTEM user only provider, but a user besides the
-                // SYSTEM user is asking to initialize a process it runs
+            if (singleton && app.userId != UserHandle.USER_SYSTEM) {
+                // This is a singleton provider, but a user besides the
+                // default user is asking to initialize a process it runs
                 // in...  well, no, it doesn't actually run in this process,
                 // it runs in the process of the default user.  Get rid of it.
                 providers.remove(i);
@@ -1398,7 +1398,8 @@ public class ContentProviderHelper {
                                     final boolean processMatch =
                                             Objects.equals(pi.processName, app.processName)
                                             || pi.multiprocess;
-                                    final boolean userMatch = !isSingletonOrSystemUserOnly(pi)
+                                    final boolean userMatch = !mService.isSingleton(
+                                            pi.processName, pi.applicationInfo, pi.name, pi.flags)
                                             || app.userId == UserHandle.USER_SYSTEM;
                                     final boolean isInstantApp = pi.applicationInfo.isInstantApp();
                                     final boolean splitInstalled = pi.splitName == null
@@ -1983,14 +1984,5 @@ public class ContentProviderHelper {
             mCloneProfileAuthorityRedirectionCache.put(auth, isAuthRedirected);
             return isAuthRedirected;
         }
-    }
-
-    /**
-     * Returns true if Provider is either singleUser or systemUserOnly provider.
-     */
-    private boolean isSingletonOrSystemUserOnly(ProviderInfo pi) {
-        return (android.multiuser.Flags.enableSystemUserOnlyForServicesAndProviders()
-                && mService.isSystemUserOnly(pi.flags))
-                || mService.isSingleton(pi.processName, pi.applicationInfo, pi.name, pi.flags);
     }
 }
