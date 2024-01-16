@@ -272,6 +272,14 @@ public class NotificationShadeWindowViewController implements Dumpable {
         return result;
     }
 
+    /**
+     * Handle a touch event while dreaming by forwarding the event to the content view.
+     * @param event The event to forward.
+     */
+    public void handleDreamTouch(MotionEvent event) {
+        mView.dispatchTouchEvent(event);
+    }
+
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
     public void setupExpandedStatusBar() {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
