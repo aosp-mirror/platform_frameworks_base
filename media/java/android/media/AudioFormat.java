@@ -1079,7 +1079,7 @@ public final class AudioFormat implements Parcelable {
      * @return one of the values that can be set in {@link Builder#setEncoding(int)} or
      * {@link AudioFormat#ENCODING_INVALID} if not set.
      */
-    public int getEncoding() {
+    public @Encoding int getEncoding() {
         return mEncoding;
     }
 
