@@ -1049,8 +1049,17 @@ public class TelecomManager {
     public static final int PRESENTATION_UNAVAILABLE = 5;
 
 
+    /**
+     * Controls audio route for video calls.
+     * 0 - Use the default audio routing strategy.
+     * 1 - Disable the speaker. Route the audio to Headset or Bluetooth
+     *     or Earpiece, based on the default audio routing strategy.
+     * @hide
+     */
+    public static final String PROPERTY_VIDEOCALL_AUDIO_OUTPUT = "persist.radio.call.audio.output";
+
     /*
-     * Values for the adb property "persist.radio.videocall.audio.output"
+     * Values for the adb property "persist.radio.call.audio.output"
      */
     /** @hide */
     public static final int AUDIO_OUTPUT_ENABLE_SPEAKER = 0;
