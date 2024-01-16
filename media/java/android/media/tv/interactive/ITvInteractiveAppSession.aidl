@@ -78,6 +78,7 @@ oneway interface ITvInteractiveAppSession {
     void notifyBroadcastInfoResponse(in BroadcastInfoResponse response);
     void notifyAdResponse(in AdResponse response);
     void notifyAdBufferConsumed(in AdBuffer buffer);
+    void sendSelectedTrackInfo(in List<TvTrackInfo> tracks);
 
     void createMediaView(in IBinder windowToken, in Rect frame);
     void relayoutMediaView(in Rect frame);

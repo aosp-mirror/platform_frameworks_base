@@ -582,6 +582,20 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
+     * Sends the currently selected track info to the TV Interactive App.
+     *
+     * @hide
+     */
+    public void sendSelectedTrackInfo(@Nullable List<TvTrackInfo> tracks) {
+        if (DEBUG) {
+            Log.d(TAG, "sendSelectedTrackInfo");
+        }
+        if (mSession != null) {
+            mSession.sendSelectedTrackInfo(tracks);
+        }
+    }
+
+    /**
      * Sends current TV input ID to related TV interactive app.
      *
      * @param inputId The current TV input ID whose channel is tuned. {@code null} if no channel is
@@ -1197,6 +1211,16 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
+         * This is called when {@link TvInteractiveAppService.Session#requestSelectedTrackInfo()} is
+         * called.
+         *
+         * @param iAppServiceId The ID of the TV interactive app service bound to this view.
+         * @hide
+         */
+        public void onRequestSelectedTrackInfo(@NonNull String iAppServiceId) {
+        }
+
+        /**
          * This is called when {@link TvInteractiveAppService.Session#requestCurrentTvInputId()} is
          * called.
          *
@@ -1706,6 +1730,28 @@ public class TvInteractiveAppView extends ViewGroup {
                         synchronized (mCallbackLock) {
                             if (mCallback != null) {
                                 mCallback.onRequestTrackInfoList(mIAppServiceId);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        @Override
+        public void onRequestSelectedTrackInfo(Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onRequestSelectedTrackInfo");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onRequestSelectedTrackInfo - session not created");
+                return;
+            }
+            synchronized (mCallbackLock) {
+                if (mCallbackExecutor != null) {
+                    mCallbackExecutor.execute(() -> {
+                        synchronized (mCallbackLock) {
+                            if (mCallback != null) {
+                                mCallback.onRequestSelectedTrackInfo(mIAppServiceId);
                             }
                         }
                     });

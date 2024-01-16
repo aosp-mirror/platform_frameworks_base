@@ -102,6 +102,8 @@ interface ITvInteractiveAppManager {
             int UserId);
     void notifyAdResponse(in IBinder sessionToken, in AdResponse response, int UserId);
     void notifyAdBufferConsumed(in IBinder sessionToken, in AdBuffer buffer, int userId);
+    void sendSelectedTrackInfo(in IBinder sessionToken, in List<TvTrackInfo> tracks,
+            int userId);
 
     void createMediaView(in IBinder sessionToken, in IBinder windowToken, in Rect frame,
             int userId);

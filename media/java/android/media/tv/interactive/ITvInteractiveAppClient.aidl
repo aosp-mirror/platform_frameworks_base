@@ -48,6 +48,7 @@ oneway interface ITvInteractiveAppClient {
     void onRequestCurrentChannelLcn(int seq);
     void onRequestStreamVolume(int seq);
     void onRequestTrackInfoList(int seq);
+    void onRequestSelectedTrackInfo(int seq);
     void onRequestCurrentTvInputId(int seq);
     void onRequestTimeShiftMode(int seq);
     void onRequestAvailableSpeeds(int seq);
