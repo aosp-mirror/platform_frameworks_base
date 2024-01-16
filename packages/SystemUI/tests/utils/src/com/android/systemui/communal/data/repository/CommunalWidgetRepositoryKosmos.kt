@@ -17,9 +17,14 @@
 package com.android.systemui.communal.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 
-var Kosmos.communalWidgetRepository: CommunalWidgetRepository by
-    Kosmos.Fixture { fakeCommunalWidgetRepository }
-val Kosmos.fakeCommunalWidgetRepository by
-    Kosmos.Fixture { FakeCommunalWidgetRepository(applicationCoroutineScope) }
+val Kosmos.fakeCommunalWidgetRepository by Fixture {
+    FakeCommunalWidgetRepository(
+        coroutineScope = applicationCoroutineScope,
+    )
+}
+
+val Kosmos.communalWidgetRepository by
+    Fixture<CommunalWidgetRepository> { fakeCommunalWidgetRepository }

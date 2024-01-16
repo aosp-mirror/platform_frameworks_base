@@ -28,6 +28,7 @@ import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -37,11 +38,17 @@ class SceneContainerViewModelTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val interactor = utils.sceneInteractor()
-    private val underTest =
-        SceneContainerViewModel(
-            sceneInteractor = interactor,
-            falsingInteractor = utils.falsingInteractor(),
-        )
+    private lateinit var underTest: SceneContainerViewModel
+
+    @Before
+    fun setUp() {
+        utils.fakeSceneContainerFlags.enabled = true
+        underTest =
+            SceneContainerViewModel(
+                sceneInteractor = interactor,
+                falsingInteractor = utils.falsingInteractor(),
+            )
+    }
 
     @Test
     fun isVisible() = runTest {

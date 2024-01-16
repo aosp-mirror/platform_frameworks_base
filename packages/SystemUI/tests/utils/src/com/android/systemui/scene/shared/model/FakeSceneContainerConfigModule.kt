@@ -30,6 +30,7 @@ data class FakeSceneContainerConfigModule(
                     SceneKey.Lockscreen,
                     SceneKey.Bouncer,
                     SceneKey.Gone,
+                    SceneKey.Communal,
                 ),
             initialSceneKey = SceneKey.Lockscreen,
         ),

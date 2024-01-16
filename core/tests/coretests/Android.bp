@@ -83,6 +83,10 @@ android_test {
         "com.android.text.flags-aconfig-java",
         "flag-junit",
         "ravenwood-junit",
+        "perfetto_trace_java_protos",
+        "flickerlib-parsers",
+        "flickerlib-trace_processor_shell",
+        "mockito-target-extended-minus-junit4",
     ],
 
     libs: [

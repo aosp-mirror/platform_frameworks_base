@@ -121,10 +121,10 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
             SUPERVISED_USER_CREATION_APP_PACKAGE,
         )
 
-        utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+        utils.fakeFeatureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_SWITCH_USER_ON_BG)
         spyContext = spy(context)
-        keyguardReply = KeyguardInteractorFactory.create(featureFlags = utils.featureFlags)
+        keyguardReply = KeyguardInteractorFactory.create(featureFlags = utils.fakeFeatureFlags)
         keyguardRepository = keyguardReply.repository
         userRepository = FakeUserRepository()
         refreshUsersScheduler =
@@ -363,7 +363,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun actions_deviceUnlocked_fullScreen() {
         createUserInteractor()
         testScope.runTest {
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.fakeFeatureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 2, includeGuest = false)
 
             userRepository.setUserInfos(userInfos)
@@ -447,7 +447,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun actions_deviceLockedAddFromLockscreenSet_fullList_fullScreen() {
         createUserInteractor()
         testScope.runTest {
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.fakeFeatureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -792,7 +792,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun userRecordsFullScreen() {
         createUserInteractor()
         testScope.runTest {
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.fakeFeatureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 3, includeGuest = false)
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             userRepository.setUserInfos(userInfos)
@@ -901,7 +901,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun showUserSwitcher_fullScreenEnabled_launchesFullScreenDialog() {
         createUserInteractor()
         testScope.runTest {
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.fakeFeatureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
 
             val expandable = mock<Expandable>()
             underTest.showUserSwitcher(expandable)
@@ -1139,7 +1139,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
                         resetOrExitSessionReceiver = resetOrExitSessionReceiver,
                     ),
                 uiEventLogger = uiEventLogger,
-                featureFlags = utils.featureFlags,
+                featureFlags = utils.fakeFeatureFlags,
                 userRestrictionChecker = mock(),
             )
     }

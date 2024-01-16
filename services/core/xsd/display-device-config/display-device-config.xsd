@@ -625,6 +625,9 @@
 
     If no mode is specified, the mapping will be used for the default mode.
     If no setting is specified, the mapping will be used for the normal brightness setting.
+
+    If no mapping is defined for one of the settings, the mapping for the normal setting will be
+    used as a fallback.
     -->
     <xs:complexType name="luxToBrightnessMapping">
         <xs:element name="map" type="nonNegativeFloatToFloatMap">

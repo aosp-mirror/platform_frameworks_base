@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.admin.flags.Flags;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -131,6 +132,7 @@ public final class BugreportParams {
      */
     @TestApi
     @FlaggedApi(Flags.FLAG_ONBOARDING_BUGREPORT_V2_ENABLED)
+    @UnsupportedAppUsage
     public static final int BUGREPORT_MODE_ONBOARDING = IDumpstate.BUGREPORT_MODE_ONBOARDING;
 
     /**

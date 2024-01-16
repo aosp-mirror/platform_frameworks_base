@@ -475,14 +475,40 @@ public class OverlayPresentationTest {
     @Test
     public void testOnTaskFragmentParentInfoChanged_positionOnlyChange_earlyReturn() {
         final TaskFragmentContainer overlayContainer = createTestOverlayContainer(TASK_ID, "test");
-
         final TaskContainer taskContainer = overlayContainer.getTaskContainer();
+
+        assertThat(taskContainer.getOverlayContainer()).isEqualTo(overlayContainer);
+
         spyOn(taskContainer);
         final TaskContainer.TaskProperties taskProperties = taskContainer.getTaskProperties();
         final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(
                 new Configuration(taskProperties.getConfiguration()), taskProperties.getDisplayId(),
                 true /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
         parentInfo.getConfiguration().windowConfiguration.getBounds().offset(10, 10);
+
+        mSplitController.onTaskFragmentParentInfoChanged(mTransaction, TASK_ID, parentInfo);
+
+        // The parent info must be applied to the task container
+        verify(taskContainer).updateTaskFragmentParentInfo(parentInfo);
+        verify(mSplitController, never()).updateContainer(any(), any());
+
+        assertWithMessage("The overlay container must still be dismissed even if "
+                + "#updateContainer is not called")
+                .that(taskContainer.getOverlayContainer()).isNull();
+    }
+
+    @Test
+    public void testOnTaskFragmentParentInfoChanged_invisibleTask_callDismissOverlayContainer() {
+        final TaskFragmentContainer overlayContainer = createTestOverlayContainer(TASK_ID, "test");
+        final TaskContainer taskContainer = overlayContainer.getTaskContainer();
+
+        assertThat(taskContainer.getOverlayContainer()).isEqualTo(overlayContainer);
+
+        spyOn(taskContainer);
+        final TaskContainer.TaskProperties taskProperties = taskContainer.getTaskProperties();
+        final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(
+                new Configuration(taskProperties.getConfiguration()), taskProperties.getDisplayId(),
+                false /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
 
         mSplitController.onTaskFragmentParentInfoChanged(mTransaction, TASK_ID, parentInfo);
 

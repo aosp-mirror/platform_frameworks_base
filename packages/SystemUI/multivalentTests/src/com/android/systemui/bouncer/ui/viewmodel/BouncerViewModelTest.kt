@@ -41,6 +41,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -52,15 +53,14 @@ class BouncerViewModelTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val authenticationInteractor = utils.authenticationInteractor()
-    private val bouncerInteractor =
-        utils.bouncerInteractor(
-            authenticationInteractor = authenticationInteractor,
-        )
-    private val underTest =
-        utils.bouncerViewModel(
-            bouncerInteractor = bouncerInteractor,
-            authenticationInteractor = authenticationInteractor,
-        )
+    private val bouncerInteractor = utils.bouncerInteractor()
+    private lateinit var underTest: BouncerViewModel
+
+    @Before
+    fun setUp() {
+        utils.fakeSceneContainerFlags.enabled = true
+        underTest = utils.bouncerViewModel()
+    }
 
     @Test
     fun authMethod_nonNullForSecureMethods_nullForNotSecureMethods() =
@@ -228,13 +228,13 @@ class BouncerViewModelTest : SysuiTestCase() {
     fun isSideBySideSupported() =
         testScope.runTest {
             val isSideBySideSupported by collectLastValue(underTest.isSideBySideSupported)
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.fakeFeatureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             utils.authenticationRepository.setAuthenticationMethod(Pin)
             assertThat(isSideBySideSupported).isTrue()
             utils.authenticationRepository.setAuthenticationMethod(Password)
             assertThat(isSideBySideSupported).isTrue()
 
-            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+            utils.fakeFeatureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
             utils.authenticationRepository.setAuthenticationMethod(Pin)
             assertThat(isSideBySideSupported).isTrue()
 

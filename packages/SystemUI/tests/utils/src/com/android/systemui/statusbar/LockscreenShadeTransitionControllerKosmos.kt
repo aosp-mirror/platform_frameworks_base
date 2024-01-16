@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar
 
-import android.content.testableContext
+import android.content.applicationContext
 import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.classifier.falsingManager
 import com.android.systemui.dump.dumpManager
@@ -47,7 +47,7 @@ val Kosmos.lockscreenShadeTransitionController by Fixture {
         scrimTransitionController = lockscreenShadeScrimTransitionController,
         keyguardTransitionControllerFactory = lockscreenShadeKeyguardTransitionControllerFactory,
         depthController = notificationShadeDepthController,
-        context = testableContext,
+        context = applicationContext,
         splitShadeOverScrollerFactory = splitShadeLockScreenOverScrollerFactory,
         singleShadeOverScrollerFactory = singleShadeLockScreenOverScrollerFactory,
         activityStarter = activityStarter,

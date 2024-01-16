@@ -16,11 +16,18 @@
 
 package com.android.server.display.mode;
 
+import static com.android.internal.util.FrameworkStatsLog.DISPLAY_MODE_DIRECTOR_VOTE_CHANGED;
+import static com.android.internal.util.FrameworkStatsLog.DISPLAY_MODE_DIRECTOR_VOTE_CHANGED__VOTE_STATUS__STATUS_ACTIVE;
+import static com.android.internal.util.FrameworkStatsLog.DISPLAY_MODE_DIRECTOR_VOTE_CHANGED__VOTE_STATUS__STATUS_ADDED;
+import static com.android.internal.util.FrameworkStatsLog.DISPLAY_MODE_DIRECTOR_VOTE_CHANGED__VOTE_STATUS__STATUS_REMOVED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Trace;
 import android.util.SparseArray;
 import android.view.Display;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 /**
  * The VotesStatsReporter is responsible for collecting and sending Vote related statistics 
@@ -31,42 +38,77 @@ class VotesStatsReporter {
     private final boolean mIgnoredRenderRate;
     private final boolean mFrameworkStatsLogReportingEnabled;
 
+    private int mLastMinPriorityReported = Vote.MAX_PRIORITY + 1;
+
     public VotesStatsReporter(boolean ignoreRenderRate, boolean refreshRateVotingTelemetryEnabled) {
         mIgnoredRenderRate = ignoreRenderRate;
         mFrameworkStatsLogReportingEnabled = refreshRateVotingTelemetryEnabled;
     }
 
-    void reportVoteAdded(int displayId, int priority,  @NonNull Vote vote) {
+    void reportVoteChanged(int displayId, int priority,  @Nullable Vote vote) {
+        if (vote == null) {
+            reportVoteRemoved(displayId, priority);
+        } else {
+            reportVoteAdded(displayId, priority, vote);
+        }
+    }
+
+    private void reportVoteAdded(int displayId, int priority,  @NonNull Vote vote) {
         int maxRefreshRate = getMaxRefreshRate(vote, mIgnoredRenderRate);
         Trace.traceCounter(Trace.TRACE_TAG_POWER,
                 TAG + "." + displayId + ":" + Vote.priorityToString(priority), maxRefreshRate);
-        // if ( mFrameworkStatsLogReportingEnabled) {
-        // FrameworkStatsLog.write(VOTE_CHANGED, displayID, priority, ADDED, maxRefreshRate, -1);
-        // }
+        if (mFrameworkStatsLogReportingEnabled) {
+            FrameworkStatsLog.write(
+                    DISPLAY_MODE_DIRECTOR_VOTE_CHANGED, displayId, priority,
+                    DISPLAY_MODE_DIRECTOR_VOTE_CHANGED__VOTE_STATUS__STATUS_ADDED,
+                    maxRefreshRate, -1);
+        }
     }
 
-    void reportVoteRemoved(int displayId, int priority) {
+    private void reportVoteRemoved(int displayId, int priority) {
         Trace.traceCounter(Trace.TRACE_TAG_POWER,
                 TAG + "." + displayId + ":" + Vote.priorityToString(priority), -1);
-        // if ( mFrameworkStatsLogReportingEnabled) {
-        // FrameworkStatsLog.write(VOTE_CHANGED, displayID, priority, REMOVED, -1, -1);
-        // }
+        if (mFrameworkStatsLogReportingEnabled) {
+            FrameworkStatsLog.write(
+                    DISPLAY_MODE_DIRECTOR_VOTE_CHANGED, displayId, priority,
+                    DISPLAY_MODE_DIRECTOR_VOTE_CHANGED__VOTE_STATUS__STATUS_REMOVED, -1, -1);
+        }
     }
 
     void reportVotesActivated(int displayId, int minPriority, @Nullable Display.Mode baseMode,
             SparseArray<Vote> votes) {
-//        if (!mFrameworkStatsLogReportingEnabled) {
-//            return;
-//        }
-//        int selectedRefreshRate = baseMode != null ? (int) baseMode.getRefreshRate() : -1;
-//        for (int priority = minPriority; priority <= Vote.MAX_PRIORITY; priority ++) {
-//            Vote vote = votes.get(priority);
-//            if (vote != null) {
-//                int maxRefreshRate = getMaxRefreshRate(vote, mIgnoredRenderRate);
-//                FrameworkStatsLog.write(VOTE_CHANGED, displayId, priority,
-//                        ACTIVE, maxRefreshRate, selectedRefreshRate);
-//            }
-//        }
+        if (!mFrameworkStatsLogReportingEnabled) {
+            return;
+        }
+        int selectedRefreshRate = baseMode != null ? (int) baseMode.getRefreshRate() : -1;
+        for (int priority = Vote.MIN_PRIORITY; priority <= Vote.MAX_PRIORITY; priority++) {
+            if (priority < mLastMinPriorityReported && priority < minPriority) {
+                continue;
+            }
+            Vote vote = votes.get(priority);
+            if (vote == null) {
+                continue;
+            }
+
+            // Was previously reported ACTIVE, changed to ADDED
+            if (priority >= mLastMinPriorityReported && priority < minPriority) {
+                int maxRefreshRate = getMaxRefreshRate(vote, mIgnoredRenderRate);
+                FrameworkStatsLog.write(
+                        DISPLAY_MODE_DIRECTOR_VOTE_CHANGED, displayId, priority,
+                        DISPLAY_MODE_DIRECTOR_VOTE_CHANGED__VOTE_STATUS__STATUS_ADDED,
+                        maxRefreshRate, selectedRefreshRate);
+            }
+            // Was previously reported ADDED, changed to ACTIVE
+            if (priority >= minPriority && priority < mLastMinPriorityReported) {
+                int maxRefreshRate = getMaxRefreshRate(vote, mIgnoredRenderRate);
+                FrameworkStatsLog.write(
+                        DISPLAY_MODE_DIRECTOR_VOTE_CHANGED, displayId, priority,
+                        DISPLAY_MODE_DIRECTOR_VOTE_CHANGED__VOTE_STATUS__STATUS_ACTIVE,
+                        maxRefreshRate, selectedRefreshRate);
+            }
+
+            mLastMinPriorityReported = minPriority;
+        }
     }
 
     private static int getMaxRefreshRate(@NonNull Vote vote, boolean ignoreRenderRate) {

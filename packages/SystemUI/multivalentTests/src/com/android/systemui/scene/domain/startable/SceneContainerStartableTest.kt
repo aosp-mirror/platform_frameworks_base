@@ -28,7 +28,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
@@ -68,17 +68,11 @@ class SceneContainerStartableTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
-    private val sceneContainerFlags = utils.sceneContainerFlags
+    private val sceneContainerFlags = utils.fakeSceneContainerFlags
     private val authenticationInteractor = utils.authenticationInteractor()
-    private val bouncerInteractor =
-        utils.bouncerInteractor(authenticationInteractor = authenticationInteractor)
-    private val faceAuthRepository = FakeDeviceEntryFaceAuthRepository()
-    private val deviceEntryInteractor =
-        utils.deviceEntryInteractor(
-            faceAuthRepository = faceAuthRepository,
-            authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
-        )
+    private val bouncerInteractor = utils.bouncerInteractor()
+    private val faceAuthRepository = utils.kosmos.fakeDeviceEntryFaceAuthRepository
+    private val deviceEntryInteractor = utils.deviceEntryInteractor()
     private val keyguardInteractor = utils.keyguardInteractor()
     private val sysUiState: SysUiState = mock()
     private val falsingCollector: FalsingCollector = mock()

@@ -838,10 +838,11 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
-        public boolean isDisplayOwnedByAnyVirtualDevice(int displayId) {
+        public boolean isInputDeviceOwnedByVirtualDevice(int inputDeviceId) {
             ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
             for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
-                if (virtualDevicesSnapshot.get(i).isDisplayOwnedByVirtualDevice(displayId)) {
+                if (virtualDevicesSnapshot.get(i)
+                        .isInputDeviceOwnedByVirtualDevice(inputDeviceId)) {
                     return true;
                 }
             }

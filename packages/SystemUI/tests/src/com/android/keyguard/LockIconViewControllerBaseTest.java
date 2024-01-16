@@ -175,7 +175,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mPrimaryBouncerInteractor,
                 mContext,
                 () -> mDeviceEntryInteractor,
-                mSceneTestUtils.getSceneContainerFlags()
+                mSceneTestUtils.getFakeSceneContainerFlags()
         );
     }
 

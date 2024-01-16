@@ -16,9 +16,7 @@
 
 package android.content
 
-import com.android.systemui.SysuiTestableContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 
-val Kosmos.testableContext: SysuiTestableContext by Kosmos.Fixture { testCase.context }
-var Kosmos.applicationContext: Context by Kosmos.Fixture { testableContext }
+var Kosmos.applicationContext: Context by Kosmos.Fixture { testCase.context }

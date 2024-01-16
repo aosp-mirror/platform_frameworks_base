@@ -25,7 +25,8 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
@@ -37,8 +38,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -46,9 +45,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class BouncerInteractorTest : SysuiTestCase() {
 
-    @Mock private lateinit var mDeviceEntryFaceAuthInteractor: DeviceEntryFaceAuthInteractor
-
-    private val utils = SceneTestUtils(this)
+    private val utils = SceneTestUtils(this).apply { fakeSceneContainerFlags.enabled = true }
     private val testScope = utils.testScope
     private val authenticationInteractor = utils.authenticationInteractor()
 
@@ -57,6 +54,7 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
         overrideResource(R.string.keyguard_enter_your_pin, MESSAGE_ENTER_YOUR_PIN)
         overrideResource(R.string.keyguard_enter_your_password, MESSAGE_ENTER_YOUR_PASSWORD)
         overrideResource(R.string.keyguard_enter_your_pattern, MESSAGE_ENTER_YOUR_PATTERN)
@@ -64,11 +62,7 @@ class BouncerInteractorTest : SysuiTestCase() {
         overrideResource(R.string.kg_wrong_password, MESSAGE_WRONG_PASSWORD)
         overrideResource(R.string.kg_wrong_pattern, MESSAGE_WRONG_PATTERN)
 
-        underTest =
-            utils.bouncerInteractor(
-                authenticationInteractor = authenticationInteractor,
-                deviceEntryFaceAuthInteractor = mDeviceEntryFaceAuthInteractor,
-            )
+        underTest = utils.bouncerInteractor()
     }
 
     @Test
@@ -305,8 +299,16 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun intentionalUserInputEvent_notifiesFaceAuthInteractor() =
         testScope.runTest {
+            val isFaceAuthRunning by
+                collectLastValue(utils.kosmos.fakeDeviceEntryFaceAuthRepository.isAuthRunning)
+            utils.kosmos.deviceEntryFaceAuthInteractor.onDeviceLifted()
+            runCurrent()
+            assertThat(isFaceAuthRunning).isTrue()
+
             underTest.onIntentionalUserInput()
-            verify(mDeviceEntryFaceAuthInteractor).onPrimaryBouncerUserInput()
+            runCurrent()
+
+            assertThat(isFaceAuthRunning).isFalse()
         }
 
     companion object {
