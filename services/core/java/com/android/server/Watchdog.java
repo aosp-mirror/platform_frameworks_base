@@ -164,6 +164,7 @@ public class Watchdog implements Dumpable {
     public static final String[] AIDL_INTERFACE_PREFIXES_OF_INTEREST = new String[] {
             "android.hardware.audio.core.IModule/",
             "android.hardware.audio.core.IConfig/",
+            "android.hardware.audio.effect.IFactory/",
             "android.hardware.biometrics.face.IFace/",
             "android.hardware.biometrics.fingerprint.IFingerprint/",
             "android.hardware.bluetooth.IBluetoothHci/",
