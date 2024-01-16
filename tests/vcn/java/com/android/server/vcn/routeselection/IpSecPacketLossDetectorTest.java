@@ -144,7 +144,7 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
         mTestLooper.dispatchAll();
 
         verify(mIpSecTransform)
-                .getIpSecTransformState(any(), mTransformStateReceiverCaptor.capture());
+                .requestIpSecTransformState(any(), mTransformStateReceiverCaptor.capture());
         return mTransformStateReceiverCaptor.getValue();
     }
 
@@ -210,7 +210,7 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
         assertNull(mIpSecPacketLossDetector.getLastTransformState());
         mTestLooper.moveTimeForward(POLL_IPSEC_STATE_INTERVAL_MS);
         mTestLooper.dispatchAll();
-        verify(newTransform).getIpSecTransformState(any(), any());
+        verify(newTransform).requestIpSecTransformState(any(), any());
     }
 
     @Test

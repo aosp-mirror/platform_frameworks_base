@@ -252,7 +252,7 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
             }
 
             getInboundTransformInternal()
-                    .getIpSecTransformState(
+                    .requestIpSecTransformState(
                             new HandlerExecutor(mHandler), new IpSecTransformStateReceiver());
 
             // Schedule for next poll
@@ -302,7 +302,8 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
                 "packetLossRate: "
                         + packetLossRate
                         + "% in the past "
-                        + (state.getTimestamp() - mLastIpSecTransformState.getTimestamp())
+                        + (state.getTimestampMillis()
+                                - mLastIpSecTransformState.getTimestampMillis())
                         + "ms";
 
         mLastIpSecTransformState = state;
