@@ -37,6 +37,7 @@ object SceneContainerFlag {
     /** The flag description -- not an aconfig flag name */
     const val DESCRIPTION = "SceneContainerFlag"
 
+    @JvmStatic
     inline val isEnabled
         get() =
             SCENE_CONTAINER_ENABLED && // mainStaticFlag

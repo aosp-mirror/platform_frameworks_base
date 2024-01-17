@@ -94,6 +94,7 @@ import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -187,6 +188,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mOverflingDistance;
     private float mMaxOverScroll;
     private boolean mIsBeingDragged;
+    private boolean mSendingTouchesToSceneFramework;
     private int mLastMotionY;
     private int mDownX;
     private int mActivePointerId = INVALID_POINTER;
@@ -1509,7 +1511,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     public void setExpandedHeight(float height) {
         final boolean skipHeightUpdate = shouldSkipHeightUpdate();
-        updateStackPosition();
+
+        // when scene framework is enabled, updateStackPosition is already called by
+        // updateTopPadding every time the stack moves, so skip it here to avoid flickering.
+        if (!SceneContainerFlag.isEnabled()) {
+            updateStackPosition();
+        }
 
         if (!skipHeightUpdate) {
             mExpandedHeight = height;
@@ -2450,6 +2457,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                         /* notificationStackScrollLayout= */ this, mMaxDisplayedNotifications,
                         shelfIntrinsicHeight);
         mIntrinsicContentHeight = height;
+        mController.setIntrinsicContentHeight(mIntrinsicContentHeight);
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
@@ -3558,8 +3566,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (mTouchHandler != null && mTouchHandler.onTouchEvent(ev)) {
-            return true;
+        if (mTouchHandler != null) {
+            boolean touchHandled = mTouchHandler.onTouchEvent(ev);
+            if (SceneContainerFlag.isEnabled() || touchHandled) {
+                return touchHandled;
+            }
         }
 
         return super.onTouchEvent(ev);
@@ -3567,6 +3578,27 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (SceneContainerFlag.isEnabled() && mIsBeingDragged) {
+            if (!mSendingTouchesToSceneFramework) {
+                // if this is the first touch being sent to the scene framework,
+                // convert it into a synthetic DOWN event.
+                mSendingTouchesToSceneFramework = true;
+                MotionEvent downEvent = MotionEvent.obtain(ev);
+                downEvent.setAction(MotionEvent.ACTION_DOWN);
+                mController.sendTouchToSceneFramework(downEvent);
+                downEvent.recycle();
+            } else {
+                mController.sendTouchToSceneFramework(ev);
+            }
+
+            if (
+                    ev.getActionMasked() == MotionEvent.ACTION_UP
+                    || ev.getActionMasked() == MotionEvent.ACTION_CANCEL
+            ) {
+                setIsBeingDragged(false);
+            }
+            return false;
+        }
         return TouchLogger.logDispatchTouch(TAG, ev, super.dispatchTouchEvent(ev));
     }
 
@@ -3633,6 +3665,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return true;
         }
 
+        // If the scene framework is enabled, ignore all non-move gestures if we are currently
+        // dragging - they should be dispatched to the scene framework. Move gestures should be let
+        // through to determine if we are still dragging or not.
+        if (
+                SceneContainerFlag.isEnabled()
+                && mIsBeingDragged
+                && action != MotionEvent.ACTION_MOVE
+        ) {
+            setIsBeingDragged(false);
+            return false;
+        }
+
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 if (getChildCount() == 0 || !isInContentBounds(ev)) {
@@ -3676,6 +3720,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     }
                 }
                 if (mIsBeingDragged) {
+                    // Defer actual scrolling to the scene framework if enabled
+                    if (SceneContainerFlag.isEnabled()) {
+                        setIsBeingDragged(false);
+                        return false;
+                    }
                     // Scroll to follow the motion event
                     mLastMotionY = y;
                     float scrollAmount;
@@ -3770,9 +3819,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     protected boolean isInsideQsHeader(MotionEvent ev) {
-        if (mQsHeader == null) {
-            Log.wtf(TAG, "qsHeader is null while NSSL is handling a touch");
-            return false;
+        if (SceneContainerFlag.isEnabled()) {
+            return ev.getY() < mController.getPlaceholderTop();
         }
 
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
@@ -4026,7 +4074,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             requestDisallowInterceptTouchEvent(true);
             cancelLongPress();
             resetExposedMenuView(true /* animate */, true /* force */);
+        } else {
+            mSendingTouchesToSceneFramework = false;
         }
+    }
+
+    @VisibleForTesting
+    boolean getIsBeingDragged() {
+        return mIsBeingDragged;
     }
 
     public void requestDisallowLongPress() {
