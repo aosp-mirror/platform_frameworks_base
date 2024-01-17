@@ -6913,13 +6913,13 @@ public class RemoteViews implements Parcelable, Filter {
             View parent = (View) view.getParent();
             // Break the for loop on the first encounter of:
             //    1) an AdapterView,
-            //    2) an AppWidgetHostView that is not a RemoteViewsFrameLayout, or
+            //    2) an AppWidgetHostView that is not a child of an adapter view, or
             //    3) a null parent.
             // 2) and 3) are unexpected and catch the case where a child is not
             // correctly parented in an AdapterView.
             while (parent != null && !(parent instanceof AdapterView<?>)
                     && !((parent instanceof AppWidgetHostView)
-                    && !(parent instanceof RemoteViewsAdapter.RemoteViewsFrameLayout))) {
+                            && !(parent instanceof AppWidgetHostView.AdapterChildHostView))) {
                 parent = (View) parent.getParent();
             }
 
