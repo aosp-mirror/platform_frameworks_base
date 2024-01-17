@@ -1237,8 +1237,15 @@ class TransitionController {
             // enableHighPerfTransition(true) is also called in Transition#recordDisplay.
             for (int i = mAtm.mRootWindowContainer.getChildCount() - 1; i >= 0; i--) {
                 final DisplayContent dc = mAtm.mRootWindowContainer.getChildAt(i);
-                if (isTransitionOnDisplay(dc)) {
+                if (mCollectingTransition != null && mCollectingTransition.shouldUsePerfHint(dc)) {
                     dc.enableHighPerfTransition(true);
+                    continue;
+                }
+                for (int j = mPlayingTransitions.size() - 1; j >= 0; j--) {
+                    if (mPlayingTransitions.get(j).shouldUsePerfHint(dc)) {
+                        dc.enableHighPerfTransition(true);
+                        break;
+                    }
                 }
             }
             // Usually transitions put quite a load onto the system already (with all the things
