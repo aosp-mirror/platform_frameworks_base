@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 import android.content.Context
 import android.text.Html
 import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -28,6 +29,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.ui.model.InternetTileModel
 import com.android.systemui.statusbar.pipeline.shared.ui.model.SignalIcon
@@ -116,14 +118,31 @@ constructor(
                     it.signalLevelIcon,
                     mobileDataContentName,
                 ) { networkNameModel, signalIcon, dataContentDescription ->
-                    val secondary =
-                        mobileDataContentConcat(networkNameModel.name, dataContentDescription)
-                    InternetTileModel.Active(
-                        secondaryTitle = secondary,
-                        icon = SignalIcon(signalIcon.toSignalDrawableState()),
-                        stateDescription = ContentDescription.Loaded(secondary.toString()),
-                        contentDescription = ContentDescription.Loaded(internetLabel),
-                    )
+                    when (signalIcon) {
+                        is SignalIconModel.Cellular -> {
+                            val secondary =
+                                mobileDataContentConcat(
+                                    networkNameModel.name,
+                                    dataContentDescription
+                                )
+                            InternetTileModel.Active(
+                                secondaryTitle = secondary,
+                                icon = SignalIcon(signalIcon.toSignalDrawableState()),
+                                stateDescription = ContentDescription.Loaded(secondary.toString()),
+                                contentDescription = ContentDescription.Loaded(internetLabel),
+                            )
+                        }
+                        is SignalIconModel.Satellite -> {
+                            val secondary =
+                                signalIcon.icon.contentDescription.loadContentDescription(context)
+                            InternetTileModel.Active(
+                                secondaryTitle = secondary,
+                                iconId = signalIcon.icon.res,
+                                stateDescription = ContentDescription.Loaded(secondary),
+                                contentDescription = ContentDescription.Loaded(internetLabel),
+                            )
+                        }
+                    }
                 }
             }
         }
