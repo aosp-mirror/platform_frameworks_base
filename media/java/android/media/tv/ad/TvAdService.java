@@ -17,6 +17,7 @@
 package android.media.tv.ad;
 
 import android.annotation.CallSuper;
+import android.annotation.FlaggedApi;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +33,7 @@ import android.graphics.Rect;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
+import android.media.tv.flags.Flags;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -61,8 +63,8 @@ import java.util.List;
 
 /**
  * The TvAdService class represents a TV client-side advertisement service.
- * @hide
  */
+@FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
 public abstract class TvAdService extends Service {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvAdService";
@@ -73,7 +75,6 @@ public abstract class TvAdService extends Service {
      * Name under which a TvAdService component publishes information about itself. This meta-data
      * must reference an XML resource containing an
      * <code>&lt;{@link android.R.styleable#TvAdService tv-ad-service}&gt;</code> tag.
-     * @hide
      */
     public static final String SERVICE_META_DATA = "android.media.tv.ad.service";
 
@@ -92,7 +93,7 @@ public abstract class TvAdService extends Service {
 
     @Override
     @Nullable
-    public final IBinder onBind(@NonNull Intent intent) {
+    public final IBinder onBind(@Nullable Intent intent) {
         ITvAdService.Stub tvAdServiceBinder = new ITvAdService.Stub() {
             @Override
             public void registerCallback(ITvAdServiceCallback cb) {
@@ -398,6 +399,7 @@ public abstract class TvAdService extends Service {
          * @param data the original bytes to be signed.
          *
          * @see #onSigningResult(String, byte[])
+         * @hide
          */
         @CallSuper
         public void requestSigning(@NonNull String signingId, @NonNull String algorithm,
@@ -421,22 +423,22 @@ public abstract class TvAdService extends Service {
         }
 
         @Override
-        public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
+        public boolean onKeyDown(int keyCode, @Nullable KeyEvent event) {
             return false;
         }
 
         @Override
-        public boolean onKeyLongPress(int keyCode, @NonNull KeyEvent event) {
+        public boolean onKeyLongPress(int keyCode, @Nullable KeyEvent event) {
             return false;
         }
 
         @Override
-        public boolean onKeyMultiple(int keyCode, int count, @NonNull KeyEvent event) {
+        public boolean onKeyMultiple(int keyCode, int count, @Nullable KeyEvent event) {
             return false;
         }
 
         @Override
-        public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
+        public boolean onKeyUp(int keyCode, @Nullable KeyEvent event) {
             return false;
         }
 
@@ -484,6 +486,8 @@ public abstract class TvAdService extends Service {
          * @param top Top position in pixels, relative to the overlay view.
          * @param right Right position in pixels, relative to the overlay view.
          * @param bottom Bottom position in pixels, relative to the overlay view.
+         *
+         * @hide
          */
         @CallSuper
         public void layoutSurface(final int left, final int top, final int right,
@@ -530,6 +534,7 @@ public abstract class TvAdService extends Service {
          * @param format The new {@link PixelFormat} of the surface.
          * @param width The new width of the surface.
          * @param height The new height of the surface.
+         * @hide
          */
         public void onSurfaceChanged(@PixelFormat.Format int format, int width, int height) {
         }

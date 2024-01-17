@@ -437,11 +437,10 @@ public class TvAdManager {
     }
 
     /**
-     * Returns the complete list of TV AD service on the system.
+     * Returns the complete list of TV AD services on the system.
      *
      * @return List of {@link TvAdServiceInfo} for each TV AD service that describes its meta
      * information.
-     * @hide
      */
     @NonNull
     public List<TvAdServiceInfo> getTvAdServiceList() {
@@ -1174,8 +1173,7 @@ public class TvAdManager {
     }
 
     /**
-     * Callback used to monitor status of the TV AD service.
-     * @hide
+     * Callback used to monitor status of the TV advertisement service.
      */
     public abstract static class TvAdServiceCallback {
         /**
