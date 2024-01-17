@@ -557,6 +557,43 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun isIdleOnCommunal() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Blank)
+                )
+            communalRepository.setTransitionState(transitionState)
+
+            // isIdleOnCommunal is false when not on communal.
+            val isIdleOnCommunal by collectLastValue(underTest.isIdleOnCommunal)
+            runCurrent()
+            assertThat(isIdleOnCommunal).isEqualTo(false)
+
+            // Transition to communal.
+            transitionState.value =
+                ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+            runCurrent()
+
+            // isIdleOnCommunal is now true since we're on communal.
+            assertThat(isIdleOnCommunal).isEqualTo(true)
+
+            // Start transition away from communal.
+            transitionState.value =
+                ObservableCommunalTransitionState.Transition(
+                    fromScene = CommunalSceneKey.Communal,
+                    toScene = CommunalSceneKey.Blank,
+                    progress = flowOf(0f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                )
+            runCurrent()
+
+            // isIdleOnCommunal turns false as soon as transition away starts.
+            assertThat(isIdleOnCommunal).isEqualTo(false)
+        }
+
+    @Test
     fun testShowWidgetEditorStartsActivity() =
         testScope.runTest {
             underTest.showWidgetEditor()

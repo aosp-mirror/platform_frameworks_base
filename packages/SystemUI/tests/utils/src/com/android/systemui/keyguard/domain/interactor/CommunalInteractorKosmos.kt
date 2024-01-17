@@ -24,14 +24,14 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.smartspace.data.repository.smartspaceRepository
 import org.mockito.Mockito.mock
 
 val Kosmos.communalInteractor by
     Kosmos.Fixture {
         CommunalInteractor(
-            applicationScope = testScope.backgroundScope,
+            applicationScope = applicationCoroutineScope,
             communalRepository = communalRepository,
             widgetRepository = communalWidgetRepository,
             mediaRepository = communalMediaRepository,
