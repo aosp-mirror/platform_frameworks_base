@@ -50,4 +50,11 @@ class FakeCommunalRepository(
     fun setIsCommunalHubShowing(isCommunalHubShowing: Boolean) {
         _isCommunalHubShowing.value = isCommunalHubShowing
     }
+
+    private val _communalEnabledState: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val communalEnabledState: StateFlow<Boolean> = _communalEnabledState
+
+    fun setCommunalEnabledState(enabled: Boolean) {
+        _communalEnabledState.value = enabled
+    }
 }

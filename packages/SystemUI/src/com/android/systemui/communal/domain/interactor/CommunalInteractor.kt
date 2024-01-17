@@ -72,7 +72,12 @@ constructor(
     val isCommunalEnabled: Boolean
         get() = communalRepository.isCommunalEnabled
 
-    val isCommunalAvailable =
+    /** A {@link StateFlow} that tracks whether communal features are enabled. */
+    val communalEnabledState: StateFlow<Boolean>
+        get() = communalRepository.communalEnabledState
+
+    /** Whether communal features are enabled and available. */
+    val isCommunalAvailable: StateFlow<Boolean> =
         flowOf(isCommunalEnabled)
             .flatMapLatest { enabled ->
                 if (enabled)
