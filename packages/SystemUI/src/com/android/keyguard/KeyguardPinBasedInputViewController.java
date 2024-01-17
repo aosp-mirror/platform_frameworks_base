@@ -16,17 +16,25 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
+import static com.android.systemui.Flags.pinInputFieldStyledFocusState;
+
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyboard.data.repository.KeyboardRepository;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
@@ -35,6 +43,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
 
     private final LiftToActivateListener mLiftToActivateListener;
     private final FalsingCollector mFalsingCollector;
+    private final KeyboardRepository mKeyboardRepository;
     protected PasswordTextView mPasswordEntry;
 
     private final OnKeyListener mOnKeyListener = (v, keyCode, event) -> {
@@ -65,12 +74,14 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             EmergencyButtonController emergencyButtonController,
             FalsingCollector falsingCollector,
             FeatureFlags featureFlags,
-            SelectedUserInteractor selectedUserInteractor) {
+            SelectedUserInteractor selectedUserInteractor,
+            KeyboardRepository keyboardRepository) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
                 emergencyButtonController, featureFlags, selectedUserInteractor);
         mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
+        mKeyboardRepository = keyboardRepository;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
     }
 
@@ -119,6 +130,35 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
                 }
             });
             okButton.setOnHoverListener(mLiftToActivateListener);
+        }
+        if (pinInputFieldStyledFocusState()) {
+            collectFlow(mPasswordEntry, mKeyboardRepository.isAnyKeyboardConnected(),
+                    this::setKeyboardBasedFocusOutline);
+
+            /**
+             * new UI Specs for PIN Input field have new dimensions go/pin-focus-states.
+             * However we want these changes behind a flag, and resource files cannot be flagged
+             * hence the dimension change in code. When the flags are removed these dimensions
+             * should be set in resources permanently and the code below removed.
+             */
+            ViewGroup.LayoutParams layoutParams = mPasswordEntry.getLayoutParams();
+            layoutParams.width = (int) getResources().getDimension(
+                    R.dimen.keyguard_pin_field_width);
+            layoutParams.height = (int) getResources().getDimension(
+                    R.dimen.keyguard_pin_field_height);
+        }
+    }
+
+    private void setKeyboardBasedFocusOutline(boolean isAnyKeyboardConnected) {
+        StateListDrawable background = (StateListDrawable) mPasswordEntry.getBackground();
+        GradientDrawable stateDrawable = (GradientDrawable) background.getStateDrawable(0);
+        int color = getResources().getColor(R.color.bouncer_password_focus_color);
+        if (!isAnyKeyboardConnected) {
+            stateDrawable.setStroke(0, color);
+        } else {
+            int strokeWidthInDP = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3,
+                    getResources().getDisplayMetrics());
+            stateDrawable.setStroke(strokeWidthInDP, color);
         }
     }
 

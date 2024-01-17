@@ -28,6 +28,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyboard.data.repository.KeyboardRepository;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
@@ -58,12 +59,13 @@ public class KeyguardPinViewController
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
             EmergencyButtonController emergencyButtonController,
             FalsingCollector falsingCollector,
-            DevicePostureController postureController,
-            FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor,
-            UiEventLogger uiEventLogger) {
+            DevicePostureController postureController, FeatureFlags featureFlags,
+            SelectedUserInteractor selectedUserInteractor, UiEventLogger uiEventLogger,
+            KeyboardRepository keyboardRepository) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
-                emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor);
+                emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor,
+                keyboardRepository);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPostureController = postureController;
         mLockPatternUtils = lockPatternUtils;
