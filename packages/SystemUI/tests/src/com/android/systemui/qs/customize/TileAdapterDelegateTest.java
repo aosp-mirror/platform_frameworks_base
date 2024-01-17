@@ -31,8 +31,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -136,6 +136,7 @@ public class TileAdapterDelegateTest extends SysuiTestCase {
         AccessibilityNodeInfoCompat.AccessibilityActionCompat action =
                 getActionForId(mInfo, AccessibilityNodeInfo.ACTION_CLICK);
         assertThat(action.getLabel().toString()).contains(expectedString);
+        assertThat(mInfo.isClickable()).isTrue();
     }
 
     @Test
@@ -152,10 +153,11 @@ public class TileAdapterDelegateTest extends SysuiTestCase {
         AccessibilityNodeInfoCompat.AccessibilityActionCompat action =
                 getActionForId(mInfo, AccessibilityNodeInfo.ACTION_CLICK);
         assertThat(action.getLabel().toString()).contains(expectedString);
+        assertThat(mInfo.isClickable()).isTrue();
     }
 
     @Test
-    public void testNoClickAction() {
+    public void testNoClickActionAndNotClickable() {
         mView.setTag(mHolder);
         when(mHolder.canTakeAccessibleAction()).thenReturn(true);
         when(mHolder.canAdd()).thenReturn(false);
@@ -167,6 +169,7 @@ public class TileAdapterDelegateTest extends SysuiTestCase {
         AccessibilityNodeInfoCompat.AccessibilityActionCompat action =
                 getActionForId(mInfo, AccessibilityNodeInfo.ACTION_CLICK);
         assertThat(action).isNull();
+        assertThat(mInfo.isClickable()).isFalse();
     }
 
     @Test
