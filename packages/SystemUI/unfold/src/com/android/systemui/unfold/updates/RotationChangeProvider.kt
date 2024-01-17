@@ -20,6 +20,7 @@ import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.os.RemoteException
+import android.os.Trace
 import com.android.systemui.unfold.util.CallbackController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -86,14 +87,19 @@ constructor(
     private inner class RotationDisplayListener : DisplayManager.DisplayListener {
 
         override fun onDisplayChanged(displayId: Int) {
-            val display = context.display ?: return
+            Trace.beginSection("RotationChangeProvider.RotationDisplayListener#onDisplayChanged")
+            try {
+                val display = context.display ?: return
 
-            if (displayId == display.displayId) {
-                val currentRotation = display.rotation
-                if (lastRotation == null || lastRotation != currentRotation) {
-                    listeners.forEach { it.onRotationChanged(currentRotation) }
-                    lastRotation = currentRotation
+                if (displayId == display.displayId) {
+                    val currentRotation = display.rotation
+                    if (lastRotation == null || lastRotation != currentRotation) {
+                        listeners.forEach { it.onRotationChanged(currentRotation) }
+                        lastRotation = currentRotation
+                    }
                 }
+            } finally {
+                Trace.endSection()
             }
         }
 
