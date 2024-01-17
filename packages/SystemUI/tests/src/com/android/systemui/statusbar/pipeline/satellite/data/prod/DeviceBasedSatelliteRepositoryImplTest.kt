@@ -100,6 +100,28 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun satelliteManagerThrows_checkSupportDoesNotCrash() =
+        testScope.runTest {
+            whenever(satelliteManager.requestIsSatelliteSupported(any(), any()))
+                .thenThrow(IllegalStateException())
+
+            systemClock.setUptimeMillis(Process.getStartUptimeMillis() + MIN_UPTIME)
+
+            underTest =
+                DeviceBasedSatelliteRepositoryImpl(
+                    Optional.of(satelliteManager),
+                    dispatcher,
+                    testScope.backgroundScope,
+                    systemClock,
+                )
+
+            runCurrent()
+
+            // Creating the repo does not crash, and we consider the feature not to be supported
+            assertThat(underTest.satelliteSupport.value).isEqualTo(SatelliteSupport.NotSupported)
+        }
+
+    @Test
     fun connectionState_mapsFromSatelliteModemState() =
         testScope.runTest {
             setupDefaultRepo()

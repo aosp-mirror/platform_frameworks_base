@@ -20,6 +20,7 @@ import android.os.OutcomeReceiver
 import android.telephony.satellite.NtnSignalStrengthCallback
 import android.telephony.satellite.SatelliteManager
 import android.telephony.satellite.SatelliteModemStateCallback
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -62,8 +63,10 @@ private typealias SupportedSatelliteManager = SatelliteManager
 /**
  * "Supported" here means supported by the device. The value of this should be stable during the
  * process lifetime.
+ *
+ * @VisibleForTesting
  */
-private sealed interface SatelliteSupport {
+sealed interface SatelliteSupport {
     /** Not yet fetched */
     data object Unknown : SatelliteSupport
 
@@ -132,7 +135,8 @@ constructor(
 
     // Some calls into satellite manager will throw exceptions if it is not supported.
     // This is never expected to change after boot, but may need to be retried in some cases
-    private val satelliteSupport: MutableStateFlow<SatelliteSupport> = MutableStateFlow(Unknown)
+    @get:VisibleForTesting
+    val satelliteSupport: MutableStateFlow<SatelliteSupport> = MutableStateFlow(Unknown)
 
     init {
         satelliteManager = satelliteManagerOpt.getOrNull()
@@ -244,7 +248,11 @@ constructor(
                     }
                 }
 
-            requestIsSatelliteSupported(bgDispatcher.asExecutor(), cb)
+            try {
+                requestIsSatelliteSupported(bgDispatcher.asExecutor(), cb)
+            } catch (e: Exception) {
+                continuation.resume(NotSupported)
+            }
         }
 
     companion object {
