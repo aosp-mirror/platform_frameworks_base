@@ -123,6 +123,7 @@ public final class UserProperties implements Parcelable {
      * @hide
      */
     @IntDef(prefix = "SHOW_IN_LAUNCHER_", value = {
+            SHOW_IN_LAUNCHER_UNKNOWN,
             SHOW_IN_LAUNCHER_WITH_PARENT,
             SHOW_IN_LAUNCHER_SEPARATE,
             SHOW_IN_LAUNCHER_NO,
@@ -130,6 +131,13 @@ public final class UserProperties implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShowInLauncher {
     }
+    /**
+     * Indicates that the show in launcher value for this profile is unknown or unsupported.
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_LAUNCHER_UNKNOWN = -1;
     /**
      * Suggests that the launcher should show this user's apps in the main tab.
      * That is, either this user is a full user, so its apps should be presented accordingly, or, if
@@ -157,6 +165,7 @@ public final class UserProperties implements Parcelable {
      * @hide
      */
     @IntDef(prefix = "SHOW_IN_SETTINGS_", value = {
+            SHOW_IN_SETTINGS_UNKNOWN,
             SHOW_IN_SETTINGS_WITH_PARENT,
             SHOW_IN_SETTINGS_SEPARATE,
             SHOW_IN_SETTINGS_NO,
@@ -164,6 +173,12 @@ public final class UserProperties implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShowInSettings {
     }
+    /**
+     * Indicates that the show in settings value for this profile is unknown or unsupported.
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_SETTINGS_UNKNOWN = -1;
     /**
      * Suggests that the Settings app should show this user's apps in the main tab.
      * That is, either this user is a full user, so its apps should be presented accordingly, or, if
@@ -309,6 +324,7 @@ public final class UserProperties implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "SHOW_IN_QUIET_MODE_",
             value = {
+                    SHOW_IN_QUIET_MODE_UNKNOWN,
                     SHOW_IN_QUIET_MODE_PAUSED,
                     SHOW_IN_QUIET_MODE_HIDDEN,
                     SHOW_IN_QUIET_MODE_DEFAULT,
@@ -316,6 +332,12 @@ public final class UserProperties implements Parcelable {
     )
     public @interface ShowInQuietMode {
     }
+
+    /**
+     * Indicates that the show in quiet mode value for this profile is unknown.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_QUIET_MODE_UNKNOWN = -1;
 
     /**
      * Indicates that the profile should still be visible in quiet mode but should be shown as
@@ -347,6 +369,7 @@ public final class UserProperties implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "SHOW_IN_SHARING_SURFACES_",
             value = {
+                    SHOW_IN_SHARING_SURFACES_UNKNOWN,
                     SHOW_IN_SHARING_SURFACES_SEPARATE,
                     SHOW_IN_SHARING_SURFACES_WITH_PARENT,
                     SHOW_IN_SHARING_SURFACES_NO,
@@ -354,6 +377,12 @@ public final class UserProperties implements Parcelable {
     )
     public @interface ShowInSharingSurfaces {
     }
+
+    /**
+     * Indicates that the show in launcher value for this profile is unknown or unsupported.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_SHARING_SURFACES_UNKNOWN = SHOW_IN_LAUNCHER_UNKNOWN;
 
     /**
      * Indicates that the profile data and apps should be shown in sharing surfaces intermixed with
@@ -379,13 +408,21 @@ public final class UserProperties implements Parcelable {
      *
      * @hide
      */
-    @IntDef(prefix = {"CROSS_PROFILE_CONTENT_SHARING_STRATEGY_"}, value = {
+    @IntDef(prefix = {"CROSS_PROFILE_CONTENT_SHARING_"}, value = {
+            CROSS_PROFILE_CONTENT_SHARING_UNKNOWN,
             CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION,
             CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CrossProfileContentSharingStrategy {
     }
+
+    /**
+     * Signifies that cross-profile content sharing strategy, both to and from this profile, is
+     * unknown/unsupported.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int CROSS_PROFILE_CONTENT_SHARING_UNKNOWN = -1;
 
     /**
      * Signifies that cross-profile content sharing strategy, both to and from this profile, should
