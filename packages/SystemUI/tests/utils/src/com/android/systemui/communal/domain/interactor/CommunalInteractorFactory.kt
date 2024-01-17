@@ -67,6 +67,7 @@ object CommunalInteractorFactory {
             appWidgetHost,
             editWidgetsActivityStarter,
             CommunalInteractor(
+                testScope.backgroundScope,
                 communalRepository,
                 widgetRepository,
                 communalPrefsRepository,

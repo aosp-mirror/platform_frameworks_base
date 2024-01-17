@@ -62,6 +62,10 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 
+/**
+ * This class of test cases assume that communal is enabled. For disabled cases, see
+ * [CommunalInteractorCommunalDisabledTest].
+ */
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -95,17 +99,43 @@ class CommunalInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun communalEnabled() =
+    fun communalEnabled_true() =
+        testScope.runTest { assertThat(underTest.isCommunalEnabled).isTrue() }
+
+    @Test
+    fun isCommunalAvailable_trueWhenStorageUnlock() =
         testScope.runTest {
-            communalRepository.setIsCommunalEnabled(true)
-            assertThat(underTest.isCommunalEnabled).isTrue()
+            val isAvailable by collectLastValue(underTest.isCommunalAvailable)
+            assertThat(isAvailable).isFalse()
+
+            keyguardRepository.setIsEncryptedOrLockdown(false)
+            runCurrent()
+
+            assertThat(isAvailable).isTrue()
         }
 
     @Test
-    fun communalDisabled() =
+    fun isCommunalAvailable_whenStorageUnlock_true() =
         testScope.runTest {
-            communalRepository.setIsCommunalEnabled(false)
-            assertThat(underTest.isCommunalEnabled).isFalse()
+            val isAvailable by collectLastValue(underTest.isCommunalAvailable)
+            assertThat(isAvailable).isFalse()
+
+            keyguardRepository.setIsEncryptedOrLockdown(false)
+            runCurrent()
+
+            assertThat(isAvailable).isTrue()
+        }
+
+    @Test
+    fun updateAppWidgetHostActive_uponStorageUnlock_true() =
+        testScope.runTest {
+            collectLastValue(underTest.isCommunalAvailable)
+            assertThat(widgetRepository.isHostActive()).isFalse()
+
+            keyguardRepository.setIsEncryptedOrLockdown(false)
+            runCurrent()
+
+            assertThat(widgetRepository.isHostActive()).isTrue()
         }
 
     @Test

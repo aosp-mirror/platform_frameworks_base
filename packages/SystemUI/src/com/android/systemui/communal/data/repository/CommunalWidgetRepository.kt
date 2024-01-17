@@ -18,11 +18,7 @@ package com.android.systemui.communal.data.repository
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.UserManager
 import androidx.annotation.WorkerThread
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
@@ -35,7 +31,6 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.settings.UserTracker
 import java.util.Optional
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -43,16 +38,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /** Encapsulates the state of widgets for communal mode. */
 interface CommunalWidgetRepository {
@@ -75,9 +66,11 @@ interface CommunalWidgetRepository {
      * @param widgetIdToPriorityMap mapping of the widget ids to the priority of the widget.
      */
     fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {}
+
+    /** Update whether the app widget host should be active. */
+    fun updateAppWidgetHostActive(active: Boolean)
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalWidgetRepositoryImpl
 @Inject
@@ -86,12 +79,8 @@ constructor(
     private val appWidgetHost: CommunalAppWidgetHost,
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    broadcastDispatcher: BroadcastDispatcher,
-    communalRepository: CommunalRepository,
     private val communalWidgetHost: CommunalWidgetHost,
     private val communalWidgetDao: CommunalWidgetDao,
-    private val userManager: UserManager,
-    private val userTracker: UserTracker,
     @CommunalLog logBuffer: LogBuffer,
 ) : CommunalWidgetRepository {
     companion object {
@@ -100,40 +89,22 @@ constructor(
 
     private val logger = Logger(logBuffer, TAG)
 
-    // Whether the [AppWidgetHost] is listening for updates.
-    private var isHostListening = false
-
-    private suspend fun isUserUnlockingOrUnlocked(): Boolean =
-        withContext(bgDispatcher) { userManager.isUserUnlockingOrUnlocked(userTracker.userHandle) }
-
-    private val isUserUnlocked: Flow<Boolean> =
-        flowOf(communalRepository.isCommunalEnabled)
-            .flatMapLatest { enabled ->
-                if (enabled) {
-                    broadcastDispatcher
-                        .broadcastFlow(
-                            filter = IntentFilter(Intent.ACTION_USER_UNLOCKED),
-                            user = userTracker.userHandle
-                        )
-                        .onStart { emit(Unit) }
-                        .mapLatest { isUserUnlockingOrUnlocked() }
-                } else {
-                    emptyFlow()
-                }
-            }
-            .distinctUntilChanged()
-
-    private val isHostActive: Flow<Boolean> =
-        isUserUnlocked.map {
-            if (it) {
-                startListening()
-                true
-            } else {
-                stopListening()
-                false
-            }
+    override fun updateAppWidgetHostActive(active: Boolean) {
+        if (active == isHostActive.value) {
+            return
         }
 
+        if (active) {
+            appWidgetHost.startListening()
+        } else {
+            appWidgetHost.stopListening()
+        }
+        isHostActive.value = active
+    }
+
+    private val isHostActive = MutableStateFlow(false)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     override val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
         isHostActive.flatMapLatest { isHostActive ->
             if (!isHostActive || !appWidgetManager.isPresent) {
@@ -217,23 +188,5 @@ constructor(
             providerInfo = appWidgetManager.get().getAppWidgetInfo(widgetId),
             priority = entry.key.rank,
         )
-    }
-
-    private fun startListening() {
-        if (isHostListening) {
-            return
-        }
-
-        appWidgetHost.startListening()
-        isHostListening = true
-    }
-
-    private fun stopListening() {
-        if (!isHostListening) {
-            return
-        }
-
-        appWidgetHost.stopListening()
-        isHostListening = false
     }
 }

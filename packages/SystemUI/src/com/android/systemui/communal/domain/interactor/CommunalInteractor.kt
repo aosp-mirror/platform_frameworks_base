@@ -32,22 +32,30 @@ import com.android.systemui.communal.shared.model.ObservableCommunalTransitionSt
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business-logic related to communal mode. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalInteractor
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
     private val communalPrefsRepository: CommunalPrefsRepository,
@@ -61,6 +69,20 @@ constructor(
     /** Whether communal features are enabled. */
     val isCommunalEnabled: Boolean
         get() = communalRepository.isCommunalEnabled
+
+    /** Whether communal features are enabled and available. */
+    val isCommunalAvailable: StateFlow<Boolean> =
+        flowOf(isCommunalEnabled)
+            .flatMapLatest { enabled ->
+                if (enabled) keyguardInteractor.isEncryptedOrLockdown.map { !it } else flowOf(false)
+            }
+            .distinctUntilChanged()
+            .onEach { available -> widgetRepository.updateAppWidgetHostActive(available) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through

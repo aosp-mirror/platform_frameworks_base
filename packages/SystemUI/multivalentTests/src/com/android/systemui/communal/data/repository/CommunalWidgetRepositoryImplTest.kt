@@ -19,10 +19,6 @@ package com.android.systemui.communal.data.repository
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
-import android.content.Intent
-import android.content.Intent.ACTION_USER_UNLOCKED
-import android.os.UserHandle
-import android.os.UserManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -38,7 +34,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
@@ -68,12 +63,6 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
 
-    @Mock private lateinit var userManager: UserManager
-
-    @Mock private lateinit var userHandle: UserHandle
-
-    @Mock private lateinit var userTracker: UserTracker
-
     @Mock private lateinit var stopwatchProviderInfo: AppWidgetProviderInfo
 
     @Mock private lateinit var providerInfoA: AppWidgetProviderInfo
@@ -86,8 +75,6 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     private val testScope = kosmos.testScope
 
-    private lateinit var communalRepository: FakeCommunalRepository
-
     private lateinit var logBuffer: LogBuffer
 
     private val fakeAllowlist =
@@ -97,68 +84,60 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             "com.android.fake/WidgetProviderC",
         )
 
+    private lateinit var underTest: CommunalWidgetRepositoryImpl
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         logBuffer = logcatLogBuffer(name = "CommunalWidgetRepoImplTest")
-        communalRepository = kosmos.fakeCommunalRepository
 
-        communalEnabled(true)
         setAppWidgetIds(emptyList())
 
         overrideResource(R.array.config_communalWidgetAllowlist, fakeAllowlist.toTypedArray())
 
         whenever(stopwatchProviderInfo.loadLabel(any())).thenReturn("Stopwatch")
-        whenever(userTracker.userHandle).thenReturn(userHandle)
         whenever(communalWidgetDao.getWidgets()).thenReturn(flowOf(emptyMap()))
         whenever(appWidgetManagerOptional.isPresent).thenReturn(true)
         whenever(appWidgetManagerOptional.get()).thenReturn(appWidgetManager)
+
+        underTest =
+            CommunalWidgetRepositoryImpl(
+                appWidgetManagerOptional,
+                appWidgetHost,
+                testScope.backgroundScope,
+                kosmos.testDispatcher,
+                communalWidgetHost,
+                communalWidgetDao,
+                logBuffer,
+            )
     }
 
     @Test
-    fun neverQueryDbForWidgets_whenFeatureIsDisabled() =
+    fun neverQueryDbForWidgets_whenHostIsInactive() =
         testScope.runTest {
-            communalEnabled(false)
-            val repository = initCommunalWidgetRepository()
-            repository.communalWidgets.launchIn(backgroundScope)
+            underTest.updateAppWidgetHostActive(false)
+            underTest.communalWidgets.launchIn(testScope.backgroundScope)
             runCurrent()
 
             verify(communalWidgetDao, never()).getWidgets()
         }
 
     @Test
-    fun neverQueryDbForWidgets_whenFeatureEnabled_andUserLocked() =
+    fun communalWidgets_whenHostIsActive_queryWidgetsFromDb() =
         testScope.runTest {
-            userUnlocked(false)
-            val repository = initCommunalWidgetRepository()
-            repository.communalWidgets.launchIn(backgroundScope)
-            runCurrent()
+            underTest.updateAppWidgetHostActive(true)
 
-            verify(communalWidgetDao, never()).getWidgets()
-        }
-
-    @Test
-    fun communalWidgets_whenUserUnlocked_queryWidgetsFromDb() =
-        testScope.runTest {
-            userUnlocked(false)
-            val repository = initCommunalWidgetRepository()
-            val communalWidgets by collectLastValue(repository.communalWidgets)
-            runCurrent()
             val communalItemRankEntry = CommunalItemRank(uid = 1L, rank = 1)
             val communalWidgetItemEntry = CommunalWidgetItem(uid = 1L, 1, "pk_name/cls_name", 1L)
             whenever(communalWidgetDao.getWidgets())
                 .thenReturn(flowOf(mapOf(communalItemRankEntry to communalWidgetItemEntry)))
             whenever(appWidgetManager.getAppWidgetInfo(anyInt())).thenReturn(providerInfoA)
 
-            userUnlocked(true)
             installedProviders(listOf(stopwatchProviderInfo))
-            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
-                context,
-                Intent(ACTION_USER_UNLOCKED)
-            )
-            runCurrent()
 
+            val communalWidgets by collectLastValue(underTest.communalWidgets)
+            runCurrent()
             verify(communalWidgetDao).getWidgets()
             assertThat(communalWidgets)
                 .containsExactly(
@@ -173,9 +152,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Test
     fun addWidget_allocateId_bindWidget_andAddToDb() =
         testScope.runTest {
-            userUnlocked(true)
-            val repository = initCommunalWidgetRepository()
-            runCurrent()
+            underTest.updateAppWidgetHostActive(true)
 
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
@@ -183,7 +160,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             whenever(communalWidgetHost.requiresConfiguration(id)).thenReturn(true)
             whenever(communalWidgetHost.allocateIdAndBindWidget(any<ComponentName>()))
                 .thenReturn(id)
-            repository.addWidget(provider, priority) { true }
+            underTest.addWidget(provider, priority) { true }
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider)
@@ -193,16 +170,14 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Test
     fun addWidget_configurationFails_doNotAddWidgetToDb() =
         testScope.runTest {
-            userUnlocked(true)
-            val repository = initCommunalWidgetRepository()
-            runCurrent()
+            underTest.updateAppWidgetHostActive(true)
 
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
             whenever(communalWidgetHost.requiresConfiguration(id)).thenReturn(true)
             whenever(communalWidgetHost.allocateIdAndBindWidget(provider)).thenReturn(id)
-            repository.addWidget(provider, priority) { false }
+            underTest.addWidget(provider, priority) { false }
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider)
@@ -213,16 +188,14 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Test
     fun addWidget_configurationThrowsError_doNotAddWidgetToDb() =
         testScope.runTest {
-            userUnlocked(true)
-            val repository = initCommunalWidgetRepository()
-            runCurrent()
+            underTest.updateAppWidgetHostActive(true)
 
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val priority = 1
             whenever(communalWidgetHost.requiresConfiguration(id)).thenReturn(true)
             whenever(communalWidgetHost.allocateIdAndBindWidget(provider)).thenReturn(id)
-            repository.addWidget(provider, priority) { throw IllegalStateException("some error") }
+            underTest.addWidget(provider, priority) { throw IllegalStateException("some error") }
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider)
@@ -233,9 +206,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Test
     fun addWidget_configurationNotRequired_doesNotConfigure_addWidgetToDb() =
         testScope.runTest {
-            userUnlocked(true)
-            val repository = initCommunalWidgetRepository()
-            runCurrent()
+            underTest.updateAppWidgetHostActive(true)
 
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
@@ -244,7 +215,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             whenever(communalWidgetHost.allocateIdAndBindWidget(any<ComponentName>()))
                 .thenReturn(id)
             var configured = false
-            repository.addWidget(provider, priority) {
+            underTest.addWidget(provider, priority) {
                 configured = true
                 true
             }
@@ -258,12 +229,10 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Test
     fun deleteWidget_removeWidgetId_andDeleteFromDb() =
         testScope.runTest {
-            userUnlocked(true)
-            val repository = initCommunalWidgetRepository()
-            runCurrent()
+            underTest.updateAppWidgetHostActive(true)
 
             val id = 1
-            repository.deleteWidget(id)
+            underTest.deleteWidget(id)
             runCurrent()
 
             verify(communalWidgetDao).deleteWidgetById(id)
@@ -273,107 +242,36 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
     @Test
     fun reorderWidgets_queryDb() =
         testScope.runTest {
-            userUnlocked(true)
-            val repository = initCommunalWidgetRepository()
-            runCurrent()
+            underTest.updateAppWidgetHostActive(true)
 
             val widgetIdToPriorityMap = mapOf(104 to 1, 103 to 2, 101 to 3)
-            repository.updateWidgetOrder(widgetIdToPriorityMap)
+            underTest.updateWidgetOrder(widgetIdToPriorityMap)
             runCurrent()
 
             verify(communalWidgetDao).updateWidgetOrder(widgetIdToPriorityMap)
         }
 
     @Test
-    fun broadcastReceiver_communalDisabled_doNotRegisterUserUnlockedBroadcastReceiver() =
+    fun appWidgetHost_startListening() =
         testScope.runTest {
-            communalEnabled(false)
-            val repository = initCommunalWidgetRepository()
-            repository.communalWidgets.launchIn(backgroundScope)
-            runCurrent()
-            assertThat(fakeBroadcastDispatcher.numReceiversRegistered).isEqualTo(0)
-        }
-
-    @Test
-    fun broadcastReceiver_featureEnabledAndUserLocked_registerBroadcastReceiver() =
-        testScope.runTest {
-            userUnlocked(false)
-            val repository = initCommunalWidgetRepository()
-            repository.communalWidgets.launchIn(backgroundScope)
-            runCurrent()
-            assertThat(fakeBroadcastDispatcher.numReceiversRegistered).isEqualTo(1)
-        }
-
-    @Test
-    fun appWidgetHost_userUnlocked_startListening() =
-        testScope.runTest {
-            userUnlocked(false)
-            val repository = initCommunalWidgetRepository()
-            repository.communalWidgets.launchIn(backgroundScope)
-            runCurrent()
             verify(appWidgetHost, never()).startListening()
 
-            userUnlocked(true)
-            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
-                context,
-                Intent(ACTION_USER_UNLOCKED)
-            )
-            runCurrent()
+            underTest.updateAppWidgetHostActive(true)
 
             verify(appWidgetHost).startListening()
         }
 
     @Test
-    fun appWidgetHost_userLockedAgain_stopListening() =
+    fun appWidgetHost_stopListening() =
         testScope.runTest {
-            userUnlocked(false)
-            val repository = initCommunalWidgetRepository()
-            repository.communalWidgets.launchIn(backgroundScope)
-            runCurrent()
-
-            userUnlocked(true)
-            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
-                context,
-                Intent(ACTION_USER_UNLOCKED)
-            )
-            runCurrent()
+            underTest.updateAppWidgetHostActive(true)
 
             verify(appWidgetHost).startListening()
-            verify(appWidgetHost, never()).stopListening()
 
-            userUnlocked(false)
-            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
-                context,
-                Intent(ACTION_USER_UNLOCKED)
-            )
-            runCurrent()
+            underTest.updateAppWidgetHostActive(false)
 
             verify(appWidgetHost).stopListening()
         }
-
-    private fun initCommunalWidgetRepository(): CommunalWidgetRepositoryImpl {
-        return CommunalWidgetRepositoryImpl(
-            appWidgetManagerOptional,
-            appWidgetHost,
-            testScope.backgroundScope,
-            kosmos.testDispatcher,
-            fakeBroadcastDispatcher,
-            communalRepository,
-            communalWidgetHost,
-            communalWidgetDao,
-            userManager,
-            userTracker,
-            logBuffer,
-        )
-    }
-
-    private fun communalEnabled(enabled: Boolean) {
-        communalRepository.setIsCommunalEnabled(enabled)
-    }
-
-    private fun userUnlocked(userUnlocked: Boolean) {
-        whenever(userManager.isUserUnlockingOrUnlocked(userHandle)).thenReturn(userUnlocked)
-    }
 
     private fun installedProviders(providers: List<AppWidgetProviderInfo>) {
         whenever(appWidgetManager.installedProviders).thenReturn(providers)

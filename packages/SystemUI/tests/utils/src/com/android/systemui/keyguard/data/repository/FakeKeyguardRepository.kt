@@ -127,6 +127,9 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override val ambientIndicationVisible: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
+    private val _isEncryptedOrLockdown = MutableStateFlow(true)
+    override val isEncryptedOrLockdown: Flow<Boolean> = _isEncryptedOrLockdown
+
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
     }
@@ -246,6 +249,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
+    }
+
+    fun setIsEncryptedOrLockdown(value: Boolean) {
+        _isEncryptedOrLockdown.value = value
     }
 }
 

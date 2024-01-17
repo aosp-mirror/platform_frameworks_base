@@ -35,4 +35,13 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
             }
         }
     }
+
+    private var isHostActive = false
+    override fun updateAppWidgetHostActive(active: Boolean) {
+        isHostActive = active
+    }
+
+    fun isHostActive(): Boolean {
+        return isHostActive
+    }
 }
