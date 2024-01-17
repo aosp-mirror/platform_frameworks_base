@@ -21,9 +21,9 @@ import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
 import android.annotation.FlaggedApi;
 
 /**
- * A list item shown on {@link PromptVerticalListContentView}.
+ * An item shown on {@link PromptContentView}.
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-public interface PromptContentListItem {
+public interface PromptContentItem {
 }
 
