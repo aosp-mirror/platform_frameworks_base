@@ -487,7 +487,6 @@ public abstract class TvAdService extends Service {
          * @param right Right position in pixels, relative to the overlay view.
          * @param bottom Bottom position in pixels, relative to the overlay view.
          *
-         * @hide
          */
         @CallSuper
         public void layoutSurface(final int left, final int top, final int right,
@@ -534,7 +533,6 @@ public abstract class TvAdService extends Service {
          * @param format The new {@link PixelFormat} of the surface.
          * @param width The new width of the surface.
          * @param height The new height of the surface.
-         * @hide
          */
         public void onSurfaceChanged(@PixelFormat.Format int format, int width, int height) {
         }
