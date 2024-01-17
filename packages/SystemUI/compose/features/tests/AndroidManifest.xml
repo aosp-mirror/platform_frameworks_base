@@ -30,11 +30,6 @@
             android:enabled="false"
             tools:replace="android:authorities"
             tools:node="remove" />
-        <provider android:name="com.google.android.systemui.keyguard.KeyguardSliceProviderGoogle"
-            android:authorities="com.android.systemui.test.keyguard.disabled"
-            android:enabled="false"
-            tools:replace="android:authorities"
-            tools:node="remove" />
         <provider android:name="com.android.systemui.keyguard.CustomizationProvider"
             android:authorities="com.android.systemui.test.keyguard.quickaffordance.disabled"
             android:enabled="false"
