@@ -422,17 +422,41 @@ public class RemoteViewsTest {
         if (!drawDataParcel()) {
             return;
         }
+        final RemoteViews.DrawInstructions drawInstructions = getDrawInstructions();
+        final RemoteViews rv = new RemoteViews(drawInstructions);
+        final View view = rv.apply(mContext, mContainer);
+        assertTrue(view instanceof RemoteCanvas);
+        assertEquals(drawInstructions, view.getTag());
+    }
+
+    @Test
+    public void remoteCanvasWiresClickHandlers() {
+        if (!drawDataParcel()) {
+            return;
+        }
+        final RemoteViews.DrawInstructions drawInstructions = getDrawInstructions();
+        final RemoteViews rv = new RemoteViews(drawInstructions);
+        final PendingIntent pi = PendingIntent.getActivity(mContext, 0,
+                new Intent(Intent.ACTION_VIEW), PendingIntent.FLAG_IMMUTABLE);
+        final Intent i = new Intent().putExtra("TEST", "Success");
+        final int viewId = 1;
+        rv.setPendingIntentTemplate(viewId, pi);
+        rv.setOnClickFillInIntent(viewId, i);
+        final View view = rv.apply(mContext, mContainer);
+        assertTrue(view instanceof RemoteCanvas);
+        RemoteCanvas target = (RemoteCanvas) view;
+        assertEquals(1, target.getCallbacks().size());
+        assertNotNull(target.getCallbacks().get(viewId));
+    }
+
+    private RemoteViews.DrawInstructions getDrawInstructions() {
         final byte[] first = new byte[] {'f', 'i', 'r', 's', 't'};
         final byte[] second = new byte[] {'s', 'e', 'c', 'o', 'n', 'd'};
         final RemoteViews.DrawInstructions drawInstructions =
                 new RemoteViews.DrawInstructions.Builder(
                         Collections.singletonList(first)).build();
         drawInstructions.appendInstructions(second);
-
-        RemoteViews rv = new RemoteViews(drawInstructions);
-        View view = rv.apply(mContext, mContainer);
-        assertTrue(view instanceof RemoteCanvas);
-        assertEquals(drawInstructions, view.getTag());
+        return drawInstructions;
     }
 
     private RemoteViews createViewChained(int depth, String... texts) {

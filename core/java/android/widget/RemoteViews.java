@@ -452,6 +452,12 @@ public class RemoteViews implements Parcelable, Filter {
      */
     private boolean mHasDrawInstructions;
 
+    @Nullable
+    private SparseArray<PendingIntent> mPendingIntentTemplate;
+
+    @Nullable
+    private SparseArray<Intent> mFillInIntent;
+
     private static final InteractionHandler DEFAULT_INTERACTION_HANDLER =
             (view, pendingIntent, response) ->
                     startPendingIntent(view, pendingIntent, response.getLaunchOptions(view));
@@ -1473,6 +1479,11 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void apply(View root, ViewGroup rootParent, ActionApplyParams params) {
+            if (hasDrawInstructions() && root instanceof RemoteCanvas target) {
+                target.addOnClickHandler(mViewId, () ->
+                        mResponse.handleViewInteraction(root, params.handler));
+                return;
+            }
             final View target = root.findViewById(mViewId);
             if (target == null) return;
 
@@ -4814,7 +4825,12 @@ public class RemoteViews implements Parcelable, Filter {
      *          by a child of viewId and executed when that child is clicked
      */
     public void setPendingIntentTemplate(@IdRes int viewId, PendingIntent pendingIntentTemplate) {
-        addAction(new SetPendingIntentTemplate(viewId, pendingIntentTemplate));
+        if (hasDrawInstructions()) {
+            getPendingIntentTemplate().set(viewId, pendingIntentTemplate);
+            tryAddRemoteResponse(viewId);
+        } else {
+            addAction(new SetPendingIntentTemplate(viewId, pendingIntentTemplate));
+        }
     }
 
     /**
@@ -4835,7 +4851,12 @@ public class RemoteViews implements Parcelable, Filter {
      *        in order to determine the on-click behavior of the view specified by viewId
      */
     public void setOnClickFillInIntent(@IdRes int viewId, Intent fillInIntent) {
-        setOnClickResponse(viewId, RemoteResponse.fromFillInIntent(fillInIntent));
+        if (hasDrawInstructions()) {
+            getFillInIntent().set(viewId, fillInIntent);
+            tryAddRemoteResponse(viewId);
+        } else {
+            setOnClickResponse(viewId, RemoteResponse.fromFillInIntent(fillInIntent));
+        }
     }
 
     /**
@@ -6463,6 +6484,32 @@ public class RemoteViews implements Parcelable, Filter {
         return context;
     }
 
+    @NonNull
+    private SparseArray<PendingIntent> getPendingIntentTemplate() {
+        if (mPendingIntentTemplate == null) {
+            mPendingIntentTemplate = new SparseArray<>();
+        }
+        return mPendingIntentTemplate;
+    }
+
+    @NonNull
+    private SparseArray<Intent> getFillInIntent() {
+        if (mFillInIntent == null) {
+            mFillInIntent = new SparseArray<>();
+        }
+        return mFillInIntent;
+    }
+
+    private void tryAddRemoteResponse(final int viewId) {
+        final PendingIntent pendingIntent = getPendingIntentTemplate().get(viewId);
+        final Intent intent = getFillInIntent().get(viewId);
+        if (pendingIntent != null && intent != null) {
+            addAction(new SetOnClickResponse(viewId,
+                    RemoteResponse.fromPendingIntentTemplateAndFillInIntent(
+                            pendingIntent, intent)));
+        }
+    }
+
     /**
      * Utility class to hold all the options when applying the remote views
      * @hide
@@ -7002,6 +7049,14 @@ public class RemoteViews implements Parcelable, Filter {
             return response;
         }
 
+        private static RemoteResponse fromPendingIntentTemplateAndFillInIntent(
+                @NonNull final PendingIntent pendingIntent, @NonNull final Intent intent) {
+            RemoteResponse response = new RemoteResponse();
+            response.mPendingIntent = pendingIntent;
+            response.mFillIntent = intent;
+            return response;
+        }
+
         /**
          * Adds a shared element to be transferred as part of the transition between Activities
          * using cross-Activity scene animations. The position of the first element will be used as
@@ -7040,8 +7095,8 @@ public class RemoteViews implements Parcelable, Filter {
 
         private void writeToParcel(Parcel dest, int flags) {
             PendingIntent.writePendingIntentOrNullToParcel(mPendingIntent, dest);
-            if (mPendingIntent == null) {
-                // Only write the intent if pending intent is null
+            dest.writeBoolean((mFillIntent != null));
+            if (mFillIntent != null) {
                 dest.writeTypedObject(mFillIntent, flags);
             }
             dest.writeInt(mInteractionType);
@@ -7051,9 +7106,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         private void readFromParcel(Parcel parcel) {
             mPendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(parcel);
-            if (mPendingIntent == null) {
-                mFillIntent = parcel.readTypedObject(Intent.CREATOR);
-            }
+            mFillIntent = parcel.readBoolean() ? parcel.readTypedObject(Intent.CREATOR) : null;
             mInteractionType = parcel.readInt();
             int[] viewIds = parcel.createIntArray();
             mViewIds = viewIds == null ? null : IntArray.wrap(viewIds);
@@ -7130,7 +7183,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         /** @hide */
         public Pair<Intent, ActivityOptions> getLaunchOptions(View view) {
-            Intent intent = mPendingIntent != null ? new Intent() : new Intent(mFillIntent);
+            Intent intent = mFillIntent == null ? new Intent() : new Intent(mFillIntent);
             intent.setSourceBounds(getSourceBounds(view));
 
             if (view instanceof CompoundButton

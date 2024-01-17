@@ -22,10 +22,15 @@ import android.annotation.FlaggedApi;
 import android.annotation.StyleRes;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
+import java.util.function.IntConsumer;
 
 /**
  * {@link RemoteCanvas} is designed to support arbitrary protocols between two processes using
@@ -38,6 +43,25 @@ import androidx.annotation.Nullable;
  */
 @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
 public class RemoteCanvas extends View {
+
+    private static final String TAG = "RemoteCanvas";
+
+    @Nullable
+    private SparseArray<Runnable> mCallbacks;
+
+    private final IntConsumer mOnClickHandler = (viewId) -> {
+        if (mCallbacks == null) {
+            Log.w(TAG, "Cannot find callback for " + viewId
+                    + ", in fact there were no callbacks from this RemoteViews at all.");
+            return;
+        }
+        final Runnable cb = getCallbacks().get(viewId);
+        if (cb != null) {
+            cb.run();
+        } else {
+            Log.w(TAG, "Cannot find callback for " + viewId);
+        }
+    };
 
     RemoteCanvas(@NonNull Context context) {
         super(context);
@@ -66,5 +90,28 @@ public class RemoteCanvas extends View {
     void setDrawInstructions(@NonNull final RemoteViews.DrawInstructions instructions) {
         setTag(instructions);
         // TODO: handle draw instructions
+        // TODO: attach mOnClickHandler
+    }
+
+    /**
+     * Adds a callback function to a clickable area in the RemoteCanvas.
+     *
+     * @param viewId the viewId of the clickable area
+     * @param cb the callback function to be triggered when clicked
+     */
+    void addOnClickHandler(final int viewId, @NonNull final Runnable cb) {
+        getCallbacks().set(viewId, cb);
+    }
+
+    /**
+     * Returns all callbacks added to the RemoteCanvas through
+     * {@link #addOnClickHandler(int, Runnable)}.
+     */
+    @VisibleForTesting
+    public SparseArray<Runnable> getCallbacks() {
+        if (mCallbacks == null) {
+            mCallbacks = new SparseArray<>();
+        }
+        return mCallbacks;
     }
 }
