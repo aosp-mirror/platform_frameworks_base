@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.kosmos
 
 import android.content.applicationContext
@@ -24,6 +26,8 @@ import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -36,6 +40,7 @@ import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.statusbar.phone.screenOffAnimationController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.util.time.systemClock
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Helper for using [Kosmos] from Java. */
 @Deprecated("Please convert your test to Kotlin and use [Kosmos] directly.")
@@ -65,6 +70,8 @@ class KosmosJavaAdapter(
     val sceneInteractor by lazy { kosmos.sceneInteractor }
     val falsingCollector by lazy { kosmos.falsingCollector }
     val powerInteractor by lazy { kosmos.powerInteractor }
+    val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
+    val deviceUnlockedInteractor by lazy { kosmos.deviceUnlockedInteractor }
 
     init {
         kosmos.applicationContext = testCase.context

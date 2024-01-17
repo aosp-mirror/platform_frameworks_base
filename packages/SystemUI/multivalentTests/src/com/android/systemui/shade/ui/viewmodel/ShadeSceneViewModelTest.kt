@@ -160,9 +160,11 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
+            runCurrent()
             sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
             sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")
 
