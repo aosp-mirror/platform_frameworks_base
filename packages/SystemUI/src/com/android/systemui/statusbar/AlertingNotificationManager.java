@@ -37,19 +37,9 @@ import java.util.stream.Stream;
  */
 public abstract class AlertingNotificationManager {
     private static final String TAG = "AlertNotifManager";
-    protected final SystemClock mSystemClock;
-    protected final ArrayMap<String, AlertEntry> mAlertEntries = new ArrayMap<>();
-    protected final HeadsUpManagerLogger mLogger;
-    protected int mMinimumDisplayTime;
-    protected int mStickyForSomeTimeAutoDismissTime;
-    protected int mAutoDismissTime;
-    protected DelayableExecutor mExecutor;
 
     public AlertingNotificationManager(HeadsUpManagerLogger logger,
             SystemClock systemClock, @Main DelayableExecutor executor) {
-        mLogger = logger;
-        mExecutor = executor;
-        mSystemClock = systemClock;
     }
 
     public abstract void showNotification(@NonNull NotificationEntry entry);

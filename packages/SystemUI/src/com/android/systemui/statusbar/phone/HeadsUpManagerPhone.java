@@ -375,9 +375,9 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
     }
 
     @Override
-    protected void onAlertEntryRemoved(AlertEntry alertEntry) {
-        super.onAlertEntryRemoved(alertEntry);
-        mEntryPool.release((HeadsUpEntryPhone) alertEntry);
+    protected void onAlertEntryRemoved(HeadsUpEntry headsUpEntry) {
+        super.onAlertEntryRemoved(headsUpEntry);
+        mEntryPool.release((HeadsUpEntryPhone) headsUpEntry);
     }
 
     @Override
@@ -529,7 +529,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             mStatusBarState = newState;
             if (wasKeyguard && !isKeyguard && mBypassController.getBypassEnabled()) {
                 ArrayList<String> keysToRemove = new ArrayList<>();
-                for (AlertEntry entry : mAlertEntries.values()) {
+                for (HeadsUpEntry entry : mAlertEntries.values()) {
                     if (entry.mEntry != null && entry.mEntry.isBubble() && !entry.isSticky()) {
                         keysToRemove.add(entry.mEntry.getKey());
                     }
@@ -545,7 +545,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             if (!isDozing) {
                 // Let's make sure all huns we got while dozing time out within the normal timeout
                 // duration. Otherwise they could get stuck for a very long time
-                for (AlertEntry entry : mAlertEntries.values()) {
+                for (HeadsUpEntry entry : mAlertEntries.values()) {
                     entry.updateEntry(true /* updatePostTime */, "onDozingChanged(false)");
                 }
             }
