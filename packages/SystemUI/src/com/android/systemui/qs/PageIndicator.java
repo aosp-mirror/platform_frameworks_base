@@ -1,5 +1,8 @@
 package com.android.systemui.qs;
 
+import static com.android.systemui.qs.PageIndicator.PageScrollActionListener.LEFT;
+import static com.android.systemui.qs.PageIndicator.PageScrollActionListener.RIGHT;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -9,10 +12,12 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 
 import com.android.settingslib.Utils;
@@ -43,6 +48,7 @@ public class PageIndicator extends ViewGroup {
 
     private int mPosition = -1;
     private boolean mAnimating;
+    private PageScrollActionListener mPageScrollActionListener;
 
     private final Animatable2.AnimationCallback mAnimationCallback =
             new Animatable2.AnimationCallback() {
@@ -77,6 +83,14 @@ public class PageIndicator extends ViewGroup {
         mPageIndicatorWidth = res.getDimensionPixelSize(R.dimen.qs_page_indicator_width);
         mPageIndicatorHeight = res.getDimensionPixelSize(R.dimen.qs_page_indicator_height);
         mPageDotWidth = res.getDimensionPixelSize(R.dimen.qs_page_indicator_dot_width);
+        LeftRightArrowPressedListener arrowListener =
+                LeftRightArrowPressedListener.createAndRegisterListenerForView(this);
+        arrowListener.setArrowKeyPressedListener(keyCode -> {
+            if (mPageScrollActionListener != null) {
+                int swipeDirection = keyCode == KeyEvent.KEYCODE_DPAD_LEFT ? LEFT : RIGHT;
+                mPageScrollActionListener.onScrollActionTriggered(swipeDirection);
+            }
+        });
     }
 
     public void setNumPages(int numPages) {
@@ -279,5 +293,20 @@ public class PageIndicator extends ViewGroup {
             int left = (mPageIndicatorWidth - mPageDotWidth) * i;
             getChildAt(i).layout(left, 0, mPageIndicatorWidth + left, mPageIndicatorHeight);
         }
+    }
+
+    void setPageScrollActionListener(PageScrollActionListener listener) {
+        mPageScrollActionListener = listener;
+    }
+
+    interface PageScrollActionListener {
+
+        @IntDef({LEFT, RIGHT})
+        @interface Direction { }
+
+        int LEFT = 0;
+        int RIGHT = 1;
+
+        void onScrollActionTriggered(@Direction int swipeDirection);
     }
 }
