@@ -367,7 +367,7 @@ public class PackageArchiverTest {
         verify(mInstallerService).uninstall(
                 eq(new VersionedPackage(PACKAGE, PackageManager.VERSION_CODE_HIGHEST)),
                 eq(CALLER_PACKAGE), eq(DELETE_ARCHIVE | DELETE_KEEP_DATA), eq(mIntentSender),
-                eq(UserHandle.CURRENT.getIdentifier()), anyInt());
+                eq(UserHandle.CURRENT.getIdentifier()), anyInt(), anyInt());
 
         ArchiveState expectedArchiveState = createArchiveState();
         ArchiveState actualArchiveState = mPackageSetting.readUserState(
@@ -391,7 +391,7 @@ public class PackageArchiverTest {
                 eq(CALLER_PACKAGE),
                 eq(DELETE_ARCHIVE | DELETE_KEEP_DATA),
                 eq(mIntentSender),
-                eq(UserHandle.CURRENT.getIdentifier()), anyInt());
+                eq(UserHandle.CURRENT.getIdentifier()), anyInt(), anyInt());
 
         ArchiveState expectedArchiveState = createArchiveState();
         ArchiveState actualArchiveState = mPackageSetting.readUserState(

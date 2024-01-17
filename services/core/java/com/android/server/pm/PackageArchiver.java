@@ -191,6 +191,7 @@ public class PackageArchiver {
         Computer snapshot = mPm.snapshotComputer();
         int userId = userHandle.getIdentifier();
         int binderUid = Binder.getCallingUid();
+        int binderPid = Binder.getCallingPid();
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell(binderUid)) {
             verifyCaller(snapshot.getPackageUid(callerPackageName, 0, userId), binderUid);
         }
@@ -225,7 +226,8 @@ public class PackageArchiver {
                                     DELETE_ARCHIVE | DELETE_KEEP_DATA,
                                     intentSender,
                                     userId,
-                                    binderUid);
+                                    binderUid,
+                                    binderPid);
                         })
                 .exceptionally(
                         e -> {
