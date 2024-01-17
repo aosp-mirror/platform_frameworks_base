@@ -19,6 +19,7 @@ package com.android.systemui.communal.domain.interactor
 
 import android.appwidget.AppWidgetHost
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
@@ -42,6 +43,7 @@ object CommunalInteractorFactory {
         mediaRepository: FakeCommunalMediaRepository = FakeCommunalMediaRepository(),
         smartspaceRepository: FakeSmartspaceRepository = FakeSmartspaceRepository(),
         tutorialRepository: FakeCommunalTutorialRepository = FakeCommunalTutorialRepository(),
+        communalPrefsRepository: FakeCommunalPrefsRepository = FakeCommunalPrefsRepository(),
         appWidgetHost: AppWidgetHost = mock(),
         editWidgetsActivityStarter: EditWidgetsActivityStarter = mock(),
     ): WithDependencies {
@@ -55,6 +57,7 @@ object CommunalInteractorFactory {
             testScope,
             communalRepository,
             widgetRepository,
+            communalPrefsRepository,
             mediaRepository,
             smartspaceRepository,
             tutorialRepository,
@@ -66,6 +69,7 @@ object CommunalInteractorFactory {
             CommunalInteractor(
                 communalRepository,
                 widgetRepository,
+                communalPrefsRepository,
                 mediaRepository,
                 smartspaceRepository,
                 withDeps.keyguardInteractor,
@@ -79,6 +83,7 @@ object CommunalInteractorFactory {
         val testScope: TestScope,
         val communalRepository: FakeCommunalRepository,
         val widgetRepository: FakeCommunalWidgetRepository,
+        val communalPrefsRepository: FakeCommunalPrefsRepository,
         val mediaRepository: FakeCommunalMediaRepository,
         val smartspaceRepository: FakeSmartspaceRepository,
         val tutorialRepository: FakeCommunalTutorialRepository,
