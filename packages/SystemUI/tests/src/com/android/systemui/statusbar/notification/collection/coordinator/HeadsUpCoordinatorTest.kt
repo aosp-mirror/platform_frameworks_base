@@ -148,7 +148,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             verify(remoteInputManager).addActionPressListener(capture())
         }
         given(headsUpManager.allEntries).willAnswer { huns.stream() }
-        given(headsUpManager.isAlerting(anyString())).willAnswer { invocation ->
+        given(headsUpManager.isHeadsUpEntry(anyString())).willAnswer { invocation ->
             val key = invocation.getArgument<String>(0)
             huns.any { entry -> entry.key == key }
         }

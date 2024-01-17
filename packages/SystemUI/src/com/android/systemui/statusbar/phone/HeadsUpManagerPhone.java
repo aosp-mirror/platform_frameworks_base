@@ -222,7 +222,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             mReleaseOnExpandFinish = false;
         } else {
             for (NotificationEntry entry : mEntriesToRemoveAfterExpand) {
-                if (isAlerting(entry.getKey())) {
+                if (isHeadsUpEntry(entry.getKey())) {
                     // Maybe the heads-up was removed already
                     removeAlertEntry(entry.getKey());
                 }
@@ -357,7 +357,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
     private final OnReorderingAllowedListener mOnReorderingAllowedListener = () -> {
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
-            if (isAlerting(entry.getKey())) {
+            if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
                 removeAlertEntry(entry.getKey());
             }

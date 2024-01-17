@@ -140,7 +140,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 .setSummary(mEntry)
                 .build();
 
-        when(mHeadsUpManager.isAlerting(mEntry.getKey())).thenReturn(false);
+        when(mHeadsUpManager.isHeadsUpEntry(mEntry.getKey())).thenReturn(false);
 
         // Whenever we invalidate, the pipeline runs again, so we invalidate the state
         doAnswer(i -> {
@@ -373,7 +373,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setSleepy(false);
 
         // WHEN a notification is alerting and visible
-        when(mHeadsUpManager.isAlerting(mEntry.getKey())).thenReturn(true);
+        when(mHeadsUpManager.isHeadsUpEntry(mEntry.getKey())).thenReturn(true);
         when(mVisibilityLocationProvider.isInVisibleLocation(any(NotificationEntry.class)))
                 .thenReturn(true);
 
@@ -389,7 +389,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setSleepy(false);
 
         // WHEN a notification is alerting but not visible
-        when(mHeadsUpManager.isAlerting(mEntry.getKey())).thenReturn(true);
+        when(mHeadsUpManager.isHeadsUpEntry(mEntry.getKey())).thenReturn(true);
         when(mVisibilityLocationProvider.isInVisibleLocation(any(NotificationEntry.class)))
                 .thenReturn(false);
 
@@ -537,7 +537,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
 
         // GIVEN mEntry is a HUN
-        when(mHeadsUpManager.isAlerting(mEntry.getKey())).thenReturn(true);
+        when(mHeadsUpManager.isHeadsUpEntry(mEntry.getKey())).thenReturn(true);
 
         // THEN group + section changes are allowed
         assertTrue(mNotifStabilityManager.isGroupChangeAllowed(mEntry));

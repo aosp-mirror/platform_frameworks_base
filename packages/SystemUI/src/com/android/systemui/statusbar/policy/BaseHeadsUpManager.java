@@ -258,7 +258,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     /**
      * @return true if the notification is managed by this manager
      */
-    public boolean isAlerting(@NonNull String key) {
+    public boolean isHeadsUpEntry(@NonNull String key) {
         return mHeadsUpEntryMap.containsKey(key);
     }
 

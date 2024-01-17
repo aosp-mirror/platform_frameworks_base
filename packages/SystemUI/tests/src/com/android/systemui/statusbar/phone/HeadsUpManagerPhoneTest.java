@@ -173,7 +173,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                 /* releaseImmediately = */ false);
 
         assertTrue(removedImmediately);
-        assertFalse(hmp.isAlerting(entry.getKey()));
+        assertFalse(hmp.isHeadsUpEntry(entry.getKey()));
     }
 
     @Test
@@ -212,6 +212,6 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
         hmp.extendHeadsUp();
         mSystemClock.advanceTime(TEST_AUTO_DISMISS_TIME + hmp.mExtensionTime / 2);
 
-        assertTrue(hmp.isAlerting(entry.getKey()));
+        assertTrue(hmp.isHeadsUpEntry(entry.getKey()));
     }
 }

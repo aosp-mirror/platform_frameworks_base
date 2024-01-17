@@ -71,7 +71,7 @@ interface HeadsUpManager : Dumpable {
     fun hasPinnedHeadsUp(): Boolean
 
     /** Returns whether or not the given notification is alerting and managed by this manager. */
-    fun isAlerting(key: String): Boolean
+    fun isHeadsUpEntry(key: String): Boolean
 
     fun isHeadsUpGoingAway(): Boolean
 
@@ -213,7 +213,7 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
     override fun getTouchableRegion(): Region? = null
     override fun getTopEntry() = null
     override fun hasPinnedHeadsUp() = false
-    override fun isAlerting(key: String) = false
+    override fun isHeadsUpEntry(key: String) = false
     override fun isHeadsUpGoingAway() = false
     override fun isSnoozed(packageName: String) = false
     override fun isSticky(key: String?) = false
