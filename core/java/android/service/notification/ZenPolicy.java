@@ -45,8 +45,8 @@ import java.util.Objects;
  */
 public final class ZenPolicy implements Parcelable {
 
-    /** Used to track which rule variables have been modified by the user.
-     * Should be checked against the bitmask {@link #getUserModifiedFields()}.
+    /**
+     * Enum for the user-modifiable fields in this object.
      * @hide
      */
     @IntDef(flag = true, prefix = { "FIELD_" }, value = {
@@ -76,7 +76,6 @@ public final class ZenPolicy implements Parcelable {
      * the same time.
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_MESSAGES = 1 << 0;
     /**
@@ -84,7 +83,6 @@ public final class ZenPolicy implements Parcelable {
      * the same time.
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_CALLS = 1 << 1;
     /**
@@ -92,13 +90,11 @@ public final class ZenPolicy implements Parcelable {
      * set at the same time.
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_CONVERSATIONS = 1 << 2;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_ALLOW_CHANNELS = 1 << 3;
     /**
@@ -109,73 +105,61 @@ public final class ZenPolicy implements Parcelable {
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_PRIORITY_CATEGORY_EVENTS = 1 << 5;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS = 1 << 6;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_PRIORITY_CATEGORY_ALARMS = 1 << 7;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_PRIORITY_CATEGORY_MEDIA = 1 << 8;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_PRIORITY_CATEGORY_SYSTEM = 1 << 9;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_VISUAL_EFFECT_FULL_SCREEN_INTENT = 1 << 10;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_VISUAL_EFFECT_LIGHTS = 1 << 11;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_VISUAL_EFFECT_PEEK = 1 << 12;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_VISUAL_EFFECT_STATUS_BAR = 1 << 13;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_VISUAL_EFFECT_BADGE = 1 << 14;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_VISUAL_EFFECT_AMBIENT = 1 << 15;
     /**
      * @hide
      */
-    @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int FIELD_VISUAL_EFFECT_NOTIFICATION_LIST = 1 << 16;
 
@@ -186,7 +170,6 @@ public final class ZenPolicy implements Parcelable {
     private @ConversationSenders int mConversationSenders = CONVERSATION_SENDERS_UNSET;
     @FlaggedApi(Flags.FLAG_MODES_API)
     private @ChannelType int mAllowChannels = CHANNEL_POLICY_UNSET;
-    private final @ModifiableField int mUserModifiedFields; // Bitwise representation
 
     /** @hide */
     @IntDef(prefix = { "PRIORITY_CATEGORY_" }, value = {
@@ -388,22 +371,19 @@ public final class ZenPolicy implements Parcelable {
     public ZenPolicy() {
         mPriorityCategories = new ArrayList<>(Collections.nCopies(NUM_PRIORITY_CATEGORIES, 0));
         mVisualEffects = new ArrayList<>(Collections.nCopies(NUM_VISUAL_EFFECTS, 0));
-        mUserModifiedFields = 0;
     }
 
     /** @hide */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public ZenPolicy(List<Integer> priorityCategories, List<Integer> visualEffects,
                      @PeopleType int priorityMessages, @PeopleType int priorityCalls,
-                     @ConversationSenders int conversationSenders, @ChannelType int allowChannels,
-                     @ModifiableField int userModifiedFields) {
+                     @ConversationSenders int conversationSenders, @ChannelType int allowChannels) {
         mPriorityCategories = priorityCategories;
         mVisualEffects = visualEffects;
         mPriorityMessages = priorityMessages;
         mPriorityCalls = priorityCalls;
         mConversationSenders = conversationSenders;
         mAllowChannels = allowChannels;
-        mUserModifiedFields = userModifiedFields;
     }
 
     /**
@@ -633,8 +613,6 @@ public final class ZenPolicy implements Parcelable {
      * is not set, it is (@link STATE_UNSET} and will not change the current set policy.
      */
     public static final class Builder {
-        private @ModifiableField int mUserModifiedFields;
-
         private ZenPolicy mZenPolicy;
 
         public Builder() {
@@ -649,9 +627,6 @@ public final class ZenPolicy implements Parcelable {
         public Builder(@Nullable ZenPolicy policy) {
             if (policy != null) {
                 mZenPolicy = policy.copy();
-                if (Flags.modesApi()) {
-                    mUserModifiedFields = policy.mUserModifiedFields;
-                }
             } else {
                 mZenPolicy = new ZenPolicy();
             }
@@ -662,11 +637,10 @@ public final class ZenPolicy implements Parcelable {
          */
         public @NonNull ZenPolicy build() {
             if (Flags.modesApi()) {
-                return new ZenPolicy(new ArrayList<Integer>(mZenPolicy.mPriorityCategories),
-                        new ArrayList<Integer>(mZenPolicy.mVisualEffects),
+                return new ZenPolicy(new ArrayList<>(mZenPolicy.mPriorityCategories),
+                        new ArrayList<>(mZenPolicy.mVisualEffects),
                         mZenPolicy.mPriorityMessages, mZenPolicy.mPriorityCalls,
-                        mZenPolicy.mConversationSenders, mZenPolicy.mAllowChannels,
-                        mUserModifiedFields);
+                        mZenPolicy.mConversationSenders, mZenPolicy.mAllowChannels);
             } else {
                 return mZenPolicy.copy();
             }
@@ -1025,28 +999,6 @@ public final class ZenPolicy implements Parcelable {
             mZenPolicy.mAllowChannels = allow ? CHANNEL_POLICY_PRIORITY : CHANNEL_POLICY_NONE;
             return this;
         }
-
-        /**
-         * Sets the user modified fields bitmask.
-         * @hide
-         */
-        @TestApi
-        @FlaggedApi(Flags.FLAG_MODES_API)
-        public @NonNull Builder setUserModifiedFields(@ModifiableField int userModifiedFields) {
-            mUserModifiedFields = userModifiedFields;
-            return this;
-        }
-    }
-
-    /**
-     Gets the bitmask representing which fields are user modified. Bits are set using
-     * {@link ModifiableField}.
-     * @hide
-     */
-    @TestApi
-    @FlaggedApi(Flags.FLAG_MODES_API)
-    public @ModifiableField int getUserModifiedFields() {
-        return mUserModifiedFields;
     }
 
     @Override
@@ -1063,7 +1015,6 @@ public final class ZenPolicy implements Parcelable {
         dest.writeInt(mConversationSenders);
         if (Flags.modesApi()) {
             dest.writeInt(mAllowChannels);
-            dest.writeInt(mUserModifiedFields);
         }
     }
 
@@ -1079,7 +1030,7 @@ public final class ZenPolicy implements Parcelable {
                                 trimList(source.readArrayList(Integer.class.getClassLoader(),
                                         Integer.class), NUM_VISUAL_EFFECTS),
                                 source.readInt(), source.readInt(), source.readInt(),
-                                source.readInt(), source.readInt()
+                                source.readInt()
                         );
                     } else {
                         policy = new ZenPolicy();
@@ -1114,14 +1065,12 @@ public final class ZenPolicy implements Parcelable {
                         conversationTypeToString(mConversationSenders));
         if (Flags.modesApi()) {
             sb.append(", allowChannels=").append(channelTypeToString(mAllowChannels));
-            sb.append(", userModifiedFields=")
-                    .append(modifiedFieldsToString(mUserModifiedFields));
         }
         return sb.append('}').toString();
     }
 
-    @FlaggedApi(Flags.FLAG_MODES_API)
-    private String modifiedFieldsToString(@ModifiableField int bitmask) {
+    /** @hide */
+    public static String fieldsToString(@ModifiableField int bitmask) {
         ArrayList<String> modified = new ArrayList<>();
         if ((bitmask & FIELD_MESSAGES) != 0) {
             modified.add("FIELD_MESSAGES");
@@ -1332,8 +1281,7 @@ public final class ZenPolicy implements Parcelable {
                 && other.mPriorityMessages == mPriorityMessages
                 && other.mConversationSenders == mConversationSenders;
         if (Flags.modesApi()) {
-            return eq && other.mAllowChannels == mAllowChannels
-                    && other.mUserModifiedFields == mUserModifiedFields;
+            return eq && other.mAllowChannels == mAllowChannels;
         }
         return eq;
     }
@@ -1342,7 +1290,7 @@ public final class ZenPolicy implements Parcelable {
     public int hashCode() {
         if (Flags.modesApi()) {
             return Objects.hash(mPriorityCategories, mVisualEffects, mPriorityCalls,
-                    mPriorityMessages, mConversationSenders, mAllowChannels, mUserModifiedFields);
+                    mPriorityMessages, mConversationSenders, mAllowChannels);
         }
         return Objects.hash(mPriorityCategories, mVisualEffects, mPriorityCalls, mPriorityMessages,
                 mConversationSenders);

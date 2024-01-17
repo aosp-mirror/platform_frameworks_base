@@ -23,7 +23,6 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.app.NotificationManager.InterruptionFilter;
 import android.content.ComponentName;
 import android.net.Uri;
@@ -113,8 +112,8 @@ public final class AutomaticZenRule implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
-    /** Used to track which rule variables have been modified by the user.
-     * Should be checked against the bitmask {@link #getUserModifiedFields()}.
+    /**
+     * Enum for the user-modifiable fields in this object.
      * @hide
      */
     @IntDef(flag = true, prefix = { "FIELD_" }, value = {
@@ -128,13 +127,11 @@ public final class AutomaticZenRule implements Parcelable {
      * @hide
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    @TestApi
     public static final int FIELD_NAME = 1 << 0;
     /**
      * @hide
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    @TestApi
     public static final int FIELD_INTERRUPTION_FILTER = 1 << 1;
 
     private boolean enabled;
@@ -153,7 +150,6 @@ public final class AutomaticZenRule implements Parcelable {
     private int mIconResId;
     private String mTriggerDescription;
     private boolean mAllowManualInvocation;
-    private @ModifiableField int mUserModifiedFields; // Bitwise representation
 
     /**
      * The maximum string length for any string contained in this automatic zen rule. This pertains
@@ -256,7 +252,6 @@ public final class AutomaticZenRule implements Parcelable {
             mIconResId = source.readInt();
             mTriggerDescription = getTrimmedString(source.readString(), MAX_DESC_LENGTH);
             mType = source.readInt();
-            mUserModifiedFields = source.readInt();
         }
     }
 
@@ -307,8 +302,7 @@ public final class AutomaticZenRule implements Parcelable {
      * Returns whether this rule's name has been modified by the user.
      * @hide
      */
-    // TODO: b/310620812 - Replace with mUserModifiedFields & FIELD_NAME once
-    //  FLAG_MODES_API is inlined.
+    // TODO: b/310620812 - Consider removing completely. Seems not be used anywhere except tests.
     public boolean isModified() {
         return mModified;
     }
@@ -506,32 +500,6 @@ public final class AutomaticZenRule implements Parcelable {
         return type;
     }
 
-    /**
-     * Gets the bitmask representing which fields are user modified. Bits are set using
-     * {@link ModifiableField}.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_MODES_API)
-    @TestApi
-    public @ModifiableField int getUserModifiedFields() {
-        return mUserModifiedFields;
-    }
-
-    /**
-     * Returns {@code true} if the {@link AutomaticZenRule} can be updated.
-     * When this returns {@code false}, calls to
-     * {@link NotificationManager#updateAutomaticZenRule(String, AutomaticZenRule)}) with this rule
-     * will ignore changes to user-configurable fields.
-     */
-    @FlaggedApi(Flags.FLAG_MODES_API)
-    public boolean canUpdate() {
-        // The rule is considered updateable if its bitmask has no user modifications, and
-        // the bitmasks of the policy and device effects have no modification.
-        return mUserModifiedFields == 0
-                && (mZenPolicy == null || mZenPolicy.getUserModifiedFields() == 0)
-                && (mDeviceEffects == null || mDeviceEffects.getUserModifiedFields() == 0);
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -560,7 +528,6 @@ public final class AutomaticZenRule implements Parcelable {
             dest.writeInt(mIconResId);
             dest.writeString(mTriggerDescription);
             dest.writeInt(mType);
-            dest.writeInt(mUserModifiedFields);
         }
     }
 
@@ -582,16 +549,14 @@ public final class AutomaticZenRule implements Parcelable {
                     .append(",allowManualInvocation=").append(mAllowManualInvocation)
                     .append(",iconResId=").append(mIconResId)
                     .append(",triggerDescription=").append(mTriggerDescription)
-                    .append(",type=").append(mType)
-                    .append(",userModifiedFields=")
-                    .append(modifiedFieldsToString(mUserModifiedFields));
+                    .append(",type=").append(mType);
         }
 
         return sb.append(']').toString();
     }
 
-    @FlaggedApi(Flags.FLAG_MODES_API)
-    private String modifiedFieldsToString(int bitmask) {
+    /** @hide */
+    public static String fieldsToString(@ModifiableField int bitmask) {
         ArrayList<String> modified = new ArrayList<>();
         if ((bitmask & FIELD_NAME) != 0) {
             modified.add("FIELD_NAME");
@@ -623,8 +588,7 @@ public final class AutomaticZenRule implements Parcelable {
                     && other.mAllowManualInvocation == mAllowManualInvocation
                     && other.mIconResId == mIconResId
                     && Objects.equals(other.mTriggerDescription, mTriggerDescription)
-                    && other.mType == mType
-                    && other.mUserModifiedFields == mUserModifiedFields;
+                    && other.mType == mType;
         }
         return finalEquals;
     }
@@ -634,8 +598,7 @@ public final class AutomaticZenRule implements Parcelable {
         if (Flags.modesApi()) {
             return Objects.hash(enabled, name, interruptionFilter, conditionId, owner,
                     configurationActivity, mZenPolicy, mDeviceEffects, mModified, creationTime,
-                    mPkg, mAllowManualInvocation, mIconResId, mTriggerDescription, mType,
-                    mUserModifiedFields);
+                    mPkg, mAllowManualInvocation, mIconResId, mTriggerDescription, mType);
         }
         return Objects.hash(enabled, name, interruptionFilter, conditionId, owner,
                 configurationActivity, mZenPolicy, mModified, creationTime, mPkg);
@@ -704,7 +667,6 @@ public final class AutomaticZenRule implements Parcelable {
         private boolean mAllowManualInvocation;
         private long mCreationTime;
         private String mPkg;
-        private @ModifiableField int mUserModifiedFields;
 
         public Builder(@NonNull AutomaticZenRule rule) {
             mName = rule.getName();
@@ -721,7 +683,6 @@ public final class AutomaticZenRule implements Parcelable {
             mAllowManualInvocation = rule.isManualInvocationAllowed();
             mCreationTime = rule.getCreationTime();
             mPkg = rule.getPackageName();
-            mUserModifiedFields = rule.mUserModifiedFields;
         }
 
         public Builder(@NonNull String name, @NonNull Uri conditionId) {
@@ -848,19 +809,6 @@ public final class AutomaticZenRule implements Parcelable {
             return this;
         }
 
-        /**
-         * Sets the bitmask representing which fields have been user-modified.
-         * This method should not be used outside of tests. The value of userModifiedFields
-         * should be set based on what values are changed when a rule is populated or updated..
-         * @hide
-         */
-        @FlaggedApi(Flags.FLAG_MODES_API)
-        @TestApi
-        public @NonNull Builder setUserModifiedFields(@ModifiableField int userModifiedFields) {
-            mUserModifiedFields = userModifiedFields;
-            return this;
-        }
-
         public @NonNull AutomaticZenRule build() {
             AutomaticZenRule rule = new AutomaticZenRule(mName, mOwner, mConfigurationActivity,
                     mConditionId, mPolicy, mInterruptionFilter, mEnabled);
@@ -871,7 +819,6 @@ public final class AutomaticZenRule implements Parcelable {
             rule.mIconResId = mIconResId;
             rule.mAllowManualInvocation = mAllowManualInvocation;
             rule.setPackageName(mPkg);
-            rule.mUserModifiedFields = mUserModifiedFields;
 
             return rule;
         }
