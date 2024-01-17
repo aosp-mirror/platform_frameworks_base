@@ -91,7 +91,7 @@ abstract class SystemUIAppComponentFactoryBase : AppComponentFactory() {
         return app
     }
 
-    @UsesReflection(KeepTarget(extendsClassConstant = SysUIComponent::class, methodName = "inject"))
+    @UsesReflection(KeepTarget(instanceOfClassConstant = SysUIComponent::class, methodName = "inject"))
     override fun instantiateProviderCompat(cl: ClassLoader, className: String): ContentProvider {
         val contentProvider = super.instantiateProviderCompat(cl, className)
         if (contentProvider is ContextInitializer) {
