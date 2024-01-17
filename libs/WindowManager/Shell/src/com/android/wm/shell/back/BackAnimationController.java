@@ -17,7 +17,7 @@
 package com.android.wm.shell.back;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_HOME;
-import static com.android.window.flags.Flags.predictiveBackSystemAnimations;
+import static com.android.window.flags.Flags.predictiveBackSystemAnims;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
@@ -244,7 +244,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private void setupAnimationDeveloperSettingsObserver(
             @NonNull ContentResolver contentResolver,
             @NonNull @ShellBackgroundThread final Handler backgroundHandler) {
-        if (predictiveBackSystemAnimations()) {
+        if (predictiveBackSystemAnims()) {
             ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Back animation aconfig flag is enabled, therefore "
                     + "developer settings flag is ignored and no content observer registered");
             return;
@@ -267,7 +267,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      */
     @ShellBackgroundThread
     private void updateEnableAnimationFromFlags() {
-        boolean isEnabled = predictiveBackSystemAnimations() || isDeveloperSettingEnabled();
+        boolean isEnabled = predictiveBackSystemAnims() || isDeveloperSettingEnabled();
         mEnableAnimations.set(isEnabled);
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Back animation enabled=%s", isEnabled);
     }
