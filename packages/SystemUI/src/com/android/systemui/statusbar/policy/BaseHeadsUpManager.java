@@ -70,7 +70,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     private final UiEventLogger mUiEventLogger;
 
     protected final SystemClock mSystemClock;
-    protected final ArrayMap<String, HeadsUpEntry> mAlertEntries = new ArrayMap<>();
+    protected final ArrayMap<String, HeadsUpEntry> mHeadsUpEntryMap = new ArrayMap<>();
     protected final HeadsUpManagerLogger mLogger;
     protected int mMinimumDisplayTime;
     protected int mStickyForSomeTimeAutoDismissTime;
@@ -173,7 +173,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     @Override
     public boolean removeNotification(@NonNull String key, boolean releaseImmediately) {
         mLogger.logRemoveNotification(key, releaseImmediately);
-        HeadsUpEntry headsUpEntry = mAlertEntries.get(key);
+        HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
         if (headsUpEntry == null) {
             return true;
         }
@@ -194,7 +194,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      *              removal time
      */
     public void updateNotification(@NonNull String key, boolean alert) {
-        HeadsUpEntry headsUpEntry = mAlertEntries.get(key);
+        HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
         mLogger.logUpdateNotification(key, alert, headsUpEntry != null);
         if (headsUpEntry == null) {
             // the entry was released before this update (i.e by a listener) This can happen
@@ -219,7 +219,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         mLogger.logReleaseAllImmediately();
         // A copy is necessary here as we are changing the underlying map.  This would cause
         // undefined behavior if we iterated over the key set directly.
-        ArraySet<String> keysToRemove = new ArraySet<>(mAlertEntries.keySet());
+        ArraySet<String> keysToRemove = new ArraySet<>(mHeadsUpEntryMap.keySet());
         for (String key : keysToRemove) {
             removeAlertEntry(key);
         }
@@ -232,7 +232,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      */
     @Nullable
     public NotificationEntry getEntry(@NonNull String key) {
-        HeadsUpEntry headsUpEntry = mAlertEntries.get(key);
+        HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
         return headsUpEntry != null ? headsUpEntry.mEntry : null;
     }
 
@@ -243,24 +243,23 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     @NonNull
     @Override
     public Stream<NotificationEntry> getAllEntries() {
-        return mAlertEntries.values().stream().map(headsUpEntry -> headsUpEntry.mEntry);
+        return mHeadsUpEntryMap.values().stream().map(headsUpEntry -> headsUpEntry.mEntry);
     }
 
     /**
-     * Whether or not there are any active alerting notifications.
+     * Whether or not there are any active notifications.
      * @return true if there is an alert, false otherwise
      */
     @Override
     public boolean hasNotifications() {
-        return !mAlertEntries.isEmpty();
+        return !mHeadsUpEntryMap.isEmpty();
     }
 
     /**
-     * Whether or not the given notification is alerting and managed by this manager.
-     * @return true if the notification is alerting
+     * @return true if the notification is managed by this manager
      */
     public boolean isAlerting(@NonNull String key) {
-        return mAlertEntries.containsKey(key);
+        return mHeadsUpEntryMap.containsKey(key);
     }
 
     /**
@@ -269,7 +268,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      */
     @Override
     public long getEarliestRemovalTime(String key) {
-        HeadsUpEntry entry = mAlertEntries.get(key);
+        HeadsUpEntry entry = mHeadsUpEntryMap.get(key);
         if (entry != null) {
             return Math.max(0, entry.mEarliestRemovalTime - mSystemClock.elapsedRealtime());
         }
@@ -280,7 +279,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         final HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
         if (headsUpEntry == null) {
             // This should not happen since shouldHeadsUpBecomePinned is always called after adding
-            // the NotificationEntry into AlertingNotificationManager's mAlertEntries map.
+            // the NotificationEntry into mHeadsUpEntryMap.
             return hasFullScreenIntent(entry);
         }
         return hasFullScreenIntent(entry) && !headsUpEntry.mWasUnpinned;
@@ -326,7 +325,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     protected final void addAlertEntry(@NonNull NotificationEntry entry) {
         HeadsUpEntry headsUpEntry = createAlertEntry();
         headsUpEntry.setEntry(entry);
-        mAlertEntries.put(entry.getKey(), headsUpEntry);
+        mHeadsUpEntryMap.put(entry.getKey(), headsUpEntry);
         onAlertEntryAdded(headsUpEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         entry.setIsAlerting(true);
@@ -353,7 +352,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      * @param key key of notification to remove
      */
     protected final void removeAlertEntry(@NonNull String key) {
-        HeadsUpEntry headsUpEntry = mAlertEntries.get(key);
+        HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
         if (headsUpEntry == null) {
             return;
         }
@@ -364,7 +363,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             return;
         }
         entry.demoteStickyHun();
-        mAlertEntries.remove(key);
+        mHeadsUpEntryMap.remove(key);
         onAlertEntryRemoved(headsUpEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         headsUpEntry.reset();
@@ -421,7 +420,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      * Snoozes all current Heads Up Notifications.
      */
     public void snooze() {
-        for (String key : mAlertEntries.keySet()) {
+        for (String key : mHeadsUpEntryMap.keySet()) {
             HeadsUpEntry entry = getHeadsUpEntry(key);
             String packageName = entry.mEntry.getSbn().getPackageName();
             String snoozeKey = snoozeKey(packageName, mUser);
@@ -437,7 +436,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
 
     @Nullable
     protected HeadsUpEntry getHeadsUpEntry(@NonNull String key) {
-        return (HeadsUpEntry) mAlertEntries.get(key);
+        return (HeadsUpEntry) mHeadsUpEntryMap.get(key);
     }
 
     /**
@@ -451,11 +450,11 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
 
     @Nullable
     protected HeadsUpEntry getTopHeadsUpEntry() {
-        if (mAlertEntries.isEmpty()) {
+        if (mHeadsUpEntryMap.isEmpty()) {
             return null;
         }
         HeadsUpEntry topEntry = null;
-        for (HeadsUpEntry entry: mAlertEntries.values()) {
+        for (HeadsUpEntry entry: mHeadsUpEntryMap.values()) {
             if (topEntry == null || entry.compareTo(topEntry) < 0) {
                 topEntry = (HeadsUpEntry) entry;
             }
@@ -486,7 +485,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         pw.print("  mSnoozeLengthMs="); pw.println(mSnoozeLengthMs);
         pw.print("  now="); pw.println(mSystemClock.elapsedRealtime());
         pw.print("  mUser="); pw.println(mUser);
-        for (HeadsUpEntry entry: mAlertEntries.values()) {
+        for (HeadsUpEntry entry: mHeadsUpEntryMap.values()) {
             pw.print("  HeadsUpEntry="); pw.println(entry.mEntry);
         }
         int n = mSnoozedPackages.size();
@@ -505,7 +504,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     }
 
     private boolean hasPinnedNotificationInternal() {
-        for (String key : mAlertEntries.keySet()) {
+        for (String key : mHeadsUpEntryMap.keySet()) {
             HeadsUpEntry entry = getHeadsUpEntry(key);
             if (entry.mEntry.isRowPinned()) {
                 return true;
@@ -519,7 +518,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      * @param userUnPinned The unpinned action is trigger by user real operation.
      */
     public void unpinAll(boolean userUnPinned) {
-        for (String key : mAlertEntries.keySet()) {
+        for (String key : mHeadsUpEntryMap.keySet()) {
             HeadsUpEntry entry = getHeadsUpEntry(key);
             setEntryPinned(entry, false /* isPinned */);
             // maybe it got un sticky
@@ -611,7 +610,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      */
     @Override
     public boolean isSticky(String key) {
-        HeadsUpEntry headsUpEntry = mAlertEntries.get(key);
+        HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
         if (headsUpEntry != null) {
             return headsUpEntry.isSticky();
         }
