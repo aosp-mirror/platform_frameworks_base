@@ -90,6 +90,7 @@ LIBANDROID {
     AInputEvent_getSource;
     AInputEvent_getType;
     AInputEvent_release; # introduced=31
+    AInputEvent_toJava; # introduced=35
     AInputQueue_attachLooper;
     AInputQueue_detachLooper;
     AInputQueue_finishEvent;
