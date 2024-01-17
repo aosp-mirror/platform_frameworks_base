@@ -27,6 +27,7 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -644,6 +645,59 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         protected boolean mExpanded;
         protected boolean mWasUnpinned;
 
+        @Nullable public NotificationEntry mEntry;
+        public long mPostTime;
+        public long mEarliestRemovalTime;
+
+        @Nullable protected Runnable mRemoveAlertRunnable;
+
+        @Nullable private Runnable mCancelRemoveAlertRunnable;
+
+        @Override
+        public void setEntry(@NonNull final NotificationEntry entry) {
+            setEntry(entry, () -> removeAlertEntry(entry.getKey()));
+        }
+
+        @Override
+        public void setEntry(@NonNull final NotificationEntry entry,
+                @Nullable Runnable removeAlertRunnable) {
+            mEntry = entry;
+            mRemoveAlertRunnable = removeAlertRunnable;
+
+            mPostTime = calculatePostTime();
+            updateEntry(true /* updatePostTime */, "setEntry");
+        }
+
+        /**
+         * Updates an entry's removal time.
+         * @param updatePostTime whether or not to refresh the post time
+         */
+        @Override
+        public void updateEntry(boolean updatePostTime, @Nullable String reason) {
+            mLogger.logUpdateEntry(mEntry, updatePostTime, reason);
+
+            final long now = mSystemClock.elapsedRealtime();
+            mEarliestRemovalTime = now + mMinimumDisplayTime;
+
+            if (updatePostTime) {
+                mPostTime = Math.max(mPostTime, now);
+            }
+
+            if (isSticky()) {
+                removeAutoRemovalCallbacks("updateEntry (sticky)");
+                return;
+            }
+
+            final long finishTime = calculateFinishTime();
+            final long timeLeft = Math.max(finishTime - now, mMinimumDisplayTime);
+            scheduleAutoRemovalCallback(timeLeft, "updateEntry (not sticky)");
+        }
+
+        /**
+         * Whether or not the notification is "sticky" i.e. should stay on screen regardless
+         * of the timer (forever) and should be removed externally.
+         * @return true if the notification is sticky
+         */
         @Override
         public boolean isSticky() {
             return (mEntry.isRowPinned() && mExpanded)
@@ -654,6 +708,15 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         @Override
         public boolean isStickyForSomeTime() {
             return mEntry.isStickyAndNotDemoted();
+        }
+
+        /**
+         * Whether the notification has befen on screen long enough and can be removed.
+         * @return true if the notification has been on screen long enough
+         */
+        @Override
+        public boolean wasShownLongEnough() {
+            return mEarliestRemovalTime < mSystemClock.elapsedRealtime();
         }
 
         @Override
@@ -689,7 +752,13 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
                 return 1;
             }
 
-            return super.compareTo(headsUpEntry);
+            if (mPostTime > alertEntry.mPostTime) {
+                return -1;
+            } else if (mPostTime == alertEntry.mPostTime) {
+                return mEntry.getKey().compareTo(alertEntry.mEntry.getKey());
+            } else {
+                return 1;
+            }
         }
 
         public void setExpanded(boolean expanded) {
@@ -698,15 +767,74 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
 
         @Override
         public void reset() {
-            super.reset();
+            removeAutoRemovalCallbacks("reset()");
+            mEntry = null;
+            mRemoveAlertRunnable = null;
             mExpanded = false;
             mRemoteInputActive = false;
         }
 
+        /**
+         * Clear any pending removal runnables.
+         */
+        @Override
+        public void removeAutoRemovalCallbacks(@Nullable String reason) {
+            final boolean removed = removeAutoRemovalCallbackInternal();
+
+            if (removed) {
+                mLogger.logAutoRemoveCanceled(mEntry, reason);
+            }
+        }
+
+        @Override
+        public void scheduleAutoRemovalCallback(long delayMillis, @NonNull String reason) {
+            if (mRemoveAlertRunnable == null) {
+                Log.wtf(TAG, "scheduleAutoRemovalCallback with no callback set");
+                return;
+            }
+
+            final boolean removed = removeAutoRemovalCallbackInternal();
+
+            if (removed) {
+                mLogger.logAutoRemoveRescheduled(mEntry, delayMillis, reason);
+            } else {
+                mLogger.logAutoRemoveScheduled(mEntry, delayMillis, reason);
+            }
+
+            mCancelRemoveAlertRunnable = mExecutor.executeDelayed(mRemoveAlertRunnable,
+                    delayMillis);
+        }
+
+        @Override
+        public boolean removeAutoRemovalCallbackInternal() {
+            final boolean scheduled = (mCancelRemoveAlertRunnable != null);
+
+            if (scheduled) {
+                mCancelRemoveAlertRunnable.run();
+                mCancelRemoveAlertRunnable = null;
+            }
+
+            return scheduled;
+        }
+
+        /**
+         * Remove the alert at the earliest allowed removal time.
+         */
+        public void removeAsSoonAsPossible() {
+            if (mRemoveAlertRunnable != null) {
+                final long timeLeft = mEarliestRemovalTime - mSystemClock.elapsedRealtime();
+                scheduleAutoRemovalCallback(timeLeft, "removeAsSoonAsPossible");
+            }
+        }
+
+        /**
+         * Calculate what the post time of a notification is at some current time.
+         * @return the post time
+         */
         @Override
         protected long calculatePostTime() {
             // The actual post time will be just after the heads-up really slided in
-            return super.calculatePostTime() + mTouchAcceptanceDelay;
+            return mSystemClock.elapsedRealtime() + mTouchAcceptanceDelay;
         }
 
         /**
