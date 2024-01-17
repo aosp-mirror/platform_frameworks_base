@@ -45,10 +45,10 @@ import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.utils.CameraIdAndSessionConfiguration;
 import android.hardware.camera2.utils.ConcurrentCameraIdCombination;
+import android.hardware.camera2.utils.ExceptionUtils;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
@@ -643,7 +643,7 @@ public final class CameraManager {
             ServiceSpecificException sse = new ServiceSpecificException(
                     ICameraService.ERROR_DISCONNECTED,
                     "Camera service is currently unavailable");
-            throwAsPublicException(sse);
+            throw ExceptionUtils.throwAsPublicException(sse);
         }
 
         return multiResolutionStreamConfigurations;
@@ -736,7 +736,7 @@ public final class CameraManager {
 
                 characteristics = new CameraCharacteristics(info);
             } catch (ServiceSpecificException e) {
-                throwAsPublicException(e);
+                throw ExceptionUtils.throwAsPublicException(e);
             } catch (RemoteException e) {
                 // Camera service died - act as if the camera was disconnected
                 throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
@@ -858,11 +858,11 @@ public final class CameraManager {
                             e.errorCode == ICameraService.ERROR_DISCONNECTED ||
                             e.errorCode == ICameraService.ERROR_CAMERA_IN_USE) {
                         // Per API docs, these failures call onError and throw
-                        throwAsPublicException(e);
+                        throw ExceptionUtils.throwAsPublicException(e);
                     }
                 } else {
                     // Unexpected failure - rethrow
-                    throwAsPublicException(e);
+                    throw ExceptionUtils.throwAsPublicException(e);
                 }
             } catch (RemoteException e) {
                 // Camera service died - act as if it's a CAMERA_DISCONNECTED case
@@ -870,7 +870,7 @@ public final class CameraManager {
                     ICameraService.ERROR_DISCONNECTED,
                     "Camera service is currently unavailable");
                 deviceImpl.setRemoteFailure(sse);
-                throwAsPublicException(sse);
+                throw ExceptionUtils.throwAsPublicException(sse);
             }
 
             // TODO: factor out callback to be non-nested, then move setter to constructor
@@ -1705,56 +1705,6 @@ public final class CameraManager {
     }
 
     /**
-     * Convert ServiceSpecificExceptions and Binder RemoteExceptions from camera binder interfaces
-     * into the correct public exceptions.
-     *
-     * @hide
-     */
-    public static void throwAsPublicException(Throwable t) throws CameraAccessException {
-        if (t instanceof ServiceSpecificException) {
-            ServiceSpecificException e = (ServiceSpecificException) t;
-            int reason = CameraAccessException.CAMERA_ERROR;
-            switch(e.errorCode) {
-                case ICameraService.ERROR_DISCONNECTED:
-                    reason = CameraAccessException.CAMERA_DISCONNECTED;
-                    break;
-                case ICameraService.ERROR_DISABLED:
-                    reason = CameraAccessException.CAMERA_DISABLED;
-                    break;
-                case ICameraService.ERROR_CAMERA_IN_USE:
-                    reason = CameraAccessException.CAMERA_IN_USE;
-                    break;
-                case ICameraService.ERROR_MAX_CAMERAS_IN_USE:
-                    reason = CameraAccessException.MAX_CAMERAS_IN_USE;
-                    break;
-                case ICameraService.ERROR_DEPRECATED_HAL:
-                    reason = CameraAccessException.CAMERA_DEPRECATED_HAL;
-                    break;
-                case ICameraService.ERROR_ILLEGAL_ARGUMENT:
-                case ICameraService.ERROR_ALREADY_EXISTS:
-                    throw new IllegalArgumentException(e.getMessage(), e);
-                case ICameraService.ERROR_PERMISSION_DENIED:
-                    throw new SecurityException(e.getMessage(), e);
-                case ICameraService.ERROR_TIMED_OUT:
-                case ICameraService.ERROR_INVALID_OPERATION:
-                default:
-                    reason = CameraAccessException.CAMERA_ERROR;
-            }
-            throw new CameraAccessException(reason, e.getMessage(), e);
-        } else if (t instanceof DeadObjectException) {
-            throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
-                    "Camera service has died unexpectedly",
-                    t);
-        } else if (t instanceof RemoteException) {
-            throw new UnsupportedOperationException("An unknown RemoteException was thrown" +
-                    " which should never happen.", t);
-        } else if (t instanceof RuntimeException) {
-            RuntimeException e = (RuntimeException) t;
-            throw e;
-        }
-    }
-
-    /**
      * Queries the camera service if a cameraId is a hidden physical camera that belongs to a
      * logical camera device.
      *
@@ -1829,13 +1779,13 @@ public final class CameraManager {
                         internalCamId, externalCamId, cameraInjectionCallback);
                 injectionSessionImpl.setRemoteInjectionSession(injectionSession);
             } catch (ServiceSpecificException e) {
-                throwAsPublicException(e);
+                throw ExceptionUtils.throwAsPublicException(e);
             } catch (RemoteException e) {
                 // Camera service died - act as if it's a CAMERA_DISCONNECTED case
                 ServiceSpecificException sse = new ServiceSpecificException(
                         ICameraService.ERROR_DISCONNECTED,
                         "Camera service is currently unavailable");
-                throwAsPublicException(sse);
+                throw ExceptionUtils.throwAsPublicException(sse);
             }
         }
     }
@@ -2124,7 +2074,7 @@ public final class CameraManager {
                     cameraService.remapCameraIds(cameraIdRemapping);
                     mActiveCameraIdRemapping = cameraIdRemapping;
                 } catch (ServiceSpecificException e) {
-                    throwAsPublicException(e);
+                    throw ExceptionUtils.throwAsPublicException(e);
                 } catch (RemoteException e) {
                     throw new CameraAccessException(
                             CameraAccessException.CAMERA_DISCONNECTED,
@@ -2148,7 +2098,7 @@ public final class CameraManager {
                 try {
                     cameraService.injectSessionParams(cameraId, sessionParams.getNativeMetadata());
                 } catch (ServiceSpecificException e) {
-                    throwAsPublicException(e);
+                    throw ExceptionUtils.throwAsPublicException(e);
                 } catch (RemoteException e) {
                     throw new CameraAccessException(
                             CameraAccessException.CAMERA_DISCONNECTED,
@@ -2391,15 +2341,13 @@ public final class CameraManager {
                     return mCameraService.isConcurrentSessionConfigurationSupported(
                             cameraIdsAndConfigs, targetSdkVersion);
                 } catch (ServiceSpecificException e) {
-                   throwAsPublicException(e);
+                    throw ExceptionUtils.throwAsPublicException(e);
                 } catch (RemoteException e) {
                   // Camera service died - act as if the camera was disconnected
                   throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
                           "Camera service is currently unavailable", e);
                 }
             }
-
-            return false;
         }
 
         public boolean isSessionConfigurationWithParametersSupported(
@@ -2411,15 +2359,13 @@ public final class CameraManager {
                     return mCameraService.isSessionConfigurationWithParametersSupported(
                             cameraId, sessionConfiguration);
                 } catch (ServiceSpecificException e) {
-                    throwAsPublicException(e);
+                    throw ExceptionUtils.throwAsPublicException(e);
                 } catch (RemoteException e) {
                     // Camera service died - act as if the camera was disconnected
                     throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
                           "Camera service is currently unavailable", e);
                 }
             }
-
-            return false;
         }
 
       /**
@@ -2462,7 +2408,7 @@ public final class CameraManager {
                 try {
                     cameraService.setTorchMode(cameraId, enabled, mTorchClientBinder);
                 } catch(ServiceSpecificException e) {
-                    throwAsPublicException(e);
+                    throw ExceptionUtils.throwAsPublicException(e);
                 } catch (RemoteException e) {
                     throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
                             "Camera service is currently unavailable");
@@ -2488,7 +2434,7 @@ public final class CameraManager {
                     cameraService.turnOnTorchWithStrengthLevel(cameraId, torchStrength,
                             mTorchClientBinder);
                 } catch(ServiceSpecificException e) {
-                    throwAsPublicException(e);
+                    throw ExceptionUtils.throwAsPublicException(e);
                 } catch (RemoteException e) {
                     throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
                             "Camera service is currently unavailable.");
@@ -2512,7 +2458,7 @@ public final class CameraManager {
                 try {
                     torchStrength = cameraService.getTorchStrengthLevel(cameraId);
                 } catch(ServiceSpecificException e) {
-                    throwAsPublicException(e);
+                    throw ExceptionUtils.throwAsPublicException(e);
                 } catch (RemoteException e) {
                     throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
                             "Camera service is currently unavailable.");
@@ -2551,7 +2497,7 @@ public final class CameraManager {
                         throw new UnsupportedOperationException(e.getMessage());
                     }
 
-                    throwAsPublicException(e);
+                    throw ExceptionUtils.throwAsPublicException(e);
                 } catch (RemoteException e) {
                     throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
                             "Camera service is currently unavailable.");
