@@ -25,17 +25,24 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @SysUISingleton
 class FromGlanceableHubTransitionInteractor
 @Inject
 constructor(
+    @Background private val scope: CoroutineScope,
     private val glanceableHubTransitions: GlanceableHubTransitions,
     override val transitionRepository: KeyguardTransitionRepository,
     transitionInteractor: KeyguardTransitionInteractor,
+    private val powerInteractor: PowerInteractor,
     @Main mainDispatcher: CoroutineDispatcher,
     @Background bgDispatcher: CoroutineDispatcher,
 ) :
@@ -50,6 +57,7 @@ constructor(
             return
         }
         listenForHubToLockscreen()
+        listenForHubToDozing()
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {
@@ -69,6 +77,20 @@ constructor(
             transitionOwnerName = TAG,
             toScene = CommunalSceneKey.Blank
         )
+    }
+
+    private fun listenForHubToDozing() {
+        scope.launch {
+            powerInteractor.isAsleep.sample(startedKeyguardTransitionStep, ::Pair).collect {
+                (isAsleep, lastStartedStep) ->
+                if (lastStartedStep.to == fromState && isAsleep) {
+                    startTransitionTo(
+                        toState = KeyguardState.DOZING,
+                        modeOnCanceled = TransitionModeOnCanceled.LAST_VALUE,
+                    )
+                }
+            }
+        }
     }
 
     companion object {

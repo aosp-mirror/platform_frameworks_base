@@ -250,6 +250,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
                     powerInteractor = powerInteractor,
+                    communalInteractor = communalInteractor,
                 )
                 .apply { start() }
 
@@ -279,11 +280,13 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
         fromGlanceableHubTransitionInteractor =
             FromGlanceableHubTransitionInteractor(
+                    scope = testScope,
                     bgDispatcher = testDispatcher,
                     mainDispatcher = testDispatcher,
                     glanceableHubTransitions = glanceableHubTransitions,
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
+                    powerInteractor = powerInteractor,
                 )
                 .apply { start() }
     }
@@ -719,6 +722,38 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info.ownerName).isEqualTo("FromDozingTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.DOZING)
             assertThat(info.to).isEqualTo(KeyguardState.GONE)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dozingToGlanceableHub() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DOZING
+            runTransitionAndSetWakefulness(KeyguardState.GLANCEABLE_HUB, KeyguardState.DOZING)
+            runCurrent()
+
+            // GIVEN the device is idle on the glanceable hub
+            val idleTransitionState =
+                MutableStateFlow<ObservableCommunalTransitionState>(
+                    ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal)
+                )
+            communalInteractor.setTransitionState(idleTransitionState)
+            runCurrent()
+
+            // WHEN the device begins to wake
+            powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+            // THEN a transition to DOZING should occur
+            assertThat(info.ownerName).isEqualTo(FromDozingTransitionInteractor::class.simpleName)
+            assertThat(info.from).isEqualTo(KeyguardState.DOZING)
+            assertThat(info.to).isEqualTo(KeyguardState.GLANCEABLE_HUB)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()
@@ -1573,6 +1608,30 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info2.from).isEqualTo(KeyguardState.LOCKSCREEN)
             assertThat(info2.to).isEqualTo(KeyguardState.GLANCEABLE_HUB)
             assertThat(info.animator).isNull() // transition should be manually animated
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun glanceableHubToDozing() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to GLANCEABLE_HUB
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.GLANCEABLE_HUB)
+
+            // WHEN the device begins to sleep
+            powerInteractor.setAsleepForTest()
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+            // THEN a transition to DOZING should occur
+            assertThat(info.ownerName)
+                .isEqualTo(FromGlanceableHubTransitionInteractor::class.simpleName)
+            assertThat(info.from).isEqualTo(KeyguardState.GLANCEABLE_HUB)
+            assertThat(info.to).isEqualTo(KeyguardState.DOZING)
+            assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()
         }

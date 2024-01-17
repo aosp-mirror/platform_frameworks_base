@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -25,7 +26,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
+import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -45,6 +46,7 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
     private val powerInteractor: PowerInteractor,
+    private val communalInteractor: CommunalInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DOZING,
@@ -54,26 +56,33 @@ constructor(
     ) {
 
     override fun start() {
-        listenForDozingToLockscreenOrOccluded()
+        listenForDozingToLockscreenHubOrOccluded()
         listenForDozingToGone()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private fun listenForDozingToLockscreenOrOccluded() {
+    private fun listenForDozingToLockscreenHubOrOccluded() {
         scope.launch {
             powerInteractor.isAwake
                 .sample(
                     combine(
                         startedKeyguardTransitionStep,
                         keyguardInteractor.isKeyguardOccluded,
-                        ::Pair
+                        communalInteractor.isIdleOnCommunal,
+                        ::Triple
                     ),
-                    ::toTriple
+                    ::toQuad
                 )
-                .collect { (isAwake, lastStartedTransition, occluded) ->
+                .collect { (isAwake, lastStartedTransition, occluded, isIdleOnCommunal) ->
                     if (isAwake && lastStartedTransition.to == KeyguardState.DOZING) {
                         startTransitionTo(
-                            if (occluded) KeyguardState.OCCLUDED else KeyguardState.LOCKSCREEN
+                            if (occluded) {
+                                KeyguardState.OCCLUDED
+                            } else if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
                         )
                     }
                 }
