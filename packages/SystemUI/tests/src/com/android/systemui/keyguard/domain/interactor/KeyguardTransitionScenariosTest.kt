@@ -1342,14 +1342,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.AOD)
             runCurrent()
 
-            // WHEN the keyguard is occluded and aod ends
+            // WHEN the keyguard is occluded
             keyguardRepository.setKeyguardOccluded(true)
-            keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(
-                    from = DozeStateModel.DOZE_AOD,
-                    to = DozeStateModel.FINISH,
-                )
-            )
             runCurrent()
 
             val info =
@@ -1360,6 +1354,30 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info.ownerName).isEqualTo("FromAodTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.AOD)
             assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun aodToPrimaryBouncer() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to AOD
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.AOD)
+            runCurrent()
+
+            // WHEN the primary bouncer is set to show
+            bouncerRepository.setPrimaryShow(true)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+            // THEN a transition to OCCLUDED should occur
+            assertThat(info.ownerName).isEqualTo("FromAodTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.AOD)
+            assertThat(info.to).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()
