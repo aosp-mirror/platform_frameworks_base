@@ -8,6 +8,13 @@ flag {
 }
 
 flag {
+    name: "bal_require_opt_in_same_uid"
+    namespace: "responsible_apis"
+    description: "Require the PendingIntent creator/sender to opt in if it is the same UID"
+    bug: "296478951"
+}
+
+flag {
     name: "bal_dont_bring_existing_background_task_stack_to_fg"
     namespace: "responsible_apis"
     description: "When starting a PendingIntent with ONLY creator privileges, don't bring the existing task stack to foreground"

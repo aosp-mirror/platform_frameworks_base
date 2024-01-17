@@ -35,6 +35,7 @@ import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
+import static com.android.window.flags.Flags.balRequireOptInSameUid;
 import static com.android.window.flags.Flags.balShowToasts;
 import static com.android.window.flags.Flags.balShowToastsBlocked;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
@@ -277,6 +278,8 @@ public class BackgroundActivityStartController {
                 mAutoOptInReason = "notPendingIntent";
             } else if (balRequireOptInByPendingIntentCreator() && mIsCallForResult) {
                 mAutoOptInReason = "callForResult";
+            } else if (callingUid == realCallingUid && !balRequireOptInSameUid()) {
+                mAutoOptInReason = "sameUid";
             } else {
                 mAutoOptInReason = null;
             }
