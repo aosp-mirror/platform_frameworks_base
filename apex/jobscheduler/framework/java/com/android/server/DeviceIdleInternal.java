@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
@@ -76,6 +77,9 @@ public interface DeviceIdleInternal {
     int[] getPowerSaveWhitelistUserAppIds();
 
     int[] getPowerSaveTempWhitelistAppIds();
+
+    @NonNull
+    String[] getFullPowerWhitelistExceptIdle();
 
     /**
      * Listener to be notified when DeviceIdleController determines that the device has moved or is

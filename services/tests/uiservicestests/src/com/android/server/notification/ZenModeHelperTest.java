@@ -1151,7 +1151,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .allowAlarms(true)
                 .allowRepeatCallers(false)
                 .allowCalls(PEOPLE_TYPE_STARRED)
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .allowPriorityChannels(false)
                 .build();
         mZenModeHelper.mConfig.automaticRules.put(rule.id, rule);
         List<StatsEvent> events = new LinkedList<>();
@@ -1174,7 +1174,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 assertThat(policy.getAllowCallsFrom().getNumber())
                         .isEqualTo(DNDProtoEnums.PEOPLE_STARRED);
                 assertThat(policy.getAllowChannels().getNumber())
-                        .isEqualTo(DNDProtoEnums.CHANNEL_TYPE_NONE);
+                        .isEqualTo(DNDProtoEnums.CHANNEL_POLICY_NONE);
             }
         }
         assertTrue("couldn't find custom rule", foundCustomEvent);
@@ -3098,7 +3098,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         DNDPolicyProto origDndProto = mZenModeEventLogger.getPolicyProto(0);
         checkDndProtoMatchesSetupZenConfig(origDndProto);
         assertThat(origDndProto.getAllowChannels().getNumber())
-                .isEqualTo(DNDProtoEnums.CHANNEL_TYPE_PRIORITY);
+                .isEqualTo(DNDProtoEnums.CHANNEL_POLICY_PRIORITY);
 
         // Second message where we change the policy:
         //   - DND_POLICY_CHANGED (indicates only the policy changed and nothing else)
@@ -3110,7 +3110,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .isEqualTo(DNDProtoEnums.UNKNOWN_RULE);
         DNDPolicyProto dndProto = mZenModeEventLogger.getPolicyProto(1);
         assertThat(dndProto.getAllowChannels().getNumber())
-                .isEqualTo(DNDProtoEnums.CHANNEL_TYPE_NONE);
+                .isEqualTo(DNDProtoEnums.CHANNEL_POLICY_NONE);
     }
 
     @Test
@@ -3299,7 +3299,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // one rule, custom policy, allows channels
         ZenPolicy customPolicy = new ZenPolicy.Builder()
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_PRIORITY)
+                .allowPriorityChannels(true)
                 .build();
 
         AutomaticZenRule zenRule = new AutomaticZenRule("name",
@@ -3321,7 +3321,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // add new rule with policy that disallows channels
         ZenPolicy strictPolicy = new ZenPolicy.Builder()
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .allowPriorityChannels(false)
                 .build();
 
         AutomaticZenRule zenRule2 = new AutomaticZenRule("name2",
@@ -3552,7 +3552,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // Modifies the zen policy and device effects
         ZenPolicy policy = new ZenPolicy.Builder(rule.getZenPolicy())
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_PRIORITY)
+                .allowPriorityChannels(true)
                 .build();
         ZenDeviceEffects deviceEffects =
                 new ZenDeviceEffects.Builder(rule.getDeviceEffects())
@@ -3575,8 +3575,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .isEqualTo(AutomaticZenRule.FIELD_INTERRUPTION_FILTER);
         assertThat(rule.getZenPolicy().getUserModifiedFields())
                 .isEqualTo(ZenPolicy.FIELD_ALLOW_CHANNELS);
-        assertThat(rule.getZenPolicy().getAllowedChannels())
-                .isEqualTo(ZenPolicy.CHANNEL_TYPE_PRIORITY);
+        assertThat(rule.getZenPolicy().getPriorityChannels()).isEqualTo(ZenPolicy.STATE_ALLOW);
         assertThat(rule.getDeviceEffects().getUserModifiedFields())
                 .isEqualTo(ZenDeviceEffects.FIELD_GRAYSCALE);
         assertThat(rule.getDeviceEffects().shouldDisplayGrayscale()).isTrue();
@@ -3864,7 +3863,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // Create a fully populated ZenPolicy.
         ZenPolicy policy = new ZenPolicy.Builder()
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE) // Differs from the default
+                .allowPriorityChannels(false) // Differs from the default
                 .allowReminders(true) // Differs from the default
                 .allowEvents(true) // Differs from the default
                 .allowConversations(ZenPolicy.CONVERSATION_SENDERS_IMPORTANT)
@@ -3894,7 +3893,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // New ZenPolicy differs from the default config
         assertThat(rule.getZenPolicy()).isNotNull();
-        assertThat(rule.getZenPolicy().getAllowedChannels()).isEqualTo(ZenPolicy.CHANNEL_TYPE_NONE);
+        assertThat(rule.getZenPolicy().getPriorityChannels()).isEqualTo(ZenPolicy.STATE_DISALLOW);
         assertThat(rule.canUpdate()).isFalse();
         assertThat(rule.getZenPolicy().getUserModifiedFields()).isEqualTo(
                 ZenPolicy.FIELD_ALLOW_CHANNELS
@@ -4756,7 +4755,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .allowCalls(PEOPLE_TYPE_CONTACTS)
                 .allowConversations(CONVERSATION_SENDERS_IMPORTANT)
                 .hideAllVisualEffects()
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_PRIORITY)
+                .allowPriorityChannels(true)
                 .build();
         assertThat(mZenModeHelper.mConfig.automaticRules.values())
                 .comparingElementsUsing(IGNORE_TIMESTAMPS)
@@ -4788,7 +4787,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .allowCalls(PEOPLE_TYPE_STARRED)
                 .allowConversations(CONVERSATION_SENDERS_IMPORTANT)
                 .hideAllVisualEffects()
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_PRIORITY)
+                .allowPriorityChannels(true)
                 .build();
         assertThat(mZenModeHelper.mConfig.automaticRules.values())
                 .comparingElementsUsing(IGNORE_TIMESTAMPS)

@@ -43,3 +43,10 @@ flag {
   description: "Whether the API PackageManager.USER_MIN_ASPECT_RATIO_APP_DEFAULT is available"
   bug: "310816437"
 }
+
+flag {
+  name: "allow_hide_scm_button"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether we should allow hiding the size compat restart button"
+  bug: "318840081"
+}

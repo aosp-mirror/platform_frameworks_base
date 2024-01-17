@@ -17,8 +17,11 @@
 package com.android.internal.logging
 
 import com.android.internal.logging.testing.FakeMetricsLogger
+import com.android.internal.util.LatencyTracker
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.util.mockito.mock
 
 val Kosmos.fakeMetricsLogger by Fixture { FakeMetricsLogger() }
 val Kosmos.metricsLogger by Fixture<MetricsLogger> { fakeMetricsLogger }
+val Kosmos.latencyTracker by Fixture { mock<LatencyTracker>() }

@@ -2409,6 +2409,17 @@ class ContextImpl extends Context {
         }
     }
 
+    @Override
+    public int checkContentUriPermissionFull(Uri uri, int pid, int uid, int modeFlags) {
+        try {
+            return ActivityManager.getService().checkContentUriPermissionFull(
+                    ContentProvider.getUriWithoutUserId(uri), pid, uid, modeFlags,
+                    resolveUserId(uri));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @NonNull
     @Override
     public int[] checkUriPermissions(@NonNull List<Uri> uris, int pid, int uid,

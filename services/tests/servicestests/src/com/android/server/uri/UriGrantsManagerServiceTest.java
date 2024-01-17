@@ -345,15 +345,18 @@ public class UriGrantsManagerServiceTest {
                 intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY), service);
 
         // Verify that everything is good with the world
-        assertTrue(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ));
+        assertTrue(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ,
+                /* isFullAccessForContentUri */ false));
 
         // Finish activity; service should hold permission
         activity.removeUriPermissions();
-        assertTrue(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ));
+        assertTrue(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ,
+                /* isFullAccessForContentUri */ false));
 
         // And finishing service should wrap things up
         service.removeUriPermissions();
-        assertFalse(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ));
+        assertFalse(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ,
+                /* isFullAccessForContentUri */ false));
     }
 
     @Test

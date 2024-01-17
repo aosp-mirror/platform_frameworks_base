@@ -13,3 +13,10 @@ flag {
      description: "API to get importance of UID that's binding to the caller"
      bug: "292533010"
 }
+
+flag {
+    namespace: "backstage_power"
+    name: "app_restrictions_api"
+    description: "API to track and query restrictions applied to apps"
+    bug: "320150834"
+}

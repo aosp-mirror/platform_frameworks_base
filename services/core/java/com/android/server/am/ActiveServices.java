@@ -94,6 +94,8 @@ import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
+import static android.content.flags.Flags.enableBindPackageIsolatedProcess;
+
 
 import static com.android.internal.messages.nano.SystemMessageProto.SystemMessage.NOTE_FOREGROUND_SERVICE_BG_LAUNCH;
 import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_DELEGATE;
@@ -791,13 +793,15 @@ public final class ActiveServices {
 
     static String getProcessNameForService(ServiceInfo sInfo, ComponentName name,
             String callingPackage, String instanceName, boolean isSdkSandbox,
-            boolean inSharedIsolatedProcess) {
+            boolean inSharedIsolatedProcess, boolean inPrivateSharedIsolatedProcess) {
         if (isSdkSandbox) {
             // For SDK sandbox, the process name is passed in as the instanceName
             return instanceName;
         }
-        if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) == 0) {
-            // For regular processes, just the name in sInfo
+        if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) == 0
+                || (inPrivateSharedIsolatedProcess && !isDefaultProcessService(sInfo))) {
+            // For regular processes, or private package-shared isolated processes, just the name
+            // in sInfo
             return sInfo.processName;
         }
         // Isolated processes remain.
@@ -807,6 +811,10 @@ public final class ActiveServices {
         } else {
             return sInfo.processName + ":" + name.getClassName();
         }
+    }
+
+    private static boolean isDefaultProcessService(ServiceInfo serviceInfo) {
+        return serviceInfo.applicationInfo.processName.equals(serviceInfo.processName);
     }
 
     private static void traceInstant(@NonNull String message, @NonNull ServiceRecord service) {
@@ -864,7 +872,7 @@ public final class ActiveServices {
 
         ServiceLookupResult res = retrieveServiceLocked(service, instanceName, isSdkSandboxService,
                 sdkSandboxClientAppUid, sdkSandboxClientAppPackage, resolvedType, callingPackage,
-                callingPid, callingUid, userId, true, callerFg, false, false, null, false);
+                callingPid, callingUid, userId, true, callerFg, false, false, null, false, false);
         if (res == null) {
             return null;
         }
@@ -1550,7 +1558,7 @@ public final class ActiveServices {
         ServiceLookupResult r = retrieveServiceLocked(service, instanceName, isSdkSandboxService,
                 sdkSandboxClientAppUid, sdkSandboxClientAppPackage, resolvedType, null,
                 Binder.getCallingPid(), Binder.getCallingUid(), userId, false, false, false, false,
-                null, false);
+                null, false, false);
         if (r != null) {
             if (r.record != null) {
                 final long origId = Binder.clearCallingIdentity();
@@ -1642,7 +1650,7 @@ public final class ActiveServices {
     IBinder peekServiceLocked(Intent service, String resolvedType, String callingPackage) {
         ServiceLookupResult r = retrieveServiceLocked(service, null, resolvedType, callingPackage,
                 Binder.getCallingPid(), Binder.getCallingUid(),
-                UserHandle.getCallingUserId(), false, false, false, false, false);
+                UserHandle.getCallingUserId(), false, false, false, false, false, false);
 
         IBinder ret = null;
         if (r != null) {
@@ -3714,6 +3722,9 @@ public final class ActiveServices {
                 || (flags & Context.BIND_EXTERNAL_SERVICE_LONG) != 0;
         final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
         final boolean inSharedIsolatedProcess = (flags & Context.BIND_SHARED_ISOLATED_PROCESS) != 0;
+        final boolean inPrivateSharedIsolatedProcess =
+                ((flags & Context.BIND_PACKAGE_ISOLATED_PROCESS) != 0)
+                        && enableBindPackageIsolatedProcess();
         final boolean matchQuarantined =
                 (flags & Context.BIND_MATCH_QUARANTINED_COMPONENTS) != 0;
 
@@ -3725,7 +3736,7 @@ public final class ActiveServices {
                 isSdkSandboxService, sdkSandboxClientAppUid, sdkSandboxClientAppPackage,
                 resolvedType, callingPackage, callingPid, callingUid, userId, true, callerFg,
                 isBindExternal, allowInstant, null /* fgsDelegateOptions */,
-                inSharedIsolatedProcess, matchQuarantined);
+                inSharedIsolatedProcess, inPrivateSharedIsolatedProcess, matchQuarantined);
         if (res == null) {
             return 0;
         }
@@ -4204,14 +4215,14 @@ public final class ActiveServices {
     }
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
-            String instanceName, String resolvedType, String callingPackage,
-            int callingPid, int callingUid, int userId,
-            boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
-            boolean allowInstant, boolean inSharedIsolatedProcess) {
+            String instanceName, String resolvedType, String callingPackage, int callingPid,
+            int callingUid, int userId, boolean createIfNeeded, boolean callingFromFg,
+            boolean isBindExternal, boolean allowInstant, boolean inSharedIsolatedProcess,
+            boolean inPrivateSharedIsolatedProcess) {
         return retrieveServiceLocked(service, instanceName, false, INVALID_UID, null, resolvedType,
                 callingPackage, callingPid, callingUid, userId, createIfNeeded, callingFromFg,
                 isBindExternal, allowInstant, null /* fgsDelegateOptions */,
-                inSharedIsolatedProcess);
+                inSharedIsolatedProcess, inPrivateSharedIsolatedProcess);
     }
 
     // TODO(b/265746493): Special case for HotwordDetectionService,
@@ -4233,21 +4244,22 @@ public final class ActiveServices {
             String callingPackage, int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant, ForegroundServiceDelegationOptions fgsDelegateOptions,
-            boolean inSharedIsolatedProcess) {
+            boolean inSharedIsolatedProcess, boolean inPrivateSharedIsolatedProcess) {
         return retrieveServiceLocked(service, instanceName, isSdkSandboxService,
                 sdkSandboxClientAppUid, sdkSandboxClientAppPackage, resolvedType, callingPackage,
                 callingPid, callingUid, userId, createIfNeeded, callingFromFg, isBindExternal,
                 allowInstant, fgsDelegateOptions, inSharedIsolatedProcess,
-                false /* matchQuarantined */);
+                inPrivateSharedIsolatedProcess, false /* matchQuarantined */);
     }
 
-    private ServiceLookupResult retrieveServiceLocked(Intent service,
-            String instanceName, boolean isSdkSandboxService, int sdkSandboxClientAppUid,
-            String sdkSandboxClientAppPackage, String resolvedType,
+    private ServiceLookupResult retrieveServiceLocked(
+            Intent service, String instanceName, boolean isSdkSandboxService,
+            int sdkSandboxClientAppUid, String sdkSandboxClientAppPackage, String resolvedType,
             String callingPackage, int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant, ForegroundServiceDelegationOptions fgsDelegateOptions,
-            boolean inSharedIsolatedProcess, boolean matchQuarantined) {
+            boolean inSharedIsolatedProcess, boolean inPrivateSharedIsolatedProcess,
+            boolean matchQuarantined) {
         if (isSdkSandboxService && instanceName == null) {
             throw new IllegalArgumentException("No instanceName provided for sdk sandbox process");
         }
@@ -4344,7 +4356,8 @@ public final class ActiveServices {
                 final ServiceRestarter res = new ServiceRestarter();
                 final String processName = getProcessNameForService(sInfo, cn, callingPackage,
                         null /* instanceName */, false /* isSdkSandbox */,
-                        false /* inSharedIsolatedProcess */);
+                        false /* inSharedIsolatedProcess */,
+                        false /*inPrivateSharedIsolatedProcess*/);
                 r = new ServiceRecord(mAm, cn /* name */, cn /* instanceName */,
                         sInfo.applicationInfo.packageName, sInfo.applicationInfo.uid, filter, sInfo,
                         callingFromFg, res, processName,
@@ -4415,6 +4428,10 @@ public final class ActiveServices {
                             throw new SecurityException("BIND_EXTERNAL_SERVICE failed, "
                                     + className + " is not exported");
                         }
+                        if (inPrivateSharedIsolatedProcess) {
+                            throw new SecurityException("BIND_PACKAGE_ISOLATED_PROCESS cannot be "
+                                    + "applied to an external service.");
+                        }
                         if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) == 0) {
                             throw new SecurityException("BIND_EXTERNAL_SERVICE failed, "
                                     + className + " is not an isolatedProcess");
@@ -4448,28 +4465,32 @@ public final class ActiveServices {
                     throw new SecurityException("BIND_EXTERNAL_SERVICE failed, " + name +
                             " is not an externalService");
                 }
-                if (inSharedIsolatedProcess) {
+                if (inSharedIsolatedProcess && inPrivateSharedIsolatedProcess) {
+                    throw new SecurityException("Either BIND_SHARED_ISOLATED_PROCESS or "
+                            + "BIND_PACKAGE_ISOLATED_PROCESS should be set. Not both.");
+                }
+                if (inSharedIsolatedProcess || inPrivateSharedIsolatedProcess) {
                     if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) == 0) {
                         throw new SecurityException("BIND_SHARED_ISOLATED_PROCESS failed, "
                                 + className + " is not an isolatedProcess");
+                    }
+                }
+                if (inPrivateSharedIsolatedProcess && isDefaultProcessService(sInfo)) {
+                    throw new SecurityException("BIND_PACKAGE_ISOLATED_PROCESS cannot be used for "
+                            + "services running in the main app process.");
+                }
+                if (inSharedIsolatedProcess) {
+                    if (instanceName == null) {
+                        throw new IllegalArgumentException("instanceName must be provided for "
+                                + "binding a service into a shared isolated process.");
                     }
                     if ((sInfo.flags & ServiceInfo.FLAG_ALLOW_SHARED_ISOLATED_PROCESS) == 0) {
                         throw new SecurityException("BIND_SHARED_ISOLATED_PROCESS failed, "
                                 + className + " has not set the allowSharedIsolatedProcess "
                                 + " attribute.");
                     }
-                    if (instanceName == null) {
-                        throw new IllegalArgumentException("instanceName must be provided for "
-                                + "binding a service into a shared isolated process.");
-                    }
                 }
                 if (userId > 0) {
-                    if (mAm.isSystemUserOnly(sInfo.flags)) {
-                        Slog.w(TAG_SERVICE, service + " is only available for the SYSTEM user,"
-                                + " calling userId is: " + userId);
-                        return null;
-                    }
-
                     if (mAm.isSingleton(sInfo.processName, sInfo.applicationInfo,
                             sInfo.name, sInfo.flags)
                             && mAm.isValidSingletonCall(callingUid, sInfo.applicationInfo.uid)) {
@@ -4503,11 +4524,13 @@ public final class ActiveServices {
                             = new Intent.FilterComparison(service.cloneFilter());
                     final ServiceRestarter res = new ServiceRestarter();
                     String processName = getProcessNameForService(sInfo, name, callingPackage,
-                            instanceName, isSdkSandboxService, inSharedIsolatedProcess);
+                            instanceName, isSdkSandboxService, inSharedIsolatedProcess,
+                            inPrivateSharedIsolatedProcess);
                     r = new ServiceRecord(mAm, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res,
                             processName, sdkSandboxClientAppUid,
-                            sdkSandboxClientAppPackage, inSharedIsolatedProcess);
+                            sdkSandboxClientAppPackage,
+                            (inSharedIsolatedProcess || inPrivateSharedIsolatedProcess));
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);
@@ -8504,7 +8527,8 @@ public final class ActiveServices {
                 null /* sdkSandboxClientAppPackage */, null /* resolvedType */, callingPackage,
                 callingPid, callingUid, userId, true /* createIfNeeded */,
                 false /* callingFromFg */, false /* isBindExternal */, false /* allowInstant */ ,
-                options, false /* inSharedIsolatedProcess */);
+                options, false /* inSharedIsolatedProcess */,
+                false /*inPrivateSharedIsolatedProcess*/);
         if (res == null || res.record == null) {
             Slog.d(TAG,
                     "startForegroundServiceDelegateLocked retrieveServiceLocked returns null");

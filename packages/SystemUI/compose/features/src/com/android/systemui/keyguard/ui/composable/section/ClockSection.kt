@@ -30,10 +30,10 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
 import com.android.keyguard.KeyguardClockSwitch
+import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChanged
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
-import com.android.systemui.res.R
 import javax.inject.Inject
 
 class ClockSection
@@ -79,7 +79,7 @@ constructor(
                     modifier =
                         Modifier.padding(
                                 horizontal =
-                                    dimensionResource(R.dimen.keyguard_affordance_horizontal_offset)
+                                    dimensionResource(customizationR.dimen.clock_padding_start)
                             )
                             .padding(top = { viewModel.getSmallClockTopMargin(view.context) })
                             .onTopPlacementChanged(onTopChanged),
@@ -117,9 +117,7 @@ constructor(
             content {
                 AndroidView(
                     factory = { checkNotNull(currentClock).largeClock.view },
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(top = { viewModel.getLargeClockTopMargin(view.context) })
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }

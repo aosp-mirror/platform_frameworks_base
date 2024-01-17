@@ -338,6 +338,9 @@
     <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5165842622743212268] -->
     <string name="bluetooth_talkback_input_peripheral">Input Peripheral</string>
 
+    <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=26580326066627664] -->
+    <string name="bluetooth_talkback_hearing_aids">Hearing Aids</string>
+
     <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5615463912185280812] -->
     <string name="bluetooth_talkback_bluetooth">Bluetooth</string>
 
@@ -1081,6 +1084,8 @@
     <string name="power_remaining_settings_home_page"><xliff:g id="percentage" example="10%">%1$s</xliff:g> - <xliff:g id="time_string" example="1 hour left based on your usage">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=NONE] Label for charging on hold on main page of settings -->
     <string name="power_charging_on_hold_settings_home_page"><xliff:g id="level">%1$s</xliff:g> - Charging on hold to protect battery</string>
+    <!-- [CHAR_LIMIT=NONE] Label for incompatible charging accessory on main page of settings -->
+    <string name="power_incompatible_charging_settings_home_page"><xliff:g id="level">%1$s</xliff:g> - Checking charging accessory</string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
     <string name="power_remaining_duration_only">About <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
@@ -1141,7 +1146,7 @@
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item. A state which device is connected with any charger(e.g. USB, Adapter or Wireless) but not charging yet. Used for diagnostic info screens, precise translation isn't needed -->
-    <string name="battery_info_status_not_charging">Connected, not charging</string>
+    <string name="battery_info_status_not_charging">Connected, but not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_full">Charged</string>
     <!-- [CHAR_LIMIT=40] Battery Info screen. Value for a status item. A state which device is fully charged -->

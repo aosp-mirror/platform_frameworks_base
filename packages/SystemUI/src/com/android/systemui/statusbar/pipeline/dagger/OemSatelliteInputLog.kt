@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.companion.virtual.camera;
 
-/**
- * The configuration of a single virtual camera stream.
- * @hide
- */
-parcelable VirtualCameraStreamConfig;
+package com.android.systemui.statusbar.pipeline.dagger
+
+import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
+import javax.inject.Qualifier
+
+/** Detailed [DeviceBasedSatelliteRepository] logs */
+@Qualifier
+@MustBeDocumented
+@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
+annotation class OemSatelliteInputLog

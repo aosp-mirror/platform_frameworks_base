@@ -157,7 +157,7 @@ public class FileIntegrityService extends SystemService {
             Objects.requireNonNull(authFd);
             try {
                 var authToken = getStorageManagerInternal().createFsveritySetupAuthToken(authFd,
-                        Binder.getCallingUid(), Binder.getCallingUserHandle().getIdentifier());
+                        Binder.getCallingUid());
                 // fs-verity setup requires no writable fd to the file. Release the dup now that
                 // it's passed.
                 authFd.close();

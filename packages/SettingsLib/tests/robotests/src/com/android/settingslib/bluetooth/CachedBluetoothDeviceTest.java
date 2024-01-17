@@ -18,7 +18,9 @@ package com.android.settingslib.bluetooth;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -55,6 +57,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
+
+import java.util.concurrent.ExecutionException;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
@@ -1813,6 +1817,52 @@ public class CachedBluetoothDeviceTest {
         updateProfileStatus(mLeAudioProfile, BluetoothProfile.STATE_DISCONNECTED);
 
         assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
+    }
+
+    @Test
+    public void syncProfileForMemberDevice_hasDiff_shouldSync()
+            throws ExecutionException, InterruptedException {
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        when(mProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
+        when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
+        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
+
+        when(mA2dpProfile.isEnabled(mDevice)).thenReturn(true);
+        when(mHearingAidProfile.isEnabled(mDevice)).thenReturn(true);
+        when(mLeAudioProfile.isEnabled(mDevice)).thenReturn(true);
+
+        when(mA2dpProfile.isEnabled(mSubDevice)).thenReturn(true);
+        when(mHearingAidProfile.isEnabled(mSubDevice)).thenReturn(false);
+        when(mLeAudioProfile.isEnabled(mSubDevice)).thenReturn(false);
+
+        mCachedDevice.syncProfileForMemberDevice().get();
+
+        verify(mA2dpProfile, never()).setEnabled(any(BluetoothDevice.class), anyBoolean());
+        verify(mHearingAidProfile).setEnabled(any(BluetoothDevice.class), eq(true));
+        verify(mLeAudioProfile).setEnabled(any(BluetoothDevice.class), eq(true));
+    }
+
+    @Test
+    public void syncProfileForMemberDevice_noDiff_shouldNotSync()
+            throws ExecutionException, InterruptedException {
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        when(mProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
+        when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
+        when(mProfileManager.getLeAudioProfile()).thenReturn(mLeAudioProfile);
+
+        when(mA2dpProfile.isEnabled(mDevice)).thenReturn(false);
+        when(mHearingAidProfile.isEnabled(mDevice)).thenReturn(false);
+        when(mLeAudioProfile.isEnabled(mDevice)).thenReturn(true);
+
+        when(mA2dpProfile.isEnabled(mSubDevice)).thenReturn(false);
+        when(mHearingAidProfile.isEnabled(mSubDevice)).thenReturn(false);
+        when(mLeAudioProfile.isEnabled(mSubDevice)).thenReturn(true);
+
+        mCachedDevice.syncProfileForMemberDevice().get();
+
+        verify(mA2dpProfile, never()).setEnabled(any(BluetoothDevice.class), anyBoolean());
+        verify(mHearingAidProfile, never()).setEnabled(any(BluetoothDevice.class), anyBoolean());
+        verify(mLeAudioProfile, never()).setEnabled(any(BluetoothDevice.class), anyBoolean());
     }
 
     private HearingAidInfo getLeftAshaHearingAidInfo() {

@@ -74,6 +74,7 @@ aconfig_srcjars = [
     ":android.chre.flags-aconfig-java{.generated_srcjars}",
     ":android.speech.flags-aconfig-java{.generated_srcjars}",
     ":power_flags_lib{.generated_srcjars}",
+    ":android.content.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -452,6 +453,13 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.media.flags.bettertogether-aconfig-java",
     aconfig_declarations: "com.android.media.flags.bettertogether-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "com.android.media.flags.bettertogether-aconfig-java-host",
+    aconfig_declarations: "com.android.media.flags.bettertogether-aconfig",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -938,5 +946,18 @@ java_aconfig_library {
 java_aconfig_library {
     name: "power_flags_lib",
     aconfig_declarations: "power_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Content
+aconfig_declarations {
+    name: "android.content.flags-aconfig",
+    package: "android.content.flags",
+    srcs: ["core/java/android/content/flags/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.content.flags-aconfig-java",
+    aconfig_declarations: "android.content.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

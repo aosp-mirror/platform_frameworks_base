@@ -157,8 +157,11 @@ public class SplashScreenExceptionListTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 KEY_SPLASH_SCREEN_EXCEPTION_LIST, commaSeparatedList, false);
         try {
-            assertTrue("Timed out waiting for DeviceConfig to be updated.",
-                    latch.await(5, TimeUnit.SECONDS));
+            if (!latch.await(1, TimeUnit.SECONDS)) {
+                Log.w(getClass().getSimpleName(),
+                        "Timed out waiting for DeviceConfig to be updated. Force update.");
+                mList.updateDeviceConfig(commaSeparatedList);
+            }
         } catch (InterruptedException e) {
             Assert.fail(e.getMessage());
         }

@@ -50,6 +50,18 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
         DaggerActiveNotificationsInteractorTest_TestComponent.factory().create(test = this)
 
     @Test
+    fun testAllNotificationsCount() =
+        testComponent.runTest {
+            val count by collectLastValue(underTest.allNotificationsCount)
+
+            activeNotificationListRepository.setActiveNotifs(5)
+            runCurrent()
+
+            assertThat(count).isEqualTo(5)
+            assertThat(underTest.allNotificationsCountValue).isEqualTo(5)
+        }
+
+    @Test
     fun testAreAnyNotificationsPresent_isTrue() =
         testComponent.runTest {
             val areAnyNotificationsPresent by collectLastValue(underTest.areAnyNotificationsPresent)

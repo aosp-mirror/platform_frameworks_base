@@ -125,7 +125,8 @@ public class BluetoothUtils {
                 // The device should show hearing aid icon if it contains any hearing aid related
                 // profiles
                 if (profile instanceof HearingAidProfile || profile instanceof HapClientProfile) {
-                    return new Pair<>(getBluetoothDrawable(context, profileResId), null);
+                    return new Pair<>(getBluetoothDrawable(context, profileResId),
+                            context.getString(R.string.bluetooth_talkback_hearing_aids));
                 }
                 if (resId == 0) {
                     resId = profileResId;

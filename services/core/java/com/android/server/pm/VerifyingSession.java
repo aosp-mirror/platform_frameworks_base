@@ -356,6 +356,11 @@ final class VerifyingSession {
         if (verifierUser == UserHandle.ALL) {
             verifierUser = UserHandle.of(mPm.mUserManager.getCurrentUserId());
         }
+        // TODO(b/300965895): Remove when inconsistencies loading classpaths from apex for
+        // user > 1 are fixed.
+        if (pkgLite.isSdkLibrary) {
+            verifierUser = UserHandle.SYSTEM;
+        }
         final int verifierUserId = verifierUser.getIdentifier();
 
         List<String> requiredVerifierPackages = new ArrayList<>(

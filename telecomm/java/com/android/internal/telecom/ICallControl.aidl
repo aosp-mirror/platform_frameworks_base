@@ -32,5 +32,6 @@ oneway interface ICallControl {
     void disconnect(String callId, in DisconnectCause disconnectCause, in ResultReceiver callback);
     void startCallStreaming(String callId, in ResultReceiver callback);
     void requestCallEndpointChange(in CallEndpoint callEndpoint, in ResultReceiver callback);
+    void setMuteState(boolean isMuted, in ResultReceiver callback);
     void sendEvent(String callId, String event, in Bundle extras);
 }

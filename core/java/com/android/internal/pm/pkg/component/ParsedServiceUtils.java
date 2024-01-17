@@ -29,7 +29,6 @@ import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.multiuser.Flags;
 import android.os.Build;
 
 import com.android.internal.R;
@@ -105,11 +104,6 @@ public class ParsedServiceUtils {
                             R.styleable.AndroidManifestService_allowSharedIsolatedProcess, sa)
                             | flag(ServiceInfo.FLAG_SINGLE_USER,
                             R.styleable.AndroidManifestService_singleUser, sa)));
-
-            if (Flags.enableSystemUserOnlyForServicesAndProviders()) {
-                service.setFlags(service.getFlags() | flag(ServiceInfo.FLAG_SYSTEM_USER_ONLY,
-                        R.styleable.AndroidManifestService_systemUserOnly, sa));
-            }
 
             visibleToEphemeral = sa.getBoolean(
                     R.styleable.AndroidManifestService_visibleToInstantApps, false);

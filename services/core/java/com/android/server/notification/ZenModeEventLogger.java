@@ -18,6 +18,8 @@ package com.android.server.notification;
 
 import static android.app.NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
+import static android.service.notification.NotificationServiceProto.CHANNEL_POLICY_PRIORITY;
+import static android.service.notification.NotificationServiceProto.CHANNEL_POLICY_NONE;
 import static android.service.notification.NotificationServiceProto.RULE_TYPE_AUTOMATIC;
 import static android.service.notification.NotificationServiceProto.RULE_TYPE_MANUAL;
 import static android.service.notification.NotificationServiceProto.RULE_TYPE_UNKNOWN;
@@ -551,8 +553,8 @@ class ZenModeEventLogger {
                 if (Flags.modesApi()) {
                     proto.write(DNDPolicyProto.ALLOW_CHANNELS,
                             mNewPolicy.allowPriorityChannels()
-                                    ? ZenPolicy.CHANNEL_TYPE_PRIORITY
-                                    : ZenPolicy.CHANNEL_TYPE_NONE);
+                                    ? CHANNEL_POLICY_PRIORITY
+                                    : CHANNEL_POLICY_NONE);
                 }
             } else {
                 Log.wtf(TAG, "attempted to write zen mode log event with null policy");
