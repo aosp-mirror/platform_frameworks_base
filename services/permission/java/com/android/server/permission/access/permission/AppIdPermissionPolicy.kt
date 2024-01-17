@@ -134,7 +134,9 @@ class AppIdPermissionPolicy : SchemePolicy() {
     ) {
         val changedPermissionNames = MutableIndexedSet<String>()
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]!!
+            // The package may still be removed even if it was once notified as installed.
+            val packageState = newState.externalState.packageStates[packageName]
+                ?: return@forEachIndexed
             adoptPermissions(packageState, changedPermissionNames)
             addPermissionGroups(packageState)
             addPermissions(packageState, changedPermissionNames)
@@ -147,12 +149,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
 
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]!!
+            val packageState = newState.externalState.packageStates[packageName]
+                ?: return@forEachIndexed
             val installedPackageState = if (isSystemUpdated) packageState else null
             evaluateAllPermissionStatesForPackage(packageState, installedPackageState)
         }
         packageNames.forEachIndexed { _, packageName ->
-            val packageState = newState.externalState.packageStates[packageName]!!
+            val packageState = newState.externalState.packageStates[packageName]
+                ?: return@forEachIndexed
             newState.externalState.userIds.forEachIndexed { _, userId ->
                 inheritImplicitPermissionStates(packageState.appId, userId)
             }
@@ -1607,6 +1611,13 @@ class AppIdPermissionPolicy : SchemePolicy() {
         flagMask: Int,
         flagValues: Int
     ): Boolean {
+        if (userId !in newState.userStates) {
+            // Despite that we check UserManagerInternal.exists() in PermissionService, we may still
+            // sometimes get race conditions between that check and the actual mutateState() call.
+            // This should rarely happen but at least we should not crash.
+            Slog.e(LOG_TAG, "Unable to update permission flags for missing user $userId")
+            return false
+        }
         val oldFlags =
             newState.userStates[userId]!!
                 .appIdPermissionFlags[appId]
