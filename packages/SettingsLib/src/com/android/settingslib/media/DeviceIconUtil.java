@@ -71,15 +71,15 @@ public class DeviceIconUtil {
                         new Device(
                                 AudioDeviceInfo.TYPE_HDMI,
                                 MediaRoute2Info.TYPE_HDMI,
-                                mIsTv ? R.drawable.ic_tv : R.drawable.ic_headphone),
+                                mIsTv ? R.drawable.ic_tv : R.drawable.ic_external_display),
                         new Device(
                                 AudioDeviceInfo.TYPE_HDMI_ARC,
                                 MediaRoute2Info.TYPE_HDMI_ARC,
-                                mIsTv ? R.drawable.ic_hdmi : R.drawable.ic_headphone),
+                                mIsTv ? R.drawable.ic_hdmi : R.drawable.ic_external_display),
                         new Device(
                                 AudioDeviceInfo.TYPE_HDMI_EARC,
                                 MediaRoute2Info.TYPE_HDMI_EARC,
-                                mIsTv ? R.drawable.ic_hdmi : R.drawable.ic_headphone),
+                                mIsTv ? R.drawable.ic_hdmi : R.drawable.ic_external_display),
                         new Device(
                                 AudioDeviceInfo.TYPE_WIRED_HEADSET,
                                 MediaRoute2Info.TYPE_WIRED_HEADSET,
