@@ -1181,6 +1181,28 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testProtoWithAutoRuleWithModifiedFields() throws Exception {
+        setupZenConfig();
+        mZenModeHelper.mConfig.automaticRules = new ArrayMap<>();
+        ZenRule rule = createCustomAutomaticRule(ZEN_MODE_IMPORTANT_INTERRUPTIONS, CUSTOM_RULE_ID);
+        rule.userModifiedFields = AutomaticZenRule.FIELD_NAME;
+        rule.zenPolicyUserModifiedFields = ZenPolicy.FIELD_PRIORITY_CATEGORY_MEDIA;
+        rule.zenDeviceEffectsUserModifiedFields = ZenDeviceEffects.FIELD_GRAYSCALE;
+        mZenModeHelper.mConfig.automaticRules.put(rule.id, rule);
+
+        List<StatsEvent> events = new ArrayList<>();
+        mZenModeHelper.pullRules(events);
+
+        assertThat(events).hasSize(2); // Global config + 1 automatic rule
+        DNDModeProto ruleProto = StatsEventTestUtils.convertToAtom(events.get(1)).getDndModeRule();
+        assertThat(ruleProto.getRuleModifiedFields()).isEqualTo(rule.userModifiedFields);
+        assertThat(ruleProto.getPolicyModifiedFields()).isEqualTo(rule.zenPolicyUserModifiedFields);
+        assertThat(ruleProto.getDeviceEffectsModifiedFields()).isEqualTo(
+                rule.zenDeviceEffectsUserModifiedFields);
+    }
+
+    @Test
     public void ruleUidsCached() throws Exception {
         setupZenConfig();
         // one enabled automatic rule
