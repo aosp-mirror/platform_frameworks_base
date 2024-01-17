@@ -318,6 +318,10 @@ public final class BackgroundJobsController extends StateController {
 
         try {
             final boolean isStopped = mPackageManagerInternal.isPackageStopped(packageName, uid);
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "Pulled stopped state of " + packageName + " (" + uid + "): " + isStopped);
+            }
             mPackageStoppedState.add(uid, packageName, isStopped);
             return isStopped;
         } catch (PackageManager.NameNotFoundException e) {

@@ -4830,7 +4830,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
             }
-            maybeSendBootCompletedLocked(app);
+
+            // Temporarily disable sending BOOT_COMPLETED to see if this was impacting perf tests
+            if (false) {
+                maybeSendBootCompletedLocked(app);
+            }
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)
             Slog.wtf(TAG, "Exception thrown during bind of " + app, e);
@@ -6525,7 +6529,24 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid,
             final int modeFlags, int userId, IBinder callerToken) {
-        enforceNotIsolatedCaller("checkUriPermission");
+        return checkUriPermission(uri, pid, uid, modeFlags, userId,
+                /* isFullAccessForContentUri */ false, "checkUriPermission");
+    }
+
+    /**
+     * @param uri This uri must NOT contain an embedded userId.
+     * @param userId The userId in which the uri is to be resolved.
+     */
+    @Override
+    public int checkContentUriPermissionFull(Uri uri, int pid, int uid,
+            final int modeFlags, int userId) {
+        return checkUriPermission(uri, pid, uid, modeFlags, userId,
+                /* isFullAccessForContentUri */ true, "checkContentUriPermissionFull");
+    }
+
+    private int checkUriPermission(Uri uri, int pid, int uid,
+            final int modeFlags, int userId, boolean isFullAccessForContentUri, String methodName) {
+        enforceNotIsolatedCaller(methodName);
 
         // Our own process gets to do everything.
         if (pid == MY_PID) {
@@ -6536,8 +6557,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return PackageManager.PERMISSION_DENIED;
             }
         }
-        return mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid, modeFlags)
-                ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
+        boolean granted = mUgmInternal.checkUriPermission(new GrantUri(userId, uri, modeFlags), uid,
+                modeFlags, isFullAccessForContentUri);
+
+        return granted ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
     }
 
     @Override
@@ -9858,7 +9881,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
     @Override
-    public void setApplicationStartInfoCompleteListener(
+    public void addApplicationStartInfoCompleteListener(
             IApplicationStartInfoCompleteListener listener, int userId) {
         enforceNotIsolatedCaller("setApplicationStartInfoCompleteListener");
 
@@ -9873,7 +9896,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
     @Override
-    public void clearApplicationStartInfoCompleteListener(int userId) {
+    public void removeApplicationStartInfoCompleteListener(
+            IApplicationStartInfoCompleteListener listener, int userId) {
         enforceNotIsolatedCaller("clearApplicationStartInfoCompleteListener");
 
         // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
@@ -9882,7 +9906,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final int callingUid = Binder.getCallingUid();
-        mProcessList.getAppStartInfoTracker().clearStartInfoCompleteListener(callingUid, true);
+        mProcessList.getAppStartInfoTracker().removeStartInfoCompleteListener(listener, callingUid,
+                true);
     }
 
     @Override
@@ -13745,11 +13770,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "isSingleton(" + componentProcessName + ", " + aInfo + ", " + className + ", 0x"
                 + Integer.toHexString(flags) + ") = " + result);
         return result;
-    }
-
-    boolean isSystemUserOnly(int flags) {
-        return android.multiuser.Flags.enableSystemUserOnlyForServicesAndProviders()
-                && (flags & ServiceInfo.FLAG_SYSTEM_USER_ONLY) != 0;
     }
 
     /**

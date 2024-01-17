@@ -17,13 +17,16 @@
 package com.android.systemui.keyguard.ui.composable.blueprint
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntRect
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.modifiers.padding
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
@@ -66,6 +69,7 @@ constructor(
     override fun SceneScope.Content(modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
         val burnIn = rememberBurnIn(clockInteractor)
+        val resources = LocalContext.current.resources
 
         LockscreenLongPress(
             viewModel = viewModel.longPress,
@@ -88,13 +92,27 @@ constructor(
                             SmartSpace(
                                 burnInParams = burnIn.parameters,
                                 onTopChanged = burnIn.onSmartspaceTopChanged,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .padding(
+                                            top = { viewModel.getSmartSpacePaddingTop(resources) }
+                                        ),
                             )
                         }
-                        with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
-                        with(notificationSection) {
-                            Notifications(modifier = Modifier.fillMaxWidth().weight(1f))
+
+                        if (viewModel.isLargeClockVisible) {
+                            Spacer(modifier = Modifier.weight(weight = 1f))
+                            with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
                         }
+
+                        if (viewModel.areNotificationsVisible) {
+                            with(notificationSection) {
+                                Notifications(
+                                    modifier = Modifier.fillMaxWidth().weight(weight = 1f)
+                                )
+                            }
+                        }
+
                         if (!isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {
                             with(ambientIndicationSectionOptional.get()) {
                                 AmbientIndication(modifier = Modifier.fillMaxWidth())

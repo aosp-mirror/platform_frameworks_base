@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.os.Build.VERSION_CODES.S;
+import static android.permission.flags.Flags.serverSideAttributionRegistration;
 
 import android.Manifest;
 import android.annotation.CheckResult;
@@ -59,6 +60,7 @@ import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
@@ -1464,13 +1466,19 @@ public final class PermissionManager {
         // We use a shared static token for sources that are not registered since the token's
         // only used for process death detection. If we are about to use the source for security
         // enforcement we need to replace the binder with a unique one.
-        final AttributionSource registeredSource = source.withToken(new Binder());
         try {
-            mPermissionManager.registerAttributionSource(registeredSource.asState());
+            if (serverSideAttributionRegistration()) {
+                IBinder newToken = mPermissionManager.registerAttributionSource(source.asState());
+                return source.withToken(newToken);
+            } else {
+                AttributionSource registeredSource = source.withToken(new Binder());
+                mPermissionManager.registerAttributionSource(registeredSource.asState());
+                return registeredSource;
+            }
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-        return registeredSource;
+        return source;
     }
 
     /**

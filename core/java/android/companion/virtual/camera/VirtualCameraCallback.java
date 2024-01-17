@@ -17,9 +17,11 @@
 package android.companion.virtual.camera;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.companion.virtual.flags.Flags;
+import android.graphics.ImageFormat;
 import android.view.Surface;
 
 import java.util.concurrent.Executor;
@@ -41,33 +43,33 @@ public interface VirtualCameraCallback {
      *
      * @param streamId The id of the configured stream
      * @param surface The surface to write data into for this stream
-     * @param streamConfig The image data configuration for this stream
+     * @param width The width of the surface
+     * @param height The height of the surface
+     * @param format The {@link ImageFormat} of the surface
      */
-    void onStreamConfigured(
-            int streamId,
-            @NonNull Surface surface,
-            @NonNull VirtualCameraStreamConfig streamConfig);
+    void onStreamConfigured(int streamId, @NonNull Surface surface,
+            @IntRange(from = 1) int width, @IntRange(from = 1) int height,
+            @ImageFormat.Format int format);
 
     /**
      * The client application is requesting a camera frame for the given streamId and frameId.
      *
      * <p>The virtual camera needs to write the frame data in the {@link Surface} corresponding to
-     * this stream that was provided during the {@link #onStreamConfigured(int, Surface,
-     * VirtualCameraStreamConfig)} call.
+     * this stream that was provided during the
+     * {@link #onStreamConfigured(int, Surface, int, int, int)} call.
      *
      * @param streamId The streamId for which the frame is requested. This corresponds to the
-     *     streamId that was given in {@link #onStreamConfigured(int, Surface,
-     *     VirtualCameraStreamConfig)}
+     *     streamId that was given in {@link #onStreamConfigured(int, Surface, int, int, int)}
      * @param frameId The frameId that is being requested. Each request will have a different
      *     frameId, that will be increasing for each call with a particular streamId.
      */
     default void onProcessCaptureRequest(int streamId, long frameId) {}
 
     /**
-     * The stream previously configured when {@link #onStreamConfigured(int, Surface,
-     * VirtualCameraStreamConfig)} was called is now being closed and associated resources can be
-     * freed. The Surface corresponding to that streamId was disposed on the client side and should
-     * not be used anymore by the virtual camera owner
+     * The stream previously configured when
+     * {@link #onStreamConfigured(int, Surface, int, int, int)} was called is now being closed and
+     * associated resources can be freed. The Surface corresponding to that streamId was disposed on
+     * the client side and should not be used anymore by the virtual camera owner.
      *
      * @param streamId The id of the stream that was closed.
      */

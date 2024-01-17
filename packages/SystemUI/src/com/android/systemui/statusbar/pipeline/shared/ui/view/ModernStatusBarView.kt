@@ -103,7 +103,7 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
      *
      * Creates a dot view, and uses [bindingCreator] to get and set the binding.
      */
-    fun initView(slot: String, bindingCreator: () -> ModernStatusBarViewBinding) {
+    open fun initView(slot: String, bindingCreator: () -> ModernStatusBarViewBinding) {
         // The dot view requires [slot] to be set, and the [binding] may require an instantiated dot
         // view. So, this is the required order.
         this.slot = slot

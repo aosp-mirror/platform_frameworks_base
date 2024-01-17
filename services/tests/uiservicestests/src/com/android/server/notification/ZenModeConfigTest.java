@@ -164,7 +164,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
                 .allowConversations(CONVERSATION_SENDERS_IMPORTANT)
                 .showLights(false)
                 .showInAmbientDisplay(false)
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .allowPriorityChannels(false)
                 .build();
 
         Policy originalPolicy = config.toNotificationPolicy();
@@ -255,7 +255,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
                 .allowCalls(ZenPolicy.PEOPLE_TYPE_CONTACTS)
                 .allowMessages(ZenPolicy.PEOPLE_TYPE_STARRED)
                 .allowConversations(ZenPolicy.CONVERSATION_SENDERS_NONE)
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .allowPriorityChannels(false)
                 .build();
 
         ZenModeConfig config = getMutedAllConfig();
@@ -284,7 +284,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
                 actual.getPriorityConversationSenders());
         assertEquals(expected.getPriorityCallSenders(), actual.getPriorityCallSenders());
         assertEquals(expected.getPriorityMessageSenders(), actual.getPriorityMessageSenders());
-        assertEquals(expected.getAllowedChannels(), actual.getAllowedChannels());
+        assertEquals(expected.getPriorityChannels(), actual.getPriorityChannels());
         assertEquals(expected.getUserModifiedFields(), actual.getUserModifiedFields());
     }
 
@@ -694,7 +694,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
                 .allowSystem(true)
                 .allowReminders(false)
                 .allowEvents(true)
-                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .allowPriorityChannels(false)
                 .hideAllVisualEffects()
                 .showVisualEffect(ZenPolicy.VISUAL_EFFECT_AMBIENT, true)
                 .setUserModifiedFields(4)
@@ -721,7 +721,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(policy.getPriorityCategorySystem(), fromXml.getPriorityCategorySystem());
         assertEquals(policy.getPriorityCategoryReminders(), fromXml.getPriorityCategoryReminders());
         assertEquals(policy.getPriorityCategoryEvents(), fromXml.getPriorityCategoryEvents());
-        assertEquals(policy.getAllowedChannels(), fromXml.getAllowedChannels());
+        assertEquals(policy.getPriorityChannels(), fromXml.getPriorityChannels());
 
         assertEquals(policy.getVisualEffectFullScreenIntent(),
                 fromXml.getVisualEffectFullScreenIntent());

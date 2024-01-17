@@ -99,34 +99,4 @@ constructor(
             context.resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
                 Utils.getStatusBarHeaderHeightKeyguard(context)
         }
-
-    fun getLargeClockTopMargin(context: Context): Int {
-        var largeClockTopMargin =
-            context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +
-                context.resources.getDimensionPixelSize(
-                    com.android.systemui.customization.R.dimen.small_clock_padding_top
-                ) +
-                context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
-        largeClockTopMargin += getDimen(context, DATE_WEATHER_VIEW_HEIGHT)
-        largeClockTopMargin += getDimen(context, ENHANCED_SMARTSPACE_HEIGHT)
-        if (!useLargeClock) {
-            largeClockTopMargin -=
-                context.resources.getDimensionPixelSize(
-                    com.android.systemui.customization.R.dimen.small_clock_height
-                )
-        }
-
-        return largeClockTopMargin
-    }
-
-    private fun getDimen(context: Context, name: String): Int {
-        val res = context.packageManager.getResourcesForApplication(context.packageName)
-        val id = res.getIdentifier(name, "dimen", context.packageName)
-        return res.getDimensionPixelSize(id)
-    }
-
-    companion object {
-        private const val DATE_WEATHER_VIEW_HEIGHT = "date_weather_view_height"
-        private const val ENHANCED_SMARTSPACE_HEIGHT = "enhanced_smartspace_height"
-    }
 }

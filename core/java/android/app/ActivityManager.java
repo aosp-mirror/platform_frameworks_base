@@ -4052,9 +4052,27 @@ public class ActivityManager {
         }
     }
 
+    private final ArrayList<AppStartInfoCallbackWrapper> mAppStartInfoCallbacks =
+            new ArrayList<>();
+    @Nullable
+    private IApplicationStartInfoCompleteListener mAppStartInfoCompleteListener = null;
+
+    private static final class AppStartInfoCallbackWrapper {
+        @NonNull final Executor mExecutor;
+        @NonNull final Consumer<ApplicationStartInfo> mListener;
+
+        AppStartInfoCallbackWrapper(@NonNull final Executor executor,
+                @NonNull final Consumer<ApplicationStartInfo> listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+    }
+
     /**
-     * Sets a callback to be notified when the {@link ApplicationStartInfo} records of this startup
+     * Adds a callback to be notified when the {@link ApplicationStartInfo} records of this startup
      * are complete.
+     *
+     * <p class="note"> Note: callback will be removed automatically after being triggered.</p>
      *
      * <p class="note"> Note: callback will not wait for {@link Activity#reportFullyDrawn} to occur.
      * Timestamp for fully drawn may be added after callback occurs. Set callback after invoking
@@ -4073,33 +4091,77 @@ public class ActivityManager {
      * @throws IllegalArgumentException if executor or listener are null.
      */
     @FlaggedApi(Flags.FLAG_APP_START_INFO)
-    public void setApplicationStartInfoCompletionListener(@NonNull final Executor executor,
+    public void addApplicationStartInfoCompletionListener(@NonNull final Executor executor,
             @NonNull final Consumer<ApplicationStartInfo> listener) {
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(listener, "listener cannot be null");
-        IApplicationStartInfoCompleteListener callback =
-                new IApplicationStartInfoCompleteListener.Stub() {
-            @Override
-            public void onApplicationStartInfoComplete(ApplicationStartInfo applicationStartInfo) {
-                executor.execute(() -> listener.accept(applicationStartInfo));
+        synchronized (mAppStartInfoCallbacks) {
+            for (int i = 0; i < mAppStartInfoCallbacks.size(); i++) {
+                if (listener.equals(mAppStartInfoCallbacks.get(i).mListener)) {
+                    return;
+                }
             }
-        };
-        try {
-            getService().setApplicationStartInfoCompleteListener(callback, mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            if (mAppStartInfoCompleteListener == null) {
+                mAppStartInfoCompleteListener = new IApplicationStartInfoCompleteListener.Stub() {
+                    @Override
+                    public void onApplicationStartInfoComplete(
+                            ApplicationStartInfo applicationStartInfo) {
+                        synchronized (mAppStartInfoCallbacks) {
+                            for (int i = 0; i < mAppStartInfoCallbacks.size(); i++) {
+                                final AppStartInfoCallbackWrapper callback =
+                                        mAppStartInfoCallbacks.get(i);
+                                callback.mExecutor.execute(() -> callback.mListener.accept(
+                                        applicationStartInfo));
+                            }
+                            mAppStartInfoCallbacks.clear();
+                            mAppStartInfoCompleteListener = null;
+                        }
+                    }
+                };
+                boolean succeeded = false;
+                try {
+                    getService().addApplicationStartInfoCompleteListener(
+                            mAppStartInfoCompleteListener, mContext.getUserId());
+                    succeeded = true;
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+                if (succeeded) {
+                    mAppStartInfoCallbacks.add(new AppStartInfoCallbackWrapper(executor, listener));
+                } else {
+                    mAppStartInfoCompleteListener = null;
+                    mAppStartInfoCallbacks.clear();
+                }
+            } else {
+                mAppStartInfoCallbacks.add(new AppStartInfoCallbackWrapper(executor, listener));
+            }
         }
     }
 
     /**
-     * Removes the callback set by {@link #setApplicationStartInfoCompletionListener} if there is one.
+     * Removes the provided callback set by {@link #addApplicationStartInfoCompletionListener}.
      */
     @FlaggedApi(Flags.FLAG_APP_START_INFO)
-    public void clearApplicationStartInfoCompletionListener() {
-        try {
-            getService().clearApplicationStartInfoCompleteListener(mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+    public void removeApplicationStartInfoCompletionListener(
+            @NonNull final Consumer<ApplicationStartInfo> listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        synchronized (mAppStartInfoCallbacks) {
+            for (int i = 0; i < mAppStartInfoCallbacks.size(); i++) {
+                final AppStartInfoCallbackWrapper callback = mAppStartInfoCallbacks.get(i);
+                if (listener.equals(callback.mListener)) {
+                    mAppStartInfoCallbacks.remove(i);
+                    break;
+                }
+            }
+            if (mAppStartInfoCompleteListener != null && mAppStartInfoCallbacks.isEmpty()) {
+                try {
+                    getService().removeApplicationStartInfoCompleteListener(
+                            mAppStartInfoCompleteListener, mContext.getUserId());
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+                mAppStartInfoCompleteListener = null;
+            }
         }
     }
 

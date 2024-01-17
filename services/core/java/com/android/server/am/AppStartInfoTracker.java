@@ -119,7 +119,7 @@ public final class AppStartInfoTracker {
 
     /** UID as key. */
     @GuardedBy("mLock")
-    private final SparseArray<ApplicationStartInfoCompleteCallback> mCallbacks;
+    private final SparseArray<ArrayList<ApplicationStartInfoCompleteCallback>> mCallbacks;
 
     /**
      * Whether or not we've loaded the historical app process start info from persistent storage.
@@ -465,11 +465,18 @@ public final class AppStartInfoTracker {
         synchronized (mLock) {
             if (startInfo.getStartupState()
                     == ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN) {
-                ApplicationStartInfoCompleteCallback callback =
+                final List<ApplicationStartInfoCompleteCallback> callbacks =
                         mCallbacks.get(startInfo.getRealUid());
-                if (callback != null) {
-                    callback.onApplicationStartInfoComplete(startInfo);
+                if (callbacks == null) {
+                    return;
                 }
+                final int size = callbacks.size();
+                for (int i = 0; i < size; i++) {
+                    if (callbacks.get(i) != null) {
+                        callbacks.get(i).onApplicationStartInfoComplete(startInfo);
+                    }
+                }
+                mCallbacks.remove(startInfo.getRealUid());
             }
         }
     }
@@ -542,7 +549,6 @@ public final class AppStartInfoTracker {
             } catch (RemoteException e) {
                 /*ignored*/
             }
-            clearStartInfoCompleteListener(mUid, true);
         }
 
         void unlinkToDeath() {
@@ -551,7 +557,7 @@ public final class AppStartInfoTracker {
 
         @Override
         public void binderDied() {
-            clearStartInfoCompleteListener(mUid, false);
+            removeStartInfoCompleteListener(mCallback, mUid, false);
         }
     }
 
@@ -561,22 +567,43 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            mCallbacks.put(uid, new ApplicationStartInfoCompleteCallback(listener, uid));
+            ArrayList<ApplicationStartInfoCompleteCallback> callbacks = mCallbacks.get(uid);
+            if (callbacks == null) {
+                mCallbacks.set(uid,
+                        callbacks = new ArrayList<ApplicationStartInfoCompleteCallback>());
+            }
+            callbacks.add(new ApplicationStartInfoCompleteCallback(listener, uid));
         }
     }
 
-    void clearStartInfoCompleteListener(final int uid, boolean unlinkDeathRecipient) {
+    void removeStartInfoCompleteListener(
+            final IApplicationStartInfoCompleteListener listener, final int uid,
+            boolean unlinkDeathRecipient) {
         synchronized (mLock) {
             if (!mEnabled) {
                 return;
             }
-            if (unlinkDeathRecipient) {
-                ApplicationStartInfoCompleteCallback callback = mCallbacks.get(uid);
-                if (callback != null) {
-                    callback.unlinkToDeath();
+            final ArrayList<ApplicationStartInfoCompleteCallback> callbacks = mCallbacks.get(uid);
+            if (callbacks == null) {
+                return;
+            }
+            final int size  = callbacks.size();
+            int index;
+            for (index = 0; index < size; index++) {
+                final ApplicationStartInfoCompleteCallback callback = callbacks.get(index);
+                if (callback.mCallback == listener) {
+                    if (unlinkDeathRecipient) {
+                        callback.unlinkToDeath();
+                    }
+                    break;
                 }
             }
-            mCallbacks.remove(uid);
+            if (index < size) {
+                callbacks.remove(index);
+            }
+            if (callbacks.isEmpty()) {
+                mCallbacks.remove(uid);
+            }
         }
     }
 

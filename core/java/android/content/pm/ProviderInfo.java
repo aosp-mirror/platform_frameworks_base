@@ -89,15 +89,6 @@ public final class ProviderInfo extends ComponentInfo
     public static final int FLAG_VISIBLE_TO_INSTANT_APP = 0x100000;
 
     /**
-     * Bit in {@link #flags}: If set, this provider will only be available
-     * for the system user.
-     * Set from the android.R.attr#systemUserOnly attribute.
-     * In Sync with {@link ActivityInfo#FLAG_SYSTEM_USER_ONLY}
-     * @hide
-     */
-    public static final int FLAG_SYSTEM_USER_ONLY = ActivityInfo.FLAG_SYSTEM_USER_ONLY;
-
-    /**
      * Bit in {@link #flags}: If set, a single instance of the provider will
      * run for all users on the device.  Set from the
      * {@link android.R.attr#singleUser} attribute.

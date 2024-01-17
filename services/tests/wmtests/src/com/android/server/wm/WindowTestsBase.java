@@ -1062,6 +1062,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mWm.mAnimator.ready();
         if (!mWm.mWindowPlacerLocked.isTraversalScheduled()) {
             mRootWindowContainer.performSurfacePlacement();
+        } else {
+            waitHandlerIdle(mWm.mAnimationHandler);
         }
         waitUntilWindowAnimatorIdle();
     }

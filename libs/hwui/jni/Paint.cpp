@@ -578,16 +578,6 @@ namespace PaintGlue {
         return result;
     }
 
-    // This method is kept for old Robolectric JNI signature used by SystemUIGoogleRoboRNGTests.
-    static jfloat getRunCharacterAdvance___CIIIIZI_FI_F_ForRobolectric(
-            JNIEnv* env, jclass cls, jlong paintHandle, jcharArray text, jint start, jint end,
-            jint contextStart, jint contextEnd, jboolean isRtl, jint offset, jfloatArray advances,
-            jint advancesIndex, jobject drawBounds) {
-        return getRunCharacterAdvance___CIIIIZI_FI_F(env, cls, paintHandle, text, start, end,
-                                                     contextStart, contextEnd, isRtl, offset,
-                                                     advances, advancesIndex, drawBounds, nullptr);
-    }
-
     static jint doOffsetForAdvance(const Paint* paint, const Typeface* typeface, const jchar buf[],
             jint start, jint count, jint bufSize, jboolean isRtl, jfloat advance) {
         minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
@@ -1163,8 +1153,6 @@ static const JNINativeMethod methods[] = {
         {"nGetRunCharacterAdvance",
          "(J[CIIIIZI[FILandroid/graphics/RectF;Landroid/graphics/Paint$RunInfo;)F",
          (void*)PaintGlue::getRunCharacterAdvance___CIIIIZI_FI_F},
-        {"nGetRunCharacterAdvance", "(J[CIIIIZI[FILandroid/graphics/RectF;)F",
-         (void*)PaintGlue::getRunCharacterAdvance___CIIIIZI_FI_F_ForRobolectric},
         {"nGetOffsetForAdvance", "(J[CIIIIZF)I", (void*)PaintGlue::getOffsetForAdvance___CIIIIZF_I},
         {"nGetFontMetricsIntForText", "(J[CIIIIZLandroid/graphics/Paint$FontMetricsInt;)V",
          (void*)PaintGlue::getFontMetricsIntForText___C},

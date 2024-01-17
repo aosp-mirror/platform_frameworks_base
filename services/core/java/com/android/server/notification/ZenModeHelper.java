@@ -1131,7 +1131,7 @@ public class ZenModeHelper {
                     != newPolicy.getPriorityConversationSenders()) {
                 userModifiedFields |= ZenPolicy.FIELD_CONVERSATIONS;
             }
-            if (oldPolicy.getAllowedChannels() != newPolicy.getAllowedChannels()) {
+            if (oldPolicy.getPriorityChannels() != newPolicy.getPriorityChannels()) {
                 userModifiedFields |= ZenPolicy.FIELD_ALLOW_CHANNELS;
             }
             if (oldPolicy.getPriorityCategoryReminders()

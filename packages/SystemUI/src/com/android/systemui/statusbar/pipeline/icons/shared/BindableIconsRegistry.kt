@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.icons.shared
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.pipeline.icons.shared.model.BindableIcon
+import com.android.systemui.statusbar.pipeline.satellite.ui.DeviceBasedSatelliteBindableIcon
 import javax.inject.Inject
 
 /**
@@ -38,11 +39,12 @@ interface BindableIconsRegistry {
 class BindableIconsRegistryImpl
 @Inject
 constructor(
-/** Bindables go here */
+    /** Bindables go here */
+    oemSatellite: DeviceBasedSatelliteBindableIcon
 ) : BindableIconsRegistry {
     /**
      * Adding the injected bindables to this list will get them registered with
      * StatusBarIconController
      */
-    override val bindableIcons: List<BindableIcon> = listOf()
+    override val bindableIcons: List<BindableIcon> = listOf(oemSatellite)
 }
