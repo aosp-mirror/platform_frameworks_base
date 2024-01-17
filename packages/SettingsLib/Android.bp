@@ -9,6 +9,9 @@ package {
 
 android_library {
     name: "SettingsLib",
+    defaults: [
+        "SettingsLintDefaults",
+    ],
 
     static_libs: [
         "androidx.localbroadcastmanager_localbroadcastmanager",
@@ -60,8 +63,15 @@ android_library {
         "src/**/*.java",
         "src/**/*.kt",
     ],
+}
+
+// defaults for lint option
+java_defaults {
+    name: "SettingsLintDefaults",
     lint: {
-        extra_check_modules: ["SettingsLibLintChecker"],
+        extra_check_modules: [
+            "SettingsLibLintChecker",
+        ],
     },
 }
 
