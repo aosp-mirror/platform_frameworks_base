@@ -19,7 +19,10 @@ package com.android.internal.util;
 import static com.android.internal.util.Preconditions.checkArgumentPositive;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 /**
  * A simple ring buffer structure with bounded capacity backed by an array.
@@ -29,16 +32,35 @@ import java.util.Arrays;
  */
 public class RingBuffer<T> {
 
+    private final Supplier<T> mNewItem;
     // Array for storing events.
     private final T[] mBuffer;
     // Cursor keeping track of the logical end of the array. This cursor never
     // wraps and instead keeps track of the total number of append() operations.
     private long mCursor = 0;
 
+    /**
+     * @deprecated This uses reflection to create new instances.
+     *             Use {@link #RingBuffer(Supplier, IntFunction, int)}} instead.
+     */
+    @Deprecated
     public RingBuffer(Class<T> c, int capacity) {
+        this(() -> (T) createNewItem(c), cap -> (T[]) Array.newInstance(c, cap), capacity);
+    }
+
+    private static Object createNewItem(Class c) {
+        try {
+            return c.getDeclaredConstructor().newInstance();
+        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException
+                 | InvocationTargetException e) {
+            return null;
+        }
+    }
+
+    public RingBuffer(Supplier<T> newItem, IntFunction<T[]> newBacking, int capacity) {
         checkArgumentPositive(capacity, "A RingBuffer cannot have 0 capacity");
-        // Java cannot create generic arrays without a runtime hint.
-        mBuffer = (T[]) Array.newInstance(c, capacity);
+        mBuffer = newBacking.apply(capacity);
+        mNewItem = newItem;
     }
 
     public int size() {
@@ -68,20 +90,9 @@ public class RingBuffer<T> {
     public T getNextSlot() {
         final int nextSlotIdx = indexOf(mCursor++);
         if (mBuffer[nextSlotIdx] == null) {
-            mBuffer[nextSlotIdx] = createNewItem();
+            mBuffer[nextSlotIdx] = mNewItem.get();
         }
         return mBuffer[nextSlotIdx];
-    }
-
-    /**
-     * @return a new object of type <T> or null if a new object could not be created.
-     */
-    protected T createNewItem() {
-        try {
-            return (T) mBuffer.getClass().getComponentType().newInstance();
-        } catch (IllegalAccessException | InstantiationException e) {
-            return null;
-        }
     }
 
     public T[] toArray() {
