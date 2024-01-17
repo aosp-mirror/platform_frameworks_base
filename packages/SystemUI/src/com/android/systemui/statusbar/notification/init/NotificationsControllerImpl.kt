@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.init
 
 import android.service.notification.StatusBarNotification
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
 import com.android.systemui.statusbar.NotificationListener
@@ -72,7 +71,6 @@ constructor(
     private val animatedImageNotificationManager: AnimatedImageNotificationManager,
     private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager,
     private val bubblesOptional: Optional<Bubbles>,
-    private val featureFlags: FeatureFlags
 ) : NotificationsController {
 
     override fun initialize(
@@ -136,5 +134,8 @@ constructor(
         }
     }
 
-    override fun getActiveNotificationsCount(): Int = notifLiveDataStore.activeNotifCount.value
+    override fun getActiveNotificationsCount(): Int {
+        NotificationsLiveDataStoreRefactor.assertInLegacyMode()
+        return notifLiveDataStore.activeNotifCount.value
+    }
 }

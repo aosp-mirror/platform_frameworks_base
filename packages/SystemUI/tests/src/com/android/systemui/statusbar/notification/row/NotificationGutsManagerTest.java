@@ -42,6 +42,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -85,6 +87,8 @@ import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -156,6 +160,12 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     @Mock private UserManager mUserManager;
 
+    private final ActiveNotificationListRepository mActiveNotificationListRepository =
+            new ActiveNotificationListRepository();
+    private final ActiveNotificationsInteractor mActiveNotificationsInteractor =
+            new ActiveNotificationsInteractor(mActiveNotificationListRepository,
+                    StandardTestDispatcher(null, null));
+
     private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
 
     @Before
@@ -171,7 +181,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 new WindowRootViewVisibilityRepository(mBarService, mExecutor),
                 new FakeKeyguardRepository(),
                 mHeadsUpManager,
-                PowerInteractorFactory.create().getPowerInteractor());
+                PowerInteractorFactory.create().getPowerInteractor(),
+                mActiveNotificationsInteractor);
 
         mGutsManager = new NotificationGutsManager(
                 mContext,
