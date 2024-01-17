@@ -49,7 +49,6 @@ import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.ImmersiveModeConfirmation
 import com.android.systemui.statusbar.gesture.GesturePointerEventListener
 import com.android.systemui.statusbar.notification.InstantAppNotifier
-import com.android.systemui.statusbar.phone.KeyguardLiftController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener
 import com.android.systemui.stylus.StylusUsiPowerStartable
@@ -222,12 +221,6 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(WMShell::class)
     abstract fun bindWMShell(sysui: WMShell): CoreStartable
-
-    /** Inject into KeyguardLiftController.  */
-    @Binds
-    @IntoMap
-    @ClassKey(KeyguardLiftController::class)
-    abstract fun bindKeyguardLiftController(sysui: KeyguardLiftController): CoreStartable
 
     /** Inject into MediaTttSenderCoordinator. */
     @Binds

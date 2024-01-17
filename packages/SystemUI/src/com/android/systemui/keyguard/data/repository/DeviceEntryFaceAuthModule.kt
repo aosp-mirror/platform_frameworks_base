@@ -23,6 +23,7 @@ import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepos
 import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepositoryImpl
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.SystemUIDeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.ui.binder.LiftToRunFaceAuthBinder
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import dagger.Binds
@@ -32,7 +33,7 @@ import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
 @Module
-interface KeyguardFaceAuthModule {
+interface DeviceEntryFaceAuthModule {
     @Binds
     fun deviceEntryFaceAuthRepository(
         impl: DeviceEntryFaceAuthRepositoryImpl
@@ -41,12 +42,19 @@ interface KeyguardFaceAuthModule {
     @Binds
     @IntoMap
     @ClassKey(SystemUIDeviceEntryFaceAuthInteractor::class)
-    fun bind(impl: SystemUIDeviceEntryFaceAuthInteractor): CoreStartable
+    fun bindSystemUIDeviceEntryFaceAuthInteractor(
+        impl: SystemUIDeviceEntryFaceAuthInteractor
+    ): CoreStartable
 
     @Binds
     fun keyguardFaceAuthInteractor(
         impl: SystemUIDeviceEntryFaceAuthInteractor
     ): DeviceEntryFaceAuthInteractor
+
+    @Binds
+    @IntoMap
+    @ClassKey(LiftToRunFaceAuthBinder::class)
+    fun bindLiftToRunFaceAuthBinder(impl: LiftToRunFaceAuthBinder): CoreStartable
 
     companion object {
         @Provides
