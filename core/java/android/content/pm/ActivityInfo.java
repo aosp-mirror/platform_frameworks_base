@@ -1519,6 +1519,16 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     private static final long CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW = 197654537L;
 
     /**
+     * The activity is targeting a SDK version that should receive the changed behavior of
+     * configuration insets decouple.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long INSETS_DECOUPLED_CONFIGURATION_ENFORCED = 151861875L;
+
+    /**
      * Optional set of a certificates identifying apps that are allowed to embed this activity. From
      * the "knownActivityEmbeddingCerts" attribute.
      */
