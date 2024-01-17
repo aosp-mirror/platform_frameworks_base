@@ -133,6 +133,7 @@ package android {
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String GET_APP_METADATA = "android.permission.GET_APP_METADATA";
     field public static final String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
+    field @FlaggedApi("android.app.bic_client") public static final String GET_BACKGROUND_INSTALLED_PACKAGES = "android.permission.GET_BACKGROUND_INSTALLED_PACKAGES";
     field @FlaggedApi("android.app.get_binding_uid_importance") public static final String GET_BINDING_UID_IMPORTANCE = "android.permission.GET_BINDING_UID_IMPORTANCE";
     field public static final String GET_HISTORICAL_APP_OPS_STATS = "android.permission.GET_HISTORICAL_APP_OPS_STATS";
     field public static final String GET_PROCESS_STATE_AND_OOM_SCORE = "android.permission.GET_PROCESS_STATE_AND_OOM_SCORE";
