@@ -79,13 +79,13 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val sceneContainerFlags = kosmos.fakeSceneContainerFlags
-    private val authenticationInteractor = kosmos.authenticationInteractor
-    private val bouncerInteractor = kosmos.bouncerInteractor
-    private val faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository
-    private val deviceEntryInteractor = kosmos.deviceEntryInteractor
-    private val keyguardInteractor = kosmos.keyguardInteractor
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val sceneContainerFlags by lazy { kosmos.fakeSceneContainerFlags }
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }
+    private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
+    private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
     private val sysUiState: SysUiState = mock()
     private val falsingCollector: FalsingCollector = mock()
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor

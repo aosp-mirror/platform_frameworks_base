@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -29,6 +30,7 @@ import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -37,8 +39,14 @@ import org.junit.runner.RunWith
 class GoneToDreamingTransitionViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val repository = kosmos.fakeKeyguardTransitionRepository
-    private val underTest = kosmos.goneToDreamingTransitionViewModel
+    private lateinit var repository: FakeKeyguardTransitionRepository
+    private lateinit var underTest: GoneToDreamingTransitionViewModel
+
+    @Before
+    fun setUp() {
+        repository = kosmos.fakeKeyguardTransitionRepository
+        underTest = kosmos.goneToDreamingTransitionViewModel
+    }
 
     @Test
     fun runTest() =

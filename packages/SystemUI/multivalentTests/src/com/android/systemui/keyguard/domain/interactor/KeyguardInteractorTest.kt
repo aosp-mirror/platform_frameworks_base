@@ -54,8 +54,8 @@ class KeyguardInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val repository = kosmos.fakeKeyguardRepository
-    private val sceneInteractor = kosmos.sceneInteractor
+    private val repository by lazy { kosmos.fakeKeyguardRepository }
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val commandQueue by lazy {
         FakeCommandQueue()
     }

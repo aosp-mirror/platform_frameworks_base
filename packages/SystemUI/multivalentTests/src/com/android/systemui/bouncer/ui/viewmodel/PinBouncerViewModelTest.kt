@@ -53,22 +53,24 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val authenticationInteractor = kosmos.authenticationInteractor
-    private val bouncerInteractor = kosmos.bouncerInteractor
-    private val bouncerViewModel = kosmos.bouncerViewModel
-    private val underTest =
-        PinBouncerViewModel(
-            applicationContext = context,
-            viewModelScope = testScope.backgroundScope,
-            interactor = bouncerInteractor,
-            isInputEnabled = MutableStateFlow(true).asStateFlow(),
-            simBouncerInteractor = kosmos.simBouncerInteractor,
-            authenticationMethod = AuthenticationMethodModel.Pin,
-        )
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val bouncerViewModel by lazy { kosmos.bouncerViewModel }
+    private lateinit var underTest: PinBouncerViewModel
 
     @Before
     fun setUp() {
+        underTest =
+            PinBouncerViewModel(
+                    applicationContext = context,
+                    viewModelScope = testScope.backgroundScope,
+                    interactor = bouncerInteractor,
+                    isInputEnabled = MutableStateFlow(true).asStateFlow(),
+                    simBouncerInteractor = kosmos.simBouncerInteractor,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+            )
+
         overrideResource(R.string.keyguard_enter_your_pin, ENTER_YOUR_PIN)
         overrideResource(R.string.kg_wrong_pin, WRONG_PIN)
     }
