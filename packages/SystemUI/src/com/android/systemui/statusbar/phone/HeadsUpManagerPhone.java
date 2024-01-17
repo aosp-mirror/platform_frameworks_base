@@ -224,7 +224,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             for (NotificationEntry entry : mEntriesToRemoveAfterExpand) {
                 if (isHeadsUpEntry(entry.getKey())) {
                     // Maybe the heads-up was removed already
-                    removeAlertEntry(entry.getKey());
+                    removeEntry(entry.getKey());
                 }
             }
         }
@@ -359,7 +359,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
-                removeAlertEntry(entry.getKey());
+                removeEntry(entry.getKey());
             }
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();
@@ -370,13 +370,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
     //  HeadsUpManager utility (protected) methods overrides:
 
     @Override
-    protected HeadsUpEntry createAlertEntry() {
+    protected HeadsUpEntry createHeadsUpEntry() {
         return mEntryPool.acquire();
     }
 
     @Override
-    protected void onAlertEntryRemoved(HeadsUpEntry headsUpEntry) {
-        super.onAlertEntryRemoved(headsUpEntry);
+    protected void onEntryRemoved(HeadsUpEntry headsUpEntry) {
+        super.onEntryRemoved(headsUpEntry);
         mEntryPool.release((HeadsUpEntryPhone) headsUpEntry);
     }
 
@@ -455,7 +455,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
                 } else {
-                    removeAlertEntry(entry.getKey());
+                    removeEntry(entry.getKey());
                 }
             };
 
@@ -535,7 +535,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
                     }
                 }
                 for (String key : keysToRemove) {
-                    removeAlertEntry(key);
+                    removeEntry(key);
                 }
             }
         }

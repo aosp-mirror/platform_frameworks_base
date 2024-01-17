@@ -132,8 +132,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         }
 
         @Override
-        protected HeadsUpEntry createAlertEntry() {
-            mLastCreatedEntry = spy(super.createAlertEntry());
+        protected HeadsUpEntry createHeadsUpEntry() {
+            mLastCreatedEntry = spy(super.createHeadsUpEntry());
             return mLastCreatedEntry;
         }
 
@@ -375,7 +375,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
                 BaseHeadsUpManager.HeadsUpEntry.class);
         headsUpEntry.mEntry = notifEntry;
 
-        hum.onAlertEntryRemoved(headsUpEntry);
+        hum.onEntryRemoved(headsUpEntry);
 
         verify(mLogger, times(1)).logNotificationActuallyRemoved(eq(notifEntry));
     }
@@ -702,7 +702,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         // the notification and then updates it; in order to not log twice, the entry needs
         // to have a functional ExpandableNotificationRow that can keep track of whether it's
         // pinned or not (via isRowPinned()). That feels like a lot to pull in to test this one bit.
-        hum.onAlertEntryAdded(entryToPin);
+        hum.onEntryAdded(entryToPin);
 
         assertEquals(1, mUiEventLoggerFake.numLogs());
         assertEquals(BaseHeadsUpManager.NotificationPeekEvent.NOTIFICATION_PEEK.getId(),
