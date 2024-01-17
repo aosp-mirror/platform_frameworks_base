@@ -117,6 +117,12 @@ public class BluetoothUtils {
             }
         }
 
+        if (cachedDevice.isHearingAidDevice()) {
+            return new Pair<>(getBluetoothDrawable(context,
+                    com.android.internal.R.drawable.ic_bt_hearing_aid),
+                    context.getString(R.string.bluetooth_talkback_hearing_aids));
+        }
+
         List<LocalBluetoothProfile> profiles = cachedDevice.getProfiles();
         int resId = 0;
         for (LocalBluetoothProfile profile : profiles) {
