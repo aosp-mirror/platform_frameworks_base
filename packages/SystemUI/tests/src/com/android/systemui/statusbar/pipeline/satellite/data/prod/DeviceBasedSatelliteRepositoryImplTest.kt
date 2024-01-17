@@ -35,6 +35,7 @@ import android.telephony.satellite.SatelliteModemStateCallback
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl.Companion.MIN_UPTIME
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl.Companion.POLLING_INTERVAL_MS
 import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
@@ -87,6 +88,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     Optional.empty(),
                     dispatcher,
                     testScope.backgroundScope,
+                    FakeLogBuffer.Factory.create(),
                     systemClock,
                 )
 
@@ -419,6 +421,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                 if (satMan != null) Optional.of(satMan) else Optional.empty(),
                 dispatcher,
                 testScope.backgroundScope,
+                FakeLogBuffer.Factory.create(),
                 systemClock,
             )
     }
