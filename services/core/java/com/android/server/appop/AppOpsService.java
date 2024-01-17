@@ -65,6 +65,9 @@ import static android.app.AppOpsManager.opRestrictsRead;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.opToPublicName;
 import static android.companion.virtual.VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
+import static android.content.Intent.ACTION_PACKAGE_ADDED;
+import static android.content.Intent.ACTION_PACKAGE_REMOVED;
+import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
@@ -973,7 +976,29 @@ public class AppOpsService extends IAppOpsService.Stub {
             String pkgName = intent.getData().getEncodedSchemeSpecificPart();
             int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
 
-            if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
+            if (action.equals(ACTION_PACKAGE_ADDED)
+                    && !intent.getBooleanExtra(EXTRA_REPLACING, false)) {
+                PackageInfo pi = getPackageManagerInternal().getPackageInfo(pkgName,
+                        PackageManager.GET_PERMISSIONS, Process.myUid(),
+                        UserHandle.getUserId(uid));
+                boolean isSamplingTarget = isSamplingTarget(pi);
+                synchronized (AppOpsService.this) {
+                    if (isSamplingTarget) {
+                        mRarelyUsedPackages.add(pkgName);
+                    }
+                    UidState uidState = getUidStateLocked(uid, true);
+                    if (!uidState.pkgOps.containsKey(pkgName)) {
+                        uidState.pkgOps.put(pkgName,
+                                new Ops(pkgName, uidState));
+                    }
+
+                    createSandboxUidStateIfNotExistsForAppLocked(uid);
+                }
+            } else if (action.equals(ACTION_PACKAGE_REMOVED) && !intent.hasExtra(EXTRA_REPLACING)) {
+                synchronized (AppOpsService.this) {
+                    packageRemovedLocked(uid, pkgName);
+                }
+            } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
                 AndroidPackage pkg = getPackageManagerInternal().getPackage(pkgName);
                 if (pkg == null) {
                     return;
@@ -1052,7 +1077,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHistoricalRegistry.systemReady(mContext.getContentResolver());
 
         IntentFilter packageUpdateFilter = new IntentFilter();
+        packageUpdateFilter.addAction(ACTION_PACKAGE_ADDED);
         packageUpdateFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        packageUpdateFilter.addAction(ACTION_PACKAGE_REMOVED);
         packageUpdateFilter.addDataScheme("package");
 
         mContext.registerReceiverAsUser(mOnPackageUpdatedReceiver, UserHandle.ALL,
@@ -1079,7 +1106,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                     String action;
                     if (!ArrayUtils.contains(pkgsInUid, pkg)) {
-                        action = Intent.ACTION_PACKAGE_REMOVED;
+                        action = ACTION_PACKAGE_REMOVED;
                     } else {
                         action = Intent.ACTION_PACKAGE_REPLACED;
                     }
@@ -1159,44 +1186,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     // onUserRemoved handled by #removeUser
-                });
-
-        getPackageManagerInternal().getPackageList(
-                new PackageManagerInternal.PackageListObserver() {
-                    @Override
-                    public void onPackageAdded(String packageName, int appId) {
-                        PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
-                                PackageManager.GET_PERMISSIONS, Process.myUid(),
-                                mContext.getUserId());
-                        boolean isSamplingTarget = isSamplingTarget(pi);
-                        int[] userIds = getUserManagerInternal().getUserIds();
-                        synchronized (AppOpsService.this) {
-                            if (isSamplingTarget) {
-                                mRarelyUsedPackages.add(packageName);
-                            }
-                            for (int i = 0; i < userIds.length; i++) {
-                                int uid = UserHandle.getUid(userIds[i], appId);
-                                UidState uidState = getUidStateLocked(uid, true);
-                                if (!uidState.pkgOps.containsKey(packageName)) {
-                                    uidState.pkgOps.put(packageName,
-                                            new Ops(packageName, uidState));
-                                }
-
-                                createSandboxUidStateIfNotExistsForAppLocked(uid);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onPackageRemoved(String packageName, int appId) {
-                        int[] userIds = getUserManagerInternal().getUserIds();
-                        synchronized (AppOpsService.this) {
-                            for (int i = 0; i < userIds.length; i++) {
-                                int uid = UserHandle.getUid(userIds[i], appId);
-                                packageRemovedLocked(uid, packageName);
-                            }
-                        }
-                    }
                 });
     }
 
