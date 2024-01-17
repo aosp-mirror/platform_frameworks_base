@@ -26,6 +26,8 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
@@ -43,6 +45,7 @@ import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
+import java.util.stream.Stream;
 
 /**
  * A manager which handles heads up notifications which is a special mode where
@@ -50,7 +53,7 @@ import java.io.PrintWriter;
  */
 public abstract class BaseHeadsUpManager extends AlertingNotificationManager implements
         HeadsUpManager {
-    private static final String TAG = "HeadsUpManager";
+    private static final String TAG = "BaseHeadsUpManager";
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
 
     protected final ListenerSet<OnHeadsUpChangedListener> mListeners = new ListenerSet<>();
@@ -138,13 +141,131 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         mListeners.remove(listener);
     }
 
-    /** Updates the notification with the given key. */
-    public void updateNotification(@NonNull String key, boolean alert) {
-        super.updateNotification(key, alert);
-        HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
-        if (alert && headsUpEntry != null) {
-            setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUpEntry.mEntry));
+    /**
+     * Called when posting a new notification that should alert the user and appear on screen.
+     * Adds the notification to be managed.
+     * @param entry entry to show
+     */
+    @Override
+    public void showNotification(@NonNull NotificationEntry entry) {
+        mLogger.logShowNotification(entry);
+        addAlertEntry(entry);
+        updateNotification(entry.getKey(), true /* alert */);
+        entry.setInterruption();
+    }
+
+    /**
+     * Try to remove the notification.  May not succeed if the notification has not been shown long
+     * enough and needs to be kept around.
+     * @param key the key of the notification to remove
+     * @param releaseImmediately force a remove regardless of earliest removal time
+     * @return true if notification is removed, false otherwise
+     */
+    @Override
+    public boolean removeNotification(@NonNull String key, boolean releaseImmediately) {
+        mLogger.logRemoveNotification(key, releaseImmediately);
+        AlertEntry alertEntry = mAlertEntries.get(key);
+        if (alertEntry == null) {
+            return true;
         }
+        if (releaseImmediately || canRemoveImmediately(key)) {
+            removeAlertEntry(key);
+        } else {
+            alertEntry.removeAsSoonAsPossible();
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * Called when the notification state has been updated.
+     * @param key the key of the entry that was updated
+     * @param alert whether the notification should alert again and force reevaluation of
+     *              removal time
+     */
+    public void updateNotification(@NonNull String key, boolean alert) {
+        AlertEntry alertEntry = mAlertEntries.get(key);
+        mLogger.logUpdateNotification(key, alert, alertEntry != null);
+        if (alertEntry == null) {
+            // the entry was released before this update (i.e by a listener) This can happen
+            // with the groupmanager
+            return;
+        }
+
+        alertEntry.mEntry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
+
+        if (alert) {
+            alertEntry.updateEntry(true /* updatePostTime */, "updateNotification");
+            if (headsUpEntry != null) {
+                setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUpEntry.mEntry));
+            }
+        }
+    }
+
+    /**
+     * Clears all managed notifications.
+     */
+    public void releaseAllImmediately() {
+        mLogger.logReleaseAllImmediately();
+        // A copy is necessary here as we are changing the underlying map.  This would cause
+        // undefined behavior if we iterated over the key set directly.
+        ArraySet<String> keysToRemove = new ArraySet<>(mAlertEntries.keySet());
+        for (String key : keysToRemove) {
+            removeAlertEntry(key);
+        }
+    }
+
+    /**
+     * Returns the entry if it is managed by this manager.
+     * @param key key of notification
+     * @return the entry
+     */
+    @Nullable
+    public NotificationEntry getEntry(@NonNull String key) {
+        AlertEntry entry = mAlertEntries.get(key);
+        return entry != null ? entry.mEntry : null;
+    }
+
+    /**
+     * Returns the stream of all current notifications managed by this manager.
+     * @return all entries
+     */
+    @NonNull
+    @Override
+    public Stream<NotificationEntry> getAllEntries() {
+        return mAlertEntries.values().stream().map(headsUpEntry -> headsUpEntry.mEntry);
+    }
+
+    /**
+     * Whether or not there are any active alerting notifications.
+     * @return true if there is an alert, false otherwise
+     */
+    @Override
+    public boolean hasNotifications() {
+        return !mAlertEntries.isEmpty();
+    }
+
+    /**
+     * Whether or not the given notification is alerting and managed by this manager.
+     * @return true if the notification is alerting
+     */
+    public boolean isAlerting(@NonNull String key) {
+        return mAlertEntries.containsKey(key);
+    }
+
+    /**
+     * @param key
+     * @return When a HUN entry should be removed in milliseconds from now
+     */
+    @Override
+    public long getEarliestRemovalTime(String key) {
+        AlertEntry alerting = mAlertEntries.get(key);
+        if (alerting != null) {
+            return Math.max(0, alerting.mEarliestRemovalTime - mSystemClock.elapsedRealtime());
+        }
+        return 0;
     }
 
     protected boolean shouldHeadsUpBecomePinned(@NonNull NotificationEntry entry) {
@@ -190,6 +311,23 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         return FLAG_CONTENT_VIEW_HEADS_UP;
     }
 
+    /**
+     * Add a new entry and begin managing it.
+     * @param entry the entry to add
+     */
+    protected final void addAlertEntry(@NonNull NotificationEntry entry) {
+        AlertEntry alertEntry = createAlertEntry();
+        alertEntry.setEntry(entry);
+        mAlertEntries.put(entry.getKey(), alertEntry);
+        onAlertEntryAdded(alertEntry);
+        entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        entry.setIsAlerting(true);
+    }
+
+    /**
+     * Manager-specific logic that should occur when an entry is added.
+     * @param alertEntry alert entry added
+     */
     @Override
     protected void onAlertEntryAdded(AlertEntry alertEntry) {
         NotificationEntry entry = alertEntry.mEntry;
@@ -203,6 +341,33 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         }
     }
 
+    /**
+     * Remove a notification and reset the alert entry.
+     * @param key key of notification to remove
+     */
+    @Override
+    protected final void removeAlertEntry(@NonNull String key) {
+        AlertEntry alertEntry = mAlertEntries.get(key);
+        if (alertEntry == null) {
+            return;
+        }
+        NotificationEntry entry = alertEntry.mEntry;
+
+        // If the notification is animating, we will remove it at the end of the animation.
+        if (entry != null && entry.isExpandAnimationRunning()) {
+            return;
+        }
+        entry.demoteStickyHun();
+        mAlertEntries.remove(key);
+        onAlertEntryRemoved(alertEntry);
+        entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        alertEntry.reset();
+    }
+
+    /**
+     * Manager-specific logic that should occur when an alert entry is removed.
+     * @param alertEntry alert entry removed
+     */
     @Override
     protected void onAlertEntryRemoved(AlertEntry alertEntry) {
         NotificationEntry entry = alertEntry.mEntry;
@@ -419,13 +584,34 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         }
     }
 
+    /**
+     * Whether or not the alert can be removed currently.  If it hasn't been on screen long enough
+     * it should not be removed unless forced
+     * @param key the key to check if removable
+     * @return true if the alert entry can be removed
+     */
     @Override
     public boolean canRemoveImmediately(@NonNull String key) {
         HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
         if (headsUpEntry != null && headsUpEntry.mUserActionMayIndirectlyRemove) {
             return true;
         }
-        return super.canRemoveImmediately(key);
+        AlertEntry alertEntry = mAlertEntries.get(key);
+        return alertEntry == null || alertEntry.wasShownLongEnough()
+                || alertEntry.mEntry.isRowDismissed();
+    }
+
+    /**
+     * @param key
+     * @return true if the entry is (pinned and expanded) or (has an active remote input)
+     */
+    @Override
+    public boolean isSticky(String key) {
+        AlertEntry alerting = mAlertEntries.get(key);
+        if (alerting != null) {
+            return alerting.isSticky();
+        }
+        return false;
     }
 
     @NonNull
