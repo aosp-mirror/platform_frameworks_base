@@ -117,11 +117,11 @@ import com.android.systemui.keyguard.domain.interactor.GlanceableHubTransitions;
 import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
-import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
@@ -356,8 +356,8 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
 
-    private final SceneTestUtils mUtils = new SceneTestUtils(this);
-    private final TestScope mTestScope = mUtils.getTestScope();
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private final TestScope mTestScope = mKosmos.getTestScope();
     private ShadeInteractor mShadeInteractor;
     private ShellTaskOrganizer mShellTaskOrganizer;
     private TaskViewTransitions mTaskViewTransitions;
@@ -408,8 +408,8 @@ public class BubblesTest extends SysuiTestCase {
         FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
 
         PowerInteractor powerInteractor = new PowerInteractor(
-                mUtils.getPowerRepository(),
-                mUtils.falsingCollector(),
+                mKosmos.getPowerRepository(),
+                mKosmos.getFalsingCollector(),
                 mock(ScreenOffAnimationController.class),
                 mStatusBarStateController);
 
@@ -417,7 +417,7 @@ public class BubblesTest extends SysuiTestCase {
                 mTestScope.getBackgroundScope(),
                 new SceneContainerRepository(
                         mTestScope.getBackgroundScope(),
-                        mUtils.fakeSceneContainerConfig()),
+                        mKosmos.getFakeSceneContainerConfig()),
                 powerInteractor,
                 mock(SceneLogger.class));
 
@@ -449,8 +449,8 @@ public class BubblesTest extends SysuiTestCase {
                 keyguardTransitionRepository,
                 keyguardTransitionInteractor,
                 mTestScope.getBackgroundScope(),
-                mUtils.getTestDispatcher(),
-                mUtils.getTestDispatcher(),
+                mKosmos.getTestDispatcher(),
+                mKosmos.getTestDispatcher(),
                 keyguardInteractor,
                 featureFlags,
                 shadeRepository,
@@ -475,8 +475,8 @@ public class BubblesTest extends SysuiTestCase {
                 keyguardTransitionRepository,
                 keyguardTransitionInteractor,
                 mTestScope.getBackgroundScope(),
-                mUtils.getTestDispatcher(),
-                mUtils.getTestDispatcher(),
+                mKosmos.getTestDispatcher(),
+                mKosmos.getTestDispatcher(),
                 keyguardInteractor,
                 featureFlags,
                 mock(KeyguardSecurityModel.class),

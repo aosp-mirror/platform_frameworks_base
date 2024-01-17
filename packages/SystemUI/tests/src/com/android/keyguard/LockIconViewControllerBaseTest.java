@@ -48,10 +48,10 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -76,7 +76,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
 
     protected MockitoSession mStaticMockSession;
 
-    protected final SceneTestUtils mSceneTestUtils = new SceneTestUtils(this);
+    protected final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     protected @Mock DeviceEntryInteractor mDeviceEntryInteractor;
     protected @Mock LockIconView mLockIconView;
     protected @Mock AnimatedStateListDrawable mIconDrawable;
@@ -175,7 +175,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mPrimaryBouncerInteractor,
                 mContext,
                 () -> mDeviceEntryInteractor,
-                mSceneTestUtils.getFakeSceneContainerFlags()
+                mKosmos.getFakeSceneContainerFlags()
         );
     }
 
