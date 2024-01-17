@@ -112,6 +112,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                     Optional.of(satelliteManager),
                     dispatcher,
                     testScope.backgroundScope,
+                    FakeLogBuffer.Factory.create(),
                     systemClock,
                 )
 
@@ -119,6 +120,22 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
 
             // Creating the repo does not crash, and we consider the feature not to be supported
             assertThat(underTest.satelliteSupport.value).isEqualTo(SatelliteSupport.NotSupported)
+        }
+
+    @Test
+    fun satelliteManagerThrows_doesNotCrash() =
+        testScope.runTest {
+            setupDefaultRepo()
+
+            whenever(satelliteManager.registerForNtnSignalStrengthChanged(any(), any()))
+                .thenThrow(SatelliteException(13))
+
+            val conn by collectLastValue(underTest.connectionState)
+            val strength by collectLastValue(underTest.signalStrength)
+
+            // Flows have not emitted, we haven't crashed
+            assertThat(conn).isNull()
+            assertThat(strength).isNull()
         }
 
     @Test
