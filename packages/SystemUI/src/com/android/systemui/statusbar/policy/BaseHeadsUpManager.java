@@ -328,7 +328,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         mHeadsUpEntryMap.put(entry.getKey(), headsUpEntry);
         onEntryAdded(headsUpEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-        entry.setIsAlerting(true);
+        entry.setIsHeadsUpEntry(true);
     }
 
     /**

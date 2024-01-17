@@ -578,7 +578,7 @@ public class AmbientState implements Dumpable {
     }
 
     public boolean isPulsing(NotificationEntry entry) {
-        return mPulsing && entry.isAlerting();
+        return mPulsing && entry.isHeadsUpEntry();
     }
 
     public void setPulsingRow(ExpandableNotificationRow row) {
