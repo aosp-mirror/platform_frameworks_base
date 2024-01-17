@@ -650,18 +650,18 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         public long mPostTime;
         public long mEarliestRemovalTime;
 
-        @Nullable protected Runnable mRemoveAlertRunnable;
+        @Nullable protected Runnable mRemoveRunnable;
 
-        @Nullable private Runnable mCancelRemoveAlertRunnable;
+        @Nullable private Runnable mCancelRemoveRunnable;
 
         public void setEntry(@NonNull final NotificationEntry entry) {
             setEntry(entry, () -> removeEntry(entry.getKey()));
         }
 
         public void setEntry(@NonNull final NotificationEntry entry,
-                @Nullable Runnable removeAlertRunnable) {
+                @Nullable Runnable removeRunnable) {
             mEntry = entry;
-            mRemoveAlertRunnable = removeAlertRunnable;
+            mRemoveRunnable = removeRunnable;
 
             mPostTime = calculatePostTime();
             updateEntry(true /* updatePostTime */, "setEntry");
@@ -761,7 +761,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         public void reset() {
             removeAutoRemovalCallbacks("reset()");
             mEntry = null;
-            mRemoveAlertRunnable = null;
+            mRemoveRunnable = null;
             mExpanded = false;
             mRemoteInputActive = false;
         }
@@ -778,7 +778,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
 
         public void scheduleAutoRemovalCallback(long delayMillis, @NonNull String reason) {
-            if (mRemoveAlertRunnable == null) {
+            if (mRemoveRunnable == null) {
                 Log.wtf(TAG, "scheduleAutoRemovalCallback with no callback set");
                 return;
             }
@@ -791,16 +791,16 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                 mLogger.logAutoRemoveScheduled(mEntry, delayMillis, reason);
             }
 
-            mCancelRemoveAlertRunnable = mExecutor.executeDelayed(mRemoveAlertRunnable,
+            mCancelRemoveRunnable = mExecutor.executeDelayed(mRemoveRunnable,
                     delayMillis);
         }
 
         public boolean removeAutoRemovalCallbackInternal() {
-            final boolean scheduled = (mCancelRemoveAlertRunnable != null);
+            final boolean scheduled = (mCancelRemoveRunnable != null);
 
             if (scheduled) {
-                mCancelRemoveAlertRunnable.run();
-                mCancelRemoveAlertRunnable = null;
+                mCancelRemoveRunnable.run();
+                mCancelRemoveRunnable = null;
             }
 
             return scheduled;
@@ -810,7 +810,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
          * Remove the entry at the earliest allowed removal time.
          */
         public void removeAsSoonAsPossible() {
-            if (mRemoveAlertRunnable != null) {
+            if (mRemoveRunnable != null) {
                 final long timeLeft = mEarliestRemovalTime - mSystemClock.elapsedRealtime();
                 scheduleAutoRemovalCallback(timeLeft, "removeAsSoonAsPossible");
             }
