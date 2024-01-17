@@ -605,7 +605,11 @@ public class ZenModeHelper {
                     rule = newImplicitZenRule(callingPkg);
                     newConfig.automaticRules.put(rule.id, rule);
                 }
-                rule.zenMode = zenMode;
+                // If the user has changed the rule's *zenMode*, then don't let app overwrite it.
+                // We allow the update if the user has only changed other aspects of the rule.
+                if ((rule.userModifiedFields & AutomaticZenRule.FIELD_INTERRUPTION_FILTER) == 0) {
+                    rule.zenMode = zenMode;
+                }
                 rule.snoozing = false;
                 rule.condition = new Condition(rule.conditionId,
                         mContext.getString(R.string.zen_mode_implicit_activated),
@@ -628,7 +632,7 @@ public class ZenModeHelper {
      * {@link Global#ZEN_MODE_IMPORTANT_INTERRUPTIONS}.
      */
     void applyGlobalPolicyAsImplicitZenRule(String callingPkg, int callingUid,
-            NotificationManager.Policy policy, @ConfigChangeOrigin int origin) {
+            NotificationManager.Policy policy) {
         if (!android.app.Flags.modesApi()) {
             Log.wtf(TAG, "applyGlobalPolicyAsImplicitZenRule called with flag off!");
             return;
@@ -644,10 +648,17 @@ public class ZenModeHelper {
                 rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                 newConfig.automaticRules.put(rule.id, rule);
             }
-            // TODO: b/308673679 - Keep user customization of this rule!
-            rule.zenPolicy = ZenAdapters.notificationPolicyToZenPolicy(policy);
-            setConfigLocked(newConfig, /* triggeringComponent= */ null, origin,
-                    "applyGlobalPolicyAsImplicitZenRule", callingUid);
+            // If the user has changed the rule's *ZenPolicy*, then don't let app overwrite it.
+            // We allow the update if the user has only changed other aspects of the rule.
+            if (rule.zenPolicyUserModifiedFields == 0) {
+                updatePolicy(
+                        rule,
+                        ZenAdapters.notificationPolicyToZenPolicy(policy),
+                        /* updateBitmask= */ false);
+
+                setConfigLocked(newConfig, /* triggeringComponent= */ null, UPDATE_ORIGIN_APP,
+                        "applyGlobalPolicyAsImplicitZenRule", callingUid);
+            }
         }
     }
 

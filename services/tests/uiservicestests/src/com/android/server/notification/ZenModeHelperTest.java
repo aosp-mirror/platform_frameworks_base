@@ -46,6 +46,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+import static android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 import static android.service.notification.Condition.SOURCE_SCHEDULE;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
@@ -67,6 +68,7 @@ import static com.android.os.dnd.DNDProtoEnums.STATE_ALLOW;
 import static com.android.os.dnd.DNDProtoEnums.STATE_DISALLOW;
 import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -294,6 +296,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         appInfoSpy.icon = ICON_RES_ID;
         when(appInfoSpy.loadLabel(any())).thenReturn(CUSTOM_APP_LABEL);
         when(mPackageManager.getApplicationInfo(eq(CUSTOM_PKG_NAME), anyInt()))
+                .thenReturn(appInfoSpy);
+        when(mPackageManager.getApplicationInfo(eq(mContext.getPackageName()), anyInt()))
                 .thenReturn(appInfoSpy);
         mZenModeHelper.mPm = mPackageManager;
 
@@ -4578,7 +4582,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
         assertThat(mZenModeHelper.mConfig.automaticRules.values())
-                .comparingElementsUsing(IGNORE_TIMESTAMPS)
+                .comparingElementsUsing(IGNORE_METADATA)
                 .containsExactly(
                         expectedImplicitRule(CUSTOM_PKG_NAME, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                                 null, true));
@@ -4598,9 +4602,72 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ZEN_MODE_ALARMS);
 
         assertThat(mZenModeHelper.mConfig.automaticRules.values())
-                .comparingElementsUsing(IGNORE_TIMESTAMPS)
+                .comparingElementsUsing(IGNORE_METADATA)
                 .containsExactly(
                         expectedImplicitRule(CUSTOM_PKG_NAME, ZEN_MODE_ALARMS, null, true));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void applyGlobalZenModeAsImplicitZenRule_ruleCustomized_doesNotUpdateRule() {
+        mZenModeHelper.mConfig.automaticRules.clear();
+        String pkg = mContext.getPackageName();
+
+        // From app, call "setInterruptionFilter" and create and implicit rule.
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(pkg, CUSTOM_PKG_UID,
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        String ruleId = getOnlyElement(mZenModeHelper.mConfig.automaticRules.keySet());
+        assertThat(getOnlyElement(mZenModeHelper.mConfig.automaticRules.values()).zenMode)
+                .isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+
+        // From user, update that rule's interruption filter.
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(ruleId);
+        AutomaticZenRule userUpdateRule = new AutomaticZenRule.Builder(rule)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdateRule, UPDATE_ORIGIN_USER, "reason",
+                Process.SYSTEM_UID);
+
+        // From app, call "setInterruptionFilter" again.
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(pkg, CUSTOM_PKG_UID,
+                ZEN_MODE_NO_INTERRUPTIONS);
+
+        // The app's update was ignored, and the user's update is still current, and the current
+        // mode is the one they chose.
+        assertThat(getOnlyElement(mZenModeHelper.mConfig.automaticRules.values()).zenMode)
+                .isEqualTo(ZEN_MODE_ALARMS);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void applyGlobalZenModeAsImplicitZenRule_ruleCustomizedButNotFilter_updatesRule() {
+        mZenModeHelper.mConfig.automaticRules.clear();
+        String pkg = mContext.getPackageName();
+
+        // From app, call "setInterruptionFilter" and create and implicit rule.
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(pkg, CUSTOM_PKG_UID,
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        String ruleId = getOnlyElement(mZenModeHelper.mConfig.automaticRules.keySet());
+        assertThat(getOnlyElement(mZenModeHelper.mConfig.automaticRules.values()).zenMode)
+                .isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+
+        // From user, update something in that rule, but not the interruption filter.
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(ruleId);
+        AutomaticZenRule userUpdateRule = new AutomaticZenRule.Builder(rule)
+                .setName("Renamed")
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdateRule, UPDATE_ORIGIN_USER, "reason",
+                Process.SYSTEM_UID);
+
+        // From app, call "setInterruptionFilter" again.
+        mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(pkg, CUSTOM_PKG_UID,
+                ZEN_MODE_NO_INTERRUPTIONS);
+
+        // The app's update was accepted, and the current mode is the one that they wanted.
+        assertThat(getOnlyElement(mZenModeHelper.mConfig.automaticRules.values()).zenMode)
+                .isEqualTo(ZEN_MODE_NO_INTERRUPTIONS);
+        assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_NO_INTERRUPTIONS);
     }
 
     @Test
@@ -4673,8 +4740,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         Policy policy = new Policy(PRIORITY_CATEGORY_CALLS | PRIORITY_CATEGORY_CONVERSATIONS,
                 PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED,
                 Policy.getAllSuppressedVisualEffects(), CONVERSATION_SENDERS_IMPORTANT);
-        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID, policy,
-                UPDATE_ORIGIN_APP);
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID, policy);
 
         ZenPolicy expectedZenPolicy = new ZenPolicy.Builder()
                 .disallowAllSounds()
@@ -4684,7 +4750,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .allowPriorityChannels(true)
                 .build();
         assertThat(mZenModeHelper.mConfig.automaticRules.values())
-                .comparingElementsUsing(IGNORE_TIMESTAMPS)
+                .comparingElementsUsing(IGNORE_METADATA)
                 .containsExactly(
                         expectedImplicitRule(CUSTOM_PKG_NAME, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                                 expectedZenPolicy, /* conditionActive= */ null));
@@ -4699,14 +4765,13 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED,
                 Policy.getAllSuppressedVisualEffects(), CONVERSATION_SENDERS_IMPORTANT);
         mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID,
-                original, UPDATE_ORIGIN_APP);
+                original);
 
         // Change priorityCallSenders: contacts -> starred.
         Policy updated = new Policy(PRIORITY_CATEGORY_CALLS | PRIORITY_CATEGORY_CONVERSATIONS,
                 PRIORITY_SENDERS_STARRED, PRIORITY_SENDERS_STARRED,
                 Policy.getAllSuppressedVisualEffects(), CONVERSATION_SENDERS_IMPORTANT);
-        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID, updated,
-                UPDATE_ORIGIN_APP);
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID, updated);
 
         ZenPolicy expectedZenPolicy = new ZenPolicy.Builder()
                 .disallowAllSounds()
@@ -4716,10 +4781,77 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .allowPriorityChannels(true)
                 .build();
         assertThat(mZenModeHelper.mConfig.automaticRules.values())
-                .comparingElementsUsing(IGNORE_TIMESTAMPS)
+                .comparingElementsUsing(IGNORE_METADATA)
                 .containsExactly(
                         expectedImplicitRule(CUSTOM_PKG_NAME, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                                 expectedZenPolicy, /* conditionActive= */ null));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void applyGlobalPolicyAsImplicitZenRule_ruleCustomized_doesNotUpdateRule() {
+        mZenModeHelper.mConfig.automaticRules.clear();
+        String pkg = mContext.getPackageName();
+
+        // From app, call "setNotificationPolicy" and create and implicit rule.
+        Policy originalPolicy = new Policy(PRIORITY_CATEGORY_MEDIA, 0, 0);
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(pkg, CUSTOM_PKG_UID, originalPolicy);
+        String ruleId = getOnlyElement(mZenModeHelper.mConfig.automaticRules.keySet());
+
+        // From user, update that rule's policy.
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(ruleId);
+        ZenPolicy userUpdateZenPolicy = new ZenPolicy.Builder().disallowAllSounds()
+                .allowAlarms(true).build();
+        AutomaticZenRule userUpdateRule = new AutomaticZenRule.Builder(rule)
+                .setZenPolicy(userUpdateZenPolicy)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdateRule, UPDATE_ORIGIN_USER, "reason",
+                Process.SYSTEM_UID);
+
+        // From app, call "setNotificationPolicy" again.
+        Policy appUpdatePolicy = new Policy(PRIORITY_CATEGORY_SYSTEM, 0, 0);
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(pkg, CUSTOM_PKG_UID, appUpdatePolicy);
+
+        // The app's update was ignored, and the user's update is still current.
+        assertThat(mZenModeHelper.mConfig.automaticRules.values())
+                .comparingElementsUsing(IGNORE_METADATA)
+                .containsExactly(
+                        expectedImplicitRule(pkg, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                                userUpdateZenPolicy,
+                                /* conditionActive= */ null));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void applyGlobalPolicyAsImplicitZenRule_ruleCustomizedButNotZenPolicy_updatesRule() {
+        mZenModeHelper.mConfig.automaticRules.clear();
+        String pkg = mContext.getPackageName();
+
+        // From app, call "setNotificationPolicy" and create and implicit rule.
+        Policy originalPolicy = new Policy(PRIORITY_CATEGORY_MEDIA, 0, 0);
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(pkg, CUSTOM_PKG_UID, originalPolicy);
+        String ruleId = getOnlyElement(mZenModeHelper.mConfig.automaticRules.keySet());
+
+        // From user, update something in that rule, but not the ZenPolicy.
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(ruleId);
+        AutomaticZenRule userUpdateRule = new AutomaticZenRule.Builder(rule)
+                .setName("Rule renamed, not touching policy")
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdateRule, UPDATE_ORIGIN_USER, "reason",
+                Process.SYSTEM_UID);
+
+        // From app, call "setNotificationPolicy" again.
+        Policy appUpdatePolicy = new Policy(PRIORITY_CATEGORY_SYSTEM, 0, 0);
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(pkg, CUSTOM_PKG_UID, appUpdatePolicy);
+
+        // The app's update was applied.
+        ZenPolicy appsSecondZenPolicy = new ZenPolicy.Builder()
+                .disallowAllSounds()
+                .allowSystem(true)
+                .allowPriorityChannels(true)
+                .build();
+        assertThat(getOnlyElement(mZenModeHelper.mConfig.automaticRules.values()).zenPolicy)
+                .isEqualTo(appsSecondZenPolicy);
     }
 
     @Test
@@ -4729,7 +4861,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         withoutWtfCrash(
                 () -> mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME,
-                        CUSTOM_PKG_UID, new Policy(0, 0, 0), UPDATE_ORIGIN_APP));
+                        CUSTOM_PKG_UID, new Policy(0, 0, 0)));
 
         assertThat(mZenModeHelper.mConfig.automaticRules).isEmpty();
     }
@@ -4742,7 +4874,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 Policy.getAllSuppressedVisualEffects(), STATE_FALSE,
                 CONVERSATION_SENDERS_IMPORTANT);
         mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID,
-                writtenPolicy, UPDATE_ORIGIN_APP);
+                writtenPolicy);
 
         Policy readPolicy = mZenModeHelper.getNotificationPolicyFromImplicitZenRule(
                 CUSTOM_PKG_NAME);
@@ -4782,7 +4914,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertThat(readPolicy.allowConversations()).isFalse();
     }
 
-    private static final Correspondence<ZenRule, ZenRule> IGNORE_TIMESTAMPS =
+    private static final Correspondence<ZenRule, ZenRule> IGNORE_METADATA =
             Correspondence.transforming(zr -> {
                 Parcel p = Parcel.obtain();
                 try {
@@ -4790,12 +4922,15 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     p.setDataPosition(0);
                     ZenRule copy = new ZenRule(p);
                     copy.creationTime = 0;
+                    copy.userModifiedFields = 0;
+                    copy.zenPolicyUserModifiedFields = 0;
+                    copy.zenDeviceEffectsUserModifiedFields = 0;
                     return copy;
                 } finally {
                     p.recycle();
                 }
             },
-            "Ignoring timestamps");
+            "Ignoring timestamp and userModifiedFields");
 
     private ZenRule expectedImplicitRule(String ownerPkg, int zenMode, ZenPolicy policy,
             @Nullable Boolean conditionActive) {
