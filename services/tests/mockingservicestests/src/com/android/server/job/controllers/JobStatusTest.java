@@ -45,6 +45,7 @@ import static com.android.server.job.controllers.JobStatus.CONSTRAINT_WITHIN_QUO
 import static com.android.server.job.controllers.JobStatus.NO_EARLIEST_RUNTIME;
 import static com.android.server.job.controllers.JobStatus.NO_LATEST_RUNTIME;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -78,6 +79,7 @@ import org.mockito.quality.Strictness;
 
 import java.time.Clock;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 public class JobStatusTest {
@@ -135,6 +137,35 @@ public class JobStatusTest {
             jobStatus.setStandbyBucket(effectiveBucket.keyAt(i));
             assertEquals(effectiveBucket.valueAt(i), jobStatus.getEffectiveStandbyBucket());
         }
+    }
+
+    @Test
+    public void testApplyBasicPiiFilters_email() {
+        assertEquals("[EMAIL]", JobStatus.applyBasicPiiFilters("test@email.com"));
+        assertEquals("[EMAIL]", JobStatus.applyBasicPiiFilters("test+plus@email.com"));
+        assertEquals("[EMAIL]", JobStatus.applyBasicPiiFilters("t.e_st+plus-minus@email.com"));
+
+        assertEquals("prefix:[EMAIL]", JobStatus.applyBasicPiiFilters("prefix:test@email.com"));
+
+        assertEquals("not-an-email", JobStatus.applyBasicPiiFilters("not-an-email"));
+    }
+
+    @Test
+    public void testApplyBasicPiiFilters_mixture() {
+        assertEquals("[PHONE]:[EMAIL]",
+                JobStatus.applyBasicPiiFilters("123-456-7890:test+plus@email.com"));
+        assertEquals("prefix:[PHONE]:[EMAIL]",
+                JobStatus.applyBasicPiiFilters("prefix:123-456-7890:test+plus@email.com"));
+    }
+
+    @Test
+    public void testApplyBasicPiiFilters_phone() {
+        assertEquals("[PHONE]", JobStatus.applyBasicPiiFilters("123-456-7890"));
+        assertEquals("[PHONE]", JobStatus.applyBasicPiiFilters("+1-234-567-8900"));
+
+        assertEquals("prefix:[PHONE]", JobStatus.applyBasicPiiFilters("prefix:123-456-7890"));
+
+        assertEquals("not-a-phone-number", JobStatus.applyBasicPiiFilters("not-a-phone-number"));
     }
 
     @Test
@@ -242,6 +273,42 @@ public class JobStatusTest {
         assertEquals(3, js.getNumAppliedFlexibleConstraints());
         assertEquals(2, js.getNumDroppedFlexibleConstraints());
         assertEquals(1, js.getNumRequiredFlexibleConstraints());
+    }
+
+    @Test
+    public void testGetFilteredDebugTags() {
+        final JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .addDebugTag("test@email.com")
+                .addDebugTag("123-456-7890")
+                .addDebugTag("random")
+                .build();
+        JobStatus job = createJobStatus(jobInfo);
+        String[] expected = new String[]{"[EMAIL]", "[PHONE]", "random"};
+        String[] result = job.getFilteredDebugTags();
+        Arrays.sort(expected);
+        Arrays.sort(result);
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testGetFilteredTraceTag() {
+        JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setTraceTag("test@email.com")
+                .build();
+        JobStatus job = createJobStatus(jobInfo);
+        assertEquals("[EMAIL]", job.getFilteredTraceTag());
+
+        jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setTraceTag("123-456-7890")
+                .build();
+        job = createJobStatus(jobInfo);
+        assertEquals("[PHONE]", job.getFilteredTraceTag());
+
+        jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setTraceTag("random")
+                .build();
+        job = createJobStatus(jobInfo);
+        assertEquals("random", job.getFilteredTraceTag());
     }
 
     @Test

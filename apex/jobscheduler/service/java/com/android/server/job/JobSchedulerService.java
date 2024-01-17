@@ -1840,7 +1840,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     /* isFlexConstraintSatisfied */ false,
                     jobStatus.canApplyTransportAffinities(),
                     jobStatus.getNumAppliedFlexibleConstraints(),
-                    jobStatus.getNumDroppedFlexibleConstraints());
+                    jobStatus.getNumDroppedFlexibleConstraints(),
+                    jobStatus.getFilteredTraceTag(),
+                    jobStatus.getFilteredDebugTags());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -2288,7 +2290,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_FLEXIBLE),
                     cancelled.canApplyTransportAffinities(),
                     cancelled.getNumAppliedFlexibleConstraints(),
-                    cancelled.getNumDroppedFlexibleConstraints());
+                    cancelled.getNumDroppedFlexibleConstraints(),
+                    cancelled.getFilteredTraceTag(),
+                    cancelled.getFilteredDebugTags());
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
