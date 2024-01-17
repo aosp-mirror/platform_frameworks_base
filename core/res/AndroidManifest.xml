@@ -3160,7 +3160,7 @@
          types of interactions
          @hide -->
     <permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
-        android:protectionLevel="signature|installer|role" />
+        android:protectionLevel="signature|installer|module|role" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
     <!-- Allows interaction across profiles in the same profile group. -->
@@ -5055,7 +5055,7 @@
          <p>Intended for use by ROLE_ASSISTANT and signature apps only.
     -->
     <permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE"
-                android:protectionLevel="signature|role"/>
+                android:protectionLevel="signature|module|role"/>
 
     <!-- Must be required by a {@link android.service.autofill.AutofillService},
          to ensure that only the system can bind to it.
@@ -5673,7 +5673,7 @@
     <!-- @SystemApi Allows an application to manage the holders of a role.
          @hide -->
     <permission android:name="android.permission.MANAGE_ROLE_HOLDERS"
-                android:protectionLevel="signature|installer" />
+                android:protectionLevel="signature|installer|module" />
 
     <!-- @SystemApi Allows an application to manage the holders of roles associated with default
          applications.
@@ -5693,7 +5693,7 @@
     <!-- @SystemApi Allows an application to observe role holder changes.
          @hide -->
     <permission android:name="android.permission.OBSERVE_ROLE_HOLDERS"
-                android:protectionLevel="signature|installer" />
+                android:protectionLevel="signature|installer|module" />
 
     <!-- Allows an application to manage the companion devices.
          @hide -->
