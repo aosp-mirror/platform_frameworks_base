@@ -928,10 +928,19 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_GEOLOCATION = 1;
 
+    /**
+     * Satellite communication restricted by entitlement server. This can be triggered based on
+     * the EntitlementStatus value received from the entitlement server to enable or disable
+     * satellite.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_ENTITLEMENT = 2;
+
     /** @hide */
     @IntDef(prefix = "SATELLITE_COMMUNICATION_RESTRICTION_REASON_", value = {
             SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER,
-            SATELLITE_COMMUNICATION_RESTRICTION_REASON_GEOLOCATION
+            SATELLITE_COMMUNICATION_RESTRICTION_REASON_GEOLOCATION,
+            SATELLITE_COMMUNICATION_RESTRICTION_REASON_ENTITLEMENT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteCommunicationRestrictionReason {}
