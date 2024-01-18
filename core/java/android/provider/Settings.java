@@ -10162,7 +10162,9 @@ public final class Settings {
         public static final int HUB_MODE_TUTORIAL_STARTED = 1;
 
         /**
-         * Indicates that the user has completed the hub mode tutorial.
+         * Any value greater than or equal to this value is considered that the user has
+         * completed the hub mode tutorial.
+         *
          * One of the possible states for {@link #HUB_MODE_TUTORIAL_STATE}.
          *
          * @hide
@@ -10181,8 +10183,11 @@ public final class Settings {
 
         /**
          * Defines the user's current state of navigating through the hub mode tutorial.
-         * The possible states are defined in {@link HubModeTutorialState}.
+         * Some possible states are defined in {@link HubModeTutorialState}.
          *
+         * Any value greater than or equal to {@link HUB_MODE_TUTORIAL_COMPLETED} indicates that
+         * the user has completed that version of the hub mode tutorial. And tutorial may be
+         * shown again when a new version becomes available.
          * @hide
          */
         public static final String HUB_MODE_TUTORIAL_STATE = "hub_mode_tutorial_state";
