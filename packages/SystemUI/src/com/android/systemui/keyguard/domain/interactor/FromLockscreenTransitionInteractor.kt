@@ -23,7 +23,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
@@ -307,7 +307,7 @@ constructor(
     }
 
     private fun listenForLockscreenToGone() {
-        if (flags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+        if (KeyguardWmStateRefactor.isEnabled) {
             return
         }
 
@@ -324,7 +324,7 @@ constructor(
     }
 
     private fun listenForLockscreenToGoneDragging() {
-        if (flags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+        if (KeyguardWmStateRefactor.isEnabled) {
             return
         }
 

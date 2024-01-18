@@ -220,19 +220,6 @@ object Flags {
     @JvmField
     val WALLPAPER_PICKER_PREVIEW_ANIMATION = releasedFlag("wallpaper_picker_preview_animation")
 
-    /**
-     * TODO(b/278086361): Tracking bug
-     * Complete rewrite of the interactions between System UI and Window Manager involving keyguard
-     * state. When enabled, calls to ActivityTaskManagerService from System UI will exclusively
-     * occur from [WmLockscreenVisibilityManager] rather than the legacy KeyguardViewMediator.
-     *
-     * This flag is under development; some types of unlock may not animate properly if you enable
-     * it.
-     */
-    @JvmField
-    val KEYGUARD_WM_STATE_REFACTOR: UnreleasedFlag =
-            unreleasedFlag("keyguard_wm_state_refactor")
-
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag("power_menu_lite")

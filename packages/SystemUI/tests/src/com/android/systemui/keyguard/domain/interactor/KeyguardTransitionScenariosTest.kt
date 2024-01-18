@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -28,7 +29,6 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
@@ -133,8 +133,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
-        featureFlags = FakeFeatureFlags().apply { set(Flags.KEYGUARD_WM_STATE_REFACTOR, false) }
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
+        featureFlags = FakeFeatureFlags()
 
         keyguardInteractor = createKeyguardInteractor()
 
@@ -286,6 +286,10 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     transitionInteractor = transitionInteractor,
                 )
                 .apply { start() }
+
+        mSetFlagsRule.disableFlags(
+            FLAG_KEYGUARD_WM_STATE_REFACTOR,
+        )
     }
 
     @Test
