@@ -20,6 +20,7 @@ import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetHost
 import android.content.ComponentName
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
+import com.android.systemui.communal.data.repository.CommunalPrefsRepository
 import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -49,6 +50,7 @@ class CommunalInteractor
 constructor(
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
+    private val communalPrefsRepository: CommunalPrefsRepository,
     mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
@@ -122,7 +124,7 @@ constructor(
     }
 
     /** Dismiss the CTA tile from the hub in view mode. */
-    fun dismissCtaTile() = communalRepository.setCtaTileInViewModeVisibility(isVisible = false)
+    suspend fun dismissCtaTile() = communalPrefsRepository.setCtaDismissedForCurrentUser()
 
     /**
      * Add a widget at the specified position.
@@ -174,8 +176,8 @@ constructor(
 
     /** CTA tile to be displayed in the glanceable hub (view mode). */
     val ctaTileContent: Flow<List<CommunalContentModel.CtaTileInViewMode>> =
-        communalRepository.isCtaTileInViewModeVisible.map { visible ->
-            if (visible) listOf(CommunalContentModel.CtaTileInViewMode()) else emptyList()
+        communalPrefsRepository.isCtaDismissed.map { isDismissed ->
+            if (isDismissed) emptyList() else listOf(CommunalContentModel.CtaTileInViewMode())
         }
 
     /** A list of tutorial content to be displayed in the communal hub in tutorial mode. */

@@ -1349,6 +1349,26 @@ public class SettingsProvider extends ContentProvider {
             final int nameCount = names.size();
             HashMap<String, String> flagsToValues = new HashMap<>(names.size());
 
+            if (Flags.loadAconfigDefaults()) {
+                Map<String, Map<String, String>> allDefaults =
+                        settingsState.getAconfigDefaultValues();
+
+                if (allDefaults != null) {
+                    if (prefix != null) {
+                        String namespace = prefix.substring(0, prefix.length() - 1);
+
+                        Map<String, String> namespaceDefaults = allDefaults.get(namespace);
+                        if (namespaceDefaults != null) {
+                            flagsToValues.putAll(namespaceDefaults);
+                        }
+                    } else {
+                        for (Map<String, String> namespaceDefaults : allDefaults.values()) {
+                            flagsToValues.putAll(namespaceDefaults);
+                        }
+                    }
+                }
+            }
+
             for (int i = 0; i < nameCount; i++) {
                 String name = names.get(i);
                 Setting setting = settingsState.getSettingLocked(name);

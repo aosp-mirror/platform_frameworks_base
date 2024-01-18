@@ -66,6 +66,11 @@ class FakeMediaProjectionManager {
 
         private const val DEFAULT_PACKAGE_NAME = "com.media.projection.test"
         private val DEFAULT_USER_HANDLE = UserHandle.getUserHandleForUid(UserHandle.myUserId())
-        private val DEFAULT_INFO = MediaProjectionInfo(DEFAULT_PACKAGE_NAME, DEFAULT_USER_HANDLE)
+        private val DEFAULT_INFO =
+            MediaProjectionInfo(
+                DEFAULT_PACKAGE_NAME,
+                DEFAULT_USER_HANDLE,
+                /* launchCookie = */ null
+            )
     }
 }

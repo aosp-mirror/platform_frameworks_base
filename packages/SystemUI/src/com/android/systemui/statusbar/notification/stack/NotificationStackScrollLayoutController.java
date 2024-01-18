@@ -80,6 +80,9 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEv
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -120,6 +123,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
+import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -145,6 +149,7 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
  * Controller for {@link NotificationStackScrollLayout}.
@@ -181,6 +186,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final VisibilityLocationProviderDelegator mVisibilityLocationProviderDelegator;
     private final ShadeController mShadeController;
+    private final Provider<WindowRootView> mWindowRootView;
+    private final NotificationStackAppearanceInteractor mStackAppearanceInteractor;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -689,6 +696,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             SeenNotificationsInteractor seenNotificationsInteractor,
             NotificationListViewBinder viewBinder,
             ShadeController shadeController,
+            SceneContainerFlags sceneContainerFlags,
+            Provider<WindowRootView> windowRootView,
+            NotificationStackAppearanceInteractor stackAppearanceInteractor,
             InteractionJankMonitor jankMonitor,
             StackStateLogger stackLogger,
             NotificationStackScrollLogger logger,
@@ -739,6 +749,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mVisibilityLocationProviderDelegator = visibilityLocationProviderDelegator;
         mSeenNotificationsInteractor = seenNotificationsInteractor;
         mShadeController = shadeController;
+        mWindowRootView = windowRootView;
+        mStackAppearanceInteractor = stackAppearanceInteractor;
         mFeatureFlags = featureFlags;
         mNotificationTargetsHelper = notificationTargetsHelper;
         mSecureSettings = secureSettings;
@@ -1074,6 +1086,28 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public int getIntrinsicContentHeight() {
         return mView.getIntrinsicContentHeight();
+    }
+
+    /**
+     * Dispatch a touch to the scene container framework.
+     * TODO(b/316965302): Replace findViewById to avoid DFS
+     */
+    public void sendTouchToSceneFramework(MotionEvent ev) {
+        View sceneContainer = mWindowRootView.get()
+                .findViewById(R.id.scene_container_root_composable);
+        if (sceneContainer != null) {
+            sceneContainer.dispatchTouchEvent(ev);
+        }
+    }
+
+    /** Get the y-coordinate of the top bound of the stack. */
+    public float getPlaceholderTop() {
+        return mStackAppearanceInteractor.getStackBounds().getValue().getTop();
+    }
+
+    /** Set the intrinsic height of the stack content without additional padding. */
+    public void setIntrinsicContentHeight(float intrinsicContentHeight) {
+        mStackAppearanceInteractor.setIntrinsicContentHeight(intrinsicContentHeight);
     }
 
     public void setIntrinsicPadding(int intrinsicPadding) {

@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.appwidget.AppWidgetHost
 import com.android.systemui.communal.data.repository.communalMediaRepository
+import com.android.systemui.communal.data.repository.communalPrefsRepository
 import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -32,6 +33,7 @@ val Kosmos.communalInteractor by
             communalRepository = communalRepository,
             widgetRepository = communalWidgetRepository,
             mediaRepository = communalMediaRepository,
+            communalPrefsRepository = communalPrefsRepository,
             smartspaceRepository = smartspaceRepository,
             keyguardInteractor = keyguardInteractor,
             appWidgetHost = mock(AppWidgetHost::class.java),

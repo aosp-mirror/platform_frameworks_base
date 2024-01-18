@@ -51,6 +51,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ArchivedActivityParcel;
+import android.content.pm.ArchivedPackageInfo;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
@@ -402,23 +403,30 @@ public class PackageArchiver {
                 installerPackage, /* flags= */ 0, userId);
         if (installerInfo == null) {
             // Should never happen because we just fetched the installerInfo.
-            Slog.e(TAG, "Couldnt find installer " + installerPackage);
+            Slog.e(TAG, "Couldn't find installer " + installerPackage);
             return null;
         }
+        final int iconSize = mContext.getSystemService(
+                ActivityManager.class).getLauncherLargeIconSize();
+
+        var info = new ArchivedPackageInfo(archivedPackage);
 
         try {
-            var packageName = archivedPackage.packageName;
-            var mainActivities = archivedPackage.archivedActivities;
-            List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>(mainActivities.length);
-            for (int i = 0, size = mainActivities.length; i < size; ++i) {
-                var mainActivity = mainActivities[i];
-                Path iconPath = storeIconForParcel(packageName, mainActivity, userId, i);
+            var packageName = info.getPackageName();
+            var mainActivities = info.getLauncherActivities();
+            List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>(mainActivities.size());
+            for (int i = 0, size = mainActivities.size(); i < size; ++i) {
+                var mainActivity = mainActivities.get(i);
+                Path iconPath = storeDrawable(
+                        packageName, mainActivity.getIcon(), userId, i, iconSize);
+                Path monochromePath =  storeDrawable(
+                        packageName, mainActivity.getMonochromeIcon(), userId, i, iconSize);
                 ArchiveActivityInfo activityInfo =
                         new ArchiveActivityInfo(
-                                mainActivity.title,
-                                mainActivity.originalComponentName,
+                                mainActivity.getLabel().toString(),
+                                mainActivity.getComponentName(),
                                 iconPath,
-                                null);
+                                monochromePath);
                 archiveActivityInfos.add(activityInfo);
             }
 
@@ -452,21 +460,6 @@ public class PackageArchiver {
         return new ArchiveState(archiveActivityInfos, installerTitle);
     }
 
-    // TODO(b/298452477) Handle monochrome icons.
-    private static Path storeIconForParcel(String packageName, ArchivedActivityParcel mainActivity,
-            @UserIdInt int userId, int index) throws IOException {
-        if (mainActivity.iconBitmap == null) {
-            return null;
-        }
-        File iconsDir = createIconsDir(packageName, userId);
-        File iconFile = new File(iconsDir, index + ".png");
-        try (FileOutputStream out = new FileOutputStream(iconFile)) {
-            out.write(mainActivity.iconBitmap);
-            out.flush();
-        }
-        return iconFile.toPath();
-    }
-
     @VisibleForTesting
     Path storeIcon(String packageName, LauncherActivityInfo mainActivity,
             @UserIdInt int userId, int index, int iconSize) throws IOException {
@@ -475,9 +468,18 @@ public class PackageArchiver {
             // The app doesn't define an icon. No need to store anything.
             return null;
         }
+        return storeDrawable(packageName, mainActivity.getIcon(/* density= */ 0), userId, index,
+                iconSize);
+    }
+
+    private static Path storeDrawable(String packageName, @Nullable Drawable iconDrawable,
+            @UserIdInt int userId, int index, int iconSize) throws IOException {
+        if (iconDrawable == null) {
+            return null;
+        }
         File iconsDir = createIconsDir(packageName, userId);
         File iconFile = new File(iconsDir, index + ".png");
-        Bitmap icon = drawableToBitmap(mainActivity.getIcon(/* density= */ 0), iconSize);
+        Bitmap icon = drawableToBitmap(iconDrawable, iconSize);
         try (FileOutputStream out = new FileOutputStream(iconFile)) {
             // Note: Quality is ignored for PNGs.
             if (!icon.compress(Bitmap.CompressFormat.PNG, /* quality= */ 100, out)) {

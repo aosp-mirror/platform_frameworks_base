@@ -22,11 +22,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -47,7 +45,7 @@ import com.android.systemui.media.controls.ui.MediaCarouselController
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
-import com.android.systemui.notifications.ui.composable.NotificationStack
+import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
@@ -148,35 +146,27 @@ private fun SceneScope.ShadeScene(
     mediaHost: MediaHost,
     modifier: Modifier = Modifier,
 ) {
+    val localDensity = LocalDensity.current
     val layoutWidth = remember { mutableStateOf(0) }
 
-    Box(modifier.element(Shade.Elements.Scrim)) {
-        Spacer(
-            modifier =
-                Modifier.element(Shade.Elements.ScrimBackground)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.scrim, shape = Shade.Shapes.Scrim)
-        )
+    Box(
+        modifier =
+            modifier.element(Shade.Elements.Scrim).background(MaterialTheme.colorScheme.scrim),
+    )
+    Box {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier =
-                Modifier.fillMaxSize()
-                    .clickable(onClick = { viewModel.onContentClicked() })
-                    .padding(
-                        start = Shade.Dimensions.HorizontalPadding,
-                        end = Shade.Dimensions.HorizontalPadding,
-                        bottom = 48.dp
-                    )
+            modifier = Modifier.fillMaxWidth().clickable(onClick = { viewModel.onContentClicked() })
         ) {
             CollapsedShadeHeader(
                 viewModel = viewModel.shadeHeaderViewModel,
                 createTintedIconManager = createTintedIconManager,
                 createBatteryMeterViewController = createBatteryMeterViewController,
                 statusBarIconController = statusBarIconController,
+                modifier = Modifier.padding(horizontal = Shade.Dimensions.HorizontalPadding)
             )
-            Spacer(modifier = Modifier.height(16.dp))
             QuickSettings(
-                modifier = Modifier.wrapContentHeight(),
+                modifier = Modifier.height(130.dp),
                 viewModel.qsSceneAdapter,
             )
 
@@ -202,16 +192,15 @@ private fun SceneScope.ShadeScene(
                         },
                     mediaHost = mediaHost,
                     layoutWidth = layoutWidth.value,
-                    layoutHeight = with(LocalDensity.current) { mediaHeight.toPx() }.toInt(),
+                    layoutHeight = with(localDensity) { mediaHeight.toPx() }.toInt(),
                     carouselController = mediaCarouselController,
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            NotificationStack(
+            NotificationScrollingStack(
                 viewModel = viewModel.notifications,
-                isScrimVisible = true,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth().weight(1f),
             )
         }
     }

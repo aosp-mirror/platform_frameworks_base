@@ -28,6 +28,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.app.Notification;
 import android.os.Handler;
 import android.os.Looper;
@@ -56,6 +58,8 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.logging.nano.Notifications;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -110,6 +114,11 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     private final PowerInteractor mPowerInteractor =
             PowerInteractorFactory.create().getPowerInteractor();
+    private final ActiveNotificationListRepository mActiveNotificationListRepository =
+            new ActiveNotificationListRepository();
+    private final ActiveNotificationsInteractor mActiveNotificationsInteractor =
+            new ActiveNotificationsInteractor(mActiveNotificationListRepository,
+                    StandardTestDispatcher(null, null));
     private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
@@ -123,7 +132,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 new WindowRootViewVisibilityRepository(mBarService, mUiBgExecutor),
                 mKeyguardRepository,
                 mHeadsUpManager,
-                mPowerInteractor);
+                mPowerInteractor,
+                mActiveNotificationsInteractor);
         mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
 
         mEntry = new NotificationEntryBuilder()

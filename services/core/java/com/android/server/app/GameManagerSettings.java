@@ -251,6 +251,7 @@ public class GameManagerSettings {
                             + type);
                 }
             }
+            str.close();
         } catch (XmlPullParserException | java.io.IOException e) {
             Slog.wtf(TAG, "Error reading game manager settings", e);
             return false;

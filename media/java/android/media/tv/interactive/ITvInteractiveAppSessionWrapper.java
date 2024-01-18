@@ -102,6 +102,7 @@ public class ITvInteractiveAppSessionWrapper
     private static final int DO_NOTIFY_RECORDING_SCHEDULED = 45;
     private static final int DO_SEND_TIME_SHIFT_MODE = 46;
     private static final int DO_SEND_AVAILABLE_SPEEDS = 47;
+    private static final int DO_SEND_SELECTED_TRACK_INFO = 48;
 
     private final HandlerCaller mCaller;
     private Session mSessionImpl;
@@ -245,6 +246,10 @@ public class ITvInteractiveAppSessionWrapper
                 SomeArgs args = (SomeArgs) msg.obj;
                 mSessionImpl.notifyTvMessage((Integer) args.arg1, (Bundle) args.arg2);
                 args.recycle();
+                break;
+            }
+            case DO_SEND_SELECTED_TRACK_INFO: {
+                mSessionImpl.sendSelectedTrackInfo((List<TvTrackInfo>) msg.obj);
                 break;
             }
             case DO_NOTIFY_VIDEO_AVAILABLE: {
@@ -523,6 +528,12 @@ public class ITvInteractiveAppSessionWrapper
     public void notifyTvMessage(int type, Bundle data) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageOO(DO_NOTIFY_TV_MESSAGE, type, data));
+    }
+
+    @Override
+    public void sendSelectedTrackInfo(List<TvTrackInfo> tracks) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_SELECTED_TRACK_INFO, tracks));
     }
 
     @Override

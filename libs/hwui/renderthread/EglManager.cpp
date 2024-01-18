@@ -441,22 +441,32 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
             colorMode = ColorMode::Default;
         }
 
-        if (DeviceInfo::get()->getWideColorType() == kRGBA_F16_SkColorType) {
+        // TODO: maybe we want to get rid of the WCG check if overlay properties just works?
+        const bool canUseFp16 = DeviceInfo::get()->isSupportFp16ForHdr() ||
+                                DeviceInfo::get()->getWideColorType() == kRGBA_F16_SkColorType;
+
+        if (canUseFp16) {
             if (mEglConfigF16 == EGL_NO_CONFIG_KHR) {
                 colorMode = ColorMode::Default;
             } else {
                 config = mEglConfigF16;
             }
         }
+
         if (EglExtensions.glColorSpace) {
             attribs[0] = EGL_GL_COLORSPACE_KHR;
             switch (colorMode) {
                 case ColorMode::Default:
                     attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;
                     break;
+                case ColorMode::Hdr:
+                    if (canUseFp16) {
+                        attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
+                        break;
+                        // No fp16 support so fallthrough to HDR10
+                    }
                 // We don't have an EGL colorspace for extended range P3 that's used for HDR
                 // So override it after configuring the EGL context
-                case ColorMode::Hdr:
                 case ColorMode::Hdr10:
                     overrideWindowDataSpaceForHdr = true;
                     attribs[1] = EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT;

@@ -33,6 +33,8 @@ import com.android.systemui.scene.data.repository.WindowRootViewVisibilityReposi
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -45,6 +47,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,6 +62,8 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class ShadeControllerImplTest : SysuiTestCase() {
     private val executor = FakeExecutor(FakeSystemClock())
+    private val testDispatcher = StandardTestDispatcher()
+    private val activeNotificationsRepository = ActiveNotificationListRepository()
 
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var keyguardStateController: KeyguardStateController
@@ -84,6 +89,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
             FakeKeyguardRepository(),
             headsUpManager,
             PowerInteractorFactory.create().powerInteractor,
+            ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher)
         )
     }
 

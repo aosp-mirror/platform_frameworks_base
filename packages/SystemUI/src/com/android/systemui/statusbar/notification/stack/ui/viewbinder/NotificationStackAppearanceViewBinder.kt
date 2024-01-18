@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -43,24 +44,28 @@ object NotificationStackAppearanceViewBinder {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
                     viewModel.stackBounds.collect { bounds ->
-                        controller.updateTopPadding(
-                            bounds.top,
-                            controller.isAddOrRemoveAnimationPending
-                        )
                         controller.setRoundedClippingBounds(
-                            it.left,
-                            it.top,
-                            it.right,
-                            it.bottom,
+                            bounds.left.roundToInt(),
+                            bounds.top.roundToInt(),
+                            bounds.right.roundToInt(),
+                            bounds.bottom.roundToInt(),
                             viewModel.cornerRadiusDp.value.dpToPx(context),
                             viewModel.cornerRadiusDp.value.dpToPx(context),
                         )
                     }
                 }
+
+                launch {
+                    viewModel.contentTop.collect {
+                        controller.updateTopPadding(it, controller.isAddOrRemoveAnimationPending)
+                    }
+                }
+
                 launch {
                     viewModel.expandFraction.collect { expandFraction ->
                         ambientState.expansionFraction = expandFraction
                         controller.expandedHeight = expandFraction * controller.view.height
+                        controller.setMaxAlphaForExpansion(expandFraction.pow(0.75f))
                     }
                 }
             }

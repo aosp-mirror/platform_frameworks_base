@@ -36,3 +36,10 @@ flag {
     description: "Animates the floating menu's transition between curved and jagged edges."
     bug: "281140482"
 }
+
+flag {
+    name: "create_windowless_window_magnifier"
+    namespace: "accessibility"
+    description: "Uses SurfaceControlViewHost to create the magnifier for window magnification."
+    bug: "280992417"
+}

@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -33,15 +34,19 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
+import com.android.internal.telephony.flags.Flags;
 
 import dalvik.system.VMRuntime;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
  * A callback class for monitoring changes in specific telephony states
@@ -627,6 +632,18 @@ public class TelephonyCallback {
     public static final int EVENT_EMERGENCY_CALLBACK_MODE_CHANGED = 40;
 
     /**
+     * Event for listening to changes in simultaneous cellular calling subscriptions.
+     *
+     * @see SimultaneousCellularCallingSupportListener
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SIMULTANEOUS_CALLING_INDICATIONS)
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public static final int EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED = 41;
+
+    /**
      * @hide
      */
     @IntDef(prefix = {"EVENT_"}, value = {
@@ -669,7 +686,8 @@ public class TelephonyCallback {
             EVENT_LINK_CAPACITY_ESTIMATE_CHANGED,
             EVENT_TRIGGER_NOTIFY_ANBR,
             EVENT_MEDIA_QUALITY_STATUS_CHANGED,
-            EVENT_EMERGENCY_CALLBACK_MODE_CHANGED
+            EVENT_EMERGENCY_CALLBACK_MODE_CHANGED,
+            EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -1373,6 +1391,44 @@ public class TelephonyCallback {
     }
 
     /**
+     * Interface for listening to changes in the simultaneous cellular calling state for active
+     * cellular subscriptions.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SIMULTANEOUS_CALLING_INDICATIONS)
+    @SystemApi
+    public interface SimultaneousCellularCallingSupportListener {
+        /**
+         * Notify the Listener that the subscriptions available for simultaneous <b>cellular</b>
+         * calling have changed.
+         * <p>
+         * If we have an ongoing <b>cellular</b> call on one subscription in this Set, a
+         * simultaneous incoming or outgoing <b>cellular</b> call is possible on any of the
+         * subscriptions in this Set. On a traditional Dual Sim Dual Standby device, simultaneous
+         * calling is not possible between subscriptions, where on a Dual Sim Dual Active device,
+         * simultaneous calling may be possible between subscriptions in certain network conditions.
+         * <p>
+         * Note: This listener only tracks the capability of the modem to perform simultaneous
+         * cellular calls and does not track the simultaneous calling state of scenarios based on
+         * multiple IMS registration over multiple transports (WiFi/Internet calling).
+         * <p>
+         * Note: This listener fires for all changes to cellular calling subscriptions independent
+         * of which subscription it is registered on.
+         *
+         * @param simultaneousCallingSubscriptionIds The Set of subscription IDs that support
+         * simultaneous calling. If there is an ongoing call on a subscription in this Set, then a
+         * simultaneous incoming or outgoing call is only possible for other subscriptions in this
+         * Set. If there is an ongoing call on a subscription that is not in this Set, then
+         * simultaneous calling is not possible at the current time.
+         *
+         */
+        @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+        void onSimultaneousCellularCallingSubscriptionsChanged(
+                @NonNull Set<Integer> simultaneousCallingSubscriptionIds);
+    }
+
+    /**
      * Interface for call attributes listener.
      *
      * @hide
@@ -1974,6 +2030,17 @@ public class TelephonyCallback {
                     () -> mExecutor.execute(
                             () -> listener.onAllowedNetworkTypesChanged(reason,
                                     allowedNetworkType)));
+        }
+
+        public void onSimultaneousCallingStateChanged(int[] subIds) {
+            SimultaneousCellularCallingSupportListener listener =
+                    (SimultaneousCellularCallingSupportListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> listener.onSimultaneousCellularCallingSubscriptionsChanged(
+                                    Arrays.stream(subIds).boxed().collect(Collectors.toSet()))));
         }
 
         public void onLinkCapacityEstimateChanged(

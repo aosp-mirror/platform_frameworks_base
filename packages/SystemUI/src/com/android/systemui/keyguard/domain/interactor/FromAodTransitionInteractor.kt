@@ -54,12 +54,33 @@ constructor(
     ) {
 
     override fun start() {
-        listenForAodToLockscreenOrOccluded()
+        listenForAodToLockscreen()
+        listenForAodToPrimaryBouncer()
         listenForAodToGone()
+        listenForAodToOccluded()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private fun listenForAodToLockscreenOrOccluded() {
+    /**
+     * There are cases where the transition to AOD begins but never completes, such as tapping power
+     * during an incoming phone call when unlocked. In this case, GONE->AOD should be interrupted to
+     * run AOD->OCCLUDED.
+     */
+    private fun listenForAodToOccluded() {
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded.sample(startedKeyguardState, ::Pair).collect {
+                (isOccluded, startedKeyguardState) ->
+                if (isOccluded && startedKeyguardState == KeyguardState.AOD) {
+                    startTransitionTo(
+                        toState = KeyguardState.OCCLUDED,
+                        modeOnCanceled = TransitionModeOnCanceled.RESET
+                    )
+                }
+            }
+        }
+    }
+
+    private fun listenForAodToLockscreen() {
         scope.launch {
             keyguardInteractor
                 .dozeTransitionTo(DozeStateModel.FINISH)
@@ -72,22 +93,33 @@ constructor(
                     ::toTriple
                 )
                 .collect { (_, lastStartedStep, occluded) ->
-                    if (lastStartedStep.to == KeyguardState.AOD) {
-                        val toState =
-                            if (occluded) KeyguardState.OCCLUDED else KeyguardState.LOCKSCREEN
+                    if (lastStartedStep.to == KeyguardState.AOD && !occluded) {
                         val modeOnCanceled =
-                            if (
-                                toState == KeyguardState.LOCKSCREEN &&
-                                    lastStartedStep.from == KeyguardState.LOCKSCREEN
-                            ) {
+                            if (lastStartedStep.from == KeyguardState.LOCKSCREEN) {
                                 TransitionModeOnCanceled.REVERSE
                             } else {
                                 TransitionModeOnCanceled.LAST_VALUE
                             }
                         startTransitionTo(
-                            toState = toState,
+                            toState = KeyguardState.LOCKSCREEN,
                             modeOnCanceled = modeOnCanceled,
                         )
+                    }
+                }
+        }
+    }
+
+    /**
+     * If there is a biometric lockout and FPS is tapped while on AOD, it should go directly to the
+     * PRIMARY_BOUNCER.
+     */
+    private fun listenForAodToPrimaryBouncer() {
+        scope.launch {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { (isBouncerShowing, lastStartedTransitionStep) ->
+                    if (isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.AOD) {
+                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
                     }
                 }
         }
@@ -96,8 +128,7 @@ constructor(
     private fun listenForAodToGone() {
         scope.launch {
             keyguardInteractor.biometricUnlockState.sample(finishedKeyguardState, ::Pair).collect {
-                pair ->
-                val (biometricUnlockState, keyguardState) = pair
+                (biometricUnlockState, keyguardState) ->
                 if (keyguardState == KeyguardState.AOD && isWakeAndUnlock(biometricUnlockState)) {
                     startTransitionTo(KeyguardState.GONE)
                 }

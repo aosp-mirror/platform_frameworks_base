@@ -778,17 +778,22 @@ class ActivityClientController extends IActivityClientController.Stub {
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+                if (r == null) {
+                    return false;
+                }
                 // Create a transition if the activity is playing in case the below activity didn't
                 // commit invisible. That's because if any activity below this one has changed its
                 // visibility while playing transition, there won't able to commit visibility until
                 // the running transition finish.
-                final Transition transition = r != null
-                        && r.mTransitionController.inPlayingTransition(r)
+                final Transition transition = r.mTransitionController.isShellTransitionsEnabled()
                         && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_BACK) : null;
-                final boolean changed = r != null && r.setOccludesParent(true);
+                final boolean changed = r.setOccludesParent(true);
                 if (transition != null) {
                     if (changed) {
+                        // Always set as scene transition because it expects to be a jump-cut.
+                        transition.setOverrideAnimation(TransitionInfo.AnimationOptions
+                                .makeSceneTransitionAnimOptions(), null, null);
                         r.mTransitionController.requestStartTransition(transition,
                                 null /*startTask */, null /* remoteTransition */,
                                 null /* displayChange */);

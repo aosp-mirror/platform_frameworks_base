@@ -4242,6 +4242,7 @@ public abstract class Context {
             VIRTUALIZATION_SERVICE,
             GRAMMATICAL_INFLECTION_SERVICE,
             SECURITY_STATE_SERVICE,
+           //@hide: ECM_ENHANCED_CONFIRMATION_SERVICE,
 
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -6525,6 +6526,18 @@ public abstract class Context {
      */
     @FlaggedApi(Flags.FLAG_SECURITY_STATE_SERVICE)
     public static final String SECURITY_STATE_SERVICE = "security_state";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.app.ecm.EnhancedConfirmationManager}.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.ecm.EnhancedConfirmationManager
+     * @hide
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED)
+    @SystemApi
+    public static final String ECM_ENHANCED_CONFIRMATION_SERVICE = "ecm_enhanced_confirmation";
 
     /**
      * Determine whether the given permission is allowed for a particular

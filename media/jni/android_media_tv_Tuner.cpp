@@ -967,7 +967,7 @@ void FilterClientCallbackImpl::onFilterStatus(const DemuxFilterStatus status) {
     ScopedLocalRef<jobject> filter(env);
     {
         android::Mutex::Autolock autoLock(mLock);
-        if (env->IsSameObject(filter.get(), nullptr)) {
+        if (env->IsSameObject(mFilterObj, nullptr)) {
             ALOGE("FilterClientCallbackImpl::onFilterStatus:"
                   "Filter object has been freed. Ignoring callback.");
             return;

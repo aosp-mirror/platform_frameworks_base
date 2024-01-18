@@ -68,7 +68,7 @@ public class ActivityEmbeddingSecondaryActivity extends Activity {
                         // This triggers a recalcuation of splitatributes.
                         ActivityEmbeddingController
                                 .getInstance(ActivityEmbeddingSecondaryActivity.this)
-                                .invalidateTopVisibleActivityStacks();
+                                .invalidateVisibleActivityStacks();
                     }
         });
         findViewById(R.id.secondary_enter_pip_button).setOnClickListener(

@@ -20,6 +20,7 @@ import static android.view.View.GONE;
 import static android.view.WindowInsets.Type.ime;
 
 import static com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION;
+import static com.android.systemui.Flags.FLAG_SCENE_CONTAINER;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.RUBBER_BAND_FACTOR_NORMAL;
@@ -37,6 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
@@ -51,6 +53,7 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.os.SystemClock;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
@@ -74,6 +77,7 @@ import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -93,11 +97,13 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -947,6 +953,78 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         verify(runnable).run();
     }
 
+    @Test
+    public void testDispatchTouchEvent_sceneContainerDisabled() {
+        Assume.assumeFalse(SceneContainerFlag.isEnabled());
+
+        MotionEvent event = MotionEvent.obtain(
+                SystemClock.uptimeMillis(),
+                SystemClock.uptimeMillis(),
+                MotionEvent.ACTION_MOVE,
+                0,
+                0,
+                0
+        );
+
+        mStackScroller.dispatchTouchEvent(event);
+
+        verify(mStackScrollLayoutController, never()).sendTouchToSceneFramework(any());
+    }
+
+    @Test
+    public void testDispatchTouchEvent_sceneContainerEnabled() {
+        Assume.assumeTrue(SceneContainerFlag.isEnabled());
+        mStackScroller.setIsBeingDragged(true);
+
+        MotionEvent moveEvent = MotionEvent.obtain(
+                SystemClock.uptimeMillis(),
+                SystemClock.uptimeMillis(),
+                MotionEvent.ACTION_MOVE,
+                0,
+                0,
+                0
+        );
+        MotionEvent syntheticDownEvent = moveEvent.copy();
+        syntheticDownEvent.setAction(MotionEvent.ACTION_DOWN);
+        mStackScroller.dispatchTouchEvent(moveEvent);
+
+        verify(mStackScrollLayoutController).sendTouchToSceneFramework(argThat(
+                new MotionEventMatcher(syntheticDownEvent)));
+
+        mStackScroller.dispatchTouchEvent(moveEvent);
+
+        verify(mStackScrollLayoutController).sendTouchToSceneFramework(moveEvent);
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    public void testDispatchTouchEvent_sceneContainerEnabled_actionUp() {
+        Assume.assumeTrue(SceneContainerFlag.isEnabled());
+        mStackScroller.setIsBeingDragged(true);
+
+        MotionEvent upEvent = MotionEvent.obtain(
+                SystemClock.uptimeMillis(),
+                SystemClock.uptimeMillis(),
+                MotionEvent.ACTION_UP,
+                0,
+                0,
+                0
+        );
+        MotionEvent syntheticDownEvent = upEvent.copy();
+        syntheticDownEvent.setAction(MotionEvent.ACTION_DOWN);
+
+        mStackScroller.dispatchTouchEvent(upEvent);
+
+        verify(mStackScrollLayoutController, atLeastOnce()).sendTouchToSceneFramework(argThat(
+                new MotionEventMatcher(syntheticDownEvent)));
+
+        mStackScroller.dispatchTouchEvent(upEvent);
+
+        verify(mStackScrollLayoutController, atLeastOnce()).sendTouchToSceneFramework(argThat(
+                new MotionEventMatcher(upEvent)));
+        assertFalse(mStackScroller.getIsBeingDragged());
+    }
+
     private void setBarStateForTest(int state) {
         // Can't inject this through the listener or we end up on the actual implementation
         // rather than the mock because the spy just coppied the anonymous inner /shruggie.
@@ -992,5 +1070,22 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 y,
                 /* metaState= */0
         );
+    }
+
+    private static class MotionEventMatcher implements ArgumentMatcher<MotionEvent> {
+        private final MotionEvent mLeftEvent;
+
+        MotionEventMatcher(MotionEvent leftEvent) {
+            mLeftEvent = leftEvent;
+        }
+
+        @Override
+        public boolean matches(MotionEvent right) {
+            return mLeftEvent.getActionMasked() == right.getActionMasked()
+                    && mLeftEvent.getDownTime() == right.getDownTime()
+                    && mLeftEvent.getEventTime() == right.getEventTime()
+                    && mLeftEvent.getX() == right.getX()
+                    && mLeftEvent.getY() == right.getY();
+        }
     }
 }

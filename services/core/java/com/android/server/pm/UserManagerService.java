@@ -46,6 +46,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
@@ -587,7 +588,10 @@ public class UserManagerService extends IUserManager.Stub {
         public void onFinished(int id, Bundle extras) {
             mHandler.post(() -> {
                 try {
-                    mContext.startIntentSender(mTarget, null, 0, 0, 0);
+                    ActivityOptions activityOptions =
+                            ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                    mContext.startIntentSender(mTarget, null, 0, 0, 0, activityOptions.toBundle());
                 } catch (IntentSender.SendIntentException e) {
                     Slog.e(LOG_TAG, "Failed to start the target in the callback", e);
                 }

@@ -38,6 +38,9 @@ namespace hwui_flags {
 constexpr bool clip_surfaceviews() {
     return false;
 }
+constexpr bool hdr_10bit_plus() {
+    return false;
+}
 }  // namespace hwui_flags
 #endif
 
@@ -105,6 +108,7 @@ bool Properties::isSystemOrPersistent = false;
 float Properties::maxHdrHeadroomOn8bit = 5.f;  // TODO: Refine this number
 
 bool Properties::clipSurfaceViews = false;
+bool Properties::hdr10bitPlus = false;
 
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
@@ -177,6 +181,7 @@ bool Properties::load() {
 
     clipSurfaceViews =
             base::GetBoolProperty("debug.hwui.clip_surfaceviews", hwui_flags::clip_surfaceviews());
+    hdr10bitPlus = hwui_flags::hdr_10bit_plus();
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }

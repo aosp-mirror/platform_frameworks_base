@@ -66,6 +66,8 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -91,6 +93,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
+import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -111,6 +114,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import javax.inject.Provider;
 
 /**
  * Tests for {@link NotificationStackScrollLayoutController}.
@@ -153,6 +158,9 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private VisibilityLocationProviderDelegator mVisibilityLocationProviderDelegator;
     @Mock private ShadeController mShadeController;
+    @Mock private SceneContainerFlags mSceneContainerFlags;
+    @Mock private Provider<WindowRootView> mWindowRootView;
+    @Mock private NotificationStackAppearanceInteractor mNotificationStackAppearanceInteractor;
     @Mock private InteractionJankMonitor mJankMonitor;
     private final StackStateLogger mStackLogger = new StackStateLogger(logcatLogBuffer(),
             logcatLogBuffer());
@@ -724,6 +732,9 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mSeenNotificationsInteractor,
                 mViewBinder,
                 mShadeController,
+                mSceneContainerFlags,
+                mWindowRootView,
+                mNotificationStackAppearanceInteractor,
                 mJankMonitor,
                 mStackLogger,
                 mLogger,

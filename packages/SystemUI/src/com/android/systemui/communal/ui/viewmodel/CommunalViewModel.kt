@@ -86,9 +86,11 @@ constructor(
     override fun onOpenWidgetEditor() = communalInteractor.showWidgetEditor()
 
     override fun onDismissCtaTile() {
-        communalInteractor.dismissCtaTile()
-        setPopupOnDismissCtaVisibility(true)
-        schedulePopupHiding()
+        scope.launch {
+            communalInteractor.dismissCtaTile()
+            setPopupOnDismissCtaVisibility(true)
+            schedulePopupHiding()
+        }
     }
 
     override fun getInteractionHandler(): RemoteViews.InteractionHandler = interactionHandler

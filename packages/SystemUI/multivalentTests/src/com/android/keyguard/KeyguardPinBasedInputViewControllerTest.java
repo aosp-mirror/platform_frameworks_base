@@ -35,6 +35,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository;
 import com.android.systemui.res.R;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
@@ -107,7 +108,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
                 mEmergencyButtonController, mFalsingCollector, featureFlags,
-                mSelectedUserInteractor) {
+                mSelectedUserInteractor, new FakeKeyboardRepository()) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);

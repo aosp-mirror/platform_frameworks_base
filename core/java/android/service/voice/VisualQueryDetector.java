@@ -325,7 +325,7 @@ public class VisualQueryDetector {
             Slog.v(TAG, "BinderCallback#onQueryDetected");
             Binder.withCleanCallingIdentity(() -> {
                 synchronized (mLock) {
-                    mCallback.onQueryDetected(partialQuery);
+                    mExecutor.execute(()->mCallback.onQueryDetected(partialQuery));
                 }
             });
         }
@@ -335,7 +335,7 @@ public class VisualQueryDetector {
             Slog.v(TAG, "BinderCallback#onQueryFinished");
             Binder.withCleanCallingIdentity(() -> {
                 synchronized (mLock) {
-                    mCallback.onQueryFinished();
+                    mExecutor.execute(()->mCallback.onQueryFinished());
                 }
             });
         }
@@ -345,7 +345,7 @@ public class VisualQueryDetector {
             Slog.v(TAG, "BinderCallback#onQueryRejected");
             Binder.withCleanCallingIdentity(() -> {
                 synchronized (mLock) {
-                    mCallback.onQueryRejected();
+                    mExecutor.execute(()->mCallback.onQueryRejected());
                 }
             });
         }

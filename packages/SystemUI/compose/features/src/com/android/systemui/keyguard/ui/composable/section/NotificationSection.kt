@@ -16,23 +16,55 @@
 
 package com.android.systemui.keyguard.ui.composable.section
 
+import android.content.Context
+import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.notifications.ui.composable.NotificationStack
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.statusbar.notification.stack.AmbientState
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
+import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackAppearanceViewBinder
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 
 class NotificationSection
 @Inject
 constructor(
+    @Application context: Context,
     private val viewModel: NotificationsPlaceholderViewModel,
+    controller: NotificationStackScrollLayoutController,
+    sceneContainerFlags: SceneContainerFlags,
+    sharedNotificationContainer: SharedNotificationContainer,
+    stackScrollLayout: NotificationStackScrollLayout,
+    notificationStackAppearanceViewModel: NotificationStackAppearanceViewModel,
+    ambientState: AmbientState,
 ) {
+    init {
+        if (sceneContainerFlags.flexiNotifsEnabled()) {
+            (stackScrollLayout.parent as? ViewGroup)?.removeView(stackScrollLayout)
+            sharedNotificationContainer.addNotificationStackScrollLayout(stackScrollLayout)
+
+            NotificationStackAppearanceViewBinder.bind(
+                context,
+                sharedNotificationContainer,
+                notificationStackAppearanceViewModel,
+                ambientState,
+                controller,
+            )
+        }
+    }
+
     @Composable
     fun SceneScope.Notifications(modifier: Modifier = Modifier) {
         NotificationStack(
             viewModel = viewModel,
-            isScrimVisible = false,
             modifier = modifier,
         )
     }

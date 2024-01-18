@@ -3617,7 +3617,7 @@ public class HdmiControlService extends SystemService {
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     protected boolean isEarcSupported() {
         synchronized (mLock) {
             return mEarcSupported;

@@ -3,6 +3,7 @@ package com.android.keyguard;
 import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_X_CLOCK_DESIGN;
 import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_Y_CLOCK_DESIGN;
 import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_Y_CLOCK_SIZE;
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -191,11 +192,11 @@ public class KeyguardClockSwitch extends RelativeLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        mSmallClockFrame = findViewById(R.id.lockscreen_clock_view);
-        mLargeClockFrame = findViewById(R.id.lockscreen_clock_view_large);
-        mStatusArea = findViewById(R.id.keyguard_status_area);
-
+        if (!migrateClocksToBlueprint()) {
+            mSmallClockFrame = findViewById(R.id.lockscreen_clock_view);
+            mLargeClockFrame = findViewById(R.id.lockscreen_clock_view_large);
+            mStatusArea = findViewById(R.id.keyguard_status_area);
+        }
         onConfigChanged();
     }
 

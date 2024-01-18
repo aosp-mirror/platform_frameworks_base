@@ -40,9 +40,9 @@ import java.util.List;
  *     .setSubTitle(...)
  *     .setContentView(new PromptVerticalListContentView.Builder()
  *         .setDescription("test description")
- *         .addListItem(new PromptContentListItemPlainText("test item 1"))
- *         .addListItem(new PromptContentListItemPlainText("test item 2"))
- *         .addListItem(new PromptContentListItemBulletedText("test item 3"))
+ *         .addListItem(new PromptContentItemPlainText("test item 1"))
+ *         .addListItem(new PromptContentItemPlainText("test item 2"))
+ *         .addListItem(new PromptContentItemBulletedText("test item 3"))
  *         .build())
  *     .build();
  * </pre>
@@ -51,11 +51,11 @@ import java.util.List;
 public final class PromptVerticalListContentView implements PromptContentViewParcelable {
     private static final int MAX_ITEM_NUMBER = 20;
     private static final int MAX_EACH_ITEM_CHARACTER_NUMBER = 640;
-    private final List<PromptContentListItemParcelable> mContentList;
+    private final List<PromptContentItemParcelable> mContentList;
     private final CharSequence mDescription;
 
     private PromptVerticalListContentView(
-            @NonNull List<PromptContentListItemParcelable> contentList,
+            @NonNull List<PromptContentItemParcelable> contentList,
             @NonNull CharSequence description) {
         mContentList = contentList;
         mDescription = description;
@@ -63,8 +63,8 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
 
     private PromptVerticalListContentView(Parcel in) {
         mContentList = in.readArrayList(
-                PromptContentListItemParcelable.class.getClassLoader(),
-                PromptContentListItemParcelable.class);
+                PromptContentItemParcelable.class.getClassLoader(),
+                PromptContentItemParcelable.class);
         mDescription = in.readCharSequence();
     }
 
@@ -94,13 +94,13 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
     }
 
     /**
-     * Gets the list of ListItem on the content view, as set by
-     * {@link PromptVerticalListContentView.Builder#addListItem(PromptContentListItem)}.
+     * Gets the list of items on the content view, as set by
+     * {@link PromptVerticalListContentView.Builder#addListItem(PromptContentItem)}.
      *
      * @return The item list on the content view.
      */
     @NonNull
-    public List<PromptContentListItem> getListItems() {
+    public List<PromptContentItem> getListItems() {
         return new ArrayList<>(mContentList);
     }
 
@@ -142,7 +142,7 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
      * A builder that collects arguments to be shown on the vertical list view.
      */
     public static final class Builder {
-        private final List<PromptContentListItemParcelable> mContentList = new ArrayList<>();
+        private final List<PromptContentItemParcelable> mContentList = new ArrayList<>();
         private CharSequence mDescription;
 
         /**
@@ -159,28 +159,50 @@ public final class PromptVerticalListContentView implements PromptContentViewPar
 
         /**
          * Optional: Adds a list item in the current row. Maximum {@value MAX_ITEM_NUMBER} items in
-         * total.
+         * total. The maximum length for each item is {@value MAX_EACH_ITEM_CHARACTER_NUMBER}
+         * characters.
          *
          * @param listItem The list item view to display
          * @return This builder.
          */
         @NonNull
-        public Builder addListItem(@NonNull PromptContentListItem listItem) {
+        public Builder addListItem(@NonNull PromptContentItem listItem) {
             if (doesListItemExceedsCharLimit(listItem)) {
                 throw new IllegalStateException(
                         "The character number of list item exceeds "
                                 + MAX_EACH_ITEM_CHARACTER_NUMBER);
             }
-            mContentList.add((PromptContentListItemParcelable) listItem);
+            mContentList.add((PromptContentItemParcelable) listItem);
             return this;
         }
 
-        private boolean doesListItemExceedsCharLimit(PromptContentListItem listItem) {
-            if (listItem instanceof PromptContentListItemPlainText) {
-                return ((PromptContentListItemPlainText) listItem).getText().length()
+
+        /**
+         * Optional: Adds a list item in the current row. Maximum {@value MAX_ITEM_NUMBER} items in
+         * total. The maximum length for each item is {@value MAX_EACH_ITEM_CHARACTER_NUMBER}
+         * characters.
+         *
+         * @param listItem The list item view to display
+         * @param index The position at which to add the item
+         * @return This builder.
+         */
+        @NonNull
+        public Builder addListItem(@NonNull PromptContentItem listItem, int index) {
+            if (doesListItemExceedsCharLimit(listItem)) {
+                throw new IllegalStateException(
+                        "The character number of list item exceeds "
+                                + MAX_EACH_ITEM_CHARACTER_NUMBER);
+            }
+            mContentList.add(index, (PromptContentItemParcelable) listItem);
+            return this;
+        }
+
+        private boolean doesListItemExceedsCharLimit(PromptContentItem listItem) {
+            if (listItem instanceof PromptContentItemPlainText) {
+                return ((PromptContentItemPlainText) listItem).getText().length()
                         > MAX_EACH_ITEM_CHARACTER_NUMBER;
-            } else if (listItem instanceof PromptContentListItemBulletedText) {
-                return ((PromptContentListItemBulletedText) listItem).getText().length()
+            } else if (listItem instanceof PromptContentItemBulletedText) {
+                return ((PromptContentItemBulletedText) listItem).getText().length()
                         > MAX_EACH_ITEM_CHARACTER_NUMBER;
             } else {
                 return false;

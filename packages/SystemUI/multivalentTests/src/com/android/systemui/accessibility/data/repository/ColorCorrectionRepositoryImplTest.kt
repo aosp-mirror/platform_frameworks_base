@@ -17,14 +17,15 @@
 package com.android.systemui.accessibility.data.repository
 
 import android.os.UserHandle
+import android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -51,6 +52,7 @@ class ColorCorrectionRepositoryImplTest : SysuiTestCase() {
         underTest =
             ColorCorrectionRepositoryImpl(
                 testDispatcher,
+                scope.backgroundScope,
                 settings,
             )
     }
@@ -58,83 +60,78 @@ class ColorCorrectionRepositoryImplTest : SysuiTestCase() {
     @Test
     fun isEnabled_initiallyGetsSettingsValue() =
         scope.runTest {
+            val actualValue by collectLastValue(underTest.isEnabled(testUser1))
+
             settings.putIntForUser(
-                ColorCorrectionRepositoryImpl.SETTING_NAME,
-                1,
+                SETTING_NAME,
+                ENABLED,
                 testUser1.identifier
             )
-
-            underTest =
-                ColorCorrectionRepositoryImpl(
-                    testDispatcher,
-                    settings,
-                )
-
-            underTest.isEnabled(testUser1).launchIn(backgroundScope)
             runCurrent()
 
-            val actualValue: Boolean = underTest.isEnabled(testUser1).first()
             Truth.assertThat(actualValue).isTrue()
         }
 
     @Test
     fun isEnabled_settingUpdated_valueUpdated() =
         scope.runTest {
-            underTest.isEnabled(testUser1).launchIn(backgroundScope)
+            val flowValues: List<Boolean> by collectValues(underTest.isEnabled(testUser1))
 
             settings.putIntForUser(
-                ColorCorrectionRepositoryImpl.SETTING_NAME,
-                ColorCorrectionRepositoryImpl.DISABLED,
+                SETTING_NAME,
+                DISABLED,
                 testUser1.identifier
             )
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(testUser1).first()).isFalse()
 
             settings.putIntForUser(
-                ColorCorrectionRepositoryImpl.SETTING_NAME,
-                ColorCorrectionRepositoryImpl.ENABLED,
+                SETTING_NAME,
+                ENABLED,
                 testUser1.identifier
             )
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(testUser1).first()).isTrue()
 
             settings.putIntForUser(
-                ColorCorrectionRepositoryImpl.SETTING_NAME,
-                ColorCorrectionRepositoryImpl.DISABLED,
+                SETTING_NAME,
+                DISABLED,
                 testUser1.identifier
             )
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(testUser1).first()).isFalse()
+
+            Truth.assertThat(flowValues.size).isEqualTo(3)
+            Truth.assertThat(flowValues).containsExactly(false, true, false).inOrder()
         }
 
     @Test
     fun isEnabled_settingForUserOneOnly_valueUpdatedForUserOneOnly() =
         scope.runTest {
-            underTest.isEnabled(testUser1).launchIn(backgroundScope)
+            val lastValueUser1 by collectLastValue(underTest.isEnabled(testUser1))
+            val lastValueUser2 by collectLastValue(underTest.isEnabled(testUser2))
+
             settings.putIntForUser(
-                ColorCorrectionRepositoryImpl.SETTING_NAME,
-                ColorCorrectionRepositoryImpl.DISABLED,
+                SETTING_NAME,
+                DISABLED,
                 testUser1.identifier
             )
-            underTest.isEnabled(testUser2).launchIn(backgroundScope)
             settings.putIntForUser(
-                ColorCorrectionRepositoryImpl.SETTING_NAME,
-                ColorCorrectionRepositoryImpl.DISABLED,
+                SETTING_NAME,
+                DISABLED,
                 testUser2.identifier
             )
-
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(testUser1).first()).isFalse()
-            Truth.assertThat(underTest.isEnabled(testUser2).first()).isFalse()
+
+            Truth.assertThat(lastValueUser1).isFalse()
+            Truth.assertThat(lastValueUser2).isFalse()
 
             settings.putIntForUser(
-                ColorCorrectionRepositoryImpl.SETTING_NAME,
-                ColorCorrectionRepositoryImpl.ENABLED,
+                SETTING_NAME,
+                ENABLED,
                 testUser1.identifier
             )
             runCurrent()
-            Truth.assertThat(underTest.isEnabled(testUser1).first()).isTrue()
-            Truth.assertThat(underTest.isEnabled(testUser2).first()).isFalse()
+
+            Truth.assertThat(lastValueUser1).isTrue()
+            Truth.assertThat(lastValueUser2).isFalse()
         }
 
     @Test
@@ -146,10 +143,10 @@ class ColorCorrectionRepositoryImplTest : SysuiTestCase() {
 
             val actualValue =
                 settings.getIntForUser(
-                    ColorCorrectionRepositoryImpl.SETTING_NAME,
+                    SETTING_NAME,
                     testUser1.identifier
                 )
-            Truth.assertThat(actualValue).isEqualTo(ColorCorrectionRepositoryImpl.ENABLED)
+            Truth.assertThat(actualValue).isEqualTo(ENABLED)
         }
 
     @Test
@@ -161,9 +158,15 @@ class ColorCorrectionRepositoryImplTest : SysuiTestCase() {
 
             val actualValue =
                 settings.getIntForUser(
-                    ColorCorrectionRepositoryImpl.SETTING_NAME,
+                    SETTING_NAME,
                     testUser1.identifier
                 )
-            Truth.assertThat(actualValue).isEqualTo(ColorCorrectionRepositoryImpl.DISABLED)
+            Truth.assertThat(actualValue).isEqualTo(DISABLED)
         }
+
+    companion object {
+        private const val SETTING_NAME = ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED
+        private const val DISABLED = 0
+        private const val ENABLED = 1
+    }
 }

@@ -56,9 +56,6 @@ interface CommunalRepository {
     /** Exposes the transition state of the communal [SceneTransitionLayout]. */
     val transitionState: StateFlow<ObservableCommunalTransitionState>
 
-    /** Whether the CTA tile is visible in the hub under view mode. */
-    val isCtaTileInViewModeVisible: Flow<Boolean>
-
     /** Updates the requested scene. */
     fun setDesiredScene(desiredScene: CommunalSceneKey)
 
@@ -68,9 +65,6 @@ interface CommunalRepository {
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
     fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?)
-
-    /** Updates whether to display the CTA tile in the hub under view mode. */
-    fun setCtaTileInViewModeVisibility(isVisible: Boolean)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -101,16 +95,6 @@ constructor(
                 started = SharingStarted.Lazily,
                 initialValue = defaultTransitionState,
             )
-
-    // TODO(b/313462210) - persist the value in local storage, so the tile won't show up again
-    //  once dismissed.
-    private val _isCtaTileInViewModeVisible: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    override val isCtaTileInViewModeVisible: Flow<Boolean> =
-        _isCtaTileInViewModeVisible.asStateFlow()
-
-    override fun setCtaTileInViewModeVisibility(isVisible: Boolean) {
-        _isCtaTileInViewModeVisible.value = isVisible
-    }
 
     override fun setDesiredScene(desiredScene: CommunalSceneKey) {
         _desiredScene.value = desiredScene

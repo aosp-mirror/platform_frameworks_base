@@ -406,8 +406,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
     public void testPushDynamicShortcut() {
         // Change the max number of shortcuts.
-        mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=5");
-
+        mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=5,"
+                + ShortcutService.ConfigConstants.KEY_SAVE_DELAY_MILLIS + "=1");
         setCaller(CALLING_PACKAGE_1, USER_0);
 
         final ShortcutInfo s1 = makeShortcut("s1");
@@ -543,6 +543,57 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 "s8");
         verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
                 eq(CALLING_PACKAGE_1), eq("s9"), eq(USER_0));
+    }
+
+    public void testPushDynamicShortcut_CallsToUsageStatsManagerAreThrottled()
+            throws InterruptedException {
+        mService.updateConfigurationLocked(
+                ShortcutService.ConfigConstants.KEY_SAVE_DELAY_MILLIS + "=500");
+
+        // Verify calls to UsageStatsManagerInternal#reportShortcutUsage are throttled.
+        setCaller(CALLING_PACKAGE_1, USER_0);
+        {
+            final ShortcutInfo si = makeShortcut("s0");
+            mManager.pushDynamicShortcut(si);
+        }
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), eq("s0"), eq(USER_0));
+        Mockito.reset(mMockUsageStatsManagerInternal);
+        for (int i = 2; i <= 10; i++) {
+            final ShortcutInfo si = makeShortcut("s" + i);
+            mManager.pushDynamicShortcut(si);
+        }
+        verify(mMockUsageStatsManagerInternal, times(0)).reportShortcutUsage(
+                any(), any(), anyInt());
+
+        // Verify pkg2 isn't blocked by pkg1, but consecutive calls from pkg2 are throttled as well.
+        setCaller(CALLING_PACKAGE_2, USER_0);
+        {
+            final ShortcutInfo si = makeShortcut("s1");
+            mManager.pushDynamicShortcut(si);
+        }
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_2), eq("s1"), eq(USER_0));
+        Mockito.reset(mMockUsageStatsManagerInternal);
+        for (int i = 2; i <= 10; i++) {
+            final ShortcutInfo si = makeShortcut("s" + i);
+            mManager.pushDynamicShortcut(si);
+        }
+        verify(mMockUsageStatsManagerInternal, times(0)).reportShortcutUsage(
+                any(), any(), anyInt());
+
+        Mockito.reset(mMockUsageStatsManagerInternal);
+        // Let time passes which resets the throttle
+        Thread.sleep(505);
+        // Verify UsageStatsManagerInternal#reportShortcutUsed can be called again
+        setCaller(CALLING_PACKAGE_1, USER_0);
+        mManager.pushDynamicShortcut(makeShortcut("s10"));
+        setCaller(CALLING_PACKAGE_2, USER_0);
+        mManager.pushDynamicShortcut(makeShortcut("s10"));
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_1), any(), eq(USER_0));
+        verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                eq(CALLING_PACKAGE_2), any(), eq(USER_0));
     }
 
     public void testUnlimitedCalls() {

@@ -355,6 +355,8 @@
 
     <uses-permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT" />
 
+    <uses-permission android:name="android.permission.MONITOR_STICKY_MODIFIER_STATE" />
+
     <!-- Listen to (dis-)connection of external displays and enable / disable them. -->
     <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
 
