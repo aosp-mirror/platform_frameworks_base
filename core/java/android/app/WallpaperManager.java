@@ -1727,15 +1727,22 @@ public class WallpaperManager {
 
     /**
      * Returns the information about the home screen wallpaper if its current wallpaper is a live
-     * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
+     * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, or if the
+     * caller doesn't have the appropriate permissions, this returns {@code null}.
      *
      * <p>
-     * In order to use this, apps should declare a {@code <queries>} tag with the action
-     * {@code "android.service.wallpaper.WallpaperService"}. Otherwise,
+     * Before Android U, this method requires the
+     * {@link android.Manifest.permission#QUERY_ALL_PACKAGES} permission.
+     * </p>
+     *
+     * <p>
+     * Starting from Android U, in order to use this, apps should declare a {@code <queries>} tag
+     * with the action {@code "android.service.wallpaper.WallpaperService"}. Otherwise,
      * this method will return {@code null} if the caller doesn't otherwise have
      * <a href="{@docRoot}training/package-visibility">visibility</a> of the wallpaper package.
      * </p>
      */
+    @RequiresPermission(value = "QUERY_ALL_PACKAGES", conditional = true)
     public WallpaperInfo getWallpaperInfo() {
         return getWallpaperInfoForUser(mContext.getUserId());
     }
@@ -1752,19 +1759,14 @@ public class WallpaperManager {
     }
 
     /**
-     * Returns the information about the home screen wallpaper if its current wallpaper is a live
-     * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, or if the
+     * Returns the information about the designated wallpaper if its current wallpaper is a live
+     * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, or if
      * the caller doesn't have the appropriate permissions, this returns {@code null}.
      *
      * <p>
-     * Before Android U, this method requires the
-     * {@link android.Manifest.permission#QUERY_ALL_PACKAGES} permission.
-     * </p>
-     *
-     * <p>
-     * Starting from Android U, In order to use this, apps should declare a {@code <queries>} tag
-     * with the action {@code "android.service.wallpaper.WallpaperService"}. Otherwise,
-     * this method will return {@code null} if the caller doesn't otherwise have
+     * In order to use this, apps should declare a {@code <queries>} tag with the action
+     * {@code "android.service.wallpaper.WallpaperService"}. Otherwise, this method will return
+     * {@code null} if the caller doesn't otherwise have
      * <a href="{@docRoot}training/package-visibility">visibility</a> of the wallpaper package.
      * </p>
      *
@@ -1780,7 +1782,7 @@ public class WallpaperManager {
     /**
      * Returns the information about the designated wallpaper if its current wallpaper is a live
      * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, or if the
-     * the caller doesn't have the appropriate permissions, this returns {@code null}.
+     * caller doesn't have the appropriate permissions, this returns {@code null}.
      *
      * <p>
      * In order to use this, apps should declare a {@code <queries>} tag
