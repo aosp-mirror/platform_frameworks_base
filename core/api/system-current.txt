@@ -10044,12 +10044,17 @@ package android.os {
     field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_CHARGING_POLICY = 9; // 0x9
     field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_FIRST_USAGE_DATE = 8; // 0x8
     field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_MANUFACTURING_DATE = 7; // 0x7
+    field @FlaggedApi("android.os.battery_part_status_api") @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_PART_STATUS = 12; // 0xc
+    field @FlaggedApi("android.os.battery_part_status_api") @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_SERIAL_NUMBER = 11; // 0xb
     field public static final int CHARGING_POLICY_ADAPTIVE_AC = 3; // 0x3
     field public static final int CHARGING_POLICY_ADAPTIVE_AON = 2; // 0x2
     field public static final int CHARGING_POLICY_ADAPTIVE_LONGLIFE = 4; // 0x4
     field public static final int CHARGING_POLICY_DEFAULT = 1; // 0x1
     field public static final String EXTRA_EVENTS = "android.os.extra.EVENTS";
     field public static final String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
+    field @FlaggedApi("android.os.battery_part_status_api") public static final int PART_STATUS_ORIGINAL = 1; // 0x1
+    field @FlaggedApi("android.os.battery_part_status_api") public static final int PART_STATUS_REPLACED = 2; // 0x2
+    field @FlaggedApi("android.os.battery_part_status_api") public static final int PART_STATUS_UNSUPPORTED = 0; // 0x0
   }
 
   public final class BatterySaverPolicyConfig implements android.os.Parcelable {
