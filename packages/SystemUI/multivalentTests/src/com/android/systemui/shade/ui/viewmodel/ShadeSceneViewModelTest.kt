@@ -28,7 +28,6 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.pipeline.MediaDataManager
-import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
@@ -90,7 +89,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private lateinit var underTest: ShadeSceneViewModel
 
     @Mock private lateinit var mediaDataManager: MediaDataManager
-    @Mock private lateinit var mediaHost: MediaHost
 
     @Before
     fun setUp() {
@@ -113,7 +111,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
                 mediaDataManager = mediaDataManager,
-                mediaHost = mediaHost,
             )
     }
 
