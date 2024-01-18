@@ -1813,6 +1813,12 @@
 
     <attr name="allowUpdateOwnership" format="boolean" />
 
+    <!-- This attribute can be applied to any tag in the manifest. The system uses its value to
+         determine whether the element (e.g., a permission) should be enabled or disabled
+         depending on the state of feature flags.
+         @hide @SystemApi @FlaggedApi("android.content.res.manifest_flagging") -->
+    <attr name="featureFlag" format="string" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
