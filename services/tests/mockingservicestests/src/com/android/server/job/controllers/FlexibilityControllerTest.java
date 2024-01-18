@@ -955,8 +955,7 @@ public class FlexibilityControllerTest {
         mJobStore.add(js);
 
         // Needed because if before and after Uid bias is the same, nothing happens.
-        when(mJobSchedulerService.getUidBias(mSourceUid))
-                .thenReturn(JobInfo.BIAS_DEFAULT);
+        doReturn(JobInfo.BIAS_DEFAULT).when(mJobSchedulerService).getUidBias(mSourceUid);
 
         synchronized (mFlexibilityController.mLock) {
             mFlexibilityController.maybeStartTrackingJobLocked(js, null);
