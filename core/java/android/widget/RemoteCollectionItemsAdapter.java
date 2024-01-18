@@ -18,13 +18,14 @@ package android.widget;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.appwidget.AppWidgetHostView;
 import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RemoteViews.ColorResources;
 import android.widget.RemoteViews.InteractionHandler;
 import android.widget.RemoteViews.RemoteCollectionItems;
+
+import com.android.internal.R;
 
 import java.util.stream.IntStream;
 
@@ -177,14 +178,40 @@ class RemoteCollectionItemsAdapter extends BaseAdapter {
 
         RemoteViews item = mItems.getItemView(position);
         item.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
+        View reapplyView = getViewToReapply(convertView, item);
 
-        AppWidgetHostView newView = convertView instanceof AppWidgetHostView.AdapterChildHostView
-                widgetChildView
-                ? widgetChildView
-                : new AppWidgetHostView.AdapterChildHostView(parent.getContext());
-        newView.setInteractionHandler(mInteractionHandler);
-        newView.setColorResourcesNoReapply(mColorResources);
-        newView.updateAppWidget(item);
-        return newView;
+        // Reapply the RemoteViews if we can.
+        if (reapplyView != null) {
+            try {
+                item.reapply(
+                        parent.getContext(),
+                        reapplyView,
+                        mInteractionHandler,
+                        null /* size */,
+                        mColorResources);
+                return reapplyView;
+            } catch (RuntimeException e) {
+                // We can't reapply for some reason, we'll fallback to an apply and inflate a
+                // new view.
+            }
+        }
+
+        return item.apply(
+                parent.getContext(),
+                parent,
+                mInteractionHandler,
+                null /* size */,
+                mColorResources);
+    }
+
+    /** Returns {@code convertView} if it can be used to reapply {@code item}, or null otherwise. */
+    @Nullable
+    private static View getViewToReapply(@Nullable View convertView, @NonNull RemoteViews item) {
+        if (convertView == null) return null;
+
+        Object layoutIdTag = convertView.getTag(R.id.widget_frame);
+        if (!(layoutIdTag instanceof Integer)) return null;
+
+        return item.getLayoutId() == (Integer) layoutIdTag ? convertView : null;
     }
 }
