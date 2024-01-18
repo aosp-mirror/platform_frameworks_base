@@ -1135,16 +1135,17 @@ class RecentTasks {
                     if (!mFreezeTaskListReordering) {
                         // Simple case: this is not an affiliated task, so we just move it to the
                         // front unless overridden by the provided activity options
+                        int indexToAdd = findIndexToAdd(task);
                         mTasks.remove(taskIndex);
-                        mTasks.add(0, task);
+                        mTasks.add(indexToAdd, task);
                         if (taskIndex != 0) {
                             // Only notify when position changes
                             mTaskNotificationController.notifyTaskListUpdated();
                         }
 
                         if (DEBUG_RECENTS) {
-                            Slog.d(TAG_RECENTS, "addRecent: moving to top " + task
-                                    + " from " + taskIndex);
+                            Slog.d(TAG_RECENTS, "addRecent: moving " + task + " to index "
+                                    + indexToAdd + " from " + taskIndex);
                         }
                     }
                     notifyTaskPersisterLocked(task, false);
@@ -1229,6 +1230,37 @@ class RecentTasks {
 
         mCheckTrimmableTasksOnIdle = true;
         notifyTaskPersisterLocked(task, false /* flush */);
+    }
+
+    // Looks for a new index to move the recent Task. Note that the recent Task should not be
+    // placed higher than another recent Task that has higher hierarchical z-ordering.
+    private int findIndexToAdd(Task task) {
+        int indexToAdd = 0;
+        for (int i = 0; i < mTasks.size(); i++) {
+            final Task otherTask = mTasks.get(i);
+            if (task == otherTask) {
+                break;
+            }
+
+            if (!otherTask.isAttached()) {
+                // Stop searching if not attached.
+                break;
+            }
+
+            if (otherTask.inPinnedWindowingMode()) {
+                // Skip pip task without increasing index since pip is always on screen.
+                continue;
+            }
+
+            // Stop searching if the task has higher z-ordering, or increase the index and
+            // continue the search.
+            if (task.compareTo(otherTask) > 0) {
+                break;
+            }
+
+            indexToAdd = i + 1;
+        }
+        return indexToAdd;
     }
 
     /**
