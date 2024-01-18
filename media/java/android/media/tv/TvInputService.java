@@ -1558,6 +1558,17 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Called when a request to freeze the video is received from the TV app. The audio should
+         * continue playback while the video is frozen.
+         *
+         * <p> This should freeze the video to the last frame when the state is set to {@code true}.
+         * @param isFrozen whether or not the video should be frozen.
+         * @hide
+         */
+        public void onSetVideoFrozen(boolean isFrozen) {
+        }
+
+        /**
          * Called when the application requests to play a given recorded TV program.
          *
          * @param recordedProgramUri The URI of a recorded TV program.
@@ -2031,6 +2042,13 @@ public abstract class TvInputService extends Service {
          */
         void startPlayback() {
             onStartPlayback();
+        }
+
+        /**
+         * Calls {@link #onSetVideoFrozen(boolean)}.
+         */
+        void setVideoFrozen(boolean isFrozen) {
+            onSetVideoFrozen(isFrozen);
         }
 
         /**
