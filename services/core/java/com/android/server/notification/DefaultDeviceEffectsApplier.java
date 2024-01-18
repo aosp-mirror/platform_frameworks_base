@@ -16,7 +16,8 @@
 
 package com.android.server.notification;
 
-import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_NIGHT;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
 
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
@@ -128,10 +129,9 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
 
     private void updateNightModeImmediately(boolean useNightMode) {
         Binder.withCleanCallingIdentity(() -> {
-            // TODO: b/314285749 - Placeholder; use real APIs when available.
-            mUiModeManager.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
-            mUiModeManager.setNightModeActivatedForCustomMode(MODE_NIGHT_CUSTOM_TYPE_BEDTIME,
-                    useNightMode);
+            mUiModeManager.setAttentionModeThemeOverlay(
+                    useNightMode ? MODE_ATTENTION_THEME_OVERLAY_NIGHT
+                            : MODE_ATTENTION_THEME_OVERLAY_OFF);
         });
     }
 

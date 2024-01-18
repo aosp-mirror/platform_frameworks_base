@@ -16,8 +16,10 @@
 
 package com.android.server;
 
+import static android.app.Flags.modesApi;
 import static android.app.UiModeManager.ContrastUtils.CONTRAST_DEFAULT_VALUE;
 import static android.app.UiModeManager.DEFAULT_PRIORITY;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
@@ -50,6 +52,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.UiModeManager;
+import android.app.UiModeManager.AttentionModeThemeOverlayType;
 import android.app.UiModeManager.NightModeCustomReturnType;
 import android.app.UiModeManager.NightModeCustomType;
 import android.content.BroadcastReceiver;
@@ -134,6 +137,7 @@ final class UiModeManagerService extends SystemService {
     private int mLastBroadcastState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private int mNightMode = UiModeManager.MODE_NIGHT_NO;
     private int mNightModeCustomType = UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
+    private int mAttentionModeThemeOverlay = UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
     private final LocalTime DEFAULT_CUSTOM_NIGHT_START_TIME = LocalTime.of(22, 0);
     private final LocalTime DEFAULT_CUSTOM_NIGHT_END_TIME = LocalTime.of(6, 0);
     private LocalTime mCustomAutoNightModeStartMilliseconds = DEFAULT_CUSTOM_NIGHT_START_TIME;
@@ -839,6 +843,8 @@ final class UiModeManagerService extends SystemService {
                                 ? customModeType
                                 : MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
                         mNightMode = mode;
+                        //deactivates AttentionMode if user toggles DarkTheme
+                        mAttentionModeThemeOverlay = MODE_ATTENTION_THEME_OVERLAY_OFF;
                         resetNightModeOverrideLocked();
                         persistNightMode(user);
                         // on screen off will update configuration instead
@@ -876,6 +882,29 @@ final class UiModeManagerService extends SystemService {
             getNightModeCustomType_enforcePermission();
             synchronized (mLock) {
                 return mNightModeCustomType;
+            }
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+        @Override
+            public void setAttentionModeThemeOverlay(
+                @AttentionModeThemeOverlayType int attentionModeThemeOverlayType) {
+            setAttentionModeThemeOverlay_enforcePermission();
+
+            synchronized (mLock) {
+                if (mAttentionModeThemeOverlay != attentionModeThemeOverlayType) {
+                    mAttentionModeThemeOverlay = attentionModeThemeOverlayType;
+                    Binder.withCleanCallingIdentity(()-> updateLocked(0, 0));
+                }
+            }
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+        @Override
+        public @AttentionModeThemeOverlayType int getAttentionModeThemeOverlay() {
+            getAttentionModeThemeOverlay_enforcePermission();
+            synchronized (mLock) {
+                return mAttentionModeThemeOverlay;
             }
         }
 
@@ -1406,7 +1435,7 @@ final class UiModeManagerService extends SystemService {
             pw.print(Shell.nightModeToStr(mNightMode, mNightModeCustomType)); pw.print(") ");
             pw.print(" mOverrideOn/Off="); pw.print(mOverrideNightModeOn);
             pw.print("/"); pw.print(mOverrideNightModeOff);
-
+            pw.print("  mAttentionModeThemeOverlay="); pw.print(mAttentionModeThemeOverlay);
             pw.print(" mNightModeLocked="); pw.println(mNightModeLocked);
 
             pw.print("  mCarModeEnabled="); pw.print(mCarModeEnabled);
@@ -1685,7 +1714,7 @@ final class UiModeManagerService extends SystemService {
     }
 
     @UiModeManager.NightMode
-    private int getComputedUiModeConfiguration(@UiModeManager.NightMode int uiMode) {
+    private int getComputedUiModeConfiguration(int uiMode) {
         uiMode |= mComputedNightMode ? Configuration.UI_MODE_NIGHT_YES
                 : Configuration.UI_MODE_NIGHT_NO;
         uiMode &= mComputedNightMode ? ~Configuration.UI_MODE_NIGHT_NO
@@ -1980,18 +2009,26 @@ final class UiModeManagerService extends SystemService {
     }
 
     private void updateComputedNightModeLocked(boolean activate) {
-        mComputedNightMode = activate;
-        if (mNightMode == MODE_NIGHT_YES || mNightMode == UiModeManager.MODE_NIGHT_NO) {
-            return;
+        boolean newComputedValue = activate;
+        if (mNightMode != MODE_NIGHT_YES && mNightMode != UiModeManager.MODE_NIGHT_NO) {
+            if (mOverrideNightModeOn && !newComputedValue) {
+                newComputedValue = true;
+            } else if (mOverrideNightModeOff && newComputedValue) {
+                newComputedValue = false;
+            }
         }
-        if (mOverrideNightModeOn && !mComputedNightMode) {
-            mComputedNightMode = true;
-            return;
+
+        if (modesApi()) {
+            // Computes final night mode values based on Attention Mode.
+            mComputedNightMode = switch (mAttentionModeThemeOverlay) {
+                case (UiModeManager.MODE_ATTENTION_THEME_OVERLAY_NIGHT) -> true;
+                case (UiModeManager.MODE_ATTENTION_THEME_OVERLAY_DAY) -> false;
+                default -> newComputedValue; // case OFF
+            };
+        } else {
+            mComputedNightMode = newComputedValue;
         }
-        if (mOverrideNightModeOff && mComputedNightMode) {
-            mComputedNightMode = false;
-            return;
-        }
+
         if (mNightMode != MODE_NIGHT_AUTO || (mTwilightManager != null
                 && mTwilightManager.getLastTwilightState() != null)) {
             resetNightModeOverrideLocked();
