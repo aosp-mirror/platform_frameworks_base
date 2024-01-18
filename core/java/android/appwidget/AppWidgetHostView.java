@@ -156,22 +156,6 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
     }
 
     /**
-     * @hide
-     */
-    public static class AdapterChildHostView extends AppWidgetHostView {
-
-        public AdapterChildHostView(Context context) {
-            super(context);
-        }
-
-        @Override
-        public Context getRemoteContextEnsuringCorrectCachedApkPath() {
-            // To reduce noise in error messages
-            return null;
-        }
-    }
-
-    /**
      * Set the AppWidget that will be displayed by this view. This method also adds default padding
      * to widgets, as described in {@link #getDefaultPaddingForWidget(Context, ComponentName, Rect)}
      * and can be overridden in order to add custom padding.
@@ -937,29 +921,15 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
         setColorResources(RemoteViews.ColorResources.create(mContext, colorMapping));
     }
 
-    private void setColorResourcesStates(RemoteViews.ColorResources colorResources) {
-        mColorResources = colorResources;
-        mColorMappingChanged = true;
-        mViewMode = VIEW_MODE_NOINIT;
-    }
-
     /** @hide **/
     public void setColorResources(RemoteViews.ColorResources colorResources) {
         if (colorResources == mColorResources) {
             return;
         }
-        setColorResourcesStates(colorResources);
+        mColorResources = colorResources;
+        mColorMappingChanged = true;
+        mViewMode = VIEW_MODE_NOINIT;
         reapplyLastRemoteViews();
-    }
-
-    /**
-     * @hide
-     */
-    public void setColorResourcesNoReapply(RemoteViews.ColorResources colorResources) {
-        if (colorResources == mColorResources) {
-            return;
-        }
-        setColorResourcesStates(colorResources);
     }
 
     /** Check if, in the current context, the two color mappings are equivalent. */
