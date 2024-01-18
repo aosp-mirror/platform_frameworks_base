@@ -3249,7 +3249,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);
     method public void setCarrierTestOverride(String, String, String, String, String, String, String, String, String);
-    method @RequiresPermission(android.Manifest.permission.BIND_TELECOM_CONNECTION_SERVICE) public void setVoiceServiceStateOverride(boolean);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(android.Manifest.permission.BIND_TELECOM_CONNECTION_SERVICE) public void setVoiceServiceStateOverride(boolean);
     field public static final int HAL_SERVICE_DATA = 1; // 0x1
     field public static final int HAL_SERVICE_IMS = 7; // 0x7
     field public static final int HAL_SERVICE_MESSAGING = 2; // 0x2
