@@ -2280,6 +2280,26 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void setVideoFrozen(IBinder sessionToken, boolean isFrozen, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "setVideoFrozen");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .setVideoFrozen(isFrozen);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in setVideoFrozen", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void setTvMessageEnabled(IBinder sessionToken, int type, boolean enabled,
                 int userId) {
             final int callingUid = Binder.getCallingUid();

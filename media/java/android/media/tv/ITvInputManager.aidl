@@ -149,4 +149,7 @@ interface ITvInputManager {
     // For CTS purpose only. Add/remove a TvInputHardware device
     void addHardwareDevice(in int deviceId);
     void removeHardwareDevice(in int deviceId);
+
+    // For freezing video playback
+    void setVideoFrozen(in IBinder sessionToken, boolean isFrozen, int userId);
 }

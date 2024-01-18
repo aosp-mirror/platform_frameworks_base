@@ -675,6 +675,23 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Sets whether or not the video is frozen. While the video is frozen, audio playback will
+     * continue.
+     *
+     * <p> This should be invoked after a {@link TvInteractiveAppService.Session#requestCommand} is
+     * received with the command to freeze the video.
+     *
+     * <p> This will freeze the video to the last frame when the state is set to {@code true}.
+     * @param isFrozen whether or not the video is frozen.
+     * @hide
+     */
+    public void setVideoFrozen(boolean isFrozen) {
+        if (mSession != null) {
+            mSession.setVideoFrozen(isFrozen);
+        }
+    }
+
+    /**
      * Sends TV messages to the session for testing purposes
      *
      * @hide
