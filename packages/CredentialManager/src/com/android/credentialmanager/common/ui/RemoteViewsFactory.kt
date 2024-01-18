@@ -44,7 +44,7 @@ class RemoteViewsFactory {
             if (credentialEntryInfo.credentialType == CredentialType.UNKNOWN) {
                 return remoteViews
             }
-            setRemoteViewsPaddings(remoteViews, context)
+            setRemoteViewsPaddings(remoteViews, context, /* primaryTextBottomPadding=*/0)
             if (credentialEntryInfo.credentialType == CredentialType.PASSKEY) {
                 val displayName = credentialEntryInfo.displayName ?: credentialEntryInfo.userName
                 remoteViews.setTextViewText(android.R.id.text1, displayName)
@@ -81,8 +81,46 @@ class RemoteViewsFactory {
             return remoteViews
         }
 
+        fun createMoreSignInOptionsPresentation(context: Context): RemoteViews {
+            var layoutId: Int = com.android.credentialmanager.R.layout
+                    .credman_dropdown_bottom_sheet
+            val remoteViews = RemoteViews(context.packageName, layoutId)
+            setRemoteViewsPaddings(remoteViews, context)
+            remoteViews.setTextViewText(android.R.id.text1, ContextCompat.getString(context,
+                    com.android.credentialmanager
+                            .R.string.dropdown_presentation_more_sign_in_options_text))
+
+            val textColorPrimary = ContextCompat.getColor(context,
+                    com.android.credentialmanager.R.color.text_primary)
+            remoteViews.setTextColor(android.R.id.text1, textColorPrimary)
+            val icon = Icon.createWithResource(context, com
+                    .android.credentialmanager.R.drawable.more_horiz_24px)
+            icon.setTint(ContextCompat.getColor(context,
+                    com.android.credentialmanager.R.color.sign_in_options_icon_color))
+            remoteViews.setImageViewIcon(android.R.id.icon1, icon)
+            remoteViews.setBoolean(
+                    android.R.id.icon1, setAdjustViewBoundsMethodName, true);
+            remoteViews.setInt(
+                    android.R.id.icon1,
+                    setMaxHeightMethodName,
+                    context.resources.getDimensionPixelSize(
+                            com.android.credentialmanager.R.dimen.autofill_icon_size));
+            val drawableId =
+                    com.android.credentialmanager.R.drawable.more_options_list_item
+            remoteViews.setInt(
+                    android.R.id.content, setBackgroundResourceMethodName, drawableId);
+            return remoteViews
+        }
+
         private fun setRemoteViewsPaddings(
                 remoteViews: RemoteViews, context: Context) {
+            val bottomPadding = context.resources.getDimensionPixelSize(
+                    com.android.credentialmanager.R.dimen.autofill_view_bottom_padding)
+            setRemoteViewsPaddings(remoteViews, context, bottomPadding)
+        }
+
+        private fun setRemoteViewsPaddings(
+                remoteViews: RemoteViews, context: Context, primaryTextBottomPadding: Int) {
             val leftPadding = context.resources.getDimensionPixelSize(
                     com.android.credentialmanager.R.dimen.autofill_view_left_padding)
             val iconToTextPadding = context.resources.getDimensionPixelSize(
@@ -104,7 +142,7 @@ class RemoteViewsFactory {
                     iconToTextPadding,
                     /* top=*/topPadding,
                     /* right=*/rightPadding,
-                    /* bottom=*/0)
+                    primaryTextBottomPadding)
             remoteViews.setViewPadding(
                     android.R.id.text2,
                     iconToTextPadding,

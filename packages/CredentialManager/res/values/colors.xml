@@ -20,4 +20,6 @@
     <color name="text_primary">#1A1B20</color>
     <color name="text_secondary">#44474F</color>
     <color name="dropdown_container">#F3F3FA</color>
+    <color name="sign_in_options_container">#DADADA</color>
+    <color name="sign_in_options_icon_color">#1B1B1B</color>
 </resources>
