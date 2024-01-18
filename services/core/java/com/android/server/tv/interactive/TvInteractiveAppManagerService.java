@@ -1038,7 +1038,7 @@ public class TvInteractiveAppManagerService extends SystemService {
                 }
             } finally {
                 if (surface != null) {
-                    // surface is not used in TvInteractiveAppManagerService.
+                    // surface is not used in TvAdManagerService.
                     surface.release();
                 }
                 Binder.restoreCallingIdentity(identity);
@@ -1100,6 +1100,67 @@ public class TvInteractiveAppManagerService extends SystemService {
                 synchronized (mLock) {
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     userState.mAdCallbacks.unregister(callback);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void createMediaView(IBinder sessionToken, IBinder windowToken, Rect frame,
+                int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "createMediaView");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getAdSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .createMediaView(windowToken, frame);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in createMediaView", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void relayoutMediaView(IBinder sessionToken, Rect frame, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "relayoutMediaView");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getAdSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .relayoutMediaView(frame);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in relayoutMediaView", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void removeMediaView(IBinder sessionToken, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "removeMediaView");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getAdSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .removeMediaView();
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in removeMediaView", e);
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
