@@ -82,6 +82,13 @@ flag {
 }
 
 flag {
+    name: "notification_avalanche_suppression"
+    namespace: "systemui"
+    description: "After notification avalanche floodgate event, suppress HUNs completely."
+    bug: "321089634"
+}
+
+flag {
     name: "notification_background_tint_optimization"
     namespace: "systemui"
     description: "Re-enable the codepath that removed tinting of notifications when the"
