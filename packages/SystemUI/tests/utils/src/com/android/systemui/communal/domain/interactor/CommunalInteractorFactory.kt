@@ -26,10 +26,12 @@ import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.test.TestScope
 
+// TODO(b/319335645): get rid of me and use kosmos.
 object CommunalInteractorFactory {
 
     @JvmOverloads
@@ -38,6 +40,7 @@ object CommunalInteractorFactory {
         testScope: TestScope = TestScope(),
         communalRepository: FakeCommunalRepository =
             FakeCommunalRepository(testScope.backgroundScope),
+        keyguardRepository: FakeKeyguardRepository = FakeKeyguardRepository(),
         widgetRepository: FakeCommunalWidgetRepository =
             FakeCommunalWidgetRepository(testScope.backgroundScope),
         mediaRepository: FakeCommunalMediaRepository = FakeCommunalMediaRepository(),
@@ -47,12 +50,16 @@ object CommunalInteractorFactory {
         appWidgetHost: CommunalAppWidgetHost = mock(),
         editWidgetsActivityStarter: EditWidgetsActivityStarter = mock(),
     ): WithDependencies {
-        val withDeps =
-            CommunalTutorialInteractorFactory.create(
-                testScope = testScope,
-                communalTutorialRepository = tutorialRepository,
-                communalRepository = communalRepository,
+        val keyguardInteractor =
+            KeyguardInteractorFactory.create(repository = keyguardRepository).keyguardInteractor
+        val communalTutorialInteractor =
+            CommunalTutorialInteractor(
+                testScope.backgroundScope,
+                tutorialRepository,
+                keyguardInteractor,
+                communalRepository,
             )
+
         return WithDependencies(
             testScope,
             communalRepository,
@@ -61,9 +68,9 @@ object CommunalInteractorFactory {
             mediaRepository,
             smartspaceRepository,
             tutorialRepository,
-            withDeps.keyguardRepository,
-            withDeps.keyguardInteractor,
-            withDeps.communalTutorialInteractor,
+            keyguardRepository,
+            keyguardInteractor,
+            communalTutorialInteractor,
             appWidgetHost,
             editWidgetsActivityStarter,
             CommunalInteractor(
@@ -73,7 +80,7 @@ object CommunalInteractorFactory {
                 communalPrefsRepository,
                 mediaRepository,
                 smartspaceRepository,
-                withDeps.keyguardInteractor,
+                keyguardInteractor,
                 appWidgetHost,
                 editWidgetsActivityStarter,
             ),
