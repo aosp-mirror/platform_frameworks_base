@@ -22,27 +22,28 @@
 
 #include <android-base/expected.h>
 #include <android-base/unique_fd.h>
-
+#include <android/configuration.h>
 #include <androidfw/Asset.h>
 #include <androidfw/Errors.h>
 #include <androidfw/LocaleData.h>
 #include <androidfw/StringPiece.h>
 #include <utils/ByteOrder.h>
 #include <utils/Errors.h>
+#include <utils/KeyedVector.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>
-#include <utils/KeyedVector.h>
-
 #include <utils/threads.h>
 
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <android/configuration.h>
-
 #include <array>
 #include <map>
 #include <memory>
+#include <optional>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
 
 namespace android {
 
@@ -512,23 +513,24 @@ struct ResStringPool_span
 class ResStringPool
 {
 public:
-    ResStringPool();
-    ResStringPool(const void* data, size_t size, bool copyData=false);
-    virtual ~ResStringPool();
+ ResStringPool();
+ explicit ResStringPool(bool optimize_name_lookups);
+ ResStringPool(const void* data, size_t size, bool copyData = false,
+               bool optimize_name_lookups = false);
+ virtual ~ResStringPool();
 
-    void setToEmpty();
-    status_t setTo(incfs::map_ptr<void> data, size_t size, bool copyData=false);
+ void setToEmpty();
+ status_t setTo(incfs::map_ptr<void> data, size_t size, bool copyData = false);
 
-    status_t getError() const;
+ status_t getError() const;
 
-    void uninit();
+ void uninit();
 
-    // Return string entry as UTF16; if the pool is UTF8, the string will
-    // be converted before returning.
-    inline base::expected<StringPiece16, NullOrIOError> stringAt(
-            const ResStringPool_ref& ref) const {
-        return stringAt(ref.index);
-    }
+ // Return string entry as UTF16; if the pool is UTF8, the string will
+ // be converted before returning.
+ inline base::expected<StringPiece16, NullOrIOError> stringAt(const ResStringPool_ref& ref) const {
+   return stringAt(ref.index);
+ }
     virtual base::expected<StringPiece16, NullOrIOError> stringAt(size_t idx) const;
 
     // Note: returns null if the string pool is not UTF8.
@@ -557,7 +559,7 @@ private:
     void*                                         mOwnedData;
     incfs::verified_map_ptr<ResStringPool_header> mHeader;
     size_t                                        mSize;
-    mutable Mutex                                 mDecodeLock;
+    mutable Mutex                                 mCachesLock;
     incfs::map_ptr<uint32_t>                      mEntries;
     incfs::map_ptr<uint32_t>                      mEntryStyles;
     incfs::map_ptr<void>                          mStrings;
@@ -565,6 +567,10 @@ private:
     uint32_t                                      mStringPoolSize;    // number of uint16_t
     incfs::map_ptr<uint32_t>                      mStyles;
     uint32_t                                      mStylePoolSize;    // number of uint32_t
+
+    mutable std::optional<std::pair<std::unordered_map<std::string_view, int>,
+                                    std::unordered_map<std::u16string_view, int>>>
+        mIndexLookupCache;
 
     base::expected<StringPiece, NullOrIOError> stringDecodeAt(
         size_t idx, incfs::map_ptr<uint8_t> str, size_t encLen) const;
@@ -1401,8 +1407,8 @@ struct ResTable_typeSpec
     
     // Must be 0.
     uint8_t res0;
-    // Must be 0.
-    uint16_t res1;
+    // Used to be reserved, if >0 specifies the number of ResTable_type entries for this spec.
+    uint16_t typesCount;
     
     // Number of uint32_t entry configuration masks that follow.
     uint32_t entryCount;
