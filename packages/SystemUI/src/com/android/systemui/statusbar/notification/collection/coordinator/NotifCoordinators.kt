@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.notification.collection.PipelineDumper
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import javax.inject.Inject
 
 /**
@@ -61,6 +62,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         sensitiveContentCoordinator: SensitiveContentCoordinator,
         dismissibilityCoordinator: DismissibilityCoordinator,
         dreamCoordinator: DreamCoordinator,
+        statsLoggerCoordinator: NotificationStatsLoggerCoordinator,
 ) : NotifCoordinators {
 
     private val mCoreCoordinators: MutableList<CoreCoordinator> = ArrayList()
@@ -102,6 +104,10 @@ class NotifCoordinatorsImpl @Inject constructor(
 
         if (featureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
             mCoordinators.add(dreamCoordinator)
+        }
+
+        if (NotificationsLiveDataStoreRefactor.isEnabled) {
+            mCoordinators.add(statsLoggerCoordinator)
         }
 
         // Manually add Ordered Sections

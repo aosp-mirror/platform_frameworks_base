@@ -41,6 +41,8 @@ object NotificationStatsLoggerBinder {
         logger: NotificationStatsLogger,
         viewModel: NotificationLoggerViewModel,
     ) {
+        // Updates the logger about whether the Notification panel, and the individual Notifications
+        // are visible to the user.
         viewModel.isLockscreenOrShadeInteractive
             .sample(
                 combine(viewModel.isOnLockScreen, viewModel.activeNotifications, ::Pair),
@@ -52,14 +54,14 @@ object NotificationStatsLoggerBinder {
                         isOnLockScreen = isOnLockScreen,
                         activeNotifications = notifications,
                     )
-                    view.onNotificationsUpdated
-                        // Delay the updates with [NOTIFICATION_UPDATES_PERIOD_MS]. If the original
+                    view.onNotificationLocationsUpdated
+                        // Delay the updates with [NOTIFICATION_UPDATE_PERIOD_MS]. If the original
                         // flow emits more than once during this period, only the latest value is
                         // emitted, meaning that we won't log the intermediate Notification states.
                         .throttle(NOTIFICATION_UPDATE_PERIOD_MS)
                         .sample(viewModel.activeNotificationRanks, ::Pair)
-                        .collect { (locationsProvider, notificationRanks) ->
-                            logger.onNotificationListUpdated(locationsProvider, notificationRanks)
+                        .collect { (locationsProvider, ranks) ->
+                            logger.onNotificationLocationsChanged(locationsProvider, ranks)
                         }
                 } else {
                     logger.onLockscreenOrShadeNotInteractive(
@@ -70,7 +72,7 @@ object NotificationStatsLoggerBinder {
     }
 }
 
-private val NotificationStackScrollLayout.onNotificationsUpdated
+private val NotificationStackScrollLayout.onNotificationLocationsUpdated
     get() =
         ConflatedCallbackFlow.conflatedCallbackFlow {
             val callback =

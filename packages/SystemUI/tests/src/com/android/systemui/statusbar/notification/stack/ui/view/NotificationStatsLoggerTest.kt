@@ -67,7 +67,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             // AND they're visible
             val (ranks, locations) = fakeNotificationMaps("key0", "key1")
             val callable = Callable { locations }
-            underTest.onNotificationListUpdated(callable, ranks)
+            underTest.onNotificationLocationsChanged(callable, ranks)
             runCurrent()
 
             // THEN visibility changes are reported
@@ -103,13 +103,13 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             // GIVEN some visible Notifications are reported
             val (ranks, locations) = fakeNotificationMaps("key0", "key1")
             val callable = Callable { locations }
-            underTest.onNotificationListUpdated(callable, ranks)
+            underTest.onNotificationLocationsChanged(callable, ranks)
             runCurrent()
             clearInvocations(mockStatusBarService, mockNotificationListenerService)
 
             // WHEN the same Notifications are removed
             val emptyCallable = Callable { emptyMap<String, Int>() }
-            underTest.onNotificationListUpdated(emptyCallable, emptyMap())
+            underTest.onNotificationLocationsChanged(emptyCallable, emptyMap())
             runCurrent()
 
             // THEN visibility changes are reported
@@ -140,13 +140,13 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             // GIVEN some visible Notifications are reported
             val (ranks, locations) = fakeNotificationMaps("key0", "key1")
             val callable = Callable { locations }
-            underTest.onNotificationListUpdated(callable, ranks)
+            underTest.onNotificationLocationsChanged(callable, ranks)
             runCurrent()
             clearInvocations(mockStatusBarService, mockNotificationListenerService)
 
             // WHEN the same Notifications are becoming invisible
             val emptyCallable = Callable { emptyMap<String, Int>() }
-            underTest.onNotificationListUpdated(emptyCallable, ranks)
+            underTest.onNotificationLocationsChanged(emptyCallable, ranks)
             runCurrent()
 
             // THEN visibility changes are reported
@@ -176,13 +176,13 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
         testScope.runTest {
             // GIVEN some visible Notifications are reported
             val (ranks, locations) = fakeNotificationMaps("key0", "key1")
-            underTest.onNotificationListUpdated({ locations }, ranks)
+            underTest.onNotificationLocationsChanged({ locations }, ranks)
             runCurrent()
             clearInvocations(mockStatusBarService, mockNotificationListenerService)
 
             // WHEN the reported Notifications are changing positions
             val (newRanks, newLocations) = fakeNotificationMaps("key1", "key0")
-            underTest.onNotificationListUpdated({ newLocations }, newRanks)
+            underTest.onNotificationLocationsChanged({ newLocations }, newRanks)
             runCurrent()
 
             // THEN no visibility changes are reported
@@ -195,13 +195,13 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             // GIVEN some visible Notifications are reported
             val (ranks, locations) = fakeNotificationMaps("key0", "key1", "key2")
             val callable = spy(Callable { locations })
-            underTest.onNotificationListUpdated(callable, ranks)
+            underTest.onNotificationLocationsChanged(callable, ranks)
             runCurrent()
             clearInvocations(callable)
 
             // WHEN a new update comes
             val otherCallable = spy(Callable { locations })
-            underTest.onNotificationListUpdated(otherCallable, ranks)
+            underTest.onNotificationLocationsChanged(otherCallable, ranks)
             runCurrent()
 
             // THEN we call the new Callable
@@ -215,7 +215,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             // GIVEN some visible Notifications are reported
             val (ranks, locations) = fakeNotificationMaps("key0", "key1")
             val callable = Callable { locations }
-            underTest.onNotificationListUpdated(callable, ranks)
+            underTest.onNotificationLocationsChanged(callable, ranks)
             runCurrent()
             clearInvocations(mockStatusBarService, mockNotificationListenerService)
 
@@ -281,7 +281,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
         }
 
     @Test
-    fun onNotificationExpanded_visibleLocation_expansionLogged() =
+    fun onNotificationExpansionChanged_whenExpandedInVisibleLocation_logsExpansion() =
         testScope.runTest {
             // WHEN a Notification is expanded
             underTest.onNotificationExpansionChanged(
@@ -303,7 +303,33 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
         }
 
     @Test
-    fun onNotificationExpanded_notVisibleLocation_nothingLogged() =
+    fun onNotificationExpansionChanged_whenCalledTwiceWithTheSameUpdate_doesNotDuplicateLogs() =
+        testScope.runTest {
+            // GIVEN a Notification is expanded
+            underTest.onNotificationExpansionChanged(
+                key = "key",
+                isExpanded = true,
+                location = ExpandableViewState.LOCATION_MAIN_AREA,
+                isUserAction = true
+            )
+            runCurrent()
+            clearInvocations(mockStatusBarService)
+
+            // WHEN the logger receives the same expansion update
+            underTest.onNotificationExpansionChanged(
+                key = "key",
+                isExpanded = true,
+                location = ExpandableViewState.LOCATION_MAIN_AREA,
+                isUserAction = true
+            )
+            runCurrent()
+
+            // THEN the Expand event is not reported again
+            verifyZeroInteractions(mockStatusBarService)
+        }
+
+    @Test
+    fun onNotificationExpansionChanged_whenCalledForNotVisibleItem_nothingLogged() =
         testScope.runTest {
             // WHEN a NOT visible Notification is expanded
             underTest.onNotificationExpansionChanged(
@@ -319,35 +345,73 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
         }
 
     @Test
-    fun onNotificationExpanded_notVisibleLocation_becomesVisible_expansionLogged() =
+    fun onNotificationExpansionChanged_whenNotVisibleItemBecomesVisible_logsChanges() =
         testScope.runTest {
             // WHEN a NOT visible Notification is expanded
             underTest.onNotificationExpansionChanged(
                 key = "key",
                 isExpanded = true,
                 location = ExpandableViewState.LOCATION_GONE,
-                isUserAction = true
+                isUserAction = false
             )
             runCurrent()
 
             // AND it becomes visible
             val (ranks, locations) = fakeNotificationMaps("key")
             val callable = Callable { locations }
-            underTest.onNotificationListUpdated(callable, ranks)
+            underTest.onNotificationLocationsChanged(callable, ranks)
             runCurrent()
 
             // THEN the Expand event is reported
             verify(mockStatusBarService)
                 .onNotificationExpansionChanged(
                     /* key = */ "key",
-                    /* userAction = */ true,
+                    /* userAction = */ false,
                     /* expanded = */ true,
                     NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal
                 )
         }
 
     @Test
-    fun onNotificationCollapsed_isFirstInteraction_nothingLogged() =
+    fun onNotificationExpansionChanged_whenUpdatedItemBecomesVisible_logsChanges() =
+        testScope.runTest {
+            // GIVEN a NOT visible Notification is expanded
+            underTest.onNotificationExpansionChanged(
+                key = "key",
+                isExpanded = true,
+                location = ExpandableViewState.LOCATION_GONE,
+                isUserAction = false
+            )
+            runCurrent()
+            // AND we open the shade, so we log its events
+            val (ranks, locations) = fakeNotificationMaps("key")
+            val callable = Callable { locations }
+            underTest.onNotificationLocationsChanged(callable, ranks)
+            runCurrent()
+            // AND we close the shade, so it is NOT visible
+            val emptyCallable = Callable { emptyMap<String, Int>() }
+            underTest.onNotificationLocationsChanged(emptyCallable, ranks)
+            runCurrent()
+            clearInvocations(mockStatusBarService) // clear the previous expand log
+
+            // WHEN it receives an update
+            underTest.onNotificationUpdated("key")
+            // AND it becomes visible again
+            underTest.onNotificationLocationsChanged(callable, ranks)
+            runCurrent()
+
+            // THEN we log its expand event again
+            verify(mockStatusBarService)
+                .onNotificationExpansionChanged(
+                    /* key = */ "key",
+                    /* userAction = */ false,
+                    /* expanded = */ true,
+                    NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal
+                )
+        }
+
+    @Test
+    fun onNotificationExpansionChanged_whenCollapsedForTheFirstTime_nothingLogged() =
         testScope.runTest {
             // WHEN a Notification is collapsed, and it is the first interaction
             underTest.onNotificationExpansionChanged(
@@ -364,7 +428,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
         }
 
     @Test
-    fun onNotificationExpandedAndCollapsed_expansionChangesLogged() =
+    fun onNotificationExpansionChanged_receivesMultipleUpdates_logsChanges() =
         testScope.runTest {
             // GIVEN a Notification is expanded
             underTest.onNotificationExpansionChanged(
@@ -401,6 +465,60 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
                     /* expanded = */ false,
                     NotificationVisibility.NotificationLocation.LOCATION_MAIN_AREA.ordinal
                 )
+        }
+
+    @Test
+    fun onNotificationUpdated_clearsTrackedExpansionChanges() =
+        testScope.runTest {
+            // GIVEN some notification updates are posted
+            underTest.onNotificationExpansionChanged(
+                key = "key1",
+                isExpanded = true,
+                location = ExpandableViewState.LOCATION_MAIN_AREA,
+                isUserAction = true
+            )
+            runCurrent()
+            underTest.onNotificationExpansionChanged(
+                key = "key2",
+                isExpanded = true,
+                location = ExpandableViewState.LOCATION_MAIN_AREA,
+                isUserAction = true
+            )
+            runCurrent()
+            clearInvocations(mockStatusBarService)
+
+            // WHEN a Notification is updated
+            underTest.onNotificationUpdated("key1")
+
+            // THEN the tracked expansion changes are updated
+            assertThat(underTest.lastReportedExpansionValues.keys).containsExactly("key2")
+        }
+
+    @Test
+    fun onNotificationRemoved_clearsTrackedExpansionChanges() =
+        testScope.runTest {
+            // GIVEN some notification updates are posted
+            underTest.onNotificationExpansionChanged(
+                key = "key1",
+                isExpanded = true,
+                location = ExpandableViewState.LOCATION_MAIN_AREA,
+                isUserAction = true
+            )
+            runCurrent()
+            underTest.onNotificationExpansionChanged(
+                key = "key2",
+                isExpanded = true,
+                location = ExpandableViewState.LOCATION_MAIN_AREA,
+                isUserAction = true
+            )
+            runCurrent()
+            clearInvocations(mockStatusBarService)
+
+            // WHEN a Notification is removed
+            underTest.onNotificationRemoved("key1")
+
+            // THEN it is removed from the tracked expansion changes
+            assertThat(underTest.lastReportedExpansionValues.keys).doesNotContain("key1")
         }
 
     private fun fakeNotificationMaps(
