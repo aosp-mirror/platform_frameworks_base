@@ -625,14 +625,9 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
     {
         // FrameInfoVisualizer accesses the frame events, which cannot be mutated mid-draw
         // or it can lead to memory corruption.
-        // This lock is overly broad, but it's the quickest fix since this mutex is otherwise
-        // not visible to IRenderPipeline much less FrameInfoVisualizer. And since this is
-        // the thread we're primarily concerned about being responsive, this being too broad
-        // shouldn't pose a performance issue.
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
-        drawResult = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry,
-                                           &mLayerUpdateQueue, mContentDrawBounds, mOpaque,
-                                           mLightInfo, mRenderNodes, &(profiler()), mBufferParams);
+        drawResult = mRenderPipeline->draw(
+                frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue, mContentDrawBounds,
+                mOpaque, mLightInfo, mRenderNodes, &(profiler()), mBufferParams, profilerLock());
     }
 
     uint64_t frameCompleteNr = getFrameNumber();
@@ -762,7 +757,7 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
             mCurrentFrameInfo->markFrameCompleted();
             mCurrentFrameInfo->set(FrameInfoIndex::GpuCompleted)
                     = mCurrentFrameInfo->get(FrameInfoIndex::FrameCompleted);
-            std::scoped_lock lock(mFrameMetricsReporterMutex);
+            std::scoped_lock lock(mFrameInfoMutex);
             mJankTracker.finishFrame(*mCurrentFrameInfo, mFrameMetricsReporter, frameCompleteNr,
                                      mSurfaceControlGenerationId);
         }
@@ -791,7 +786,7 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
 
 void CanvasContext::reportMetricsWithPresentTime() {
     {  // acquire lock
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
+        std::scoped_lock lock(mFrameInfoMutex);
         if (mFrameMetricsReporter == nullptr) {
             return;
         }
@@ -826,7 +821,7 @@ void CanvasContext::reportMetricsWithPresentTime() {
 
     forthBehind->set(FrameInfoIndex::DisplayPresentTime) = presentTime;
     {  // acquire lock
-        std::scoped_lock lock(mFrameMetricsReporterMutex);
+        std::scoped_lock lock(mFrameInfoMutex);
         if (mFrameMetricsReporter != nullptr) {
             mFrameMetricsReporter->reportFrameMetrics(forthBehind->data(), true /*hasPresentTime*/,
                                                       frameNumber, surfaceControlId);
@@ -835,7 +830,7 @@ void CanvasContext::reportMetricsWithPresentTime() {
 }
 
 void CanvasContext::addFrameMetricsObserver(FrameMetricsObserver* observer) {
-    std::scoped_lock lock(mFrameMetricsReporterMutex);
+    std::scoped_lock lock(mFrameInfoMutex);
     if (mFrameMetricsReporter.get() == nullptr) {
         mFrameMetricsReporter.reset(new FrameMetricsReporter());
     }
@@ -849,7 +844,7 @@ void CanvasContext::addFrameMetricsObserver(FrameMetricsObserver* observer) {
 }
 
 void CanvasContext::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
-    std::scoped_lock lock(mFrameMetricsReporterMutex);
+    std::scoped_lock lock(mFrameInfoMutex);
     if (mFrameMetricsReporter.get() != nullptr) {
         mFrameMetricsReporter->removeObserver(observer);
         if (!mFrameMetricsReporter->hasObservers()) {
@@ -886,7 +881,7 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, int32_t surfaceContro
     FrameInfo* frameInfo = instance->getFrameInfoFromLast4(frameNumber, surfaceControlId);
 
     if (frameInfo != nullptr) {
-        std::scoped_lock lock(instance->mFrameMetricsReporterMutex);
+        std::scoped_lock lock(instance->mFrameInfoMutex);
         frameInfo->set(FrameInfoIndex::FrameCompleted) = std::max(gpuCompleteTime,
                 frameInfo->get(FrameInfoIndex::SwapBuffersCompleted));
         frameInfo->set(FrameInfoIndex::GpuCompleted) = std::max(

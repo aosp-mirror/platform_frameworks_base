@@ -164,6 +164,7 @@ public:
     void notifyFramePending();
 
     FrameInfoVisualizer& profiler() { return mProfiler; }
+    std::mutex& profilerLock() { return mFrameInfoMutex; }
 
     void dumpFrames(int fd);
     void resetFrameStats();
@@ -342,9 +343,8 @@ private:
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
-    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter
-            GUARDED_BY(mFrameMetricsReporterMutex);
-    std::mutex mFrameMetricsReporterMutex;
+    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter GUARDED_BY(mFrameInfoMutex);
+    std::mutex mFrameInfoMutex;
 
     std::set<RenderNode*> mPrefetchedLayers;
 
