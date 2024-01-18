@@ -951,7 +951,7 @@ public final class FlexibilityController extends StateController {
         @VisibleForTesting
         static final long DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS = 15 * MINUTE_IN_MILLIS;
         @VisibleForTesting
-        static final long DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS = 72 * HOUR_IN_MILLIS;
+        static final long DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS = 24 * HOUR_IN_MILLIS;
         private static final long DEFAULT_MIN_TIME_BETWEEN_FLEXIBILITY_ALARMS_MS = MINUTE_IN_MILLIS;
         @VisibleForTesting
         final int[] DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS = {50, 60, 70, 80};
