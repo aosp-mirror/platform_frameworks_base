@@ -17,6 +17,7 @@ package com.android.systemui.unfold.util
 
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.GuardedBy
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import java.util.concurrent.CopyOnWriteArrayList
@@ -41,8 +42,12 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
 
     private val listeners = CopyOnWriteArrayList<TransitionProgressListener>()
 
-    @Volatile private var isReadyToHandleTransition = false
-    @Volatile private var isTransitionRunning = false
+    private val lock = Object()
+
+    @GuardedBy("lock") private var isReadyToHandleTransition = false
+    // Accessed only from progress thread
+    private var isTransitionRunning = false
+    // Accessed only from progress thread
     private var lastTransitionProgress = PROGRESS_UNSET
 
     init {
@@ -72,23 +77,44 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
      * the transition progress events.
      *
      * Call it with readyToHandleTransition = false when listeners can't process the events.
+     *
+     * Note that this could be called by any thread.
      */
     fun setReadyToHandleTransition(isReadyToHandleTransition: Boolean) {
-        val progressHandler = this.progressHandler
-        if (isTransitionRunning && progressHandler != null) {
-            progressHandler.post {
-                if (isReadyToHandleTransition) {
-                    listeners.forEach { it.onTransitionStarted() }
-                    if (lastTransitionProgress != PROGRESS_UNSET) {
-                        listeners.forEach { it.onTransitionProgress(lastTransitionProgress) }
-                    }
-                } else {
-                    isTransitionRunning = false
-                    listeners.forEach { it.onTransitionFinished() }
-                }
+        synchronized(lock) {
+            this.isReadyToHandleTransition = isReadyToHandleTransition
+            val progressHandlerLocal = this.progressHandler
+            if (progressHandlerLocal != null) {
+                ensureInHandler(progressHandlerLocal) { reportLastProgressIfNeeded() }
             }
         }
-        this.isReadyToHandleTransition = isReadyToHandleTransition
+    }
+
+    /** Runs directly if called from the handler thread. Posts otherwise. */
+    private fun ensureInHandler(handler: Handler, f: () -> Unit) {
+        if (handler.looper.isCurrentThread) {
+            f()
+        } else {
+            handler.post(f)
+        }
+    }
+
+    private fun reportLastProgressIfNeeded() {
+        assertInProgressThread()
+        synchronized(lock) {
+            if (!isTransitionRunning) {
+                return
+            }
+            if (isReadyToHandleTransition) {
+                listeners.forEach { it.onTransitionStarted() }
+                if (lastTransitionProgress != PROGRESS_UNSET) {
+                    listeners.forEach { it.onTransitionProgress(lastTransitionProgress) }
+                }
+            } else {
+                isTransitionRunning = false
+                listeners.forEach { it.onTransitionFinished() }
+            }
+        }
     }
 
     override fun addCallback(listener: TransitionProgressListener) {
@@ -106,34 +132,42 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
 
     override fun onTransitionStarted() {
         assertInProgressThread()
-        isTransitionRunning = true
-        if (isReadyToHandleTransition) {
-            listeners.forEach { it.onTransitionStarted() }
+        synchronized(lock) {
+            isTransitionRunning = true
+            if (isReadyToHandleTransition) {
+                listeners.forEach { it.onTransitionStarted() }
+            }
         }
     }
 
     override fun onTransitionProgress(progress: Float) {
         assertInProgressThread()
-        if (isReadyToHandleTransition) {
-            listeners.forEach { it.onTransitionProgress(progress) }
+        synchronized(lock) {
+            if (isReadyToHandleTransition) {
+                listeners.forEach { it.onTransitionProgress(progress) }
+            }
+            lastTransitionProgress = progress
         }
-        lastTransitionProgress = progress
     }
 
     override fun onTransitionFinishing() {
         assertInProgressThread()
-        if (isReadyToHandleTransition) {
-            listeners.forEach { it.onTransitionFinishing() }
+        synchronized(lock) {
+            if (isReadyToHandleTransition) {
+                listeners.forEach { it.onTransitionFinishing() }
+            }
         }
     }
 
     override fun onTransitionFinished() {
         assertInProgressThread()
-        if (isReadyToHandleTransition) {
-            listeners.forEach { it.onTransitionFinished() }
+        synchronized(lock) {
+            if (isReadyToHandleTransition) {
+                listeners.forEach { it.onTransitionFinished() }
+            }
+            isTransitionRunning = false
+            lastTransitionProgress = PROGRESS_UNSET
         }
-        isTransitionRunning = false
-        lastTransitionProgress = PROGRESS_UNSET
     }
 
     private fun assertInProgressThread() {
@@ -151,7 +185,7 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
         }
     }
 
-    companion object {
-        private const val PROGRESS_UNSET = -1f
+    private companion object {
+        const val PROGRESS_UNSET = -1f
     }
 }

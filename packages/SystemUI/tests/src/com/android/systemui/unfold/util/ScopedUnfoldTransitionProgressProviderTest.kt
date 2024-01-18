@@ -88,6 +88,30 @@ class ScopedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     }
 
     @Test
+    fun setReadyToHandleTransition_whileTransitionRunning_fromBgThread_propagatesCallbacks() =
+        testScope.runTest {
+            runBlockingInBg { rootProvider.onTransitionStarted() }
+
+            runBlockingInBg {
+                // This causes the transition started callback to be propagated immediately, without
+                // the need to switch thread (as we're already in the correct one). We don't need a
+                // sync barrier on the bg thread as in
+                // setReadyToHandleTransition_whileTransitionRunning_propagatesCallbacks here.
+                scopedProvider.setReadyToHandleTransition(true)
+            }
+
+            listener.assertStarted()
+
+            runBlockingInBg { rootProvider.onTransitionProgress(1f) }
+
+            listener.assertLastProgress(1f)
+
+            runBlockingInBg { rootProvider.onTransitionFinished() }
+
+            listener.assertNotStarted()
+        }
+
+    @Test
     fun setReadyToHandleTransition_beforeAnyCallback_doesNotCrash() {
         testScope.runTest { scopedProvider.setReadyToHandleTransition(true) }
     }
