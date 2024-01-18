@@ -50,9 +50,10 @@ public class SurfaceInputTestActivity extends Activity {
     private static final String TAG = "SurfaceInputTestActivity";
     private SurfaceView mLocalSurfaceView;
     private SurfaceView mRemoteSurfaceView;
-    private IBinder mInputToken;
     private IAttachEmbeddedWindow mIAttachEmbeddedWindow;
     private SurfaceControl mParentSurfaceControl;
+
+    private SurfaceControl mLocalSurfaceControl;
 
     private final ServiceConnection mConnection = new ServiceConnection() {
         // Called when the connection with the service is established
@@ -112,30 +113,33 @@ public class SurfaceInputTestActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        getWindowManager().unregisterSurfaceControlInputReceiver(mInputToken);
+        if (mLocalSurfaceControl != null) {
+            getWindowManager().unregisterSurfaceControlInputReceiver(mLocalSurfaceControl);
+            new SurfaceControl.Transaction().remove(mLocalSurfaceControl).apply();
+        }
     }
 
     private void addLocalChildSurfaceControl(AttachedSurfaceControl attachedSurfaceControl) {
-        SurfaceControl surfaceControl = new SurfaceControl.Builder().setName("LocalSC")
+        mLocalSurfaceControl = new SurfaceControl.Builder().setName("LocalSC")
                 .setBufferSize(100, 100).build();
-        attachedSurfaceControl.buildReparentTransaction(surfaceControl)
-                .setVisibility(surfaceControl, true)
-                .setCrop(surfaceControl, new Rect(0, 0, 100, 100))
-                .setPosition(surfaceControl, 250, 1000)
-                .setLayer(surfaceControl, 1).apply();
+        attachedSurfaceControl.buildReparentTransaction(mLocalSurfaceControl)
+                .setVisibility(mLocalSurfaceControl, true)
+                .setCrop(mLocalSurfaceControl, new Rect(0, 0, 100, 100))
+                .setPosition(mLocalSurfaceControl, 250, 1000)
+                .setLayer(mLocalSurfaceControl, 1).apply();
 
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
         paint.setTextSize(20);
 
-        Surface surface = new Surface(surfaceControl);
+        Surface surface = new Surface(mLocalSurfaceControl);
         Canvas c = surface.lockCanvas(null);
         c.drawColor(Color.GREEN);
         c.drawText("Local SC", 0, 0, paint);
         surface.unlockCanvasAndPost(c);
         WindowManager wm = getSystemService(WindowManager.class);
-        mInputToken = wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
-                attachedSurfaceControl.getHostToken(), surfaceControl,
+        wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
+                attachedSurfaceControl.getHostToken(), mLocalSurfaceControl,
                 Choreographer.getInstance(), event -> {
                     Log.d(TAG, "onInputEvent-sc " + event);
                     return false;
@@ -143,8 +147,6 @@ public class SurfaceInputTestActivity extends Activity {
     }
 
     private final SurfaceHolder.Callback mLocalSurfaceViewCallback = new SurfaceHolder.Callback() {
-        private IBinder mInputToken;
-
         @Override
         public void surfaceCreated(@NonNull SurfaceHolder holder) {
             Paint paint = new Paint();
@@ -157,7 +159,7 @@ public class SurfaceInputTestActivity extends Activity {
             holder.unlockCanvasAndPost(c);
 
             WindowManager wm = getSystemService(WindowManager.class);
-            mInputToken = wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
+            wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
                     mLocalSurfaceView.getHostToken(), mLocalSurfaceView.getSurfaceControl(),
                     Choreographer.getInstance(), event -> {
                         Log.d(TAG, "onInputEvent-local " + event);
@@ -173,9 +175,8 @@ public class SurfaceInputTestActivity extends Activity {
 
         @Override
         public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-            if (mInputToken != null) {
-                getWindowManager().unregisterSurfaceControlInputReceiver(mInputToken);
-            }
+            getWindowManager().unregisterSurfaceControlInputReceiver(
+                    mLocalSurfaceView.getSurfaceControl());
         }
     };
 

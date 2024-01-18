@@ -134,7 +134,7 @@ public class EmbeddedWindowService extends Service {
                 c.drawText("Remote", 250, 250, paint);
                 surface.unlockCanvasAndPost(c);
                 WindowManager wm = getSystemService(WindowManager.class);
-                mInputToken = wm.registerBatchedSurfaceControlInputReceiver(displayId, hostToken,
+                wm.registerBatchedSurfaceControlInputReceiver(displayId, hostToken,
                         mSurfaceControl,
                         Choreographer.getInstance(), event -> {
                             Log.d(TAG, "onInputEvent-remote " + event);
@@ -147,11 +147,9 @@ public class EmbeddedWindowService extends Service {
         @Override
         public void tearDownEmbeddedSurfaceControl() {
             if (mSurfaceControl != null) {
-                new SurfaceControl.Transaction().remove(mSurfaceControl);
-            }
-            if (mInputToken != null) {
                 WindowManager wm = getSystemService(WindowManager.class);
-                wm.unregisterSurfaceControlInputReceiver(mInputToken);
+                wm.unregisterSurfaceControlInputReceiver(mSurfaceControl);
+                new SurfaceControl.Transaction().remove(mSurfaceControl).apply();
             }
         }
     }
