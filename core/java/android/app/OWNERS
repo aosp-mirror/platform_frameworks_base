@@ -57,6 +57,7 @@ per-file ReceiverInfo* = file:/BROADCASTS_OWNERS
 
 # GrammaticalInflectionManager
 per-file *GrammaticalInflection* = file:/services/core/java/com/android/server/grammaticalinflection/OWNERS
+per-file grammatical_inflection_manager.aconfig = file:/services/core/java/com/android/server/grammaticalinflection/OWNERS
 
 # KeyguardManager
 per-file KeyguardManager.java = file:/services/core/java/com/android/server/locksettings/OWNERS
