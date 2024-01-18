@@ -16,8 +16,11 @@
 
 package com.android.systemui.biometrics.ui.viewmodel
 
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.graphics.Point
+import android.graphics.drawable.BitmapDrawable
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
@@ -76,6 +79,7 @@ import org.mockito.junit.MockitoJUnit
 private const val USER_ID = 4
 private const val CHALLENGE = 2L
 private const val DELAY = 1000L
+private const val OP_PACKAGE_NAME = "biometric.testapp"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -88,9 +92,14 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var udfpsUtils: UdfpsUtils
+    @Mock private lateinit var packageManager: PackageManager
 
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope()
+    private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
+    private val logoResFromApp = R.drawable.ic_cake
+    private val logoFromApp = context.getDrawable(logoResFromApp)
+    private val logoBitmapFromApp = Bitmap.createBitmap(400, 400, Bitmap.Config.RGB_565)
 
     private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
     private lateinit var promptRepository: FakePromptRepository
@@ -153,6 +162,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 udfpsUtils
             )
         iconViewModel = viewModel.iconViewModel
+
+        // Set up default logo icon and app customized icon
+        whenever(packageManager.getApplicationIcon(OP_PACKAGE_NAME)).thenReturn(defaultLogoIcon)
+        context.setMockPackageManager(packageManager)
+        val resources = context.getOrCreateTestableResources()
+        resources.addOverride(logoResFromApp, logoFromApp)
     }
 
     @Test
@@ -1227,6 +1242,26 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             assertThat(contentView).isNull()
         }
 
+    @Test
+    fun defaultLogoIfNoLogoSet() = runGenericTest {
+        val logo by collectLastValue(viewModel.logo)
+        assertThat(logo).isEqualTo(defaultLogoIcon)
+    }
+
+    @Test
+    fun logoResSetByApp() =
+        runGenericTest(logoRes = logoResFromApp) {
+            val logo by collectLastValue(viewModel.logo)
+            assertThat(logo).isEqualTo(logoFromApp)
+        }
+
+    @Test
+    fun logoBitmapSetByApp() =
+        runGenericTest(logoBitmap = logoBitmapFromApp) {
+            val logo by collectLastValue(viewModel.logo)
+            assertThat((logo as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
+        }
+
     /** Asserts that the selected buttons are visible now. */
     private suspend fun TestScope.assertButtonsVisible(
         tryAgain: Boolean = false,
@@ -1248,6 +1283,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         allowCredentialFallback: Boolean = false,
         description: String? = null,
         contentView: PromptContentView? = null,
+        logoRes: Int = -1,
+        logoBitmap: Bitmap? = null,
         block: suspend TestScope.() -> Unit
     ) {
         selector.initializePrompt(
@@ -1257,6 +1294,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             face = testCase.face,
             descriptionFromApp = description,
             contentViewFromApp = contentView,
+            logoResFromApp = logoRes,
+            logoBitmapFromApp = logoBitmap,
         )
 
         // put the view model in the initial authenticating state, unless explicitly skipped
@@ -1434,9 +1473,13 @@ private fun PromptSelectorInteractor.initializePrompt(
     allowCredentialFallback: Boolean = false,
     descriptionFromApp: String? = null,
     contentViewFromApp: PromptContentView? = null,
+    logoResFromApp: Int = -1,
+    logoBitmapFromApp: Bitmap? = null,
 ) {
     val info =
         PromptInfo().apply {
+            logoRes = logoResFromApp
+            logoBitmap = logoBitmapFromApp
             title = "t"
             subtitle = "s"
             description = descriptionFromApp
@@ -1445,11 +1488,13 @@ private fun PromptSelectorInteractor.initializePrompt(
             isDeviceCredentialAllowed = allowCredentialFallback
             isConfirmationRequested = requireConfirmation
         }
+
     useBiometricsForAuthentication(
         info,
         USER_ID,
         CHALLENGE,
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
+        OP_PACKAGE_NAME,
     )
 }
 

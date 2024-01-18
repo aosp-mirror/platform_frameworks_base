@@ -399,7 +399,8 @@ public class AuthContainerView extends LinearLayout
                     config.mPromptInfo,
                     config.mUserId,
                     config.mOperationId,
-                    new BiometricModalities(fpProps, faceProps));
+                    new BiometricModalities(fpProps, faceProps),
+                    config.mOpPackageName);
 
             final BiometricPromptLayout view = (BiometricPromptLayout) layoutInflater.inflate(
                     R.layout.biometric_prompt_layout, null, false);
@@ -470,7 +471,8 @@ public class AuthContainerView extends LinearLayout
         mBackgroundView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
 
         mPromptSelectorInteractorProvider.get().useCredentialsForAuthentication(
-                mConfig.mPromptInfo, credentialType, mConfig.mUserId, mConfig.mOperationId);
+                mConfig.mPromptInfo, credentialType, mConfig.mUserId, mConfig.mOperationId,
+                mConfig.mOpPackageName);
         final CredentialViewModel vm = mCredentialViewModelProvider.get();
         vm.setAnimateContents(animateContents);
         ((CredentialView) mCredentialView).init(vm, this, mPanelController, animatePanel);

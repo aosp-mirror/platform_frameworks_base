@@ -1,5 +1,6 @@
 package com.android.systemui.biometrics.domain.model
 
+import android.graphics.Bitmap
 import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
 import com.android.systemui.biometrics.shared.model.BiometricModalities
@@ -26,6 +27,7 @@ sealed class BiometricPromptRequest(
         userInfo: BiometricUserInfo,
         operationInfo: BiometricOperationInfo,
         val modalities: BiometricModalities,
+        val opPackageName: String,
     ) :
         BiometricPromptRequest(
             title = info.title?.toString() ?: "",
@@ -36,6 +38,8 @@ sealed class BiometricPromptRequest(
             showEmergencyCallButton = info.isShowEmergencyCallButton
         ) {
         val contentView: PromptContentView? = info.contentView
+        val logoRes: Int = info.logoRes
+        val logoBitmap: Bitmap? = info.logoBitmap
         val negativeButtonText: String = info.negativeButtonText?.toString() ?: ""
     }
 
