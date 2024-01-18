@@ -3840,6 +3840,23 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void onVideoFreezeUpdated(boolean isFrozen) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onVideoFreezeUpdated(" + isFrozen + ")");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onVideoFreezeUpdated(isFrozen, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onVideoFreezeUpdated", e);
+                }
+            }
+        }
+
+        @Override
         public void onContentAllowed() {
             synchronized (mLock) {
                 if (DEBUG) {

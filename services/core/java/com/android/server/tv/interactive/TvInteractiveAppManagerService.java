@@ -1470,6 +1470,28 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
+        public void notifyVideoFreezeUpdated(IBinder sessionToken, boolean isFrozen, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
+                    "notifyVideoFreezeUpdated");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
+                                resolvedUserId);
+                        getSessionLocked(sessionState).notifyVideoFreezeUpdated(isFrozen);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slogf.e(TAG, "error in notifyVideoFreezeUpdated", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void notifyContentAllowed(IBinder sessionToken, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
@@ -1556,7 +1578,6 @@ public class TvInteractiveAppManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
         }
-
 
         @Override
         public void notifyRecordingStarted(IBinder sessionToken, String recordingId,

@@ -878,6 +878,15 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
+         * Called when video becomes frozen or unfrozen. Audio playback will continue while
+         * video will be frozen to the last frame if {@code true}.
+         * @param isFrozen Whether or not the video is frozen.
+         * @hide
+         */
+        public void onVideoFreezeUpdated(boolean isFrozen) {
+        }
+
+        /**
          * Called when content is allowed.
          */
         public void onContentAllowed() {
@@ -1764,6 +1773,13 @@ public abstract class TvInteractiveAppService extends Service {
                 Log.d(TAG, "notifyVideoAvailable (reason=" + reason + ")");
             }
             onVideoUnavailable(reason);
+        }
+
+        void notifyVideoFreezeUpdated(boolean isFrozen) {
+            if (DEBUG) {
+                Log.d(TAG, "notifyVideoFreezeUpdated (isFrozen=" + isFrozen + ")");
+            }
+            onVideoFreezeUpdated(isFrozen);
         }
 
         void notifyContentAllowed() {

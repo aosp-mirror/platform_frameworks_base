@@ -763,6 +763,34 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Informs the application that the video freeze state has been updated.
+         *
+         * When {@code true}, the video is frozen on the last frame but audio playback remains
+         * active.
+         *
+         * @param isFrozen Whether or not the video is frozen
+         * @hide
+         */
+        public void notifyVideoFreezeUpdated(boolean isFrozen) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, "notifyVideoFreezeUpdated");
+                        }
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onVideoFreezeUpdated(isFrozen);
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "error in notifyVideoFreezeUpdated", e);
+                    }
+                }
+            });
+        }
+
+        /**
          * Sends an updated list of all audio presentations available from a Next Generation Audio
          * service. This is used by the framework to maintain the audio presentation information for
          * a given track of {@link TvTrackInfo#TYPE_AUDIO}, which in turn is used by

@@ -44,6 +44,7 @@ oneway interface ITvInputClient {
     void onTrackSelected(int type, in String trackId, int seq);
     void onVideoAvailable(int seq);
     void onVideoUnavailable(int reason, int seq);
+    void onVideoFreezeUpdated(boolean isFrozen, int seq);
     void onContentAllowed(int seq);
     void onContentBlocked(in String rating, int seq);
     void onLayoutSurface(int left, int top, int right, int bottom, int seq);
