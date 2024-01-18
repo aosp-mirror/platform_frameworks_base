@@ -434,10 +434,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Kuvumela i-app ukusebenzisa amasevisi aphambili ngohlobo lokuthi \"systemExempted\""</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"qalisa isevisi ephambili ngohlobo lokuthi \"Ikholi yefoni\""</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Kuvumela i-app ukusebenzisa amasevisi aphambili ngohlobo lwe-\"systemExempted\""</string>
-    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
-    <skip />
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"qalisa isevisi ephambili ngohlobo oluthi \"mediaProcessing\""</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Ivumela i-app ukusebenzisa amasevisi aphambili ngohlobo lwe-\"mediaProcessing\""</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"qalisa isevisi ephambili ngohlobo lokuthi \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Kuvumela i-app ukusebenzisa amasevisi aphambili ngohlobo lokuthi \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"linganisa isikhala sokugcina uhlelo lokusebenza"</string>
@@ -636,8 +634,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Sebenzisa isikhiya sesikrini"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Faka ukukhiya isikrini kwakho ukuze uqhubeke"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Cindezela inzwa uqinise"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Isigxivizo somunwe asaziwa. Zama futhi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hlanza inzwa yesigxivizo somunwe bese uzame futhi"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Hlanza inzwa bese uzame futhi"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Cindezela inzwa uqinise"</string>
@@ -701,8 +698,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Ayikwazi ukubona ubuso bakho. Bamba ifoni yakho iqondane namehlo"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Ukunyakaza okuningi kakhulu. Bamba ifoni iqine."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Sicela uphinde ubhalise ubuso bakho."</string>
-    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Ubuso abaziwa. Zama futhi."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Shintsha indawo yekhanda lakho kancane"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Bheka ngqo kakhulu kufoni yakho"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Bheka ngqo kakhulu kufoni yakho"</string>

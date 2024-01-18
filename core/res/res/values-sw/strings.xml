@@ -434,10 +434,8 @@
     <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"Huruhusu programu itumie huduma zinazoonekana kwenye skrini zinazohusiana na \"systemExempted\""</string>
     <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"kutekeleza huduma inayoonekana kwenye skrini inayohusiana na \"fileManagement\""</string>
     <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"Huiruhusu programu itumie huduma zinazoonekana kwenye skrini zinazohusiana na \"fileManagement\""</string>
-    <!-- no translation found for permlab_foregroundServiceMediaProcessing (3045295152245381864) -->
-    <skip />
-    <!-- no translation found for permdesc_foregroundServiceMediaProcessing (8303086172106677312) -->
-    <skip />
+    <string name="permlab_foregroundServiceMediaProcessing" msgid="3045295152245381864">"kutekeleza huduma yenye aina ya \"mediaProcessing\" inayoonekana kwenye skrini"</string>
+    <string name="permdesc_foregroundServiceMediaProcessing" msgid="8303086172106677312">"Huruhusu programu kutumia huduma zenye aina ya \"mediaProcessing\" zinazoonekana kwenye skrini"</string>
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"kutekeleza huduma inayoonekana kwenye skrini inayohusiana na \"specialUse\""</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"Huruhusu programu itumie huduma zinazoonekana kwenye skrini zinazohusiana na \"specialUse\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"Pima nafasi ya hifadhi ya programu"</string>
@@ -636,8 +634,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Tumia mbinu ya kufunga skrini"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Weka mbinu yako ya kufunga skrini ili uendelee"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Bonyeza kwa uthabiti kwenye kitambuzi"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Alama ya kidole haitambuliki. Jaribu tena."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Safisha kitambua alama ya kidole kisha ujaribu tena"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Safisha kitambuzi kisha ujaribu tena"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Bonyeza kwa nguvu kwenye kitambuzi"</string>
@@ -701,8 +698,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Imeshindwa kuona uso wako. Shikilia simu ikilingana na macho."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Inatikisika sana. Ishike simu iwe thabiti."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Tafadhali sajili uso wako tena."</string>
-    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"Uso hautambuliki. Jaribu tena."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Badilisha nafasi ya kichwa chako kidogo"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Angalia simu yako moja kwa moja"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Angalia simu yako moja kwa moja"</string>

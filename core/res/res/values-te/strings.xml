@@ -634,8 +634,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"కొనసాగించడానికి మీ స్క్రీన్ లాక్‌ను ఎంటర్ చేయండి"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"సెన్సార్ మీద గట్టిగా నొక్కండి"</string>
-    <!-- no translation found for fingerprint_acquired_insufficient (2410176550915730974) -->
-    <skip />
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"వేలిముద్ర గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"వేలిముద్ర సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"సెన్సార్ మీద గట్టిగా నొక్కండి"</string>
@@ -699,8 +698,7 @@
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"మీ ముఖం కనిపించడం లేదు. మీ ఫోన్‌ను కళ్లకు ఎదురుగా పట్టుకోండి."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
-    <!-- no translation found for face_acquired_too_different (4505278456634706967) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="4505278456634706967">"ముఖం గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"మీ తల స్థానాన్ని కొద్దిగా మార్చండి"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
