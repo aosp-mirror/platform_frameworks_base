@@ -1408,14 +1408,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
                 canSilentlyInstallPackage, userId, mPackageArchiver, flags);
-        final boolean shouldShowConfirmationDialog =
-                (flags & PackageManager.DELETE_SHOW_DIALOG) != 0;
-        if (!shouldShowConfirmationDialog
-                && mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
-                    == PackageManager.PERMISSION_GRANTED) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
+                == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
-        } else if (!shouldShowConfirmationDialog && canSilentlyInstallPackage) {
+        } else if (canSilentlyInstallPackage) {
             // Allow the device owner and affiliated profile owner to silently delete packages
             // Need to clear the calling identity to get DELETE_PACKAGES permission
             final long ident = Binder.clearCallingIdentity();
@@ -1657,10 +1654,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             @NonNull String packageName,
             @NonNull String callerPackageName,
             @NonNull IntentSender intentSender,
-            @NonNull UserHandle userHandle,
-            @DeleteFlags int flags) {
-        mPackageArchiver.requestArchive(packageName, callerPackageName, intentSender,
-                userHandle, flags);
+            @NonNull UserHandle userHandle) {
+        mPackageArchiver.requestArchive(packageName, callerPackageName, intentSender, userHandle);
     }
 
     @Override

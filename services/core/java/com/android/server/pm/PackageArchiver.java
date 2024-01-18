@@ -58,7 +58,6 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.VersionedPackage;
@@ -183,8 +182,7 @@ public class PackageArchiver {
             @NonNull String packageName,
             @NonNull String callerPackageName,
             @NonNull IntentSender intentSender,
-            @NonNull UserHandle userHandle,
-            @DeleteFlags int flags) {
+            @NonNull UserHandle userHandle) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(callerPackageName);
         Objects.requireNonNull(intentSender);
@@ -224,7 +222,7 @@ public class PackageArchiver {
                                     new VersionedPackage(packageName,
                                             PackageManager.VERSION_CODE_HIGHEST),
                                     callerPackageName,
-                                    DELETE_ARCHIVE | DELETE_KEEP_DATA | flags,
+                                    DELETE_ARCHIVE | DELETE_KEEP_DATA,
                                     intentSender,
                                     userId,
                                     binderUid);
