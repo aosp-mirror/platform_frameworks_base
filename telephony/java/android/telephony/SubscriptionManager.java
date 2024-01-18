@@ -1953,7 +1953,6 @@ public class SubscriptionManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    // @RequiresPermission(TODO(b/308809058))
     public List<SubscriptionInfo> getActiveSubscriptionInfoList() {
         List<SubscriptionInfo> activeList = null;
 
@@ -2010,6 +2009,9 @@ public class SubscriptionManager {
      * Create a new subscription manager instance that can see all subscriptions across
      * user profiles.
      *
+     * The permission check for accessing all subscriptions will be enforced upon calling the
+     * individual APIs linked below.
+     *
      * @return a SubscriptionManager that can see all subscriptions regardless its user profile
      * association.
      *
@@ -2018,9 +2020,7 @@ public class SubscriptionManager {
      * @see UserHandle
      */
     @FlaggedApi(Flags.FLAG_ENFORCE_SUBSCRIPTION_USER_FILTER)
-    // @RequiresPermission(TODO(b/308809058))
-    // The permission check for accessing all subscriptions will be enforced upon calling the
-    // individual APIs linked above.
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_PROFILES)
     @NonNull public SubscriptionManager createForAllUserProfiles() {
         return new SubscriptionManager(mContext, true/*isForAllUserProfiles*/);
     }
@@ -2215,7 +2215,6 @@ public class SubscriptionManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    // @RequiresPermission(TODO(b/308809058))
     public int getActiveSubscriptionInfoCount() {
         int result = 0;
 
