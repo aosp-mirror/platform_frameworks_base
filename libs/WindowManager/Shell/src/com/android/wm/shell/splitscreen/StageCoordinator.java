@@ -1449,6 +1449,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mExitSplitScreenOnHide = exitSplitScreenOnHide;
     }
 
+    /** Exits split screen with legacy transition */
     void exitSplitScreen(int toTopTaskId, @ExitReason int exitReason) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "exitSplitScreen: topTaskId=%d reason=%s active=%b",
                 toTopTaskId, exitReasonToString(exitReason), mMainStage.isActive());
@@ -1468,6 +1469,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         applyExitSplitScreen(childrenToTop, wct, exitReason);
     }
 
+    /** Exits split screen with legacy transition */
     private void exitSplitScreen(@Nullable StageTaskListener childrenToTop,
             @ExitReason int exitReason) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "exitSplitScreen: mainStageToTop=%b reason=%s active=%b",
@@ -1545,6 +1547,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    void dismissSplitScreen(int toTopTaskId, @ExitReason int exitReason) {
+        if (!mMainStage.isActive()) return;
+        final int stage = getStageOfTask(toTopTaskId);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        prepareExitSplitScreen(stage, wct);
+        mSplitTransitions.startDismissTransition(wct, this, stage, exitReason);
+    }
+
     /**
      * Overridden by child classes.
      */
@@ -1610,6 +1620,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 // User has used a keyboard shortcut to go back to fullscreen from split
             case EXIT_REASON_DESKTOP_MODE:
                 // One of the children enters desktop mode
+            case EXIT_REASON_UNKNOWN:
+                // Unknown reason
                 return true;
             default:
                 return false;
