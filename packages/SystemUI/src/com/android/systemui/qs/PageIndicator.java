@@ -5,6 +5,7 @@ import static com.android.systemui.qs.PageIndicator.PageScrollActionListener.RIG
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Animatable2;
@@ -41,9 +42,9 @@ public class PageIndicator extends ViewGroup {
 
     private final ArrayList<Integer> mQueuedPositions = new ArrayList<>();
 
-    private final int mPageIndicatorWidth;
-    private final int mPageIndicatorHeight;
-    private final int mPageDotWidth;
+    private int mPageIndicatorWidth;
+    private int mPageIndicatorHeight;
+    private int mPageDotWidth;
     private @NonNull ColorStateList mTint;
 
     private int mPosition = -1;
@@ -91,6 +92,35 @@ public class PageIndicator extends ViewGroup {
                 mPageScrollActionListener.onScrollActionTriggered(swipeDirection);
             }
         });
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateResources();
+    }
+
+    private void updateResources() {
+        Resources res = getResources();
+        boolean changed = false;
+        int pageIndicatorWidth = res.getDimensionPixelSize(R.dimen.qs_page_indicator_width);
+        if (pageIndicatorWidth != mPageIndicatorWidth) {
+            mPageIndicatorWidth = pageIndicatorWidth;
+            changed = true;
+        }
+        int pageIndicatorHeight = res.getDimensionPixelSize(R.dimen.qs_page_indicator_height);
+        if (pageIndicatorHeight != mPageIndicatorHeight) {
+            mPageIndicatorHeight = pageIndicatorHeight;
+            changed = true;
+        }
+        int pageIndicatorDotWidth = res.getDimensionPixelSize(R.dimen.qs_page_indicator_dot_width);
+        if (pageIndicatorDotWidth != mPageDotWidth) {
+            mPageDotWidth = pageIndicatorDotWidth;
+            changed = true;
+        }
+        if (changed) {
+            invalidate();
+        }
     }
 
     public void setNumPages(int numPages) {
