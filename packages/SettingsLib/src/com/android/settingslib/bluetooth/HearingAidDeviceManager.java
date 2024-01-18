@@ -15,8 +15,8 @@
  */
 package com.android.settingslib.bluetooth;
 
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
+import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.le.ScanFilter;
@@ -68,14 +68,9 @@ public class HearingAidDeviceManager {
 
     void initHearingAidDeviceIfNeeded(CachedBluetoothDevice newDevice,
             List<ScanFilter> leScanFilters) {
-        long hiSyncId = getHiSyncId(newDevice.getDevice());
-        if (isValidHiSyncId(hiSyncId)) {
-            // Once hiSyncId is valid, assign hearing aid info
-            final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
-                    .setAshaDeviceSide(getDeviceSide(newDevice.getDevice()))
-                    .setAshaDeviceMode(getDeviceMode(newDevice.getDevice()))
-                    .setHiSyncId(hiSyncId);
-            newDevice.setHearingAidInfo(infoBuilder.build());
+        HearingAidInfo info = generateHearingAidInfo(newDevice);
+        if (info != null) {
+            newDevice.setHearingAidInfo(info);
         } else if (leScanFilters != null && !newDevice.isHearingAidDevice()) {
             // If the device is added with hearing aid scan filter during pairing, set an empty
             // hearing aid info to indicate it's a hearing aid device. The info will be updated
@@ -92,38 +87,6 @@ public class HearingAidDeviceManager {
                 }
             }
         }
-    }
-
-    private long getHiSyncId(BluetoothDevice device) {
-        final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
-        final HearingAidProfile profileProxy = profileManager.getHearingAidProfile();
-        if (profileProxy == null) {
-            return BluetoothHearingAid.HI_SYNC_ID_INVALID;
-        }
-
-        return profileProxy.getHiSyncId(device);
-    }
-
-    private int getDeviceSide(BluetoothDevice device) {
-        final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
-        final HearingAidProfile profileProxy = profileManager.getHearingAidProfile();
-        if (profileProxy == null) {
-            Log.w(TAG, "HearingAidProfile is not supported and not ready to fetch device side");
-            return HearingAidProfile.DeviceSide.SIDE_INVALID;
-        }
-
-        return profileProxy.getDeviceSide(device);
-    }
-
-    private int getDeviceMode(BluetoothDevice device) {
-        final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
-        final HearingAidProfile profileProxy = profileManager.getHearingAidProfile();
-        if (profileProxy == null) {
-            Log.w(TAG, "HearingAidProfile is not supported and not ready to fetch device mode");
-            return HearingAidProfile.DeviceMode.MODE_INVALID;
-        }
-
-        return profileProxy.getDeviceMode(device);
     }
 
     boolean setSubDeviceIfNeeded(CachedBluetoothDevice newDevice) {
@@ -157,21 +120,17 @@ public class HearingAidDeviceManager {
 
     // To collect all HearingAid devices and call #onHiSyncIdChanged to group device by HiSyncId
     void updateHearingAidsDevices() {
-        final Set<Long> newSyncIdSet = new HashSet<Long>();
+        final Set<Long> newSyncIdSet = new HashSet<>();
         for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
             // Do nothing if HiSyncId has been assigned
-            if (!isValidHiSyncId(cachedDevice.getHiSyncId())) {
-                final long newHiSyncId = getHiSyncId(cachedDevice.getDevice());
-                // Do nothing if there is no HiSyncId on Bluetooth device
-                if (isValidHiSyncId(newHiSyncId)) {
-                    // Once hiSyncId is valid, assign hearing aid info
-                    final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
-                            .setAshaDeviceSide(getDeviceSide(cachedDevice.getDevice()))
-                            .setAshaDeviceMode(getDeviceMode(cachedDevice.getDevice()))
-                            .setHiSyncId(newHiSyncId);
-                    cachedDevice.setHearingAidInfo(infoBuilder.build());
-
-                    newSyncIdSet.add(newHiSyncId);
+            if (isValidHiSyncId(cachedDevice.getHiSyncId())) {
+                continue;
+            }
+            HearingAidInfo info = generateHearingAidInfo(cachedDevice);
+            if (info != null) {
+                cachedDevice.setHearingAidInfo(info);
+                if (isValidHiSyncId(info.getHiSyncId())) {
+                    newSyncIdSet.add(info.getHiSyncId());
                 }
             }
         }
@@ -372,6 +331,54 @@ public class HearingAidDeviceManager {
                 CachedBluetoothDevice subDevice = cachedDevice.getSubDevice();
                 if (subDevice != null && subDevice.equals(device)) {
                     return cachedDevice;
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isLeAudioHearingAid(CachedBluetoothDevice cachedDevice) {
+        List<LocalBluetoothProfile> profiles = cachedDevice.getProfiles();
+        boolean supportLeAudio = profiles.stream().anyMatch(p -> p instanceof LeAudioProfile);
+        boolean supportHapClient = profiles.stream().anyMatch(p -> p instanceof HapClientProfile);
+        return supportLeAudio && supportHapClient;
+    }
+
+    private boolean isAshaHearingAid(CachedBluetoothDevice cachedDevice) {
+        return cachedDevice.getProfiles().stream().anyMatch(p -> p instanceof HearingAidProfile);
+    }
+
+    private HearingAidInfo generateHearingAidInfo(CachedBluetoothDevice cachedDevice) {
+        final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
+        if (isAshaHearingAid(cachedDevice)) {
+            final HearingAidProfile asha = profileManager.getHearingAidProfile();
+            if (asha == null) {
+                Log.w(TAG, "HearingAidProfile is not supported on this device");
+            } else {
+                long hiSyncId = asha.getHiSyncId(cachedDevice.getDevice());
+                if (isValidHiSyncId(hiSyncId)) {
+                    final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                            .setAshaDeviceSide(asha.getDeviceSide(cachedDevice.getDevice()))
+                            .setAshaDeviceMode(asha.getDeviceMode(cachedDevice.getDevice()))
+                            .setHiSyncId(hiSyncId);
+                    return infoBuilder.build();
+                }
+            }
+        }
+        if (isLeAudioHearingAid(cachedDevice)) {
+            final HapClientProfile hapClientProfile = profileManager.getHapClientProfile();
+            final LeAudioProfile leAudioProfile = profileManager.getLeAudioProfile();
+            if (hapClientProfile == null || leAudioProfile == null) {
+                Log.w(TAG, "HapClientProfile or LeAudioProfile is not supported on this device");
+            } else {
+                int audioLocation = leAudioProfile.getAudioLocation(cachedDevice.getDevice());
+                int hearingAidType = hapClientProfile.getHearingAidType(cachedDevice.getDevice());
+                if (audioLocation != BluetoothLeAudio.AUDIO_LOCATION_INVALID
+                        && hearingAidType != HapClientProfile.HearingAidType.TYPE_INVALID) {
+                    final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                            .setLeAudioLocation(audioLocation)
+                            .setHapDeviceType(hearingAidType);
+                    return infoBuilder.build();
                 }
             }
         }
