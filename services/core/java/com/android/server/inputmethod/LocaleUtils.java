@@ -212,10 +212,16 @@ final class LocaleUtils {
 
     /**
      * Returns the language component of a given locale string.
-     * TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(String)}
+     * TODO(b/321064051): Switch to {@link
+     * com.android.internal.inputmethod.SubtypeLocaleUtils#constructLocaleFromString(String)}
      */
     static String getLanguageFromLocaleString(String locale) {
-        return Locale.forLanguageTag(locale).getLanguage();
+        final int idx = locale.indexOf('_');
+        if (idx < 0) {
+            return locale;
+        } else {
+            return locale.substring(0, idx);
+        }
     }
 
     static Locale getSystemLocaleFromContext(Context context) {
