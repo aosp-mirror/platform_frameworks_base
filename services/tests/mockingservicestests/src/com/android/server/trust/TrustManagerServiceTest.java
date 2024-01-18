@@ -47,6 +47,10 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.face.FaceManager;
+import android.hardware.face.FaceSensorProperties;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -69,6 +73,7 @@ import android.view.WindowManagerGlobal;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -105,6 +110,8 @@ public class TrustManagerServiceTest {
 
     private static final String URI_SCHEME_PACKAGE = "package";
     private static final int TEST_USER_ID = 50;
+    private static final UserInfo TEST_USER =
+            new UserInfo(TEST_USER_ID, "user", UserInfo.FLAG_FULL);
     private static final int PARENT_USER_ID = 60;
     private static final int PROFILE_USER_ID = 70;
     private static final long[] PARENT_BIOMETRIC_SIDS = new long[] { 600L, 601L };
@@ -117,6 +124,8 @@ public class TrustManagerServiceTest {
     private @Mock ActivityManager mActivityManager;
     private @Mock BiometricManager mBiometricManager;
     private @Mock DevicePolicyManager mDevicePolicyManager;
+    private @Mock FaceManager mFaceManager;
+    private @Mock FingerprintManager mFingerprintManager;
     private @Mock IKeystoreAuthorization mKeystoreAuthorization;
     private @Mock LockPatternUtils mLockPatternUtils;
     private @Mock PackageManager mPackageManager;
@@ -132,6 +141,9 @@ public class TrustManagerServiceTest {
     public void setUp() throws Exception {
         when(mActivityManager.isUserRunning(TEST_USER_ID)).thenReturn(true);
         doReturn(mock(IActivityManager.class)).when(() -> ActivityManager.getService());
+
+        when(mFaceManager.getSensorProperties()).thenReturn(List.of());
+        when(mFingerprintManager.getSensorProperties()).thenReturn(List.of());
 
         doReturn(mKeystoreAuthorization).when(() -> Authorization.getService());
 
@@ -161,13 +173,16 @@ public class TrustManagerServiceTest {
         when(mPackageManager.checkPermission(any(), any())).thenReturn(
                 PackageManager.PERMISSION_GRANTED);
 
-        when(mUserManager.getAliveUsers()).thenReturn(
-                List.of(new UserInfo(TEST_USER_ID, "user", UserInfo.FLAG_FULL)));
+        when(mUserManager.getAliveUsers()).thenReturn(List.of(TEST_USER));
+        when(mUserManager.getEnabledProfileIds(TEST_USER_ID)).thenReturn(new int[0]);
+        when(mUserManager.getUserInfo(TEST_USER_ID)).thenReturn(TEST_USER);
 
         when(mWindowManager.isKeyguardLocked()).thenReturn(true);
 
         mMockContext.addMockSystemService(ActivityManager.class, mActivityManager);
         mMockContext.addMockSystemService(BiometricManager.class, mBiometricManager);
+        mMockContext.addMockSystemService(FaceManager.class, mFaceManager);
+        mMockContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
         mMockContext.setMockPackageManager(mPackageManager);
         mMockContext.addMockSystemService(UserManager.class, mUserManager);
         doReturn(mWindowManager).when(() -> WindowManagerGlobal.getWindowManagerService());
@@ -362,9 +377,9 @@ public class TrustManagerServiceTest {
         when(mWindowManager.isKeyguardLocked()).thenReturn(true);
         mTrustManager.reportKeyguardShowingChanged();
         verify(mKeystoreAuthorization)
-                .onDeviceLocked(eq(PARENT_USER_ID), eq(PARENT_BIOMETRIC_SIDS));
+                .onDeviceLocked(eq(PARENT_USER_ID), eq(PARENT_BIOMETRIC_SIDS), eq(false));
         verify(mKeystoreAuthorization)
-                .onDeviceLocked(eq(PROFILE_USER_ID), eq(PARENT_BIOMETRIC_SIDS));
+                .onDeviceLocked(eq(PROFILE_USER_ID), eq(PARENT_BIOMETRIC_SIDS), eq(false));
     }
 
     // Tests that when the device is locked for a managed profile with a *separate* challenge, the
@@ -381,7 +396,188 @@ public class TrustManagerServiceTest {
 
         mTrustManager.setDeviceLockedForUser(PROFILE_USER_ID, true);
         verify(mKeystoreAuthorization)
-                .onDeviceLocked(eq(PROFILE_USER_ID), eq(PROFILE_BIOMETRIC_SIDS));
+                .onDeviceLocked(eq(PROFILE_USER_ID), eq(PROFILE_BIOMETRIC_SIDS), eq(false));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockEnabled_whenWeakFingerprintIsSetupAndAllowed()
+            throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFingerprint(SensorProperties.STRENGTH_WEAK);
+        verifyWeakUnlockEnabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockEnabled_whenWeakFaceIsSetupAndAllowed() throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFace(SensorProperties.STRENGTH_WEAK);
+        verifyWeakUnlockEnabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockEnabled_whenConvenienceFingerprintIsSetupAndAllowed()
+            throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFingerprint(SensorProperties.STRENGTH_CONVENIENCE);
+        verifyWeakUnlockEnabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockEnabled_whenConvenienceFaceIsSetupAndAllowed()
+            throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFace(SensorProperties.STRENGTH_CONVENIENCE);
+        verifyWeakUnlockEnabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockDisabled_whenStrongAuthRequired() throws Exception {
+        setupStrongAuthTracker(StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN, true);
+        setupFace(SensorProperties.STRENGTH_WEAK);
+        verifyWeakUnlockDisabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockDisabled_whenNonStrongBiometricNotAllowed() throws Exception {
+        setupStrongAuthTracker(StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED,
+                /* isNonStrongBiometricAllowed= */ false);
+        setupFace(SensorProperties.STRENGTH_WEAK);
+        verifyWeakUnlockDisabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockDisabled_whenWeakFingerprintSensorIsPresentButNotEnrolled()
+            throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFingerprint(SensorProperties.STRENGTH_WEAK, /* enrolled= */ false);
+        verifyWeakUnlockDisabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockDisabled_whenWeakFaceSensorIsPresentButNotEnrolled()
+            throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFace(SensorProperties.STRENGTH_WEAK, /* enrolled= */ false);
+        verifyWeakUnlockDisabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void
+            testKeystoreWeakUnlockDisabled_whenWeakFingerprintIsSetupButForbiddenByDevicePolicy()
+            throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFingerprint(SensorProperties.STRENGTH_WEAK);
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, TEST_USER_ID))
+                .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
+        verifyWeakUnlockDisabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockDisabled_whenWeakFaceIsSetupButForbiddenByDevicePolicy()
+            throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFace(SensorProperties.STRENGTH_WEAK);
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, TEST_USER_ID))
+                .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FACE);
+        verifyWeakUnlockDisabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockDisabled_whenOnlyStrongFingerprintIsSetup() throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFingerprint(SensorProperties.STRENGTH_STRONG);
+        verifyWeakUnlockDisabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockDisabled_whenOnlyStrongFaceIsSetup() throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        setupFace(SensorProperties.STRENGTH_STRONG);
+        verifyWeakUnlockDisabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_FIX_UNLOCKED_DEVICE_REQUIRED_KEYS_V2)
+    public void testKeystoreWeakUnlockDisabled_whenNoBiometricsAreSetup() throws Exception {
+        setupStrongAuthTrackerToAllowEverything();
+        verifyWeakUnlockDisabled();
+    }
+
+    private void setupStrongAuthTrackerToAllowEverything() throws Exception {
+        setupStrongAuthTracker(StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED, true);
+    }
+
+    private void setupStrongAuthTracker(int strongAuthFlags, boolean isNonStrongBiometricAllowed)
+            throws Exception {
+        bootService();
+        mService.onUserSwitching(null, new SystemService.TargetUser(TEST_USER));
+
+        ArgumentCaptor<StrongAuthTracker> strongAuthTracker =
+                ArgumentCaptor.forClass(StrongAuthTracker.class);
+        verify(mLockPatternUtils).registerStrongAuthTracker(strongAuthTracker.capture());
+        strongAuthTracker.getValue().getStub().onStrongAuthRequiredChanged(
+                strongAuthFlags, TEST_USER_ID);
+        strongAuthTracker.getValue().getStub().onIsNonStrongBiometricAllowedChanged(
+                isNonStrongBiometricAllowed, TEST_USER_ID);
+        mService.waitForIdle();
+    }
+
+    private void setupFingerprint(int strength) {
+        setupFingerprint(strength, /* enrolled= */ true);
+    }
+
+    private void setupFingerprint(int strength, boolean enrolled) {
+        int sensorId = 100;
+        List<SensorProperties.ComponentInfo> componentInfo = List.of();
+        SensorProperties sensor = new SensorProperties(sensorId, strength, componentInfo);
+        when(mFingerprintManager.getSensorProperties()).thenReturn(List.of(sensor));
+        when(mFingerprintManager.hasEnrolledTemplates(TEST_USER_ID)).thenReturn(enrolled);
+    }
+
+    private void setupFace(int strength) {
+        setupFace(strength, /* enrolled= */ true);
+    }
+
+    private void setupFace(int strength, boolean enrolled) {
+        int sensorId = 100;
+        List<SensorProperties.ComponentInfo> componentInfo = List.of();
+        FaceSensorProperties sensor = new FaceSensorProperties(
+                sensorId, strength, componentInfo, FaceSensorProperties.TYPE_RGB);
+        when(mFaceManager.getSensorProperties()).thenReturn(List.of(sensor));
+        when(mFaceManager.hasEnrolledTemplates(TEST_USER_ID)).thenReturn(enrolled);
+    }
+
+    private void verifyWeakUnlockEnabled() throws Exception {
+        verifyWeakUnlockValue(true);
+    }
+
+    private void verifyWeakUnlockDisabled() throws Exception {
+        verifyWeakUnlockValue(false);
+    }
+
+    // Simulates a device unlock and a device lock, then verifies that the expected
+    // weakUnlockEnabled flag was passed to Keystore's onDeviceLocked method.
+    private void verifyWeakUnlockValue(boolean expectedWeakUnlockEnabled) throws Exception {
+        when(mWindowManager.isKeyguardLocked()).thenReturn(false);
+        mTrustManager.reportKeyguardShowingChanged();
+        verify(mKeystoreAuthorization).onDeviceUnlocked(TEST_USER_ID, null);
+
+        when(mWindowManager.isKeyguardLocked()).thenReturn(true);
+        mTrustManager.reportKeyguardShowingChanged();
+        verify(mKeystoreAuthorization).onDeviceLocked(eq(TEST_USER_ID), any(),
+                eq(expectedWeakUnlockEnabled));
     }
 
     private void setupMocksForProfile(boolean unifiedChallenge) {
