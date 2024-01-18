@@ -3243,16 +3243,8 @@ public final class Settings {
 
         private static final String NAME_EQ_PLACEHOLDER = "name=?";
 
-        // Cached values of queried settings.
-        // Key is the setting's name, value is the setting's value.
         // Must synchronize on 'this' to access mValues and mValuesVersion.
         private final ArrayMap<String, String> mValues = new ArrayMap<>();
-
-        // Cached values for queried prefixes.
-        // Key is the prefix, value is all of the settings under the prefix, mapped from a setting's
-        // name to a setting's value. The name string doesn't include the prefix.
-        // Must synchronize on 'this' to access.
-        private final ArrayMap<String, ArrayMap<String, String>> mPrefixToValues = new ArrayMap<>();
 
         private final Uri mUri;
         @UnsupportedAppUsage
@@ -3600,13 +3592,15 @@ public final class Settings {
                     || applicationInfo.isSignedWithPlatformKey();
         }
 
-        private Map<String, String> getStringsForPrefixStripPrefix(
-                ContentResolver cr, String prefix, List<String> names) {
+        private ArrayMap<String, String> getStringsForPrefixStripPrefix(
+                ContentResolver cr, String prefix, String[] names) {
             String namespace = prefix.substring(0, prefix.length() - 1);
             ArrayMap<String, String> keyValues = new ArrayMap<>();
             int substringLength = prefix.length();
+
             int currentGeneration = -1;
             boolean needsGenerationTracker = false;
+
             synchronized (NameValueCache.this) {
                 final GenerationTracker generationTracker = mGenerationTrackers.get(prefix);
                 if (generationTracker != null) {
@@ -3620,22 +3614,40 @@ public final class Settings {
                         // generation tracker and request a new one
                         generationTracker.destroy();
                         mGenerationTrackers.remove(prefix);
-                        mPrefixToValues.remove(prefix);
+                        for (int i = mValues.size() - 1; i >= 0; i--) {
+                            String key = mValues.keyAt(i);
+                            if (key.startsWith(prefix)) {
+                                mValues.remove(key);
+                            }
+                        }
                         needsGenerationTracker = true;
                     } else {
-                        final ArrayMap<String, String> cachedSettings = mPrefixToValues.get(prefix);
-                        if (cachedSettings != null) {
-                            if (!names.isEmpty()) {
+                        boolean prefixCached = mValues.containsKey(prefix);
+                        if (prefixCached) {
+                            if (DEBUG) {
+                                Log.i(TAG, "Cache hit for prefix:" + prefix);
+                            }
+                            if (names.length > 0) {
                                 for (String name : names) {
-                                    // The cache can contain "null" values, need to use containsKey.
-                                    if (cachedSettings.containsKey(name)) {
+                                    // mValues can contain "null" values, need to use containsKey.
+                                    if (mValues.containsKey(name)) {
                                         keyValues.put(
-                                                name,
-                                                cachedSettings.get(name));
+                                                name.substring(substringLength),
+                                                mValues.get(name));
                                     }
                                 }
                             } else {
-                                keyValues.putAll(cachedSettings);
+                                for (int i = 0; i < mValues.size(); ++i) {
+                                    String key = mValues.keyAt(i);
+                                    // Explicitly exclude the prefix as it is only there to
+                                    // signal that the prefix has been cached.
+                                    if (key.startsWith(prefix) && !key.equals(prefix)) {
+                                        String value = mValues.valueAt(i);
+                                        keyValues.put(
+                                                key.substring(substringLength),
+                                                value);
+                                    }
+                                }
                             }
                             return keyValues;
                         }
@@ -3645,6 +3657,7 @@ public final class Settings {
                     needsGenerationTracker = true;
                 }
             }
+
             if (mCallListCommand == null) {
                 // No list command specified, return empty map
                 return keyValues;
@@ -3689,23 +3702,20 @@ public final class Settings {
                 }
 
                 // All flags for the namespace
-                HashMap<String, String> flagsToValues =
+                Map<String, String> flagsToValues =
                         (HashMap) b.getSerializable(Settings.NameValueTable.VALUE, java.util.HashMap.class);
-                if (flagsToValues == null) {
-                    return keyValues;
-                }
                 // Only the flags requested by the caller
-                if (!names.isEmpty()) {
+                if (names.length > 0) {
                     for (String name : names) {
                         // flagsToValues can contain "null" values, need to use containsKey.
-                        final String key = Config.createCompositeName(namespace, name);
-                        if (flagsToValues.containsKey(key)) {
+                        if (flagsToValues.containsKey(name)) {
                             keyValues.put(
-                                    name,
-                                    flagsToValues.get(key));
+                                    name.substring(substringLength),
+                                    flagsToValues.get(name));
                         }
                     }
                 } else {
+                    keyValues.ensureCapacity(keyValues.size() + flagsToValues.size());
                     for (Map.Entry<String, String> flag : flagsToValues.entrySet()) {
                         keyValues.put(
                                 flag.getKey().substring(substringLength),
@@ -3741,18 +3751,10 @@ public final class Settings {
                         if (DEBUG) {
                             Log.i(TAG, "Updating cache for prefix:" + prefix);
                         }
-                        // Cache the complete list of flags for the namespace for bulk queries.
-                        // In this cached list, the setting's name doesn't include the prefix.
-                        ArrayMap<String, String> namesToValues =
-                                new ArrayMap<>(flagsToValues.size() + 1);
-                        for (Map.Entry<String, String> flag : flagsToValues.entrySet()) {
-                            namesToValues.put(
-                                    flag.getKey().substring(substringLength),
-                                    flag.getValue());
-                        }
-                        // Legacy behavior, we return <"", null> when queried with name = ""
-                        namesToValues.put("", null);
-                        mPrefixToValues.put(prefix, namesToValues);
+                        // cache the complete list of flags for the namespace
+                        mValues.putAll(flagsToValues);
+                        // Adding the prefix as a signal that the prefix is cached.
+                        mValues.put(prefix, null);
                     }
                 }
                 return keyValues;
@@ -19938,9 +19940,16 @@ public final class Settings {
         @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
         public static Map<String, String> getStrings(@NonNull ContentResolver resolver,
                 @NonNull String namespace, @NonNull List<String> names) {
+            String[] compositeNames = new String[names.size()];
+            for (int i = 0, size = names.size(); i < size; ++i) {
+                compositeNames[i] = createCompositeName(namespace, names.get(i));
+            }
+
             String prefix = createPrefix(namespace);
 
-            return sNameValueCache.getStringsForPrefixStripPrefix(resolver, prefix, names);
+            ArrayMap<String, String> keyValues = sNameValueCache.getStringsForPrefixStripPrefix(
+                    resolver, prefix, compositeNames);
+            return keyValues;
         }
 
         /**
@@ -20262,7 +20271,7 @@ public final class Settings {
             }
         }
 
-        static String createCompositeName(@NonNull String namespace, @NonNull String name) {
+        private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
             Preconditions.checkNotNull(namespace);
             Preconditions.checkNotNull(name);
             var sb = new StringBuilder(namespace.length() + 1 + name.length());
