@@ -1,13 +1,6 @@
 package: "com.android.wm.shell"
 
 flag {
-    name: "example_flag"
-    namespace: "multitasking"
-    description: "An Example Flag"
-    bug: "300136750"
-}
-
-flag {
     name: "enable_app_pairs"
     namespace: "multitasking"
     description: "Enables the ability to create and save app pairs to the Home screen"
