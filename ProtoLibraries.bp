@@ -34,6 +34,7 @@ gensrcs {
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
+        ":libtombstone_proto-src",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
     ],
