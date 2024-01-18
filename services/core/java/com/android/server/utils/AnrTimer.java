@@ -111,7 +111,7 @@ public class AnrTimer<V> implements AutoCloseable {
      * but it can be changed for local testing.
      */
     private static boolean anrTimerServiceEnabled() {
-        return Flags.anrTimerServiceEnabled();
+        return Flags.anrTimerService();
     }
 
     /**
