@@ -30,6 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -544,8 +545,14 @@ public final class WebViewFactory {
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getChromiumProviderClass()");
             try {
                 sTimestamps.mAddAssetsStart = SystemClock.uptimeMillis();
-                for (String newAssetPath : webViewContext.getApplicationInfo().getAllApkPaths()) {
-                    initialApplication.getAssets().addAssetPathAsSharedLibrary(newAssetPath);
+                if (android.content.res.Flags.registerResourcePaths()) {
+                    Resources.registerResourcePaths(webViewContext.getPackageName(),
+                            webViewContext.getApplicationInfo());
+                } else {
+                    for (String newAssetPath : webViewContext.getApplicationInfo()
+                            .getAllApkPaths()) {
+                        initialApplication.getAssets().addAssetPathAsSharedLibrary(newAssetPath);
+                    }
                 }
                 sTimestamps.mAddAssetsEnd = sTimestamps.mGetClassLoaderStart =
                         SystemClock.uptimeMillis();
