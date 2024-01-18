@@ -19,6 +19,10 @@ package com.android.internal.util;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_MANAGED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -62,12 +66,15 @@ import java.util.List;
 @SmallTest
 public class LockPatternUtilsTest {
 
+    private ILockSettings mLockSettings;
+    private static final int USER_ID = 1;
     private static final int DEMO_USER_ID = 5;
 
     private LockPatternUtils mLockPatternUtils;
 
     private void configureTest(boolean isSecure, boolean isDemoUser, int deviceDemoMode)
             throws Exception {
+        mLockSettings = Mockito.mock(ILockSettings.class);
         final Context context = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
         final MockContentResolver cr = new MockContentResolver(context);
@@ -75,15 +82,14 @@ public class LockPatternUtilsTest {
         when(context.getContentResolver()).thenReturn(cr);
         Settings.Global.putInt(cr, Settings.Global.DEVICE_DEMO_MODE, deviceDemoMode);
 
-        final ILockSettings ils = Mockito.mock(ILockSettings.class);
-        when(ils.getCredentialType(DEMO_USER_ID)).thenReturn(
+        when(mLockSettings.getCredentialType(DEMO_USER_ID)).thenReturn(
                 isSecure ? LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
                          : LockPatternUtils.CREDENTIAL_TYPE_NONE);
-        when(ils.getLong("lockscreen.password_type", PASSWORD_QUALITY_UNSPECIFIED, DEMO_USER_ID))
-                .thenReturn((long) PASSWORD_QUALITY_MANAGED);
+        when(mLockSettings.getLong("lockscreen.password_type", PASSWORD_QUALITY_UNSPECIFIED,
+                DEMO_USER_ID)).thenReturn((long) PASSWORD_QUALITY_MANAGED);
         // TODO(b/63758238): stop spying the class under test
         mLockPatternUtils = spy(new LockPatternUtils(context));
-        when(mLockPatternUtils.getLockSettings()).thenReturn(ils);
+        when(mLockPatternUtils.getLockSettings()).thenReturn(mLockSettings);
         doReturn(true).when(mLockPatternUtils).hasSecureLockScreen();
 
         final UserInfo userInfo = Mockito.mock(UserInfo.class);
@@ -91,6 +97,31 @@ public class LockPatternUtilsTest {
         final UserManager um = Mockito.mock(UserManager.class);
         when(um.getUserInfo(DEMO_USER_ID)).thenReturn(userInfo);
         when(context.getSystemService(Context.USER_SERVICE)).thenReturn(um);
+    }
+
+    @Test
+    public void isUserInLockDown() throws Exception {
+        configureTest(true, false, 2);
+
+        // GIVEN strong auth not required
+        when(mLockSettings.getStrongAuthForUser(USER_ID)).thenReturn(STRONG_AUTH_NOT_REQUIRED);
+
+        // THEN user isn't in lockdown
+        assertFalse(mLockPatternUtils.isUserInLockdown(USER_ID));
+
+        // GIVEN lockdown
+        when(mLockSettings.getStrongAuthForUser(USER_ID)).thenReturn(
+                STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+
+        // THEN user is in lockdown
+        assertTrue(mLockPatternUtils.isUserInLockdown(USER_ID));
+
+        // GIVEN lockdown and lockout
+        when(mLockSettings.getStrongAuthForUser(USER_ID)).thenReturn(
+                STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN | STRONG_AUTH_REQUIRED_AFTER_LOCKOUT);
+
+        // THEN user is in lockdown
+        assertTrue(mLockPatternUtils.isUserInLockdown(USER_ID));
     }
 
     @Test
