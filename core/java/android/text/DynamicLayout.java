@@ -40,6 +40,7 @@ import android.util.Pools.SynchronizedPool;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
+import com.android.text.flags.Flags;
 
 import java.lang.ref.WeakReference;
 
@@ -1276,8 +1277,21 @@ public class DynamicLayout extends Layout {
         }
 
         public void onSpanRemoved(Spannable s, Object o, int start, int end) {
-            if (o instanceof UpdateLayout)
-                transformAndReflow(s, start, end);
+            if (o instanceof UpdateLayout) {
+                if (Flags.insertModeCrashWhenDelete()) {
+                    final DynamicLayout dynamicLayout = mLayout.get();
+                    if (dynamicLayout != null && dynamicLayout.mDisplay instanceof OffsetMapping) {
+                        // It's possible that a Span is removed when the text covering it is
+                        // deleted, in this case, the original start and end of the span might be
+                        // OOB. So it'll reflow the entire string instead.
+                        reflow(s, 0, 0, s.length());
+                    } else {
+                        reflow(s, start, end - start, end - start);
+                    }
+                } else {
+                    transformAndReflow(s, start, end);
+                }
+            }
         }
 
         public void onSpanChanged(Spannable s, Object o, int start, int end, int nstart, int nend) {
@@ -1287,8 +1301,21 @@ public class DynamicLayout extends Layout {
                     // instead of causing an exception
                     start = 0;
                 }
-                transformAndReflow(s, start, end);
-                transformAndReflow(s, nstart, nend);
+                if (Flags.insertModeCrashWhenDelete()) {
+                    final DynamicLayout dynamicLayout = mLayout.get();
+                    if (dynamicLayout != null && dynamicLayout.mDisplay instanceof OffsetMapping) {
+                        // When text is changed, it'll also trigger onSpanChanged. In this case we
+                        // can't determine the updated range in the transformed text. So it'll
+                        // reflow the entire range instead.
+                        reflow(s, 0, 0, s.length());
+                    } else {
+                        reflow(s, start, end - start, end - start);
+                        reflow(s, nstart, nend - nstart, nend - nstart);
+                    }
+                } else {
+                    transformAndReflow(s, start, end);
+                    transformAndReflow(s, nstart, nend);
+                }
             }
         }
 

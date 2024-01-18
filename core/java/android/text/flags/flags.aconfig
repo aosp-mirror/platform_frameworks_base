@@ -89,3 +89,10 @@ flag {
   description: "Feature flag for clearing focus when the escape key is pressed."
   bug: "312921137"
 }
+
+flag {
+  name: "insert_mode_crash_when_delete"
+  namespace: "text"
+  description: "A feature flag for fixing the crash while delete text in insert mode."
+  bug: "314254153"
+}
