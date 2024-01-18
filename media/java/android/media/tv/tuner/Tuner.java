@@ -919,7 +919,7 @@ public class Tuner implements AutoCloseable  {
                 if (DEBUG) {
                     Log.d(TAG, "calling mLnb.close() : " + mClientId);
                 }
-                mLnb.close();
+                mLnb.closeInternal();
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "NOT calling mLnb.close() : " + mClientId);
@@ -2353,6 +2353,7 @@ public class Tuner implements AutoCloseable  {
     @Nullable
     public Lnb openLnbByName(@NonNull String name, @CallbackExecutor @NonNull Executor executor,
             @NonNull LnbCallback cb) {
+        acquireTRMSLock("openLnbByName");
         mLnbLock.lock();
         try {
             Objects.requireNonNull(name, "LNB name must not be null");
@@ -2361,7 +2362,7 @@ public class Tuner implements AutoCloseable  {
             Lnb newLnb = nativeOpenLnbByName(name);
             if (newLnb != null) {
                 if (mLnb != null) {
-                    mLnb.close();
+                    mLnb.closeInternal();
                     mLnbHandle = null;
                 }
                 mLnb = newLnb;
@@ -2372,6 +2373,7 @@ public class Tuner implements AutoCloseable  {
             }
             return mLnb;
         } finally {
+            releaseTRMSLock();
             mLnbLock.unlock();
         }
     }
@@ -2789,8 +2791,8 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    // Must be called while TRMS lock is being held
     /* package */ void releaseLnb() {
-        acquireTRMSLock("releaseLnb()");
         mLnbLock.lock();
         try {
             if (mLnbHandle != null) {
@@ -2807,7 +2809,6 @@ public class Tuner implements AutoCloseable  {
             }
             mLnb = null;
         } finally {
-            releaseTRMSLock();
             mLnbLock.unlock();
         }
     }
