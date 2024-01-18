@@ -35,13 +35,12 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
-import com.android.systemui.statusbar.AlertingNotificationManager;
-import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.BaseHeadsUpManagerTest;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
@@ -64,7 +63,7 @@ import kotlinx.coroutines.flow.StateFlowKt;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
+public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Rule public MockitoRule rule = MockitoJUnit.rule();
 
     private final HeadsUpManagerLogger mHeadsUpManagerLogger = new HeadsUpManagerLogger(
@@ -135,11 +134,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mJavaAdapter,
                 mShadeInteractor
         );
-    }
-
-    @Override
-    protected AlertingNotificationManager createAlertingNotificationManager() {
-        return createHeadsUpManagerPhone();
     }
 
     @Before
