@@ -22,6 +22,9 @@ import dagger.Module
 
 @Module
 interface CommunalTutorialRepositoryModule {
+    // TODO(b/320769333): use [CommunalTutorialRepositoryImpl] when tutorial is ready.
     @Binds
-    fun communalTutorialRepository(impl: CommunalTutorialRepositoryImpl): CommunalTutorialRepository
+    fun communalTutorialRepository(
+        impl: CommunalTutorialDisabledRepositoryImpl
+    ): CommunalTutorialRepository
 }
