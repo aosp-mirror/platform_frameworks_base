@@ -882,8 +882,6 @@ public class SizeCompatTests extends WindowTestsBase {
 
         spyOn(mActivity.mLetterboxUiController);
         doReturn(true).when(mActivity.mLetterboxUiController)
-                .isSurfaceReadyToShow(any());
-        doReturn(true).when(mActivity.mLetterboxUiController)
                 .isSurfaceVisible(any());
 
         assertTrue(mActivity.mLetterboxUiController.shouldShowLetterboxUi(

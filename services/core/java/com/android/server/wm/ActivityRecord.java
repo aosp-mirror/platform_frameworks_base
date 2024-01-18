@@ -2631,10 +2631,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (snapshot == null) {
             return false;
         }
-        if (!snapshot.getTopActivityComponent().equals(mActivityComponent)) {
-            // Obsoleted snapshot.
-            return false;
-        }
+        return isSnapshotComponentCompatible(snapshot) && isSnapshotOrientationCompatible(snapshot);
+    }
+
+    /**
+     * Returns {@code true} if the top activity component of task snapshot equals to this activity.
+     */
+    boolean isSnapshotComponentCompatible(@NonNull TaskSnapshot snapshot) {
+        return snapshot.getTopActivityComponent().equals(mActivityComponent);
+    }
+
+    /**
+     * Returns {@code true} if the orientation of task snapshot is compatible with this activity.
+     */
+    boolean isSnapshotOrientationCompatible(@NonNull TaskSnapshot snapshot) {
         final int rotation = mDisplayContent.rotationForActivityInDifferentOrientation(this);
         final int currentRotation = task.getWindowConfiguration().getRotation();
         final int targetRotation = rotation != ROTATION_UNDEFINED

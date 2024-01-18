@@ -1424,7 +1424,7 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        if (mIsRelaunchingAfterRequestedOrientationChanged || !isSurfaceReadyToShow(mainWindow)) {
+        if (mIsRelaunchingAfterRequestedOrientationChanged) {
             return mLastShouldShowLetterboxUi;
         }
 
@@ -1439,13 +1439,6 @@ final class LetterboxUiController {
         mLastShouldShowLetterboxUi = shouldShowLetterboxUi;
 
         return shouldShowLetterboxUi;
-    }
-
-    @VisibleForTesting
-    boolean isSurfaceReadyToShow(WindowState mainWindow) {
-        return mainWindow.isDrawn() // Regular case
-                // Waiting for relayoutWindow to call preserveSurface
-                || mainWindow.isDragResizeChanged();
     }
 
     @VisibleForTesting

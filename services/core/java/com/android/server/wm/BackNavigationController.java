@@ -938,6 +938,18 @@ class BackNavigationController {
                 return;
             }
 
+            // Start fixed rotation for previous activity before create animation.
+            if (openingActivities.length == 1) {
+                final ActivityRecord next = openingActivities[0];
+                final DisplayContent dc = next.mDisplayContent;
+                dc.rotateInDifferentOrientationIfNeeded(next);
+                if (next.hasFixedRotationTransform()) {
+                    // Set the record so we can recognize it to continue to update display
+                    // orientation if the previous activity becomes the top later.
+                    dc.setFixedRotationLaunchingApp(next,
+                            next.getWindowConfiguration().getRotation());
+                }
+            }
             mOpenAnimAdaptor = new BackWindowAnimationAdaptorWrapper(true, mSwitchType, open);
             if (!mOpenAnimAdaptor.isValid()) {
                 Slog.w(TAG, "compose animations fail, skip");
@@ -1603,16 +1615,6 @@ class BackNavigationController {
         }
         activity.mLaunchTaskBehind = true;
 
-        // Handle fixed rotation launching app.
-        final DisplayContent dc = activity.mDisplayContent;
-        dc.rotateInDifferentOrientationIfNeeded(activity);
-        if (activity.hasFixedRotationTransform()) {
-            // Set the record so we can recognize it to continue to update display
-            // orientation if the previous activity becomes the top later.
-            dc.setFixedRotationLaunchingApp(activity,
-                    activity.getWindowConfiguration().getRotation());
-        }
-
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "Setting Activity.mLauncherTaskBehind to true. Activity=%s", activity);
         activity.mTaskSupervisor.mStoppingActivities.remove(activity);
@@ -1680,20 +1682,37 @@ class BackNavigationController {
 
     static TaskSnapshot getSnapshot(@NonNull WindowContainer w,
             ActivityRecord[] visibleOpenActivities) {
+        TaskSnapshot snapshot = null;
         if (w.asTask() != null) {
             final Task task = w.asTask();
-            return task.mRootWindowContainer.mWindowManager.mTaskSnapshotController.getSnapshot(
+            snapshot = task.mRootWindowContainer.mWindowManager.mTaskSnapshotController.getSnapshot(
                     task.mTaskId, task.mUserId, false /* restoreFromDisk */,
                     false /* isLowResolution */);
-        }
-
-        if (w.asActivityRecord() != null) {
+        } else if (w.asActivityRecord() != null) {
             final ActivityRecord ar = w.asActivityRecord();
-            return ar.mWmService.mSnapshotController.mActivitySnapshotController
+            snapshot = ar.mWmService.mSnapshotController.mActivitySnapshotController
                     .getSnapshot(visibleOpenActivities);
         }
-        return null;
+
+        return isSnapshotCompatible(snapshot, visibleOpenActivities) ? snapshot : null;
     }
+
+    static boolean isSnapshotCompatible(@NonNull TaskSnapshot snapshot,
+            @NonNull ActivityRecord[] visibleOpenActivities) {
+        if (snapshot == null) {
+            return false;
+        }
+        boolean oneComponentMatch = false;
+        for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {
+            final ActivityRecord ar = visibleOpenActivities[i];
+            if (!ar.isSnapshotOrientationCompatible(snapshot)) {
+                return false;
+            }
+            oneComponentMatch |= ar.isSnapshotComponentCompatible(snapshot);
+        }
+        return oneComponentMatch;
+    }
+
 
     void setWindowManager(WindowManagerService wm) {
         mWindowManagerService = wm;
