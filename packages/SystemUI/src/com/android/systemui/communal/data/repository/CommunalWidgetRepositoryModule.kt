@@ -17,11 +17,11 @@
 
 package com.android.systemui.communal.data.repository
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.res.Resources
 import com.android.systemui.communal.shared.CommunalWidgetHost
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -48,15 +48,15 @@ interface CommunalWidgetRepositoryModule {
 
         @SysUISingleton
         @Provides
-        fun provideAppWidgetHost(@Application context: Context): AppWidgetHost {
-            return AppWidgetHost(context, APP_WIDGET_HOST_ID)
+        fun provideCommunalAppWidgetHost(@Application context: Context): CommunalAppWidgetHost {
+            return CommunalAppWidgetHost(context, APP_WIDGET_HOST_ID)
         }
 
         @SysUISingleton
         @Provides
         fun provideCommunalWidgetHost(
             appWidgetManager: Optional<AppWidgetManager>,
-            appWidgetHost: AppWidgetHost,
+            appWidgetHost: CommunalAppWidgetHost,
             @CommunalLog logBuffer: LogBuffer,
         ): CommunalWidgetHost {
             return CommunalWidgetHost(appWidgetManager, appWidgetHost, logBuffer)

@@ -20,7 +20,6 @@ import android.app.Activity
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.app.ActivityOptions
-import android.appwidget.AppWidgetHost
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.widget.RemoteViews
@@ -28,6 +27,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalUiEvent
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.dagger.MediaModule
@@ -48,7 +48,7 @@ class CommunalEditModeViewModel
 @Inject
 constructor(
     private val communalInteractor: CommunalInteractor,
-    private val appWidgetHost: AppWidgetHost,
+    private val appWidgetHost: CommunalAppWidgetHost,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     private val uiEventLogger: UiEventLogger,
 ) : BaseCommunalViewModel(communalInteractor, mediaHost) {

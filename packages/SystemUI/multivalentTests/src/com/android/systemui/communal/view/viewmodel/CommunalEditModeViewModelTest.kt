@@ -19,7 +19,6 @@ package com.android.systemui.communal.view.viewmodel
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.app.smartspace.SmartspaceTarget
-import android.appwidget.AppWidgetHost
 import android.content.ComponentName
 import android.provider.Settings
 import android.widget.RemoteViews
@@ -36,6 +35,7 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
@@ -61,7 +61,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class CommunalEditModeViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
-    @Mock private lateinit var appWidgetHost: AppWidgetHost
+    @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
     @Mock private lateinit var uiEventLogger: UiEventLogger
 
     private val kosmos = testKosmos()
