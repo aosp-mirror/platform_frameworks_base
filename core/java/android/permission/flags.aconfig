@@ -86,10 +86,3 @@ flag {
     description: "This flag is used to enabled the Wallet Role for all users on the device"
     bug: "283989236"
 }
-
-flag {
-  name: "runtime_permission_appops_mapping"
-  namespace: "permissions"
-  description: "Use runtime permission state to determine appop state"
-  bug: "266164193"
-}
