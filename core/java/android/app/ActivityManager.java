@@ -4402,7 +4402,7 @@ public class ActivityManager {
     }
 
     /**
-     * Start monitoring changes to the importance of uids running in the system.
+     * Start monitoring changes to the importance of all uids running in the system.
      * @param listener The listener callback that will receive change reports.
      * @param importanceCutpoint The level of importance in which the caller is interested
      * in differences.  For example, if {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE}
@@ -4422,17 +4422,48 @@ public class ActivityManager {
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public void addOnUidImportanceListener(OnUidImportanceListener listener,
             @RunningAppProcessInfo.Importance int importanceCutpoint) {
-        synchronized (this) {
+        addOnUidImportanceListenerInternal(listener, importanceCutpoint, null /* uids */);
+    }
+
+    /**
+     * Start monitoring changes to the importance of given uids running in the system.
+     *
+     * @param listener The listener callback that will receive change reports.
+     * @param importanceCutpoint The level of importance in which the caller is interested
+     * in differences.  For example, if {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE}
+     * is used here, you will receive a call each time a uids importance transitions between
+     * being <= {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE} and
+     * > {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE}.
+     * @param uids The UIDs that this listener is interested with. A {@code null} value means
+     * all UIDs will be monitored by this listener, this will be equivalent to the
+     * {@link #addOnUidImportanceListener(OnUidImportanceListener, int)} in this case.
+     *
+     * @throws IllegalArgumentException If the listener is already registered.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UID_IMPORTANCE_LISTENER_FOR_UIDS)
+    @SystemApi
+    @SuppressLint("SamShouldBeLast")
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    public void addOnUidImportanceListener(@NonNull OnUidImportanceListener listener,
+            @RunningAppProcessInfo.Importance int importanceCutpoint, @Nullable int[] uids) {
+        addOnUidImportanceListenerInternal(listener, importanceCutpoint, uids);
+    }
+
+    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+    private void addOnUidImportanceListenerInternal(@NonNull OnUidImportanceListener listener,
+            @RunningAppProcessInfo.Importance int importanceCutpoint, @Nullable int[] uids) {
+        synchronized (mImportanceListeners) {
             if (mImportanceListeners.containsKey(listener)) {
                 throw new IllegalArgumentException("Listener already registered: " + listener);
             }
             // TODO: implement the cut point in the system process to avoid IPCs.
             MyUidObserver observer = new MyUidObserver(listener, mContext);
             try {
-                getService().registerUidObserver(observer,
+                getService().registerUidObserverForUids(observer,
                         UID_OBSERVER_PROCSTATE | UID_OBSERVER_GONE,
                         RunningAppProcessInfo.importanceToProcState(importanceCutpoint),
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), uids);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -4450,7 +4481,7 @@ public class ActivityManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
     public void removeOnUidImportanceListener(OnUidImportanceListener listener) {
-        synchronized (this) {
+        synchronized (mImportanceListeners) {
             MyUidObserver observer = mImportanceListeners.remove(listener);
             if (observer == null) {
                 throw new IllegalArgumentException("Listener not registered: " + listener);

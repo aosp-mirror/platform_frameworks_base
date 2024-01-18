@@ -20,3 +20,10 @@ flag {
     description: "API to track and query restrictions applied to apps"
     bug: "320150834"
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "uid_importance_listener_for_uids"
+     description: "API to add OnUidImportanceListener with targetted UIDs"
+     bug: "286258140"
+}

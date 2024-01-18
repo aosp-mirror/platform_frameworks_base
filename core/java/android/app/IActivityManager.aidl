@@ -116,6 +116,7 @@ interface IActivityManager {
      * @throws RemoteException
      * @return Returns A binder token identifying the UidObserver registration.
      */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     IBinder registerUidObserverForUids(in IUidObserver observer, int which, int cutpoint,
             String callingPackage, in int[] uids);
 
