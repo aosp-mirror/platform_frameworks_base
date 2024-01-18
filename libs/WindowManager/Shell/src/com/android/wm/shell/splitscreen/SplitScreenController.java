@@ -440,6 +440,17 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     /**
+     * Performs previous child eviction and such to prepare for the pip task expending into one of
+     * the split stages
+     *
+     * @param taskInfo TaskInfo of the pip task
+     */
+    public void onPipExpandToSplit(WindowContainerTransaction wct,
+            ActivityManager.RunningTaskInfo taskInfo) {
+        mStageCoordinator.onPipExpandToSplit(wct, taskInfo);
+    }
+
+    /**
      * Doing necessary window transaction for other transition handler need to exit split in
      * transition.
      */

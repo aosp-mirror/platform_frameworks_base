@@ -589,9 +589,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             if (requestEnterSplit && mSplitScreenOptional.isPresent()) {
                 wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
-                mSplitScreenOptional.get().prepareEnterSplitScreen(wct, mTaskInfo,
-                        isPipToTopLeft()
-                                ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT);
+                mSplitScreenOptional.get().onPipExpandToSplit(wct, mTaskInfo);
                 mPipTransitionController.startExitTransition(
                         TRANSIT_EXIT_PIP_TO_SPLIT, wct, destinationBounds);
                 return;

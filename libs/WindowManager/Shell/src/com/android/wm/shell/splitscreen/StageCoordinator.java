@@ -2979,6 +2979,25 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     }
 
+    /**
+     * Performs previous child eviction and such to prepare for the pip task expending into one of
+     * the split stages
+     *
+     * @param taskInfo TaskInfo of the pip task
+     */
+    public void onPipExpandToSplit(WindowContainerTransaction wct,
+            ActivityManager.RunningTaskInfo taskInfo) {
+        prepareEnterSplitScreen(wct, taskInfo, getActivateSplitPosition(taskInfo),
+                false /*resizeAnim*/);
+
+        if (!isSplitScreenVisible() || mSplitRequest == null) {
+            return;
+        }
+
+        boolean replacingMainStage = getMainStagePosition() == mSplitRequest.mActivatePosition;
+        (replacingMainStage ? mMainStage : mSideStage).evictOtherChildren(wct, taskInfo.taskId);
+    }
+
     boolean isLaunchToSplit(TaskInfo taskInfo) {
         return getActivateSplitPosition(taskInfo) != SPLIT_POSITION_UNDEFINED;
     }
