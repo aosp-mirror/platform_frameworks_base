@@ -1540,9 +1540,16 @@ public class AppOpsManager {
     public static final int OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER =
             AppProtoEnums.APP_OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER;
 
+    /**
+     * See {@link #OPSTR_READ_SYSTEM_GRAMMATICAL_GENDER}.
+     * @hide
+     */
+    public static final int OP_READ_SYSTEM_GRAMMATICAL_GENDER =
+            AppProtoEnums.APP_OP_READ_SYSTEM_GRAMMATICAL_GENDER;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 143;
+    public static final int _NUM_OP = 144;
 
     /**
      * All app ops represented as strings.
@@ -2375,6 +2382,14 @@ public class AppOpsManager {
     public static final String OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER =
             "android:rapid_clear_notifications_by_listener";
 
+    /**
+     * Allows an application to read the system grammatical gender.
+     *
+     * @hide
+     */
+    public static final String OPSTR_READ_SYSTEM_GRAMMATICAL_GENDER =
+            "android:read_system_grammatical_gender";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2486,6 +2501,7 @@ public class AppOpsManager {
             OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
             OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OP_MEDIA_ROUTING_CONTROL,
+            OP_READ_SYSTEM_GRAMMATICAL_GENDER,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -2938,6 +2954,10 @@ public class AppOpsManager {
                 OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
                 "RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER")
                 .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_SYSTEM_GRAMMATICAL_GENDER,
+                OPSTR_READ_SYSTEM_GRAMMATICAL_GENDER, "READ_SYSTEM_GRAMMATICAL_GENDER")
+                .setPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
+                .build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops

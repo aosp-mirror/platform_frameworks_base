@@ -7908,6 +7908,14 @@
     <permission android:name="android.permission.GET_BACKGROUND_INSTALLED_PACKAGES"
         android:protectionLevel="signature|role" />
 
+    <!-- @SystemApi Allows an application to read the system grammatical gender.
+         @FlaggedApi("android.app.system_terms_of_address_enabled")
+         <p>Protection level: signature|privileged|appop
+         @hide
+    -->
+    <permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"
+                android:protectionLevel="signature|privileged|appop"/>
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
