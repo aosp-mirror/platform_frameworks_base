@@ -132,8 +132,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         }
 
         @Override
-        protected HeadsUpEntry createAlertEntry() {
-            mLastCreatedEntry = spy(super.createAlertEntry());
+        protected HeadsUpEntry createHeadsUpEntry() {
+            mLastCreatedEntry = spy(super.createHeadsUpEntry());
             return mLastCreatedEntry;
         }
 
@@ -300,7 +300,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
         alm.showNotification(entry);
 
-        assertTrue(alm.isAlerting(entry.getKey()));
+        assertTrue(alm.isHeadsUpEntry(entry.getKey()));
         assertTrue(alm.hasNotifications());
         assertEquals(entry, alm.getEntry(entry.getKey()));
     }
@@ -313,7 +313,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         alm.showNotification(entry);
         mSystemClock.advanceTime(TEST_AUTO_DISMISS_TIME * 3 / 2);
 
-        assertFalse(alm.isAlerting(entry.getKey()));
+        assertFalse(alm.isHeadsUpEntry(entry.getKey()));
     }
 
     @Test
@@ -326,7 +326,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         final boolean removedImmediately = alm.removeNotification(
                 entry.getKey(), /* releaseImmediately = */ false);
         assertFalse(removedImmediately);
-        assertTrue(alm.isAlerting(entry.getKey()));
+        assertTrue(alm.isHeadsUpEntry(entry.getKey()));
     }
 
     @Test
@@ -339,7 +339,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         final boolean removedImmediately = alm.removeNotification(
                 entry.getKey(), /* releaseImmediately = */ true);
         assertTrue(removedImmediately);
-        assertFalse(alm.isAlerting(entry.getKey()));
+        assertFalse(alm.isHeadsUpEntry(entry.getKey()));
     }
 
     @Test
@@ -375,7 +375,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
                 BaseHeadsUpManager.HeadsUpEntry.class);
         headsUpEntry.mEntry = notifEntry;
 
-        hum.onAlertEntryRemoved(headsUpEntry);
+        hum.onEntryRemoved(headsUpEntry);
 
         verify(mLogger, times(1)).logNotificationActuallyRemoved(eq(notifEntry));
     }
@@ -428,7 +428,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.showNotification(entry);
         mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME / 2 + TEST_AUTO_DISMISS_TIME);
 
-        assertTrue(hum.isAlerting(entry.getKey()));
+        assertTrue(hum.isHeadsUpEntry(entry.getKey()));
     }
 
 
@@ -442,7 +442,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME
                 + (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2);
 
-        assertFalse(hum.isAlerting(entry.getKey()));
+        assertFalse(hum.isHeadsUpEntry(entry.getKey()));
     }
 
 
@@ -456,7 +456,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME
                 + (TEST_AUTO_DISMISS_TIME + TEST_STICKY_AUTO_DISMISS_TIME) / 2);
 
-        assertTrue(hum.isAlerting(entry.getKey()));
+        assertTrue(hum.isHeadsUpEntry(entry.getKey()));
     }
 
 
@@ -469,7 +469,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.showNotification(entry);
         mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME + 2 * TEST_A11Y_AUTO_DISMISS_TIME);
 
-        assertTrue(hum.isAlerting(entry.getKey()));
+        assertTrue(hum.isHeadsUpEntry(entry.getKey()));
     }
 
 
@@ -483,7 +483,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME
                 + (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2);
 
-        assertTrue(hum.isAlerting(entry.getKey()));
+        assertTrue(hum.isHeadsUpEntry(entry.getKey()));
     }
 
 
@@ -497,7 +497,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME
                 + (TEST_STICKY_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2);
 
-        assertTrue(hum.isAlerting(entry.getKey()));
+        assertTrue(hum.isHeadsUpEntry(entry.getKey()));
     }
 
 
@@ -512,11 +512,11 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         final boolean removedImmediately = hum.removeNotification(
                 entry.getKey(), /* releaseImmediately = */ false);
         assertFalse(removedImmediately);
-        assertTrue(hum.isAlerting(entry.getKey()));
+        assertTrue(hum.isHeadsUpEntry(entry.getKey()));
 
         mSystemClock.advanceTime((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2);
 
-        assertFalse(hum.isAlerting(entry.getKey()));
+        assertFalse(hum.isHeadsUpEntry(entry.getKey()));
     }
 
 
@@ -529,12 +529,12 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         hum.showNotification(entry);
         mSystemClock.advanceTime((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2);
 
-        assertTrue(hum.isAlerting(entry.getKey()));
+        assertTrue(hum.isHeadsUpEntry(entry.getKey()));
 
         final boolean removedImmediately = hum.removeNotification(
                 entry.getKey(), /* releaseImmediately = */ false);
         assertTrue(removedImmediately);
-        assertFalse(hum.isAlerting(entry.getKey()));
+        assertFalse(hum.isHeadsUpEntry(entry.getKey()));
     }
 
 
@@ -548,7 +548,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         final boolean removedImmediately = hum.removeNotification(
                 entry.getKey(), /* releaseImmediately = */ true);
         assertTrue(removedImmediately);
-        assertFalse(hum.isAlerting(entry.getKey()));
+        assertFalse(hum.isHeadsUpEntry(entry.getKey()));
     }
 
 
@@ -702,7 +702,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         // the notification and then updates it; in order to not log twice, the entry needs
         // to have a functional ExpandableNotificationRow that can keep track of whether it's
         // pinned or not (via isRowPinned()). That feels like a lot to pull in to test this one bit.
-        hum.onAlertEntryAdded(entryToPin);
+        hum.onEntryAdded(entryToPin);
 
         assertEquals(1, mUiEventLoggerFake.numLogs());
         assertEquals(BaseHeadsUpManager.NotificationPeekEvent.NOTIFICATION_PEEK.getId(),

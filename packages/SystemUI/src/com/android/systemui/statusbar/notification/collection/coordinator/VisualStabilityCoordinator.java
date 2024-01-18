@@ -134,7 +134,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private final NotifStabilityManager mNotifStabilityManager =
             new NotifStabilityManager("VisualStabilityCoordinator") {
                 private boolean canMoveForHeadsUp(NotificationEntry entry) {
-                    return entry != null && mHeadsUpManager.isAlerting(entry.getKey())
+                    return entry != null && mHeadsUpManager.isHeadsUpEntry(entry.getKey())
                             && !mVisibilityLocationProvider.isInVisibleLocation(entry);
                 }
 

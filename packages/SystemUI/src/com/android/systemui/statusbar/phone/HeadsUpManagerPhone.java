@@ -222,9 +222,9 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             mReleaseOnExpandFinish = false;
         } else {
             for (NotificationEntry entry : mEntriesToRemoveAfterExpand) {
-                if (isAlerting(entry.getKey())) {
+                if (isHeadsUpEntry(entry.getKey())) {
                     // Maybe the heads-up was removed already
-                    removeAlertEntry(entry.getKey());
+                    removeEntry(entry.getKey());
                 }
             }
         }
@@ -357,9 +357,9 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
     private final OnReorderingAllowedListener mOnReorderingAllowedListener = () -> {
         mAnimationStateHandler.setHeadsUpGoingAwayAnimationsAllowed(false);
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
-            if (isAlerting(entry.getKey())) {
+            if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
-                removeAlertEntry(entry.getKey());
+                removeEntry(entry.getKey());
             }
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();
@@ -370,13 +370,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
     //  HeadsUpManager utility (protected) methods overrides:
 
     @Override
-    protected HeadsUpEntry createAlertEntry() {
+    protected HeadsUpEntry createHeadsUpEntry() {
         return mEntryPool.acquire();
     }
 
     @Override
-    protected void onAlertEntryRemoved(HeadsUpEntry headsUpEntry) {
-        super.onAlertEntryRemoved(headsUpEntry);
+    protected void onEntryRemoved(HeadsUpEntry headsUpEntry) {
+        super.onEntryRemoved(headsUpEntry);
         mEntryPool.release((HeadsUpEntryPhone) headsUpEntry);
     }
 
@@ -403,7 +403,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
 
     @Nullable
     private HeadsUpEntryPhone getHeadsUpEntryPhone(@NonNull String key) {
-        return (HeadsUpEntryPhone) mAlertEntries.get(key);
+        return (HeadsUpEntryPhone) mHeadsUpEntryMap.get(key);
     }
 
     @Nullable
@@ -455,7 +455,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
                 } else {
-                    removeAlertEntry(entry.getKey());
+                    removeEntry(entry.getKey());
                 }
             };
 
@@ -529,13 +529,13 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             mStatusBarState = newState;
             if (wasKeyguard && !isKeyguard && mBypassController.getBypassEnabled()) {
                 ArrayList<String> keysToRemove = new ArrayList<>();
-                for (HeadsUpEntry entry : mAlertEntries.values()) {
+                for (HeadsUpEntry entry : mHeadsUpEntryMap.values()) {
                     if (entry.mEntry != null && entry.mEntry.isBubble() && !entry.isSticky()) {
                         keysToRemove.add(entry.mEntry.getKey());
                     }
                 }
                 for (String key : keysToRemove) {
-                    removeAlertEntry(key);
+                    removeEntry(key);
                 }
             }
         }
@@ -545,7 +545,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             if (!isDozing) {
                 // Let's make sure all huns we got while dozing time out within the normal timeout
                 // duration. Otherwise they could get stuck for a very long time
-                for (HeadsUpEntry entry : mAlertEntries.values()) {
+                for (HeadsUpEntry entry : mHeadsUpEntryMap.values()) {
                     entry.updateEntry(true /* updatePostTime */, "onDozingChanged(false)");
                 }
             }
