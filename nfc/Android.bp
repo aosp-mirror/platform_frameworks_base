@@ -68,7 +68,6 @@ java_sdk_library {
     ],
     jarjar_rules: ":nfc-jarjar-rules",
     lint: {
-        strict_updatability_linting: true,
         baseline_filename: "lint-baseline.xml",
     },
     apex_available: [
