@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -52,6 +53,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
@@ -68,6 +71,8 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
+    @Mock private lateinit var userTracker: UserTracker
+    @Captor private lateinit var updateCallbackCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
     private val mainDispatcher = StandardTestDispatcher()
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -93,6 +98,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 systemClock,
                 facePropertyRepository,
+                userTracker,
             )
     }
 
@@ -552,5 +558,26 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 )
 
             job.cancel()
+        }
+
+    @Test
+    fun isEncryptedOrLockdown() =
+        testScope.runTest {
+            whenever(userTracker.userId).thenReturn(0)
+            whenever(keyguardUpdateMonitor.isEncryptedOrLockdown(0)).thenReturn(true)
+
+            // Default value for isEncryptedOrLockdown is true
+            val isEncryptedOrLockdown by collectLastValue(underTest.isEncryptedOrLockdown)
+            assertThat(isEncryptedOrLockdown).isTrue()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateCallbackCaptor.capture())
+            val updateCallback = updateCallbackCaptor.value
+
+            // Strong auth state updated
+            whenever(keyguardUpdateMonitor.isEncryptedOrLockdown(0)).thenReturn(false)
+            updateCallback.onStrongAuthStateChanged(0)
+
+            // Verify no longer encrypted or lockdown
+            assertThat(isEncryptedOrLockdown).isFalse()
         }
 }

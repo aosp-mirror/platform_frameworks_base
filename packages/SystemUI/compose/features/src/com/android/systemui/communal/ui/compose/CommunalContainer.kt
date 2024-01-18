@@ -67,8 +67,9 @@ fun CommunalContainer(
     // Don't show hub mode UI if keyguard is not present. This is important since we're in the
     // shade, which can be opened from many locations.
     val isKeyguardShowing by viewModel.isKeyguardVisible.collectAsState(initial = false)
+    val isCommunalAvailable by viewModel.isCommunalAvailable.collectAsState()
 
-    if (!isKeyguardShowing) {
+    if (!isKeyguardShowing || !isCommunalAvailable) {
         return
     }
 

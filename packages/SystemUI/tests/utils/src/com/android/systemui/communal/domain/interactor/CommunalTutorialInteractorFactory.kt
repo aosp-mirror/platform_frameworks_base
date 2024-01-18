@@ -32,7 +32,7 @@ object CommunalTutorialInteractorFactory {
         communalTutorialRepository: FakeCommunalTutorialRepository =
             FakeCommunalTutorialRepository(),
         communalRepository: FakeCommunalRepository =
-            FakeCommunalRepository(isCommunalEnabled = true),
+            FakeCommunalRepository(applicationScope = testScope.backgroundScope),
         keyguardRepository: FakeKeyguardRepository = FakeKeyguardRepository(),
         keyguardInteractor: KeyguardInteractor =
             KeyguardInteractorFactory.create(

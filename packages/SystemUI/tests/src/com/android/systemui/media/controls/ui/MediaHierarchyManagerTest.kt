@@ -104,18 +104,19 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var dreamOverlayCallback:
         ArgumentCaptor<(DreamOverlayStateController.Callback)>
     @JvmField @Rule val mockito = MockitoJUnit.rule()
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
     private lateinit var mediaHierarchyManager: MediaHierarchyManager
     private lateinit var isQsBypassingShade: MutableStateFlow<Boolean>
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
-    private val communalRepository = FakeCommunalRepository(isCommunalEnabled = true)
+    private val communalRepository =
+        FakeCommunalRepository(applicationScope = testScope.backgroundScope)
     private val communalInteractor =
         CommunalInteractorFactory.create(communalRepository = communalRepository).communalInteractor
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setup() {
