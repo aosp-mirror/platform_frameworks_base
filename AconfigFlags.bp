@@ -15,6 +15,7 @@
 aconfig_srcjars = [
     // !!! KEEP THIS LIST ALPHABETICAL !!!
     ":aconfig_mediacodec_flags_java_lib{.generated_srcjars}",
+    ":android.adaptiveauth.flags-aconfig-java{.generated_srcjars}",
     ":android.app.flags-aconfig-java{.generated_srcjars}",
     ":android.app.smartspace.flags-aconfig-java{.generated_srcjars}",
     ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
@@ -1031,5 +1032,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.content.flags-aconfig-java",
     aconfig_declarations: "android.content.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Adaptive Auth
+aconfig_declarations {
+    name: "android.adaptiveauth.flags-aconfig",
+    package: "android.adaptiveauth",
+    srcs: ["core/java/android/adaptiveauth/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.adaptiveauth.flags-aconfig-java",
+    aconfig_declarations: "android.adaptiveauth.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
