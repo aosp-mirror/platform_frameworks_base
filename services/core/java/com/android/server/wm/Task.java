@@ -3558,9 +3558,11 @@ class Task extends TaskFragment {
                 && top.mLetterboxUiController.isSystemOverrideToFullscreenEnabled();
         appCompatTaskInfo.isFromLetterboxDoubleTap = top != null
                 && top.mLetterboxUiController.isFromDoubleTap();
-        if (appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
+        if (top != null) {
             appCompatTaskInfo.topActivityLetterboxWidth = top.getBounds().width();
             appCompatTaskInfo.topActivityLetterboxHeight = top.getBounds().height();
+        }
+        if (appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
             if (appCompatTaskInfo.isTopActivityPillarboxed()) {
                 // Pillarboxed
                 appCompatTaskInfo.topActivityLetterboxHorizontalPosition =
