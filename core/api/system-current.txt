@@ -1616,6 +1616,7 @@ package android.app.ambientcontext {
     field public static final int LEVEL_MEDIUM_HIGH = 4; // 0x4
     field public static final int LEVEL_MEDIUM_LOW = 2; // 0x2
     field public static final int LEVEL_UNKNOWN = 0; // 0x0
+    field @FlaggedApi("android.app.ambient_heart_rate") public static final int RATE_PER_MINUTE_UNKNOWN = -1; // 0xffffffff
   }
 
   public static final class AmbientContextEvent.Builder {
