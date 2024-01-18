@@ -7319,6 +7319,28 @@ public final class Settings {
                 "bluetooth_le_broadcast_app_source_name";
 
         /**
+         * This is used by LocalBluetoothLeBroadcast to downgrade the broadcast quality to improve
+         * compatibility.
+         *
+         * <ul>
+         *   <li>0 = false
+         *   <li>1 = true
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String BLUETOOTH_LE_BROADCAST_IMPROVE_COMPATIBILITY =
+                "bluetooth_le_broadcast_improve_compatibility";
+
+        /**
+         * This is used by LocalBluetoothLeBroadcast to store the fallback active device address.
+         *
+         * @hide
+         */
+        public static final String BLUETOOTH_LE_BROADCAST_FALLBACK_ACTIVE_DEVICE_ADDRESS =
+                "bluetooth_le_broadcast_fallback_active_device_address";
+
+        /**
          * Ringtone routing value for hearing aid. It routes ringtone to hearing aid or device
          * speaker.
          * <ul>
