@@ -53,7 +53,7 @@ flag {
 
 flag {
     name: "frp_enforcement"
-    namespace: "android_hw_security"
+    namespace: "hardware_backed_security"
     description: "This flag controls whether PDB enforces FRP"
     bug: "290312729"
     is_fixed_read_only: true
