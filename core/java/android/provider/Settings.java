@@ -3176,15 +3176,7 @@ public final class Settings {
         }
 
         public void destroy() {
-            try {
-                // If this process is the system server process, mArray is the same object as
-                // the memory int array kept inside SettingsProvider, so skipping the close()
-                if (!Settings.isInSystemServer() && !mArray.isClosed()) {
-                    mArray.close();
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Error closing backing array", e);
-            }
+            maybeCloseGenerationArray(mArray);
         }
 
         @Override
@@ -3194,6 +3186,21 @@ public final class Settings {
             } finally {
                 super.finalize();
             }
+        }
+    }
+
+    private static void maybeCloseGenerationArray(@Nullable MemoryIntArray array) {
+        if (array == null) {
+            return;
+        }
+        try {
+            // If this process is the system server process, the MemoryIntArray received from Parcel
+            // is the same object as the one kept inside SettingsProvider, so skipping the close().
+            if (!Settings.isInSystemServer() && !array.isClosed()) {
+                array.close();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error closing the generation tracking array", e);
         }
     }
 
@@ -3504,6 +3511,8 @@ public final class Settings {
                                         mGenerationTrackers.put(name, new GenerationTracker(name,
                                                 array, index, generation,
                                                 mGenerationTrackerErrorHandler));
+                                    } else {
+                                        maybeCloseGenerationArray(array);
                                     }
                                 }
                                 if (mGenerationTrackers.get(name) != null
@@ -3723,6 +3732,8 @@ public final class Settings {
                                     new GenerationTracker(prefix, array, index, generation,
                                             mGenerationTrackerErrorHandler));
                             currentGeneration = generation;
+                        } else {
+                            maybeCloseGenerationArray(array);
                         }
                     }
                     if (mGenerationTrackers.get(prefix) != null && currentGeneration
