@@ -32,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.TaskFragment.EMBEDDED_DIM_AREA_PARENT_TASK;
 import static com.android.server.wm.TaskFragment.EMBEDDED_DIM_AREA_TASK_FRAGMENT;
@@ -46,7 +47,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
 
+import android.content.pm.SigningDetails;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -61,17 +64,22 @@ import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.server.pm.pkg.AndroidPackage;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Collections;
+import java.util.Set;
+
 /**
  * Test class for {@link TaskFragment}.
  *
  * Build/Install/Run:
- *  atest WmTests:TaskFragmentTest
+ * atest WmTests:TaskFragmentTest
  */
 @MediumTest
 @Presubmit
@@ -534,6 +542,49 @@ public class TaskFragmentTest extends WindowTestsBase {
         doReturn(true).when(taskFragment).smallerThanMinDimension(any());
         assertEquals(EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION,
                 taskFragment.isAllowedToEmbedActivity(activity));
+    }
+
+    @Test
+    public void testIsAllowedToEmbedActivityInTrustedModeByHostPackage() {
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .createActivityCount(1)
+                .build();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+
+        final String mockCert = "MOCKCERT";
+        final AndroidPackage hostPackage = mock(AndroidPackage.class);
+        final SigningDetails signingDetails = mock(SigningDetails.class);
+        when(signingDetails.hasAncestorOrSelfWithDigest(any()))
+                .thenAnswer(invocation -> ((Set) invocation.getArgument(0)).contains(mockCert));
+        doReturn(signingDetails).when(hostPackage).getSigningDetails();
+
+        // Should return false when no certs are specified
+        assertFalse(taskFragment.isAllowedToEmbedActivityInTrustedModeByHostPackage(
+                activity, hostPackage));
+
+        // Should return true when the cert is specified in <activity>
+        activity.info.setKnownActivityEmbeddingCerts(Set.of(mockCert));
+        assertTrue(taskFragment.isAllowedToEmbedActivityInTrustedModeByHostPackage(
+                activity, hostPackage));
+
+        // Should return false when the certs specified in <activity> doesn't match
+        activity.info.setKnownActivityEmbeddingCerts(Set.of("WRONGCERT"));
+        assertFalse(taskFragment.isAllowedToEmbedActivityInTrustedModeByHostPackage(
+                activity, hostPackage));
+
+        // Should return true when the certs is specified in <application>
+        activity.info.setKnownActivityEmbeddingCerts(Collections.emptySet());
+        activity.info.applicationInfo.setKnownActivityEmbeddingCerts(Set.of(mockCert));
+        assertTrue(taskFragment.isAllowedToEmbedActivityInTrustedModeByHostPackage(
+                activity, hostPackage));
+
+        // When the certs is specified in both <activity> and <application>, <activity> takes
+        // precedence
+        activity.info.setKnownActivityEmbeddingCerts(Set.of("WRONGCERT"));
+        activity.info.applicationInfo.setKnownActivityEmbeddingCerts(Set.of(mockCert));
+        assertFalse(taskFragment.isAllowedToEmbedActivityInTrustedModeByHostPackage(
+                activity, hostPackage));
     }
 
     @Test
