@@ -49,6 +49,7 @@ public class DeviceWiphyCapabilitiesTest {
         capa.setChannelWidthSupported(ScanResult.CHANNEL_WIDTH_80MHZ_PLUS_MHZ, false);
         capa.setMaxNumberTxSpatialStreams(2);
         capa.setMaxNumberRxSpatialStreams(1);
+        capa.setMaxNumberAkms(2);
 
         Parcel parcel = Parcel.obtain();
         capa.writeToParcel(parcel, 0);
