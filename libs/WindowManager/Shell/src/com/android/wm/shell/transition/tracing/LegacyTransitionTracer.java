@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.transition;
+package com.android.wm.shell.transition.tracing;
 
 import static android.os.Build.IS_USER;
 
@@ -29,6 +29,7 @@ import android.util.Log;
 
 import com.android.internal.util.TraceBuffer;
 import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.transition.Transitions;
 
 import com.google.protobuf.nano.MessageNano;
 
@@ -45,7 +46,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Helper class to collect and dump transition traces.
  */
-public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
+public class LegacyTransitionTracer
+        implements ShellCommandHandler.ShellCommandActionHandler, TransitionTracer {
     private static final int ALWAYS_ON_TRACING_CAPACITY = 15 * 1024; // 15 KB
     private static final int ACTIVE_TRACING_BUFFER_CAPACITY = 5000 * 1024; // 5 MB
 
@@ -60,33 +62,33 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
 
     private final TraceBuffer.ProtoProvider mProtoProvider =
             new TraceBuffer.ProtoProvider<MessageNano,
-                com.android.wm.shell.nano.WmShellTransitionTraceProto,
-                com.android.wm.shell.nano.Transition>() {
-        @Override
-        public int getItemSize(MessageNano proto) {
-            return proto.getCachedSize();
-        }
+                    com.android.wm.shell.nano.WmShellTransitionTraceProto,
+                    com.android.wm.shell.nano.Transition>() {
+                @Override
+                public int getItemSize(MessageNano proto) {
+                    return proto.getCachedSize();
+                }
 
-        @Override
-        public byte[] getBytes(MessageNano proto) {
-            return MessageNano.toByteArray(proto);
-        }
+                @Override
+                public byte[] getBytes(MessageNano proto) {
+                    return MessageNano.toByteArray(proto);
+                }
 
-        @Override
-        public void write(
-                com.android.wm.shell.nano.WmShellTransitionTraceProto encapsulatingProto,
-                Queue<com.android.wm.shell.nano.Transition> buffer, OutputStream os)
+                @Override
+                public void write(
+                        com.android.wm.shell.nano.WmShellTransitionTraceProto encapsulatingProto,
+                        Queue<com.android.wm.shell.nano.Transition> buffer, OutputStream os)
                         throws IOException {
-            encapsulatingProto.transitions = buffer.toArray(
-                    new com.android.wm.shell.nano.Transition[0]);
-            os.write(getBytes(encapsulatingProto));
-        }
-    };
+                    encapsulatingProto.transitions = buffer.toArray(
+                            new com.android.wm.shell.nano.Transition[0]);
+                    os.write(getBytes(encapsulatingProto));
+                }
+            };
     private final TraceBuffer<MessageNano,
             com.android.wm.shell.nano.WmShellTransitionTraceProto,
-            com.android.wm.shell.nano.Transition> mTraceBuffer
-                    = new TraceBuffer(ALWAYS_ON_TRACING_CAPACITY, mProtoProvider,
-                            (proto) -> handleOnEntryRemovedFromTrace(proto));
+            com.android.wm.shell.nano.Transition> mTraceBuffer =
+                new TraceBuffer(ALWAYS_ON_TRACING_CAPACITY, mProtoProvider,
+                        this::handleOnEntryRemovedFromTrace);
     private final Map<Object, Runnable> mRemovedFromTraceCallbacks = new HashMap<>();
 
     private final Map<Transitions.TransitionHandler, Integer> mHandlerIds = new HashMap<>();
@@ -99,6 +101,7 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
      * @param transitionId The id of the transition being dispatched.
      * @param handler The handler the transition is being dispatched to.
      */
+    @Override
     public void logDispatched(int transitionId, Transitions.TransitionHandler handler) {
         final int handlerId;
         if (mHandlerIds.containsKey(handler)) {
@@ -130,6 +133,7 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
      *
      * @param mergeRequestedTransitionId The id of the transition we are requesting to be merged.
      */
+    @Override
     public void logMergeRequested(int mergeRequestedTransitionId, int playingTransitionId) {
         com.android.wm.shell.nano.Transition proto = new com.android.wm.shell.nano.Transition();
         proto.id = mergeRequestedTransitionId;
@@ -145,6 +149,7 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
      * @param mergedTransitionId The id of the transition that was merged.
      * @param playingTransitionId The id of the transition the transition was merged into.
      */
+    @Override
     public void logMerged(int mergedTransitionId, int playingTransitionId) {
         com.android.wm.shell.nano.Transition proto = new com.android.wm.shell.nano.Transition();
         proto.id = mergedTransitionId;
@@ -159,6 +164,7 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
      *
      * @param transitionId The id of the transition that was aborted.
      */
+    @Override
     public void logAborted(int transitionId) {
         com.android.wm.shell.nano.Transition proto = new com.android.wm.shell.nano.Transition();
         proto.id = transitionId;
