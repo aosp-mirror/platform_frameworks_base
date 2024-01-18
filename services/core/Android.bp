@@ -30,6 +30,14 @@ filegroup {
     ],
 }
 
+java_library_static {
+    name: "services-config-update",
+    srcs: [
+        "java/**/ConfigUpdateInstallReceiver.java",
+        "java/**/*.logtags",
+    ],
+}
+
 genrule {
     name: "services.core.protologsrc",
     srcs: [
