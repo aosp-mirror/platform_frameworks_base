@@ -228,11 +228,6 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
 }
 
 int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNanos) {
-    if (actualDurationNanos <= 0) {
-        ALOGE("%s: actualDurationNanos must be positive", __FUNCTION__);
-        return EINVAL;
-    }
-
     WorkDuration workDuration(0, actualDurationNanos, actualDurationNanos, 0);
 
     return reportActualWorkDurationInternal(&workDuration);
@@ -320,23 +315,6 @@ int APerformanceHintSession::setPreferPowerEfficiency(bool enabled) {
 
 int APerformanceHintSession::reportActualWorkDuration(AWorkDuration* aWorkDuration) {
     WorkDuration* workDuration = static_cast<WorkDuration*>(aWorkDuration);
-    if (workDuration->workPeriodStartTimestampNanos <= 0) {
-        ALOGE("%s: workPeriodStartTimestampNanos must be positive", __FUNCTION__);
-        return EINVAL;
-    }
-    if (workDuration->actualTotalDurationNanos <= 0) {
-        ALOGE("%s: actualDurationNanos must be positive", __FUNCTION__);
-        return EINVAL;
-    }
-    if (workDuration->actualCpuDurationNanos <= 0) {
-        ALOGE("%s: cpuDurationNanos must be positive", __FUNCTION__);
-        return EINVAL;
-    }
-    if (workDuration->actualGpuDurationNanos < 0) {
-        ALOGE("%s: gpuDurationNanos must be non negative", __FUNCTION__);
-        return EINVAL;
-    }
-
     return reportActualWorkDurationInternal(workDuration);
 }
 
@@ -428,62 +406,87 @@ APerformanceHintManager* APerformanceHint_getManager() {
     return APerformanceHintManager::getInstance();
 }
 
+#define VALIDATE_PTR(ptr) \
+    LOG_ALWAYS_FATAL_IF(ptr == nullptr, "%s: " #ptr " is nullptr", __FUNCTION__);
+
+#define VALIDATE_INT(value, cmp)                                                             \
+    if (!(value cmp)) {                                                                      \
+        ALOGE("%s: Invalid value. Check failed: (" #value " " #cmp ") with value: %" PRIi64, \
+              __FUNCTION__, value);                                                          \
+        return EINVAL;                                                                       \
+    }
+
+#define WARN_INT(value, cmp)                                                                 \
+    if (!(value cmp)) {                                                                      \
+        ALOGE("%s: Invalid value. Check failed: (" #value " " #cmp ") with value: %" PRIi64, \
+              __FUNCTION__, value);                                                          \
+    }
+
 APerformanceHintSession* APerformanceHint_createSession(APerformanceHintManager* manager,
                                                         const int32_t* threadIds, size_t size,
                                                         int64_t initialTargetWorkDurationNanos) {
+    VALIDATE_PTR(manager)
+    VALIDATE_PTR(threadIds)
     return manager->createSession(threadIds, size, initialTargetWorkDurationNanos);
 }
 
 int64_t APerformanceHint_getPreferredUpdateRateNanos(APerformanceHintManager* manager) {
+    VALIDATE_PTR(manager)
     return manager->getPreferredRateNanos();
 }
 
 int APerformanceHint_updateTargetWorkDuration(APerformanceHintSession* session,
                                               int64_t targetDurationNanos) {
+    VALIDATE_PTR(session)
     return session->updateTargetWorkDuration(targetDurationNanos);
 }
 
 int APerformanceHint_reportActualWorkDuration(APerformanceHintSession* session,
                                               int64_t actualDurationNanos) {
+    VALIDATE_PTR(session)
+    VALIDATE_INT(actualDurationNanos, > 0)
     return session->reportActualWorkDuration(actualDurationNanos);
 }
 
 void APerformanceHint_closeSession(APerformanceHintSession* session) {
+    VALIDATE_PTR(session)
     delete session;
 }
 
 int APerformanceHint_sendHint(void* session, SessionHint hint) {
+    VALIDATE_PTR(session)
     return reinterpret_cast<APerformanceHintSession*>(session)->sendHint(hint);
 }
 
 int APerformanceHint_setThreads(APerformanceHintSession* session, const pid_t* threadIds,
                                 size_t size) {
-    if (session == nullptr) {
-        return EINVAL;
-    }
+    VALIDATE_PTR(session)
+    VALIDATE_PTR(threadIds)
     return session->setThreads(threadIds, size);
 }
 
 int APerformanceHint_getThreadIds(void* aPerformanceHintSession, int32_t* const threadIds,
                                   size_t* const size) {
-    if (aPerformanceHintSession == nullptr) {
-        return EINVAL;
-    }
+    VALIDATE_PTR(aPerformanceHintSession)
     return static_cast<APerformanceHintSession*>(aPerformanceHintSession)
             ->getThreadIds(threadIds, size);
 }
 
 int APerformanceHint_setPreferPowerEfficiency(APerformanceHintSession* session, bool enabled) {
+    VALIDATE_PTR(session)
     return session->setPreferPowerEfficiency(enabled);
 }
 
 int APerformanceHint_reportActualWorkDuration2(APerformanceHintSession* session,
-                                               AWorkDuration* workDuration) {
-    if (session == nullptr || workDuration == nullptr) {
-        ALOGE("Invalid value: (session %p, workDuration %p)", session, workDuration);
-        return EINVAL;
-    }
-    return session->reportActualWorkDuration(workDuration);
+                                               AWorkDuration* workDurationPtr) {
+    VALIDATE_PTR(session)
+    VALIDATE_PTR(workDurationPtr)
+    WorkDuration& workDuration = *static_cast<WorkDuration*>(workDurationPtr);
+    VALIDATE_INT(workDuration.workPeriodStartTimestampNanos, > 0)
+    VALIDATE_INT(workDuration.actualTotalDurationNanos, > 0)
+    VALIDATE_INT(workDuration.actualCpuDurationNanos, > 0)
+    VALIDATE_INT(workDuration.actualGpuDurationNanos, >= 0)
+    return session->reportActualWorkDuration(workDurationPtr);
 }
 
 AWorkDuration* AWorkDuration_create() {
@@ -492,46 +495,36 @@ AWorkDuration* AWorkDuration_create() {
 }
 
 void AWorkDuration_release(AWorkDuration* aWorkDuration) {
-    if (aWorkDuration == nullptr) {
-        ALOGE("%s: aWorkDuration is nullptr", __FUNCTION__);
-    }
+    VALIDATE_PTR(aWorkDuration)
     delete aWorkDuration;
 }
 
 void AWorkDuration_setWorkPeriodStartTimestampNanos(AWorkDuration* aWorkDuration,
                                                     int64_t workPeriodStartTimestampNanos) {
-    if (aWorkDuration == nullptr || workPeriodStartTimestampNanos <= 0) {
-        ALOGE("%s: Invalid value. (AWorkDuration: %p, workPeriodStartTimestampNanos: %" PRIi64 ")",
-              __FUNCTION__, aWorkDuration, workPeriodStartTimestampNanos);
-    }
+    VALIDATE_PTR(aWorkDuration)
+    WARN_INT(workPeriodStartTimestampNanos, > 0)
     static_cast<WorkDuration*>(aWorkDuration)->workPeriodStartTimestampNanos =
             workPeriodStartTimestampNanos;
 }
 
 void AWorkDuration_setActualTotalDurationNanos(AWorkDuration* aWorkDuration,
                                                int64_t actualTotalDurationNanos) {
-    if (aWorkDuration == nullptr || actualTotalDurationNanos <= 0) {
-        ALOGE("%s: Invalid value. (AWorkDuration: %p, actualTotalDurationNanos: %" PRIi64 ")",
-              __FUNCTION__, aWorkDuration, actualTotalDurationNanos);
-    }
+    VALIDATE_PTR(aWorkDuration)
+    WARN_INT(actualTotalDurationNanos, > 0)
     static_cast<WorkDuration*>(aWorkDuration)->actualTotalDurationNanos = actualTotalDurationNanos;
 }
 
 void AWorkDuration_setActualCpuDurationNanos(AWorkDuration* aWorkDuration,
                                              int64_t actualCpuDurationNanos) {
-    if (aWorkDuration == nullptr || actualCpuDurationNanos <= 0) {
-        ALOGE("%s: Invalid value. (AWorkDuration: %p, actualCpuDurationNanos: %" PRIi64 ")",
-              __FUNCTION__, aWorkDuration, actualCpuDurationNanos);
-    }
+    VALIDATE_PTR(aWorkDuration)
+    WARN_INT(actualCpuDurationNanos, > 0)
     static_cast<WorkDuration*>(aWorkDuration)->actualCpuDurationNanos = actualCpuDurationNanos;
 }
 
 void AWorkDuration_setActualGpuDurationNanos(AWorkDuration* aWorkDuration,
                                              int64_t actualGpuDurationNanos) {
-    if (aWorkDuration == nullptr || actualGpuDurationNanos < 0) {
-        ALOGE("%s: Invalid value. (AWorkDuration: %p, actualGpuDurationNanos: %" PRIi64 ")",
-              __FUNCTION__, aWorkDuration, actualGpuDurationNanos);
-    }
+    VALIDATE_PTR(aWorkDuration)
+    WARN_INT(actualGpuDurationNanos, >= 0)
     static_cast<WorkDuration*>(aWorkDuration)->actualGpuDurationNanos = actualGpuDurationNanos;
 }
 
