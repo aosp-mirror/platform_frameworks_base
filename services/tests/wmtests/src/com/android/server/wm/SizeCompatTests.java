@@ -4781,6 +4781,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 new WindowManager.LayoutParams(TYPE_STATUS_BAR);
         final Binder owner = new Binder();
         attrs.gravity = android.view.Gravity.TOP;
+        attrs.height = STATUS_BAR_HEIGHT;
         attrs.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         attrs.setFitInsetsTypes(0 /* types */);
