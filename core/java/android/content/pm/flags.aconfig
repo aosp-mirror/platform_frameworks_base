@@ -168,3 +168,10 @@ flag {
     description: "Feature flag to allow the sandbox SDK to query intent activities of the client app."
     bug: "295842134"
 }
+
+flag {
+    name: "emergency_install_permission"
+    namespace: "permissions"
+    description: "Feature flag to enable permission EMERGENCY_INSTALL_PACKAGES"
+    bug: "321080601"
+}

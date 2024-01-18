@@ -7985,6 +7985,16 @@
     <permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"
                 android:protectionLevel="signature|privileged"/>
 
+    <!-- @SystemApi
+        @FlaggedApi("android.content.pm.emergency_install_permission")
+        Allows each app store in the system image to designate another app in the system image to
+        update the app store
+        <p>Protection level: signature|privileged
+        @hide
+    -->
+    <permission android:name="android.permission.EMERGENCY_INSTALL_PACKAGES"
+                android:protectionLevel="signature|privileged"/>
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
