@@ -41,10 +41,12 @@ import com.android.systemui.keyguard.domain.interactor.GlanceableHubTransitions
 import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.data.repository.FakeShadeRepository
@@ -56,6 +58,7 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.Share
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Assert.assertEquals
@@ -71,17 +74,17 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class StatusBarStateControllerImplTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val testDispatcher = utils.testDispatcher
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val testDispatcher = kosmos.testDispatcher
     private lateinit var shadeInteractor: ShadeInteractor
     private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
     private lateinit var fromPrimaryBouncerTransitionInteractor:
@@ -131,7 +134,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 FakeKeyguardBouncerRepository(),
                 ConfigurationInteractor(configurationRepository),
                 shadeRepository,
-                utils::sceneInteractor
+                { kosmos.sceneInteractor },
             )
         val keyguardTransitionInteractor =
             KeyguardTransitionInteractor(

@@ -22,11 +22,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,12 +42,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SceneContainerRepositoryTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this).apply { fakeSceneContainerFlags.enabled = true }
-    private val testScope = utils.testScope
+    private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
+    private val testScope = kosmos.testScope
 
     @Test
     fun allSceneKeys() {
-        val underTest = utils.fakeSceneContainerRepository()
+        val underTest = kosmos.sceneContainerRepository
         assertThat(underTest.allSceneKeys())
             .isEqualTo(
                 listOf(
@@ -61,7 +64,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
     @Test
     fun desiredScene() =
         testScope.runTest {
-            val underTest = utils.fakeSceneContainerRepository()
+            val underTest = kosmos.sceneContainerRepository
             val currentScene by collectLastValue(underTest.desiredScene)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
@@ -71,15 +74,15 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
     @Test(expected = IllegalStateException::class)
     fun setDesiredScene_noSuchSceneInContainer_throws() {
-        utils.kosmos.sceneKeys = listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
-        val underTest = utils.fakeSceneContainerRepository()
+        kosmos.sceneKeys = listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
+        val underTest = kosmos.sceneContainerRepository
         underTest.setDesiredScene(SceneModel(SceneKey.Shade))
     }
 
     @Test
     fun isVisible() =
         testScope.runTest {
-            val underTest = utils.fakeSceneContainerRepository()
+            val underTest = kosmos.sceneContainerRepository
             val isVisible by collectLastValue(underTest.isVisible)
             assertThat(isVisible).isTrue()
 
@@ -93,19 +96,19 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
     @Test
     fun transitionState_defaultsToIdle() =
         testScope.runTest {
-            val underTest = utils.fakeSceneContainerRepository()
+            val underTest = kosmos.sceneContainerRepository
             val transitionState by collectLastValue(underTest.transitionState)
 
             assertThat(transitionState)
                 .isEqualTo(
-                    ObservableTransitionState.Idle(utils.fakeSceneContainerConfig().initialSceneKey)
+                    ObservableTransitionState.Idle(kosmos.sceneContainerConfig.initialSceneKey)
                 )
         }
 
     @Test
     fun transitionState_reflectsUpdates() =
         testScope.runTest {
-            val underTest = utils.fakeSceneContainerRepository()
+            val underTest = kosmos.sceneContainerRepository
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
                     ObservableTransitionState.Idle(SceneKey.Lockscreen)
@@ -134,7 +137,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
             underTest.setTransitionState(null)
             assertThat(reflectedTransitionState)
                 .isEqualTo(
-                    ObservableTransitionState.Idle(utils.fakeSceneContainerConfig().initialSceneKey)
+                    ObservableTransitionState.Idle(kosmos.sceneContainerConfig.initialSceneKey)
                 )
         }
 }

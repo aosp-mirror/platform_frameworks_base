@@ -29,10 +29,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
@@ -59,8 +62,8 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var tableLogger: TableLogBuffer
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
-    private val testUtils = SceneTestUtils(this)
-    private val testScope = testUtils.testScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
     private val clock = FakeSystemClock()
     private val userRepository = FakeUserRepository()
     private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
@@ -82,8 +85,8 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
         underTest =
             AuthenticationRepositoryImpl(
                 applicationScope = testScope.backgroundScope,
-                backgroundDispatcher = testUtils.testDispatcher,
-                flags = testUtils.fakeSceneContainerFlags,
+                backgroundDispatcher = kosmos.testDispatcher,
+                flags = kosmos.sceneContainerFlags,
                 clock = clock,
                 getSecurityMode = getSecurityMode,
                 userRepository = userRepository,

@@ -25,20 +25,22 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository
 import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
 import com.android.systemui.statusbar.policy.BatteryController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -47,20 +49,20 @@ import org.mockito.Mockito.verify
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 class KeyguardStatusBarViewModelTest : SysuiTestCase() {
-    private val testScope = TestScope()
-    private val sceneTestUtils = SceneTestUtils(this)
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
     private val keyguardRepository = FakeKeyguardRepository()
     private val keyguardInteractor =
         KeyguardInteractor(
             keyguardRepository,
             mock<CommandQueue>(),
             PowerInteractorFactory.create().powerInteractor,
-            sceneTestUtils.fakeSceneContainerFlags,
+            kosmos.fakeSceneContainerFlags,
             FakeKeyguardBouncerRepository(),
             ConfigurationInteractor(FakeConfigurationRepository()),
             FakeShadeRepository(),
         ) {
-            sceneTestUtils.sceneInteractor()
+            kosmos.sceneInteractor
         }
     private val keyguardStatusBarInteractor =
         KeyguardStatusBarInteractor(

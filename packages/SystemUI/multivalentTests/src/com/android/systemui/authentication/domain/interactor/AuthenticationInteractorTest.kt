@@ -22,6 +22,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.None
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Password
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
@@ -29,7 +30,8 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,9 +47,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AuthenticationInteractorTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val underTest = utils.authenticationInteractor()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val underTest = kosmos.authenticationInteractor
 
     private val onAuthenticationResult by
         testScope.collectLastValue(underTest.onAuthenticationResult)
@@ -62,7 +64,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             assertThat(authMethod).isEqualTo(Pin)
             assertThat(underTest.getAuthenticationMethod()).isEqualTo(Pin)
 
-            utils.authenticationRepository.setAuthenticationMethod(Password)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Password)
 
             assertThat(authMethod).isEqualTo(Password)
             assertThat(underTest.getAuthenticationMethod()).isEqualTo(Password)
@@ -74,7 +76,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val authMethod by collectLastValue(underTest.authenticationMethod)
             runCurrent()
 
-            utils.authenticationRepository.setAuthenticationMethod(None)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(None)
 
             assertThat(authMethod).isEqualTo(None)
             assertThat(underTest.getAuthenticationMethod()).isEqualTo(None)
@@ -83,7 +85,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withCorrectPin_succeeds() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
 
             assertSucceeded(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
         }
@@ -91,7 +93,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withIncorrectPin_fails() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
 
             assertFailed(underTest.authenticate(listOf(9, 8, 7, 6, 5, 4)))
         }
@@ -99,7 +101,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test(expected = IllegalArgumentException::class)
     fun authenticate_withEmptyPin_throwsException() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
             underTest.authenticate(listOf())
         }
 
@@ -107,7 +109,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun authenticate_withCorrectMaxLengthPin_succeeds() =
         testScope.runTest {
             val correctMaxLengthPin = List(16) { 9 }
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 overrideCredential(correctMaxLengthPin)
             }
@@ -124,7 +126,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             // If the policy changes, there is work to do in SysUI.
             assertThat(DevicePolicyManager.MAX_PASSWORD_LENGTH).isLessThan(17)
 
-            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
 
             assertFailed(underTest.authenticate(List(17) { 9 }))
         }
@@ -132,7 +134,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withCorrectPassword_succeeds() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Password)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Password)
 
             assertSucceeded(underTest.authenticate("password".toList()))
         }
@@ -140,7 +142,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withIncorrectPassword_fails() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Password)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Password)
 
             assertFailed(underTest.authenticate("alohomora".toList()))
         }
@@ -148,7 +150,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withCorrectPattern_succeeds() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Pattern)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pattern)
 
             assertSucceeded(underTest.authenticate(FakeAuthenticationRepository.PATTERN))
         }
@@ -156,7 +158,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withIncorrectPattern_fails() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Pattern)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pattern)
             val wrongPattern =
                 listOf(
                     AuthenticationPatternCoordinate(x = 2, y = 0),
@@ -172,7 +174,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmPinAndShorterPin_returnsNull() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
             }
@@ -182,14 +184,14 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             assertSkipped(underTest.authenticate(shorterPin, tryAutoConfirm = true))
             assertThat(underTest.lockoutEndTimestamp).isNull()
-            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
+            assertThat(kosmos.fakeAuthenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         }
 
     @Test
     fun tryAutoConfirm_withAutoConfirmWrongPinCorrectLength_returnsFalse() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
             }
@@ -207,7 +209,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmLongerPin_returnsFalse() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
             }
@@ -225,7 +227,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmCorrectPin_returnsTrue() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
             }
@@ -241,7 +243,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
                 reportLockoutStarted(42)
@@ -258,7 +260,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun tryAutoConfirm_withoutAutoConfirmButCorrectPin_returnsNull() =
         testScope.runTest {
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(false)
             }
@@ -271,7 +273,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun tryAutoConfirm_withoutCorrectPassword_returnsNull() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Password)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Password)
 
             assertSkipped(underTest.authenticate("password".toList(), tryAutoConfirm = true))
         }
@@ -280,7 +282,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun isAutoConfirmEnabled_featureDisabled_returnsFalse() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            utils.authenticationRepository.setAutoConfirmFeatureEnabled(false)
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(false)
 
             assertThat(isAutoConfirmEnabled).isFalse()
         }
@@ -289,7 +291,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun isAutoConfirmEnabled_featureEnabled_returnsTrue() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             assertThat(isAutoConfirmEnabled).isTrue()
         }
@@ -298,7 +300,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun isAutoConfirmEnabled_featureEnabledButDisabledByLockout() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             // The feature is enabled.
             assertThat(isAutoConfirmEnabled).isTrue()
@@ -308,7 +310,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 assertFailed(underTest.authenticate(listOf(5, 6, 7))) // Wrong PIN
             }
             assertThat(underTest.lockoutEndTimestamp).isNotNull()
-            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
+            assertThat(kosmos.fakeAuthenticationRepository.lockoutStartedReportCount).isEqualTo(1)
 
             // Lockout disabled auto-confirm.
             assertThat(isAutoConfirmEnabled).isFalse()
@@ -336,7 +338,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val failedAuthenticationAttempts by
                 collectLastValue(underTest.failedAuthenticationAttempts)
 
-            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
             val correctPin = FakeAuthenticationRepository.DEFAULT_PIN
 
             assertSucceeded(underTest.authenticate(correctPin))
@@ -366,7 +368,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun lockoutEndTimestamp() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
             val correctPin = FakeAuthenticationRepository.DEFAULT_PIN
 
             underTest.authenticate(correctPin)
@@ -384,7 +386,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val expectedLockoutEndTimestamp =
                 testScope.currentTime + FakeAuthenticationRepository.LOCKOUT_DURATION_MS
             assertThat(underTest.lockoutEndTimestamp).isEqualTo(expectedLockoutEndTimestamp)
-            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
+            assertThat(kosmos.fakeAuthenticationRepository.lockoutStartedReportCount).isEqualTo(1)
 
             // Correct PIN, but locked out, so doesn't attempt it:
             assertSkipped(underTest.authenticate(correctPin), assertNoResultEvents = false)
@@ -409,7 +411,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun upcomingWipe() =
         testScope.runTest {
             val upcomingWipe by collectLastValue(underTest.upcomingWipe)
-            utils.authenticationRepository.setAuthenticationMethod(Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
             val correctPin = FakeAuthenticationRepository.DEFAULT_PIN
             val wrongPin = FakeAuthenticationRepository.DEFAULT_PIN.map { it + 1 }
 
@@ -418,7 +420,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             var expectedFailedAttempts = 0
             var remainingFailedAttempts =
-                utils.authenticationRepository.getMaxFailedUnlockAttemptsForWipe()
+                kosmos.fakeAuthenticationRepository.getMaxFailedUnlockAttemptsForWipe()
             assertThat(remainingFailedAttempts)
                 .isGreaterThan(LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE)
 
@@ -458,7 +460,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun hintedPinLength_withoutAutoConfirm_isNull() =
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(false)
             }
@@ -470,11 +472,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun hintedPinLength_withAutoConfirmPinTooShort_isNull() =
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 overrideCredential(
                     buildList {
-                        repeat(utils.authenticationRepository.hintedPinLength - 1) { add(it + 1) }
+                        repeat(kosmos.fakeAuthenticationRepository.hintedPinLength - 1) {
+                            add(it + 1)
+                        }
                     }
                 )
                 setAutoConfirmFeatureEnabled(true)
@@ -487,28 +491,31 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun hintedPinLength_withAutoConfirmPinAtRightLength_isSameLength() =
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 setAutoConfirmFeatureEnabled(true)
                 overrideCredential(
                     buildList {
-                        repeat(utils.authenticationRepository.hintedPinLength) { add(it + 1) }
+                        repeat(kosmos.fakeAuthenticationRepository.hintedPinLength) { add(it + 1) }
                     }
                 )
             }
 
-            assertThat(hintedPinLength).isEqualTo(utils.authenticationRepository.hintedPinLength)
+            assertThat(hintedPinLength)
+                .isEqualTo(kosmos.fakeAuthenticationRepository.hintedPinLength)
         }
 
     @Test
     fun hintedPinLength_withAutoConfirmPinTooLong_isNull() =
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.apply {
+            kosmos.fakeAuthenticationRepository.apply {
                 setAuthenticationMethod(Pin)
                 overrideCredential(
                     buildList {
-                        repeat(utils.authenticationRepository.hintedPinLength + 1) { add(it + 1) }
+                        repeat(kosmos.fakeAuthenticationRepository.hintedPinLength + 1) {
+                            add(it + 1)
+                        }
                     }
                 )
                 setAutoConfirmFeatureEnabled(true)
@@ -520,10 +527,10 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withTooShortPassword() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(Password)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Password)
 
             val tooShortPassword = buildList {
-                repeat(utils.authenticationRepository.minPasswordLength - 1) { time ->
+                repeat(kosmos.fakeAuthenticationRepository.minPasswordLength - 1) { time ->
                     add("$time")
                 }
             }
@@ -534,7 +541,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         assertThat(authenticationResult).isEqualTo(AuthenticationResult.SUCCEEDED)
         assertThat(onAuthenticationResult).isTrue()
         assertThat(underTest.lockoutEndTimestamp).isNull()
-        assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
+        assertThat(kosmos.fakeAuthenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         assertThat(failedAuthenticationAttempts).isEqualTo(0)
     }
 

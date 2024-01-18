@@ -47,16 +47,20 @@ import com.android.systemui.classifier.FalsingA11yDelegate
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
-import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -66,6 +70,7 @@ import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.UserSwitcherController
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.any
@@ -156,7 +161,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     private lateinit var keyguardPasswordViewController: KeyguardPasswordViewController
     private lateinit var keyguardPasswordView: KeyguardPasswordView
     private lateinit var testableResources: TestableResources
-    private lateinit var sceneTestUtils: SceneTestUtils
+    private lateinit var kosmos: Kosmos
     private lateinit var sceneInteractor: SceneInteractor
     private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     private lateinit var deviceEntryInteractor: DeviceEntryInteractor
@@ -222,15 +227,15 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 mSelectedUserInteractor,
             )
 
-        sceneTestUtils = SceneTestUtils(this)
-        sceneInteractor = sceneTestUtils.sceneInteractor()
+        kosmos = testKosmos()
+        sceneInteractor = kosmos.sceneInteractor
         keyguardTransitionInteractor =
-            KeyguardTransitionInteractorFactory.create(sceneTestUtils.testScope.backgroundScope)
+            KeyguardTransitionInteractorFactory.create(kosmos.testScope.backgroundScope)
                 .keyguardTransitionInteractor
         sceneTransitionStateFlow =
             MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Lockscreen))
         sceneInteractor.setTransitionState(sceneTransitionStateFlow)
-        deviceEntryInteractor = sceneTestUtils.deviceEntryInteractor()
+        deviceEntryInteractor = kosmos.deviceEntryInteractor
 
         mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         underTest =
@@ -249,7 +254,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 falsingManager,
                 userSwitcherController,
                 featureFlags,
-                sceneTestUtils.fakeSceneContainerFlags,
+                kosmos.fakeSceneContainerFlags,
                 globalSettings,
                 sessionTracker,
                 Optional.of(sideFpsController),
@@ -259,7 +264,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 audioManager,
                 faceAuthInteractor,
                 mock(),
-                { JavaAdapter(sceneTestUtils.testScope.backgroundScope) },
+                { JavaAdapter(kosmos.testScope.backgroundScope) },
                 mSelectedUserInteractor,
                 deviceProvisionedController,
                 faceAuthAccessibilityDelegate,
@@ -786,8 +791,8 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
     @Test
     fun dismissesKeyguard_whenSceneChangesToGone() =
-        sceneTestUtils.testScope.runTest {
-            sceneTestUtils.fakeSceneContainerFlags.enabled = true
+        kosmos.testScope.runTest {
+            kosmos.fakeSceneContainerFlags.enabled = true
             // Upon init, we have never dismisses the keyguard.
             underTest.onInit()
             runCurrent()

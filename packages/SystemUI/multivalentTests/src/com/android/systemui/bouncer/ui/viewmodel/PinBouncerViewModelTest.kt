@@ -20,12 +20,20 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.data.repository.fakeSimBouncerRepository
+import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,19 +51,19 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PinBouncerViewModelTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val sceneInteractor = utils.sceneInteractor()
-    private val authenticationInteractor = utils.authenticationInteractor()
-    private val bouncerInteractor = utils.bouncerInteractor()
-    private val bouncerViewModel = utils.bouncerViewModel()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val sceneInteractor = kosmos.sceneInteractor
+    private val authenticationInteractor = kosmos.authenticationInteractor
+    private val bouncerInteractor = kosmos.bouncerInteractor
+    private val bouncerViewModel = kosmos.bouncerViewModel
     private val underTest =
         PinBouncerViewModel(
             applicationContext = context,
             viewModelScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
             isInputEnabled = MutableStateFlow(true).asStateFlow(),
-            simBouncerInteractor = utils.simBouncerInteractor,
+            simBouncerInteractor = kosmos.simBouncerInteractor,
             authenticationMethod = AuthenticationMethodModel.Pin,
         )
 
@@ -86,7 +94,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
                     viewModelScope = testScope.backgroundScope,
                     interactor = bouncerInteractor,
                     isInputEnabled = MutableStateFlow(true).asStateFlow(),
-                    simBouncerInteractor = utils.simBouncerInteractor,
+                    simBouncerInteractor = kosmos.simBouncerInteractor,
                     authenticationMethod = AuthenticationMethodModel.Sim,
                 )
 
@@ -97,7 +105,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     fun onErrorDialogDismissed_clearsDialogMessage() =
         testScope.runTest {
             val dialogMessage by collectLastValue(underTest.errorDialogMessage)
-            utils.simBouncerRepository.setSimVerificationErrorMessage("abc")
+            kosmos.fakeSimBouncerRepository.setSimVerificationErrorMessage("abc")
             assertThat(dialogMessage).isEqualTo("abc")
 
             underTest.onErrorDialogDismissed()
@@ -114,10 +122,10 @@ class PinBouncerViewModelTest : SysuiTestCase() {
                     viewModelScope = testScope.backgroundScope,
                     interactor = bouncerInteractor,
                     isInputEnabled = MutableStateFlow(true).asStateFlow(),
-                    simBouncerInteractor = utils.simBouncerInteractor,
+                    simBouncerInteractor = kosmos.simBouncerInteractor,
                     authenticationMethod = AuthenticationMethodModel.Sim,
                 )
-            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
 
             assertThat(hintedPinLength).isNull()
@@ -254,7 +262,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onAutoConfirm_whenCorrect() =
         testScope.runTest {
-            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
             val authResult by collectLastValue(authenticationInteractor.onAuthenticationResult)
             lockDeviceAndOpenPinBouncer()
 
@@ -269,7 +277,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(bouncerViewModel.message)
             val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
-            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
             lockDeviceAndOpenPinBouncer()
 
             FakeAuthenticationRepository.DEFAULT_PIN.dropLast(1).forEach { digit ->
@@ -309,7 +317,9 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val backspaceButtonAppearance by collectLastValue(underTest.backspaceButtonAppearance)
 
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
 
             assertThat(backspaceButtonAppearance).isEqualTo(ActionButtonAppearance.Shown)
         }
@@ -318,8 +328,10 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     fun backspaceButtonAppearance_withAutoConfirmButNoInput_isHidden() =
         testScope.runTest {
             val backspaceButtonAppearance by collectLastValue(underTest.backspaceButtonAppearance)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             assertThat(backspaceButtonAppearance).isEqualTo(ActionButtonAppearance.Hidden)
         }
@@ -328,8 +340,10 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     fun backspaceButtonAppearance_withAutoConfirmAndInput_isShownQuiet() =
         testScope.runTest {
             val backspaceButtonAppearance by collectLastValue(underTest.backspaceButtonAppearance)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             underTest.onPinButtonClicked(1)
 
@@ -341,7 +355,9 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val confirmButtonAppearance by collectLastValue(underTest.confirmButtonAppearance)
 
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
 
             assertThat(confirmButtonAppearance).isEqualTo(ActionButtonAppearance.Shown)
         }
@@ -350,8 +366,10 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     fun confirmButtonAppearance_withAutoConfirm_isHidden() =
         testScope.runTest {
             val confirmButtonAppearance by collectLastValue(underTest.confirmButtonAppearance)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             assertThat(confirmButtonAppearance).isEqualTo(ActionButtonAppearance.Hidden)
         }
@@ -361,10 +379,10 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val isAnimationEnabled by collectLastValue(underTest.isDigitButtonAnimationEnabled)
 
-            utils.authenticationRepository.setPinEnhancedPrivacyEnabled(true)
+            kosmos.fakeAuthenticationRepository.setPinEnhancedPrivacyEnabled(true)
             assertThat(isAnimationEnabled).isFalse()
 
-            utils.authenticationRepository.setPinEnhancedPrivacyEnabled(false)
+            kosmos.fakeAuthenticationRepository.setPinEnhancedPrivacyEnabled(false)
             assertThat(isAnimationEnabled).isTrue()
         }
 
@@ -382,8 +400,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     }
 
     private fun TestScope.lockDeviceAndOpenPinBouncer() {
-        utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-        utils.deviceEntryRepository.setUnlocked(false)
+        kosmos.fakeAuthenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
         switchToScene(SceneKey.Bouncer)
     }
 

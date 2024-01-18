@@ -21,11 +21,19 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,9 +45,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class LockscreenSceneViewModelTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val sceneInteractor = utils.sceneInteractor()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val sceneInteractor = kosmos.sceneInteractor
 
     private val underTest = createLockscreenSceneViewModel()
 
@@ -47,9 +55,11 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_canSwipeToUnlock_gone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setLockscreenEnabled(true)
-            utils.deviceEntryRepository.setUnlocked(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
+            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
             sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
@@ -59,8 +69,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_cannotSwipeToUnlock_bouncer() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.deviceEntryRepository.setUnlocked(false)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
@@ -69,7 +81,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     @Test
     fun leftTransitionSceneKey_communalIsEnabled_communal() =
         testScope.runTest {
-            utils.communalRepository.setIsCommunalEnabled(true)
+            kosmos.fakeCommunalRepository.setIsCommunalEnabled(true)
             val underTest = createLockscreenSceneViewModel()
 
             assertThat(underTest.leftDestinationSceneKey).isEqualTo(SceneKey.Communal)
@@ -78,7 +90,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     @Test
     fun leftTransitionSceneKey_communalIsDisabled_null() =
         testScope.runTest {
-            utils.communalRepository.setIsCommunalEnabled(false)
+            kosmos.fakeCommunalRepository.setIsCommunalEnabled(false)
             val underTest = createLockscreenSceneViewModel()
 
             assertThat(underTest.leftDestinationSceneKey).isNull()
@@ -87,13 +99,13 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
         return LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
-            deviceEntryInteractor = utils.deviceEntryInteractor(),
-            communalInteractor = utils.communalInteractor(),
+            deviceEntryInteractor = kosmos.deviceEntryInteractor,
+            communalInteractor = kosmos.communalInteractor,
             longPress =
                 KeyguardLongPressViewModel(
                     interactor = mock(),
                 ),
-            notifications = utils.notificationsPlaceholderViewModel(),
+            notifications = kosmos.notificationsPlaceholderViewModel,
         )
     }
 }
