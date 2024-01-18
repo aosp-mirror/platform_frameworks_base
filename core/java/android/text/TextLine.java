@@ -291,6 +291,97 @@ public class TextLine {
     }
 
     /**
+     * Returns the run flag of at the given BiDi run.
+     *
+     * @param bidiRunIndex a BiDi run index.
+     * @return a run flag of the given BiDi run.
+     */
+    @VisibleForTesting
+    public static int calculateRunFlag(int bidiRunIndex, int bidiRunCount, int lineDirection) {
+        if (bidiRunCount == 1) {
+            // Easy case. If there is only single run, it is most left and most right run.
+            return Paint.TEXT_RUN_FLAG_LEFT_EDGE | Paint.TEXT_RUN_FLAG_RIGHT_EDGE;
+        }
+        if (bidiRunIndex != 0 && bidiRunIndex != (bidiRunCount - 1)) {
+            // Easy case. If the given run is the middle of the line, it is not the most left or
+            // the most right run.
+            return 0;
+        }
+
+        int runFlag = 0;
+        // For the historical reasons, the BiDi implementation of Android works differently
+        // from the Java BiDi APIs. The mDirections holds the BiDi runs in visual order, but
+        // it is reversed order if the paragraph direction is RTL. So, the first BiDi run of
+        // mDirections is located the most left of the line if the paragraph direction is LTR.
+        // If the paragraph direction is RTL, the first BiDi run is located the most right of
+        // the line.
+        if (bidiRunIndex == 0) {
+            if (lineDirection == Layout.DIR_LEFT_TO_RIGHT) {
+                runFlag |= Paint.TEXT_RUN_FLAG_LEFT_EDGE;
+            } else {
+                runFlag |= Paint.TEXT_RUN_FLAG_RIGHT_EDGE;
+            }
+        }
+        if (bidiRunIndex == (bidiRunCount - 1)) {
+            if (lineDirection == Layout.DIR_LEFT_TO_RIGHT) {
+                runFlag |= Paint.TEXT_RUN_FLAG_RIGHT_EDGE;
+            } else {
+                runFlag |= Paint.TEXT_RUN_FLAG_LEFT_EDGE;
+            }
+        }
+        return runFlag;
+    }
+
+    /**
+     * Resolve the runFlag for the inline span range.
+     *
+     * @param runFlag the runFlag of the current BiDi run.
+     * @param isRtlRun true for RTL run, false for LTR run.
+     * @param runStart the inclusive BiDi run start offset.
+     * @param runEnd the exclusive BiDi run end offset.
+     * @param spanStart the inclusive span start offset.
+     * @param spanEnd the exclusive span end offset.
+     * @return the resolved runFlag.
+     */
+    @VisibleForTesting
+    public static int resolveRunFlagForSubSequence(int runFlag, boolean isRtlRun, int runStart,
+            int runEnd, int spanStart, int spanEnd) {
+        if (runFlag == 0) {
+            // Easy case. If the run is in the middle of the line, any inline span is also in the
+            // middle of the line.
+            return 0;
+        }
+        int localRunFlag = runFlag;
+        if ((runFlag & Paint.TEXT_RUN_FLAG_LEFT_EDGE) != 0) {
+            if (isRtlRun) {
+                if (spanEnd != runEnd) {
+                    // In the RTL context, the last run is the most left run.
+                    localRunFlag &= ~Paint.TEXT_RUN_FLAG_LEFT_EDGE;
+                }
+            } else {  // LTR
+                if (spanStart != runStart) {
+                    // In the LTR context, the first run is the most left run.
+                    localRunFlag &= ~Paint.TEXT_RUN_FLAG_LEFT_EDGE;
+                }
+            }
+        }
+        if ((runFlag & Paint.TEXT_RUN_FLAG_RIGHT_EDGE) != 0) {
+            if (isRtlRun) {
+                if (spanStart != runStart) {
+                    // In the RTL context, the start of the run is the most right run.
+                    localRunFlag &= ~Paint.TEXT_RUN_FLAG_RIGHT_EDGE;
+                }
+            } else {  // LTR
+                if (spanEnd != runEnd) {
+                    // In the LTR context, the last run is the most right position.
+                    localRunFlag &= ~Paint.TEXT_RUN_FLAG_RIGHT_EDGE;
+                }
+            }
+        }
+        return localRunFlag;
+    }
+
+    /**
      * Renders the TextLine.
      *
      * @param c the canvas to render on
@@ -308,11 +399,13 @@ public class TextLine {
             final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
             final boolean runIsRtl = mDirections.isRunRtl(runIndex);
 
+            final int runFlag = calculateRunFlag(runIndex, runCount, mDir);
+
             int segStart = runStart;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
                 if (j == runLimit || charAt(j) == TAB_CHAR) {
                     h += drawRun(c, segStart, j, runIsRtl, x + h, top, y, bottom,
-                            runIndex != (runCount - 1) || j != mLen);
+                            runIndex != (runCount - 1) || j != mLen, runFlag);
 
                     if (j != runLimit) {  // charAt(j) == TAB_CHAR
                         h = mDir * nextTab(h * mDir);
@@ -371,11 +464,12 @@ public class TextLine {
             final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
             final boolean runIsRtl = mDirections.isRunRtl(runIndex);
 
+            final int runFlag = calculateRunFlag(runIndex, runCount, mDir);
             int segStart = runStart;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
                 if (j == runLimit || charAt(j) == TAB_CHAR) {
                     horizontal += shapeRun(consumer, segStart, j, runIsRtl, x + horizontal,
-                            runIndex != (runCount - 1) || j != mLen);
+                            runIndex != (runCount - 1) || j != mLen, runFlag);
 
                     if (j != runLimit) {  // charAt(j) == TAB_CHAR
                         horizontal = mDir * nextTab(horizontal * mDir);
@@ -441,11 +535,13 @@ public class TextLine {
         }
 
         float h = 0;
-        for (int runIndex = 0; runIndex < mDirections.getRunCount(); runIndex++) {
+        final int runCount = mDirections.getRunCount();
+        for (int runIndex = 0; runIndex < runCount; runIndex++) {
             final int runStart = mDirections.getRunStart(runIndex);
             if (runStart > mLen) break;
             final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
             final boolean runIsRtl = mDirections.isRunRtl(runIndex);
+            final int runFlag = calculateRunFlag(runIndex, runCount, mDir);
 
             int segStart = runStart;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
@@ -455,16 +551,16 @@ public class TextLine {
 
                     if (targetIsInThisSegment && sameDirection) {
                         return h + measureRun(segStart, offset, j, runIsRtl, fmi, drawBounds, null,
-                                0, h, lineInfo);
+                                0, h, lineInfo, runFlag);
                     }
 
                     final float segmentWidth = measureRun(segStart, j, j, runIsRtl, fmi, drawBounds,
-                            null, 0, h, lineInfo);
+                            null, 0, h, lineInfo, runFlag);
                     h += sameDirection ? segmentWidth : -segmentWidth;
 
                     if (targetIsInThisSegment) {
                         return h + measureRun(segStart, offset, j, runIsRtl, null, null,  null, 0,
-                                h, lineInfo);
+                                h, lineInfo, runFlag);
                     }
 
                     if (j != runLimit) {  // charAt(j) == TAB_CHAR
@@ -543,20 +639,21 @@ public class TextLine {
                     + "result, needed: " + mLen + " had: " + advances.length);
         }
         float h = 0;
-        for (int runIndex = 0; runIndex < mDirections.getRunCount(); runIndex++) {
+        final int runCount = mDirections.getRunCount();
+        for (int runIndex = 0; runIndex < runCount; runIndex++) {
             final int runStart = mDirections.getRunStart(runIndex);
             if (runStart > mLen) break;
             final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
             final boolean runIsRtl = mDirections.isRunRtl(runIndex);
+            final int runFlag = calculateRunFlag(runIndex, runCount, mDir);
 
             int segStart = runStart;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
                 if (j == runLimit || charAt(j) == TAB_CHAR) {
                     final boolean sameDirection = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
-
                     final float segmentWidth =
                             measureRun(segStart, j, j, runIsRtl, null, null, advances, segStart, 0,
-                                    null);
+                                    null, runFlag);
 
                     final float oldh = h;
                     h += sameDirection ? segmentWidth : -segmentWidth;
@@ -608,11 +705,13 @@ public class TextLine {
         }
 
         float horizontal = 0;
-        for (int runIndex = 0; runIndex < mDirections.getRunCount(); runIndex++) {
+        final int runCount = mDirections.getRunCount();
+        for (int runIndex = 0; runIndex < runCount; runIndex++) {
             final int runStart = mDirections.getRunStart(runIndex);
             if (runStart > mLen) break;
             final int runLimit = Math.min(runStart + mDirections.getRunLength(runIndex), mLen);
             final boolean runIsRtl = mDirections.isRunRtl(runIndex);
+            final int runFlag = calculateRunFlag(runIndex, runCount, mDir);
 
             int segStart = runStart;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; ++j) {
@@ -629,7 +728,7 @@ public class TextLine {
                     final float previousSegEndHorizontal = measurement[segStart];
                     final float width =
                             measureRun(segStart, j, j, runIsRtl, fmi, null, measurement, segStart,
-                                    0, null);
+                                    0, null, runFlag);
                     horizontal += sameDirection ? width : -width;
 
                     float currHorizontal = sameDirection ? oldHorizontal : horizontal;
@@ -686,22 +785,24 @@ public class TextLine {
      * @param y the baseline
      * @param bottom the bottom of the line
      * @param needWidth true if the width value is required.
+     * @param runFlag the run flag to be applied for this run.
      * @return the signed width of the run, based on the paragraph direction.
      * Only valid if needWidth is true.
      */
     private float drawRun(Canvas c, int start,
             int limit, boolean runIsRtl, float x, int top, int y, int bottom,
-            boolean needWidth) {
+            boolean needWidth, int runFlag) {
 
         if ((mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
-            float w = -measureRun(start, limit, limit, runIsRtl, null, null, null, 0, 0, null);
+            float w = -measureRun(start, limit, limit, runIsRtl, null, null, null, 0, 0, null,
+                    runFlag);
             handleRun(start, limit, limit, runIsRtl, c, null, x + w, top,
-                    y, bottom, null, null, false, null, 0, null);
+                    y, bottom, null, null, false, null, 0, null, runFlag);
             return w;
         }
 
         return handleRun(start, limit, limit, runIsRtl, c, null, x, top,
-                y, bottom, null, null, needWidth, null, 0, null);
+                y, bottom, null, null, needWidth, null, 0, null, runFlag);
     }
 
     /**
@@ -718,19 +819,21 @@ public class TextLine {
      * @param advancesIndex the start index to fill in the advance information.
      * @param x horizontal offset of the run.
      * @param lineInfo an optional output parameter for filling line information.
+     * @param runFlag the run flag to be applied for this run.
      * @return the signed width from the start of the run to the leading edge
      * of the character at offset, based on the run (not paragraph) direction
      */
     private float measureRun(int start, int offset, int limit, boolean runIsRtl,
             @Nullable FontMetricsInt fmi, @Nullable RectF drawBounds, @Nullable float[] advances,
-            int advancesIndex, float x, @Nullable LineInfo lineInfo) {
+            int advancesIndex, float x, @Nullable LineInfo lineInfo, int runFlag) {
         if (drawBounds != null && (mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
-            float w = -measureRun(start, offset, limit, runIsRtl, null, null, null, 0, 0, null);
+            float w = -measureRun(start, offset, limit, runIsRtl, null, null, null, 0, 0, null,
+                    runFlag);
             return handleRun(start, offset, limit, runIsRtl, null, null, x + w, 0, 0, 0, fmi,
-                    drawBounds, true, advances, advancesIndex, lineInfo);
+                    drawBounds, true, advances, advancesIndex, lineInfo, runFlag);
         }
         return handleRun(start, offset, limit, runIsRtl, null, null, x, 0, 0, 0, fmi, drawBounds,
-                true, advances, advancesIndex, lineInfo);
+                true, advances, advancesIndex, lineInfo, runFlag);
     }
 
     /**
@@ -742,21 +845,23 @@ public class TextLine {
      * @param runIsRtl true if the run is right-to-left
      * @param x the position of the run that is closest to the leading margin
      * @param needWidth true if the width value is required.
+     * @param runFlag the run flag to be applied for this run.
      * @return the signed width of the run, based on the paragraph direction.
      * Only valid if needWidth is true.
      */
     private float shapeRun(TextShaper.GlyphsConsumer consumer, int start,
-            int limit, boolean runIsRtl, float x, boolean needWidth) {
+            int limit, boolean runIsRtl, float x, boolean needWidth, int runFlag) {
 
         if ((mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
-            float w = -measureRun(start, limit, limit, runIsRtl, null, null, null, 0, 0, null);
+            float w = -measureRun(start, limit, limit, runIsRtl, null, null, null, 0, 0, null,
+                    runFlag);
             handleRun(start, limit, limit, runIsRtl, null, consumer, x + w, 0, 0, 0, null, null,
-                    false, null, 0, null);
+                    false, null, 0, null, runFlag);
             return w;
         }
 
         return handleRun(start, limit, limit, runIsRtl, null, consumer, x, 0, 0, 0, null, null,
-                needWidth, null, 0, null);
+                needWidth, null, 0, null, runFlag);
     }
 
 
@@ -1160,6 +1265,7 @@ public class TextLine {
      * @param advances receives the advance information about the requested run, can be null.
      * @param advancesIndex the start index to fill in the advance information.
      * @param lineInfo an optional output parameter for filling line information.
+     * @param runFlag the run flag to be applied for this run.
      * @return the signed width of the run based on the run direction; only
      * valid if needWidth is true
      */
@@ -1168,8 +1274,8 @@ public class TextLine {
             Canvas c, TextShaper.GlyphsConsumer consumer, float x, int top, int y, int bottom,
             FontMetricsInt fmi, RectF drawBounds, boolean needWidth, int offset,
             @Nullable ArrayList<DecorationInfo> decorations,
-            @Nullable float[] advances, int advancesIndex, @Nullable LineInfo lineInfo) {
-
+            @Nullable float[] advances, int advancesIndex, @Nullable LineInfo lineInfo,
+            int runFlag) {
         if (mIsJustifying) {
             wp.setWordSpacing(mAddedWidthForJustify);
         }
@@ -1187,7 +1293,16 @@ public class TextLine {
         }
 
         float totalWidth = 0;
-
+        if ((runFlag & Paint.TEXT_RUN_FLAG_LEFT_EDGE) == Paint.TEXT_RUN_FLAG_LEFT_EDGE) {
+            wp.setFlags(wp.getFlags() | Paint.TEXT_RUN_FLAG_LEFT_EDGE);
+        } else {
+            wp.setFlags(wp.getFlags() & ~Paint.TEXT_RUN_FLAG_LEFT_EDGE);
+        }
+        if ((runFlag & Paint.TEXT_RUN_FLAG_RIGHT_EDGE) == Paint.TEXT_RUN_FLAG_RIGHT_EDGE) {
+            wp.setFlags(wp.getFlags() | Paint.TEXT_RUN_FLAG_RIGHT_EDGE);
+        } else {
+            wp.setFlags(wp.getFlags() & ~Paint.TEXT_RUN_FLAG_RIGHT_EDGE);
+        }
         final int numDecorations = decorations == null ? 0 : decorations.size();
         if (needWidth || ((c != null || consumer != null) && (wp.bgColor != 0
                 || numDecorations != 0 || runIsRtl))) {
@@ -1419,6 +1534,7 @@ public class TextLine {
      * @param advances receives the advance information about the requested run, can be null.
      * @param advancesIndex the start index to fill in the advance information.
      * @param lineInfo an optional output parameter for filling line information.
+     * @param runFlag the run flag to be applied for this run.
      * @return the signed width of the run based on the run direction; only
      * valid if needWidth is true
      */
@@ -1426,7 +1542,8 @@ public class TextLine {
             int limit, boolean runIsRtl, Canvas c,
             TextShaper.GlyphsConsumer consumer, float x, int top, int y,
             int bottom, FontMetricsInt fmi, RectF drawBounds, boolean needWidth,
-            @Nullable float[] advances, int advancesIndex, @Nullable LineInfo lineInfo) {
+            @Nullable float[] advances, int advancesIndex, @Nullable LineInfo lineInfo,
+            int runFlag) {
 
         if (measureLimit < start || measureLimit > limit) {
             throw new IndexOutOfBoundsException("measureLimit (" + measureLimit + ") is out of "
@@ -1473,7 +1590,7 @@ public class TextLine {
             wp.setEndHyphenEdit(adjustEndHyphenEdit(limit, wp.getEndHyphenEdit()));
             return handleText(wp, start, limit, start, limit, runIsRtl, c, consumer, x, top,
                     y, bottom, fmi, drawBounds, needWidth, measureLimit, null, advances,
-                    advancesIndex, lineInfo);
+                    advancesIndex, lineInfo, runFlag);
         }
 
         // Shaping needs to take into account context up to metric boundaries,
@@ -1554,6 +1671,9 @@ public class TextLine {
                     // and use.
                     activePaint.set(wp);
                 } else if (!equalAttributes(wp, activePaint)) {
+                    final int spanRunFlag = resolveRunFlagForSubSequence(
+                            runFlag, runIsRtl, start, measureLimit, activeStart, activeEnd);
+
                     // The style of the present chunk of text is substantially different from the
                     // style of the previous chunk. We need to handle the active piece of text
                     // and restart with the present chunk.
@@ -1565,7 +1685,7 @@ public class TextLine {
                             consumer, x, top, y, bottom, fmi, drawBounds,
                             needWidth || activeEnd < measureLimit,
                             Math.min(activeEnd, mlimit), mDecorations,
-                            advances, advancesIndex + activeStart - start, lineInfo);
+                            advances, advancesIndex + activeStart - start, lineInfo, spanRunFlag);
 
                     activeStart = j;
                     activePaint.set(wp);
@@ -1585,6 +1705,9 @@ public class TextLine {
                     mDecorations.add(copy);
                 }
             }
+
+            final int spanRunFlag = resolveRunFlagForSubSequence(
+                    runFlag, runIsRtl, start, measureLimit, activeStart, activeEnd);
             // Handle the final piece of text.
             activePaint.setStartHyphenEdit(
                     adjustStartHyphenEdit(activeStart, mPaint.getStartHyphenEdit()));
@@ -1593,7 +1716,7 @@ public class TextLine {
             x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c, consumer, x,
                     top, y, bottom, fmi, drawBounds, needWidth || activeEnd < measureLimit,
                     Math.min(activeEnd, mlimit), mDecorations,
-                    advances, advancesIndex + activeStart - start, lineInfo);
+                    advances, advancesIndex + activeStart - start, lineInfo, spanRunFlag);
         }
 
         return x - originalX;
@@ -1614,7 +1737,6 @@ public class TextLine {
      */
     private void drawTextRun(Canvas c, TextPaint wp, int start, int end,
             int contextStart, int contextEnd, boolean runIsRtl, float x, int y) {
-
         if (mCharsValid) {
             int count = end - start;
             int contextCount = contextEnd - contextStart;

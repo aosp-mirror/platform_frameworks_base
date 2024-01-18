@@ -41,6 +41,14 @@ inline bool deprecate_ui_fonts() {
 #endif  // __ANDROID__
 }
 
+inline bool inter_character_justification() {
+#ifdef __ANDROID__
+    return com_android_text_flags_inter_character_justification();
+#else
+    return true;
+#endif  // __ANDROID__
+}
+
 }  // namespace text_feature
 
 }  // namespace android

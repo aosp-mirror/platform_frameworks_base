@@ -613,6 +613,12 @@ static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray c
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     const Typeface* typeface = paint->getAndroidTypeface();
     ScopedCharArrayRO text(env, charArray);
+
+    // The drawText API is designed to draw entire line, so ignore the text run flag and draw the
+    // text as entire line mode.
+    const minikin::RunFlag originalRunFlag = paint->getRunFlag();
+    paint->setRunFlag(minikin::RunFlag::WHOLE_LINE);
+
     // drawTextString and drawTextChars doesn't use context info
     get_canvas(canvasHandle)->drawText(
             text.get() + index, count,  // text buffer
@@ -620,6 +626,7 @@ static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray c
             0, count,  // context range
             x, y,  // draw position
             static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr /* measured text */);
+    paint->setRunFlag(originalRunFlag);
 }
 
 static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring strObj,
@@ -629,6 +636,12 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring str
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     const Typeface* typeface = paint->getAndroidTypeface();
     const int count = end - start;
+
+    // The drawText API is designed to draw entire line, so ignore the text run flag and draw the
+    // text as entire line mode.
+    const minikin::RunFlag originalRunFlag = paint->getRunFlag();
+    paint->setRunFlag(minikin::RunFlag::WHOLE_LINE);
+
     // drawTextString and drawTextChars doesn't use context info
     get_canvas(canvasHandle)->drawText(
             text.get() + start, count,  // text buffer
@@ -636,6 +649,7 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring str
             0, count,  // context range
             x, y,  // draw position
             static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr /* measured text */);
+    paint->setRunFlag(originalRunFlag);
 }
 
 static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray charArray,
@@ -681,9 +695,15 @@ static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharA
 
     jchar* jchars = env->GetCharArrayElements(text, NULL);
 
+    // The drawText API is designed to draw entire line, so ignore the text run flag and draw the
+    // text as entire line mode.
+    const minikin::RunFlag originalRunFlag = paint->getRunFlag();
+    paint->setRunFlag(minikin::RunFlag::WHOLE_LINE);
+
     get_canvas(canvasHandle)->drawTextOnPath(jchars + index, count,
             static_cast<minikin::Bidi>(bidiFlags), *path, hOffset, vOffset, *paint, typeface);
 
+    paint->setRunFlag(originalRunFlag);
     env->ReleaseCharArrayElements(text, jchars, 0);
 }
 
@@ -697,9 +717,15 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
     const jchar* jchars = env->GetStringChars(text, NULL);
     int count = env->GetStringLength(text);
 
+    // The drawText API is designed to draw entire line, so ignore the text run flag and draw the
+    // text as entire line mode.
+    const minikin::RunFlag originalRunFlag = paint->getRunFlag();
+    paint->setRunFlag(minikin::RunFlag::WHOLE_LINE);
+
     get_canvas(canvasHandle)->drawTextOnPath(jchars, count, static_cast<minikin::Bidi>(bidiFlags),
             *path, hOffset, vOffset, *paint, typeface);
 
+    paint->setRunFlag(originalRunFlag);
     env->ReleaseStringChars(text, jchars);
 }
 
