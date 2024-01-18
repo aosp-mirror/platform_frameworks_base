@@ -82,6 +82,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IpcDataCache;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
@@ -172,6 +173,11 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
             SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
+
+    @Before
+    public void disableProcessCaches() {
+        IpcDataCache.disableForTestMode();
+    }
 
     @Before
     public void setUp() {
