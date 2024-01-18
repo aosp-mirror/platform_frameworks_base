@@ -186,11 +186,16 @@ package android.app {
     method public void setEligibleForLegacyPermissionPrompt(boolean);
     method public static void setExitTransitionTimeout(long);
     method public void setLaunchActivityType(int);
+    method public void setLaunchCookie(@NonNull android.app.ActivityOptions.LaunchCookie);
     method public void setLaunchTaskDisplayAreaFeatureId(int);
     method public void setLaunchWindowingMode(int);
     method public void setLaunchedFromBubble(boolean);
     method public void setTaskAlwaysOnTop(boolean);
     method public void setTaskOverlay(boolean, boolean);
+  }
+
+  public static final class ActivityOptions.LaunchCookie {
+    ctor public ActivityOptions.LaunchCookie();
   }
 
   public static interface ActivityOptions.OnAnimationFinishedListener {
