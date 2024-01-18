@@ -69,7 +69,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -90,9 +89,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
+import androidx.core.view.setPadding
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.ui.compose.Dimensions.CardOutlineWidth
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.observeTapsWithoutConsuming
@@ -474,7 +475,7 @@ fun HighlightedItem(size: SizeF, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.size(Dp(size.width), Dp(size.height)),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(3.dp, LocalAndroidColorScheme.current.tertiaryFixed),
+        border = BorderStroke(CardOutlineWidth, LocalAndroidColorScheme.current.tertiaryFixed),
         shape = RoundedCornerShape(16.dp)
     ) {}
 }
@@ -488,7 +489,7 @@ private fun CtaTileInViewModeContent(
 ) {
     val colors = LocalAndroidColorScheme.current
     Card(
-        modifier = modifier.height(size.height.dp),
+        modifier = modifier.height(size.height.dp).padding(CardOutlineWidth),
         colors =
             CardDefaults.cardColors(
                 containerColor = colors.primary,
@@ -560,7 +561,7 @@ private fun CtaTileInEditModeContent(
     }
     val colors = LocalAndroidColorScheme.current
     Card(
-        modifier = modifier.height(size.height.dp),
+        modifier = modifier.height(size.height.dp).padding(CardOutlineWidth),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, colors.primary),
         shape = RoundedCornerShape(200.dp),
@@ -599,6 +600,7 @@ private fun WidgetContent(
         modifier = modifier.height(size.height.dp),
         contentAlignment = Alignment.Center,
     ) {
+        val paddingInPx = with(LocalDensity.current) { CardOutlineWidth.toPx().toInt() }
         AndroidView(
             modifier = modifier.allowGestures(allowed = !viewModel.isEditMode),
             factory = { context ->
@@ -613,6 +615,10 @@ private fun WidgetContent(
                         .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
                         .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
                 model.appWidgetHost.setInteractionHandler(null)
+                // Remove the extra padding applied to AppWidgetHostView to allow widgets to
+                // occupy the entire box. The added padding is now adjusted to leave only sufficient
+                // space for displaying the outline around the box when the widget is selected.
+                view.setPadding(paddingInPx)
                 view
             },
             // For reusing composition in lazy lists.
@@ -726,6 +732,7 @@ object Dimensions {
     val CardHeightFull = 630.dp
     val CardHeightHalf = 307.dp
     val CardHeightThird = 199.dp
+    val CardOutlineWidth = 3.dp
     val GridHeight = CardHeightFull
     val Spacing = 16.dp
 
