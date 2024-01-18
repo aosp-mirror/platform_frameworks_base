@@ -121,7 +121,7 @@ interface IMediaProjectionManager {
     @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
                 + ".permission.MANAGE_MEDIA_PROJECTION)")
-    void addCallback(IMediaProjectionWatcherCallback callback);
+    MediaProjectionInfo addCallback(IMediaProjectionWatcherCallback callback);
 
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")

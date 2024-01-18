@@ -1,6 +1,6 @@
 package com.android.systemui.biometrics.domain.model
 
-import android.hardware.biometrics.PromptContentListItemBulletedText
+import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -28,7 +28,8 @@ class BiometricPromptRequestTest : SysuiTestCase() {
         val contentView =
             PromptVerticalListContentView.Builder()
                 .setDescription("content description")
-                .addListItem(PromptContentListItemBulletedText("content text"))
+                .addListItem(PromptContentItemBulletedText("content item 1"))
+                .addListItem(PromptContentItemBulletedText("content item 2"), 1)
                 .build()
 
         val fpPros = fingerprintSensorPropertiesInternal().first()

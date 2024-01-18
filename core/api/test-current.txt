@@ -284,16 +284,6 @@ package android.app {
     method public default void onOpActiveChanged(@NonNull String, int, @NonNull String, @Nullable String, boolean, int, int);
   }
 
-  public final class AutomaticZenRule implements android.os.Parcelable {
-    method @FlaggedApi("android.app.modes_api") public int getUserModifiedFields();
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_INTERRUPTION_FILTER = 2; // 0x2
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_NAME = 1; // 0x1
-  }
-
-  @FlaggedApi("android.app.modes_api") public static final class AutomaticZenRule.Builder {
-    method @FlaggedApi("android.app.modes_api") @NonNull public android.app.AutomaticZenRule.Builder setUserModifiedFields(int);
-  }
-
   public class BroadcastOptions extends android.app.ComponentOptions {
     ctor public BroadcastOptions();
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
@@ -1177,6 +1167,7 @@ package android.content.pm {
     method public int getShowInLauncher();
     field public static final int SHOW_IN_LAUNCHER_NO = 2; // 0x2
     field public static final int SHOW_IN_LAUNCHER_SEPARATE = 1; // 0x1
+    field public static final int SHOW_IN_LAUNCHER_UNKNOWN = -1; // 0xffffffff
     field public static final int SHOW_IN_LAUNCHER_WITH_PARENT = 0; // 0x0
   }
 
@@ -3021,47 +3012,8 @@ package android.service.notification {
     method @Deprecated public boolean isBound();
   }
 
-  @FlaggedApi("android.app.modes_api") public final class ZenDeviceEffects implements android.os.Parcelable {
-    method public int getUserModifiedFields();
-    field public static final int FIELD_DIM_WALLPAPER = 4; // 0x4
-    field public static final int FIELD_DISABLE_AUTO_BRIGHTNESS = 16; // 0x10
-    field public static final int FIELD_DISABLE_TAP_TO_WAKE = 32; // 0x20
-    field public static final int FIELD_DISABLE_TILT_TO_WAKE = 64; // 0x40
-    field public static final int FIELD_DISABLE_TOUCH = 128; // 0x80
-    field public static final int FIELD_GRAYSCALE = 1; // 0x1
-    field public static final int FIELD_MAXIMIZE_DOZE = 512; // 0x200
-    field public static final int FIELD_MINIMIZE_RADIO_USAGE = 256; // 0x100
-    field public static final int FIELD_NIGHT_MODE = 8; // 0x8
-    field public static final int FIELD_SUPPRESS_AMBIENT_DISPLAY = 2; // 0x2
-  }
-
-  @FlaggedApi("android.app.modes_api") public static final class ZenDeviceEffects.Builder {
-    method @NonNull public android.service.notification.ZenDeviceEffects.Builder setUserModifiedFields(int);
-  }
-
-  public final class ZenPolicy implements android.os.Parcelable {
-    method @FlaggedApi("android.app.modes_api") public int getUserModifiedFields();
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_ALLOW_CHANNELS = 8; // 0x8
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_CALLS = 2; // 0x2
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_CONVERSATIONS = 4; // 0x4
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_MESSAGES = 1; // 0x1
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_PRIORITY_CATEGORY_ALARMS = 128; // 0x80
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_PRIORITY_CATEGORY_EVENTS = 32; // 0x20
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_PRIORITY_CATEGORY_MEDIA = 256; // 0x100
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS = 64; // 0x40
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_PRIORITY_CATEGORY_SYSTEM = 512; // 0x200
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_VISUAL_EFFECT_AMBIENT = 32768; // 0x8000
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_VISUAL_EFFECT_BADGE = 16384; // 0x4000
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_VISUAL_EFFECT_FULL_SCREEN_INTENT = 1024; // 0x400
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_VISUAL_EFFECT_LIGHTS = 2048; // 0x800
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_VISUAL_EFFECT_NOTIFICATION_LIST = 65536; // 0x10000
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_VISUAL_EFFECT_PEEK = 4096; // 0x1000
-    field @FlaggedApi("android.app.modes_api") public static final int FIELD_VISUAL_EFFECT_STATUS_BAR = 8192; // 0x2000
-  }
-
   public static final class ZenPolicy.Builder {
     ctor public ZenPolicy.Builder(@Nullable android.service.notification.ZenPolicy);
-    method @FlaggedApi("android.app.modes_api") @NonNull public android.service.notification.ZenPolicy.Builder setUserModifiedFields(int);
   }
 
 }

@@ -1735,6 +1735,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         processResponseLockedForPcc(response, response.getClientState(), requestFlags);
         mFillResponseEventLogger.maybeSetLatencyResponseProcessingMillis();
+        mFillResponseEventLogger.logAndEndEvent();
     }
 
 
@@ -1847,6 +1848,33 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         synchronized (mLock) {
+            // TODO(b/319913595): refactor logging for fill response for primary and secondary
+            //  providers
+            // Start a new FillResponse logger for the success case.
+            mFillResponseEventLogger.startLogForNewResponse();
+            mFillResponseEventLogger.maybeSetRequestId(fillResponse.getRequestId());
+            mFillResponseEventLogger.maybeSetAppPackageUid(uid);
+            mFillResponseEventLogger.maybeSetResponseStatus(RESPONSE_STATUS_SUCCESS);
+            mFillResponseEventLogger.startResponseProcessingTime();
+            // Time passed since session was created
+            final long fillRequestReceivedRelativeTimestamp =
+                    SystemClock.elapsedRealtime() - mLatencyBaseTime;
+            mPresentationStatsEventLogger.maybeSetFillResponseReceivedTimestampMs(
+                    (int) (fillRequestReceivedRelativeTimestamp));
+            mFillResponseEventLogger.maybeSetLatencyFillResponseReceivedMillis(
+                    (int) (fillRequestReceivedRelativeTimestamp));
+            if (mDestroyed) {
+                Slog.w(TAG, "Call to Session#onSecondaryFillResponse() rejected - session: "
+                        + id + " destroyed");
+                mFillResponseEventLogger.maybeSetResponseStatus(RESPONSE_STATUS_SESSION_DESTROYED);
+                mFillResponseEventLogger.logAndEndEvent();
+                return;
+            }
+
+            List<Dataset> datasetList = fillResponse.getDatasets();
+            int datasetCount = (datasetList == null) ? 0 : datasetList.size();
+            mFillResponseEventLogger.maybeSetTotalDatasetsProvided(datasetCount);
+            mFillResponseEventLogger.maybeSetAvailableCount(datasetCount);
             if (mSecondaryResponses == null) {
                 mSecondaryResponses = new SparseArray<>(2);
             }
@@ -1859,6 +1887,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (currentView != null) {
                 currentView.maybeCallOnFillReady(flags);
             }
+            mFillResponseEventLogger.maybeSetLatencyResponseProcessingMillis();
+            mFillResponseEventLogger.logAndEndEvent();
         }
     }
 

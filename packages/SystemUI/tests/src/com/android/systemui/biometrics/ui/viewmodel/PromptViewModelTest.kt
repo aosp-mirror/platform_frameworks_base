@@ -18,7 +18,7 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.res.Configuration
 import android.graphics.Point
-import android.hardware.biometrics.PromptContentListItemBulletedText
+import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
@@ -140,7 +140,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         selector.resetPrompt()
         promptContentView =
             PromptVerticalListContentView.Builder()
-                .addListItem(PromptContentListItemBulletedText("test"))
+                .addListItem(PromptContentItemBulletedText("content item 1"))
+                .addListItem(PromptContentItemBulletedText("content item 2"), 1)
                 .build()
 
         viewModel =

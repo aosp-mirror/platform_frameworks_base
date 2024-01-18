@@ -645,38 +645,12 @@ public class ZenPolicyTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testFromParcel() {
-        ZenPolicy.Builder builder = new ZenPolicy.Builder();
-        builder.setUserModifiedFields(10);
-
-        ZenPolicy policy = builder.build();
-        assertThat(policy.getUserModifiedFields()).isEqualTo(10);
-
-        Parcel parcel = Parcel.obtain();
-        policy.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-
-        ZenPolicy fromParcel = ZenPolicy.CREATOR.createFromParcel(parcel);
-        assertThat(fromParcel.getUserModifiedFields()).isEqualTo(10);
-    }
-
-    @Test
-    public void testPolicy_userModifiedFields() {
-        ZenPolicy.Builder builder = new ZenPolicy.Builder();
-        builder.setUserModifiedFields(10);
-        assertThat(builder.build().getUserModifiedFields()).isEqualTo(10);
-
-        builder.setUserModifiedFields(0);
-        assertThat(builder.build().getUserModifiedFields()).isEqualTo(0);
-    }
-
-    @Test
     public void testPolicyBuilder_constructFromPolicy() {
         ZenPolicy.Builder builder = new ZenPolicy.Builder();
         ZenPolicy policy = builder.allowRepeatCallers(true).allowAlarms(false)
                 .showLights(true).showBadges(false)
                 .allowPriorityChannels(true)
-                .setUserModifiedFields(20).build();
+                .build();
 
         ZenPolicy newPolicy = new ZenPolicy.Builder(policy).build();
 
@@ -689,7 +663,6 @@ public class ZenPolicyTest extends UiServiceTestCase {
         assertThat(newPolicy.getVisualEffectPeek()).isEqualTo(ZenPolicy.STATE_UNSET);
 
         assertThat(newPolicy.getPriorityChannels()).isEqualTo(ZenPolicy.STATE_ALLOW);
-        assertThat(newPolicy.getUserModifiedFields()).isEqualTo(20);
     }
 
     @Test

@@ -69,12 +69,13 @@ import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.AddToSurfaceSyncGroupResult;
+import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
-import android.window.ScreenCapture;
-import android.window.WindowContextInfo;
 import android.window.ITrustedPresentationListener;
+import android.window.ScreenCapture;
 import android.window.TrustedPresentationThresholds;
+import android.window.WindowContextInfo;
 
 /**
  * System private interface to the window manager.
@@ -1083,4 +1084,8 @@ interface IWindowManager
 
 
     void unregisterTrustedPresentationListener(in ITrustedPresentationListener listener, int id);
+
+    boolean registerScreenRecordingCallback(IScreenRecordingCallback callback);
+
+    void unregisterScreenRecordingCallback(IScreenRecordingCallback callback);
 }

@@ -162,6 +162,7 @@ internal fun <T : AppRecord> TogglePermissionAppListModel<T>.TogglePermissionApp
                 uid = checkNotNull(applicationInfo).uid,
                 packageName = packageName) })
         RestrictedSwitchPreference(switchModel, restrictions, restrictionsProviderFactory)
+        InfoPageAdditionalContent(record, isAllowed)
     }
 }
 

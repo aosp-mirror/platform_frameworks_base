@@ -5931,8 +5931,7 @@ public class NotificationManagerService extends SystemService {
                         newVisualEffects, policy.priorityConversationSenders);
 
                 if (shouldApplyAsImplicitRule) {
-                    mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(pkg, callingUid, policy,
-                            origin);
+                    mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(pkg, callingUid, policy);
                 } else {
                     ZenLog.traceSetNotificationPolicy(pkg, applicationInfo.targetSdkVersion,
                             policy);

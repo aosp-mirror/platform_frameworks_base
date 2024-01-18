@@ -348,6 +348,10 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
 
     private void pinWebviewIfRequired(ApplicationInfo appInfo) {
         PinnerService pinnerService = LocalServices.getService(PinnerService.class);
+        if (pinnerService == null) {
+            // This happens in unit tests which do not have services.
+            return;
+        }
         int webviewPinQuota = pinnerService.getWebviewPinQuota();
         if (webviewPinQuota <= 0) {
             return;

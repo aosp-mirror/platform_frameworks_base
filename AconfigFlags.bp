@@ -75,6 +75,7 @@ aconfig_srcjars = [
     ":android.speech.flags-aconfig-java{.generated_srcjars}",
     ":power_flags_lib{.generated_srcjars}",
     ":android.content.flags-aconfig-java{.generated_srcjars}",
+    ":aconfig_mediacodec_flags_java_lib{.generated_srcjars}",
 ]
 
 filegroup {

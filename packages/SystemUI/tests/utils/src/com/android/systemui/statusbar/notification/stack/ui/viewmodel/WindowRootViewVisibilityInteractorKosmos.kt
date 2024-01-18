@@ -23,6 +23,7 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.data.repository.windowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.policy.headsUpManager
 
 val Kosmos.windowRootViewVisibilityInteractor by Fixture {
@@ -32,5 +33,6 @@ val Kosmos.windowRootViewVisibilityInteractor by Fixture {
         keyguardRepository = keyguardRepository,
         headsUpManager = headsUpManager,
         powerInteractor = powerInteractor,
+        activeNotificationsInteractor = activeNotificationsInteractor,
     )
 }

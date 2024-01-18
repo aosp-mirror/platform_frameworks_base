@@ -32,6 +32,7 @@ import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR
 import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_USER;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
+import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -427,6 +428,7 @@ public class ZenModeHelper {
 
     public String addAutomaticZenRule(String pkg, AutomaticZenRule automaticZenRule,
             @ConfigChangeOrigin int origin, String reason, int callingUid) {
+        requirePublicOrigin("addAutomaticZenRule", origin);
         if (!ZenModeConfig.SYSTEM_AUTHORITY.equals(pkg)) {
             PackageItemInfo component = getServiceInfo(automaticZenRule.getOwner());
             if (component == null) {
@@ -525,6 +527,7 @@ public class ZenModeHelper {
 
     public boolean updateAutomaticZenRule(String ruleId, AutomaticZenRule automaticZenRule,
             @ConfigChangeOrigin int origin, String reason, int callingUid) {
+        requirePublicOrigin("updateAutomaticZenRule", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
             if (mConfig == null) return false;
@@ -602,7 +605,11 @@ public class ZenModeHelper {
                     rule = newImplicitZenRule(callingPkg);
                     newConfig.automaticRules.put(rule.id, rule);
                 }
-                rule.zenMode = zenMode;
+                // If the user has changed the rule's *zenMode*, then don't let app overwrite it.
+                // We allow the update if the user has only changed other aspects of the rule.
+                if ((rule.userModifiedFields & AutomaticZenRule.FIELD_INTERRUPTION_FILTER) == 0) {
+                    rule.zenMode = zenMode;
+                }
                 rule.snoozing = false;
                 rule.condition = new Condition(rule.conditionId,
                         mContext.getString(R.string.zen_mode_implicit_activated),
@@ -625,7 +632,7 @@ public class ZenModeHelper {
      * {@link Global#ZEN_MODE_IMPORTANT_INTERRUPTIONS}.
      */
     void applyGlobalPolicyAsImplicitZenRule(String callingPkg, int callingUid,
-            NotificationManager.Policy policy, @ConfigChangeOrigin int origin) {
+            NotificationManager.Policy policy) {
         if (!android.app.Flags.modesApi()) {
             Log.wtf(TAG, "applyGlobalPolicyAsImplicitZenRule called with flag off!");
             return;
@@ -641,10 +648,17 @@ public class ZenModeHelper {
                 rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                 newConfig.automaticRules.put(rule.id, rule);
             }
-            // TODO: b/308673679 - Keep user customization of this rule!
-            rule.zenPolicy = ZenAdapters.notificationPolicyToZenPolicy(policy);
-            setConfigLocked(newConfig, /* triggeringComponent= */ null, origin,
-                    "applyGlobalPolicyAsImplicitZenRule", callingUid);
+            // If the user has changed the rule's *ZenPolicy*, then don't let app overwrite it.
+            // We allow the update if the user has only changed other aspects of the rule.
+            if (rule.zenPolicyUserModifiedFields == 0) {
+                updatePolicy(
+                        rule,
+                        ZenAdapters.notificationPolicyToZenPolicy(policy),
+                        /* updateBitmask= */ false);
+
+                setConfigLocked(newConfig, /* triggeringComponent= */ null, UPDATE_ORIGIN_APP,
+                        "applyGlobalPolicyAsImplicitZenRule", callingUid);
+            }
         }
     }
 
@@ -726,6 +740,7 @@ public class ZenModeHelper {
 
     boolean removeAutomaticZenRule(String id, @ConfigChangeOrigin int origin, String reason,
             int callingUid) {
+        requirePublicOrigin("removeAutomaticZenRule", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
             if (mConfig == null) return false;
@@ -758,6 +773,7 @@ public class ZenModeHelper {
 
     boolean removeAutomaticZenRules(String packageName, @ConfigChangeOrigin int origin,
             String reason, int callingUid) {
+        requirePublicOrigin("removeAutomaticZenRules", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
             if (mConfig == null) return false;
@@ -806,6 +822,7 @@ public class ZenModeHelper {
 
     void setAutomaticZenRuleState(String id, Condition condition, @ConfigChangeOrigin int origin,
             int callingUid) {
+        requirePublicOrigin("setAutomaticZenRuleState", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
             if (mConfig == null) return;
@@ -819,6 +836,7 @@ public class ZenModeHelper {
 
     void setAutomaticZenRuleState(Uri ruleDefinition, Condition condition,
             @ConfigChangeOrigin int origin, int callingUid) {
+        requirePublicOrigin("setAutomaticZenRuleState", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
             if (mConfig == null) return;
@@ -988,7 +1006,7 @@ public class ZenModeHelper {
         return null;
     }
 
-    void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
+    private void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
                          @ConfigChangeOrigin int origin, boolean isNew) {
         if (Flags.modesApi()) {
             // These values can always be edited by the app, so we apply changes immediately.
@@ -1053,11 +1071,9 @@ public class ZenModeHelper {
             rule.zenMode = newZenMode;
 
             // Updates the bitmask and values for all policy fields, based on the origin.
-            rule.zenPolicy = updatePolicy(rule.zenPolicy, automaticZenRule.getZenPolicy(),
-                    updateBitmask);
+            updatePolicy(rule, automaticZenRule.getZenPolicy(), updateBitmask);
             // Updates the bitmask and values for all device effect fields, based on the origin.
-            rule.zenDeviceEffects = updateZenDeviceEffects(
-                    rule.zenDeviceEffects, automaticZenRule.getDeviceEffects(),
+            updateZenDeviceEffects(rule, automaticZenRule.getDeviceEffects(),
                     origin == UPDATE_ORIGIN_APP, updateBitmask);
         } else {
             if (rule.enabled != automaticZenRule.isEnabled()) {
@@ -1069,13 +1085,6 @@ public class ZenModeHelper {
             rule.enabled = automaticZenRule.isEnabled();
             rule.modified = automaticZenRule.isModified();
             rule.zenPolicy = automaticZenRule.getZenPolicy();
-            if (Flags.modesApi()) {
-                rule.zenDeviceEffects = updateZenDeviceEffects(
-                        rule.zenDeviceEffects,
-                        automaticZenRule.getDeviceEffects(),
-                        origin == UPDATE_ORIGIN_APP,
-                        origin == UPDATE_ORIGIN_USER);
-            }
             rule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
                     automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
             rule.configurationActivity = automaticZenRule.getConfigurationActivity();
@@ -1099,28 +1108,28 @@ public class ZenModeHelper {
     }
 
     /**
-     * Modifies {@link ZenPolicy} that is being stored as part of a new or updated ZenRule.
-     * Returns a policy based on {@code oldPolicy}, but with fields updated to match
-     * {@code newPolicy} where they differ, and updating the internal user-modified bitmask to
-     * track these changes, if applicable based on {@code origin}.
+     * Modifies the {@link ZenPolicy} associated to a new or updated ZenRule.
+     *
+     * <p>The new policy is {@code newPolicy}, while the user-modified bitmask is updated to reflect
+     * the changes being applied (if applicable, i.e. if the update is from the user).
      */
-    @Nullable
-    private ZenPolicy updatePolicy(@Nullable ZenPolicy oldPolicy, @Nullable ZenPolicy newPolicy,
-                                   boolean updateBitmask) {
-        // If the update is to make the policy null, we don't need to update the bitmask,
-        // because it won't be stored anywhere anyway.
+    private void updatePolicy(ZenRule zenRule, @Nullable ZenPolicy newPolicy,
+            boolean updateBitmask) {
         if (newPolicy == null) {
-            return null;
+            // TODO: b/319242206 - Treat as newPolicy == default policy and continue below.
+            zenRule.zenPolicy = null;
+            return;
         }
 
         // If oldPolicy is null, we compare against the default policy when determining which
         // fields in the bitmask should be marked as updated.
-        if (oldPolicy == null) {
-            oldPolicy = mDefaultConfig.toZenPolicy();
-        }
+        ZenPolicy oldPolicy =
+                zenRule.zenPolicy != null ? zenRule.zenPolicy : mDefaultConfig.toZenPolicy();
 
-        int userModifiedFields = oldPolicy.getUserModifiedFields();
+        zenRule.zenPolicy = newPolicy;
+
         if (updateBitmask) {
+            int userModifiedFields = zenRule.zenPolicyUserModifiedFields;
             if (oldPolicy.getPriorityMessageSenders() != newPolicy.getPriorityMessageSenders()) {
                 userModifiedFields |= ZenPolicy.FIELD_MESSAGES;
             }
@@ -1178,66 +1187,47 @@ public class ZenModeHelper {
                     != newPolicy.getVisualEffectNotificationList()) {
                 userModifiedFields |= ZenPolicy.FIELD_VISUAL_EFFECT_NOTIFICATION_LIST;
             }
+            zenRule.zenPolicyUserModifiedFields = userModifiedFields;
         }
-
-        // After all bitmask changes have been made, sets the bitmask.
-        return new ZenPolicy.Builder(newPolicy).setUserModifiedFields(userModifiedFields).build();
     }
 
     /**
-     * Modifies {@link ZenDeviceEffects} that are being stored as part of a new or updated ZenRule.
-     * Returns a {@link ZenDeviceEffects} based on {@code oldEffects}, but with fields updated to
-     * match {@code newEffects} where they differ, and updating the internal user-modified bitmask
-     * to track these changes, if applicable based on {@code origin}.
-     * <ul>
-     *     <li> Apps cannot turn on hidden effects (those tagged as {@code @hide}) since they are
-     *     intended for platform-specific rules (e.g. wearables). If it's a new rule, we blank them
-     *     out; if it's an update, we preserve the previous values.
-     * </ul>
+     * Modifies the {@link ZenDeviceEffects} associated to a new or updated ZenRule.
+     *
+     * <p>The new value is {@code newEffects}, while the user-modified bitmask is updated to reflect
+     * the changes being applied (if applicable, i.e. if the update is from the user).
+     *
+     * <p>Apps cannot turn on hidden effects (those tagged as {@code @hide}), so those fields are
+     * treated especially: for a new rule, they are blanked out; for an updated rule, previous
+     * values are preserved.
      */
-    @Nullable
-    private static ZenDeviceEffects updateZenDeviceEffects(@Nullable ZenDeviceEffects oldEffects,
-                                                           @Nullable ZenDeviceEffects newEffects,
-                                                           boolean isFromApp,
-                                                           boolean updateBitmask) {
+    private static void updateZenDeviceEffects(ZenRule zenRule,
+            @Nullable ZenDeviceEffects newEffects, boolean isFromApp, boolean updateBitmask) {
         if (newEffects == null) {
-            return null;
+            zenRule.zenDeviceEffects = null;
+            return;
         }
 
-        // Since newEffects is not null, we want to adopt all the new provided device effects.
-        ZenDeviceEffects.Builder builder = new ZenDeviceEffects.Builder(newEffects);
+        ZenDeviceEffects oldEffects = zenRule.zenDeviceEffects != null
+                ? zenRule.zenDeviceEffects
+                : new ZenDeviceEffects.Builder().build();
 
         if (isFromApp) {
-            if (oldEffects != null) {
-                // We can do this because we know we don't need to update the bitmask FROM_APP.
-                return builder
-                        .setShouldDisableAutoBrightness(oldEffects.shouldDisableAutoBrightness())
-                        .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
-                        .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
-                        .setShouldDisableTouch(oldEffects.shouldDisableTouch())
-                        .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
-                        .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
-                        .build();
-            } else {
-                return builder
-                        .setShouldDisableAutoBrightness(false)
-                        .setShouldDisableTapToWake(false)
-                        .setShouldDisableTiltToWake(false)
-                        .setShouldDisableTouch(false)
-                        .setShouldMinimizeRadioUsage(false)
-                        .setShouldMaximizeDoze(false)
-                        .build();
-            }
+            // Don't allow apps to toggle hidden effects.
+            newEffects = new ZenDeviceEffects.Builder(newEffects)
+                    .setShouldDisableAutoBrightness(oldEffects.shouldDisableAutoBrightness())
+                    .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
+                    .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
+                    .setShouldDisableTouch(oldEffects.shouldDisableTouch())
+                    .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
+                    .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
+                    .build();
         }
 
-        // If oldEffects is null, we compare against the default device effects object when
-        // determining which fields in the bitmask should be marked as updated.
-        if (oldEffects == null) {
-            oldEffects = new ZenDeviceEffects.Builder().build();
-        }
+        zenRule.zenDeviceEffects = newEffects;
 
-        int userModifiedFields = oldEffects.getUserModifiedFields();
         if (updateBitmask) {
+            int userModifiedFields = zenRule.zenDeviceEffectsUserModifiedFields;
             if (oldEffects.shouldDisplayGrayscale() != newEffects.shouldDisplayGrayscale()) {
                 userModifiedFields |= ZenDeviceEffects.FIELD_GRAYSCALE;
             }
@@ -1270,11 +1260,8 @@ public class ZenModeHelper {
             if (oldEffects.shouldMaximizeDoze() != newEffects.shouldMaximizeDoze()) {
                 userModifiedFields |= ZenDeviceEffects.FIELD_MAXIMIZE_DOZE;
             }
+            zenRule.zenDeviceEffectsUserModifiedFields = userModifiedFields;
         }
-
-        // Since newEffects is not null, we want to adopt all the new provided device effects.
-        // Set the usermodifiedFields value separately, to reflect the updated bitmask.
-        return builder.setUserModifiedFields(userModifiedFields).build();
     }
 
     private AutomaticZenRule zenRuleToAutomaticZenRule(ZenRule rule) {
@@ -1293,7 +1280,6 @@ public class ZenModeHelper {
                     .setOwner(rule.component)
                     .setConfigurationActivity(rule.configurationActivity)
                     .setTriggerDescription(rule.triggerDescription)
-                    .setUserModifiedFields(rule.userModifiedFields)
                     .build();
         } else {
             azr = new AutomaticZenRule(rule.name, rule.component,
@@ -2369,6 +2355,19 @@ public class ZenModeHelper {
             return null;
         }
     }
+
+    /** Checks that the {@code origin} supplied to a ZenModeHelper "API" method makes sense. */
+    private static void requirePublicOrigin(String method, @ConfigChangeOrigin int origin) {
+        if (!Flags.modesApi()) {
+            return;
+        }
+        checkArgument(origin == UPDATE_ORIGIN_APP || origin == UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                        || origin == UPDATE_ORIGIN_USER,
+                "Expected one of UPDATE_ORIGIN_APP, UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, or "
+                        + "UPDATE_ORIGIN_USER for %s, but received '%s'.",
+                method, origin);
+    }
+
     private final class Metrics extends Callback {
         private static final String COUNTER_MODE_PREFIX = "dnd_mode_";
         private static final String COUNTER_TYPE_PREFIX = "dnd_type_";

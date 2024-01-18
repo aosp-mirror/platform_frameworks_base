@@ -891,6 +891,9 @@
     <!-- Permission required for Cts test - CtsNotificationTestCases -->
     <uses-permission android:name="android.permission.RECEIVE_SENSITIVE_NOTIFICATIONS" />
 
+    <!-- Permission required for BinaryTransparencyService shell API and host test -->
+    <uses-permission android:name="android.permission.GET_BACKGROUND_INSTALLED_PACKAGES" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

@@ -2,11 +2,13 @@ package com.android.systemui.qs
 
 import android.content.Context
 import android.testing.AndroidTestingRunner
-import android.view.KeyEvent
 import android.view.View
 import android.widget.Scroller
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.qs.PageIndicator.PageScrollActionListener
+import com.android.systemui.qs.PageIndicator.PageScrollActionListener.LEFT
+import com.android.systemui.qs.PageIndicator.PageScrollActionListener.RIGHT
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -22,7 +24,7 @@ import org.mockito.MockitoAnnotations
 class PagedTileLayoutTest : SysuiTestCase() {
 
     @Mock private lateinit var pageIndicator: PageIndicator
-    @Captor private lateinit var captor: ArgumentCaptor<View.OnKeyListener>
+    @Captor private lateinit var captor: ArgumentCaptor<PageScrollActionListener>
 
     private lateinit var pageTileLayout: TestPagedTileLayout
     private lateinit var scroller: Scroller
@@ -32,7 +34,7 @@ class PagedTileLayoutTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         pageTileLayout = TestPagedTileLayout(mContext)
         pageTileLayout.setPageIndicator(pageIndicator)
-        verify(pageIndicator).setOnKeyListener(captor.capture())
+        verify(pageIndicator).setPageScrollActionListener(captor.capture())
         setViewWidth(pageTileLayout, width = PAGE_WIDTH)
         scroller = pageTileLayout.mScroller
     }
@@ -43,28 +45,27 @@ class PagedTileLayoutTest : SysuiTestCase() {
     }
 
     @Test
-    fun scrollsRight_afterRightArrowPressed_whenFocusOnPagerIndicator() {
+    fun scrollsRight_afterRightScrollActionTriggered() {
         pageTileLayout.currentPageIndex = 0
 
-        sendUpEvent(KeyEvent.KEYCODE_DPAD_RIGHT)
+        sendScrollActionEvent(RIGHT)
 
         assertThat(scroller.isFinished).isFalse() // aka we're scrolling
         assertThat(scroller.finalX).isEqualTo(scroller.currX + PAGE_WIDTH)
     }
 
     @Test
-    fun scrollsLeft_afterLeftArrowPressed_whenFocusOnPagerIndicator() {
+    fun scrollsLeft_afterLeftScrollActionTriggered() {
         pageTileLayout.currentPageIndex = 1 // we won't scroll left if we're on the first page
 
-        sendUpEvent(KeyEvent.KEYCODE_DPAD_LEFT)
+        sendScrollActionEvent(LEFT)
 
         assertThat(scroller.isFinished).isFalse() // aka we're scrolling
         assertThat(scroller.finalX).isEqualTo(scroller.currX - PAGE_WIDTH)
     }
 
-    private fun sendUpEvent(keyCode: Int) {
-        val event = KeyEvent(KeyEvent.ACTION_UP, keyCode)
-        captor.value.onKey(pageIndicator, keyCode, event)
+    private fun sendScrollActionEvent(@PageScrollActionListener.Direction direction: Int) {
+        captor.value.onScrollActionTriggered(direction)
     }
 
     /**

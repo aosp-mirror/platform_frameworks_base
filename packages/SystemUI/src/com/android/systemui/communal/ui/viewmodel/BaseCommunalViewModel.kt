@@ -24,6 +24,7 @@ import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.media.controls.ui.MediaHost
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 
@@ -35,6 +36,15 @@ abstract class BaseCommunalViewModel(
     val isKeyguardVisible: Flow<Boolean> = communalInteractor.isKeyguardVisible
 
     val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
+
+    /** Whether widgets are currently being re-ordered. */
+    open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)
+
+    private val _selectedIndex: MutableStateFlow<Int?> = MutableStateFlow(null)
+
+    /** The index of the currently selected item, or null if no item selected. */
+    val selectedIndex: StateFlow<Int?>
+        get() = _selectedIndex
 
     fun onSceneChanged(scene: CommunalSceneKey) {
         communalInteractor.onSceneChanged(scene)
@@ -105,4 +115,9 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the user cancels dragging a widget to reorder. */
     open fun onReorderWidgetCancel() {}
+
+    /** Set the index of the currently selected item */
+    fun setSelectedIndex(index: Int?) {
+        _selectedIndex.value = index
+    }
 }

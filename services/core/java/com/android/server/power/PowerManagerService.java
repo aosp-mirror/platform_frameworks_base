@@ -4413,8 +4413,8 @@ public final class PowerManagerService extends SystemService
 
     private boolean setPowerModeInternal(int mode, boolean enabled) {
         // Maybe filter the event.
-        if (mBatterySaverStateMachine == null || (mode == Mode.LAUNCH && enabled
-                && mBatterySaverStateMachine.getBatterySaverController().isLaunchBoostDisabled())) {
+        if (mode == Mode.LAUNCH && enabled && mBatterySaverStateMachine != null
+                && mBatterySaverStateMachine.getBatterySaverController().isLaunchBoostDisabled()) {
             return false;
         }
         return mNativeWrapper.nativeSetPowerMode(mode, enabled);

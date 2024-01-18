@@ -304,7 +304,7 @@ public final class MediaProjectionManagerService extends SystemService
     }
 
     @VisibleForTesting
-    void addCallback(final IMediaProjectionWatcherCallback callback) {
+    MediaProjectionInfo addCallback(final IMediaProjectionWatcherCallback callback) {
         IBinder.DeathRecipient deathRecipient = new IBinder.DeathRecipient() {
             @Override
             public void binderDied() {
@@ -314,6 +314,7 @@ public final class MediaProjectionManagerService extends SystemService
         synchronized (mLock) {
             mCallbackDelegate.add(callback);
             linkDeathRecipientLocked(callback, deathRecipient);
+            return mProjectionGrant != null ? mProjectionGrant.getProjectionInfo() : null;
         }
     }
 
@@ -786,11 +787,11 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override //Binder call
         @EnforcePermission(MANAGE_MEDIA_PROJECTION)
-        public void addCallback(final IMediaProjectionWatcherCallback callback) {
+        public MediaProjectionInfo addCallback(final IMediaProjectionWatcherCallback callback) {
             addCallback_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaProjectionManagerService.this.addCallback(callback);
+                return MediaProjectionManagerService.this.addCallback(callback);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1244,7 +1245,7 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         public MediaProjectionInfo getProjectionInfo() {
-            return new MediaProjectionInfo(packageName, userHandle);
+            return new MediaProjectionInfo(packageName, userHandle, mLaunchCookie);
         }
 
         boolean requiresForegroundService() {

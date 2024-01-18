@@ -30,9 +30,7 @@ import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
-import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
@@ -53,13 +51,13 @@ constructor(
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
     private val notificationIconAreaController: NotificationIconAreaController,
-    private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val systemBarUtilsState: SystemBarUtilsState,
 ) : KeyguardSection() {
 
     private var nicBindingDisposable: DisposableHandle? = null
     private val nicId = R.id.aod_notification_icon_container
     private lateinit var nic: NotificationIconContainer
+    private val smartSpaceBarrier = View.generateViewId()
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!KeyguardShadeMigrationNssl.isEnabled) {
@@ -118,7 +116,7 @@ constructor(
             }
         constraintSet.apply {
             if (migrateClocksToBlueprint()) {
-                connect(nicId, TOP, sharedR.id.bc_smartspace_view, BOTTOM, bottomMargin)
+                connect(nicId, TOP, R.id.smart_space_barrier_bottom, BOTTOM, bottomMargin)
                 setGoneMargin(nicId, BOTTOM, bottomMargin)
             } else {
                 connect(nicId, TOP, R.id.keyguard_status_view, topAlignment, bottomMargin)

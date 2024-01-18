@@ -2841,6 +2841,19 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
+    /** Returns {@code true} if the display should use high performance hint for this transition. */
+    boolean shouldUsePerfHint(@NonNull DisplayContent dc) {
+        if (mOverrideOptions != null
+                && mOverrideOptions.getType() == ActivityOptions.ANIM_SCENE_TRANSITION
+                && mType == TRANSIT_TO_BACK && mParticipants.size() == 1) {
+            // This should be from convertFromTranslucent that makes the occluded activity invisible
+            // without animation. So do not use perf hint (especially early-wakeup) that may disturb
+            // SurfaceFlinger scheduling around the last frame.
+            return false;
+        }
+        return mTargetDisplays.contains(dc);
+    }
+
     /**
      * Returns {@code true} if the transition and the corresponding transaction should be applied
      * on display thread. Currently, this only checks for display rotation change because the order

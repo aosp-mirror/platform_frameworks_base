@@ -69,6 +69,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -236,6 +237,10 @@ final class SettingsState {
     @GuardedBy("mLock")
     private int mNextHistoricalOpIdx;
 
+    @GuardedBy("mLock")
+    @Nullable
+    private Map<String, Map<String, String>> mNamespaceDefaults;
+
     public static final int SETTINGS_TYPE_GLOBAL = 0;
     public static final int SETTINGS_TYPE_SYSTEM = 1;
     public static final int SETTINGS_TYPE_SECURE = 2;
@@ -331,25 +336,21 @@ final class SettingsState {
             readStateSyncLocked();
 
             if (Flags.loadAconfigDefaults()) {
-                // Only load aconfig defaults if this is the first boot, the XML
-                // file doesn't exist yet, or this device is on its first boot after
-                // an OTA.
-                boolean shouldLoadAconfigValues = isConfigSettingsKey(mKey)
-                        && (!file.exists()
-                                || mContext.getPackageManager().isDeviceUpgrading());
-                if (shouldLoadAconfigValues) {
+                if (isConfigSettingsKey(mKey)) {
                     loadAconfigDefaultValuesLocked();
                 }
             }
+
         }
     }
 
     @GuardedBy("mLock")
     private void loadAconfigDefaultValuesLocked() {
+        mNamespaceDefaults = new HashMap<>();
+
         for (String fileName : sAconfigTextProtoFilesOnDevice) {
             try (FileInputStream inputStream = new FileInputStream(fileName)) {
-                byte[] contents = inputStream.readAllBytes();
-                loadAconfigDefaultValues(contents);
+                loadAconfigDefaultValues(inputStream.readAllBytes(), mNamespaceDefaults);
             } catch (IOException e) {
                 Slog.e(LOG_TAG, "failed to read protobuf", e);
             }
@@ -358,27 +359,21 @@ final class SettingsState {
 
     @VisibleForTesting
     @GuardedBy("mLock")
-    public void loadAconfigDefaultValues(byte[] fileContents) {
+    public static void loadAconfigDefaultValues(byte[] fileContents,
+            @NonNull Map<String, Map<String, String>> defaultMap) {
         try {
-            parsed_flags parsedFlags = parsed_flags.parseFrom(fileContents);
-
-            if (parsedFlags == null) {
-                Slog.e(LOG_TAG, "failed to parse aconfig protobuf");
-                return;
-            }
-
+            parsed_flags parsedFlags =
+                    parsed_flags.parseFrom(fileContents);
             for (parsed_flag flag : parsedFlags.getParsedFlagList()) {
-                String flagName = flag.getNamespace() + "/"
-                        + flag.getPackage() + "." + flag.getName();
-                String value = flag.getState() == flag_state.ENABLED ? "true" : "false";
-
-                Setting existingSetting = getSettingLocked(flagName);
-                boolean isDefaultLoaded = existingSetting.getTag() != null
-                        && existingSetting.getTag().equals(BOOT_LOADED_DEFAULT_TAG);
-                if (existingSetting.getValue() == null || isDefaultLoaded) {
-                    insertSettingLocked(flagName, value, BOOT_LOADED_DEFAULT_TAG,
-                            false, flag.getPackage());
+                if (!defaultMap.containsKey(flag.getNamespace())) {
+                    Map<String, String> defaults = new HashMap<>();
+                    defaultMap.put(flag.getNamespace(), defaults);
                 }
+                String flagName = flag.getNamespace()
+                        + "/" + flag.getPackage() + "." + flag.getName();
+                String flagValue = flag.getState() == flag_state.ENABLED
+                        ? "true" : "false";
+                defaultMap.get(flag.getNamespace()).put(flagName, flagValue);
             }
         } catch (IOException e) {
             Slog.e(LOG_TAG, "failed to parse protobuf", e);
@@ -441,6 +436,13 @@ final class SettingsState {
             names.add(name);
         }
         return names;
+    }
+
+    @Nullable
+    public Map<String, Map<String, String>> getAconfigDefaultValues() {
+        synchronized (mLock) {
+            return mNamespaceDefaults;
+        }
     }
 
     // The settings provider must hold its lock when calling here.

@@ -124,24 +124,19 @@ void CacheManager::trimMemory(TrimLevel mode) {
     // flush and submit all work to the gpu and wait for it to finish
     mGrContext->flushAndSubmit(GrSyncCpu::kYes);
 
-    switch (mode) {
-        case TrimLevel::BACKGROUND:
-            mGrContext->freeGpuResources();
-            SkGraphics::PurgeAllCaches();
-            mRenderThread.destroyRenderingContext();
-            break;
-        case TrimLevel::UI_HIDDEN:
-            // Here we purge all the unlocked scratch resources and then toggle the resources cache
-            // limits between the background and max amounts. This causes the unlocked resources
-            // that have persistent data to be purged in LRU order.
-            mGrContext->setResourceCacheLimit(mBackgroundResourceBytes);
-            SkGraphics::SetFontCacheLimit(mBackgroundCpuFontCacheBytes);
-            mGrContext->purgeUnlockedResources(toSkiaEnum(mMemoryPolicy.purgeScratchOnly));
-            mGrContext->setResourceCacheLimit(mMaxResourceBytes);
-            SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
-            break;
-        default:
-            break;
+    if (mode >= TrimLevel::BACKGROUND) {
+        mGrContext->freeGpuResources();
+        SkGraphics::PurgeAllCaches();
+        mRenderThread.destroyRenderingContext();
+    } else if (mode == TrimLevel::UI_HIDDEN) {
+        // Here we purge all the unlocked scratch resources and then toggle the resources cache
+        // limits between the background and max amounts. This causes the unlocked resources
+        // that have persistent data to be purged in LRU order.
+        mGrContext->setResourceCacheLimit(mBackgroundResourceBytes);
+        SkGraphics::SetFontCacheLimit(mBackgroundCpuFontCacheBytes);
+        mGrContext->purgeUnlockedResources(toSkiaEnum(mMemoryPolicy.purgeScratchOnly));
+        mGrContext->setResourceCacheLimit(mMaxResourceBytes);
+        SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
     }
 }
 

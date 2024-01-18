@@ -13792,8 +13792,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManager.Policy policy = new NotificationManager.Policy(0, 0, 0);
         mBinderService.setNotificationPolicy("package", policy, false);
 
-        verify(zenHelper).applyGlobalPolicyAsImplicitZenRule(eq("package"), anyInt(), eq(policy),
-                eq(ZenModeConfig.UPDATE_ORIGIN_APP));
+        verify(zenHelper).applyGlobalPolicyAsImplicitZenRule(eq("package"), anyInt(), eq(policy));
     }
 
     @Test
@@ -13859,7 +13858,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             verify(zenModeHelper).setNotificationPolicy(eq(policy), anyInt(), anyInt());
         } else {
             verify(zenModeHelper).applyGlobalPolicyAsImplicitZenRule(anyString(), anyInt(),
-                    eq(policy), anyInt());
+                    eq(policy));
         }
     }
 

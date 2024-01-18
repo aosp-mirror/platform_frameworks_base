@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
+import android.view.View
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
@@ -27,11 +28,9 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.NotificationPanelView
-import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
@@ -54,7 +53,6 @@ constructor(
     ambientState: AmbientState,
     controller: NotificationStackScrollLayoutController,
     notificationStackSizeCalculator: NotificationStackSizeCalculator,
-    private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     @Main mainDispatcher: CoroutineDispatcher,
 ) :
     NotificationStackScrollLayoutSection(
@@ -69,6 +67,7 @@ constructor(
         notificationStackSizeCalculator,
         mainDispatcher,
     ) {
+    private val smartSpaceBarrier = View.generateViewId()
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
@@ -76,16 +75,14 @@ constructor(
         constraintSet.apply {
             val bottomMargin =
                 context.resources.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin)
-
             if (migrateClocksToBlueprint()) {
                 connect(
                     R.id.nssl_placeholder,
                     TOP,
-                    sharedR.id.bc_smartspace_view,
+                    R.id.smart_space_barrier_bottom,
                     BOTTOM,
                     bottomMargin
                 )
-                setGoneMargin(R.id.nssl_placeholder, TOP, bottomMargin)
             } else {
                 connect(R.id.nssl_placeholder, TOP, R.id.keyguard_status_view, BOTTOM, bottomMargin)
             }

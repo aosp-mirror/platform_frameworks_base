@@ -932,6 +932,16 @@ public abstract class TvInteractiveAppService extends Service {
                 @NonNull Bundle data) {
         }
 
+        /**
+         * Called when the TV App sends the selected track info as a response to
+         * requestSelectedTrackInfo.
+         *
+         * @param tracks
+         * @hide
+         */
+        public void onSelectedTrackInfo(List<TvTrackInfo> tracks) {
+        }
+
         @Override
         public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
             return false;
@@ -1333,6 +1343,30 @@ public abstract class TvInteractiveAppService extends Service {
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in requestAvailableSpeeds", e);
                     }
+                }
+            });
+        }
+
+        /**
+         * Requests the currently selected {@link TvTrackInfo} from the TV App.
+         *
+         * <p> Normally, track info cannot be synchronized until the channel has
+         * been changed. This is used when the session of the TIAS is newly
+         * created and the normal synchronization has not happened yet.
+         * @hide
+         */
+        @CallSuper
+        public void requestSelectedTrackInfo() {
+            executeOrPostRunnableOnMainThread(() -> {
+                try {
+                    if (DEBUG) {
+                        Log.d(TAG, "requestSelectedTrackInfo");
+                    }
+                    if (mSessionCallback != null) {
+                        mSessionCallback.onRequestSelectedTrackInfo();
+                    }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "error in requestSelectedTrackInfo", e);
                 }
             });
         }
@@ -1779,6 +1813,13 @@ public abstract class TvInteractiveAppService extends Service {
                 Log.d(TAG, "notifyTvMessage (type=" + type + ", data= " + data + ")");
             }
             onTvMessage(type, data);
+        }
+
+        void sendSelectedTrackInfo(List<TvTrackInfo> tracks) {
+            if (DEBUG) {
+                Log.d(TAG, "notifySelectedTrackInfo (tracks= " + tracks + ")");
+            }
+            onSelectedTrackInfo(tracks);
         }
 
         /**

@@ -603,6 +603,14 @@ public class LogModule {
         return factory.create("BluetoothTileDialogLog", 50);
     }
 
+    /** Provides a {@link LogBuffer} for the keyboard functionalities. */
+    @Provides
+    @SysUISingleton
+    @KeyboardLog
+    public static LogBuffer provideKeyboardLogBuffer(LogBufferFactory factory) {
+        return factory.create("KeyboardLog", 50);
+    }
+
     /** Provides a {@link LogBuffer} for {@link PackageChangeRepository} */
     @Provides
     @SysUISingleton

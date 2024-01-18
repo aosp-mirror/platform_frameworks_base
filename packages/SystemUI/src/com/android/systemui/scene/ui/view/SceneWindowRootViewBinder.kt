@@ -85,12 +85,13 @@ object SceneWindowRootViewBinder {
 
                     view.addView(
                         ComposeFacade.createSceneContainerView(
-                            scope = this,
-                            context = view.context,
-                            viewModel = viewModel,
-                            windowInsets = windowInsets,
-                            sceneByKey = sortedSceneByKey,
-                        )
+                                scope = this,
+                                context = view.context,
+                                viewModel = viewModel,
+                                windowInsets = windowInsets,
+                                sceneByKey = sortedSceneByKey,
+                            )
+                            .also { it.id = R.id.scene_container_root_composable }
                     )
 
                     val legacyView = view.requireViewById<View>(R.id.legacy_window_root)

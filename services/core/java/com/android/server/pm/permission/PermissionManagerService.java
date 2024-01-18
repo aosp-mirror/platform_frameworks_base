@@ -77,7 +77,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.HotwordDetectionServiceProvider;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -114,9 +113,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     /** Internal connection to the package manager */
     private final PackageManagerInternal mPackageManagerInt;
 
-    /** Internal connection to the user manager */
-    private final UserManagerInternal mUserManagerInt;
-
     /** Map of OneTimePermissionUserManagers keyed by userId */
     @GuardedBy("mLock")
     @NonNull
@@ -148,7 +144,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         mContext = context;
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
-        mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
         mAttributionSourceRegistry = new AttributionSourceRegistry(context);
@@ -1098,12 +1093,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         private static final AtomicInteger sAttributionChainIds = new AtomicInteger(0);
 
         private final @NonNull Context mContext;
-        private final @NonNull AppOpsManager mAppOpsManager;
         private final @NonNull PermissionManagerServiceInternal mPermissionManagerServiceInternal;
 
         PermissionCheckerService(@NonNull Context context) {
             mContext = context;
-            mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
             mPermissionManagerServiceInternal =
                     LocalServices.getService(PermissionManagerServiceInternal.class);
         }

@@ -16,10 +16,15 @@
 
 package android.media.tv.ad;
 
+import android.view.Surface;
+
 /**
- * Sub-interface of ITvAdService which is created per session and has its own context.
+ * Sub-interface of ITvAdService.aidl which is created per session and has its own context.
  * @hide
  */
 oneway interface ITvAdSession {
+    void release();
     void startAdService();
+    void setSurface(in Surface surface);
+    void dispatchSurfaceChanged(int format, int width, int height);
 }

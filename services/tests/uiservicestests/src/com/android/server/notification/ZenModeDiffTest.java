@@ -73,13 +73,15 @@ public class ZenModeDiffTest extends UiServiceTestCase {
                     : Set.of("version", "manualRule", "automaticRules");
 
     // Differences for flagged fields are only generated if the flag is enabled.
-    // "Metadata" fields (userModifiedFields, deletionInstant) are not compared.
+    // "Metadata" fields (userModifiedFields & co, deletionInstant) are not compared.
     private static final Set<String> ZEN_RULE_EXEMPT_FIELDS =
             android.app.Flags.modesApi()
-                    ? Set.of("userModifiedFields", "deletionInstant")
+                    ? Set.of("userModifiedFields", "zenPolicyUserModifiedFields",
+                            "zenDeviceEffectsUserModifiedFields", "deletionInstant")
                     : Set.of(RuleDiff.FIELD_TYPE, RuleDiff.FIELD_TRIGGER_DESCRIPTION,
                             RuleDiff.FIELD_ICON_RES, RuleDiff.FIELD_ALLOW_MANUAL,
                             RuleDiff.FIELD_ZEN_DEVICE_EFFECTS, "userModifiedFields",
+                            "zenPolicyUserModifiedFields", "zenDeviceEffectsUserModifiedFields",
                             "deletionInstant");
 
     // allowPriorityChannels is flagged by android.app.modes_api

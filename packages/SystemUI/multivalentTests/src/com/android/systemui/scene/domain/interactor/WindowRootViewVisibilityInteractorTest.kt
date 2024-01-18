@@ -16,6 +16,8 @@
 
 package com.android.systemui.scene.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.IStatusBarService
@@ -28,7 +30,11 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.statusbar.NotificationPresenter
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.init.NotificationsController
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -37,6 +43,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -50,6 +57,7 @@ import org.mockito.Mockito.verify
 class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
 
     private val testScope = TestScope()
+    private val testDispatcher = StandardTestDispatcher()
     private val iStatusBarService = mock<IStatusBarService>()
     private val executor = FakeExecutor(FakeSystemClock())
     private val windowRootViewVisibilityRepository =
@@ -59,6 +67,9 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
     private val notificationPresenter = mock<NotificationPresenter>()
     private val notificationsController = mock<NotificationsController>()
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor
+    private val activeNotificationsRepository = ActiveNotificationListRepository()
+    private val activeNotificationsInteractor =
+        ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher)
 
     private val underTest =
         WindowRootViewVisibilityInteractor(
@@ -67,6 +78,7 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
                 keyguardRepository,
                 headsUpManager,
                 powerInteractor,
+                activeNotificationsInteractor,
             )
             .apply { setUp(notificationPresenter, notificationsController) }
 
@@ -257,13 +269,31 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun lockscreenShadeInteractive_hasHeadsUpAndNotifPresenterCollapsed_notifCountOne() =
+    @DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun lockscreenShadeInteractive_hasHeadsUpAndNotifPresenterCollapsed_flagOff_notifCountOne() =
         testScope.runTest {
             underTest.start()
 
             whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(true)
             whenever(notificationPresenter.isPresenterFullyCollapsed).thenReturn(true)
             whenever(notificationsController.getActiveNotificationsCount()).thenReturn(4)
+
+            makeLockscreenShadeVisible()
+
+            val notifCount = argumentCaptor<Int>()
+            verify(iStatusBarService).onPanelRevealed(any(), notifCount.capture())
+            assertThat(notifCount.value).isEqualTo(1)
+        }
+
+    @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun lockscreenShadeInteractive_hasHeadsUpAndNotifPresenterCollapsed_flagOn_notifCountOne() =
+        testScope.runTest {
+            underTest.start()
+
+            whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(true)
+            whenever(notificationPresenter.isPresenterFullyCollapsed).thenReturn(true)
+            activeNotificationsRepository.setActiveNotifs(4)
 
             makeLockscreenShadeVisible()
 
@@ -288,7 +318,8 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun lockscreenShadeInteractive_noHeadsUp_notifCountMatchesNotifController() =
+    @DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun lockscreenShadeInteractive_noHeadsUp_flagOff_notifCountMatchesNotifController() =
         testScope.runTest {
             underTest.start()
             whenever(notificationPresenter.isPresenterFullyCollapsed).thenReturn(true)
@@ -304,13 +335,48 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun lockscreenShadeInteractive_notifPresenterNotCollapsed_notifCountMatchesNotifController() =
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun lockscreenShadeInteractive_noHeadsUp_flagOn_notifCountMatchesNotifController() =
+        testScope.runTest {
+            underTest.start()
+            whenever(notificationPresenter.isPresenterFullyCollapsed).thenReturn(true)
+
+            whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(false)
+            activeNotificationsRepository.setActiveNotifs(9)
+
+            makeLockscreenShadeVisible()
+
+            val notifCount = argumentCaptor<Int>()
+            verify(iStatusBarService).onPanelRevealed(any(), notifCount.capture())
+            assertThat(notifCount.value).isEqualTo(9)
+        }
+
+    @Test
+    @DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun lockscreenShadeInteractive_notifPresenterNotCollapsed_flagOff_notifCountMatchesNotifController() =
         testScope.runTest {
             underTest.start()
             whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(true)
 
             whenever(notificationPresenter.isPresenterFullyCollapsed).thenReturn(false)
             whenever(notificationsController.getActiveNotificationsCount()).thenReturn(8)
+
+            makeLockscreenShadeVisible()
+
+            val notifCount = argumentCaptor<Int>()
+            verify(iStatusBarService).onPanelRevealed(any(), notifCount.capture())
+            assertThat(notifCount.value).isEqualTo(8)
+        }
+
+    @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun lockscreenShadeInteractive_notifPresenterNotCollapsed_flagOn_notifCountMatchesNotifController() =
+        testScope.runTest {
+            underTest.start()
+            whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(true)
+
+            whenever(notificationPresenter.isPresenterFullyCollapsed).thenReturn(false)
+            activeNotificationsRepository.setActiveNotifs(8)
 
             makeLockscreenShadeVisible()
 

@@ -994,6 +994,21 @@ public class TelephonyRegistryManager {
         }
     }
 
+    /**
+     * Notify external listeners that the subscriptions supporting simultaneous cellular calling
+     * have changed.
+     * @param subIds The new set of subIds supporting simultaneous cellular calling.
+     */
+    public void notifySimultaneousCellularCallingSubscriptionsChanged(Set<Integer> subIds) {
+        try {
+            sRegistry.notifySimultaneousCellularCallingSubscriptionsChanged(
+                    subIds.stream().mapToInt(i -> i).toArray());
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     public @NonNull Set<Integer> getEventsFromCallback(
             @NonNull TelephonyCallback telephonyCallback) {
         Set<Integer> eventList = new ArraySet<>();
@@ -1135,7 +1150,11 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED);
         }
 
-
+        if (telephonyCallback
+                instanceof TelephonyCallback.SimultaneousCellularCallingSupportListener) {
+            eventList.add(
+                    TelephonyCallback.EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED);
+        }
         return eventList;
     }
 

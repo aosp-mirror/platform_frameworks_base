@@ -3574,7 +3574,7 @@ public class ActivityManager {
          * foreground.  This may be running a window that is behind the current
          * foreground (so paused and with its state saved, not interacting with
          * the user, but visible to them to some degree); it may also be running
-         * other services under the system's control that it inconsiders important.
+         * other services under the system's control that it considers important.
          */
         public static final int IMPORTANCE_VISIBLE = 200;
 
@@ -3646,9 +3646,9 @@ public class ActivityManager {
         public static final int IMPORTANCE_CANT_SAVE_STATE = 350;
 
         /**
-         * Constant for {@link #importance}: This process process contains
-         * cached code that is expendable, not actively running any app components
-         * we care about.
+         * Constant for {@link #importance}: This process contains cached code
+         * that is expendable, not actively running any app components we care
+         * about.
          */
         public static final int IMPORTANCE_CACHED = 400;
 

@@ -77,6 +77,9 @@ interface TogglePermissionAppListModel<T : AppRecord> {
      * Sets whether the permission is allowed for the given app.
      */
     fun setAllowed(record: T, newAllowed: Boolean)
+
+    @Composable
+    fun InfoPageAdditionalContent(record: T, isAllowed: () -> Boolean?){}
 }
 
 interface TogglePermissionAppListProvider {

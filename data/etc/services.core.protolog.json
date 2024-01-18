@@ -535,6 +535,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/ActivityStarter.java"
     },
+    "-1583619037": {
+      "message": "Failed to register MediaProjectionWatcherCallback",
+      "level": "ERROR",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/ScreenRecordingCallbackController.java"
+    },
     "-1582845629": {
       "message": "Starting animation on %s",
       "level": "VERBOSE",
@@ -2982,12 +2988,6 @@
       "level": "WARN",
       "group": "WM_DEBUG_SCREEN_ON",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "466506262": {
-      "message": "Clear freezing of %s: visible=%b freezing=%b",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "485170982": {
       "message": "Not finishing noHistory %s on stop because we're just sleeping",

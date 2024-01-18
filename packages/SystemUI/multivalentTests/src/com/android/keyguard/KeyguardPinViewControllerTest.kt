@@ -33,6 +33,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED
@@ -141,7 +142,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
             postureController,
             featureFlags,
             mSelectedUserInteractor,
-            uiEventLogger
+            uiEventLogger,
+            FakeKeyboardRepository()
         )
     }
 

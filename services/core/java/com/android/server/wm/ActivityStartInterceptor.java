@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
@@ -144,22 +145,20 @@ class ActivityStartInterceptor {
     }
 
     private IntentSender createIntentSenderForOriginalIntent(int callingUid, int flags) {
-        Bundle bOptions = deferCrossProfileAppsAnimationIfNecessary();
+        ActivityOptions activityOptions = deferCrossProfileAppsAnimationIfNecessary();
+        activityOptions.setPendingIntentCreatorBackgroundActivityStartMode(
+                MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
         final TaskFragment taskFragment = getLaunchTaskFragment();
         // If the original intent is going to be embedded, try to forward the embedding TaskFragment
         // and its task id to embed back the original intent.
         if (taskFragment != null) {
-            ActivityOptions activityOptions = bOptions != null
-                    ? ActivityOptions.fromBundle(bOptions)
-                    : ActivityOptions.makeBasic();
             activityOptions.setLaunchTaskFragmentToken(taskFragment.getFragmentToken());
-            bOptions = activityOptions.toBundle();
         }
         final IIntentSender target = mService.getIntentSenderLocked(
                 INTENT_SENDER_ACTIVITY, mCallingPackage, mCallingFeatureId, callingUid, mUserId,
                 null /*token*/, null /*resultCode*/, 0 /*requestCode*/,
                 new Intent[] { mIntent }, new String[] { mResolvedType },
-                flags, bOptions);
+                flags, activityOptions.toBundle());
         return new IntentSender(target);
     }
 
@@ -272,12 +271,12 @@ class ActivityStartInterceptor {
      *
      * @return the activity option used to start the original intent.
      */
-    private Bundle deferCrossProfileAppsAnimationIfNecessary() {
+    private ActivityOptions deferCrossProfileAppsAnimationIfNecessary() {
         if (hasCrossProfileAnimation()) {
             mActivityOptions = null;
-            return ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle();
+            return ActivityOptions.makeOpenCrossProfileAppsAnimation();
         }
-        return null;
+        return ActivityOptions.makeBasic();
     }
 
     private boolean interceptQuietProfileIfNeeded() {

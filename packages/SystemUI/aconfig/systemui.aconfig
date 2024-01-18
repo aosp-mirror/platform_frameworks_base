@@ -343,3 +343,10 @@ flag {
    description: "Relocate Smartspace to bottom of the Lock Screen"
    bug: "316212788"
 }
+
+flag {
+   name: "pin_input_field_styled_focus_state"
+   namespace: "systemui"
+   description: "Enables styled focus states on pin input field if keyboard is connected"
+   bug: "316106516"
+}

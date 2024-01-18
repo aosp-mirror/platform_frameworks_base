@@ -240,13 +240,13 @@ constructor(
      */
     val translationY: Flow<Float> =
         combine(
-            isOnLockscreen,
+            isOnLockscreenWithoutShade,
             merge(
                 keyguardInteractor.keyguardTranslationY,
                 occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
             )
-        ) { isOnLockscreen, translationY ->
-            if (isOnLockscreen) {
+        ) { isOnLockscreenWithoutShade, translationY ->
+            if (isOnLockscreenWithoutShade) {
                 translationY
             } else {
                 0f

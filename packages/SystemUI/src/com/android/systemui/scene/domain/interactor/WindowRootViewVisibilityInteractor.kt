@@ -24,7 +24,9 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.statusbar.NotificationPresenter
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.init.NotificationsController
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +46,7 @@ constructor(
     private val keyguardRepository: KeyguardRepository,
     private val headsUpManager: HeadsUpManager,
     private val powerInteractor: PowerInteractor,
+    private val activeNotificationsInteractor: ActiveNotificationsInteractor,
 ) : CoreStartable {
 
     private var notificationPresenter: NotificationPresenter? = null
@@ -116,6 +119,14 @@ constructor(
     private fun getNotificationLoad(): Int {
         return if (headsUpManager.hasPinnedHeadsUp() && isNotifPresenterFullyCollapsed) {
             1
+        } else {
+            getActiveNotificationsCount()
+        }
+    }
+
+    private fun getActiveNotificationsCount(): Int {
+        return if (NotificationsLiveDataStoreRefactor.isEnabled) {
+            activeNotificationsInteractor.allNotificationsCountValue
         } else {
             notificationsController?.getActiveNotificationsCount() ?: 0
         }

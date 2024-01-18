@@ -16,8 +16,6 @@
 
 package android.app;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
@@ -28,8 +26,6 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
-import android.service.notification.ZenDeviceEffects;
-import android.service.notification.ZenPolicy;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -229,67 +225,5 @@ public class AutomaticZenRuleTest {
         AutomaticZenRule.Builder builder = new AutomaticZenRule.Builder("rule", Uri.parse("uri"));
 
         assertThrows(IllegalArgumentException.class, () -> builder.setType(100));
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_MODES_API)
-    public void testCanUpdate_nullPolicyAndDeviceEffects() {
-        AutomaticZenRule.Builder builder = new AutomaticZenRule.Builder("name",
-                Uri.parse("uri://short"));
-
-        AutomaticZenRule rule = builder.setUserModifiedFields(0)
-                .setZenPolicy(null)
-                .setDeviceEffects(null)
-                .build();
-
-        assertThat(rule.canUpdate()).isTrue();
-
-        rule = builder.setUserModifiedFields(1).build();
-        assertThat(rule.canUpdate()).isFalse();
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_MODES_API)
-    public void testCanUpdate_policyModified() {
-        ZenPolicy.Builder policyBuilder = new ZenPolicy.Builder().setUserModifiedFields(0);
-        ZenPolicy policy = policyBuilder.build();
-
-        AutomaticZenRule.Builder builder = new AutomaticZenRule.Builder("name",
-                Uri.parse("uri://short"));
-        AutomaticZenRule rule = builder.setUserModifiedFields(0)
-                .setZenPolicy(policy)
-                .setDeviceEffects(null).build();
-
-        // Newly created ZenPolicy is not user modified.
-        assertThat(policy.getUserModifiedFields()).isEqualTo(0);
-        assertThat(rule.canUpdate()).isTrue();
-
-        policy = policyBuilder.setUserModifiedFields(1).build();
-        assertThat(policy.getUserModifiedFields()).isEqualTo(1);
-        rule = builder.setZenPolicy(policy).build();
-        assertThat(rule.canUpdate()).isFalse();
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_MODES_API)
-    public void testCanUpdate_deviceEffectsModified() {
-        ZenDeviceEffects.Builder deviceEffectsBuilder =
-                new ZenDeviceEffects.Builder().setUserModifiedFields(0);
-        ZenDeviceEffects deviceEffects = deviceEffectsBuilder.build();
-
-        AutomaticZenRule.Builder builder = new AutomaticZenRule.Builder("name",
-                Uri.parse("uri://short"));
-        AutomaticZenRule rule = builder.setUserModifiedFields(0)
-                .setZenPolicy(null)
-                .setDeviceEffects(deviceEffects).build();
-
-        // Newly created ZenDeviceEffects is not user modified.
-        assertThat(deviceEffects.getUserModifiedFields()).isEqualTo(0);
-        assertThat(rule.canUpdate()).isTrue();
-
-        deviceEffects = deviceEffectsBuilder.setUserModifiedFields(1).build();
-        assertThat(deviceEffects.getUserModifiedFields()).isEqualTo(1);
-        rule = builder.setDeviceEffects(deviceEffects).build();
-        assertThat(rule.canUpdate()).isFalse();
     }
 }

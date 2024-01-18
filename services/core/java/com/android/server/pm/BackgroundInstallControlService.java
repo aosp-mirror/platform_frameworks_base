@@ -75,11 +75,9 @@ public class BackgroundInstallControlService extends SystemService {
     private static final int MSG_PACKAGE_ADDED = 1;
     private static final int MSG_PACKAGE_REMOVED = 2;
 
-    private final Context mContext;
     private final BinderService mBinderService;
     private final PackageManager mPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
-    private final UsageStatsManagerInternal mUsageStatsManagerInternal;
     private final PermissionManagerServiceInternal mPermissionManager;
     private final Handler mHandler;
     private final File mDiskFile;
@@ -99,14 +97,14 @@ public class BackgroundInstallControlService extends SystemService {
     @VisibleForTesting
     BackgroundInstallControlService(@NonNull Injector injector) {
         super(injector.getContext());
-        mContext = injector.getContext();
         mPackageManager = injector.getPackageManager();
         mPackageManagerInternal = injector.getPackageManagerInternal();
         mPermissionManager = injector.getPermissionManager();
         mHandler = new EventHandler(injector.getLooper(), this);
         mDiskFile = injector.getDiskFile();
-        mUsageStatsManagerInternal = injector.getUsageStatsManagerInternal();
-        mUsageStatsManagerInternal.registerListener(
+        UsageStatsManagerInternal usageStatsManagerInternal =
+                injector.getUsageStatsManagerInternal();
+        usageStatsManagerInternal.registerListener(
                 (userId, event) ->
                         mHandler.obtainMessage(MSG_USAGE_EVENT_RECEIVED,
                                 userId,

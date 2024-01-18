@@ -34,12 +34,32 @@ constructor(
     /** The bounds of the notification stack in the current scene. */
     val stackBounds: StateFlow<NotificationContainerBounds> = repository.stackBounds.asStateFlow()
 
+    /** The corner radius of the notification stack, in dp. */
+    val cornerRadiusDp: StateFlow<Float> = repository.cornerRadiusDp.asStateFlow()
+
+    /**
+     * The height in px of the contents of notification stack. Depending on the number of
+     * notifications, this can exceed the space available on screen to show notifications, at which
+     * point the notification stack should become scrollable.
+     */
+    val intrinsicContentHeight = repository.intrinsicContentHeight.asStateFlow()
+
+    /** The y-coordinate in px of top of the contents of the notification stack. */
+    val contentTop = repository.contentTop.asStateFlow()
+
     /** Sets the position of the notification stack in the current scene. */
     fun setStackBounds(bounds: NotificationContainerBounds) {
         check(bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
         repository.stackBounds.value = bounds
     }
 
-    /** The corner radius of the notification stack, in dp. */
-    val cornerRadiusDp: StateFlow<Float> = repository.cornerRadiusDp.asStateFlow()
+    /** Sets the height of the contents of the notification stack. */
+    fun setIntrinsicContentHeight(height: Float) {
+        repository.intrinsicContentHeight.value = height
+    }
+
+    /** Sets the y-coord in px of the top of the contents of the notification stack. */
+    fun setContentTop(startY: Float) {
+        repository.contentTop.value = startY
+    }
 }

@@ -53,6 +53,13 @@ flag {
 
 flag {
     namespace: "accessibility"
+    name: "fix_merged_content_change_event"
+    description: "Fixes event type and source of content change event merged in ViewRootImpl"
+    bug: "277305460"
+}
+
+flag {
+    namespace: "accessibility"
     name: "flash_notification_system_api"
     description: "Makes flash notification APIs as system APIs for calling from mainline module"
     bug: "303131332"

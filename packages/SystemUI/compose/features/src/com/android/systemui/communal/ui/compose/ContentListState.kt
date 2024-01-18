@@ -21,12 +21,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 
 @Composable
 fun rememberContentListState(
     communalContent: List<CommunalContentModel>,
-    viewModel: CommunalEditModeViewModel,
+    viewModel: BaseCommunalViewModel,
 ): ContentListState {
     return remember(communalContent) {
         ContentListState(
