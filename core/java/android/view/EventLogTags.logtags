@@ -59,5 +59,10 @@ option java_package android.view
 # Enqueue Input Event
 62002 view_enqueue_input_event (eventType|3),(action|3)
 
+# following other view events defined in system/logging/logcat/event.logtags
+# ViewRoot Draw Events
+60004 viewroot_draw_event (window|3),(event|3)
+
+
 # NOTE - the range 1000000-2000000 is reserved for partners and others who
 # want to define their own log tags without conflicting with the core platform.

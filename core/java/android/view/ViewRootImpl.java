@@ -286,6 +286,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_TOUCH_NAVIGATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_BLAST = false || LOCAL_LOGV;
     private static final int LOGTAG_INPUT_FOCUS = 62001;
+    private static final int LOGTAG_VIEWROOT_DRAW_EVENT = 60004;
 
     /**
      * Set to false if we do not want to use the multi threaded renderer even though
@@ -4750,13 +4751,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void reportDrawFinished(@Nullable Transaction t, int seqId) {
-        if (DEBUG_BLAST) {
-            Log.d(mTag, "reportDrawFinished");
-        }
-
-        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-            Trace.instant(Trace.TRACE_TAG_VIEW, "reportDrawFinished " + mTag + " seqId=" + seqId);
-        }
+        logAndTrace("reportDrawFinished seqId=" + seqId);
         try {
             mWindowSession.finishDrawing(mWindow, t, seqId);
         } catch (RemoteException e) {
@@ -12194,7 +12189,10 @@ public final class ViewRootImpl implements ViewParent,
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.instant(Trace.TRACE_TAG_VIEW, mTag + "-" + msg);
         }
-        Log.d(mTag, msg);
+        if (DEBUG_BLAST) {
+            Log.d(mTag, msg);
+        }
+        EventLog.writeEvent(LOGTAG_VIEWROOT_DRAW_EVENT, mTag, msg);
     }
 
     private void setPreferredFrameRateCategory(int preferredFrameRateCategory) {
