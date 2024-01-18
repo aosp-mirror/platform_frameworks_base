@@ -1938,11 +1938,11 @@ static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transac
     transaction->setFrameTimelineInfo(ftInfo);
 }
 
-static void nativeSetDesiredPresentTime(JNIEnv* env, jclass clazz, jlong transactionObj,
-                                        jlong desiredPresentTime) {
+static void nativeSetDesiredPresentTimeNanos(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                             jlong desiredPresentTimeNanos) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
-    transaction->setDesiredPresentTime(desiredPresentTime);
+    transaction->setDesiredPresentTime(desiredPresentTimeNanos);
 }
 
 static void nativeAddTransactionCommittedListener(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2412,8 +2412,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"getNativeTrustedPresentationCallbackFinalizer", "()J", (void*)getNativeTrustedPresentationCallbackFinalizer },
     {"nativeGetStalledTransactionInfo", "(I)Landroid/gui/StalledTransactionInfo;",
             (void*) nativeGetStalledTransactionInfo },
-    {"nativeSetDesiredPresentTime", "(JJ)V",
-            (void*) nativeSetDesiredPresentTime },
+    {"nativeSetDesiredPresentTimeNanos", "(JJ)V",
+            (void*) nativeSetDesiredPresentTimeNanos },
         // clang-format on
 };
 
