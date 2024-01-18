@@ -21,7 +21,6 @@ import android.util.ArraySet;
 
 import java.io.PrintWriter;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Cache of distinct package/uid pairs that require being blocked from screen capture. This class is
@@ -41,10 +40,33 @@ public class SensitiveContentPackages {
         return false;
     }
 
-    /** Replaces the set of package/uid pairs to set that should be blocked from screen capture */
-    public void setShouldBlockScreenCaptureForApp(@NonNull Set<PackageInfo> packageInfos) {
-        mProtectedPackages.clear();
+    /**
+     * Adds the set of package/uid pairs to set that should be blocked from screen capture
+     *
+     * @param packageInfos packages to be blocked
+     * @return {@code true} if packages set is modified, {@code false} otherwise.
+     */
+    public boolean addBlockScreenCaptureForApps(@NonNull ArraySet<PackageInfo> packageInfos) {
+        if (mProtectedPackages.equals(packageInfos)) {
+            // new set is equal to current set of packages, no need to update
+            return false;
+        }
         mProtectedPackages.addAll(packageInfos);
+        return true;
+    }
+
+    /**
+     * Clears the set of package/uid pairs that should be blocked from screen capture
+     *
+     * @return {@code true} if packages set is modified, {@code false} otherwise.
+     */
+    public boolean clearBlockedApps() {
+        if (mProtectedPackages.isEmpty()) {
+            // set was already empty
+            return false;
+        }
+        mProtectedPackages.clear();
+        return true;
     }
 
     void dump(PrintWriter pw) {

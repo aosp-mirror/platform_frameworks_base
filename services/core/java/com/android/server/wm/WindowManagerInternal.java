@@ -32,6 +32,7 @@ import android.hardware.display.VirtualDisplayConfig;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.view.ContentRecordingSession;
 import android.view.Display;
@@ -1020,5 +1021,13 @@ public abstract class WindowManagerInternal {
      *
      * @param packageInfos set of {@link PackageInfo} whose windows should be blocked from capture
      */
-    public abstract void setShouldBlockScreenCaptureForApp(@NonNull Set<PackageInfo> packageInfos);
+    public abstract void addBlockScreenCaptureForApps(@NonNull ArraySet<PackageInfo> packageInfos);
+
+    /**
+     * Clears apps added to collection of apps in which screen capture should be disabled.
+     *
+     * <p> This clears and resets any existing set or added applications from
+     * * {@link #addBlockScreenCaptureForApps(ArraySet)}
+     */
+    public abstract void clearBlockedApps();
 }
