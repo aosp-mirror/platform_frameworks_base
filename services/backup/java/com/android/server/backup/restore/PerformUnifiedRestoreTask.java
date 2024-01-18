@@ -140,8 +140,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // Widget-related data handled as part of this restore operation
     private byte[] mWidgetData;
 
-    // Number of apps restored in this pass
-    private int mCount;
+    // Number of apps attempted to restore in this pass
+    private int mRestoreAttemptedAppsCount;
 
     // When did we start?
     private long mStartRealtime;
@@ -574,7 +574,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     Slog.v(TAG, "No more packages; finishing restore");
                 }
                 int millis = (int) (SystemClock.elapsedRealtime() - mStartRealtime);
-                EventLog.writeEvent(EventLogTags.RESTORE_SUCCESS, mCount, millis);
+                EventLog.writeEvent(
+                        EventLogTags.RESTORE_SUCCESS, mRestoreAttemptedAppsCount, millis);
                 nextState = UnifiedRestoreState.FINAL;
                 return;
             }
@@ -582,7 +583,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             if (DEBUG) {
                 Slog.i(TAG, "Next restore package: " + mRestoreDescription);
             }
-            sendOnRestorePackage(pkgName);
+            mRestoreAttemptedAppsCount++;
+            sendOnRestorePackage(mRestoreAttemptedAppsCount, pkgName);
 
             Metadata metaInfo = mPmAgent.getRestoredMetadata(pkgName);
             if (metaInfo == null) {
@@ -810,7 +812,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // And then finally start the restore on this agent
         try {
             initiateOneRestore(mCurrentPackage, metaInfo.versionCode);
-            ++mCount;
         } catch (Exception e) {
             Slog.e(TAG, "Error when attempting restore: " + e.toString());
             Bundle monitoringExtras = addRestoreOperationTypeToEvent(/* extras= */ null);
@@ -1645,10 +1646,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
     }
 
-    void sendOnRestorePackage(String name) {
+    void sendOnRestorePackage(int index, String name) {
         if (mObserver != null) {
             try {
-                mObserver.onUpdate(mCount, name);
+                mObserver.onUpdate(index, name);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Restore observer died in onUpdate");
                 mObserver = null;
