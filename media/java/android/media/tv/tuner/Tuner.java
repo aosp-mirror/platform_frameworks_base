@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.hardware.tv.tuner.Constant;
 import android.hardware.tv.tuner.Constant64Bit;
 import android.hardware.tv.tuner.FrontendScanType;
+import android.media.MediaCodec;
 import android.media.tv.TvInputService;
 import android.media.tv.tuner.dvr.DvrPlayback;
 import android.media.tv.tuner.dvr.DvrRecorder;
@@ -272,8 +273,12 @@ public class Tuner implements AutoCloseable  {
         try {
             System.loadLibrary("media_tv_tuner");
             nativeInit();
+            // Load and initialize MediaCodec to avoid flaky cts test result.
+            Class.forName(MediaCodec.class.getName());
         } catch (UnsatisfiedLinkError e) {
             Log.d(TAG, "tuner JNI library not found!");
+        } catch (ClassNotFoundException e) {
+            Log.e(TAG, "MediaCodec class not found!", e);
         }
     }
 
