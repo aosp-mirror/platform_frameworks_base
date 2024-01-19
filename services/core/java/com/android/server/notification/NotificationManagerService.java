@@ -69,6 +69,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OF
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.app.Flags.lifetimeExtensionRefactor;
+import static android.app.NotificationManager.zenModeFromInterruptionFilter;
 import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
 import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
@@ -5311,18 +5312,41 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void requestInterruptionFilterFromListener(INotificationListener token,
                 int interruptionFilter) throws RemoteException {
-            final int callingUid = Binder.getCallingUid();
-            final boolean isSystemOrSystemUi = isCallerSystemOrSystemUi();
-            final long identity = Binder.clearCallingIdentity();
-            try {
+            if (android.app.Flags.modesApi()) {
+                final int callingUid = Binder.getCallingUid();
+                ManagedServiceInfo info;
                 synchronized (mNotificationLock) {
-                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
-                    mZenModeHelper.requestFromListener(info.component, interruptionFilter,
-                            callingUid, isSystemOrSystemUi);
-                    updateInterruptionFilterLocked();
+                    info = mListeners.checkServiceTokenLocked(token);
                 }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+
+                final int zenMode = zenModeFromInterruptionFilter(interruptionFilter, -1);
+                if (zenMode == -1) return;
+                if (!canManageGlobalZenPolicy(info.component.getPackageName(), callingUid)) {
+                    mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(
+                            info.component.getPackageName(), callingUid, zenMode);
+                } else {
+                    int origin = computeZenOrigin(/* fromUser= */ false);
+                    Binder.withCleanCallingIdentity(() -> {
+                        mZenModeHelper.setManualZenMode(zenMode, /* conditionId= */ null, origin,
+                                "listener:" + info.component.flattenToShortString(),
+                                /* caller= */ info.component.getPackageName(),
+                                callingUid);
+                    });
+                }
+            } else {
+                final int callingUid = Binder.getCallingUid();
+                final boolean isSystemOrSystemUi = isCallerSystemOrSystemUi();
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    synchronized (mNotificationLock) {
+                        final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                        mZenModeHelper.requestFromListener(info.component, interruptionFilter,
+                                callingUid, isSystemOrSystemUi);
+                        updateInterruptionFilterLocked();
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
 
@@ -5358,10 +5382,10 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setZenMode(int mode, Uri conditionId, String reason, boolean fromUser) {
             enforceSystemOrSystemUI("INotificationManager.setZenMode");
-            final int callingUid = Binder.getCallingUid();
-            final long identity = Binder.clearCallingIdentity();
             enforceUserOriginOnlyFromSystem(fromUser, "setZenMode");
 
+            final int callingUid = Binder.getCallingUid();
+            final long identity = Binder.clearCallingIdentity();
             try {
                 mZenModeHelper.setManualZenMode(mode, conditionId, computeZenOrigin(fromUser),
                         reason, /* caller= */ null, callingUid);
@@ -5554,7 +5578,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setInterruptionFilter(String pkg, int filter, boolean fromUser) {
             enforcePolicyAccess(pkg, "setInterruptionFilter");
-            final int zen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);
+            final int zen = zenModeFromInterruptionFilter(filter, -1);
             if (zen == -1) throw new IllegalArgumentException("Invalid filter: " + filter);
             final int callingUid = Binder.getCallingUid();
             enforceUserOriginOnlyFromSystem(fromUser, "setInterruptionFilter");
