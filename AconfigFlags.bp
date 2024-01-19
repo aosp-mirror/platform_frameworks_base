@@ -13,6 +13,8 @@
 // limitations under the License.
 
 aconfig_srcjars = [
+    // !!! KEEP THIS LIST ALPHABETICAL !!!
+    ":aconfig_mediacodec_flags_java_lib{.generated_srcjars}",
     ":android.content.pm.flags-aconfig-java{.generated_srcjars}",
     ":android.content.res.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.biometrics.flags-aconfig-java{.generated_srcjars}",
@@ -21,11 +23,11 @@ aconfig_srcjars = [
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
     ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
-    ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
     ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
-    ":com.android.text.flags-aconfig-java{.generated_srcjars}",
     ":com.android.net.flags-aconfig-java{.generated_srcjars}",
-    ":aconfig_mediacodec_flags_java_lib{.generated_srcjars}",
+    ":com.android.text.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
+    // !!! KEEP THIS LIST ALPHABETICAL !!!
 ]
 
 filegroup {
