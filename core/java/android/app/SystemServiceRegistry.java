@@ -251,6 +251,7 @@ import android.view.textservice.TextServicesManager;
 import android.view.translation.ITranslationManager;
 import android.view.translation.TranslationManager;
 import android.view.translation.UiTranslationManager;
+import android.webkit.WebViewBootstrapFrameworkInitializer;
 
 import com.android.internal.R;
 import com.android.internal.app.IAppOpsService;
@@ -1660,11 +1661,16 @@ public final class SystemServiceRegistry {
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
+            // This code is executed on zygote during preload, where only read-only
+            // flags can be used. Do not use mutable flags.
             if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
                 EnhancedConfirmationFrameworkInitializer.registerServiceWrappers();
             }
             if (android.server.Flags.telemetryApisService()) {
                 ProfilingFrameworkInitializer.registerServiceWrappers();
+            }
+            if (android.webkit.Flags.updateServiceIpcWrapper()) {
+                WebViewBootstrapFrameworkInitializer.registerServiceWrappers();
             }
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process

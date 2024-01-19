@@ -16,8 +16,6 @@
 
 package android.webkit;
 
-import static android.webkit.Flags.updateServiceV2;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -207,7 +205,12 @@ public final class WebViewDelegate {
      * Returns whether WebView should run in multiprocess mode.
      */
     public boolean isMultiProcessEnabled() {
-        if (updateServiceV2()) {
+        if (Flags.updateServiceV2()) {
+            return true;
+        } else if (Flags.updateServiceIpcWrapper()) {
+            // We don't want to support this method in the new wrapper because updateServiceV2 is
+            // intended to ship in the same release (or sooner). It's only possible to disable it
+            // with an obscure adb command, so just return true here too.
             return true;
         }
         try {
