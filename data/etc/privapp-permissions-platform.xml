@@ -428,6 +428,7 @@ applications that come with the platform
         <permission name="android.permission.USE_BIOMETRIC" />
         <permission name="android.permission.TEST_BIOMETRIC" />
         <permission name="android.permission.MANAGE_BIOMETRIC_DIALOG" />
+        <permission name="android.permission.USE_BACKGROUND_FACE_AUTHENTICATION" />
         <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
         <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->

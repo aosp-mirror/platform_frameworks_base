@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors.face;
 
+import static android.Manifest.permission.USE_BACKGROUND_FACE_AUTHENTICATION;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 import static android.hardware.face.FaceSensorProperties.TYPE_UNKNOWN;
@@ -229,6 +230,26 @@ public class FaceServiceTest {
         final long operationId = 5;
         mFaceService.mServiceWrapper.authenticate(mToken, operationId, mFaceServiceReceiver,
                 faceAuthenticateOptions);
+
+        assertThat(faceAuthenticateOptions.getSensorId()).isEqualTo(ID_DEFAULT);
+    }
+
+    @Test
+    public void testAuthenticateInBackground() throws Exception {
+        FaceAuthenticateOptions faceAuthenticateOptions = new FaceAuthenticateOptions.Builder()
+                .build();
+        initService();
+        mFaceService.mServiceWrapper.registerAuthenticators(List.of());
+        waitForRegistration();
+
+        mContext.getTestablePermissions().setPermission(
+                USE_BIOMETRIC_INTERNAL, PackageManager.PERMISSION_DENIED);
+        mContext.getTestablePermissions().setPermission(
+                USE_BACKGROUND_FACE_AUTHENTICATION, PackageManager.PERMISSION_GRANTED);
+
+        final long operationId = 5;
+        mFaceService.mServiceWrapper.authenticateInBackground(mToken, operationId,
+                mFaceServiceReceiver, faceAuthenticateOptions);
 
         assertThat(faceAuthenticateOptions.getSensorId()).isEqualTo(ID_DEFAULT);
     }
