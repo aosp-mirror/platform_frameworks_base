@@ -436,6 +436,10 @@ public class TaskFragmentTest extends WindowTestsBase {
         // Not ready if the task is still visible when the TaskFragment becomes empty.
         doReturn(true).when(task).isVisibleRequested();
         assertFalse(taskFragment.isReadyToTransit());
+
+        // Ready if the mAllowTransitionWhenEmpty flag is true.
+        taskFragment.setAllowTransitionWhenEmpty(true);
+        assertTrue(taskFragment.isReadyToTransit());
     }
 
     @Test

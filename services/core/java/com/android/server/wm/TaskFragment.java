@@ -369,6 +369,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     private boolean mMoveToBottomIfClearWhenLaunch;
 
+    /**
+     * If {@code true}, transitions are allowed even if this TaskFragment is empty. If
+     * {@code false}, transitions will wait until this TaskFragment becomes non-empty or other
+     * conditions are met. Default to {@code false}.
+     *
+     * @see #isReadyToTransit
+     */
+    private boolean mAllowTransitionWhenEmpty;
+
     /** When set, will force the task to report as invisible. */
     static final int FLAG_FORCE_HIDDEN_FOR_PINNED_TASK = 1;
     static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
@@ -507,6 +516,19 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return;
         }
         mIsolatedNav = isolatedNav;
+    }
+
+    /**
+     * Sets whether transitions are allowed when the TaskFragment is empty. If {@code true},
+     * transitions are allowed when the TaskFragment is empty. If {@code false}, transitions
+     * will wait until the TaskFragment becomes non-empty or other conditions are met. Default
+     * to {@code false}.
+     */
+    void setAllowTransitionWhenEmpty(boolean allowTransitionWhenEmpty) {
+        if (!isEmbedded()) {
+            return;
+        }
+        mAllowTransitionWhenEmpty = allowTransitionWhenEmpty;
     }
 
     /** @see #mIsolatedNav */
@@ -2814,8 +2836,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return true;
         }
         // We don't want to start the transition if the organized TaskFragment is empty, unless
-        // it is requested to be removed.
-        if (getTopNonFinishingActivity() != null || mIsRemovalRequested) {
+        // it is requested to be removed or the mAllowTransitionWhenEmpty flag is true.
+        if (getTopNonFinishingActivity() != null || mIsRemovalRequested
+                || mAllowTransitionWhenEmpty) {
             return true;
         }
         // Organizer shouldn't change embedded TaskFragment in PiP.
