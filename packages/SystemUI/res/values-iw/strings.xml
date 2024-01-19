@@ -903,7 +903,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"העברה מהשוליים והצגה"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"הסרה"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"החלפת מצב"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"לחצני מכשירים"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"ממשק השליטה במכשירים"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"יש לבחור אפליקציה כדי להוסיף פקדים"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{נוסף אמצעי בקרה אחד (#).}one{נוספו # אמצעי בקרה.}two{נוספו # אמצעי בקרה.}other{נוספו # אמצעי בקרה.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"הוסר"</string>
@@ -917,7 +917,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"להסיר מהמועדפים"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"העברה למיקום <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"פקדים"</string>
-    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"יש לבחור פקדי מכשירים כדי לקבל גישה מהירה"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"יש לבחור מכשירים כדי לגשת אליהם במהירות מממשק השליטה במכשירים"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"כדי לארגן מחדש את הפקדים, צריך ללחוץ לחיצה ארוכה ולגרור"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"כל הפקדים הוסרו"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"השינויים לא נשמרו"</string>
@@ -928,7 +928,7 @@
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"לא ניתן היה לטעון את הפקדים. יש לבדוק את האפליקציה <xliff:g id="APP">%s</xliff:g> כדי לוודא שהגדרות האפליקציה לא השתנו."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"פקדים תואמים לא זמינים"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"אחר"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"הוספה לפקדי המכשירים"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"הוספה לממשק השליטה במכשירים"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"הוספה"</string>
     <string name="controls_dialog_remove" msgid="3775288002711561936">"הסרה"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"הוצע על-ידי <xliff:g id="APP">%s</xliff:g>"</string>
