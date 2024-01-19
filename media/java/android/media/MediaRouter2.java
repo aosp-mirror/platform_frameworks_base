@@ -3084,11 +3084,7 @@ public final class MediaRouter2 {
         public void registerRouteCallback() {
             synchronized (mLock) {
                 try {
-                    if (mStub == null) {
-                        MediaRouter2Stub stub = new MediaRouter2Stub();
-                        mMediaRouterService.registerRouter2(stub, mPackageName);
-                        mStub = stub;
-                    }
+                    registerRouterStubIfNeededLocked();
 
                     if (updateDiscoveryPreferenceIfNeededLocked()) {
                         mMediaRouterService.setDiscoveryRequestWithRouter2(
@@ -3114,8 +3110,7 @@ public final class MediaRouter2 {
                     }
 
                     if (mRouteCallbackRecords.isEmpty() && mNonSystemRoutingControllers.isEmpty()) {
-                        mMediaRouterService.unregisterRouter2(mStub);
-                        mStub = null;
+                        unregisterRouterStubLocked();
                     }
                 } catch (RemoteException ex) {
                     Log.e(TAG, "unregisterRouteCallback: Unable to set discovery request.", ex);
@@ -3132,11 +3127,7 @@ public final class MediaRouter2 {
                 }
                 mRouteListingPreference = preference;
                 try {
-                    if (mStub == null) {
-                        MediaRouter2Stub stub = new MediaRouter2Stub();
-                        mMediaRouterService.registerRouter2(stub, mImpl.getPackageName());
-                        mStub = stub;
-                    }
+                    registerRouterStubIfNeededLocked();
                     mMediaRouterService.setRouteListingPreference(mStub, mRouteListingPreference);
                 } catch (RemoteException ex) {
                     ex.rethrowFromSystemServer();
@@ -3328,18 +3319,31 @@ public final class MediaRouter2 {
                             obtainMessage(MediaRouter2::notifyStop, MediaRouter2.this, controller));
                 }
 
-                if (mRouteCallbackRecords.isEmpty()
-                        && mNonSystemRoutingControllers.isEmpty()
-                        && mStub != null) {
+                if (mRouteCallbackRecords.isEmpty() && mNonSystemRoutingControllers.isEmpty()) {
                     try {
-                        mMediaRouterService.unregisterRouter2(mStub);
+                        unregisterRouterStubLocked();
                     } catch (RemoteException ex) {
                         ex.rethrowFromSystemServer();
                     }
-                    mStub = null;
                 }
             }
         }
 
+        @GuardedBy("mLock")
+        private void registerRouterStubIfNeededLocked() throws RemoteException {
+            if (mStub == null) {
+                MediaRouter2Stub stub = new MediaRouter2Stub();
+                mMediaRouterService.registerRouter2(stub, mPackageName);
+                mStub = stub;
+            }
+        }
+
+        @GuardedBy("mLock")
+        private void unregisterRouterStubLocked() throws RemoteException {
+            if (mStub != null) {
+                mMediaRouterService.unregisterRouter2(mStub);
+                mStub = null;
+            }
+        }
     }
 }
