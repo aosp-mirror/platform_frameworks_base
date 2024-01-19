@@ -25,7 +25,7 @@
     <string name="data_transmitted" msgid="7988167672982199061">"已傳送："</string>
     <string name="data_received" msgid="4062776929376067820">"已接收："</string>
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> 位元組 / <xliff:g id="NUMBER_1">%2$s</xliff:g> 個封包"</string>
-    <string name="always_on_disconnected_title" msgid="1906740176262776166">"無法連上永久連線的 VPN"</string>
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"無法連上永久連線 VPN"</string>
     <string name="always_on_disconnected_message" msgid="555634519845992917">"「<xliff:g id="VPN_APP_0">%1$s</xliff:g>」設定為隨時保持連線，但目前無法連線。在重新連上「<xliff:g id="VPN_APP_1">%1$s</xliff:g>」之前，你的手機將會使用公用網路。"</string>
     <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"「<xliff:g id="VPN_APP">%1$s</xliff:g>」設定為隨時保持連線，但目前無法連線。在重新連上 VPN 之前，你將無法連接網路。"</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
