@@ -52,7 +52,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val sceneInteractor = kosmos.sceneInteractor
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
     private val qsFlexiglassAdapter = FakeQSSceneAdapter { mock() }

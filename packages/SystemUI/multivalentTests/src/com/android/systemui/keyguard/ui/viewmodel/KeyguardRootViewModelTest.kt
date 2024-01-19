@@ -58,7 +58,9 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
     private val notificationsKeyguardInteractor = kosmos.notificationsKeyguardInteractor
     private val dozeParameters = kosmos.dozeParameters
-    private val underTest = kosmos.keyguardRootViewModel
+    private val underTest by lazy {
+        kosmos.keyguardRootViewModel
+    }
 
     @Before
     fun setUp() {

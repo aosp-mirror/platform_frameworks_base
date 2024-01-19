@@ -52,17 +52,18 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val authenticationInteractor = kosmos.authenticationInteractor
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val bouncerInteractor = kosmos.bouncerInteractor
-    private val bouncerViewModel = kosmos.bouncerViewModel
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val bouncerViewModel by lazy { kosmos.bouncerViewModel }
     private val isInputEnabled = MutableStateFlow(true)
 
-    private val underTest =
+    private val underTest by lazy {
         PasswordBouncerViewModel(
             viewModelScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
             isInputEnabled.asStateFlow(),
         )
+    }
 
     @Before
     fun setUp() {

@@ -308,21 +308,27 @@ class CustomTileRepositoryTest : SysuiTestCase() {
         val TEST_COMPONENT = ComponentName("test.pkg", "test.cls")
 
         val TEST_USER_1 = UserHandle.of(1)!!
-        val TEST_TILE_1 =
+        val TEST_TILE_1 by lazy {
             Tile().apply {
                 label = "test_tile_1"
                 icon = Icon.createWithContentUri("file://test_1")
             }
+        }
         val TEST_TILE_KEY_1 = TileServiceKey(TEST_COMPONENT, TEST_USER_1.identifier)
-        val TEST_DEFAULTS_1 = CustomTileDefaults.Result(TEST_TILE_1.icon, TEST_TILE_1.label)
+        val TEST_DEFAULTS_1 by lazy {
+            CustomTileDefaults.Result(TEST_TILE_1.icon, TEST_TILE_1.label)
+        }
 
         val TEST_USER_2 = UserHandle.of(2)!!
-        val TEST_TILE_2 =
+        val TEST_TILE_2 by lazy {
             Tile().apply {
                 label = "test_tile_2"
                 icon = Icon.createWithContentUri("file://test_2")
             }
+        }
         val TEST_TILE_KEY_2 = TileServiceKey(TEST_COMPONENT, TEST_USER_2.identifier)
-        val TEST_DEFAULTS_2 = CustomTileDefaults.Result(TEST_TILE_2.icon, TEST_TILE_2.label)
+        val TEST_DEFAULTS_2 by lazy {
+            CustomTileDefaults.Result(TEST_TILE_2.icon, TEST_TILE_2.label)
+        }
     }
 }

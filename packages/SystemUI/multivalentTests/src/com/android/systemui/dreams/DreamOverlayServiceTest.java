@@ -93,7 +93,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Rule
     public final LeakCheckedTest.SysuiLeakCheck mLeakCheck = new LeakCheckedTest.SysuiLeakCheck();
 
-    WindowManager.LayoutParams mWindowParams = new WindowManager.LayoutParams();
+    WindowManager.LayoutParams mWindowParams;
 
     @Mock
     IDreamOverlayCallback mDreamOverlayCallback;
@@ -184,6 +184,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);
 
+        mWindowParams = new WindowManager.LayoutParams();
         mService = new DreamOverlayService(
                 mContext,
                 mLifecycleOwner,

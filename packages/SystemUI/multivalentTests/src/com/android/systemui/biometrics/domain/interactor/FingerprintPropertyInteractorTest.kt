@@ -41,10 +41,10 @@ import org.junit.runner.RunWith
 class FingerprintPropertyInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val underTest = kosmos.fingerprintPropertyInteractor
-    private val repository = kosmos.fingerprintPropertyRepository
-    private val configurationRepository = kosmos.fakeConfigurationRepository
-    private val displayRepository = kosmos.displayRepository
+    private val underTest by lazy { kosmos.fingerprintPropertyInteractor }
+    private val repository by lazy { kosmos.fingerprintPropertyRepository }
+    private val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
+    private val displayRepository by lazy { kosmos.displayRepository }
 
     @Test
     fun sensorLocation_resolution1f() =

@@ -73,8 +73,9 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var weatherViewComponent: SmartspaceViewComponent
 
-    @Spy
-    private var weatherSmartspaceView: SmartspaceView = TestView(context)
+    private val weatherSmartspaceView: SmartspaceView by lazy {
+        Mockito.spy(TestView(context))
+    }
 
     @Mock
     private lateinit var targetFilter: SmartspaceTargetFilter
@@ -88,8 +89,9 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var precondition: SmartspacePrecondition
 
-    @Spy
-    private var smartspaceView: SmartspaceView = TestView(context)
+    private val smartspaceView: SmartspaceView by lazy {
+        Mockito.spy(TestView(context))
+    }
 
     @Mock
     private lateinit var listener: BcSmartspaceDataPlugin.SmartspaceTargetListener
@@ -100,7 +102,9 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var controller: DreamSmartspaceController
 
     // TODO(b/272811280): Remove usage of real view
-    private val fakeParent = FrameLayout(context)
+    private val fakeParent by lazy {
+        FrameLayout(context)
+    }
 
     /**
      * A class which implements SmartspaceView and extends View. This is mocked to provide the right

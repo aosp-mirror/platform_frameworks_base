@@ -49,7 +49,9 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
     val configurationRepository = kosmos.fakeConfigurationRepository
-    val underTest = kosmos.occludedToLockscreenTransitionViewModel
+    val underTest by lazy {
+        kosmos.occludedToLockscreenTransitionViewModel
+    }
 
     @Test
     fun lockscreenFadeIn() =
