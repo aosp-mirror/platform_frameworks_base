@@ -225,6 +225,8 @@ public class NotificationSnooze extends LinearLayout
             if (so.getAccessibilityAction() != null
                     && so.getAccessibilityAction().getId() == action) {
                 setSelected(so, true);
+                mSnoozeView.sendAccessibilityEvent(
+                        AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
                 return true;
             }
         }
