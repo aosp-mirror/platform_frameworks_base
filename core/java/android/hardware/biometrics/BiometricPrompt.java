@@ -16,7 +16,7 @@
 
 package android.hardware.biometrics;
 
-import static android.Manifest.permission.MANAGE_BIOMETRIC_DIALOG;
+import static android.Manifest.permission.SET_BIOMETRIC_DIALOG_LOGO;
 import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
@@ -174,9 +174,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @return This builder.
          */
         @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        @RequiresPermission(MANAGE_BIOMETRIC_DIALOG)
+        @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
         @NonNull
-        public BiometricPrompt.Builder setLogo(@DrawableRes int logoRes) {
+        public BiometricPrompt.Builder setLogoRes(@DrawableRes int logoRes) {
             mPromptInfo.setLogoRes(logoRes);
             return this;
         }
@@ -193,9 +193,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @return This builder.
          */
         @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        @RequiresPermission(MANAGE_BIOMETRIC_DIALOG)
+        @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
         @NonNull
-        public BiometricPrompt.Builder setLogo(@NonNull Bitmap logoBitmap) {
+        public BiometricPrompt.Builder setLogoBitmap(@NonNull Bitmap logoBitmap) {
             mPromptInfo.setLogoBitmap(logoBitmap);
             return this;
         }
@@ -719,25 +719,25 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
     /**
      * Gets the drawable resource of the logo for the prompt, as set by
-     * {@link Builder#setLogo(int)}. Currently for system applications use only.
+     * {@link Builder#setLogoRes(int)}. Currently for system applications use only.
      *
      * @return The drawable resource of the logo, or -1 if the prompt has no logo resource set.
      */
     @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    @RequiresPermission(MANAGE_BIOMETRIC_DIALOG)
+    @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
     @DrawableRes
     public int getLogoRes() {
         return mPromptInfo.getLogoRes();
     }
 
     /**
-     * Gets the logo bitmap for the prompt, as set by {@link Builder#setLogo(Bitmap)}. Currently for
-     * system applications use only.
+     * Gets the logo bitmap for the prompt, as set by {@link Builder#setLogoBitmap(Bitmap)}.
+     * Currently for system applications use only.
      *
      * @return The logo bitmap of the prompt, or null if the prompt has no logo bitmap set.
      */
     @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    @RequiresPermission(MANAGE_BIOMETRIC_DIALOG)
+    @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
     @Nullable
     public Bitmap getLogoBitmap() {
         return mPromptInfo.getLogoBitmap();

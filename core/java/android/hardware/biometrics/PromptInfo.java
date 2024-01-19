@@ -166,9 +166,9 @@ public class PromptInfo implements Parcelable {
     }
 
     /**
-     * Returns whether MANAGE_BIOMETRIC_DIALOG is contained.
+     * Returns whether SET_BIOMETRIC_DIALOG_LOGO is contained.
      */
-    public boolean containsManageBioApiConfigurations() {
+    public boolean containsSetLogoApiConfigurations() {
         if (mLogoRes != -1) {
             return true;
         } else if (mLogoBitmap != null) {
