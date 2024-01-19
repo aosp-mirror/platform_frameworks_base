@@ -193,6 +193,8 @@ class DefaultClockController(
             ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
 
         init {
+            view.migratedClocks = migratedClocks
+            view.hasCustomPositionUpdatedAnimation = hasStepClockAnimation
             animations = LargeClockAnimations(view, 0f, 0f)
         }
 
