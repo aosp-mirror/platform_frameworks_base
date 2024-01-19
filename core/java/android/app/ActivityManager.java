@@ -705,6 +705,8 @@ public class ActivityManager {
 
     /** @hide Process is hosting a foreground service due to a system binding. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
     public static final int PROCESS_STATE_BOUND_FOREGROUND_SERVICE =
             ProcessStateEnum.BOUND_FOREGROUND_SERVICE;
 
