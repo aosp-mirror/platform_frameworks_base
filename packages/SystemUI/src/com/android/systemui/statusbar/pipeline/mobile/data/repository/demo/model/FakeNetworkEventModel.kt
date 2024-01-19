@@ -37,6 +37,7 @@ sealed interface FakeNetworkEventModel {
         val roaming: Boolean,
         val name: String,
         val slice: Boolean = false,
+        val ntn: Boolean = false,
     ) : FakeNetworkEventModel
 
     data class MobileDisabled(

@@ -227,6 +227,12 @@ class MobileConnectionRepositoryImpl(
             .map { Utils.isInService(it.serviceState) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
+    override val isNonTerrestrial =
+        callbackEvents
+            .mapNotNull { it.onServiceStateChanged }
+            .map { it.serviceState.isUsingNonTerrestrialNetwork }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
     override val isGsm =
         callbackEvents
             .mapNotNull { it.onSignalStrengthChanged }
