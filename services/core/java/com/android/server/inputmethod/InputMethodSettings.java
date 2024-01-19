@@ -67,7 +67,8 @@ final class InputMethodSettings {
         builder.append(ime.first);
         // Inputmethod and subtypes are saved in the settings as follows:
         // ime0;subtype0;subtype1:ime1;subtype0:ime2:ime3;subtype0;subtype1
-        for (String subtypeId : ime.second) {
+        for (int i = 0; i < ime.second.size(); ++i) {
+            final String subtypeId = ime.second.get(i);
             builder.append(INPUT_METHOD_SUBTYPE_SEPARATOR).append(subtypeId);
         }
     }
@@ -123,17 +124,19 @@ final class InputMethodSettings {
     }
 
     List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(InputMethodInfo imi) {
-        List<Pair<String, ArrayList<String>>> imsList =
+        final List<Pair<String, ArrayList<String>>> imsList =
                 getEnabledInputMethodsAndSubtypeListLocked();
-        ArrayList<InputMethodSubtype> enabledSubtypes = new ArrayList<>();
+        final List<InputMethodSubtype> enabledSubtypes = new ArrayList<>();
         if (imi != null) {
-            for (Pair<String, ArrayList<String>> imsPair : imsList) {
-                InputMethodInfo info = mMethodMap.get(imsPair.first);
+            for (int i = 0; i < imsList.size(); ++i) {
+                final Pair<String, ArrayList<String>> imsPair = imsList.get(i);
+                final InputMethodInfo info = mMethodMap.get(imsPair.first);
                 if (info != null && info.getId().equals(imi.getId())) {
                     final int subtypeCount = info.getSubtypeCount();
-                    for (int i = 0; i < subtypeCount; ++i) {
-                        InputMethodSubtype ims = info.getSubtypeAt(i);
-                        for (String s : imsPair.second) {
+                    for (int j = 0; j < subtypeCount; ++j) {
+                        final InputMethodSubtype ims = info.getSubtypeAt(j);
+                        for (int k = 0; k < imsPair.second.size(); ++k) {
+                            final String s = imsPair.second.get(k);
                             if (String.valueOf(ims.hashCode()).equals(s)) {
                                 enabledSubtypes.add(ims);
                             }
@@ -182,8 +185,9 @@ final class InputMethodSettings {
             StringBuilder builder, List<Pair<String, ArrayList<String>>> imsList, String id) {
         boolean isRemoved = false;
         boolean needsAppendSeparator = false;
-        for (Pair<String, ArrayList<String>> ims : imsList) {
-            String curId = ims.first;
+        for (int i = 0; i < imsList.size(); ++i) {
+            final Pair<String, ArrayList<String>> ims = imsList.get(i);
+            final String curId = ims.first;
             if (curId.equals(id)) {
                 // We are disabling this input method, and it is
                 // currently enabled.  Skip it to remove from the
@@ -209,8 +213,9 @@ final class InputMethodSettings {
             List<Pair<String, ArrayList<String>>> imsList,
             Predicate<InputMethodInfo> matchingCondition) {
         final ArrayList<InputMethodInfo> res = new ArrayList<>();
-        for (Pair<String, ArrayList<String>> ims : imsList) {
-            InputMethodInfo info = mMethodMap.get(ims.first);
+        for (int i = 0; i < imsList.size(); ++i) {
+            final Pair<String, ArrayList<String>> ims = imsList.get(i);
+            final InputMethodInfo info = mMethodMap.get(ims.first);
             if (info != null && !info.isVrOnly()
                     && (matchingCondition == null || matchingCondition.test(info))) {
                 res.add(info);
@@ -239,15 +244,16 @@ final class InputMethodSettings {
 
     private void saveSubtypeHistory(
             List<Pair<String, String>> savedImes, String newImeId, String newSubtypeId) {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         boolean isImeAdded = false;
         if (!TextUtils.isEmpty(newImeId) && !TextUtils.isEmpty(newSubtypeId)) {
             builder.append(newImeId).append(INPUT_METHOD_SUBTYPE_SEPARATOR).append(
                     newSubtypeId);
             isImeAdded = true;
         }
-        for (Pair<String, String> ime : savedImes) {
-            String imeId = ime.first;
+        for (int i = 0; i < savedImes.size(); ++i) {
+            final Pair<String, String> ime = savedImes.get(i);
+            final String imeId = ime.first;
             String subtypeId = ime.second;
             if (TextUtils.isEmpty(subtypeId)) {
                 subtypeId = NOT_A_SUBTYPE_ID_STR;
@@ -265,8 +271,9 @@ final class InputMethodSettings {
     }
 
     private void addSubtypeToHistory(String imeId, String subtypeId) {
-        List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistoryLocked();
-        for (Pair<String, String> ime : subtypeHistory) {
+        final List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistoryLocked();
+        for (int i = 0; i < subtypeHistory.size(); ++i) {
+            final Pair<String, String> ime = subtypeHistory.get(i);
             if (ime.first.equals(imeId)) {
                 if (DEBUG) {
                     Slog.v(TAG, "Subtype found in the history: " + imeId + ", "
@@ -334,10 +341,11 @@ final class InputMethodSettings {
     }
 
     private Pair<String, String> getLastSubtypeForInputMethodLockedInternal(String imeId) {
-        List<Pair<String, ArrayList<String>>> enabledImes =
+        final List<Pair<String, ArrayList<String>>> enabledImes =
                 getEnabledInputMethodsAndSubtypeListLocked();
-        List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistoryLocked();
-        for (Pair<String, String> imeAndSubtype : subtypeHistory) {
+        final List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistoryLocked();
+        for (int i = 0; i < subtypeHistory.size(); ++i) {
+            final Pair<String, String> imeAndSubtype = subtypeHistory.get(i);
             final String imeInTheHistory = imeAndSubtype.first;
             // If imeId is empty, returns the first IME and subtype in the history
             if (TextUtils.isEmpty(imeId) || imeInTheHistory.equals(imeId)) {
@@ -363,11 +371,12 @@ final class InputMethodSettings {
     private String getEnabledSubtypeHashCodeForInputMethodAndSubtypeLocked(List<Pair<String,
             ArrayList<String>>> enabledImes, String imeId, String subtypeHashCode) {
         final LocaleList localeList = SystemLocaleWrapper.get(mCurrentUserId);
-        for (Pair<String, ArrayList<String>> enabledIme : enabledImes) {
+        for (int i = 0; i < enabledImes.size(); ++i) {
+            final Pair<String, ArrayList<String>> enabledIme = enabledImes.get(i);
             if (enabledIme.first.equals(imeId)) {
                 final ArrayList<String> explicitlyEnabledSubtypes = enabledIme.second;
                 final InputMethodInfo imi = mMethodMap.get(imeId);
-                if (explicitlyEnabledSubtypes.size() == 0) {
+                if (explicitlyEnabledSubtypes.isEmpty()) {
                     // If there are no explicitly enabled subtypes, applicable subtypes are
                     // enabled implicitly.
                     // If IME is enabled and no subtypes are enabled, applicable subtypes
@@ -377,15 +386,16 @@ final class InputMethodSettings {
                                 SubtypeUtils.getImplicitlyApplicableSubtypesLocked(localeList,
                                         imi);
                         final int numSubtypes = implicitlyEnabledSubtypes.size();
-                        for (int i = 0; i < numSubtypes; ++i) {
-                            final InputMethodSubtype st = implicitlyEnabledSubtypes.get(i);
+                        for (int j = 0; j < numSubtypes; ++j) {
+                            final InputMethodSubtype st = implicitlyEnabledSubtypes.get(j);
                             if (String.valueOf(st.hashCode()).equals(subtypeHashCode)) {
                                 return subtypeHashCode;
                             }
                         }
                     }
                 } else {
-                    for (String s : explicitlyEnabledSubtypes) {
+                    for (int j = 0; j < explicitlyEnabledSubtypes.size(); ++j) {
+                        final String s = explicitlyEnabledSubtypes.get(j);
                         if (s.equals(subtypeHashCode)) {
                             // If both imeId and subtypeId are enabled, return subtypeId.
                             try {
