@@ -156,6 +156,7 @@ package android.app {
     field public static final int PROCESS_CAPABILITY_ALL_IMPLICIT = 6; // 0x6
     field public static final int PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK = 8; // 0x8
     field public static final int PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK = 32; // 0x20
+    field public static final int PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 5; // 0x5
     field public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4; // 0x4
     field public static final int PROCESS_STATE_TOP = 2; // 0x2
     field public static final int STOP_USER_ON_SWITCH_DEFAULT = -1; // 0xffffffff
