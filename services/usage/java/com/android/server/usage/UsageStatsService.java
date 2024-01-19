@@ -1526,14 +1526,15 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     UsageEvents queryEvents(int userId, long beginTime, long endTime, int flags) {
-        return queryEventsWithTypes(userId, beginTime, endTime, flags, EmptyArray.INT);
+        return queryEventsWithQueryFilters(userId, beginTime, endTime, flags,
+                /* eventTypeFilter= */ EmptyArray.INT, /* pkgNameFilter= */ null);
     }
 
     /**
      * Called by the Binder stub.
      */
-    UsageEvents queryEventsWithTypes(int userId, long beginTime, long endTime, int flags,
-            int[] eventTypeFilter) {
+    UsageEvents queryEventsWithQueryFilters(int userId, long beginTime, long endTime, int flags,
+            int[] eventTypeFilter, ArraySet<String> pkgNameFilter) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query events for locked user " + userId);
@@ -1544,7 +1545,7 @@ public class UsageStatsService extends SystemService implements
             if (service == null) {
                 return null; // user was stopped or removed
             }
-            return service.queryEvents(beginTime, endTime, flags, eventTypeFilter);
+            return service.queryEvents(beginTime, endTime, flags, eventTypeFilter, pkgNameFilter);
         }
     }
 
@@ -2276,7 +2277,7 @@ public class UsageStatsService extends SystemService implements
         }
 
         private UsageEvents queryEventsHelper(int userId, long beginTime, long endTime,
-                String callingPackage, int[] eventTypeFilter) {
+                String callingPackage, int[] eventTypeFilter, ArraySet<String> pkgNameFilter) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
@@ -2295,8 +2296,8 @@ public class UsageStatsService extends SystemService implements
                 if (hideLocusIdEvents) flags |= UsageEvents.HIDE_LOCUS_EVENTS;
                 if (obfuscateNotificationEvents) flags |= UsageEvents.OBFUSCATE_NOTIFICATION_EVENTS;
 
-                return UsageStatsService.this.queryEventsWithTypes(userId, beginTime, endTime,
-                        flags, eventTypeFilter);
+                return UsageStatsService.this.queryEventsWithQueryFilters(userId,
+                        beginTime, endTime, flags, eventTypeFilter, pkgNameFilter);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2414,7 +2415,8 @@ public class UsageStatsService extends SystemService implements
             }
 
             return queryEventsHelper(UserHandle.getCallingUserId(), beginTime, endTime,
-                    callingPackage, /* eventTypeFilter= */ EmptyArray.INT);
+                    callingPackage, /* eventTypeFilter= */ EmptyArray.INT,
+                    /* pkgNameFilter= */ null);
         }
 
         @Override
@@ -2440,7 +2442,8 @@ public class UsageStatsService extends SystemService implements
             }
 
             return queryEventsHelper(userId, query.getBeginTimeMillis(),
-                    query.getEndTimeMillis(), callingPackage, query.getEventTypes());
+                    query.getEndTimeMillis(), callingPackage, query.getEventTypes(),
+                    /* pkgNameFilter= */ new ArraySet<>(query.getPackageNames()));
         }
 
         @Override
@@ -2476,7 +2479,8 @@ public class UsageStatsService extends SystemService implements
             }
 
             return queryEventsHelper(userId, beginTime, endTime, callingPackage,
-                    /* eventTypeFilter= */ EmptyArray.INT);
+                    /* eventTypeFilter= */ EmptyArray.INT,
+                    /* pkgNameFilter= */ null);
         }
 
         @Override
