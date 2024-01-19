@@ -847,16 +847,18 @@ public final class CameraExtensionCharacteristics {
      * of the camera resolutions advertised by
      * {@link StreamConfigurationMap#getOutputSizes}.</p>
      *
-     * <p>Device-specific extensions currently support at most two
+     * <p>Device-specific extensions currently support at most three
      * multi-frame capture surface formats. ImageFormat.JPEG will be supported by all
-     * extensions and ImageFormat.YUV_420_888 may or may not be supported.</p>
+     * extensions while ImageFormat.YUV_420_888 and ImageFormat.JPEG_R may or may not be
+     * supported.</p>
      *
      * @param extension the extension type
      * @param format    device-specific extension output format
      * @return non-modifiable list of available sizes or an empty list if the format is not
      * supported.
-     * @throws IllegalArgumentException in case of format different from ImageFormat.JPEG /
-     *                                  ImageFormat.YUV_420_888; or unsupported extension.
+     * @throws IllegalArgumentException in case of format different from ImageFormat.JPEG,
+     *                                  ImageFormat.YUV_420_888, ImageFormat.JPEG_R; or
+     *                                  unsupported extension.
      */
     public @NonNull
     List<Size> getExtensionSupportedSizes(@Extension int extension, int format) {
@@ -940,14 +942,16 @@ public final class CameraExtensionCharacteristics {
      * @param format            device-specific extension output format
      * @return the range of estimated minimal and maximal capture latency in milliseconds
      * or null if no capture latency info can be provided
-     * @throws IllegalArgumentException in case of format different from {@link ImageFormat#JPEG} /
-     *                                  {@link ImageFormat#YUV_420_888}; or unsupported extension.
+     * @throws IllegalArgumentException in case of format different from {@link ImageFormat#JPEG},
+     *                                  {@link ImageFormat#YUV_420_888}, {@link ImageFormat#JPEG_R};
+     *                                  or unsupported extension.
      */
     public @Nullable Range<Long> getEstimatedCaptureLatencyRangeMillis(@Extension int extension,
             @NonNull Size captureOutputSize, @ImageFormat.Format int format) {
         switch (format) {
             case ImageFormat.YUV_420_888:
             case ImageFormat.JPEG:
+            case ImageFormat.JPEG_R:
                 //No op
                 break;
             default:
@@ -993,6 +997,10 @@ public final class CameraExtensionCharacteristics {
                     // processed YUV_420 buffers. Latency in this case is very device
                     // specific and cannot be estimated accurately enough.
                     return  null;
+                }
+                if (format == ImageFormat.JPEG_R) {
+                    // JpegR/UltraHDR is not supported for basic extensions
+                    return null;
                 }
 
                 LatencyRange latencyRange = extenders.second.getEstimatedCaptureLatencyRange(sz);

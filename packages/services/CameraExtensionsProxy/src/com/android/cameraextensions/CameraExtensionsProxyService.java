@@ -59,6 +59,7 @@ import android.hardware.camera2.extension.Request;
 import android.hardware.camera2.extension.SizeList;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
+import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Binder;
@@ -1691,11 +1692,17 @@ public class CameraExtensionsProxyService extends Service {
         private final Surface mSurface;
         private final Size mSize;
         private final int mImageFormat;
+        private final int mDataspace;
 
         public OutputSurfaceImplStub(OutputSurface outputSurface) {
             mSurface = outputSurface.surface;
             mSize = new Size(outputSurface.size.width, outputSurface.size.height);
             mImageFormat = outputSurface.imageFormat;
+            if (mSurface != null) {
+                mDataspace = SurfaceUtils.getSurfaceDataspace(mSurface);
+            } else {
+                mDataspace = -1;
+            }
         }
 
         @Override
@@ -1711,6 +1718,11 @@ public class CameraExtensionsProxyService extends Service {
         @Override
         public int getImageFormat() {
             return mImageFormat;
+        }
+
+        @Override
+        public int getDataspace() {
+            return mDataspace;
         }
     }
 
