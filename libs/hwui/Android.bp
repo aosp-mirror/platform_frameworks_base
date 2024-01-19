@@ -427,7 +427,6 @@ cc_defaults {
                 "jni/MovieImpl.cpp",
                 "jni/pdf/PdfDocument.cpp",
                 "jni/pdf/PdfEditor.cpp",
-                "jni/pdf/PdfRenderer.cpp",
                 "jni/pdf/PdfUtils.cpp",
             ],
             shared_libs: [
