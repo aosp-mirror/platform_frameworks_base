@@ -177,9 +177,22 @@ AttributeBuilder& AttributeBuilder::SetWeak(bool weak) {
   return *this;
 }
 
+AttributeBuilder& AttributeBuilder::SetComment(StringPiece comment) {
+  attr_->SetComment(comment);
+  return *this;
+}
+
 AttributeBuilder& AttributeBuilder::AddItem(StringPiece name, uint32_t value) {
   attr_->symbols.push_back(
       Attribute::Symbol{Reference(ResourceName({}, ResourceType::kId, name)), value});
+  return *this;
+}
+
+AttributeBuilder& AttributeBuilder::AddItemWithComment(StringPiece name, uint32_t value,
+                                                       StringPiece comment) {
+  Reference ref(ResourceName({}, ResourceType::kId, name));
+  ref.SetComment(comment);
+  attr_->symbols.push_back(Attribute::Symbol{ref, value});
   return *this;
 }
 
