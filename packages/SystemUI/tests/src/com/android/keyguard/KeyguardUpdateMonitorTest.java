@@ -1720,6 +1720,24 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void assistantVisible_sendEventToFaceAuthInteractor() {
+        // WHEN the assistant is visible
+        mKeyguardUpdateMonitor.setAssistantVisible(true);
+
+        // THEN send event to face auth interactor
+        verify(mFaceAuthInteractor).onAssistantTriggeredOnLockScreen();
+    }
+
+    @Test
+    public void assistantNotVisible_doesNotSendEventToFaceAuthInteractor() {
+        // WHEN the assistant is visible
+        mKeyguardUpdateMonitor.setAssistantVisible(false);
+
+        // THEN never send event to face auth interactor
+        verify(mFaceAuthInteractor, never()).onAssistantTriggeredOnLockScreen();
+    }
+
+    @Test
     public void fingerprintFailure_requestActiveUnlock_dismissKeyguard() {
         // GIVEN shouldTriggerActiveUnlock
         bouncerFullyVisible();

@@ -1644,11 +1644,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     void setAssistantVisible(boolean assistantVisible) {
         mAssistantVisible = assistantVisible;
         mLogger.logAssistantVisible(mAssistantVisible);
-        if (getFaceAuthInteractor() != null) {
-            getFaceAuthInteractor().onAssistantTriggeredOnLockScreen();
-        }
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
         if (mAssistantVisible) {
+            if (getFaceAuthInteractor() != null) {
+                getFaceAuthInteractor().onAssistantTriggeredOnLockScreen();
+            }
             requestActiveUnlock(
                     ActiveUnlockConfig.ActiveUnlockRequestOrigin.ASSISTANT,
                     "assistant",
