@@ -45,7 +45,7 @@ package android.nfc {
 package android.nfc.cardemulation {
 
   public final class CardEmulation {
-    method @FlaggedApi("android.permission.flags.wallet_role_enabled") @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public android.nfc.cardemulation.ApduServiceInfo getPreferredPaymentService();
+    method @FlaggedApi("android.permission.flags.wallet_role_enabled") @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static android.content.ComponentName getPreferredPaymentService(@NonNull android.content.Context);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
   }
 
