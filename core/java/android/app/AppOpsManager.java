@@ -1533,10 +1533,11 @@ public class AppOpsManager {
     public static final int OP_RESERVED_FOR_TESTING = AppProtoEnums.APP_OP_RESERVED_FOR_TESTING;
 
     /**
-     * Rapid clearing of notifications by a notification listener, see b/289080543 for details
+     * Rapid clearing of notifications by a notification listener
      *
      * @hide
      */
+    // See b/289080543 for more details
     public static final int OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER =
             AppProtoEnums.APP_OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER;
 
@@ -2373,10 +2374,11 @@ public class AppOpsManager {
             "android:reserved_for_testing";
 
     /**
-     * Rapid clearing of notifications by a notification listener, see b/289080543 for details
+     * Rapid clearing of notifications by a notification listener
      *
      * @hide
      */
+    // See b/289080543 for more details
     @SystemApi
     @FlaggedApi(FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED)
     public static final String OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER =
