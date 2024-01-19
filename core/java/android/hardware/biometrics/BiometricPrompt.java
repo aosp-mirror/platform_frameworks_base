@@ -16,6 +16,7 @@
 
 package android.hardware.biometrics;
 
+import static android.Manifest.permission.MANAGE_BIOMETRIC_DIALOG;
 import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
@@ -25,6 +26,7 @@ import static android.hardware.biometrics.Flags.FLAG_GET_OP_ID_CRYPTO_OBJECT;
 import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.DrawableRes;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -33,6 +35,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
@@ -158,6 +161,45 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mPromptInfo = new PromptInfo();
             mContext = context;
         }
+
+        /**
+         * Optional: Sets the drawable resource of the logo that will be shown on the prompt.
+         *
+         * <p> Note that using this method is not recommended in most scenarios because the calling
+         * application's icon will be used by default. Setting the logo is intended for large
+         * bundled applications that perform a wide range of functions and need to show distinct
+         * icons for each function.
+         *
+         * @param logoRes A drawable resource of the logo that will be shown on the prompt.
+         * @return This builder.
+         */
+        @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+        @RequiresPermission(MANAGE_BIOMETRIC_DIALOG)
+        @NonNull
+        public BiometricPrompt.Builder setLogo(@DrawableRes int logoRes) {
+            mPromptInfo.setLogoRes(logoRes);
+            return this;
+        }
+
+        /**
+         * Optional: Sets the bitmap drawable of the logo that will be shown on the prompt.
+         *
+         * <p> Note that using this method is not recommended in most scenarios because the calling
+         * application's icon will be used by default. Setting the logo is intended for large
+         * bundled applications that perform a wide range of functions and need to show distinct
+         * icons for each function.
+         *
+         * @param logoBitmap A bitmap drawable of the logo that will be shown on the prompt.
+         * @return This builder.
+         */
+        @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+        @RequiresPermission(MANAGE_BIOMETRIC_DIALOG)
+        @NonNull
+        public BiometricPrompt.Builder setLogo(@NonNull Bitmap logoBitmap) {
+            mPromptInfo.setLogoBitmap(logoBitmap);
+            return this;
+        }
+
 
         /**
          * Required: Sets the title that will be shown on the prompt.
@@ -674,6 +716,34 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         mService = service;
         mIsPromptShowing = false;
     }
+
+    /**
+     * Gets the drawable resource of the logo for the prompt, as set by
+     * {@link Builder#setLogo(int)}. Currently for system applications use only.
+     *
+     * @return The drawable resource of the logo, or -1 if the prompt has no logo resource set.
+     */
+    @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+    @RequiresPermission(MANAGE_BIOMETRIC_DIALOG)
+    @DrawableRes
+    public int getLogoRes() {
+        return mPromptInfo.getLogoRes();
+    }
+
+    /**
+     * Gets the logo bitmap for the prompt, as set by {@link Builder#setLogo(Bitmap)}. Currently for
+     * system applications use only.
+     *
+     * @return The logo bitmap of the prompt, or null if the prompt has no logo bitmap set.
+     */
+    @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+    @RequiresPermission(MANAGE_BIOMETRIC_DIALOG)
+    @Nullable
+    public Bitmap getLogoBitmap() {
+        return mPromptInfo.getLogoBitmap();
+    }
+
+
 
     /**
      * Gets the title for the prompt, as set by {@link Builder#setTitle(CharSequence)}.

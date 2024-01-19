@@ -1256,7 +1256,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         // migrateStaticSystemToLockWallpaperLocked() and added to the lock wp map
                         // if successful.
                         WallpaperData lockWp = mLockWallpaperMap.get(mNewWallpaper.userId);
-                        if (lockWp != null) {
+                        if (lockWp != null && mOriginalSystem.connection != null) {
                             // Successful rename, set old system+lock to the pending lock wp
                             if (DEBUG) {
                                 Slog.v(TAG, "static system+lock to system success");

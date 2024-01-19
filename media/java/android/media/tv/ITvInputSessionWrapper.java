@@ -81,6 +81,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_NOTIFY_TV_MESSAGE = 32;
     private static final int DO_STOP_PLAYBACK = 33;
     private static final int DO_START_PLAYBACK = 34;
+    private static final int DO_SET_VIDEO_FROZEN = 35;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -296,6 +297,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.startPlayback();
                 break;
             }
+            case DO_SET_VIDEO_FROZEN: {
+                mTvInputSessionImpl.setVideoFrozen((Boolean) msg.obj);
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -480,6 +485,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void notifyAdBufferReady(AdBuffer buffer) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_AD_BUFFER, buffer));
+    }
+
+    @Override
+    public void setVideoFrozen(boolean isFrozen) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_VIDEO_FROZEN, isFrozen));
     }
 
     @Override

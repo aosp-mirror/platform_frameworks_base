@@ -17,6 +17,9 @@ java_library {
 android_library {
     name: "SettingsLib-search",
     use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
     static_libs: [
         "SettingsLib-search-interface",
     ],

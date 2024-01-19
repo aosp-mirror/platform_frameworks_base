@@ -89,8 +89,11 @@ public final class AmbientContextEvent implements Parcelable {
      */
     public static final String KEY_VENDOR_WEARABLE_EVENT_NAME = "wearable_event_name";
 
-    /** Default value for the rate per minute data field. */
-    private static final int RATE_PER_MINUTE_UNKNOWN = -1;
+    /**
+     * Default value for {@link #getRatePerMinute}. Indicates that the rate of the event is unknown.
+     */
+    @FlaggedApi(android.app.Flags.FLAG_AMBIENT_HEART_RATE)
+    public static final int RATE_PER_MINUTE_UNKNOWN = -1;
 
     /** @hide */
     @IntDef(prefix = { "EVENT_" }, value = {
@@ -636,10 +639,10 @@ public final class AmbientContextEvent implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1704895515931L,
+            time = 1705575046107L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/app/ambientcontext/AmbientContextEvent.java",
-            inputSignatures = "public static final  int EVENT_UNKNOWN\npublic static final  int EVENT_COUGH\npublic static final  int EVENT_SNORE\npublic static final  int EVENT_BACK_DOUBLE_TAP\npublic static final @android.app.ambientcontext.AmbientContextEvent.Event @android.annotation.FlaggedApi int EVENT_HEART_RATE\npublic static final  int EVENT_VENDOR_WEARABLE_START\npublic static final  java.lang.String KEY_VENDOR_WEARABLE_EVENT_NAME\nprivate static final  int RATE_PER_MINUTE_UNKNOWN\npublic static final  int LEVEL_UNKNOWN\npublic static final  int LEVEL_LOW\npublic static final  int LEVEL_MEDIUM_LOW\npublic static final  int LEVEL_MEDIUM\npublic static final  int LEVEL_MEDIUM_HIGH\npublic static final  int LEVEL_HIGH\nprivate final @android.app.ambientcontext.AmbientContextEvent.EventCode int mEventType\nprivate final @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInstant.class) @android.annotation.NonNull java.time.Instant mStartTime\nprivate final @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInstant.class) @android.annotation.NonNull java.time.Instant mEndTime\nprivate final @android.app.ambientcontext.AmbientContextEvent.LevelValue int mConfidenceLevel\nprivate final @android.app.ambientcontext.AmbientContextEvent.LevelValue int mDensityLevel\nprivate final @android.annotation.NonNull android.os.PersistableBundle mVendorData\nprivate final @android.annotation.IntRange int mRatePerMinute\nprivate static  int defaultEventType()\nprivate static @android.annotation.NonNull java.time.Instant defaultStartTime()\nprivate static @android.annotation.NonNull java.time.Instant defaultEndTime()\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultDensityLevel()\nprivate static  android.os.PersistableBundle defaultVendorData()\nprivate static  int defaultRatePerMinute()\nclass AmbientContextEvent extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genConstructor=false, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "public static final  int EVENT_UNKNOWN\npublic static final  int EVENT_COUGH\npublic static final  int EVENT_SNORE\npublic static final  int EVENT_BACK_DOUBLE_TAP\npublic static final @android.app.ambientcontext.AmbientContextEvent.Event @android.annotation.FlaggedApi int EVENT_HEART_RATE\npublic static final  int EVENT_VENDOR_WEARABLE_START\npublic static final  java.lang.String KEY_VENDOR_WEARABLE_EVENT_NAME\npublic static final @android.annotation.FlaggedApi int RATE_PER_MINUTE_UNKNOWN\npublic static final  int LEVEL_UNKNOWN\npublic static final  int LEVEL_LOW\npublic static final  int LEVEL_MEDIUM_LOW\npublic static final  int LEVEL_MEDIUM\npublic static final  int LEVEL_MEDIUM_HIGH\npublic static final  int LEVEL_HIGH\nprivate final @android.app.ambientcontext.AmbientContextEvent.EventCode int mEventType\nprivate final @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInstant.class) @android.annotation.NonNull java.time.Instant mStartTime\nprivate final @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInstant.class) @android.annotation.NonNull java.time.Instant mEndTime\nprivate final @android.app.ambientcontext.AmbientContextEvent.LevelValue int mConfidenceLevel\nprivate final @android.app.ambientcontext.AmbientContextEvent.LevelValue int mDensityLevel\nprivate final @android.annotation.NonNull android.os.PersistableBundle mVendorData\nprivate final @android.annotation.IntRange int mRatePerMinute\nprivate static  int defaultEventType()\nprivate static @android.annotation.NonNull java.time.Instant defaultStartTime()\nprivate static @android.annotation.NonNull java.time.Instant defaultEndTime()\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultDensityLevel()\nprivate static  android.os.PersistableBundle defaultVendorData()\nprivate static  int defaultRatePerMinute()\nclass AmbientContextEvent extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genBuilder=true, genConstructor=false, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

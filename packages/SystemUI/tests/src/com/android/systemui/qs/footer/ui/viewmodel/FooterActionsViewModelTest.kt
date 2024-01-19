@@ -393,23 +393,23 @@ class FooterActionsViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun backgroundAlpha_inSplitShade_followsExpansion_with_0_99_delay() {
+    fun backgroundAlpha_inSplitShade_followsExpansion_with_0_15_delay() {
         val underTest = utils.footerActionsViewModel()
         val floatTolerance = 0.01f
 
         underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = true)
         assertThat(underTest.backgroundAlpha.value).isEqualTo(0f)
 
-        underTest.onQuickSettingsExpansionChanged(0.5f, isInSplitShade = true)
+        underTest.onQuickSettingsExpansionChanged(0.1f, isInSplitShade = true)
         assertThat(underTest.backgroundAlpha.value).isEqualTo(0f)
 
-        underTest.onQuickSettingsExpansionChanged(0.9f, isInSplitShade = true)
+        underTest.onQuickSettingsExpansionChanged(0.14f, isInSplitShade = true)
         assertThat(underTest.backgroundAlpha.value).isEqualTo(0f)
 
-        underTest.onQuickSettingsExpansionChanged(0.991f, isInSplitShade = true)
+        underTest.onQuickSettingsExpansionChanged(0.235f, isInSplitShade = true)
         assertThat(underTest.backgroundAlpha.value).isWithin(floatTolerance).of(0.1f)
 
-        underTest.onQuickSettingsExpansionChanged(0.995f, isInSplitShade = true)
+        underTest.onQuickSettingsExpansionChanged(0.575f, isInSplitShade = true)
         assertThat(underTest.backgroundAlpha.value).isWithin(floatTolerance).of(0.5f)
 
         underTest.onQuickSettingsExpansionChanged(1f, isInSplitShade = true)

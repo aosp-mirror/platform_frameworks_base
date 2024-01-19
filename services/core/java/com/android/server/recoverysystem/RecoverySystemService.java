@@ -65,6 +65,7 @@ import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.RebootEscrowListener;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.Watchdog;
 import com.android.server.pm.ApexManager;
 import com.android.server.recoverysystem.hal.BootControlHIDL;
 
@@ -111,6 +112,9 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     private static final Object sRequestLock = new Object();
 
     private static final int SOCKET_CONNECTION_MAX_RETRY = 30;
+
+    /** How long to pause the watchdog for when rebooting the device. */
+    private static final int REBOOT_WATCHDOG_PAUSE_DURATION_MS = 20_000;
 
     static final String REQUEST_LSKF_TIMESTAMP_PREF_SUFFIX = "_request_lskf_timestamp";
     static final String REQUEST_LSKF_COUNT_PREF_SUFFIX = "_request_lskf_count";
@@ -899,7 +903,8 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
         // Clear the metrics prefs after a successful RoR reboot.
         mInjector.getMetricsPrefs().deletePrefsFile();
-
+        Watchdog.getInstance().pauseWatchingCurrentThreadFor(
+                REBOOT_WATCHDOG_PAUSE_DURATION_MS, "reboot can be slow");
         PowerManager pm = mInjector.getPowerManager();
         pm.reboot(reason);
         return RESUME_ON_REBOOT_REBOOT_ERROR_UNSPECIFIED;

@@ -120,12 +120,13 @@ filegroup {
     path: "src",
 }
 
-// Make the current.txt available for use by the cts/tests/signature tests.
+// Make the current.txt available for use by the cts/tests/signature and /vendor tests.
 // ========================================================================
 filegroup {
     name: "android-test-base-current.txt",
     visibility: [
         "//cts/tests/signature/api",
+        "//vendor:__subpackages__",
     ],
     srcs: [
         "api/current.txt",

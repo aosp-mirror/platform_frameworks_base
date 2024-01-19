@@ -71,7 +71,7 @@ class OverlayDynamicRefTable : public DynamicRefTable {
 
   // Rewrites a compile-time overlay resource id to the runtime resource id of corresponding target
   // resource.
-  virtual status_t lookupResourceIdNoRewrite(uint32_t* resId) const;
+  status_t lookupResourceIdNoRewrite(uint32_t* resId) const;
 
   const Idmap_data_header* data_header_;
   const Idmap_overlay_entry* entries_;

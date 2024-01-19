@@ -80,7 +80,7 @@ interface IPackageInstaller {
             long timeout);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES,android.Manifest.permission.REQUEST_DELETE_PACKAGES})")
-    void requestArchive(String packageName, String callerPackageName, in IntentSender statusReceiver, in UserHandle userHandle, int flags);
+    void requestArchive(String packageName, String callerPackageName, in IntentSender statusReceiver, in UserHandle userHandle);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES,android.Manifest.permission.REQUEST_INSTALL_PACKAGES})")
     void requestUnarchive(String packageName, String callerPackageName, in IntentSender statusReceiver, in UserHandle userHandle);

@@ -29,8 +29,6 @@ android_test {
         "src/**/*.java",
         "src/**/*.kt",
 
-        "test-apps/JobTestApp/src/**/*.java",
-
         "test-apps/SuspendTestApp/src/**/*.java",
     ],
     static_libs: [
@@ -124,7 +122,6 @@ android_test {
     },
 
     data: [
-        ":JobTestApp",
         ":SimpleServiceTestApp1",
         ":SimpleServiceTestApp2",
         ":SimpleServiceTestApp3",

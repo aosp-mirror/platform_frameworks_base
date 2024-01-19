@@ -92,7 +92,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.pkg.component.ParsedComponent;
 import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.pm.pkg.component.ParsedPermission;
@@ -1460,22 +1459,28 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         return false;
     }
 
-    int removePackageLPw(String name) {
+
+    /**
+     * Remove package from mPackages and its corresponding AppId.
+     *
+     * @return True if the AppId has been removed.
+     * False if the app doesn't exist, or if the app has a shared UID and there are other apps that
+     * still use the same shared UID even after the target app is removed.
+     */
+    boolean removePackageAndAppIdLPw(String name) {
         final PackageSetting p = mPackages.remove(name);
         if (p != null) {
             removeInstallerPackageStatus(name);
             SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(p);
             if (sharedUserSetting != null) {
                 sharedUserSetting.removePackage(p);
-                if (checkAndPruneSharedUserLPw(sharedUserSetting, false)) {
-                    return sharedUserSetting.mAppId;
-                }
+                return checkAndPruneSharedUserLPw(sharedUserSetting, false);
             } else {
                 removeAppIdLPw(p.getAppId());
-                return p.getAppId();
+                return true;
             }
         }
-        return -1;
+        return false;
     }
 
     /**

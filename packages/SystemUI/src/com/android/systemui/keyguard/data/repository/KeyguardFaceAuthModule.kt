@@ -53,14 +53,14 @@ interface KeyguardFaceAuthModule {
         @SysUISingleton
         @FaceAuthTableLog
         fun provideFaceAuthTableLog(factory: TableLogBufferFactory): TableLogBuffer {
-            return factory.create("FaceAuthTableLog", 100)
+            return factory.create("FaceAuthTableLog", 400)
         }
 
         @Provides
         @SysUISingleton
         @FaceDetectTableLog
         fun provideFaceDetectTableLog(factory: TableLogBufferFactory): TableLogBuffer {
-            return factory.create("FaceDetectTableLog", 100)
+            return factory.create("FaceDetectTableLog", 400)
         }
     }
 }

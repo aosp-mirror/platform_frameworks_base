@@ -3,8 +3,9 @@ package com.android.systemui.bouncer.data.repository
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.SystemClock
@@ -23,8 +24,8 @@ class KeyguardBouncerRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var systemClock: SystemClock
     @Mock private lateinit var bouncerLogger: TableLogBuffer
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     lateinit var underTest: KeyguardBouncerRepository
 

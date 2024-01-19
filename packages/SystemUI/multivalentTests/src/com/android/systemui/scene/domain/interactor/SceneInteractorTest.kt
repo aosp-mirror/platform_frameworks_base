@@ -20,10 +20,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.data.repository.fakePowerRepository
+import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.sceneContainerConfig
+import com.android.systemui.scene.sceneKeys
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -36,20 +42,20 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SceneInteractorTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     private lateinit var underTest: SceneInteractor
 
     @Before
     fun setUp() {
-        utils.fakeSceneContainerFlags.enabled = true
-        underTest = utils.sceneInteractor()
+        kosmos.fakeSceneContainerFlags.enabled = true
+        underTest = kosmos.sceneInteractor
     }
 
     @Test
     fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys()).isEqualTo(utils.fakeSceneKeys())
+        assertThat(underTest.allSceneKeys()).isEqualTo(kosmos.sceneKeys)
     }
 
     @Test
@@ -75,7 +81,7 @@ class SceneInteractorTest : SysuiTestCase() {
     @Test
     fun transitionState() =
         testScope.runTest {
-            val underTest = utils.fakeSceneContainerRepository()
+            val underTest = kosmos.sceneContainerRepository
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
                     ObservableTransitionState.Idle(SceneKey.Lockscreen)
@@ -104,7 +110,7 @@ class SceneInteractorTest : SysuiTestCase() {
             underTest.setTransitionState(null)
             assertThat(reflectedTransitionState)
                 .isEqualTo(
-                    ObservableTransitionState.Idle(utils.fakeSceneContainerConfig().initialSceneKey)
+                    ObservableTransitionState.Idle(kosmos.sceneContainerConfig.initialSceneKey)
                 )
         }
 
@@ -348,8 +354,8 @@ class SceneInteractorTest : SysuiTestCase() {
     @Test
     fun userInput() =
         testScope.runTest {
-            assertThat(utils.powerRepository.userTouchRegistered).isFalse()
+            assertThat(kosmos.fakePowerRepository.userTouchRegistered).isFalse()
             underTest.onUserInput()
-            assertThat(utils.powerRepository.userTouchRegistered).isTrue()
+            assertThat(kosmos.fakePowerRepository.userTouchRegistered).isTrue()
         }
 }

@@ -25,11 +25,18 @@ import com.android.internal.logging.fakeMetricsLogger
 import com.android.internal.logging.nano.MetricsProto
 import com.android.internal.util.emergencyAffordanceManager
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.android.telecom.telecomManager
@@ -54,11 +61,11 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var telecomManager: TelecomManager
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val metricsLogger = utils.kosmos.fakeMetricsLogger
-    private val activityTaskManager = utils.kosmos.activityTaskManager
-    private val emergencyAffordanceManager = utils.kosmos.emergencyAffordanceManager
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val metricsLogger = kosmos.fakeMetricsLogger
+    private val activityTaskManager = kosmos.activityTaskManager
+    private val emergencyAffordanceManager = kosmos.emergencyAffordanceManager
 
     private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
 
@@ -68,9 +75,9 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        utils.fakeSceneContainerFlags.enabled = true
+        kosmos.fakeSceneContainerFlags.enabled = true
 
-        mobileConnectionsRepository = utils.mobileConnectionsRepository
+        mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
 
         overrideResource(R.string.lockscreen_emergency_call, MESSAGE_EMERGENCY_CALL)
         overrideResource(R.string.lockscreen_return_to_call, MESSAGE_RETURN_TO_CALL)
@@ -83,18 +90,18 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
             .thenReturn(needsEmergencyAffordance)
         whenever(telecomManager.isInCall).thenReturn(false)
 
-        utils.fakeFeatureFlags.set(REFACTOR_GETCURRENTUSER, true)
+        kosmos.fakeFeatureFlagsClassic.set(REFACTOR_GETCURRENTUSER, true)
 
-        utils.telephonyRepository.setHasTelephonyRadio(true)
+        kosmos.fakeTelephonyRepository.setHasTelephonyRadio(true)
 
-        utils.kosmos.telecomManager = telecomManager
+        kosmos.telecomManager = telecomManager
     }
 
     @Test
     fun noTelephonyRadio_noButton() =
         testScope.runTest {
-            utils.telephonyRepository.setHasTelephonyRadio(false)
-            val underTest = utils.bouncerActionButtonInteractor()
+            kosmos.fakeTelephonyRepository.setHasTelephonyRadio(false)
+            val underTest = kosmos.bouncerActionButtonInteractor
             val actionButton by collectLastValue(underTest.actionButton)
             assertThat(actionButton).isNull()
         }
@@ -102,8 +109,8 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Test
     fun noTelecomManager_noButton() =
         testScope.runTest {
-            utils.kosmos.telecomManager = null
-            val underTest = utils.bouncerActionButtonInteractor()
+            kosmos.telecomManager = null
+            val underTest = kosmos.bouncerActionButtonInteractor
             val actionButton by collectLastValue(underTest.actionButton)
             assertThat(actionButton).isNull()
         }
@@ -111,9 +118,9 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Test
     fun duringCall_returnToCallButton() =
         testScope.runTest {
-            val underTest = utils.bouncerActionButtonInteractor()
+            val underTest = kosmos.bouncerActionButtonInteractor
             val actionButton by collectLastValue(underTest.actionButton)
-            utils.telephonyRepository.setIsInCall(true)
+            kosmos.fakeTelephonyRepository.setIsInCall(true)
 
             assertThat(actionButton).isNotNull()
             assertThat(actionButton?.label).isEqualTo(MESSAGE_RETURN_TO_CALL)
@@ -133,11 +140,13 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Test
     fun noCall_secureAuthMethod_emergencyCallButton() =
         testScope.runTest {
-            val underTest = utils.bouncerActionButtonInteractor()
+            val underTest = kosmos.bouncerActionButtonInteractor
             val actionButton by collectLastValue(underTest.actionButton)
             mobileConnectionsRepository.isAnySimSecure.value = false
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.telephonyRepository.setIsInCall(false)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+            kosmos.fakeTelephonyRepository.setIsInCall(false)
 
             assertThat(actionButton).isNotNull()
             assertThat(actionButton?.label).isEqualTo(MESSAGE_EMERGENCY_CALL)
@@ -163,11 +172,13 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Test
     fun noCall_insecureAuthMethodButSecureSim_emergencyCallButton() =
         testScope.runTest {
-            val underTest = utils.bouncerActionButtonInteractor()
+            val underTest = kosmos.bouncerActionButtonInteractor
             val actionButton by collectLastValue(underTest.actionButton)
             mobileConnectionsRepository.isAnySimSecure.value = true
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.telephonyRepository.setIsInCall(false)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+            kosmos.fakeTelephonyRepository.setIsInCall(false)
             runCurrent()
 
             assertThat(actionButton).isNotNull()
@@ -179,11 +190,13 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Test
     fun noCall_insecure_noButton() =
         testScope.runTest {
-            val underTest = utils.bouncerActionButtonInteractor()
+            val underTest = kosmos.bouncerActionButtonInteractor
             val actionButton by collectLastValue(underTest.actionButton)
             mobileConnectionsRepository.isAnySimSecure.value = false
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.telephonyRepository.setIsInCall(false)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+            kosmos.fakeTelephonyRepository.setIsInCall(false)
 
             assertThat(actionButton).isNull()
         }
@@ -191,13 +204,15 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Test
     fun noCall_simSecureButEmergencyNotSupported_noButton() =
         testScope.runTest {
-            val underTest = utils.bouncerActionButtonInteractor()
+            val underTest = kosmos.bouncerActionButtonInteractor
             val actionButton by collectLastValue(underTest.actionButton)
             mobileConnectionsRepository.isAnySimSecure.value = true
             overrideResource(R.bool.config_enable_emergency_call_while_sim_locked, false)
-            utils.configurationRepository.onConfigurationChange()
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.telephonyRepository.setIsInCall(false)
+            kosmos.fakeConfigurationRepository.onConfigurationChange()
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+            kosmos.fakeTelephonyRepository.setIsInCall(false)
             runCurrent()
 
             assertThat(actionButton).isNull()

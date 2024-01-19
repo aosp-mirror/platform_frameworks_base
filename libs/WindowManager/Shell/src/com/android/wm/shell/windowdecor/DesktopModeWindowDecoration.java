@@ -387,6 +387,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return mHandleMenu != null;
     }
 
+    boolean isHandlingDragResize() {
+        return mDragResizeListener.isHandlingDragResize();
+    }
+
     private void loadAppInfo() {
         String packageName = mTaskInfo.realActivity.getPackageName();
         PackageManager pm = mContext.getApplicationContext().getPackageManager();

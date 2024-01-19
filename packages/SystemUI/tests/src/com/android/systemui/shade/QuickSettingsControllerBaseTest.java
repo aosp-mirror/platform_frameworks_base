@@ -61,6 +61,7 @@ import com.android.systemui.keyguard.domain.interactor.GlanceableHubTransitions;
 import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -68,7 +69,6 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
@@ -131,8 +131,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
 
     protected QuickSettingsController mQsController;
 
-    protected SceneTestUtils mUtils = new SceneTestUtils(this);
-    protected TestScope mTestScope = mUtils.getTestScope();
+    protected KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    protected TestScope mTestScope = mKosmos.getTestScope();
 
     @Mock protected Resources mResources;
     @Mock protected KeyguardBottomAreaView mQsFrame;
@@ -203,8 +203,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mPanelViewControllerLazy.get()).thenReturn(mNotificationPanelViewController);
-        mStatusBarStateController = mUtils.getStatusBarStateController();
-        mInteractionJankMonitor = mUtils.getInteractionJankMonitor();
+        mStatusBarStateController = mKosmos.getStatusBarStateController();
+        mInteractionJankMonitor = mKosmos.getInteractionJankMonitor();
 
         FakeDeviceProvisioningRepository deviceProvisioningRepository =
                 new FakeDeviceProvisioningRepository();
@@ -212,13 +212,13 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
         FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
         FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
 
-        PowerInteractor powerInteractor = mUtils.powerInteractor();
+        PowerInteractor powerInteractor = mKosmos.getPowerInteractor();
 
         SceneInteractor sceneInteractor = new SceneInteractor(
                 mTestScope.getBackgroundScope(),
                 new SceneContainerRepository(
                         mTestScope.getBackgroundScope(),
-                        mUtils.fakeSceneContainerConfig()),
+                        mKosmos.getFakeSceneContainerConfig()),
                 powerInteractor,
                 mock(SceneLogger.class));
 
@@ -250,8 +250,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 keyguardTransitionRepository,
                 keyguardTransitionInteractor,
                 mTestScope.getBackgroundScope(),
-                mUtils.getTestDispatcher(),
-                mUtils.getTestDispatcher(),
+                mKosmos.getTestDispatcher(),
+                mKosmos.getTestDispatcher(),
                 keyguardInteractor,
                 featureFlags,
                 mShadeRepository,
@@ -276,8 +276,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 keyguardTransitionRepository,
                 keyguardTransitionInteractor,
                 mTestScope.getBackgroundScope(),
-                mUtils.getTestDispatcher(),
-                mUtils.getTestDispatcher(),
+                mKosmos.getTestDispatcher(),
+                mKosmos.getTestDispatcher(),
                 keyguardInteractor,
                 featureFlags,
                 mock(KeyguardSecurityModel.class),

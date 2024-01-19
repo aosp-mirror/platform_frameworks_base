@@ -17,6 +17,9 @@
 package com.android.server;
 
 import static android.Manifest.permission.MODIFY_DAY_NIGHT_MODE;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_DAY;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_NIGHT;
+import static android.app.UiModeManager.MODE_ATTENTION_THEME_OVERLAY_OFF;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
@@ -32,6 +35,7 @@ import static com.android.server.UiModeManagerService.SUPPORTED_NIGHT_MODE_CUSTO
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.fail;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
@@ -65,6 +69,7 @@ import static org.testng.Assert.assertThrows;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Flags;
 import android.app.IOnProjectionStateChangedListener;
 import android.app.IUiModeManager;
 import android.content.BroadcastReceiver;
@@ -84,6 +89,8 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.test.FakePermissionEnforcer;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.test.mock.MockContentResolver;
@@ -98,6 +105,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -109,6 +117,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @RunWith(AndroidTestingRunner.class)
@@ -158,6 +167,11 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private Consumer<PowerSaveState> mPowerSaveConsumer;
     private TwilightListener mTwilightListener;
     private FakePermissionEnforcer mPermissionEnforcer;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
+            SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
+
 
     @Before
     public void setUp() {
@@ -1435,6 +1449,51 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         triggerDockIntent();
         verifyAndSendResultBroadcast();
         verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    private void testAttentionModeThemeOverlay(boolean modeNight) throws RemoteException {
+        //setup
+        if (modeNight) {
+            mService.setNightMode(MODE_NIGHT_YES);
+            assertTrue(mUiManagerService.getConfiguration().isNightModeActive());
+        } else {
+            mService.setNightMode(MODE_NIGHT_NO);
+            assertFalse(mUiManagerService.getConfiguration().isNightModeActive());
+        }
+
+        // attention modes with expected night modes
+        Map<Integer, Boolean> modes = Map.of(
+                MODE_ATTENTION_THEME_OVERLAY_OFF, modeNight,
+                MODE_ATTENTION_THEME_OVERLAY_DAY, false,
+                MODE_ATTENTION_THEME_OVERLAY_NIGHT, true
+        );
+
+        // test
+        for (int aMode : modes.keySet()) {
+            try {
+                mService.setAttentionModeThemeOverlay(aMode);
+
+                int appliedAMode = mService.getAttentionModeThemeOverlay();
+                boolean nMode = modes.get(aMode);
+
+                assertEquals(aMode, appliedAMode);
+                assertEquals(isNightModeActivated(), nMode);
+            } catch (RemoteException e) {
+                fail("Error communicating with server: " + e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testAttentionModeThemeOverlay_nightModeDisabled() throws RemoteException {
+        testAttentionModeThemeOverlay(false);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void testAttentionModeThemeOverlay_nightModeEnabled() throws RemoteException {
+        testAttentionModeThemeOverlay(true);
     }
 
     private void triggerDockIntent() {

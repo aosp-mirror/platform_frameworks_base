@@ -7823,12 +7823,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void registerUidObserver(IUidObserver observer, int which, int cutpoint,
             String callingPackage) {
-        if (!hasUsageStatsPermission(callingPackage)) {
-            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
-                    "registerUidObserver");
-        }
-        mUidObserverController.register(observer, which, cutpoint, callingPackage,
-                Binder.getCallingUid(), /*uids*/null);
+        registerUidObserverForUids(observer, which, cutpoint, callingPackage, null /* uids */);
     }
 
     /**

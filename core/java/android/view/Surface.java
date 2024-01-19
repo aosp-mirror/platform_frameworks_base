@@ -39,8 +39,10 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.flags.Flags;
 
 import dalvik.system.CloseGuard;
+import dalvik.system.VMRuntime;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -100,6 +102,10 @@ public class Surface implements Parcelable {
     private static native int nativeSetFrameRate(
             long nativeObject, float frameRate, int compatibility, int changeFrameRateStrategy);
     private static native void nativeDestroy(long nativeObject);
+
+    // 5MB is a wild guess for what the average surface should be. On most new phones, a full-screen
+    // surface is about 9MB... but not all surfaces are screen size. This should be a nice balance.
+    private static final long SURFACE_NATIVE_ALLOCATION_SIZE_BYTES = 5_000_000;
 
     public static final @android.annotation.NonNull Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -331,6 +337,7 @@ public class Surface implements Parcelable {
      */
     @UnsupportedAppUsage
     public Surface() {
+        registerNativeMemoryUsage();
     }
 
     /**
@@ -343,6 +350,7 @@ public class Surface implements Parcelable {
      */
     public Surface(@NonNull SurfaceControl from) {
         copyFrom(from);
+        registerNativeMemoryUsage();
     }
 
     /**
@@ -370,6 +378,7 @@ public class Surface implements Parcelable {
             mName = surfaceTexture.toString();
             setNativeObjectLocked(nativeCreateFromSurfaceTexture(surfaceTexture));
         }
+        registerNativeMemoryUsage();
     }
 
     /* called from android_view_Surface_createFromIGraphicBufferProducer() */
@@ -378,6 +387,7 @@ public class Surface implements Parcelable {
         synchronized (mLock) {
             setNativeObjectLocked(nativeObject);
         }
+        registerNativeMemoryUsage();
     }
 
     @Override
@@ -389,6 +399,7 @@ public class Surface implements Parcelable {
             release();
         } finally {
             super.finalize();
+            freeNativeMemoryUsage();
         }
     }
 
@@ -1241,6 +1252,18 @@ public class Surface implements Parcelable {
 
         boolean isWideColorGamut() {
             return mIsWideColorGamut;
+        }
+    }
+
+    private static void registerNativeMemoryUsage() {
+        if (Flags.enableSurfaceNativeAllocRegistration()) {
+            VMRuntime.getRuntime().registerNativeAllocation(SURFACE_NATIVE_ALLOCATION_SIZE_BYTES);
+        }
+    }
+
+    private static void freeNativeMemoryUsage() {
+        if (Flags.enableSurfaceNativeAllocRegistration()) {
+            VMRuntime.getRuntime().registerNativeFree(SURFACE_NATIVE_ALLOCATION_SIZE_BYTES);
         }
     }
 }

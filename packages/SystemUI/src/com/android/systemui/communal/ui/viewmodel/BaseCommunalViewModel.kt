@@ -33,6 +33,8 @@ abstract class BaseCommunalViewModel(
     private val communalInteractor: CommunalInteractor,
     val mediaHost: MediaHost,
 ) {
+    val isCommunalAvailable: StateFlow<Boolean> = communalInteractor.isCommunalAvailable
+
     val isKeyguardVisible: Flow<Boolean> = communalInteractor.isKeyguardVisible
 
     val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene

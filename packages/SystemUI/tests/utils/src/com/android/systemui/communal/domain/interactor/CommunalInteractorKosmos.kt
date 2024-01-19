@@ -23,11 +23,13 @@ import com.android.systemui.communal.data.repository.communalWidgetRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.smartspace.data.repository.smartspaceRepository
 import com.android.systemui.util.mockito.mock
 
 val Kosmos.communalInteractor by Fixture {
     CommunalInteractor(
+        applicationScope = applicationCoroutineScope,
         communalRepository = communalRepository,
         widgetRepository = communalWidgetRepository,
         mediaRepository = communalMediaRepository,

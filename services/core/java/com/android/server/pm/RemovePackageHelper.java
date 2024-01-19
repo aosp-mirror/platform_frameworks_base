@@ -392,8 +392,7 @@ final class RemovePackageHelper {
             // Delete from mSettings
             final SparseBooleanArray changedUsers = new SparseBooleanArray();
             synchronized (mPm.mLock) {
-                mPm.mSettings.removePackageLPw(packageName);
-                outInfo.mIsAppIdRemoved = true;
+                outInfo.mIsAppIdRemoved = mPm.mSettings.removePackageAndAppIdLPw(packageName);
                 if (!mPm.mSettings.isDisabledSystemPackageLPr(packageName)) {
                     final SharedUserSetting sus = mPm.mSettings.getSharedUserSettingLPr(deletedPs);
                     // If we don't have a disabled system package to reinstall, the package is
@@ -485,8 +484,6 @@ final class RemovePackageHelper {
         synchronized (mPm.mInstallLock) {
             cleanUpResourcesLI(codeFile, instructionSets);
         }
-        // TODO: open logging to help debug, will delete or add debug flag
-        Slog.d(TAG, "cleanUpResources for " + codeFile);
         if (packageName == null) {
             return;
         }

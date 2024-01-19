@@ -162,6 +162,7 @@ android_library {
         "com_android_wm_shell_flags_lib",
         "com.android.window.flags.window-aconfig-java",
         "WindowManager-Shell-proto",
+        "perfetto_trace_java_protos",
         "dagger2",
         "jsr330",
     ],

@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.unfold;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-
 import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
@@ -230,8 +228,7 @@ public class UnfoldAnimationController implements UnfoldListener {
     }
 
     private void maybeResetTask(UnfoldTaskAnimator animator, TaskInfo taskInfo) {
-        // TODO(b/311084698): the windowing mode check is added here as a work around.
-        if (!mIsInStageChange || taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+        if (!mIsInStageChange) {
             // No need to resetTask if there is no ongoing state change.
             return;
         }

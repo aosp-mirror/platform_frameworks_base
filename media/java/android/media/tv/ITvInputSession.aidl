@@ -83,4 +83,7 @@ oneway interface ITvInputSession {
     // For TV messages
     void notifyTvMessage(int type, in Bundle data);
     void setTvMessageEnabled(int type, boolean enabled);
+
+    // For freezing video
+    void setVideoFrozen(boolean isFrozen);
 }

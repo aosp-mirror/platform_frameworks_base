@@ -15,6 +15,13 @@ flag {
 }
 
 flag {
+    name: "notification_async_group_header_inflation"
+    namespace: "systemui"
+    description: "Inflates the notification group summary header views from the background thread."
+    bug: "217799515"
+}
+
+flag {
     name: "notification_async_hybrid_view_inflation"
     namespace: "systemui"
     description: "Inflates hybrid (single-line) notification views from the background thread."

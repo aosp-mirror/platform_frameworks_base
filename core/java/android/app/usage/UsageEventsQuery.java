@@ -29,9 +29,6 @@ import android.util.ArraySet;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * An Object-Oriented representation for a {@link UsageEvents} query.
@@ -77,19 +74,17 @@ public final class UsageEventsQuery implements Parcelable {
     }
 
     /**
-     * Returns the set of usage event types for the query.
-     * <em>Note: An empty set indicates query for all usage events. </em>
+     * Retrieves the usage event types for the query.
+     * <p>Note that an empty array indicates querying all usage event types, and it may
+     * cause additional system overhead when calling
+     * {@link UsageStatsManager#queryEvents(UsageEventsQuery)}. Apps are encouraged to
+     * provide a list of event types via {@link Builder#setEventTypes(int...)}</p>
+     *
+     * @return an array contains the usage event types that was previously set using
+     *         {@link Builder#setEventTypes(int...)} or an empty array if no value has been set.
      */
-    public @NonNull Set<Integer> getEventTypes() {
-        if (ArrayUtils.isEmpty(mEventTypes)) {
-            return Collections.emptySet();
-        }
-
-        HashSet<Integer> eventTypeSet = new HashSet<>();
-        for (int eventType : mEventTypes) {
-            eventTypeSet.add(eventType);
-        }
-        return eventTypeSet;
+    public @NonNull @Event.EventType int[] getEventTypes() {
+        return Arrays.copyOf(mEventTypes, mEventTypes.length);
     }
 
     /** @hide */
@@ -124,11 +119,6 @@ public final class UsageEventsQuery implements Parcelable {
                     return new UsageEventsQuery[size];
                 }
             };
-
-    /** @hide */
-    public int[] getEventTypeFilter() {
-        return Arrays.copyOf(mEventTypes, mEventTypes.length);
-    }
 
     /**
      * Builder for UsageEventsQuery.
@@ -166,12 +156,25 @@ public final class UsageEventsQuery implements Parcelable {
         }
 
         /**
-         * Specifies the list of usage event types to be included in the query.
-         * @param eventTypes List of the usage event types. See {@link UsageEvents.Event}
+         * Sets the list of usage event types to be included in the query.
          *
-         * @throws llegalArgumentException if the event type is not valid.
+         * <p>Note: </p> An empty array will be returned by
+         * {@link UsageEventsQuery#getEventTypes()} without calling this method, which indicates
+         * querying for all event types. Apps are encouraged to provide a list of event types.
+         * Only the matching types supplied will be used to query.
+         *
+         * @param eventTypes the array of the usage event types. See {@link UsageEvents.Event}.
+         * @throws NullPointerException if {@code eventTypes} is {@code null} or empty.
+         * @throws IllegalArgumentException if any of event types are invalid.
+         * @see UsageEventsQuery#getEventTypes()
+         * @see UsageStatsManager#queryEvents(UsageEventsQuery)
          */
-        public @NonNull Builder addEventTypes(@NonNull @Event.EventType int... eventTypes) {
+        public @NonNull Builder setEventTypes(@NonNull @Event.EventType int... eventTypes) {
+            if (eventTypes == null || eventTypes.length == 0) {
+                throw new NullPointerException("eventTypes is null or empty");
+            }
+
+            mEventTypes.clear();
             for (int i = 0; i < eventTypes.length; i++) {
                 final int eventType = eventTypes[i];
                 if (eventType < Event.NONE || eventType > Event.MAX_EVENT_TYPE) {

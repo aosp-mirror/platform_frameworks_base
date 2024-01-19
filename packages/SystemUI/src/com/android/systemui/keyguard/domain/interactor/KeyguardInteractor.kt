@@ -264,6 +264,12 @@ constructor(
         }
     }
 
+    /**
+     * Whether the primary authentication is required for the given user due to lockdown or
+     * encryption after reboot.
+     */
+    val isEncryptedOrLockdown: Flow<Boolean> = repository.isEncryptedOrLockdown
+
     fun dozeTransitionTo(vararg states: DozeStateModel): Flow<DozeTransitionModel> {
         return dozeTransitionModel.filter { states.contains(it.to) }
     }

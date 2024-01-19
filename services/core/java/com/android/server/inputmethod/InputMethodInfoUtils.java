@@ -77,8 +77,6 @@ final class InputMethodInfoUtils {
             return this;
         }
 
-        // TODO: The behavior of InputMethodSubtype#overridesImplicitlyEnabledSubtype() should be
-        // documented more clearly.
         InputMethodListBuilder fillAuxiliaryImes(ArrayList<InputMethodInfo> imis, Context context) {
             // If one or more auxiliary input methods are available, OK to stop populating the list.
             for (final InputMethodInfo imi : mInputMethodSet) {

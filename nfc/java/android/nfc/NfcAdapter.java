@@ -26,6 +26,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -2752,6 +2753,64 @@ public final class NfcAdapter {
         }
     }
 
+   /**
+     * Notifies the system of a new polling loop.
+     *
+     * @param frame is the new frame.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void notifyPollingLoop(@NonNull Bundle frame) {
+        try {
+            if (sService == null) {
+                attemptDeadServiceRecovery(null);
+            }
+            sService.notifyPollingLoop(frame);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return;
+            }
+            try {
+                sService.notifyPollingLoop(frame);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+        }
+    }
+
+   /**
+     * Notifies the system of a an HCE session being deactivated.
+     *     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void notifyHceDeactivated() {
+        try {
+            if (sService == null) {
+                attemptDeadServiceRecovery(null);
+            }
+            sService.notifyHceDeactivated();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return;
+            }
+            try {
+                sService.notifyHceDeactivated();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+        }
+    }
+
     /**
      * Sets NFC charging feature.
      * <p>This API is for the Settings application.
@@ -2767,6 +2826,7 @@ public final class NfcAdapter {
         }
         try {
             return sService.enableWlc(enable);
+
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time

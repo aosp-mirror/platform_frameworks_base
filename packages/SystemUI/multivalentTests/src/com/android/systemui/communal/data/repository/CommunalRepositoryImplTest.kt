@@ -24,11 +24,12 @@ import com.android.systemui.communal.shared.model.ObservableCommunalTransitionSt
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.data.repository.SceneContainerRepository
+import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -51,8 +52,8 @@ class CommunalRepositoryImplTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        val sceneTestUtils = SceneTestUtils(this)
-        sceneContainerRepository = sceneTestUtils.fakeSceneContainerRepository()
+        val kosmos = testKosmos()
+        sceneContainerRepository = kosmos.sceneContainerRepository
         featureFlagsClassic = FakeFeatureFlagsClassic()
 
         featureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)

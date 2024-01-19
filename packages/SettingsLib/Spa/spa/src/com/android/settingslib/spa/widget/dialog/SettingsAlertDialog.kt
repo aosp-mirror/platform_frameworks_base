@@ -102,8 +102,8 @@ private fun AlertDialogPresenter.SettingsAlertDialog(
 fun getDialogWidth(): Dp {
     val configuration = LocalConfiguration.current
     return configuration.screenWidthDp.dp * when (configuration.orientation) {
-        Configuration.ORIENTATION_LANDSCAPE -> 0.6f
-        else -> 0.8f
+        Configuration.ORIENTATION_LANDSCAPE -> 0.65f
+        else -> 0.85f
     }
 }
 

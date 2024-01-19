@@ -1126,6 +1126,21 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
+        int phoneId = -1;
+        int subscriptionId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+        if(Flags.preventSystemServerAndPhoneDeadlock()) {
+            // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
+            // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
+            if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+                if (DBG) {
+                    log("invalid subscription id, use default id");
+                }
+            } else { //APP specify subID
+                subscriptionId = subId;
+            }
+            phoneId = getPhoneIdFromSubId(subscriptionId);
+        }
+
         synchronized (mRecords) {
             // register
             IBinder b = callback.asBinder();
@@ -1145,17 +1160,23 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             r.renounceFineLocationAccess = renounceFineLocationAccess;
             r.callerUid = Binder.getCallingUid();
             r.callerPid = Binder.getCallingPid();
-            // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
-            // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
-            if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-                if (DBG) {
-                    log("invalid subscription id, use default id");
+
+            if(!Flags.preventSystemServerAndPhoneDeadlock()) {
+                // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
+                // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
+                if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+                    if (DBG) {
+                        log("invalid subscription id, use default id");
+                    }
+                    r.subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+                } else {//APP specify subID
+                    r.subId = subId;
                 }
-                r.subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
-            } else {//APP specify subID
-                r.subId = subId;
+                r.phoneId = getPhoneIdFromSubId(r.subId);
+            } else {
+                r.subId = subscriptionId;
+                r.phoneId = phoneId;
             }
-            r.phoneId = getPhoneIdFromSubId(r.subId);
             r.eventList = events;
 
             if (DBG) {
@@ -1893,8 +1914,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void notifyCarrierNetworkChangeWithPermission(int subId, boolean active) {
+        int phoneId = -1;
+        if(Flags.preventSystemServerAndPhoneDeadlock()) {
+            phoneId = getPhoneIdFromSubId(subId);
+        }
         synchronized (mRecords) {
-            int phoneId = getPhoneIdFromSubId(subId);
+            if(!Flags.preventSystemServerAndPhoneDeadlock()) {
+                phoneId = getPhoneIdFromSubId(subId);
+            }
             mCarrierNetworkChangeState[phoneId] = active;
 
             if (VDBG) {

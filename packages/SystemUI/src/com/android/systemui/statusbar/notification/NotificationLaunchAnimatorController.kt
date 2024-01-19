@@ -157,9 +157,9 @@ class NotificationLaunchAnimatorController(
             val summaryEntry = notificationEntry.parent?.summary
 
             return when {
-                headsUpManager.isAlerting(notificationKey) -> notification
+                headsUpManager.isHeadsUpEntry(notificationKey) -> notification
                 summaryEntry == null -> null
-                headsUpManager.isAlerting(summaryEntry.key) -> summaryEntry.row
+                headsUpManager.isHeadsUpEntry(summaryEntry.key) -> summaryEntry.row
                 else -> null
             }
         }
