@@ -304,6 +304,7 @@ public:
     bool setPointerIcon(std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon,
                         int32_t displayId, DeviceId deviceId, int32_t pointerId,
                         const sp<IBinder>& inputToken);
+    void setPointerIconVisibility(int32_t displayId, bool visible);
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
@@ -1395,6 +1396,13 @@ bool NativeInputManager::setPointerIcon(
     }
 
     return mInputManager->getChoreographer().setPointerIcon(std::move(icon), displayId, deviceId);
+}
+
+void NativeInputManager::setPointerIconVisibility(int32_t displayId, bool visible) {
+    if (!ENABLE_POINTER_CHOREOGRAPHER) {
+        return;
+    }
+    mInputManager->getChoreographer().setPointerIconVisibility(displayId, visible);
 }
 
 TouchAffineTransformation NativeInputManager::getTouchAffineTransformation(
@@ -2550,6 +2558,13 @@ static bool nativeSetPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject ico
                               ibinderForJavaObject(env, inputTokenObj));
 }
 
+static void nativeSetPointerIconVisibility(JNIEnv* env, jobject nativeImplObj, jint displayId,
+                                           jboolean visible) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setPointerIconVisibility(displayId, visible);
+}
+
 static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jobject nativeImplObj, jint deviceId,
                                            jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
@@ -2828,6 +2843,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetCustomPointerIcon},
         {"setPointerIcon", "(Landroid/view/PointerIcon;IIILandroid/os/IBinder;)Z",
          (void*)nativeSetPointerIcon},
+        {"setPointerIconVisibility", "(IZ)V", (void*)nativeSetPointerIconVisibility},
         {"canDispatchToDisplay", "(II)Z", (void*)nativeCanDispatchToDisplay},
         {"notifyPortAssociationsChanged", "()V", (void*)nativeNotifyPortAssociationsChanged},
         {"changeUniqueIdAssociation", "()V", (void*)nativeChangeUniqueIdAssociation},
