@@ -5695,6 +5695,7 @@
          @hide -->
     <permission android:name="android.permission.MANAGE_ROLE_HOLDERS"
                 android:protectionLevel="signature|installer|module" />
+    <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
 
     <!-- @SystemApi Allows an application to manage the holders of roles associated with default
          applications.
