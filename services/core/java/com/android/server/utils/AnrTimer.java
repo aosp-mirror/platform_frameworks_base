@@ -96,15 +96,9 @@ public class AnrTimer<V> implements AutoCloseable {
     private static boolean DEBUG = false;
 
     /**
-     * The trace tag.
+     * The trace tag is the same usd by ActivityManager.
      */
     private static final long TRACE_TAG = Trace.TRACE_TAG_ACTIVITY_MANAGER;
-
-    /**
-     * Enable tracing from the time a timer expires until it is accepted or discarded.  This is
-     * used to diagnose long latencies in the client.
-     */
-    private static final boolean ENABLE_TRACING = false;
 
     /**
      * Return true if the feature is enabled.  By default, the value is take from the Flags class
@@ -320,24 +314,21 @@ public class AnrTimer<V> implements AutoCloseable {
     }
 
     /**
-     * Start a trace on the timer.  The trace is laid down in the AnrTimerTrack.
+     * Generate a trace point with full timer information.  The meaning of milliseconds depends on
+     * the caller.
      */
-    private void traceBegin(int timerId, int pid, int uid, String what) {
-        if (ENABLE_TRACING) {
-            final String label = formatSimple("%s(%d,%d,%s)", what, pid, uid, mLabel);
-            final int cookie = timerId;
-            Trace.asyncTraceForTrackBegin(TRACE_TAG, TRACK, label, cookie);
-        }
+    private void trace(String op, int timerId, int pid, int uid, long milliseconds) {
+        final String label =
+                formatSimple("%s(%d,%d,%d,%s,%d)", op, timerId, pid, uid, mLabel, milliseconds);
+        Trace.instantForTrack(TRACE_TAG, TRACK, label);
     }
 
     /**
-     * End a trace on the timer.
+     * Generate a trace point with just the timer ID.
      */
-    private void traceEnd(int timerId) {
-        if (ENABLE_TRACING) {
-            final int cookie = timerId;
-            Trace.asyncTraceForTrackEnd(TRACE_TAG, TRACK, cookie);
-        }
+    private void trace(String op, int timerId) {
+        final String label = formatSimple("%s(%d)", op, timerId);
+        Trace.instantForTrack(TRACE_TAG, TRACK, label);
     }
 
     /**
@@ -492,7 +483,7 @@ public class AnrTimer<V> implements AutoCloseable {
                     return false;
                 }
                 nativeAnrTimerAccept(mNative, timer);
-                traceEnd(timer);
+                trace("accept", timer);
                 return true;
             }
         }
@@ -511,7 +502,7 @@ public class AnrTimer<V> implements AutoCloseable {
                     return false;
                 }
                 nativeAnrTimerDiscard(mNative, timer);
-                traceEnd(timer);
+                trace("discard", timer);
                 return true;
             }
         }
@@ -629,13 +620,18 @@ public class AnrTimer<V> implements AutoCloseable {
     }
 
     /**
-     * The notifier that a timer has fired.  The timerId and original pid/uid are supplied.  This
-     * method is called from native code.  This method takes mLock so that a timer cannot expire
-     * in the middle of another operation (like start or cancel).
+     * The notifier that a timer has fired.  The timerId and original pid/uid are supplied.  The
+     * elapsed time is the actual time since the timer was scheduled, which may be different from
+     * the original timeout if the timer was extended or if other delays occurred. This method
+     * takes mLock so that a timer cannot expire in the middle of another operation (like start or
+     * cancel).
+     *
+     * This method is called from native code.  The function must return true if the expiration
+     * message is delivered to the upper layers and false if it could not be delivered.
      */
     @Keep
-    private boolean expire(int timerId, int pid, int uid) {
-        traceBegin(timerId, pid, uid, "expired");
+    private boolean expire(int timerId, int pid, int uid, long elapsedMs) {
+        trace("expired", timerId, pid, uid, elapsedMs);
         V arg = null;
         synchronized (mLock) {
             arg = mTimerArgMap.get(timerId);
@@ -815,9 +811,4 @@ public class AnrTimer<V> implements AutoCloseable {
 
     /** Prod the native library to log a few statistics. */
     private static native void nativeAnrTimerDump(long service, boolean verbose);
-
-    // This is not a native method but it is a native interface, in the sense that it is called from
-    // the native layer to report timer expiration.  The function must return true if the expiration
-    // message is delivered to the upper layers and false if it could not be delivered.
-    // private boolean expire(int timerId, int pid, int uid);
 }
