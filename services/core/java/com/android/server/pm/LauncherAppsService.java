@@ -32,6 +32,8 @@ import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
 
+import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
+
 import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -56,7 +58,6 @@ import android.content.IntentSender;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.Flags;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageInstallerCallback;
@@ -507,7 +508,8 @@ public class LauncherAppsService extends SystemService {
             if (!canAccessProfile(userId, "cannot get shouldHideFromSuggestions")) {
                 return false;
             }
-            if (Flags.archiving() && packageName != null && isPackageArchived(packageName, user)) {
+            if (isArchivingEnabled() && packageName != null
+                    && isPackageArchived(packageName, user)) {
                 return true;
             }
             if (mPackageManagerInternal.filterAppAccess(
@@ -530,7 +532,7 @@ public class LauncherAppsService extends SystemService {
                                     .addCategory(Intent.CATEGORY_LAUNCHER)
                                     .setPackage(packageName),
                             user);
-            if (Flags.archiving()) {
+            if (isArchivingEnabled()) {
                 launcherActivities =
                         getActivitiesForArchivedApp(packageName, user, launcherActivities);
             }
@@ -701,7 +703,7 @@ public class LauncherAppsService extends SystemService {
                                 callingUid,
                                 user.getIdentifier());
                 if (activityInfo == null) {
-                    if (Flags.archiving()) {
+                    if (isArchivingEnabled()) {
                         return getMatchingArchivedAppActivityInfo(component, user);
                     }
                     return null;
@@ -984,7 +986,7 @@ public class LauncherAppsService extends SystemService {
                 long callingFlag =
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
-                if (Flags.archiving()) {
+                if (isArchivingEnabled()) {
                     callingFlag |= PackageManager.MATCH_ARCHIVED_PACKAGES;
                 }
                 final PackageInfo info =
@@ -1457,7 +1459,7 @@ public class LauncherAppsService extends SystemService {
             if (!canAccessProfile(user.getIdentifier(), "Cannot check component")) {
                 return false;
             }
-            if (Flags.archiving() && component != null && component.getPackageName() != null) {
+            if (isArchivingEnabled() && component != null && component.getPackageName() != null) {
                 List<LauncherActivityInfoInternal> archiveActivities =
                         generateLauncherActivitiesForArchivedApp(component.getPackageName(), user);
                 if (!archiveActivities.isEmpty()) {
@@ -1788,7 +1790,7 @@ public class LauncherAppsService extends SystemService {
                 }
                 if (!canLaunch
                         && includeArchivedApps
-                        && Flags.archiving()
+                        && isArchivingEnabled()
                         && getMatchingArchivedAppActivityInfo(component, user) != null) {
                     launchIntent.setPackage(null);
                     launchIntent.setComponent(component);

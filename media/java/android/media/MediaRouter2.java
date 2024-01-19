@@ -734,7 +734,7 @@ public final class MediaRouter2 {
      *     request.
      * @param transferInitiatorPackageName the package name of the app that initiated the transfer.
      *     This value is used with the user handle to populate {@link
-     *     RoutingController#wasTransferRequestedBySelf()}.
+     *     RoutingController#wasTransferInitiatedBySelf()}.
      * @hide
      */
     @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
@@ -1550,11 +1550,11 @@ public final class MediaRouter2 {
         }
 
         /**
-         * Returns whether the transfer was requested by the calling app (as determined by comparing
+         * Returns whether the transfer was initiated by the calling app (as determined by comparing
          * {@link UserHandle} and package name).
          */
         @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
-        public boolean wasTransferRequestedBySelf() {
+        public boolean wasTransferInitiatedBySelf() {
             RoutingSessionInfo sessionInfo = getRoutingSessionInfo();
 
             UserHandle transferInitiatorUserHandle = sessionInfo.getTransferInitiatorUserHandle();

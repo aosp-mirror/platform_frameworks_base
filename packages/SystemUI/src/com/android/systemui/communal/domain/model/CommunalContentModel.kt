@@ -16,10 +16,10 @@
 
 package com.android.systemui.communal.domain.model
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetProviderInfo
 import android.widget.RemoteViews
 import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import java.util.UUID
 
 /** Encapsulates data for a communal content. */
@@ -44,7 +44,7 @@ sealed interface CommunalContentModel {
     class Widget(
         val appWidgetId: Int,
         val providerInfo: AppWidgetProviderInfo,
-        val appWidgetHost: AppWidgetHost,
+        val appWidgetHost: CommunalAppWidgetHost,
     ) : CommunalContentModel {
         override val key = KEY.widget(appWidgetId)
         // Widget size is always half.

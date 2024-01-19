@@ -148,6 +148,12 @@ public class UdfpsDialogMeasureAdapter {
                     || child.getId() == R.id.customized_view_container) {
                 //skip description view and compute later
                 continue;
+            } else if (child.getId() == R.id.logo) {
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().width,
+                                MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
+                                MeasureSpec.EXACTLY));
             } else {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),

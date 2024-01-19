@@ -221,7 +221,7 @@ class HeadsUpCoordinator @Inject constructor(
                         wasUpdated = false,
                         shouldHeadsUpEver = false,
                         shouldHeadsUpAgain = false,
-                        isAlerting = mHeadsUpManager.isAlerting(logicalSummary.key),
+                        isAlerting = mHeadsUpManager.isHeadsUpEntry(logicalSummary.key),
                         isBinding = isEntryBinding(logicalSummary),
                 )
                 // If we transfer the alert and the summary isn't even attached, that means we
@@ -268,7 +268,7 @@ class HeadsUpCoordinator @Inject constructor(
                         wasUpdated = false,
                         shouldHeadsUpEver = true,
                         shouldHeadsUpAgain = true,
-                        isAlerting = mHeadsUpManager.isAlerting(childToReceiveParentAlert.key),
+                        isAlerting = mHeadsUpManager.isHeadsUpEntry(childToReceiveParentAlert.key),
                         isBinding = isEntryBinding(childToReceiveParentAlert),
                 )
                 handlePostedEntry(
@@ -425,7 +425,7 @@ class HeadsUpCoordinator @Inject constructor(
             val shouldHeadsUpEver =
                 mVisualInterruptionDecisionProvider.makeAndLogHeadsUpDecision(entry).shouldInterrupt
             val shouldHeadsUpAgain = shouldHunAgain(entry)
-            val isAlerting = mHeadsUpManager.isAlerting(entry.key)
+            val isAlerting = mHeadsUpManager.isHeadsUpEntry(entry.key)
             val isBinding = isEntryBinding(entry)
             val posted = mPostedEntries.compute(entry.key) { _, value ->
                 value?.also { update ->
@@ -469,7 +469,7 @@ class HeadsUpCoordinator @Inject constructor(
             mEntriesUpdateTimes.remove(entry.key)
             cancelHeadsUpBind(entry)
             val entryKey = entry.key
-            if (mHeadsUpManager.isAlerting(entryKey)) {
+            if (mHeadsUpManager.isHeadsUpEntry(entryKey)) {
                 // TODO: This should probably know the RemoteInputCoordinator's conditions,
                 //  or otherwise reference that coordinator's state, rather than replicate its logic
                 val removeImmediatelyForRemoteInput = (mRemoteInputManager.isSpinning(entryKey) &&
@@ -719,7 +719,7 @@ class HeadsUpCoordinator @Inject constructor(
      * Whether the notification is already alerting or binding so that it can imminently alert
      */
     private fun isAttemptingToShowHun(entry: ListEntry) =
-        mHeadsUpManager.isAlerting(entry.key) || isEntryBinding(entry)
+        mHeadsUpManager.isHeadsUpEntry(entry.key) || isEntryBinding(entry)
 
     /**
      * Whether the notification is already alerting/binding per [isAttemptingToShowHun] OR if it

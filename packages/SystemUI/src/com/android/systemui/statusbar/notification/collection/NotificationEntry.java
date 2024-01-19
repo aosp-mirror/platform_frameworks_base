@@ -171,7 +171,7 @@ public final class NotificationEntry extends ListEntry {
     private int mBucket = BUCKET_ALERTING;
     @Nullable private Long mPendingAnimationDuration;
     private boolean mIsMarkedForUserTriggeredMovement;
-    private boolean mIsAlerting;
+    private boolean mIsHeadsUpEntry;
 
     public boolean mRemoteEditImeAnimatingAway;
     public boolean mRemoteEditImeVisible;
@@ -965,12 +965,12 @@ public final class NotificationEntry extends ListEntry {
         mIsMarkedForUserTriggeredMovement = marked;
     }
 
-    public void setIsAlerting(boolean isAlerting) {
-        mIsAlerting = isAlerting;
+    public void setIsHeadsUpEntry(boolean isHeadsUpEntry) {
+        mIsHeadsUpEntry = isHeadsUpEntry;
     }
 
-    public boolean isAlerting() {
-        return mIsAlerting;
+    public boolean isHeadsUpEntry() {
+        return mIsHeadsUpEntry;
     }
 
     /** Set whether this notification is currently used to animate a launch. */

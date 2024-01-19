@@ -62,7 +62,8 @@ public class PhoneCallStateHandler {
             SubscriptionManager subscriptionManager,
             TelephonyManager telephonyManager,
             Callback callback) {
-        mSubscriptionManager = Objects.requireNonNull(subscriptionManager);
+        mSubscriptionManager = Objects.requireNonNull(subscriptionManager)
+                .createForAllUserProfiles();
         mTelephonyManager = Objects.requireNonNull(telephonyManager);
         mCallback = Objects.requireNonNull(callback);
         mSubscriptionManager.addOnSubscriptionsChangedListener(

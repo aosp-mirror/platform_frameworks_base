@@ -115,12 +115,14 @@ constructor(
         @Utils.CredentialType kind: Int,
         userId: Int,
         challenge: Long,
+        opPackageName: String,
     ) {
         biometricPromptRepository.setPrompt(
             promptInfo,
             userId,
             challenge,
-            kind.asBiometricPromptCredential()
+            kind.asBiometricPromptCredential(),
+            opPackageName,
         )
     }
 

@@ -40,11 +40,13 @@ import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -54,7 +56,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 /** Defines interface for classes that encapsulate application state for the keyguard. */
@@ -208,6 +213,12 @@ interface KeyguardRepository {
     val clockShouldBeCentered: Flow<Boolean>
 
     /**
+     * Whether the primary authentication is required for the given user due to lockdown or
+     * encryption after reboot.
+     */
+    val isEncryptedOrLockdown: Flow<Boolean>
+
+    /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
      * Note: this is also `true` when the lock-screen is occluded with an `Activity` "above" it in
@@ -279,6 +290,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val systemClock: SystemClock,
     facePropertyRepository: FacePropertyRepository,
+    private val userTracker: UserTracker,
 ) : KeyguardRepository {
     private val _dismissAction: MutableStateFlow<DismissAction> =
         MutableStateFlow(DismissAction.None)
@@ -543,6 +555,24 @@ constructor(
 
         awaitClose { dozeTransitionListener.removeCallback(callback) }
     }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val isEncryptedOrLockdown: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : KeyguardUpdateMonitorCallback() {
+                        override fun onStrongAuthStateChanged(userId: Int) {
+                            trySend(userId)
+                        }
+                    }
+
+                keyguardUpdateMonitor.registerCallback(callback)
+
+                awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
+            }
+            .filter { userId -> userId == userTracker.userId }
+            .onStart { emit(userTracker.userId) }
+            .mapLatest { userId -> keyguardUpdateMonitor.isEncryptedOrLockdown(userId) }
 
     override fun isKeyguardShowing(): Boolean {
         return keyguardStateController.isShowing

@@ -7,9 +7,11 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
@@ -36,8 +38,8 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var keyguardBypassController: KeyguardBypassController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
 
-    private val testUtils = SceneTestUtils(this)
-    private val testScope = testUtils.testScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
     private val userRepository = FakeUserRepository()
     private val keyguardRepository = FakeKeyguardRepository()
 
@@ -52,7 +54,7 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
         underTest =
             DeviceEntryRepositoryImpl(
                 applicationScope = testScope.backgroundScope,
-                backgroundDispatcher = testUtils.testDispatcher,
+                backgroundDispatcher = kosmos.testDispatcher,
                 userRepository = userRepository,
                 lockPatternUtils = lockPatternUtils,
                 keyguardBypassController = keyguardBypassController,

@@ -20,13 +20,20 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.data.repository.authenticationRepository
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate as Point
+import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,12 +51,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PatternBouncerViewModelTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val authenticationInteractor = utils.authenticationInteractor()
-    private val sceneInteractor = utils.sceneInteractor()
-    private val bouncerInteractor = utils.bouncerInteractor()
-    private val bouncerViewModel = utils.bouncerViewModel()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val authenticationInteractor = kosmos.authenticationInteractor
+    private val sceneInteractor = kosmos.sceneInteractor
+    private val bouncerInteractor = kosmos.bouncerInteractor
+    private val bouncerViewModel = kosmos.bouncerViewModel
     private val underTest =
         PatternBouncerViewModel(
             applicationContext = context,
@@ -305,7 +312,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
                 underTest.onDragStart()
                 CORRECT_PATTERN.subList(
                         0,
-                        utils.authenticationRepository.minPatternLength - 1,
+                        kosmos.authenticationRepository.minPatternLength - 1,
                     )
                     .forEach { coordinate ->
                         underTest.onDrag(
@@ -374,8 +381,10 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     }
 
     private fun TestScope.lockDeviceAndOpenPatternBouncer() {
-        utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pattern)
-        utils.deviceEntryRepository.setUnlocked(false)
+        kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+            AuthenticationMethodModel.Pattern
+        )
+        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
         switchToScene(SceneKey.Bouncer)
     }
 

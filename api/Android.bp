@@ -60,8 +60,40 @@ metalava_cmd = "$(location metalava)"
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
 metalava_cmd += " --quiet "
 
+soong_config_module_type {
+    name: "enable_crashrecovery_module",
+    module_type: "combined_apis_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: ["release_crashrecovery_module"],
+    properties: [
+        "bootclasspath",
+        "system_server_classpath",
+    ],
+}
+
+soong_config_bool_variable {
+    name: "release_crashrecovery_module",
+}
+
+enable_crashrecovery_module {
+    name: "crashrecovery_module_defaults",
+    soong_config_variables: {
+        release_crashrecovery_module: {
+            bootclasspath: [
+                "framework-crashrecovery",
+            ],
+            system_server_classpath: [
+                "service-crashrecovery",
+            ],
+        },
+    },
+}
+
 combined_apis {
     name: "frameworks-base-api",
+    defaults: [
+        "crashrecovery_module_defaults",
+    ],
     bootclasspath: [
         "android.net.ipsec.ike",
         "art.module.public.api",
@@ -269,6 +301,7 @@ packages_to_document = [
 // classpath (or sources) somehow.
 stubs_defaults {
     name: "android-non-updatable-stubs-defaults",
+    defaults: ["framework-minus-apex-aconfig-declarations"],
     srcs: [":android-non-updatable-stub-sources"],
     sdk_version: "none",
     system_modules: "none",

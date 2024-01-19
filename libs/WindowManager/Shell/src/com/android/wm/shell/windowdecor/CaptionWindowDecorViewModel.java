@@ -271,6 +271,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                     if (e.findPointerIndex(mDragPointerId) == -1) {
                         mDragPointerId = e.getPointerId(0);
                     }
+                    final CaptionWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+                    // If a decor's resize drag zone is active, don't also try to reposition it.
+                    if (decoration.isHandlingDragResize()) break;
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragPositioningCallback.onDragPositioningMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));

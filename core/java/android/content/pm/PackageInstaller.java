@@ -2352,7 +2352,6 @@ public class PackageInstaller {
      * communicated.
      *
      * @param statusReceiver Callback used to notify when the operation is completed.
-     * @param flags Flags for archiving. Can be 0 or {@link PackageManager#DELETE_SHOW_DIALOG}.
      * @throws PackageManager.NameNotFoundException If {@code packageName} isn't found or not
      *                                              available to the caller or isn't archived.
      */
@@ -2360,12 +2359,11 @@ public class PackageInstaller {
             Manifest.permission.DELETE_PACKAGES,
             Manifest.permission.REQUEST_DELETE_PACKAGES})
     @FlaggedApi(Flags.FLAG_ARCHIVING)
-    public void requestArchive(@NonNull String packageName, @NonNull IntentSender statusReceiver,
-            @DeleteFlags int flags)
+    public void requestArchive(@NonNull String packageName, @NonNull IntentSender statusReceiver)
             throws PackageManager.NameNotFoundException {
         try {
             mInstaller.requestArchive(packageName, mInstallerPackageName, statusReceiver,
-                    new UserHandle(mUserId), flags);
+                    new UserHandle(mUserId));
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
         } catch (RemoteException e) {

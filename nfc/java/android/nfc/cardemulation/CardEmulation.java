@@ -57,6 +57,8 @@ import java.util.regex.Pattern;
  */
 public final class CardEmulation {
     private static final Pattern AID_PATTERN = Pattern.compile("[0-9A-Fa-f]{10,32}\\*?\\#?");
+    private static final Pattern PLF_PATTERN = Pattern.compile("[0-9A-Fa-f]{1,32}");
+
     static final String TAG = "CardEmulation";
 
     /**
@@ -350,6 +352,34 @@ public final class CardEmulation {
             Log.e(TAG, "Failed to reach CardEmulationService.");
         }
         return  false;
+    }
+
+    /**
+     * Register a polling loop filter for a HostApduService.
+     * @param service The HostApduService to register the filter for.
+     * @param pollingLoopFilter The filter to register.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public boolean registerPollingLoopFilterForService(@NonNull ComponentName service,
+            @NonNull String pollingLoopFilter) {
+        try {
+            return sService.registerPollingLoopFilterForService(mContext.getUser().getIdentifier(),
+                    service, pollingLoopFilter);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.registerPollingLoopFilterForService(
+                        mContext.getUser().getIdentifier(), service, pollingLoopFilter);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
     }
 
     /**
@@ -930,6 +960,24 @@ public final class CardEmulation {
                 return null;
             }
         }
+    }
+
+    /**
+     * Tests the validity of the polling loop filter.
+     * @param pollingLoopFilter The polling loop filter to test.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static boolean isValidPollingLoopFilter(@NonNull String pollingLoopFilter) {
+        // Verify hex characters
+        if (!PLF_PATTERN.matcher(pollingLoopFilter).matches()) {
+            Log.e(TAG, "Polling Loop Filter " + pollingLoopFilter
+                    + " is not a valid Polling Loop Filter.");
+            return false;
+        }
+
+        return true;
     }
 
     /**

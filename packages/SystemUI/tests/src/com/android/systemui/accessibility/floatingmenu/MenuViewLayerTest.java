@@ -55,8 +55,6 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -119,10 +117,6 @@ public class MenuViewLayerTest extends SysuiTestCase {
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Spy
     private SysuiTestableContext mSpyContext = getContext();

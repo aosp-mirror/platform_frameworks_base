@@ -4645,7 +4645,7 @@ class PackageManagerShellCommand extends ShellCommand {
         try {
             mInterface.getPackageInstaller().requestArchive(packageName,
                     /* callerPackageName= */ "", receiver.getIntentSender(),
-                    new UserHandle(translatedUserId), 0);
+                    new UserHandle(translatedUserId));
         } catch (Exception e) {
             pw.println("Failure [" + e.getMessage() + "]");
             return 1;

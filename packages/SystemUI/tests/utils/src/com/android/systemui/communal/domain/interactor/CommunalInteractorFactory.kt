@@ -17,12 +17,12 @@
 
 package com.android.systemui.communal.domain.interactor
 
-import android.appwidget.AppWidgetHost
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -44,7 +44,7 @@ object CommunalInteractorFactory {
         smartspaceRepository: FakeSmartspaceRepository = FakeSmartspaceRepository(),
         tutorialRepository: FakeCommunalTutorialRepository = FakeCommunalTutorialRepository(),
         communalPrefsRepository: FakeCommunalPrefsRepository = FakeCommunalPrefsRepository(),
-        appWidgetHost: AppWidgetHost = mock(),
+        appWidgetHost: CommunalAppWidgetHost = mock(),
         editWidgetsActivityStarter: EditWidgetsActivityStarter = mock(),
     ): WithDependencies {
         val withDeps =
@@ -67,6 +67,7 @@ object CommunalInteractorFactory {
             appWidgetHost,
             editWidgetsActivityStarter,
             CommunalInteractor(
+                testScope.backgroundScope,
                 communalRepository,
                 widgetRepository,
                 communalPrefsRepository,
@@ -90,7 +91,7 @@ object CommunalInteractorFactory {
         val keyguardRepository: FakeKeyguardRepository,
         val keyguardInteractor: KeyguardInteractor,
         val tutorialInteractor: CommunalTutorialInteractor,
-        val appWidgetHost: AppWidgetHost,
+        val appWidgetHost: CommunalAppWidgetHost,
         val editWidgetsActivityStarter: EditWidgetsActivityStarter,
         val communalInteractor: CommunalInteractor,
     )

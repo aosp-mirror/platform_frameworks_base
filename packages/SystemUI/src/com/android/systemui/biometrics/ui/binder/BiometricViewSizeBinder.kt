@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.animation.addListener
 import androidx.core.view.doOnLayout
@@ -234,7 +235,13 @@ private fun View.isLandscape(): Boolean {
 
 private fun View.showContentOrHide(forceHide: Boolean = false) {
     val isTextViewWithBlankText = this is TextView && this.text.isBlank()
-    visibility = if (forceHide || isTextViewWithBlankText) View.GONE else View.VISIBLE
+    val isImageViewWithoutImage = this is ImageView && this.drawable == null
+    visibility =
+        if (forceHide || isTextViewWithBlankText || isImageViewWithoutImage) {
+            View.GONE
+        } else {
+            View.VISIBLE
+        }
 }
 
 private fun View.asVerticalAnimator(

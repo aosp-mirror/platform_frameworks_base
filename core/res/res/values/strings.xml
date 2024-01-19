@@ -1075,6 +1075,12 @@
     <string name="permdesc_manageOngoingCalls">Allows an app to see details about ongoing calls
          on your device and to control these calls.</string>
 
+    <!-- Title for an application permission, listed so that the user can access the last known cell id provided by telephony. -->
+    <string name="permlab_accessLastKnownCellId">Access last known cell identity.</string>
+    <!-- Description on an application permission, listed so that the user can access the last known cell id provided by telephony -->
+    <string name="permdesc_accessLastKnownCellId">Allows an app to access to the last known
+        cell identity provided by telephony.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCellBroadcasts">read cell broadcast messages</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

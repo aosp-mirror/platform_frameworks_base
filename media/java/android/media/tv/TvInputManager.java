@@ -3334,6 +3334,18 @@ public final class TvInputManager {
             }
         }
 
+        void setVideoFrozen(boolean isFrozen) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.setVideoFrozen(mToken, isFrozen, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
         /**
          * Sends TV messages to the service for testing purposes
          */

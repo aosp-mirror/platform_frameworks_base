@@ -16,9 +16,11 @@
 package android.telephony;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -50,6 +52,7 @@ import com.android.internal.telephony.ICarrierConfigChangeListener;
 import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ITelephonyRegistry;
+import com.android.server.telecom.flags.Flags;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -66,11 +69,13 @@ import java.util.stream.Collectors;
  * or {@link PhoneCapability} changed. This might trigger callback from applications side through
  * {@link android.telephony.PhoneStateListener}
  *
- * TODO: limit API access to only carrier apps with certain permissions or apps running on
+ * Limit API access to only carrier apps with certain permissions or apps running on
  * privileged UID.
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
 public class TelephonyRegistryManager {
 
     private static final String TAG = "TelephonyRegistryManager";
@@ -120,6 +125,7 @@ public class TelephonyRegistryManager {
      * @param listener an instance of {@link SubscriptionManager.OnSubscriptionsChangedListener}
      *                 with onSubscriptionsChanged overridden.
      * @param executor the executor that will execute callbacks.
+     * @hide
      */
     public void addOnSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnSubscriptionsChangedListener listener,
@@ -155,6 +161,7 @@ public class TelephonyRegistryManager {
      * invoke the listener fails.
      *
      * @param listener that is to be unregistered.
+     * @hide
      */
     public void removeOnSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnSubscriptionsChangedListener listener) {
@@ -180,6 +187,7 @@ public class TelephonyRegistryManager {
      * {@link SubscriptionManager.OnOpportunisticSubscriptionsChangedListener} with
      *                 onOpportunisticSubscriptionsChanged overridden.
      * @param executor an Executor that will execute callbacks.
+     * @hide
      */
     public void addOnOpportunisticSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnOpportunisticSubscriptionsChangedListener listener,
@@ -221,6 +229,7 @@ public class TelephonyRegistryManager {
      * listener fails.
      *
      * @param listener that is to be unregistered.
+     * @hide
      */
     public void removeOnOpportunisticSubscriptionsChangedListener(
             @NonNull SubscriptionManager.OnOpportunisticSubscriptionsChangedListener listener) {
@@ -252,6 +261,7 @@ public class TelephonyRegistryManager {
      * @param listener Listener providing callback
      * @param events Events
      * @param notifyNow Whether to notify instantly
+     * @hide
      */
     public void listenFromListener(int subId, @NonNull boolean renounceFineLocationAccess,
             @NonNull boolean renounceCoarseLocationAccess, @NonNull String pkg,
@@ -318,6 +328,7 @@ public class TelephonyRegistryManager {
      * @param active Whether the carrier network change is or shortly will be
      * active. Set this value to true to begin showing alternative UI and false to stop.
      * @see TelephonyManager#hasCarrierPrivileges
+     * @hide
      */
     public void notifyCarrierNetworkChange(boolean active) {
         try {
@@ -344,6 +355,7 @@ public class TelephonyRegistryManager {
      * @param active whether the carrier network change is or shortly will be active. Set this value
      *              to true to begin showing alternative UI and false to stop.
      * @see TelephonyManager#hasCarrierPrivileges
+     * @hide
      */
     public void notifyCarrierNetworkChange(int subscriptionId, boolean active) {
         try {
@@ -362,6 +374,7 @@ public class TelephonyRegistryManager {
      * @param subId for which call state changed.
      * @param state latest call state. e.g, offhook, ringing
      * @param incomingNumber incoming phone number.
+     * @hide
      */
     public void notifyCallStateChanged(int slotIndex, int subId, @CallState int state,
             @Nullable String incomingNumber) {
@@ -380,6 +393,7 @@ public class TelephonyRegistryManager {
      * @param incomingNumber incoming phone number.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyCallStateChangedForAllSubscriptions(@CallState int state,
             @Nullable String incomingNumber) {
@@ -424,6 +438,7 @@ public class TelephonyRegistryManager {
      * subId is invalid.
      * @param subId for which the service state changed.
      * @param state service state e.g, in service, out of service or roaming status.
+     * @hide
      */
     public void notifyServiceStateChanged(int slotIndex, int subId, @NonNull ServiceState state) {
         try {
@@ -441,6 +456,7 @@ public class TelephonyRegistryManager {
      * subId is invalid.
      * @param subId for which the signalstrength changed.
      * @param signalStrength e.g, signalstrength level {@see SignalStrength#getLevel()}
+     * @hide
      */
     public void notifySignalStrengthChanged(int slotIndex, int subId,
             @NonNull SignalStrength signalStrength) {
@@ -461,6 +477,7 @@ public class TelephonyRegistryManager {
      * @param subId for which message waiting indicator changed.
      * @param msgWaitingInd {@code true} indicates there is message-waiting indicator, {@code false}
      * otherwise.
+     * @hide
      */
     public void notifyMessageWaitingChanged(int slotIndex, int subId, boolean msgWaitingInd) {
         try {
@@ -477,6 +494,7 @@ public class TelephonyRegistryManager {
      * @param subId for which call forwarding status changed.
      * @param callForwardInd {@code true} indicates there is call forwarding, {@code false}
      * otherwise.
+     * @hide
      */
     public void notifyCallForwardingChanged(int subId, boolean callForwardInd) {
         try {
@@ -493,6 +511,7 @@ public class TelephonyRegistryManager {
      * @param subId for which data activity state changed.
      * @param dataActivityType indicates the latest data activity type e.g. {@link
      * TelephonyManager#DATA_ACTIVITY_IN}
+     * @hide
      */
     public void notifyDataActivityChanged(int subId, @DataActivityType int dataActivityType) {
         try {
@@ -511,6 +530,7 @@ public class TelephonyRegistryManager {
      * @param subId for which data activity state changed.
      * @param dataActivityType indicates the latest data activity type e.g. {@link
      * TelephonyManager#DATA_ACTIVITY_IN}
+     * @hide
      */
     public void notifyDataActivityChanged(int slotIndex, int subId,
             @DataActivityType int dataActivityType) {
@@ -532,6 +552,7 @@ public class TelephonyRegistryManager {
      *
      * @see PreciseDataConnectionState
      * @see TelephonyManager#DATA_DISCONNECTED
+     * @hide
      */
     public void notifyDataConnectionForSubscriber(int slotIndex, int subId,
             @NonNull PreciseDataConnectionState preciseState) {
@@ -552,6 +573,7 @@ public class TelephonyRegistryManager {
      * @param subId for which call quality state changed.
      * @param callQuality Information about call quality e.g, call quality level
      * @param networkType associated with this data connection. e.g, LTE
+     * @hide
      */
     public void notifyCallQualityChanged(int slotIndex, int subId, @NonNull CallQuality callQuality,
         @NetworkType int networkType) {
@@ -573,6 +595,7 @@ public class TelephonyRegistryManager {
      * {@link CarrierConfigManager#KEY_VOICE_RTP_THRESHOLDS_JITTER_INT}
      *
      * @param status media quality status
+     * @hide
      */
     public void notifyMediaQualityStatusChanged(
             int slotIndex, int subId, @NonNull MediaQualityStatus status) {
@@ -590,6 +613,7 @@ public class TelephonyRegistryManager {
      * @param slotIndex for which emergency number list changed. Can be derived from subId except
      * when subId is invalid.
      * @param subId for which emergency number list changed.
+     * @hide
      */
     public void notifyEmergencyNumberList( int slotIndex, int subId) {
         try {
@@ -602,14 +626,16 @@ public class TelephonyRegistryManager {
 
     /**
      * Notify outgoing emergency call.
-     * @param phoneId Sender phone ID.
+     * @param simSlotIndex Sender phone ID.
      * @param subId Sender subscription ID.
      * @param emergencyNumber Emergency number.
+     * @hide
      */
-    public void notifyOutgoingEmergencyCall(int phoneId, int subId,
+    @SystemApi
+    public void notifyOutgoingEmergencyCall(int simSlotIndex, int subId,
             @NonNull EmergencyNumber emergencyNumber) {
         try {
-            sRegistry.notifyOutgoingEmergencyCall(phoneId, subId, emergencyNumber);
+            sRegistry.notifyOutgoingEmergencyCall(simSlotIndex, subId, emergencyNumber);
         } catch (RemoteException ex) {
             // system process is dead
             throw ex.rethrowFromSystemServer();
@@ -621,6 +647,7 @@ public class TelephonyRegistryManager {
      * @param phoneId Sender phone ID.
      * @param subId Sender subscription ID.
      * @param emergencyNumber Emergency number.
+     * @hide
      */
     public void notifyOutgoingEmergencySms(int phoneId, int subId,
             @NonNull EmergencyNumber emergencyNumber) {
@@ -639,6 +666,7 @@ public class TelephonyRegistryManager {
      * subId is invalid.
      * @param subId for which radio power state changed.
      * @param radioPowerState the current modem radio state.
+     * @hide
      */
     public void notifyRadioPowerStateChanged(int slotIndex, int subId,
             @RadioPowerState int radioPowerState) {
@@ -654,6 +682,7 @@ public class TelephonyRegistryManager {
      * Notify {@link PhoneCapability} changed.
      *
      * @param phoneCapability the capability of the modem group.
+     * @hide
      */
     public void notifyPhoneCapabilityChanged(@NonNull PhoneCapability phoneCapability) {
         try {
@@ -685,6 +714,7 @@ public class TelephonyRegistryManager {
      * when subId is invalid.
      * @param subId for which data activation state changed.
      * @param activationState sim activation state e.g, activated.
+     * @hide
      */
     public void notifyDataActivationStateChanged(int slotIndex, int subId,
             @SimActivationState int activationState) {
@@ -705,6 +735,7 @@ public class TelephonyRegistryManager {
      * subId is invalid.
      * @param subId for which voice activation state changed.
      * @param activationState sim activation state e.g, activated.
+     * @hide
      */
     public void notifyVoiceActivationStateChanged(int slotIndex, int subId,
             @SimActivationState int activationState) {
@@ -725,6 +756,7 @@ public class TelephonyRegistryManager {
      * when subId is invalid.
      * @param subId for which mobile data state has changed.
      * @param state {@code true} indicates mobile data is enabled/on. {@code false} otherwise.
+     * @hide
      */
     public void notifyUserMobileDataStateChanged(int slotIndex, int subId, boolean state) {
         try {
@@ -743,6 +775,7 @@ public class TelephonyRegistryManager {
      * when the device is in emergency-only mode.
      * @param subscriptionId Subscription id for which display network info has changed.
      * @param telephonyDisplayInfo The display info.
+     * @hide
      */
     public void notifyDisplayInfoChanged(int slotIndex, int subscriptionId,
             @NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
@@ -759,6 +792,7 @@ public class TelephonyRegistryManager {
      *
      * @param subId for which ims call disconnect.
      * @param imsReasonInfo the reason for ims call disconnect.
+     * @hide
      */
     public void notifyImsDisconnectCause(int subId, @NonNull ImsReasonInfo imsReasonInfo) {
         try {
@@ -775,6 +809,7 @@ public class TelephonyRegistryManager {
      *
      * @param subId for which srvcc state changed.
      * @param state srvcc state
+     * @hide
      */
     public void notifySrvccStateChanged(int subId, @SrvccState int state) {
         try {
@@ -798,6 +833,7 @@ public class TelephonyRegistryManager {
      * @param imsServiceTypes Array of IMS call service type for ringing, foreground &
      *                        background calls.
      * @param imsCallTypes Array of IMS call type for ringing, foreground & background calls.
+     * @hide
      */
     public void notifyPreciseCallState(int slotIndex, int subId,
             @Annotation.PreciseCallStates int[] callStates, String[] imsCallIds,
@@ -822,6 +858,7 @@ public class TelephonyRegistryManager {
      * @param cause {@link DisconnectCause} for the disconnected call.
      * @param preciseCause {@link android.telephony.PreciseDisconnectCause} for the disconnected
      * call.
+     * @hide
      */
     public void notifyDisconnectCause(int slotIndex, int subId, @DisconnectCauses int cause,
             @PreciseDisconnectCauses int preciseCause) {
@@ -838,6 +875,7 @@ public class TelephonyRegistryManager {
      *
      * <p>To be compatible with {@link TelephonyRegistry}, use {@link CellIdentity} which is
      * parcelable, and convert to CellLocation in client code.
+     * @hide
      */
     public void notifyCellLocation(int subId, @NonNull CellIdentity cellLocation) {
         try {
@@ -854,6 +892,7 @@ public class TelephonyRegistryManager {
      *
      * @param subId for which cellinfo changed.
      * @param cellInfo A list of cellInfo associated with the given subscription.
+     * @hide
      */
     public void notifyCellInfoChanged(int subId, @NonNull List<CellInfo> cellInfo) {
         try {
@@ -866,6 +905,7 @@ public class TelephonyRegistryManager {
     /**
      * Notify that the active data subscription ID has changed.
      * @param activeDataSubId The new subscription ID for active data
+     * @hide
      */
     public void notifyActiveDataSubIdChanged(int activeDataSubId) {
         try {
@@ -896,6 +936,7 @@ public class TelephonyRegistryManager {
      *        For UMTS, if a combined attach succeeds for PS only, then the GMM cause code shall be
      *        included as an additionalCauseCode. For LTE (ESM), cause codes are in
      *        TS 24.301 9.9.4.4. Integer.MAX_VALUE if this value is unused.
+     * @hide
      */
     public void notifyRegistrationFailed(int slotIndex, int subId,
             @NonNull CellIdentity cellIdentity, @NonNull String chosenPlmn,
@@ -914,6 +955,7 @@ public class TelephonyRegistryManager {
      * @param slotIndex for the phone object that got updated barring info.
      * @param subId for which the BarringInfo changed.
      * @param barringInfo updated BarringInfo.
+     * @hide
      */
     public void notifyBarringInfoChanged(
             int slotIndex, int subId, @NonNull BarringInfo barringInfo) {
@@ -931,6 +973,7 @@ public class TelephonyRegistryManager {
      * @param slotIndex for which physical channel configs changed.
      * @param subId the subId
      * @param configs a list of {@link PhysicalChannelConfig}, the configs of physical channel.
+     * @hide
      */
     public void notifyPhysicalChannelConfigForSubscriber(int slotIndex, int subId,
             List<PhysicalChannelConfig> configs) {
@@ -948,6 +991,7 @@ public class TelephonyRegistryManager {
      * @param enabled True if data is enabled, otherwise disabled.
      * @param reason Reason for data enabled/disabled. See {@code REASON_*} in
      * {@link TelephonyManager}.
+     * @hide
      */
     public void notifyDataEnabled(int slotIndex, int subId, boolean enabled,
             @TelephonyManager.DataEnabledReason int reason) {
@@ -966,6 +1010,7 @@ public class TelephonyRegistryManager {
      * @param subId for which allowed network types changed.
      * @param reason an allowed network type reasons.
      * @param allowedNetworkType an allowed network type bitmask value.
+     * @hide
      */
     public void notifyAllowedNetworkTypesChanged(int slotIndex, int subId,
             int reason, long allowedNetworkType) {
@@ -983,6 +1028,7 @@ public class TelephonyRegistryManager {
      * @param slotIndex for the phone object that gets the updated link capacity estimate
      * @param subId for subscription that gets the updated link capacity estimate
      * @param linkCapacityEstimateList a list of {@link  LinkCapacityEstimate}
+     * @hide
      */
     public void notifyLinkCapacityEstimateChanged(int slotIndex, int subId,
             List<LinkCapacityEstimate> linkCapacityEstimateList) {
@@ -998,8 +1044,10 @@ public class TelephonyRegistryManager {
      * Notify external listeners that the subscriptions supporting simultaneous cellular calling
      * have changed.
      * @param subIds The new set of subIds supporting simultaneous cellular calling.
+     * @hide
      */
-    public void notifySimultaneousCellularCallingSubscriptionsChanged(Set<Integer> subIds) {
+    public void notifySimultaneousCellularCallingSubscriptionsChanged(
+            @NonNull Set<Integer> subIds) {
         try {
             sRegistry.notifySimultaneousCellularCallingSubscriptionsChanged(
                     subIds.stream().mapToInt(i -> i).toArray());
@@ -1009,6 +1057,12 @@ public class TelephonyRegistryManager {
         }
     }
 
+    /**
+     * Processes potential event changes from the provided {@link TelephonyCallback}.
+     *
+     * @param telephonyCallback callback for monitoring callback changes to the telephony state.
+     * @hide
+     */
     public @NonNull Set<Integer> getEventsFromCallback(
             @NonNull TelephonyCallback telephonyCallback) {
         Set<Integer> eventList = new ArraySet<>();
@@ -1319,6 +1373,7 @@ public class TelephonyRegistryManager {
      * may encounter an {@link IllegalStateException} when trying to register more callbacks.
      *
      * @param callback The {@link TelephonyCallback} object to register.
+     * @hide
      */
     public void registerTelephonyCallback(boolean renounceFineLocationAccess,
             boolean renounceCoarseLocationAccess,
@@ -1338,6 +1393,7 @@ public class TelephonyRegistryManager {
      * Unregister an existing {@link TelephonyCallback}.
      *
      * @param callback The {@link TelephonyCallback} object to unregister.
+     * @hide
      */
     public void unregisterTelephonyCallback(int subId, String pkgName, String attributionTag,
             @NonNull TelephonyCallback callback, boolean notifyNow) {
@@ -1398,6 +1454,7 @@ public class TelephonyRegistryManager {
      * @param logicalSlotIndex The SIM slot to listen on
      * @param executor The executor where {@code listener} will be invoked
      * @param callback The callback to register
+     * @hide
      */
     public void addCarrierPrivilegesCallback(
             int logicalSlotIndex,
@@ -1432,6 +1489,7 @@ public class TelephonyRegistryManager {
      * Unregisters a {@link CarrierPrivilegesCallback}.
      *
      * @param callback The callback to unregister
+     * @hide
      */
     public void removeCarrierPrivilegesCallback(@NonNull CarrierPrivilegesCallback callback) {
         if (callback == null) {
@@ -1457,6 +1515,7 @@ public class TelephonyRegistryManager {
      * @param logicalSlotIndex The SIM slot the change occurred on
      * @param privilegedPackageNames The updated set of packages names with carrier privileges
      * @param privilegedUids The updated set of UIDs with carrier privileges
+     * @hide
      */
     public void notifyCarrierPrivilegesChanged(
             int logicalSlotIndex,
@@ -1482,6 +1541,7 @@ public class TelephonyRegistryManager {
      * @param logicalSlotIndex the SIM slot the change occurred on
      * @param packageName the package name of the changed {@link CarrierService}
      * @param uid the UID of the changed {@link CarrierService}
+     * @hide
      */
     public void notifyCarrierServiceChanged(int logicalSlotIndex, @Nullable String packageName,
             int uid) {
@@ -1498,6 +1558,7 @@ public class TelephonyRegistryManager {
      *
      * @param executor The executor on which the callback will be executed.
      * @param listener The CarrierConfigChangeListener to be registered with.
+     * @hide
      */
     public void addCarrierConfigChangedListener(
             @NonNull @CallbackExecutor Executor executor,
@@ -1538,6 +1599,7 @@ public class TelephonyRegistryManager {
      * Unregister to stop the notification when carrier configurations changed.
      *
      * @param listener The CarrierConfigChangeListener to be unregistered with.
+     * @hide
      */
     public void removeCarrierConfigChangedListener(
             @NonNull CarrierConfigManager.CarrierConfigChangeListener listener) {
@@ -1567,6 +1629,7 @@ public class TelephonyRegistryManager {
      *                          {@link TelephonyManager#UNKNOWN_CARRIER_ID}.
      * @param specificCarrierId The optional specific carrier Id, may be {@link
      *                          TelephonyManager#UNKNOWN_CARRIER_ID}.
+     * @hide
      */
     public void notifyCarrierConfigChanged(int slotIndex, int subId, int carrierId,
             int specificCarrierId) {
@@ -1588,6 +1651,7 @@ public class TelephonyRegistryManager {
      * @param subId Sender subscription ID.
      * @param type for callback mode entry.
      *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     * @hide
      */
     public void notifyCallBackModeStarted(int phoneId, int subId,
             @TelephonyManager.EmergencyCallbackModeType int type) {
@@ -1608,6 +1672,7 @@ public class TelephonyRegistryManager {
      *             See {@link TelephonyManager.EmergencyCallbackModeType}.
      * @param reason for changing callback mode.
      *             See {@link TelephonyManager.EmergencyCallbackModeStopReason}.
+     * @hide
      */
     public void notifyCallbackModeStopped(int phoneId, int subId,
             @TelephonyManager.EmergencyCallbackModeType int type,

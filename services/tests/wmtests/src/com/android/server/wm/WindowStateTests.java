@@ -136,7 +136,7 @@ public class WindowStateTests extends WindowTestsBase {
 
     @After
     public void tearDown() {
-        mWm.mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(Collections.emptySet());
+        mWm.mSensitiveContentPackages.clearBlockedApps();
     }
 
     @Test
@@ -1398,7 +1398,7 @@ public class WindowStateTests extends WindowTestsBase {
         PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
         ArraySet<PackageInfo> blockedPackages = new ArraySet();
         blockedPackages.add(blockedPackage);
-        mWm.mSensitiveContentPackages.setShouldBlockScreenCaptureForApp(blockedPackages);
+        mWm.mSensitiveContentPackages.addBlockScreenCaptureForApps(blockedPackages);
 
         assertTrue(window1.isSecureLocked());
         assertFalse(window2.isSecureLocked());

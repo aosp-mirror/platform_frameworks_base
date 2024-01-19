@@ -18,7 +18,9 @@ package android.platform.test.ravenwood;
 
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.ExcludeUnderRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.IncludeUnderRavenwood;
 
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -109,21 +111,52 @@ public class RavenwoodRule implements TestRule {
     }
 
     /**
-     * Test if the given {@link Description} has been marked with an {@link IgnoreUnderRavenwood}
-     * annotation, either at the method or class level.
+     * Determine if the given {@link Description} should be included when running under the
+     * Ravenwood test environment.
+     *
+     * A more specific method-level annotation always takes precedence over any class-level
+     * annotation, and an {@link IncludeUnderRavenwood} annotation always takes precedence over
+     * an {@link ExcludeUnderRavenwood} annotation.
      */
-    private static boolean hasIgnoreUnderRavenwoodAnnotation(Description description) {
-        if (description.getTestClass().getAnnotation(IgnoreUnderRavenwood.class) != null) {
-            return true;
-        } else if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
-            return true;
-        } else {
+    private boolean shouldIncludeUnderRavenwood(Description description) {
+        // Stopgap for http://g/ravenwood/EPAD-N5ntxM
+        if (description.getMethodName().endsWith("$noRavenwood")) {
             return false;
         }
+
+        // First, consult any method-level annotations
+        if (description.getAnnotation(IncludeUnderRavenwood.class) != null) {
+            return true;
+        }
+        if (description.getAnnotation(ExcludeUnderRavenwood.class) != null) {
+            return false;
+        }
+        if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
+            return false;
+        }
+
+        // Otherwise, consult any class-level annotations
+        if (description.getTestClass().getAnnotation(IncludeUnderRavenwood.class) != null) {
+            return true;
+        }
+        if (description.getTestClass().getAnnotation(ExcludeUnderRavenwood.class) != null) {
+            return false;
+        }
+        if (description.getTestClass().getAnnotation(IgnoreUnderRavenwood.class) != null) {
+            return false;
+        }
+
+        // When no annotations have been requested, assume test should be included
+        return true;
     }
 
     @Override
     public Statement apply(Statement base, Description description) {
+        // No special treatment when running outside Ravenwood; run tests as-is
+        if (!IS_UNDER_RAVENWOOD) {
+            return base;
+        }
+
         if (ENABLE_PROBE_IGNORED) {
             return applyProbeIgnored(base, description);
         } else {
@@ -138,14 +171,7 @@ public class RavenwoodRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                if (hasIgnoreUnderRavenwoodAnnotation(description)) {
-                    Assume.assumeFalse(IS_UNDER_RAVENWOOD);
-                }
-
-                // Stopgap for http://g/ravenwood/EPAD-N5ntxM
-                if (description.getMethodName().endsWith("$noRavenwood")) {
-                    Assume.assumeFalse(IS_UNDER_RAVENWOOD);
-                }
+                Assume.assumeTrue(shouldIncludeUnderRavenwood(description));
 
                 RavenwoodRuleImpl.init(RavenwoodRule.this);
                 try {
@@ -170,19 +196,17 @@ public class RavenwoodRule implements TestRule {
                 try {
                     base.evaluate();
                 } catch (Throwable t) {
-                    if (hasIgnoreUnderRavenwoodAnnotation(description)) {
-                        // This failure is expected, so eat the exception and report the
-                        // assumption failure that test authors expect
-                        Assume.assumeFalse(IS_UNDER_RAVENWOOD);
-                    }
+                    // If the test isn't included, eat the exception and report the
+                    // assumption failure that test authors expect; otherwise throw
+                    Assume.assumeTrue(shouldIncludeUnderRavenwood(description));
                     throw t;
                 } finally {
                     RavenwoodRuleImpl.reset(RavenwoodRule.this);
                 }
 
-                if (hasIgnoreUnderRavenwoodAnnotation(description) && IS_UNDER_RAVENWOOD) {
-                    fail("Test was annotated with IgnoreUnderRavenwood, but it actually "
-                            + "passed under Ravenwood; consider removing the annotation");
+                if (!shouldIncludeUnderRavenwood(description)) {
+                    fail("Test wasn't included under Ravenwood, but it actually "
+                            + "passed under Ravenwood; consider updating annotations");
                 }
             }
         };

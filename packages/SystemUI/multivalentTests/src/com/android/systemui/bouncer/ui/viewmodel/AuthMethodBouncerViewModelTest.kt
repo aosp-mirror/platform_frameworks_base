@@ -20,9 +20,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -33,16 +37,16 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AuthMethodBouncerViewModelTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val bouncerInteractor = utils.bouncerInteractor()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val bouncerInteractor = kosmos.bouncerInteractor
     private val underTest =
         PinBouncerViewModel(
             applicationContext = context,
             viewModelScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
             isInputEnabled = MutableStateFlow(true),
-            simBouncerInteractor = utils.simBouncerInteractor,
+            simBouncerInteractor = kosmos.simBouncerInteractor,
             authenticationMethod = AuthenticationMethodModel.Pin,
         )
 
@@ -50,7 +54,9 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
     fun animateFailure() =
         testScope.runTest {
             val animateFailure by collectLastValue(underTest.animateFailure)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
             assertThat(animateFailure).isFalse()
 
             // Wrong PIN:

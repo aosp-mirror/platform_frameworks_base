@@ -1,0 +1,8 @@
+package: "android.adaptiveauth"
+
+flag {
+  name: "report_biometric_auth_attempts"
+  namespace: "biometrics"
+  description: "Control the usage of the biometric auth signal in adaptive auth"
+  bug: "285053096"
+}

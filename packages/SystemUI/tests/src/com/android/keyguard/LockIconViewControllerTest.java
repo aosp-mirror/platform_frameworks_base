@@ -373,7 +373,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
     @Test
     public void longPress_showBouncer_sceneContainerNotEnabled() {
         init(/* useMigrationFlag= */ false);
-        mSceneTestUtils.getFakeSceneContainerFlags().setEnabled(false);
+        mKosmos.getFakeSceneContainerFlags().setEnabled(false);
         when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(false);
 
         // WHEN longPress
@@ -387,7 +387,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
     @Test
     public void longPress_showBouncer() {
         init(/* useMigrationFlag= */ false);
-        mSceneTestUtils.getFakeSceneContainerFlags().setEnabled(true);
+        mKosmos.getFakeSceneContainerFlags().setEnabled(true);
         when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(false);
 
         // WHEN longPress
@@ -401,7 +401,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
     @Test
     public void longPress_falsingTriggered_doesNotShowBouncer() {
         init(/* useMigrationFlag= */ false);
-        mSceneTestUtils.getFakeSceneContainerFlags().setEnabled(true);
+        mKosmos.getFakeSceneContainerFlags().setEnabled(true);
         when(mFalsingManager.isFalseLongTap(anyInt())).thenReturn(true);
 
         // WHEN longPress

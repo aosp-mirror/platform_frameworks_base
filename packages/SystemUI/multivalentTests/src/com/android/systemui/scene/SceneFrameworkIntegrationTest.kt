@@ -27,22 +27,38 @@ import com.android.internal.util.EmergencyAffordanceManager
 import com.android.internal.util.emergencyAffordanceManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
+import com.android.systemui.bouncer.domain.interactor.bouncerActionButtonInteractor
+import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.bouncerViewModel
+import com.android.systemui.classifier.domain.interactor.falsingInteractor
+import com.android.systemui.classifier.falsingCollector
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.pipeline.MediaDataManager
-import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -50,13 +66,17 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -101,13 +121,13 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this).apply { fakeSceneContainerFlags.enabled = true }
-    private val testScope = utils.testScope
-    private val sceneContainerConfig = utils.fakeSceneContainerConfig()
-    private val sceneInteractor = utils.sceneInteractor()
-    private val authenticationInteractor = utils.authenticationInteractor()
-    private val deviceEntryInteractor = utils.deviceEntryInteractor()
-    private val communalInteractor = utils.communalInteractor()
+    private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
+    private val testScope = kosmos.testScope
+    private val sceneContainerConfig = kosmos.sceneContainerConfig
+    private val sceneInteractor = kosmos.sceneInteractor
+    private val authenticationInteractor = kosmos.authenticationInteractor
+    private val deviceEntryInteractor = kosmos.deviceEntryInteractor
+    private val communalInteractor = kosmos.communalInteractor
 
     private val transitionState =
         MutableStateFlow<ObservableTransitionState>(
@@ -116,11 +136,11 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private val sceneContainerViewModel =
         SceneContainerViewModel(
                 sceneInteractor = sceneInteractor,
-                falsingInteractor = utils.falsingInteractor(),
+                falsingInteractor = kosmos.falsingInteractor,
             )
             .apply { setTransitionState(transitionState) }
 
-    private val bouncerInteractor = utils.bouncerInteractor()
+    private val bouncerInteractor = kosmos.bouncerInteractor
 
     private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
     private lateinit var bouncerActionButtonInteractor: BouncerActionButtonInteractor
@@ -135,7 +155,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 KeyguardLongPressViewModel(
                     interactor = mock(),
                 ),
-            notifications = utils.notificationsPlaceholderViewModel(),
+            notifications = kosmos.notificationsPlaceholderViewModel,
         )
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
@@ -152,22 +172,21 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                     FakeMobileConnectionsRepository(),
                 ),
             constants = mock(),
-            utils.fakeFeatureFlags,
+            flags = kosmos.fakeFeatureFlagsClassic,
             scope = testScope.backgroundScope,
         )
 
     private lateinit var shadeHeaderViewModel: ShadeHeaderViewModel
     private lateinit var shadeSceneViewModel: ShadeSceneViewModel
 
-    private val keyguardInteractor = utils.keyguardInteractor()
-    private val powerInteractor = utils.powerInteractor()
+    private val keyguardInteractor = kosmos.keyguardInteractor
+    private val powerInteractor = kosmos.powerInteractor
 
     private var bouncerSceneJob: Job? = null
 
     private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { mock() })
 
     @Mock private lateinit var mediaDataManager: MediaDataManager
-    @Mock private lateinit var mediaHost: MediaHost
 
     private lateinit var emergencyAffordanceManager: EmergencyAffordanceManager
     private lateinit var telecomManager: TelecomManager
@@ -177,27 +196,27 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         overrideResource(R.bool.config_enable_emergency_call_while_sim_locked, true)
-        telecomManager = checkNotNull(utils.kosmos.telecomManager)
+        telecomManager = checkNotNull(kosmos.telecomManager)
         whenever(telecomManager.isInCall).thenReturn(false)
-        emergencyAffordanceManager = utils.kosmos.emergencyAffordanceManager
+        emergencyAffordanceManager = kosmos.emergencyAffordanceManager
         whenever(emergencyAffordanceManager.needsEmergencyAffordance()).thenReturn(true)
 
-        utils.fakeFeatureFlags.apply {
+        kosmos.fakeFeatureFlagsClassic.apply {
             set(Flags.NEW_NETWORK_SLICE_UI, false)
             set(Flags.REFACTOR_GETCURRENTUSER, true)
         }
 
-        mobileConnectionsRepository = utils.mobileConnectionsRepository
+        mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
         mobileConnectionsRepository.isAnySimSecure.value = false
 
-        utils.telephonyRepository.apply {
+        kosmos.fakeTelephonyRepository.apply {
             setHasTelephonyRadio(true)
             setCallState(TelephonyManager.CALL_STATE_IDLE)
             setIsInCall(false)
         }
 
-        bouncerActionButtonInteractor = utils.bouncerActionButtonInteractor()
-        bouncerViewModel = utils.bouncerViewModel()
+        bouncerActionButtonInteractor = kosmos.bouncerActionButtonInteractor
+        bouncerViewModel = kosmos.bouncerViewModel
 
         shadeHeaderViewModel =
             ShadeHeaderViewModel(
@@ -215,12 +234,11 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
-                notifications = utils.notificationsPlaceholderViewModel(),
+                notifications = kosmos.notificationsPlaceholderViewModel,
                 mediaDataManager = mediaDataManager,
-                mediaHost = mediaHost,
             )
 
-        utils.deviceEntryRepository.setUnlocked(false)
+        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
 
         val displayTracker = FakeDisplayTracker(context)
         val sysUiState = SysUiState(displayTracker)
@@ -230,15 +248,15 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 deviceEntryInteractor = deviceEntryInteractor,
                 keyguardInteractor = keyguardInteractor,
-                flags = utils.fakeSceneContainerFlags,
+                flags = kosmos.fakeSceneContainerFlags,
                 sysUiState = sysUiState,
                 displayId = displayTracker.defaultDisplayId,
                 sceneLogger = mock(),
-                falsingCollector = utils.falsingCollector(),
+                falsingCollector = kosmos.falsingCollector,
                 powerInteractor = powerInteractor,
                 bouncerInteractor = bouncerInteractor,
-                simBouncerInteractor = dagger.Lazy { utils.simBouncerInteractor },
-                authenticationInteractor = dagger.Lazy { utils.authenticationInteractor() },
+                simBouncerInteractor = dagger.Lazy { kosmos.simBouncerInteractor },
+                authenticationInteractor = dagger.Lazy { kosmos.authenticationInteractor },
                 windowController = mock(),
             )
         startable.start()
@@ -534,15 +552,15 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         // Set the lockscreen enabled bit _before_ set the auth method as the code picks up on the
         // lockscreen enabled bit _after_ the auth method is changed and the lockscreen enabled bit
         // is not an observable that can trigger a new evaluation.
-        utils.deviceEntryRepository.setLockscreenEnabled(enableLockscreen)
-        utils.authenticationRepository.setAuthenticationMethod(authMethod)
+        kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(enableLockscreen)
+        kosmos.fakeAuthenticationRepository.setAuthenticationMethod(authMethod)
         runCurrent()
     }
 
     /** Emulates a phone call in progress. */
     private fun TestScope.startPhoneCall() {
         whenever(telecomManager.isInCall).thenReturn(true)
-        utils.telephonyRepository.apply {
+        kosmos.fakeTelephonyRepository.apply {
             setHasTelephonyRadio(true)
             setIsInCall(true)
             setCallState(TelephonyManager.CALL_STATE_OFFHOOK)
@@ -651,7 +669,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(authMethod.isSecure)
             .isTrue()
 
-        utils.deviceEntryRepository.setUnlocked(false)
+        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
         runCurrent()
     }
 
@@ -665,7 +683,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         enterPin()
         // This repository state is not changed by the AuthInteractor, it relies on
         // KeyguardStateController.
-        utils.deviceEntryRepository.setUnlocked(true)
+        kosmos.fakeDeviceEntryRepository.setUnlocked(true)
         emulateUiSceneTransition(
             expectedVisible = false,
         )
@@ -721,7 +739,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         }
         pinBouncerViewModel.onAuthenticateButtonClicked()
         setAuthMethod(authMethodAfterSimUnlock)
-        utils.mobileConnectionsRepository.isAnySimSecure.value = false
+        kosmos.fakeMobileConnectionsRepository.isAnySimSecure.value = false
         runCurrent()
     }
 
@@ -768,7 +786,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private fun TestScope.introduceLockedSim() {
         setAuthMethod(AuthenticationMethodModel.Sim)
-        utils.mobileConnectionsRepository.isAnySimSecure.value = true
+        kosmos.fakeMobileConnectionsRepository.isAnySimSecure.value = true
         runCurrent()
     }
 }

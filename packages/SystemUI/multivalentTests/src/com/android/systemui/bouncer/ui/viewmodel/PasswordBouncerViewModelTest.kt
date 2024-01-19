@@ -19,13 +19,19 @@ package com.android.systemui.bouncer.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,12 +49,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PasswordBouncerViewModelTest : SysuiTestCase() {
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
-    private val authenticationInteractor = utils.authenticationInteractor()
-    private val sceneInteractor = utils.sceneInteractor()
-    private val bouncerInteractor = utils.bouncerInteractor()
-    private val bouncerViewModel = utils.bouncerViewModel()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val authenticationInteractor = kosmos.authenticationInteractor
+    private val sceneInteractor = kosmos.sceneInteractor
+    private val bouncerInteractor = kosmos.bouncerInteractor
+    private val bouncerViewModel = kosmos.bouncerViewModel
     private val isInputEnabled = MutableStateFlow(true)
 
     private val underTest =
@@ -140,10 +146,10 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            utils.authenticationRepository.setAuthenticationMethod(
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
-            utils.deviceEntryRepository.setUnlocked(false)
+            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             switchToScene(SceneKey.Bouncer)
 
             // No input entered.
@@ -309,8 +315,10 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     }
 
     private fun TestScope.lockDeviceAndOpenPasswordBouncer() {
-        utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Password)
-        utils.deviceEntryRepository.setUnlocked(false)
+        kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+            AuthenticationMethodModel.Password
+        )
+        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
         switchToScene(SceneKey.Bouncer)
     }
 
@@ -320,13 +328,13 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     ) {
         if (isLockedOut) {
             repeat(failedAttemptCount) {
-                utils.authenticationRepository.reportAuthenticationAttempt(false)
+                kosmos.fakeAuthenticationRepository.reportAuthenticationAttempt(false)
             }
-            utils.authenticationRepository.reportLockoutStarted(
+            kosmos.fakeAuthenticationRepository.reportLockoutStarted(
                 30.seconds.inWholeMilliseconds.toInt()
             )
         } else {
-            utils.authenticationRepository.reportAuthenticationAttempt(true)
+            kosmos.fakeAuthenticationRepository.reportAuthenticationAttempt(true)
         }
         isInputEnabled.value = !isLockedOut
 

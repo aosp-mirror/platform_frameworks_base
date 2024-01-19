@@ -28,6 +28,11 @@ import com.android.systemui.communal.data.repository.FakeCommunalPrefsRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
+import com.android.systemui.communal.data.repository.fakeCommunalMediaRepository
+import com.android.systemui.communal.data.repository.fakeCommunalPrefsRepository
+import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
+import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalSceneKey
@@ -36,15 +41,19 @@ import com.android.systemui.communal.shared.model.ObservableCommunalTransitionSt
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.communalInteractor
+import com.android.systemui.keyguard.domain.interactor.editWidgetsActivityStarter
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
+import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -52,13 +61,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 
+/**
+ * This class of test cases assume that communal is enabled. For disabled cases, see
+ * [CommunalInteractorCommunalDisabledTest].
+ */
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CommunalInteractorTest : SysuiTestCase() {
-    private lateinit var testScope: TestScope
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
     private lateinit var communalRepository: FakeCommunalRepository
@@ -73,36 +86,56 @@ class CommunalInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
+        tutorialRepository = kosmos.fakeCommunalTutorialRepository
+        communalRepository = kosmos.fakeCommunalRepository
+        mediaRepository = kosmos.fakeCommunalMediaRepository
+        widgetRepository = kosmos.fakeCommunalWidgetRepository
+        smartspaceRepository = kosmos.fakeSmartspaceRepository
+        keyguardRepository = kosmos.fakeKeyguardRepository
+        editWidgetsActivityStarter = kosmos.editWidgetsActivityStarter
+        communalPrefsRepository = kosmos.fakeCommunalPrefsRepository
 
-        testScope = TestScope(StandardTestDispatcher())
-
-        val withDeps = CommunalInteractorFactory.create(testScope)
-
-        tutorialRepository = withDeps.tutorialRepository
-        communalRepository = withDeps.communalRepository
-        mediaRepository = withDeps.mediaRepository
-        widgetRepository = withDeps.widgetRepository
-        smartspaceRepository = withDeps.smartspaceRepository
-        keyguardRepository = withDeps.keyguardRepository
-        editWidgetsActivityStarter = withDeps.editWidgetsActivityStarter
-        communalPrefsRepository = withDeps.communalPrefsRepository
-
-        underTest = withDeps.communalInteractor
+        underTest = kosmos.communalInteractor
     }
 
     @Test
-    fun communalEnabled() =
+    fun communalEnabled_true() =
+        testScope.runTest { assertThat(underTest.isCommunalEnabled).isTrue() }
+
+    @Test
+    fun isCommunalAvailable_trueWhenStorageUnlock() =
         testScope.runTest {
-            communalRepository.setIsCommunalEnabled(true)
-            assertThat(underTest.isCommunalEnabled).isTrue()
+            val isAvailable by collectLastValue(underTest.isCommunalAvailable)
+            assertThat(isAvailable).isFalse()
+
+            keyguardRepository.setIsEncryptedOrLockdown(false)
+            runCurrent()
+
+            assertThat(isAvailable).isTrue()
         }
 
     @Test
-    fun communalDisabled() =
+    fun isCommunalAvailable_whenStorageUnlock_true() =
         testScope.runTest {
-            communalRepository.setIsCommunalEnabled(false)
-            assertThat(underTest.isCommunalEnabled).isFalse()
+            val isAvailable by collectLastValue(underTest.isCommunalAvailable)
+            assertThat(isAvailable).isFalse()
+
+            keyguardRepository.setIsEncryptedOrLockdown(false)
+            runCurrent()
+
+            assertThat(isAvailable).isTrue()
+        }
+
+    @Test
+    fun updateAppWidgetHostActive_uponStorageUnlock_true() =
+        testScope.runTest {
+            collectLastValue(underTest.isCommunalAvailable)
+            assertThat(widgetRepository.isHostActive()).isFalse()
+
+            keyguardRepository.setIsEncryptedOrLockdown(false)
+            runCurrent()
+
+            assertThat(widgetRepository.isHostActive()).isTrue()
         }
 
     @Test

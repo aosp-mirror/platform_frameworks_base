@@ -1076,6 +1076,7 @@ class StorageManagerService extends IStorageManager.Stub
             final UserManager userManager = mContext.getSystemService(UserManager.class);
             final List<UserInfo> users = userManager.getUsers();
 
+            extendWatchdogTimeout("#onReset might be slow");
             mStorageSessionController.onReset(mVold, () -> {
                 mHandler.removeCallbacksAndMessages(null);
             });

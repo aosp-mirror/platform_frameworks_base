@@ -16,6 +16,9 @@ filegroup {
 android_library {
     name: "SettingsLibRestrictedLockUtils",
     use_resource_processor: true,
+    defaults: [
+        "SettingsLintDefaults",
+    ],
 
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],

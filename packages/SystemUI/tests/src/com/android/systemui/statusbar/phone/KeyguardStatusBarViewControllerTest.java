@@ -60,10 +60,10 @@ import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.statusbar.CommandQueue;
@@ -149,7 +149,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
     private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
-    private final SceneTestUtils mSceneTestUtils = new SceneTestUtils(this);
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private KeyguardInteractor mKeyguardInteractor;
     private KeyguardStatusBarViewModel mViewModel;
 
@@ -166,11 +166,11 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKeyguardRepository,
                 mCommandQueue,
                 PowerInteractorFactory.create().getPowerInteractor(),
-                mSceneTestUtils.getFakeSceneContainerFlags(),
+                mKosmos.getFakeSceneContainerFlags(),
                 new FakeKeyguardBouncerRepository(),
                 new ConfigurationInteractor(new FakeConfigurationRepository()),
                 new FakeShadeRepository(),
-                () -> mSceneTestUtils.sceneInteractor());
+                () -> mKosmos.getSceneInteractor());
         mViewModel =
                 new KeyguardStatusBarViewModel(
                         mTestScope.getBackgroundScope(),

@@ -26,12 +26,16 @@ import com.android.systemui.common.ui.data.repository.FakeConfigurationRepositor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
-import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,10 +52,10 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class KeyguardInteractorTest : SysuiTestCase() {
 
-    private val testUtils = SceneTestUtils(this)
-    private val testScope = testUtils.testScope
-    private val repository = testUtils.keyguardRepository
-    private val sceneInteractor = testUtils.sceneInteractor()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val repository = kosmos.fakeKeyguardRepository
+    private val sceneInteractor = kosmos.sceneInteractor
     private val commandQueue = FakeCommandQueue()
     private val bouncerRepository = FakeKeyguardBouncerRepository()
     private val shadeRepository = FakeShadeRepository()
@@ -63,7 +67,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             repository = repository,
             commandQueue = commandQueue,
             powerInteractor = PowerInteractorFactory.create().powerInteractor,
-            sceneContainerFlags = testUtils.fakeSceneContainerFlags,
+            sceneContainerFlags = kosmos.fakeSceneContainerFlags,
             bouncerRepository = bouncerRepository,
             configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
             shadeRepository = shadeRepository,
@@ -183,7 +187,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     @Test
     fun animationDozingTransitions() =
         testScope.runTest {
-            testUtils.fakeSceneContainerFlags.enabled = true
+            kosmos.fakeSceneContainerFlags.enabled = true
             val isAnimate by collectLastValue(underTest.animateDozingTransitions)
 
             underTest.setAnimateDozingTransitions(true)

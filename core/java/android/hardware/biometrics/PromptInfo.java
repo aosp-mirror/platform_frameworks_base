@@ -16,8 +16,10 @@
 
 package android.hardware.biometrics;
 
+import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -30,6 +32,8 @@ import java.util.List;
  */
 public class PromptInfo implements Parcelable {
 
+    @DrawableRes private int mLogoRes = -1;
+    @Nullable private Bitmap mLogoBitmap;
     @NonNull private CharSequence mTitle;
     private boolean mUseDefaultTitle;
     @Nullable private CharSequence mSubtitle;
@@ -56,6 +60,8 @@ public class PromptInfo implements Parcelable {
     }
 
     PromptInfo(Parcel in) {
+        mLogoRes = in.readInt();
+        mLogoBitmap = in.readTypedObject(Bitmap.CREATOR);
         mTitle = in.readCharSequence();
         mUseDefaultTitle = in.readBoolean();
         mSubtitle = in.readCharSequence();
@@ -98,6 +104,8 @@ public class PromptInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mLogoRes);
+        dest.writeTypedObject(mLogoBitmap, 0);
         dest.writeCharSequence(mTitle);
         dest.writeBoolean(mUseDefaultTitle);
         dest.writeCharSequence(mSubtitle);
@@ -156,9 +164,30 @@ public class PromptInfo implements Parcelable {
         }
         return false;
     }
+
+    /**
+     * Returns whether MANAGE_BIOMETRIC_DIALOG is contained.
+     */
+    public boolean containsManageBioApiConfigurations() {
+        if (mLogoRes != -1) {
+            return true;
+        } else if (mLogoBitmap != null) {
+            return true;
+        }
+        return false;
+    }
     // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/BiometricPrompt.java)
 
     // Setters
+    public void setLogoRes(@DrawableRes int logoRes) {
+        mLogoRes = logoRes;
+        checkOnlyOneLogoSet();
+    }
+
+    public void setLogoBitmap(@NonNull Bitmap logoBitmap) {
+        mLogoBitmap = logoBitmap;
+        checkOnlyOneLogoSet();
+    }
 
     public void setTitle(CharSequence title) {
         mTitle = title;
@@ -244,6 +273,14 @@ public class PromptInfo implements Parcelable {
     }
 
     // Getters
+    @DrawableRes
+    public int getLogoRes() {
+        return mLogoRes;
+    }
+
+    public Bitmap getLogoBitmap() {
+        return mLogoBitmap;
+    }
 
     public CharSequence getTitle() {
         return mTitle;
@@ -336,5 +373,12 @@ public class PromptInfo implements Parcelable {
 
     public boolean isShowEmergencyCallButton() {
         return mShowEmergencyCallButton;
+    }
+
+    private void checkOnlyOneLogoSet() {
+        if (mLogoRes != -1 && mLogoBitmap != null) {
+            throw new IllegalStateException(
+                    "Exclusively one of logo resource or logo bitmap can be set");
+        }
     }
 }

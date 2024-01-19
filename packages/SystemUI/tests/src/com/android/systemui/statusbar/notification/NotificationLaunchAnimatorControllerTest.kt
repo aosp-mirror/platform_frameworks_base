@@ -73,7 +73,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
     }
 
     private fun flagNotificationAsHun() {
-        `when`(headsUpManager.isAlerting(notificationKey)).thenReturn(true)
+        `when`(headsUpManager.isHeadsUpEntry(notificationKey)).thenReturn(true)
     }
 
     @Test
@@ -151,8 +151,8 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
             .build()
         assertSame(summary, notification.entry.parent?.summary)
 
-        `when`(headsUpManager.isAlerting(notificationKey)).thenReturn(false)
-        `when`(headsUpManager.isAlerting(summary.key)).thenReturn(true)
+        `when`(headsUpManager.isHeadsUpEntry(notificationKey)).thenReturn(false)
+        `when`(headsUpManager.isHeadsUpEntry(summary.key)).thenReturn(true)
 
         assertNotSame(GROUP_ALERT_SUMMARY, summary.sbn.notification.groupAlertBehavior)
         assertNotSame(GROUP_ALERT_SUMMARY, notification.entry.sbn.notification.groupAlertBehavior)

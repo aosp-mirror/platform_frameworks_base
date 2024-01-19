@@ -16,27 +16,32 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.appwidget.AppWidgetHost
 import com.android.systemui.communal.data.repository.communalMediaRepository
 import com.android.systemui.communal.data.repository.communalPrefsRepository
 import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.smartspace.data.repository.smartspaceRepository
 import org.mockito.Mockito.mock
 
 val Kosmos.communalInteractor by
     Kosmos.Fixture {
         CommunalInteractor(
+            applicationScope = testScope.backgroundScope,
             communalRepository = communalRepository,
             widgetRepository = communalWidgetRepository,
             mediaRepository = communalMediaRepository,
             communalPrefsRepository = communalPrefsRepository,
             smartspaceRepository = smartspaceRepository,
             keyguardInteractor = keyguardInteractor,
-            appWidgetHost = mock(AppWidgetHost::class.java),
-            editWidgetsActivityStarter = mock(EditWidgetsActivityStarter::class.java),
+            appWidgetHost = mock(CommunalAppWidgetHost::class.java),
+            editWidgetsActivityStarter = editWidgetsActivityStarter,
         )
     }
+
+val Kosmos.editWidgetsActivityStarter by
+    Kosmos.Fixture<EditWidgetsActivityStarter> { mock(EditWidgetsActivityStarter::class.java) }

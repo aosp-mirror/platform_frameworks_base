@@ -134,6 +134,13 @@
     <!-- Whether the additional education about reachability is enabled -->
     <bool name="config_letterboxIsReachabilityEducationEnabled">false</bool>
 
+    <!-- The minimum tolerance of the percentage of activity bounds within its task to hide
+         size compat restart button. Value lower than 0 or higher than 100 will be ignored.
+         100 is the default value where the activity has to fit exactly within the task to allow
+         size compat restart button to be hidden. 0 means size compat restart button will always
+         be hidden. -->
+    <integer name="config_letterboxRestartButtonHideTolerance">100</integer>
+
     <!-- Whether DragAndDrop capability is enabled -->
     <bool name="config_enableShellDragDrop">true</bool>
 

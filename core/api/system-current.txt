@@ -12,6 +12,7 @@ package android {
     field @Deprecated public static final String ACCESS_FM_RADIO = "android.permission.ACCESS_FM_RADIO";
     field public static final String ACCESS_FPS_COUNTER = "android.permission.ACCESS_FPS_COUNTER";
     field public static final String ACCESS_INSTANT_APPS = "android.permission.ACCESS_INSTANT_APPS";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ACCESS_LAST_KNOWN_CELL_ID = "android.permission.ACCESS_LAST_KNOWN_CELL_ID";
     field public static final String ACCESS_LOCUS_ID_USAGE_STATS = "android.permission.ACCESS_LOCUS_ID_USAGE_STATS";
     field public static final String ACCESS_MOCK_LOCATION = "android.permission.ACCESS_MOCK_LOCATION";
     field public static final String ACCESS_MTP = "android.permission.ACCESS_MTP";
@@ -295,6 +296,7 @@ package android {
     field public static final String READ_RUNTIME_PROFILES = "android.permission.READ_RUNTIME_PROFILES";
     field public static final String READ_SAFETY_CENTER_STATUS = "android.permission.READ_SAFETY_CENTER_STATUS";
     field public static final String READ_SEARCH_INDEXABLES = "android.permission.READ_SEARCH_INDEXABLES";
+    field @FlaggedApi("android.app.system_terms_of_address_enabled") public static final String READ_SYSTEM_GRAMMATICAL_GENDER = "android.permission.READ_SYSTEM_GRAMMATICAL_GENDER";
     field public static final String READ_SYSTEM_UPDATE_INFO = "android.permission.READ_SYSTEM_UPDATE_INFO";
     field public static final String READ_WALLPAPER_INTERNAL = "android.permission.READ_WALLPAPER_INTERNAL";
     field public static final String READ_WIFI_CREDENTIAL = "android.permission.READ_WIFI_CREDENTIAL";
@@ -420,6 +422,7 @@ package android {
 
   public static final class R.attr {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
+    field @FlaggedApi("android.content.res.manifest_flagging") public static final int featureFlag;
     field public static final int gameSessionService = 16844373; // 0x1010655
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
     field @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public static final int isVirtualDeviceOnly;
@@ -553,6 +556,7 @@ package android.app {
 
   public class ActivityManager {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
+    method @FlaggedApi("android.app.uid_importance_listener_for_uids") @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void addOnUidImportanceListener(@NonNull android.app.ActivityManager.OnUidImportanceListener, int, @Nullable int[]);
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void forceStopPackage(String);
     method @FlaggedApi("android.app.get_binding_uid_importance") @RequiresPermission(android.Manifest.permission.GET_BINDING_UID_IMPORTANCE) public int getBindingUidImportance(int);
     method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public static int getCurrentUser();
@@ -1616,6 +1620,7 @@ package android.app.ambientcontext {
     field public static final int LEVEL_MEDIUM_HIGH = 4; // 0x4
     field public static final int LEVEL_MEDIUM_LOW = 2; // 0x2
     field public static final int LEVEL_UNKNOWN = 0; // 0x0
+    field @FlaggedApi("android.app.ambient_heart_rate") public static final int RATE_PER_MINUTE_UNKNOWN = -1; // 0xffffffff
   }
 
   public static final class AmbientContextEvent.Builder {
@@ -9984,6 +9989,7 @@ package android.nfc.cardemulation {
 
   @FlaggedApi("android.nfc.enable_nfc_mainline") public final class ApduServiceInfo implements android.os.Parcelable {
     ctor @FlaggedApi("android.nfc.enable_nfc_mainline") public ApduServiceInfo(@NonNull android.content.pm.PackageManager, @NonNull android.content.pm.ResolveInfo, boolean) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method @FlaggedApi("android.nfc.nfc_read_polling_loop") public void addPollingLoopFilter(@NonNull String);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public int describeContents();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void dump(@NonNull android.os.ParcelFileDescriptor, @NonNull java.io.PrintWriter, @NonNull String[]);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void dumpDebug(@NonNull android.util.proto.ProtoOutputStream);
@@ -9994,6 +10000,7 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getDescription();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.nfc.cardemulation.AidGroup getDynamicAidGroupForCategory(@NonNull String);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public String getOffHostSecureElement();
+    method @FlaggedApi("android.nfc.nfc_read_polling_loop") @NonNull public java.util.List<java.lang.String> getPollingLoopFilters();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<java.lang.String> getPrefixAids();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public String getSettingsActivityName();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<java.lang.String> getSubsetAids();
@@ -10006,6 +10013,7 @@ package android.nfc.cardemulation {
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public CharSequence loadLabel(@NonNull android.content.pm.PackageManager);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public boolean removeDynamicAidGroupForCategory(@NonNull String);
+    method @FlaggedApi("android.nfc.nfc_read_polling_loop") public void removePollingLoopFilter(@NonNull String);
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean requiresScreenOn();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public boolean requiresUnlock();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") public void resetOffHostSecureElement();
@@ -10044,12 +10052,17 @@ package android.os {
     field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_CHARGING_POLICY = 9; // 0x9
     field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_FIRST_USAGE_DATE = 8; // 0x8
     field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_MANUFACTURING_DATE = 7; // 0x7
+    field @FlaggedApi("android.os.battery_part_status_api") @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_PART_STATUS = 12; // 0xc
+    field @FlaggedApi("android.os.battery_part_status_api") @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_SERIAL_NUMBER = 11; // 0xb
     field public static final int CHARGING_POLICY_ADAPTIVE_AC = 3; // 0x3
     field public static final int CHARGING_POLICY_ADAPTIVE_AON = 2; // 0x2
     field public static final int CHARGING_POLICY_ADAPTIVE_LONGLIFE = 4; // 0x4
     field public static final int CHARGING_POLICY_DEFAULT = 1; // 0x1
     field public static final String EXTRA_EVENTS = "android.os.extra.EVENTS";
     field public static final String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
+    field @FlaggedApi("android.os.battery_part_status_api") public static final int PART_STATUS_ORIGINAL = 1; // 0x1
+    field @FlaggedApi("android.os.battery_part_status_api") public static final int PART_STATUS_REPLACED = 2; // 0x2
+    field @FlaggedApi("android.os.battery_part_status_api") public static final int PART_STATUS_UNSUPPORTED = 0; // 0x0
   }
 
   public final class BatterySaverPolicyConfig implements android.os.Parcelable {
@@ -14686,6 +14699,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @Nullable @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, "com.android.phone.permission.ACCESS_LAST_KNOWN_CELL_ID"}) public android.telephony.CellIdentity getLastKnownCellIdentity();
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Map<java.lang.Integer,java.lang.Integer> getLogicalToPhysicalSlotMapping();
     method public int getMaxNumberOfSimultaneouslyActiveSims();
     method public static long getMaxNumberVerificationTimeoutMillis();
@@ -14789,6 +14803,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>);
     method @Deprecated public void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoiceActivationState(int);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(android.Manifest.permission.BIND_TELECOM_CONNECTION_SERVICE) public void setVoiceServiceStateOverride(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void shutdownAllRadios();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult supplyIccLockPin(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult supplyIccLockPuk(@NonNull String, @NonNull String);
@@ -14926,6 +14941,11 @@ package android.telephony {
     field public static final int ERROR_MODEM_RESPONSE_ERROR = 3; // 0x3
     field public static final int ERROR_PHONE_NOT_AVAILABLE = 1; // 0x1
     field public static final int ERROR_UNKNOWN = 0; // 0x0
+  }
+
+  @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public class TelephonyRegistryManager {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyCallStateChangedForAllSubscriptions(int, @Nullable String);
+    method public void notifyOutgoingEmergencyCall(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
   }
 
   public final class ThermalMitigationRequest implements android.os.Parcelable {

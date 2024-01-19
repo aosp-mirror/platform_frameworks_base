@@ -30,6 +30,7 @@ import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 
+import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -826,7 +827,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         params.installFlags &= ~PackageManager.INSTALL_UNARCHIVE;
-        if (Flags.archiving() && params.appPackageName != null) {
+        if (isArchivingEnabled() && params.appPackageName != null) {
             PackageStateInternal ps = mPm.snapshotComputer().getPackageStateInternal(
                     params.appPackageName, SYSTEM_UID);
             if (ps != null
@@ -1034,7 +1035,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private int getExistingDraftSessionIdInternal(int installerUid,
             SessionParams sessionParams, int userId) {
         String appPackageName = sessionParams.appPackageName;
-        if (!Flags.archiving() || installerUid == INVALID_UID || appPackageName == null) {
+        if (!isArchivingEnabled() || installerUid == INVALID_UID || appPackageName == null) {
             return SessionInfo.INVALID_ID;
         }
 
@@ -1407,14 +1408,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
                 canSilentlyInstallPackage, userId, mPackageArchiver, flags);
-        final boolean shouldShowConfirmationDialog =
-                (flags & PackageManager.DELETE_SHOW_DIALOG) != 0;
-        if (!shouldShowConfirmationDialog
-                && mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
-                    == PackageManager.PERMISSION_GRANTED) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
+                == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
-        } else if (!shouldShowConfirmationDialog && canSilentlyInstallPackage) {
+        } else if (canSilentlyInstallPackage) {
             // Allow the device owner and affiliated profile owner to silently delete packages
             // Need to clear the calling identity to get DELETE_PACKAGES permission
             final long ident = Binder.clearCallingIdentity();
@@ -1656,10 +1654,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             @NonNull String packageName,
             @NonNull String callerPackageName,
             @NonNull IntentSender intentSender,
-            @NonNull UserHandle userHandle,
-            @DeleteFlags int flags) {
-        mPackageArchiver.requestArchive(packageName, callerPackageName, intentSender,
-                userHandle, flags);
+            @NonNull UserHandle userHandle) {
+        mPackageArchiver.requestArchive(packageName, callerPackageName, intentSender, userHandle);
     }
 
     @Override

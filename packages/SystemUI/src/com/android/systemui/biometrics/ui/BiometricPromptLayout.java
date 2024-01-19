@@ -115,6 +115,12 @@ public class BiometricPromptLayout extends LinearLayout {
                                 MeasureSpec.EXACTLY),
                         MeasureSpec.makeMeasureSpec(iconView.getLayoutParams().height,
                                 MeasureSpec.EXACTLY));
+            } else if (child.getId() == R.id.logo) {
+                child.measure(
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().width,
+                                MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(child.getLayoutParams().height,
+                                MeasureSpec.EXACTLY));
             } else if (child.getId() == R.id.biometric_icon) {
                 child.measure(
                         MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST),

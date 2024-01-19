@@ -112,7 +112,8 @@ public abstract class TvInteractiveAppService extends Service {
             PLAYBACK_COMMAND_TYPE_TUNE_PREV,
             PLAYBACK_COMMAND_TYPE_STOP,
             PLAYBACK_COMMAND_TYPE_SET_STREAM_VOLUME,
-            PLAYBACK_COMMAND_TYPE_SELECT_TRACK
+            PLAYBACK_COMMAND_TYPE_SELECT_TRACK,
+            PLAYBACK_COMMAND_TYPE_FREEZE
     })
     public @interface PlaybackCommandType {}
 
@@ -142,8 +143,11 @@ public abstract class TvInteractiveAppService extends Service {
      * Playback command type: select the given track.
      */
     public static final String PLAYBACK_COMMAND_TYPE_SELECT_TRACK = "select_track";
-
-
+    /**
+     * Playback command type: freeze the video playback on the current frame.
+     * @hide
+     */
+    public static final String PLAYBACK_COMMAND_TYPE_FREEZE = "freeze";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

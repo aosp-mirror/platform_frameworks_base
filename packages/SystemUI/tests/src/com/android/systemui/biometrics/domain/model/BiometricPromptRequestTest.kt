@@ -1,5 +1,6 @@
 package com.android.systemui.biometrics.domain.model
 
+import android.graphics.Bitmap
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
@@ -8,6 +9,7 @@ import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
 import com.android.systemui.biometrics.promptInfo
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
+import com.android.systemui.res.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,6 +17,7 @@ import org.junit.runners.JUnit4
 
 private const val USER_ID = 2
 private const val OPERATION_ID = 8L
+private const val OP_PACKAGE_NAME = "biometric.testapp"
 
 @SmallTest
 @RunWith(JUnit4::class)
@@ -22,6 +25,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
 
     @Test
     fun biometricRequestFromPromptInfo() {
+        val logoRes = R.drawable.ic_cake
         val title = "what"
         val subtitle = "a"
         val description = "request"
@@ -36,6 +40,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
         val request =
             BiometricPromptRequest.Biometric(
                 promptInfo(
+                    logoRes = logoRes,
                     title = title,
                     subtitle = subtitle,
                     description = description,
@@ -44,8 +49,10 @@ class BiometricPromptRequestTest : SysuiTestCase() {
                 BiometricUserInfo(USER_ID),
                 BiometricOperationInfo(OPERATION_ID),
                 BiometricModalities(fingerprintProperties = fpPros),
+                OP_PACKAGE_NAME,
             )
 
+        assertThat(request.logoRes).isEqualTo(logoRes)
         assertThat(request.title).isEqualTo(title)
         assertThat(request.subtitle).isEqualTo(subtitle)
         assertThat(request.description).isEqualTo(description)
@@ -54,6 +61,23 @@ class BiometricPromptRequestTest : SysuiTestCase() {
         assertThat(request.operationInfo).isEqualTo(BiometricOperationInfo(OPERATION_ID))
         assertThat(request.modalities)
             .isEqualTo(BiometricModalities(fingerprintProperties = fpPros))
+    }
+
+    @Test
+    fun biometricRequestLogoBitmapFromPromptInfo() {
+        val logoBitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888)
+        val fpPros = fingerprintSensorPropertiesInternal().first()
+        val request =
+            BiometricPromptRequest.Biometric(
+                promptInfo(
+                    logoBitmap = logoBitmap,
+                ),
+                BiometricUserInfo(USER_ID),
+                BiometricOperationInfo(OPERATION_ID),
+                BiometricModalities(fingerprintProperties = fpPros),
+                OP_PACKAGE_NAME,
+            )
+        assertThat(request.logoBitmap).isEqualTo(logoBitmap)
     }
 
     @Test

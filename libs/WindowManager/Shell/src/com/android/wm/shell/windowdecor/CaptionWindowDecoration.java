@@ -286,6 +286,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         closeBackground.setTintList(buttonTintColor);
     }
 
+    boolean isHandlingDragResize() {
+        return mDragResizeListener.isHandlingDragResize();
+    }
+
     private void closeDragResizeListener() {
         if (mDragResizeListener == null) {
             return;

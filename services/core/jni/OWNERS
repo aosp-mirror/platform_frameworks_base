@@ -33,7 +33,3 @@ per-file com_android_server_companion_virtual_InputController.cpp = file:/servic
 
 # Bug component : 158088 = per-file *AnrTimer*
 per-file *AnrTimer* = file:/PERFORMANCE_OWNERS
-
-# Bug component : 158088 = per-file com_android_server_utils_AnrTimer*.java
-per-file com_android_server_utils_AnrTimer*.java = file:/PERFORMANCE_OWNERS
-per-file com_android_server_BootReceiver.cpp = file:/STABILITY_OWNERS

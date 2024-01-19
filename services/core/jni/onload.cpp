@@ -66,7 +66,6 @@ int register_android_server_stats_pull_StatsPullAtomService(JNIEnv* env);
 int register_android_server_sensor_SensorService(JavaVM* vm, JNIEnv* env);
 int register_android_server_companion_virtual_InputController(JNIEnv* env);
 int register_android_server_app_GameManagerService(JNIEnv* env);
-int register_com_android_server_BootReceiver(JNIEnv* env);
 int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env);
 int register_com_android_server_display_DisplayControl(JNIEnv* env);
 int register_com_android_server_SystemClockTime(JNIEnv* env);
@@ -129,7 +128,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_sensor_SensorService(vm, env);
     register_android_server_companion_virtual_InputController(env);
     register_android_server_app_GameManagerService(env);
-    register_com_android_server_BootReceiver(env);
     register_com_android_server_wm_TaskFpsCallbackController(env);
     register_com_android_server_display_DisplayControl(env);
     register_com_android_server_SystemClockTime(env);

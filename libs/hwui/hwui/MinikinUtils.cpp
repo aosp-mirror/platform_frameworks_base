@@ -72,10 +72,13 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFla
     const minikin::Range contextRange(contextStart, contextStart + contextCount);
     const minikin::StartHyphenEdit startHyphen = paint->getStartHyphenEdit();
     const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
+    const minikin::RunFlag minikinRunFlag = text_feature::inter_character_justification()
+                                                    ? paint->getRunFlag()
+                                                    : minikin::RunFlag::NONE;
 
     if (mt == nullptr) {
         return minikin::Layout(textBuf.substr(contextRange), range - contextStart, bidiFlags,
-                               minikinPaint, startHyphen, endHyphen);
+                               minikinPaint, startHyphen, endHyphen, minikinRunFlag);
     } else {
         return mt->buildLayout(textBuf, range, contextRange, minikinPaint, startHyphen, endHyphen);
     }
@@ -102,9 +105,12 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
     const minikin::Range range(start, start + count);
     const minikin::StartHyphenEdit startHyphen = paint->getStartHyphenEdit();
     const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
+    const minikin::RunFlag minikinRunFlag = text_feature::inter_character_justification()
+                                                    ? paint->getRunFlag()
+                                                    : minikin::RunFlag::NONE;
 
     return minikin::Layout::measureText(textBuf, range, bidiFlags, minikinPaint, startHyphen,
-                                        endHyphen, advances, bounds, clusterCount);
+                                        endHyphen, advances, bounds, clusterCount, minikinRunFlag);
 }
 
 minikin::MinikinExtent MinikinUtils::getFontExtent(const Paint* paint, minikin::Bidi bidiFlags,

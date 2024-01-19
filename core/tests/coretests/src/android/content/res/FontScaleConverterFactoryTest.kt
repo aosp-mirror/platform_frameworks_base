@@ -48,7 +48,7 @@ class FontScaleConverterFactoryTest {
     @get:Rule
     val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
-    private lateinit var defaultLookupTables: SparseArray<FontScaleConverter>
+    private var defaultLookupTables: SparseArray<FontScaleConverter>? = null
 
     @Before
     fun setup() {
@@ -58,7 +58,9 @@ class FontScaleConverterFactoryTest {
     @After
     fun teardown() {
         // Restore the default tables (since some tests will have added extras to the cache)
-        FontScaleConverterFactory.sLookupTables = defaultLookupTables
+        if (defaultLookupTables != null) {
+            FontScaleConverterFactory.sLookupTables = defaultLookupTables!!
+        }
     }
 
     @Test

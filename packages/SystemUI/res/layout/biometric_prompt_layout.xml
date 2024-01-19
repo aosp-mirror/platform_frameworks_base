@@ -20,6 +20,13 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="@dimen/biometric_auth_icon_size"
+        android:layout_height="@dimen/biometric_auth_icon_size"
+        android:layout_gravity="center"
+        android:scaleType="fitXY"/>
+
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"

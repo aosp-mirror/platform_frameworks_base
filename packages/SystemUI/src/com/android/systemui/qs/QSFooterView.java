@@ -35,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.development.DevelopmentSettingsEnabler;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.res.R;
 
 /**
@@ -109,9 +110,29 @@ public class QSFooterView extends FrameLayout {
 
     private void updateResources() {
         updateFooterAnimator();
+        updateEditButtonResources();
+        updateBuildTextResources();
         MarginLayoutParams lp = (MarginLayoutParams) getLayoutParams();
+        lp.height = getResources().getDimensionPixelSize(R.dimen.qs_footer_height);
+        int sideMargin = getResources().getDimensionPixelSize(R.dimen.qs_footer_margin);
+        lp.leftMargin = sideMargin;
+        lp.rightMargin = sideMargin;
         lp.bottomMargin = getResources().getDimensionPixelSize(R.dimen.qs_footers_margin_bottom);
         setLayoutParams(lp);
+    }
+
+    private void updateEditButtonResources() {
+        int size = getResources().getDimensionPixelSize(R.dimen.qs_footer_action_button_size);
+        int padding = getResources().getDimensionPixelSize(R.dimen.qs_footer_icon_padding);
+        MarginLayoutParams lp = (MarginLayoutParams) mEditButton.getLayoutParams();
+        lp.height = size;
+        lp.width = size;
+        mEditButton.setLayoutParams(lp);
+        mEditButton.setPadding(padding, padding, padding, padding);
+    }
+
+    private void updateBuildTextResources() {
+        FontSizeUtils.updateFontSizeFromStyle(mBuildText, R.style.TextAppearance_QS_Status_Build);
     }
 
     private void updateFooterAnimator() {

@@ -685,6 +685,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
     { // acquire lock
         std::scoped_lock _l(mLock);
 
+        outConfig->mousePointerSpeed = mLocked.pointerSpeed;
+        outConfig->mousePointerAccelerationEnabled = mLocked.mousePointerAccelerationEnabled;
         outConfig->pointerVelocityControlParameters.scale = exp2f(mLocked.pointerSpeed
                 * POINTER_SPEED_EXPONENT);
         outConfig->pointerVelocityControlParameters.acceleration =

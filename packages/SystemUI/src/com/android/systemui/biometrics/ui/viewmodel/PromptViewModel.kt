@@ -18,6 +18,8 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.Context
 import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.PromptContentView
 import android.util.Log
@@ -232,6 +234,19 @@ constructor(
                 Rect(0, 0, 0, 0)
             }
         }
+
+    /** Logo for the prompt. */
+    val logo: Flow<Drawable?> =
+        promptSelectorInteractor.prompt
+            .map {
+                when {
+                    it == null -> null
+                    it.logoRes != -1 -> context.resources.getDrawable(it.logoRes, context.theme)
+                    it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
+                    else -> context.packageManager.getApplicationIcon(it.opPackageName)
+                }
+            }
+            .distinctUntilChanged()
 
     /** Title for the prompt. */
     val title: Flow<String> =
