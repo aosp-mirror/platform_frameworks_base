@@ -18483,7 +18483,6 @@ public class TelephonyManager {
 
     /**
      * Get last known cell identity.
-     * Require appropriate permissions, otherwise throws SecurityException.
      *
      * If there is current registered network this value will be same as the registered cell
      * identity. If the device goes out of service the previous cell identity is cached and
@@ -18495,7 +18494,7 @@ public class TelephonyManager {
     @SystemApi
     @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION,
-            "com.android.phone.permission.ACCESS_LAST_KNOWN_CELL_ID"})
+            Manifest.permission.ACCESS_LAST_KNOWN_CELL_ID})
     public @Nullable CellIdentity getLastKnownCellIdentity() {
         try {
             ITelephony telephony = getITelephony();
