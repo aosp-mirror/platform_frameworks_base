@@ -206,6 +206,7 @@ public class BubbleStackView extends FrameLayout
             };
     private final BubbleController mBubbleController;
     private final BubbleData mBubbleData;
+    private final Bubbles.SysuiProxy.Provider mSysuiProxyProvider;
     private StackViewState mStackViewState = new StackViewState();
 
     private final ValueAnimator mDismissBubbleAnimator;
@@ -867,12 +868,14 @@ public class BubbleStackView extends FrameLayout
     public BubbleStackView(Context context, BubbleController bubbleController,
             BubbleData data, @Nullable SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
+            Bubbles.SysuiProxy.Provider sysuiProxyProvider,
             ShellExecutor mainExecutor) {
         super(context);
 
         mMainExecutor = mainExecutor;
         mBubbleController = bubbleController;
         mBubbleData = data;
+        mSysuiProxyProvider = sysuiProxyProvider;
 
         Resources res = getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
@@ -2071,7 +2074,7 @@ public class BubbleStackView extends FrameLayout
 
         hideCurrentInputMethod();
 
-        mBubbleController.getSysuiProxy().onStackExpandChanged(shouldExpand);
+        mSysuiProxyProvider.getSysuiProxy().onStackExpandChanged(shouldExpand);
 
         if (wasExpanded) {
             stopMonitoringSwipeUpGesture();
@@ -3015,7 +3018,7 @@ public class BubbleStackView extends FrameLayout
         if (mExpandedBubble == null || mExpandedBubble.getExpandedView() == null) {
             mManageMenu.setVisibility(View.INVISIBLE);
             mManageMenuScrim.setVisibility(INVISIBLE);
-            mBubbleController.getSysuiProxy().onManageMenuExpandChanged(false /* show */);
+            mSysuiProxyProvider.getSysuiProxy().onManageMenuExpandChanged(false /* show */);
             return;
         }
         if (show) {
@@ -3029,7 +3032,7 @@ public class BubbleStackView extends FrameLayout
             }
         };
 
-        mBubbleController.getSysuiProxy().onManageMenuExpandChanged(show);
+        mSysuiProxyProvider.getSysuiProxy().onManageMenuExpandChanged(show);
         mManageMenuScrim.animate()
                 .setInterpolator(show ? ALPHA_IN : ALPHA_OUT)
                 .alpha(show ? BUBBLE_EXPANDED_SCRIM_ALPHA : 0f)

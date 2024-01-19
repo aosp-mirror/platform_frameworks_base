@@ -137,7 +137,7 @@ import java.util.function.IntConsumer;
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
 public class BubbleController implements ConfigurationChangeListener,
-        RemoteCallable<BubbleController> {
+        RemoteCallable<BubbleController>, Bubbles.SysuiProxy.Provider {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
@@ -706,6 +706,7 @@ public class BubbleController implements ConfigurationChangeListener,
         return mBubbleIconFactory;
     }
 
+    @Override
     public Bubbles.SysuiProxy getSysuiProxy() {
         return mSysuiProxy;
     }
@@ -732,8 +733,7 @@ public class BubbleController implements ConfigurationChangeListener,
             if (mStackView == null) {
                 mStackView = new BubbleStackView(
                         mContext, this, mBubbleData, mSurfaceSynchronizer,
-                        mFloatingContentCoordinator,
-                        mMainExecutor);
+                        mFloatingContentCoordinator, this, mMainExecutor);
                 mStackView.onOrientationChanged();
                 if (mExpandListener != null) {
                     mStackView.setExpandListener(mExpandListener);
