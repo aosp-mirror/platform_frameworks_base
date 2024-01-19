@@ -44,6 +44,9 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.SensorProperties;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -155,6 +158,8 @@ public class TrustManagerService extends SystemService {
     private final LockPatternUtils mLockPatternUtils;
     private final UserManager mUserManager;
     private final ActivityManager mActivityManager;
+    private FingerprintManager mFingerprintManager;
+    private FaceManager mFaceManager;
     private VirtualDeviceManagerInternal mVirtualDeviceManager;
 
     private enum TrustState {
@@ -292,6 +297,8 @@ public class TrustManagerService extends SystemService {
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
             mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
+            mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
+            mFaceManager = mContext.getSystemService(FaceManager.class);
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             mTrustAgentsCanRun = true;
             refreshAgentList(UserHandle.USER_ALL);
@@ -893,7 +900,19 @@ public class TrustManagerService extends SystemService {
 
     private void notifyKeystoreOfDeviceLockState(int userId, boolean isLocked) {
         if (isLocked) {
-            Authorization.onDeviceLocked(userId, getBiometricSids(userId));
+            if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()) {
+                // A profile with unified challenge is unlockable not by its own biometrics and
+                // trust agents, but rather by those of the parent user.  Therefore, when protecting
+                // the profile's UnlockedDeviceRequired keys, we must use the parent's list of
+                // biometric SIDs and weak unlock methods, not the profile's.
+                int authUserId = mLockPatternUtils.isProfileWithUnifiedChallenge(userId)
+                        ? resolveProfileParent(userId) : userId;
+
+                Authorization.onDeviceLocked(userId, getBiometricSids(authUserId),
+                        isWeakUnlockMethodEnabled(authUserId));
+            } else {
+                Authorization.onDeviceLocked(userId, getBiometricSids(userId), false);
+            }
         } else {
             // Notify Keystore that the device is now unlocked for the user.  Note that for unlocks
             // with LSKF, this is redundant with the call from LockSettingsService which provides
@@ -1440,14 +1459,57 @@ public class TrustManagerService extends SystemService {
         if (biometricManager == null) {
             return new long[0];
         }
-        if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()
-                && mLockPatternUtils.isProfileWithUnifiedChallenge(userId)) {
-            // Profiles with unified challenge have their own set of biometrics, but the device
-            // unlock happens via the parent user.  In this case Keystore needs to be given the list
-            // of biometric SIDs from the parent user, not the profile.
-            userId = resolveProfileParent(userId);
-        }
         return biometricManager.getAuthenticatorIds(userId);
+    }
+
+    // Returns whether the device can become unlocked for the specified user via one of that user's
+    // non-strong biometrics or trust agents.  This assumes that the device is currently locked, or
+    // is becoming locked, for the user.
+    private boolean isWeakUnlockMethodEnabled(int userId) {
+
+        // Check whether the system currently allows the use of non-strong biometrics for the user,
+        // *and* the user actually has a non-strong biometric enrolled.
+        //
+        // The biometrics framework ostensibly supports multiple sensors per modality.  However,
+        // that feature is unused and untested.  So, we simply consider one sensor per modality.
+        //
+        // Also, currently we just consider fingerprint and face, matching Keyguard.  If Keyguard
+        // starts supporting other biometric modalities, this will need to be updated.
+        if (mStrongAuthTracker.isBiometricAllowedForUser(/* isStrongBiometric= */ false, userId)) {
+            DevicePolicyManager dpm = mLockPatternUtils.getDevicePolicyManager();
+            int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userId);
+
+            if (mFingerprintManager != null
+                    && (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) == 0
+                    && mFingerprintManager.hasEnrolledTemplates(userId)
+                    && isWeakOrConvenienceSensor(
+                            mFingerprintManager.getSensorProperties().get(0))) {
+                Slog.i(TAG, "User is unlockable by non-strong fingerprint auth");
+                return true;
+            }
+
+            if (mFaceManager != null
+                    && (disabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_FACE) == 0
+                    && mFaceManager.hasEnrolledTemplates(userId)
+                    && isWeakOrConvenienceSensor(mFaceManager.getSensorProperties().get(0))) {
+                Slog.i(TAG, "User is unlockable by non-strong face auth");
+                return true;
+            }
+        }
+
+        // Check whether it's possible for the device to be actively unlocked by a trust agent.
+        if (getUserTrustStateInner(userId) == TrustState.TRUSTABLE
+                || (isAutomotive() && isTrustUsuallyManagedInternal(userId))) {
+            Slog.i(TAG, "User is unlockable by trust agent");
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean isWeakOrConvenienceSensor(SensorProperties sensor) {
+        return sensor.getSensorStrength() == SensorProperties.STRENGTH_WEAK
+                || sensor.getSensorStrength() == SensorProperties.STRENGTH_CONVENIENCE;
     }
 
     // User lifecycle
