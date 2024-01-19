@@ -36,13 +36,6 @@ flag {
 }
 
 flag {
-    name: "bal_return_correct_code_if_caller_is_persistent_system_process"
-    namespace: "responsible_apis"
-    description: "Split visibility check and return a better status code in case of system process."
-    bug: "171459802"
-}
-
-flag {
     name: "bal_improve_real_caller_visibility_check"
     namespace: "responsible_apis"
     description: "Prevent a task to restart based on a visible window during task switch."
