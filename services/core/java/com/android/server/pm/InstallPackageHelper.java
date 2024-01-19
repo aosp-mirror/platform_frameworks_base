@@ -576,6 +576,12 @@ final class InstallPackageHelper {
                 mApexManager.registerApkInApex(pkg);
             }
 
+            if ((mPm.isDeviceUpgrading() && pkgSetting.isSystem()) || isReplace) {
+                for (int userId : mPm.mUserManager.getUserIds()) {
+                    pkgSetting.restoreComponentSettings(userId);
+                }
+            }
+
             // Don't add keysets for APEX as their package settings are not persisted and will
             // result in orphaned keysets.
             if ((scanFlags & SCAN_AS_APEX) == 0) {
