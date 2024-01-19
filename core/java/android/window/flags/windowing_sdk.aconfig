@@ -47,3 +47,10 @@ flag {
     bug: "287582673"
     is_fixed_read_only: true
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "embedded_activity_back_nav_flag"
+    description: "Refines embedded activity back navigation behavior"
+    bug: "240575809"
+}
