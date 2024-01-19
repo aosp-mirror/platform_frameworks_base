@@ -298,7 +298,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             DozeParameters dozeParameters,
             AlarmManager alarmManager,
             KeyguardStateController keyguardStateController,
-            DelayedWakeLock.Builder delayedWakeLockBuilder,
+            DelayedWakeLock.Factory delayedWakeLockFactory,
             Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DockManager dockManager,
@@ -328,7 +328,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mScreenOffAnimationController = screenOffAnimationController;
         mTimeTicker = new AlarmTimeout(alarmManager, this::onHideWallpaperTimeout,
                 "hide_aod_wallpaper", mHandler);
-        mWakeLock = delayedWakeLockBuilder.setHandler(mHandler).setTag("Scrims").build();
+        mWakeLock = delayedWakeLockFactory.create("Scrims");
         // Scrim alpha is initially set to the value on the resource but might be changed
         // to make sure that text on top of it is legible.
         mDozeParameters = dozeParameters;

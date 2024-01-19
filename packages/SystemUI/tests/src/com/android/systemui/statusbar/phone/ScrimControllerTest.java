@@ -48,7 +48,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.MathUtils;
@@ -134,7 +133,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private AlarmManager mAlarmManager;
     @Mock private DozeParameters mDozeParameters;
     @Mock private LightBarController mLightBarController;
-    @Mock private DelayedWakeLock.Builder mDelayedWakeLockBuilder;
+    @Mock private DelayedWakeLock.Factory mDelayedWakeLockFactory;
     @Mock private DelayedWakeLock mWakeLock;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -260,11 +259,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         }).when(mLightBarController).setScrimState(
                 any(ScrimState.class), anyFloat(), any(GradientColors.class));
 
-        when(mDelayedWakeLockBuilder.setHandler(any(Handler.class)))
-                .thenReturn(mDelayedWakeLockBuilder);
-        when(mDelayedWakeLockBuilder.setTag(any(String.class)))
-                .thenReturn(mDelayedWakeLockBuilder);
-        when(mDelayedWakeLockBuilder.build()).thenReturn(mWakeLock);
+        when(mDelayedWakeLockFactory.create(any(String.class))).thenReturn(mWakeLock);
         when(mDockManager.isDocked()).thenReturn(false);
 
         when(mKeyguardTransitionInteractor.transition(any(), any()))
@@ -279,7 +274,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDozeParameters,
                 mAlarmManager,
                 mKeyguardStateController,
-                mDelayedWakeLockBuilder,
+                mDelayedWakeLockFactory,
                 new FakeHandler(mLooper.getLooper()),
                 mKeyguardUpdateMonitor,
                 mDockManager,
@@ -987,7 +982,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDozeParameters,
                 mAlarmManager,
                 mKeyguardStateController,
-                mDelayedWakeLockBuilder,
+                mDelayedWakeLockFactory,
                 new FakeHandler(mLooper.getLooper()),
                 mKeyguardUpdateMonitor,
                 mDockManager,
