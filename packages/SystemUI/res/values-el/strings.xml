@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Δεν ήταν δυνατή η ρύθμιση για το Ξεκλείδωμα με το πρόσωπο. Μεταβείτε στις Ρυθμίσεις και δοκιμάστε ξανά."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Αγγίξτε τον αισθητήρα δακτυλικού αποτυπώματος"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Πατήστε το εικονίδιο ξεκλειδώματος για συνέχεια"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Δεν αναγνωρίστηκε. Χρήση δακτυλικού αποτυπώματος."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Δεν αναγνωρίστηκε"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Χρησιμ. δακτυλ. αποτύπ."</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ξεκλ. με πρόσωπο μη διαθ."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Το Bluetooth είναι συνδεδεμένο."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Φόρτιση • Πλήρης φόρτιση σε <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Σύρετε προς τα αριστερά για να ξεκινήσετε τον κοινόχρηστο οδηγό"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Άνοιγμα προγράμ. επεξεργασίας γραφικών στοιχείων"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Προσαρμογή"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Παράβλεψη"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Προσθήκη, κατάργηση και αναδιάταξη των γραφικών στοιχείων σε αυτόν τον χώρο"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Προσθήκη περισσότερων γραφικών στοιχείων"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Παρατεταμένο πάτημα για προσαρμογή γραφ. στοιχείων"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Κατάργηση"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Προσθήκη γραφικού στοιχείου"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Τέλος"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Ενεργοποίηση Bluetooth;"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Για να συνδέσετε το πληκτρολόγιο με το tablet σας, θα πρέπει πρώτα να ενεργοποιήσετε το Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Ενεργοποίηση"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Στοιχεία ελέγχου ειδοποίησης ισχύος"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Ενεργό - Βάσει προσώπου"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Με τα στοιχεία ελέγχου ειδοποίησης ισχύος, μπορείτε να ορίσετε ένα επίπεδο βαρύτητας από 0 έως 5 για τις ειδοποιήσεις μιας εφαρμογής. \n\n"<b>"Επίπεδο 5"</b>" \n- Εμφάνιση στην κορυφή της λίστας ειδοποιήσεων \n- Να επιτρέπεται η διακοπή πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 4"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 3"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n\n"<b>"Επίπεδο 2"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n\n"<b>"Επίπεδο 1"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n- Απόκρυψη από την οθόνη κλειδώματος και τη γραμμή κατάστασης \n- Εμφάνιση στο κάτω μέρος της λίστας ειδοποιήσεων \n\n"<b>"Επίπεδο 0"</b>" \n- Αποκλεισμός όλων των ειδοποιήσεων από την εφαρμογή"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Τέλος"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Εφαρμογή"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Απενεργοποίηση ειδοποιήσεων"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Ρύθμιση"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Αποθηκευτικός χώρος"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Συμβουλές"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Προσβασιμότητα"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Εφαρμογές"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Η εφαρμογή άνοιξε χωρίς να έχει εγκατασταθεί."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Πατήστε για άνοιγμα των λειτουργιών προσβασιμότητας. Προσαρμόστε ή αντικαταστήστε το κουμπί στις Ρυθμίσεις.\n\n"<annotation id="link">"Προβολή ρυθμίσεων"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Μετακινήστε το κουμπί στο άκρο για προσωρινή απόκρυψη"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Αναίρεση"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Έχει γίνει απόκρυψη του κουμπιού προσβασιμότητας"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Πατήστε για εμφάνιση του κουμπιού προσβασιμότητας"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Η συντόμευση <xliff:g id="FEATURE_NAME">%s</xliff:g> καταργήθηκε"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Καταργήθηκε # συντόμευση}other{Καταργήθηκαν # συντομεύσεις}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Μετακίνηση επάνω αριστερά"</string>

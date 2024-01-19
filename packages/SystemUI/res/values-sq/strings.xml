@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Shkyçja me fytyrë nuk mund të konfigurohej. Shko te \"Cilësimet\" për të provuar përsëri."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Prek sensorin e gjurmës së gishtit"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Shtyp ikonën e shkyçjes për të vazhduar"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Fytyra nuk njihet. Përdor më mirë gjurmën e gishtit."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Fytyra nuk njihet"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Përdor më mirë gjurmën e gishtit"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"\"Shkyçja me fytyrë\" nuk ofrohet"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Pajisja është lidhur me \"bluetooth\"."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Rrëshqit shpejt majtas për të filluar udhëzuesin e përbashkët"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Hap modifikuesin e miniaplikacionit"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Personalizo"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Hiq"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Shto, hiq dhe rirendit miniaplikacionet e tua në këtë hapësirë"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Shto miniaplikacione të tjera"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Shtyp gjatë për të personalizuar miniaplikacionet"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Hiq"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Shto miniaplikacionin"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"U krye"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"Të aktivizohet \"bluetooth-i\"?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Për të lidhur tastierën me tabletin, në fillim duhet të aktivizosh \"bluetooth-in\"."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Aktivizo"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Kontrollet e njoftimit të energjisë"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Aktiv - Në bazë të fytyrës"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Me kontrollet e njoftimit të energjisë, mund të caktosh një nivel rëndësie nga 0 në 5 për njoftimet e një aplikacioni. \n\n"<b>"Niveli 5"</b>" \n- Shfaq në krye të listës së njoftimeve \n- Lejo ndërprerjen e ekranit të plotë \n- Gjithmonë shfaq shpejt \n\n"<b>"Niveli 4"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Gijthmonë shfaq shpejt \n\n"<b>"Niveli 3"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Asnjëherë mos shfaq shpejt \n\n"<b>"Niveli 2"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Asnjëherë mos shfaq shpejt \n- Asnjëherë mos lësho tingull dhe dridhje \n\n"<b>"Niveli 1"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Asnjëherë mos shfaq shpejt \n- Asnjëherë mos lësho tingull ose dridhje \n- Fshih nga ekrani i kyçjes dhe shiriti i statusit \n- Shfaq në fund të listës së njoftimeve \n\n"<b>"Niveli 0"</b>" \n- Blloko të gjitha njoftimet nga aplikacioni"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"U krye"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Zbato"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Çaktivizo njoftimet"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Konfigurimi"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Hapësira ruajtëse"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Sugjerimet"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Qasshmëria"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Aplikacionet e çastit"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Po ekzekutohet <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Aplikacioni u hap pa u instaluar."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Trokit dhe hap veçoritë e qasshmërisë. Modifiko ose ndërro butonin te \"Cilësimet\".\n\n"<annotation id="link">"Shih cilësimet"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Zhvendose butonin në skaj për ta fshehur përkohësisht"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Zhbëj"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Butoni i qasshmërisë u fsheh"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Trokit për të shfaqur butonin e qasshmërisë"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Shkurtorja për \"<xliff:g id="FEATURE_NAME">%s</xliff:g>\" u hoq"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# shkurtore u hoq}other{# shkurtore u hoqën}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Zhvendos lart majtas"</string>

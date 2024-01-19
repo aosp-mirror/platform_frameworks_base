@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Hindi na-set up ang pag-unlock gamit ang mukha. Pumunta sa Mga Setting para subukan ulit."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Pindutin ang fingerprint sensor"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Pindutin ang icon ng pag-unlock para magpatuloy"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Hindi nakilala ang mukha. Gumamit ng fingerprint."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"Hindi nakilala ang mukha"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Gumamit ng fingerprint"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Hindi available ang Pag-unlock Gamit ang Mukha"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Nakakonekta ang Bluetooth."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nagcha-charge • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> na lang para mapuno"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Mag-swipe pakaliwa para simulan ang communal na tutorial"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Buksan ang editor ng widget"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"I-customize"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"I-dismiss"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"Magdagdag, mag-alis, at baguhin ang ayos ng iyong mga widget sa space na ito"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Magdagdag ng higit pang widget"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Pindutin nang matagal para i-customize ang mga widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Alisin"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Magdagdag ng widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Tapos na"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"I-on ang Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Upang ikonekta ang iyong keyboard sa iyong tablet, kailangan mo munang i-on ang Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"I-on"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Mga kontrol sa notification ng power"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Naka-on - Batay sa mukha"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Sa pamamagitan ng mga kontrol sa notification ng power, magagawa mong itakda ang antas ng kahalagahan ng mga notification ng isang app mula 0 hanggang 5. \n\n"<b>"Antas 5"</b>" \n- Ipakita sa itaas ng listahan ng notification \n- Payagan ang pag-istorbo kapag full screen \n- Palaging sumilip \n\n"<b>"Antas 4"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Palaging sumilip \n\n"<b>"Antas 3"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n\n"<b>"Antas 2"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n- Huwag kailanman tumunog o mag-vibrate \n\n"<b>"Antas 1"</b>" \n- Pigilan ang pag-istorbo kapag full screen \n- Huwag kailanman sumilip \n- Huwag kailanman tumunog o mag-vibrate \n- Itago sa lock screen at status bar \n- Ipakita sa ibaba ng listahan ng notification \n\n"<b>"Antas 0"</b>" \n- I-block ang lahat ng notification mula sa app"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Tapos na"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Ilapat"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"I-off ang mga notification"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"Setup"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Storage"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Mga Hint"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"Accessibility"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"Tumatakbo ang <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Nabuksan ang app nang hindi ini-install."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"I-tap, buksan mga feature ng accessibility. I-customize o palitan button sa Mga Setting.\n\n"<annotation id="link">"Tingnan ang mga setting"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Ilipat ang button sa gilid para pansamantala itong itago"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"I-undo"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"Nakatago ang button ng accessibility"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"I-tap para ipakita ang button ng accessibility"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> shortcut ang naalis"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# shortcut ang naalis}one{# shortcut ang naalis}other{# na shortcut ang naalis}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Ilipat sa kaliwa sa itaas"</string>

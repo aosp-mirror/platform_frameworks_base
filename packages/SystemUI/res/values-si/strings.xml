@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"මුහුණෙන් අගුළු හැරීම පිහිටුවිය නොහැකි විය. නැවත උත්සාහ කිරීමට සැකසීම් වෙත යන්න."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ඇඟිලි සලකුණු සංවේදකය ස්පර්ශ කරන්න"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ඉදිරියට යාමට අගුළු ඇරීමේ නිරූපකය ඔබන්න"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"මුහුණ හඳුනා නොගැනිණි. ඒ වෙනුවට ඇඟිලි සලකුණ භාවිත කරන්න."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"මුහුණ හඳුනා නොගන්නා ලදි"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ඒ වෙනුවට ඇඟිලි සලකුණ භාවිත කරන්න"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"මුහුණෙන් අගුළු ඇරීම නැත"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"බ්ලූටූත් සම්බන්ධිතයි."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ආරෝපණය වෙමින් • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>කින් සම්පූර්ණ වේ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"පොදු නිබන්ධනය ආරම්භ කිරීමට වමට ස්වයිප් කරන්න"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"විජට් සංස්කාරකය විවෘත කරන්න"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"අභිරුචිකරණය කරන්න"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"අස් කරන්න"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"මෙම අවකාශය තුළ ඔබේ විජට් එක් කරන්න, ඉවත් කරන්න, සහ නැවත අනුපිළිවෙල කරන්න"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"තවත් විජට් එක් කරන්න"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"විජට් අභිරුචිකරණය කිරීමට දිගු ඔබන්න"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ඉවත් කරන්න"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"විජට්ටුව එක් කරන්න"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"නිමයි"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"බ්ලූටූත් ක්‍රියාත්මක කරන්නද?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"ඔබේ යතුරු පුවරුව ඔබේ ටැබ්ලට් පරිගණකයට සම්බන්ධ කිරීමට, ඔබ පළමුව බ්ලූටූත් ක්‍රියාත්මක කළ යුතුය."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"ක්‍රියාත්මක කරන්න"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"බල දැනුම්දීම් පාලන"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ක්‍රියාත්මකයි - මුහුණ-පදනම්ව"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"බල දැනුම්දීම් පාලන සමගින්, ඔබට යෙදුමක දැනුම්දීම් සඳහා වැදගත්කම 0 සිට 5 දක්වා සැකසිය හැකිය. \n\n"<b>"5 මට්ටම"</b>" \n- දැනුම්දීම් ලැයිස්තුවේ ඉහළින්ම පෙන්වන්න \n- පූර්ණ තිර බාධාවට ඉඩ දෙන්න \n- සැම විට එබී බලන්න \n\n"<b>"4 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- සැම විට එබී බලන්න \n\n"<b>"3 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n\n"<b>"2 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n\n"<b>"1 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n- අගුලු තිරය සහ තත්ත්ව තීරුව වෙතින් සඟවන්න \n- දැනුම්දීම් ලැයිස්තුවේ පහළින්ම පෙන්වන්න \n\n"<b>"0 මට්ටම"</b>" \n- යෙදුම වෙතින් වන සියලු දැනුම් දීම් සඟවන්න."</string>
     <string name="inline_done_button" msgid="6043094985588909584">"නිමයි"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"යොදන්න"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"දැනුම්දීම් අක්‍රිය කරන්න"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"පිහිටුවීම"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ගබඩාව"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ඉඟි"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"ප්‍රවේශ්‍යතාව"</string>
     <string name="instant_apps" msgid="8337185853050247304">"ක්ෂණික යෙදුම්"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> ධාවනය වෙමින්"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ස්ථාපනය නොකර යෙදුම විවෘත කර ඇත."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ප්‍රවේශ්‍යතා විශේෂාංග විවෘත කිරීමට තට්ටු කරන්න. සැකසීම් තුළ මෙම බොත්තම අභිරුචිකරණය හෝ ප්‍රතිස්ථාපනය කරන්න.\n\n"<annotation id="link">"සැකසීම් බලන්න"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"එය තාවකාලිකව සැඟවීමට බොත්තම දාරයට ගෙන යන්න"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"අස් කරන්න"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"ප්‍රවේශ්‍යතා බොත්තම සඟවා ඇත"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"ප්‍රවේශ්‍යතා බොත්තම පෙන්වීමට තට්ටු කරන්න"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> කෙටිමඟ ඉවත් කළා"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# කෙටිමඟක් ඉවත් කළා}one{කෙටිමං #ක් ඉවත් කළා}other{කෙටිමං #ක් ඉවත් කළා}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ඉහළ වමට ගෙන යන්න"</string>

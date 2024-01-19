@@ -188,12 +188,10 @@
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைக்க முடியவில்லை. அமைப்புகளுக்குச் சென்று மீண்டும் முயலவும்."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"தொடர, அன்லாக் ஐகானை அழுத்துங்கள்"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5542430577183894219) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"முகத்தைக் கண்டறிய முடியவில்லை. கைரேகை பயன்படுத்துக"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
-    <!-- no translation found for keyguard_face_failed (2346762871330729634) -->
-    <skip />
+    <string name="keyguard_face_failed" msgid="2346762871330729634">"முகம் கண்டறிய முடியவில்லை"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"கைரேகையை உபயோகிக்கவும்"</string>
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"முகம் காட்டித் திறத்தல் அம்சம் கிடைக்கவில்லை"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"புளூடூத் இணைக்கப்பட்டது."</string>
@@ -415,16 +413,11 @@
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • சார்ஜாகிறது • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> இல் முழுவதும் சார்ஜாகும்"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"சமூகப் பயிற்சியைத் தொடங்க இடதுபுறம் ஸ்வைப் செய்யுங்கள்"</string>
     <string name="button_to_open_widget_editor" msgid="5599945944349057600">"விட்ஜெட் எடிட்டரைத் திறக்கும்"</string>
-    <!-- no translation found for cta_tile_button_to_open_widget_editor (3871562362382963878) -->
-    <skip />
-    <!-- no translation found for cta_tile_button_to_dismiss (3377597875997861754) -->
-    <skip />
-    <!-- no translation found for cta_label_to_edit_widget (6496885074209203756) -->
-    <skip />
-    <!-- no translation found for cta_label_to_open_widget_picker (3874946756976360699) -->
-    <skip />
-    <!-- no translation found for popup_on_dismiss_cta_tile_text (8292501780996070019) -->
-    <skip />
+    <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"பிரத்தியேகமாக்குங்கள்"</string>
+    <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"மூடுக"</string>
+    <string name="cta_label_to_edit_widget" msgid="6496885074209203756">"இந்த இடத்தில் உங்கள் விட்ஜெட்களைச் சேர்க்கலாம், அகற்றலாம், மறுவரிசைப்படுத்தலாம்"</string>
+    <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"கூடுதல் விட்ஜெட்களைச் சேருங்கள்"</string>
+    <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"விட்ஜெட்களைப் பிரத்தியேகமாக்க நீண்ட நேரம் அழுத்துக"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"அகற்றும்"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"விட்ஜெட்டைச் சேர்"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"முடிந்தது"</string>
@@ -611,9 +604,7 @@
     <string name="enable_bluetooth_title" msgid="866883307336662596">"புளூடூத்தை இயக்கவா?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"உங்கள் டேப்லெட்டுடன் கீபோர்டை இணைக்க, முதலில் புளூடூத்தை இயக்க வேண்டும்."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"இயக்கு"</string>
-    <string name="tuner_full_importance_settings" msgid="1388025816553459059">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"ஆன் - முகம் அடிப்படையிலானது"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள் மூலம், ஆப்ஸின் அறிவிப்புகளுக்கு முக்கியத்துவ நிலையை (0-5) அமைக்கலாம். \n\n"<b>"நிலை 5"</b>" \n- அறிவிப்புப் பட்டியலின் மேலே காட்டும் \n- முழுத் திரைக் குறுக்கீட்டை அனுமதிக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 4"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 3"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n\n"<b>"நிலை 2"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது, அதிர்வுறாது \n\n"<b>"நிலை 1"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது அல்லது அதிர்வுறாது \n- லாக் ஸ்கிரீன் மற்றும் நிலைப்பட்டியிலிருந்து மறைக்கும் \n- அறிவிப்புகள் பட்டியலின் கீழே காட்டும் \n\n"<b>"நிலை 0"</b>" \n- ஆப்ஸின் எல்லா அறிவிப்புகளையும் தடுக்கும்"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"முடிந்தது"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"பயன்படுத்து"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"அறிவிப்புகளை முடக்கு"</string>
@@ -846,8 +837,7 @@
     <string name="notification_channel_setup" msgid="7660580986090760350">"அமைவு"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"சேமிப்பிடம்"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"குறிப்புகள்"</string>
-    <!-- no translation found for notification_channel_accessibility (8956203986976245820) -->
-    <skip />
+    <string name="notification_channel_accessibility" msgid="8956203986976245820">"அணுகல்தன்மை"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> இயங்குகிறது"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"நிறுவ வேண்டிய தேவையில்லாமல் ஆப்ஸ் திறக்கப்பட்டது."</string>
@@ -943,10 +933,8 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"அணுகல்தன்மை அம்சத்தை திறக்க தட்டவும். அமைப்பில் பட்டனை பிரத்தியேகமாக்கலாம்/மாற்றலாம்.\n\n"<annotation id="link">"அமைப்பில் காண்க"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"பட்டனைத் தற்காலிகமாக மறைக்க ஓரத்திற்கு நகர்த்தும்"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"செயல்தவிர்"</string>
-    <!-- no translation found for accessibility_floating_button_hidden_notification_title (4115036997406994799) -->
-    <skip />
-    <!-- no translation found for accessibility_floating_button_hidden_notification_text (1457021647040915658) -->
-    <skip />
+    <string name="accessibility_floating_button_hidden_notification_title" msgid="4115036997406994799">"அணுகல்தன்மை பட்டன் மறைக்கப்பட்டுள்ளது"</string>
+    <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"அணுகல்தன்மை பட்டனைக் காட்ட தட்டவும்"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> ஷார்ட்கட் அகற்றப்பட்டது"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# ஷார்ட்கட் அகற்றப்பட்டது}other{# ஷார்ட்கட்கள் அகற்றப்பட்டன}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"மேலே இடதுபுறத்திற்கு நகர்த்து"</string>
