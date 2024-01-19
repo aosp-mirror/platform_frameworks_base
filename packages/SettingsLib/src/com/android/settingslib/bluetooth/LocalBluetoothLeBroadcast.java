@@ -84,6 +84,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO),
                 Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE),
                 Settings.Secure.getUriFor(Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME),
+                Settings.Secure.getUriFor(
+                        Settings.Secure.BLUETOOTH_LE_BROADCAST_IMPROVE_COMPATIBILITY),
             };
 
     private BluetoothLeBroadcast mServiceBroadcast;
@@ -96,6 +98,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     private String mNewAppSourceName = "";
     private boolean mIsBroadcastProfileReady = false;
     private boolean mIsBroadcastAssistantProfileReady = false;
+    private boolean mImproveCompatibility = false;
     private String mProgramInfo;
     private byte[] mBroadcastCode;
     private Executor mExecutor;
@@ -391,6 +394,52 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
      * <p>If the system started the LE Broadcast, then the system calls the corresponding callback
      * {@link BluetoothLeBroadcast.Callback}.
      */
+    public void startPrivateBroadcast() {
+        mNewAppSourceName = "Sharing audio";
+        if (mServiceBroadcast == null) {
+            Log.d(TAG, "The BluetoothLeBroadcast is null when starting the private broadcast.");
+            return;
+        }
+        if (mServiceBroadcast.getAllBroadcastMetadata().size()
+                >= mServiceBroadcast.getMaximumNumberOfBroadcasts()) {
+            Log.d(TAG, "Skip starting the broadcast due to number limit.");
+            return;
+        }
+        String programInfo = getProgramInfo();
+        boolean improveCompatibility = getImproveCompatibility();
+        if (DEBUG) {
+            Log.d(
+                    TAG,
+                    "startBroadcast: language = null , programInfo = "
+                            + programInfo
+                            + ", improveCompatibility = "
+                            + improveCompatibility);
+        }
+        // Current broadcast framework only support one subgroup
+        BluetoothLeBroadcastSubgroupSettings subgroupSettings =
+                buildBroadcastSubgroupSettings(
+                        /* language= */ null, programInfo, improveCompatibility);
+        BluetoothLeBroadcastSettings settings =
+                buildBroadcastSettings(
+                        true, // TODO: set to false after framework fix
+                        TextUtils.isEmpty(programInfo) ? null : programInfo,
+                        (mBroadcastCode != null && mBroadcastCode.length > 0)
+                                ? mBroadcastCode
+                                : null,
+                        ImmutableList.of(subgroupSettings));
+        mServiceBroadcast.startBroadcast(settings);
+    }
+
+    /**
+     * Start the private Broadcast for personal audio sharing or qr code sharing.
+     *
+     * <p>The broadcast will use random string for both broadcast name and subgroup program info;
+     * The broadcast will use random string for broadcast code; The broadcast will only have one
+     * subgroup due to system limitation; The subgroup language will be null.
+     *
+     * <p>If the system started the LE Broadcast, then the system calls the corresponding callback
+     * {@link BluetoothLeBroadcast.Callback}.
+     */
     public void startPrivateBroadcast(int quality) {
         mNewAppSourceName = "Sharing audio";
         if (mServiceBroadcast == null) {
@@ -408,7 +457,11 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         }
         // Current broadcast framework only support one subgroup
         BluetoothLeBroadcastSubgroupSettings subgroupSettings =
-                buildBroadcastSubgroupSettings(/* language= */ null, programInfo, quality);
+                buildBroadcastSubgroupSettings(
+                        /* language= */ null,
+                        programInfo,
+                        /* improveCompatibility= */
+                        BluetoothLeBroadcastSubgroupSettings.QUALITY_STANDARD == quality);
         BluetoothLeBroadcastSettings settings =
                 buildBroadcastSettings(
                         true, // TODO: set to false after framework fix
@@ -437,7 +490,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
     }
 
     private BluetoothLeBroadcastSubgroupSettings buildBroadcastSubgroupSettings(
-            @Nullable String language, @Nullable String programInfo, int quality) {
+            @Nullable String language, @Nullable String programInfo, boolean improveCompatibility) {
         BluetoothLeAudioContentMetadata metadata =
                 new BluetoothLeAudioContentMetadata.Builder()
                         .setLanguage(language)
@@ -447,7 +500,10 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         // metadata to keep legacy UI working.
         mBluetoothLeAudioContentMetadata = metadata;
         return new BluetoothLeBroadcastSubgroupSettings.Builder()
-                .setPreferredQuality(quality)
+                .setPreferredQuality(
+                        improveCompatibility
+                                ? BluetoothLeBroadcastSubgroupSettings.QUALITY_STANDARD
+                                : BluetoothLeBroadcastSubgroupSettings.QUALITY_HIGH)
                 .setContentMetadata(mBluetoothLeAudioContentMetadata)
                 .build();
     }
@@ -510,6 +566,36 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                     mContentResolver,
                     Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
                     new String(broadcastCode, StandardCharsets.UTF_8));
+        }
+    }
+
+    /** Get compatibility config for broadcast. */
+    public boolean getImproveCompatibility() {
+        return mImproveCompatibility;
+    }
+
+    /** Set compatibility config for broadcast. */
+    public void setImproveCompatibility(boolean improveCompatibility) {
+        setImproveCompatibility(improveCompatibility, /* updateContentResolver= */ true);
+    }
+
+    private void setImproveCompatibility(
+            boolean improveCompatibility, boolean updateContentResolver) {
+        if (mImproveCompatibility == improveCompatibility) {
+            Log.d(TAG, "setImproveCompatibility: improveCompatibility is not changed");
+            return;
+        }
+        mImproveCompatibility = improveCompatibility;
+        if (updateContentResolver) {
+            if (mContentResolver == null) {
+                Log.d(TAG, "mContentResolver is null");
+                return;
+            }
+            Log.d(TAG, "Set improveCompatibility to: " + improveCompatibility);
+            Settings.Secure.putString(
+                    mContentResolver,
+                    Settings.Secure.BLUETOOTH_LE_BROADCAST_IMPROVE_COMPATIBILITY,
+                    improveCompatibility ? "1" : "0");
         }
     }
 
@@ -600,6 +686,14 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 Settings.Secure.getString(
                         mContentResolver, Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME);
         setAppSourceName(appSourceName, /* updateContentResolver= */ false);
+
+        String improveCompatibility =
+                Settings.Secure.getString(
+                        mContentResolver,
+                        Settings.Secure.BLUETOOTH_LE_BROADCAST_IMPROVE_COMPATIBILITY);
+        setImproveCompatibility(
+                improveCompatibility == null ? false : improveCompatibility.equals("1"),
+                /* updateContentResolver= */ false);
     }
 
     private void updateBroadcastInfoFromBroadcastMetadata(
