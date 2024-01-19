@@ -3550,6 +3550,13 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     /**
+     * Sets Accessibility slow keys threshold in milliseconds.
+     */
+    public void setAccessibilitySlowKeysThreshold(int thresholdTimeMs) {
+        mNative.setAccessibilitySlowKeysThreshold(thresholdTimeMs);
+    }
+
+    /**
      * Sets whether Accessibility sticky keys is enabled.
      */
     public void setAccessibilityStickyKeysEnabled(boolean enabled) {
