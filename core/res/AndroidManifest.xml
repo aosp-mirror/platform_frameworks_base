@@ -4961,7 +4961,7 @@
          <p>Protection level: signature
     -->
     <permission android:name="android.permission.BIND_NFC_SERVICE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|module" />
 
     <!-- Must be required by a {@link android.service.quickaccesswallet.QuickAccessWalletService}
          to ensure that only the system can bind to it.
