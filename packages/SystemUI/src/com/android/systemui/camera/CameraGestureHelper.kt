@@ -69,7 +69,7 @@ class CameraGestureHelper @Inject constructor(
         }
 
         val resolveInfo: ResolveInfo? = packageManager.resolveActivityAsUser(
-            getStartCameraIntent(),
+            getStartCameraIntent(selectedUserInteractor.getSelectedUserId()),
             PackageManager.MATCH_DEFAULT_ONLY,
             selectedUserInteractor.getSelectedUserId()
         )
@@ -85,7 +85,7 @@ class CameraGestureHelper @Inject constructor(
      * @param source The source of the camera launch, to be passed to the camera app via [Intent]
      */
     fun launchCamera(source: Int) {
-        val intent: Intent = getStartCameraIntent()
+        val intent: Intent = getStartCameraIntent(selectedUserInteractor.getSelectedUserId())
         intent.putExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, source)
         val wouldLaunchResolverActivity = activityIntentHelper.wouldLaunchResolverActivity(
             intent, selectedUserInteractor.getSelectedUserId()
@@ -143,13 +143,13 @@ class CameraGestureHelper @Inject constructor(
      * Returns an [Intent] that can be used to start the camera app such that it occludes the
      * lock-screen, if needed.
      */
-    private fun getStartCameraIntent(): Intent {
+    private fun getStartCameraIntent(userId: Int): Intent {
         val isLockScreenDismissible = keyguardStateController.canDismissLockScreen()
         val isSecure = keyguardStateController.isMethodSecure
         return if (isSecure && !isLockScreenDismissible) {
-            cameraIntents.getSecureCameraIntent()
+            cameraIntents.getSecureCameraIntent(userId)
         } else {
-            cameraIntents.getInsecureCameraIntent()
+            cameraIntents.getInsecureCameraIntent(userId)
         }
     }
 }
