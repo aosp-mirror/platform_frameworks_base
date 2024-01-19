@@ -403,4 +403,41 @@ public class SQLiteDatabaseTest {
         }
         assertFalse(allowed);
     }
+
+    /** Return true if the path is in the list of strings. */
+    private boolean isConcurrent(String path) throws Exception {
+        path = new File(path).toPath().toRealPath().toString();
+        return SQLiteDatabase.getConcurrentDatabasePaths().contains(path);
+    }
+
+    @Test
+    public void testDuplicateDatabases() throws Exception {
+        // The two database paths in this test are assumed not to have been opened earlier in this
+        // process.
+
+        // A database path that will be opened twice.
+        final String dbName = "never-used-db.db";
+        final File dbFile = mContext.getDatabasePath(dbName);
+        final String dbPath = dbFile.getPath();
+
+        // A database path that will be opened only once.
+        final String okName = "never-used-ok.db";
+        final File okFile = mContext.getDatabasePath(okName);
+        final String okPath = okFile.getPath();
+
+        SQLiteDatabase db1 = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+        assertFalse(isConcurrent(dbPath));
+        SQLiteDatabase db2 = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+        assertTrue(isConcurrent(dbPath));
+        db1.close();
+        assertTrue(isConcurrent(dbPath));
+        db2.close();
+        assertTrue(isConcurrent(dbPath));
+
+        SQLiteDatabase db3 = SQLiteDatabase.openOrCreateDatabase(okFile, null);
+        db3.close();
+        db3 = SQLiteDatabase.openOrCreateDatabase(okFile, null);
+        assertFalse(isConcurrent(okPath));
+        db3.close();
+    }
 }
