@@ -24,6 +24,7 @@ class AndroidHeuristicsFilter(
         private val classes: ClassNodes,
         val aidlPolicy: FilterPolicyWithReason?,
         val featureFlagsPolicy: FilterPolicyWithReason?,
+        val syspropsPolicy: FilterPolicyWithReason?,
         fallback: OutputFilter
 ) : DelegatingFilter(fallback) {
     override fun getPolicyForClass(className: String): FilterPolicyWithReason {
@@ -32,6 +33,9 @@ class AndroidHeuristicsFilter(
         }
         if (featureFlagsPolicy != null && classes.isFeatureFlagsClass(className)) {
             return featureFlagsPolicy
+        }
+        if (syspropsPolicy != null && classes.isSyspropsClass(className)) {
+            return syspropsPolicy
         }
         return super.getPolicyForClass(className)
     }
@@ -56,4 +60,14 @@ private fun ClassNodes.isFeatureFlagsClass(className: String): Boolean {
             || className.endsWith("/FeatureFlags")
             || className.endsWith("/FeatureFlagsImpl")
             || className.endsWith("/FakeFeatureFlagsImpl");
+}
+
+/**
+ * @return if a given class "seems like" a sysprops class.
+ */
+private fun ClassNodes.isSyspropsClass(className: String): Boolean {
+    // Matches template classes defined here:
+    // https://cs.android.com/android/platform/superproject/main/+/main:system/tools/sysprop/
+    return className.startsWith("android/sysprop/")
+            && className.endsWith("Properties")
 }

@@ -6,6 +6,9 @@ class :aidl stubclass
 # Keep all feature flag implementations
 class :feature_flags stubclass
 
+# Keep all sysprops generated code implementations
+class :sysprops stubclass
+
 # Collections
 class android.util.ArrayMap stubclass
 class android.util.ArraySet stubclass

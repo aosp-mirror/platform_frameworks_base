@@ -19,8 +19,6 @@ package android.platform.test.ravenwood;
 import android.os.HandlerThread;
 import android.os.Looper;
 
-import java.util.Objects;
-
 public class RavenwoodRuleImpl {
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
 
@@ -31,6 +29,10 @@ public class RavenwoodRuleImpl {
     public static void init(RavenwoodRule rule) {
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
         android.os.Binder.init$ravenwood();
+        android.os.SystemProperties.init$ravenwood(
+                rule.mSystemProperties.getValues(),
+                rule.mSystemProperties.getKeyReadablePredicate(),
+                rule.mSystemProperties.getKeyWritablePredicate());
 
         com.android.server.LocalServices.removeAllServicesForTest();
 
@@ -49,7 +51,8 @@ public class RavenwoodRuleImpl {
 
         com.android.server.LocalServices.removeAllServicesForTest();
 
-        android.os.Process.reset$ravenwood();
+        android.os.SystemProperties.reset$ravenwood();
         android.os.Binder.reset$ravenwood();
+        android.os.Process.reset$ravenwood();
     }
 }

@@ -64,6 +64,7 @@ fun createFilterFromTextPolicyFile(
 
         var aidlPolicy: FilterPolicyWithReason? = null
         var featureFlagsPolicy: FilterPolicyWithReason? = null
+        var syspropsPolicy: FilterPolicyWithReason? = null
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
@@ -141,6 +142,14 @@ fun createFilterFromTextPolicyFile(
                                         featureFlagsPolicy =
                                                 policy.withReason("$FILTER_REASON (feature flags)")
                                     }
+                                    SpecialClass.Sysprops -> {
+                                        if (syspropsPolicy != null) {
+                                            throw ParseException(
+                                                    "Policy for sysprops already defined")
+                                        }
+                                        syspropsPolicy =
+                                                policy.withReason("$FILTER_REASON (sysprops)")
+                                    }
                                 }
                             }
                         }
@@ -205,10 +214,10 @@ fun createFilterFromTextPolicyFile(
         }
 
         var ret: OutputFilter = imf
-        if (aidlPolicy != null || featureFlagsPolicy != null) {
+        if (aidlPolicy != null || featureFlagsPolicy != null || syspropsPolicy != null) {
             log.d("AndroidHeuristicsFilter enabled")
             ret = AndroidHeuristicsFilter(
-                    classes, aidlPolicy, featureFlagsPolicy, imf)
+                    classes, aidlPolicy, featureFlagsPolicy, syspropsPolicy, imf)
         }
         return ret
     }
@@ -218,6 +227,7 @@ private enum class SpecialClass {
     NotSpecial,
     Aidl,
     FeatureFlags,
+    Sysprops,
 }
 
 private fun resolveSpecialClass(className: String): SpecialClass {
@@ -227,6 +237,7 @@ private fun resolveSpecialClass(className: String): SpecialClass {
     when (className.lowercase()) {
         ":aidl" -> return SpecialClass.Aidl
         ":feature_flags" -> return SpecialClass.FeatureFlags
+        ":sysprops" -> return SpecialClass.Sysprops
     }
     throw ParseException("Invalid special class name \"$className\"")
 }
