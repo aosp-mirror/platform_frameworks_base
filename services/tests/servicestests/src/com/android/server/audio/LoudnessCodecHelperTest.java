@@ -15,6 +15,7 @@
  */
 package com.android.server.audio;
 
+import static android.media.AudioAttributes.ALLOW_CAPTURE_BY_NONE;
 import static android.media.AudioManager.GET_DEVICES_OUTPUTS;
 import static android.media.AudioPlaybackConfiguration.PLAYER_UPDATE_DEVICE_ID;
 import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_TYPE_MPEG_4;
@@ -22,6 +23,7 @@ import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_T
 import static android.media.MediaFormat.KEY_AAC_DRC_EFFECT_TYPE;
 import static android.media.MediaFormat.KEY_AAC_DRC_HEAVY_COMPRESSION;
 import static android.media.MediaFormat.KEY_AAC_DRC_TARGET_REFERENCE_LEVEL;
+import static android.os.Process.myPid;
 
 import static com.android.server.audio.LoudnessCodecHelper.SPL_RANGE_LARGE;
 import static com.android.server.audio.LoudnessCodecHelper.SPL_RANGE_MEDIUM;
@@ -37,6 +39,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.media.AudioAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
@@ -64,12 +67,15 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 public class LoudnessCodecHelperTest {
     private static final String TAG = "LoudnessCodecHelperTest";
+
+    private static final int TEST_USAGE = AudioAttributes.USAGE_MEDIA;
+
+    private static final int TEST_CONTENT = AudioAttributes.CONTENT_TYPE_MUSIC;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -83,94 +89,84 @@ public class LoudnessCodecHelperTest {
 
     private final int mInitialApcPiid = 1;
 
+    private int mSessionId;
+
     @Before
     public void setUp() throws Exception {
         mLoudnessHelper = new LoudnessCodecHelper(mAudioService);
+        mSessionId = 1;
 
         when(mAudioService.getActivePlaybackConfigurations()).thenReturn(
-                getApcListForPiids(mInitialApcPiid));
+                getApcListForApcWithPiidSid(mInitialApcPiid, mSessionId, 0));
 
         when(mDispatcher.asBinder()).thenReturn(Mockito.mock(IBinder.class));
     }
 
     @Test
-    public void registerDispatcher_sendsInitialUpdateOnStart() throws Exception {
+    public void registerDispatcher_sendsUpdateOnAddCodec() throws Exception {
         mLoudnessHelper.registerLoudnessCodecUpdatesDispatcher(mDispatcher);
 
-        mLoudnessHelper.startLoudnessCodecUpdates(mInitialApcPiid,
-                List.of(getLoudnessInfo(/*isDownmixing=*/true, CODEC_METADATA_TYPE_MPEG_4)));
+        mLoudnessHelper.startLoudnessCodecUpdates(mSessionId);
+        mLoudnessHelper.addLoudnessCodecInfo(mSessionId, /*mediaCodecHash=*/222,
+                getLoudnessInfo(/*isDownmixing=*/true, CODEC_METADATA_TYPE_MPEG_D));
 
-        verify(mDispatcher).dispatchLoudnessCodecParameterChange(eq(mInitialApcPiid), any());
+        verify(mDispatcher).dispatchLoudnessCodecParameterChange(eq(mSessionId), any());
     }
 
     @Test
-    public void unregisterDispatcher_noInitialUpdateOnStart() throws Exception {
+    public void unregisterDispatcher_noUpdateOnAdd() throws Exception {
         mLoudnessHelper.registerLoudnessCodecUpdatesDispatcher(mDispatcher);
         mLoudnessHelper.unregisterLoudnessCodecUpdatesDispatcher(mDispatcher);
 
-        mLoudnessHelper.startLoudnessCodecUpdates(mInitialApcPiid,
-                List.of(getLoudnessInfo(/*isDownmixing=*/false, CODEC_METADATA_TYPE_MPEG_D)));
-
-        verify(mDispatcher, times(0)).dispatchLoudnessCodecParameterChange(eq(mInitialApcPiid),
-                any());
-    }
-
-    @Test
-    public void addCodecInfo_sendsInitialUpdateAfterStart() throws Exception {
-        mLoudnessHelper.registerLoudnessCodecUpdatesDispatcher(mDispatcher);
-
-        mLoudnessHelper.startLoudnessCodecUpdates(mInitialApcPiid,
-                List.of(getLoudnessInfo(/*isDownmixing=*/true, CODEC_METADATA_TYPE_MPEG_4)));
-        mLoudnessHelper.addLoudnessCodecInfo(mInitialApcPiid, /*mediaCodecHash=*/222,
+        mLoudnessHelper.startLoudnessCodecUpdates(mSessionId);
+        mLoudnessHelper.addLoudnessCodecInfo(mSessionId, /*mediaCodecHash=*/222,
                 getLoudnessInfo(/*isDownmixing=*/true, CODEC_METADATA_TYPE_MPEG_D));
 
-        verify(mDispatcher, times(2)).dispatchLoudnessCodecParameterChange(eq(mInitialApcPiid),
+        verify(mDispatcher, times(0)).dispatchLoudnessCodecParameterChange(eq(mSessionId),
                 any());
     }
 
     @Test
-    public void addCodecInfoForUnstartedPiid_noUpdateSent() throws Exception {
-        final int newPiid = 2;
+    public void addCodecInfoForDifferentId_noUpdateSent() throws Exception {
+        final int newSessionId = mSessionId + 1;
         mLoudnessHelper.registerLoudnessCodecUpdatesDispatcher(mDispatcher);
 
-        mLoudnessHelper.startLoudnessCodecUpdates(mInitialApcPiid,
-                List.of(getLoudnessInfo(/*isDownmixing=*/true,
-                        CODEC_METADATA_TYPE_MPEG_4)));
-        mLoudnessHelper.addLoudnessCodecInfo(newPiid, /*mediaCodecHash=*/222,
+        mLoudnessHelper.startLoudnessCodecUpdates(mSessionId);
+        mLoudnessHelper.addLoudnessCodecInfo(newSessionId, /*mediaCodecHash=*/222,
                 getLoudnessInfo(/*isDownmixing=*/true, CODEC_METADATA_TYPE_MPEG_D));
 
-        verify(mDispatcher, times(1)).dispatchLoudnessCodecParameterChange(eq(mInitialApcPiid),
+        verify(mDispatcher, times(0)).dispatchLoudnessCodecParameterChange(eq(mSessionId),
                 any());
-    }
-
-    @Test
-    public void updateCodecParameters_updatesOnlyStartedPiids() throws Exception {
-        final int newPiid = 2;
-        mLoudnessHelper.registerLoudnessCodecUpdatesDispatcher(mDispatcher);
-
-        mLoudnessHelper.startLoudnessCodecUpdates(mInitialApcPiid,
-                List.of(getLoudnessInfo(/*isDownmixing=*/true, CODEC_METADATA_TYPE_MPEG_4)));
-        //does not trigger dispatch since active apc list does not contain newPiid
-        mLoudnessHelper.startLoudnessCodecUpdates(newPiid,
-                List.of(getLoudnessInfo(/*isDownmixing=*/true, CODEC_METADATA_TYPE_MPEG_D)));
-        verify(mDispatcher, times(1)).dispatchLoudnessCodecParameterChange(eq(mInitialApcPiid),
-                any());
-
-        // triggers dispatch for new active apc with newPiid
-        mLoudnessHelper.updateCodecParameters(getApcListForPiids(newPiid));
-        verify(mDispatcher, times(1)).dispatchLoudnessCodecParameterChange(eq(newPiid), any());
     }
 
     @Test
     public void updateCodecParameters_noStartedPiids_noDispatch() throws Exception {
         mLoudnessHelper.registerLoudnessCodecUpdatesDispatcher(mDispatcher);
-        mLoudnessHelper.addLoudnessCodecInfo(mInitialApcPiid, /*mediaCodecHash=*/222,
+        mLoudnessHelper.addLoudnessCodecInfo(mSessionId, /*mediaCodecHash=*/222,
                 getLoudnessInfo(/*isDownmixing=*/true, CODEC_METADATA_TYPE_MPEG_D));
 
-        mLoudnessHelper.updateCodecParameters(getApcListForPiids(mInitialApcPiid));
+        mLoudnessHelper.updateCodecParameters(
+                getApcListForApcWithPiidSid(mInitialApcPiid, mSessionId, 1));
 
-        // no dispatch since mInitialApcPiid was not started
-        verify(mDispatcher, times(0)).dispatchLoudnessCodecParameterChange(eq(mInitialApcPiid),
+        // no dispatch since mSessionId was not started
+        verify(mDispatcher, times(0)).dispatchLoudnessCodecParameterChange(eq(mSessionId),
+                any());
+    }
+
+    @Test
+    public void updateCodecParameters_dispatchUpdates() throws Exception {
+        final LoudnessCodecInfo info = getLoudnessInfo(/*isDownmixing=*/true,
+                CODEC_METADATA_TYPE_MPEG_4);
+        mLoudnessHelper.registerLoudnessCodecUpdatesDispatcher(mDispatcher);
+
+        mLoudnessHelper.startLoudnessCodecUpdates(mSessionId);
+        mLoudnessHelper.addLoudnessCodecInfo(mSessionId, /*mediaCodecHash=*/222, info);
+
+        mLoudnessHelper.updateCodecParameters(
+                getApcListForApcWithPiidSid(mInitialApcPiid, mSessionId, 1));
+
+        // second dispatch since player configurations were updated
+        verify(mDispatcher, times(2)).dispatchLoudnessCodecParameterChange(eq(mSessionId),
                 any());
     }
 
@@ -180,13 +176,15 @@ public class LoudnessCodecHelperTest {
                 CODEC_METADATA_TYPE_MPEG_4);
         mLoudnessHelper.registerLoudnessCodecUpdatesDispatcher(mDispatcher);
 
-        mLoudnessHelper.startLoudnessCodecUpdates(mInitialApcPiid, List.of(info));
-        mLoudnessHelper.removeLoudnessCodecInfo(mInitialApcPiid, info);
+        mLoudnessHelper.startLoudnessCodecUpdates(mSessionId);
+        mLoudnessHelper.addLoudnessCodecInfo(mSessionId, /*mediaCodecHash=*/222, info);
+        mLoudnessHelper.removeLoudnessCodecInfo(mSessionId, info);
 
-        mLoudnessHelper.updateCodecParameters(getApcListForPiids(mInitialApcPiid));
+        mLoudnessHelper.updateCodecParameters(
+                getApcListForApcWithPiidSid(mInitialApcPiid, mSessionId, 1));
 
         // no second dispatch since codec info was removed for updates
-        verify(mDispatcher, times(1)).dispatchLoudnessCodecParameterChange(eq(mInitialApcPiid),
+        verify(mDispatcher, times(1)).dispatchLoudnessCodecParameterChange(eq(mSessionId),
                 any());
     }
 
@@ -196,13 +194,14 @@ public class LoudnessCodecHelperTest {
                 CODEC_METADATA_TYPE_MPEG_4);
         mLoudnessHelper.registerLoudnessCodecUpdatesDispatcher(mDispatcher);
 
-        mLoudnessHelper.startLoudnessCodecUpdates(mInitialApcPiid, List.of(info));
-        mLoudnessHelper.stopLoudnessCodecUpdates(mInitialApcPiid);
+        mLoudnessHelper.startLoudnessCodecUpdates(mSessionId);
+        mLoudnessHelper.stopLoudnessCodecUpdates(mSessionId);
 
-        mLoudnessHelper.updateCodecParameters(getApcListForPiids(mInitialApcPiid));
+        mLoudnessHelper.updateCodecParameters(
+                getApcListForApcWithPiidSid(mInitialApcPiid, mSessionId, 1));
 
         // no second dispatch since piid was removed for updates
-        verify(mDispatcher, times(1)).dispatchLoudnessCodecParameterChange(eq(mInitialApcPiid),
+        verify(mDispatcher, times(0)).dispatchLoudnessCodecParameterChange(eq(mSessionId),
                 any());
     }
 
@@ -308,23 +307,28 @@ public class LoudnessCodecHelperTest {
         assertEquals(6, loudnessParameters.getInt(KEY_AAC_DRC_EFFECT_TYPE));
     }
 
-    private List<AudioPlaybackConfiguration> getApcListForPiids(int... piids) {
+    private List<AudioPlaybackConfiguration> getApcListForApcWithPiidSid(int piid, int sessionId,
+            int devIdx) {
         final ArrayList<AudioPlaybackConfiguration> apcList = new ArrayList<>();
 
         AudioDeviceInfo[] devicesStatic = AudioManager.getDevicesStatic(GET_DEVICES_OUTPUTS);
-        assumeTrue(devicesStatic.length > 0);
-        int index = new Random().nextInt(devicesStatic.length);
-        Log.d(TAG, "Out devices number " + devicesStatic.length + ". Picking index " + index);
-        int deviceId = devicesStatic[index].getId();
+        assumeTrue(devIdx < devicesStatic.length);
+        Log.d(TAG, "Out devices number " + devicesStatic.length + ". Picking index " + devIdx);
+        int deviceId = devicesStatic[devIdx].getId();
 
-        for (int piid : piids) {
-            PlayerBase.PlayerIdCard idCard = Mockito.mock(PlayerBase.PlayerIdCard.class);
-            AudioPlaybackConfiguration apc =
-                    new AudioPlaybackConfiguration(idCard, piid, /*uid=*/1, /*pid=*/1);
-            apc.handleStateEvent(PLAYER_UPDATE_DEVICE_ID, deviceId);
+        PlayerBase.PlayerIdCard idCard = Mockito.mock(PlayerBase.PlayerIdCard.class);
+        AudioPlaybackConfiguration apc =
+                new AudioPlaybackConfiguration(idCard, piid, /*uid=*/1, /*pid=*/myPid());
+        apc.handleStateEvent(PLAYER_UPDATE_DEVICE_ID, deviceId);
+        apc.handleSessionIdEvent(sessionId);
+        apc.handleAudioAttributesEvent(new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .setAllowedCapturePolicy(ALLOW_CAPTURE_BY_NONE)
+                .build());
 
-            apcList.add(apc);
-        }
+        apcList.add(apc);
+
         return apcList;
     }
 

@@ -16,13 +16,13 @@
 
 package android.media;
 
-import static android.media.AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
 import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_TYPE_MPEG_4;
 import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_TYPE_MPEG_D;
 import static android.media.audio.Flags.FLAG_LOUDNESS_CONFIGURATOR_API;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
+import android.media.permission.SafeCloseable;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -32,7 +32,6 @@ import androidx.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -41,16 +40,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Class for getting recommended loudness parameter updates for audio decoders, according to the
- * encoded format and current audio routing. Those updates can be automatically applied to the
- * {@link MediaCodec} instance(s), or be provided to the user. The codec loudness management
- * parameter updates are defined by the CTA-2075 standard.
- * <p>A new object should be instantiated for each {@link AudioTrack} with the help
- * of {@link #create()} or {@link #create(Executor, OnLoudnessCodecUpdateListener)}.
+ * Class for getting recommended loudness parameter updates for audio decoders as they are used
+ * to play back media content according to the encoded format and current audio routing. These
+ * audio decoder updates leverage loudness metadata present in compressed audio streams. They
+ * ensure the loudness and dynamic range of the content is optimized to the physical
+ * characteristics of the audio output device (e.g. phone microspeakers vs headphones vs TV
+ * speakers).Those updates can be automatically applied to the {@link MediaCodec} instance(s), or
+ * be provided to the user. The codec loudness management parameter updates are computed in
+ * accordance to the CTA-2075 standard.
+ * <p>A new object should be instantiated for each audio session
+ * (see {@link AudioManager#generateAudioSessionId()}) using creator methods {@link #create(int)} or
+ * {@link #create(int, Executor, OnLoudnessCodecUpdateListener)}.
  */
 @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
-public class LoudnessCodecConfigurator {
-    private static final String TAG = "LoudnessCodecConfigurator";
+public class LoudnessCodecController implements SafeCloseable {
+    private static final String TAG = "LoudnessCodecController";
 
     /**
      * Listener used for receiving asynchronous loudness metadata updates.
@@ -67,6 +71,7 @@ public class LoudnessCodecConfigurator {
          *                    directly on the mediaCodec. The listener can modify
          *                    these values with their own edits which will be
          *                    returned for the mediaCodec configuration
+         *
          * @return a Bundle which contains the original computed codecValues
          * aggregated with user edits. The platform will configure the associated
          * MediaCodecs with the returned Bundle params.
@@ -74,159 +79,116 @@ public class LoudnessCodecConfigurator {
         @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
         @NonNull
         default Bundle onLoudnessCodecUpdate(@NonNull MediaCodec mediaCodec,
-                                             @NonNull Bundle codecValues) {
+                @NonNull Bundle codecValues) {
             return codecValues;
         }
     }
 
-    @NonNull private final LoudnessCodecDispatcher mLcDispatcher;
+    @NonNull
+    private final LoudnessCodecDispatcher mLcDispatcher;
 
-    private final Object mConfiguratorLock = new Object();
+    private final Object mControllerLock = new Object();
 
-    @GuardedBy("mConfiguratorLock")
-    private AudioTrack mAudioTrack;
+    private final int mSessionId;
 
-    @GuardedBy("mConfiguratorLock")
-    private final Executor mExecutor;
-
-    @GuardedBy("mConfiguratorLock")
-    private final OnLoudnessCodecUpdateListener mListener;
-
-    @GuardedBy("mConfiguratorLock")
+    @GuardedBy("mControllerLock")
     private final HashMap<LoudnessCodecInfo, Set<MediaCodec>> mMediaCodecs = new HashMap<>();
 
     /**
-     * Creates a new instance of {@link LoudnessCodecConfigurator}
+     * Creates a new instance of {@link LoudnessCodecController}
      *
      * <p>This method should be used when the client does not need to alter the
      * codec loudness parameters before they are applied to the audio decoders.
-     * Otherwise, use {@link #create(Executor, OnLoudnessCodecUpdateListener)}.
+     * Otherwise, use {@link #create(int, Executor, OnLoudnessCodecUpdateListener)}.
      *
-     * @return the {@link LoudnessCodecConfigurator} instance
+     * @param sessionId  the session ID of the track that will receive data
+     *                        from the added {@link MediaCodec}'s
+     *
+     * @return the {@link LoudnessCodecController} instance
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
-    public static @NonNull LoudnessCodecConfigurator create() {
-        return new LoudnessCodecConfigurator(new LoudnessCodecDispatcher(AudioManager.getService()),
-                Executors.newSingleThreadExecutor(), new OnLoudnessCodecUpdateListener() {});
+    public static @NonNull LoudnessCodecController create(int sessionId) {
+        final LoudnessCodecDispatcher dispatcher = new LoudnessCodecDispatcher(
+                AudioManager.getService());
+        final LoudnessCodecController controller = new LoudnessCodecController(dispatcher,
+                sessionId);
+        dispatcher.addLoudnessCodecListener(controller, Executors.newSingleThreadExecutor(),
+                new OnLoudnessCodecUpdateListener() {});
+        dispatcher.startLoudnessCodecUpdates(sessionId);
+        return controller;
     }
 
     /**
-     * Creates a new instance of {@link LoudnessCodecConfigurator}
+     * Creates a new instance of {@link LoudnessCodecController}
      *
      * <p>This method should be used when the client wants to alter the codec
      * loudness parameters before they are applied to the audio decoders.
-     * Otherwise, use {@link #create()}.
+     * Otherwise, use {@link #create( int)}.
      *
-     * @param executor {@link Executor} to handle the callbacks
-     * @param listener used for receiving updates
+     * @param sessionId       the session ID of the track that will receive data
+     *                        from the added {@link MediaCodec}'s
+     * @param executor        {@link Executor} to handle the callbacks
+     * @param listener        used for receiving updates
      *
-     * @return the {@link LoudnessCodecConfigurator} instance
+     * @return the {@link LoudnessCodecController} instance
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
-    public static @NonNull LoudnessCodecConfigurator create(
+    public static @NonNull LoudnessCodecController create(
+            int sessionId,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnLoudnessCodecUpdateListener listener) {
         Objects.requireNonNull(executor, "Executor cannot be null");
         Objects.requireNonNull(listener, "OnLoudnessCodecUpdateListener cannot be null");
 
-        return new LoudnessCodecConfigurator(new LoudnessCodecDispatcher(AudioManager.getService()),
-                executor, listener);
+        final LoudnessCodecDispatcher dispatcher = new LoudnessCodecDispatcher(
+                AudioManager.getService());
+        final LoudnessCodecController controller = new LoudnessCodecController(dispatcher,
+                sessionId);
+        dispatcher.addLoudnessCodecListener(controller, executor, listener);
+        dispatcher.startLoudnessCodecUpdates(sessionId);
+        return controller;
     }
 
     /**
-     * Creates a new instance of {@link LoudnessCodecConfigurator}
+     * Creates a new instance of {@link LoudnessCodecController}
      *
      * <p>This method should be used only in testing
      *
-     * @param service interface for communicating with AudioService
+     * @param sessionId  the session ID of the track that will receive data
+     *                        from the added {@link MediaCodec}'s
      * @param executor {@link Executor} to handle the callbacks
      * @param listener used for receiving updates
+     * @param service  interface for communicating with AudioService
      *
-     * @return the {@link LoudnessCodecConfigurator} instance
-     *
+     * @return the {@link LoudnessCodecController} instance
      * @hide
      */
-    public static @NonNull LoudnessCodecConfigurator createForTesting(
-            @NonNull IAudioService service,
+    public static @NonNull LoudnessCodecController createForTesting(
+            int sessionId,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnLoudnessCodecUpdateListener listener) {
+            @NonNull OnLoudnessCodecUpdateListener listener,
+            @NonNull IAudioService service) {
         Objects.requireNonNull(service, "IAudioService cannot be null");
         Objects.requireNonNull(executor, "Executor cannot be null");
         Objects.requireNonNull(listener, "OnLoudnessCodecUpdateListener cannot be null");
 
-        return new LoudnessCodecConfigurator(new LoudnessCodecDispatcher(service),
-                executor, listener);
+        final LoudnessCodecDispatcher dispatcher = new LoudnessCodecDispatcher(service);
+        final LoudnessCodecController controller = new LoudnessCodecController(dispatcher,
+                sessionId);
+        dispatcher.addLoudnessCodecListener(controller, executor, listener);
+        dispatcher.startLoudnessCodecUpdates(sessionId);
+        return controller;
     }
 
     /** @hide */
-    private LoudnessCodecConfigurator(@NonNull LoudnessCodecDispatcher lcDispatcher,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnLoudnessCodecUpdateListener listener) {
+    private LoudnessCodecController(@NonNull LoudnessCodecDispatcher lcDispatcher, int sessionId) {
         mLcDispatcher = Objects.requireNonNull(lcDispatcher, "Dispatcher cannot be null");
-        mExecutor = Objects.requireNonNull(executor, "Executor cannot be null");
-        mListener = Objects.requireNonNull(listener,
-                "OnLoudnessCodecUpdateListener cannot be null");
+        mSessionId = sessionId;
     }
 
     /**
-     * Sets the {@link AudioTrack} and starts receiving asynchronous updates for
-     * the registered {@link MediaCodec}s (see {@link #addMediaCodec(MediaCodec)})
-     *
-     * <p>The AudioTrack should be the one that receives audio data from the
-     * added audio decoders and is used to determine the device routing on which
-     * the audio streaming will take place. This will directly influence the
-     * loudness parameters.
-     * <p>After calling this method the framework will compute the initial set of
-     * parameters which will be applied to the registered codecs/returned to the
-     * listener for modification.
-     *
-     * @param audioTrack the track that will receive audio data from the provided
-     *                   audio decoders. In case this is {@code null} this
-     *                   method will have the effect of clearing the existing set
-     *                   {@link AudioTrack} and will stop receiving asynchronous
-     *                   loudness updates
-     */
-    @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
-    public void setAudioTrack(@Nullable AudioTrack audioTrack) {
-        List<LoudnessCodecInfo> codecInfos;
-        int piid = PLAYER_PIID_INVALID;
-        int oldPiid = PLAYER_PIID_INVALID;
-        synchronized (mConfiguratorLock) {
-            if (mAudioTrack != null && mAudioTrack == audioTrack) {
-                Log.v(TAG, "Loudness configurator already started for piid: "
-                        + mAudioTrack.getPlayerIId());
-                return;
-            }
-
-            codecInfos = getLoudnessCodecInfoList_l();
-            if (mAudioTrack != null) {
-                oldPiid = mAudioTrack.getPlayerIId();
-                mLcDispatcher.removeLoudnessCodecListener(this);
-            }
-            if (audioTrack != null) {
-                piid = audioTrack.getPlayerIId();
-                mLcDispatcher.addLoudnessCodecListener(this, mExecutor, mListener);
-            }
-
-            mAudioTrack = audioTrack;
-        }
-
-        if (oldPiid != PLAYER_PIID_INVALID) {
-            Log.v(TAG, "Loudness configurator stopping updates for piid: " + oldPiid);
-            mLcDispatcher.stopLoudnessCodecUpdates(oldPiid);
-        }
-        if (piid != PLAYER_PIID_INVALID) {
-            Log.v(TAG, "Loudness configurator starting updates for piid: " + piid);
-            mLcDispatcher.startLoudnessCodecUpdates(piid, codecInfos);
-        }
-    }
-
-    /**
-     * Adds a new {@link MediaCodec} that will stream data to an {@link AudioTrack}
-     * which the client sets
-     * (see {@link LoudnessCodecConfigurator#setAudioTrack(AudioTrack)}).
-     *
-     * <p>This method can be called while asynchronous updates are live.
+     * Adds a new {@link MediaCodec} that will stream data to a player
+     * which uses {@link #mSessionId}.
      *
      * <p>No new element will be added if the passed {@code mediaCodec} was
      * previously added.
@@ -234,23 +196,22 @@ public class LoudnessCodecConfigurator {
      * @param mediaCodec the codec to start receiving asynchronous loudness
      *                   updates. The codec has to be in a configured or started
      *                   state in order to add it for loudness updates.
+     * @return {@code false} if the {@code mediaCodec} was not configured or does
+     * not contain loudness metadata, {@code true} otherwise.
      * @throws IllegalArgumentException if the same {@code mediaCodec} was already
      *                                  added before.
-     * @return {@code false} if the {@code mediaCodec} was not configured or does
-     *         not contain loudness metadata, {@code true} otherwise.
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
     public boolean addMediaCodec(@NonNull MediaCodec mediaCodec) {
         final MediaCodec mc = Objects.requireNonNull(mediaCodec,
                 "MediaCodec for addMediaCodec cannot be null");
-        int piid = PLAYER_PIID_INVALID;
         final LoudnessCodecInfo mcInfo = getCodecInfo(mc);
 
         if (mcInfo == null) {
             Log.v(TAG, "Could not extract codec loudness information");
             return false;
         }
-        synchronized (mConfiguratorLock) {
+        synchronized (mControllerLock) {
             final AtomicBoolean containsCodec = new AtomicBoolean(false);
             Set<MediaCodec> newSet = mMediaCodecs.computeIfPresent(mcInfo, (info, codecSet) -> {
                 containsCodec.set(!codecSet.add(mc));
@@ -263,16 +224,12 @@ public class LoudnessCodecConfigurator {
             }
             if (containsCodec.get()) {
                 throw new IllegalArgumentException(
-                        "Loudness configurator already added " + mediaCodec);
-            }
-            if (mAudioTrack != null) {
-                piid = mAudioTrack.getPlayerIId();
+                        "Loudness controller already added " + mediaCodec);
             }
         }
 
-        if (piid != PLAYER_PIID_INVALID) {
-            mLcDispatcher.addLoudnessCodecInfo(piid, mediaCodec.hashCode(), mcInfo);
-        }
+        mLcDispatcher.addLoudnessCodecInfo(mSessionId, mediaCodec.hashCode(),
+                mcInfo);
 
         return true;
     }
@@ -291,7 +248,6 @@ public class LoudnessCodecConfigurator {
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
     public void removeMediaCodec(@NonNull MediaCodec mediaCodec) {
-        int piid = PLAYER_PIID_INVALID;
         LoudnessCodecInfo mcInfo;
         AtomicBoolean removedMc = new AtomicBoolean(false);
         AtomicBoolean removeInfo = new AtomicBoolean(false);
@@ -302,10 +258,7 @@ public class LoudnessCodecConfigurator {
         if (mcInfo == null) {
             throw new IllegalArgumentException("Could not extract codec loudness information");
         }
-        synchronized (mConfiguratorLock) {
-            if (mAudioTrack != null) {
-                piid = mAudioTrack.getPlayerIId();
-            }
+        synchronized (mControllerLock) {
             mMediaCodecs.computeIfPresent(mcInfo, (format, mcs) -> {
                 removedMc.set(mcs.remove(mediaCodec));
                 if (mcs.isEmpty()) {
@@ -317,66 +270,79 @@ public class LoudnessCodecConfigurator {
             });
             if (!removedMc.get()) {
                 throw new IllegalArgumentException(
-                        "Loudness configurator does not contain " + mediaCodec);
+                        "Loudness controller does not contain " + mediaCodec);
             }
         }
 
-        if (piid != PLAYER_PIID_INVALID && removeInfo.get()) {
-            mLcDispatcher.removeLoudnessCodecInfo(piid, mcInfo);
+        if (removeInfo.get()) {
+            mLcDispatcher.removeLoudnessCodecInfo(mSessionId, mcInfo);
         }
     }
 
     /**
-     * Gets synchronous loudness updates when no listener is required. The provided
-     * {@link MediaCodec} streams audio data to the passed {@link AudioTrack}.
+     * Returns the loudness parameters of the registered audio decoders
      *
-     * @param audioTrack track that receives audio data from the passed
-     *                   {@link MediaCodec}
-     * @param mediaCodec codec that decodes loudness annotated data for the passed
-     *                   {@link AudioTrack}
+     * <p>Those parameters may have been automatically applied if the
+     * {@code LoudnessCodecController} was created with {@link #create(int)}, or they are the
+     * parameters that have been sent to the {@link OnLoudnessCodecUpdateListener} if using a
+     * codec update listener.
      *
-     * @return the {@link Bundle} containing the current loudness parameters. Caller is
-     * responsible to update the {@link MediaCodec}
+     * @param mediaCodec codec that decodes loudness annotated data. Has to be added
+     *                   with {@link #addMediaCodec(MediaCodec)} before calling this
+     *                   method
+     * @throws IllegalArgumentException if the passed {@link MediaCodec} was not
+     *                                  added before calling this method
+     *
+     * @return the {@link Bundle} containing the current loudness parameters.
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
     @NonNull
-    public Bundle getLoudnessCodecParams(@NonNull AudioTrack audioTrack,
-            @NonNull MediaCodec mediaCodec) {
-        Objects.requireNonNull(audioTrack, "Passed audio track cannot be null");
+    public Bundle getLoudnessCodecParams(@NonNull MediaCodec mediaCodec) {
+        Objects.requireNonNull(mediaCodec, "MediaCodec cannot be null");
 
         LoudnessCodecInfo codecInfo = getCodecInfo(mediaCodec);
         if (codecInfo == null) {
-            return new Bundle();
+            throw new IllegalArgumentException("MediaCodec does not have valid codec information");
         }
 
-        return mLcDispatcher.getLoudnessCodecParams(audioTrack.getPlayerIId(), codecInfo);
+        synchronized (mControllerLock) {
+            final Set<MediaCodec> codecs = mMediaCodecs.get(codecInfo);
+            if (codecs == null || !codecs.contains(mediaCodec)) {
+                throw new IllegalArgumentException(
+                        "MediaCodec was not added for loudness annotation");
+            }
+        }
+
+        return mLcDispatcher.getLoudnessCodecParams(codecInfo);
+    }
+
+    /**
+     * Stops any loudness updates and frees up the resources.
+     */
+    @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
+    public void release() {
+        close();
     }
 
     /** @hide */
-    /*package*/ int getAssignedTrackPiid() {
-        int piid = PLAYER_PIID_INVALID;
-
-        synchronized (mConfiguratorLock) {
-            if (mAudioTrack == null) {
-                return piid;
-            }
-            piid = mAudioTrack.getPlayerIId();
+    @Override
+    public void close() {
+        synchronized (mControllerLock) {
+            mMediaCodecs.clear();
         }
+        mLcDispatcher.stopLoudnessCodecUpdates(mSessionId);
+    }
 
-        return piid;
+    /** @hide */
+    /*package*/ int getSessionId() {
+        return mSessionId;
     }
 
     /** @hide */
     /*package*/ Map<LoudnessCodecInfo, Set<MediaCodec>> getRegisteredMediaCodecs() {
-        synchronized (mConfiguratorLock) {
+        synchronized (mControllerLock) {
             return mMediaCodecs;
         }
-    }
-
-    @GuardedBy("mConfiguratorLock")
-    private List<LoudnessCodecInfo> getLoudnessCodecInfoList_l() {
-        return mMediaCodecs.values().stream().flatMap(listMc -> listMc.stream().map(
-                LoudnessCodecConfigurator::getCodecInfo)).toList();
     }
 
     @Nullable
