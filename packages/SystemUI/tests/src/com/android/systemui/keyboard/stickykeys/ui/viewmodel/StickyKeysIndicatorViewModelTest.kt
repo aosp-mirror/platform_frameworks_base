@@ -34,6 +34,7 @@ import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.SHIFT
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -46,6 +47,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
