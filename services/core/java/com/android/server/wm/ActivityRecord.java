@@ -3965,20 +3965,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return removedFromHistory;
     }
 
-    boolean safelyDestroy(String reason) {
-        if (isDestroyable()) {
-            if (DEBUG_SWITCH) {
-                final Task task = getTask();
-                Slog.v(TAG_SWITCH, "Safely destroying " + this + " in state " + getState()
-                        + " resumed=" + task.getTopResumedActivity()
-                        + " pausing=" + task.getTopPausingActivity()
-                        + " for reason " + reason);
-            }
-            return destroyImmediately(reason);
-        }
-        return false;
-    }
-
     /** Note: call {@link #cleanUp(boolean, boolean)} before this method. */
     void removeFromHistory(String reason) {
         finishActivityResults(Activity.RESULT_CANCELED,
@@ -4045,10 +4031,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mDisplayContent != null) {
             mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
         }
-    }
-
-    boolean isFinishing() {
-        return finishing;
     }
 
     /**

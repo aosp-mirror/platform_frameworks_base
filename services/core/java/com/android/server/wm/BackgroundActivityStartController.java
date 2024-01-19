@@ -1726,7 +1726,7 @@ public class BackgroundActivityStartController {
         return ar
                 + " :: visible=" + ar.isVisible()
                 + ", visibleRequested=" + ar.isVisibleRequested()
-                + ", finishing=" + ar.isFinishing()
+                + ", finishing=" + ar.finishing
                 + ", alwaysOnTop=" + ar.isAlwaysOnTop()
                 + ", lastLaunchTime=" + ar.lastLaunchTime
                 + ", lastVisibleTime=" + ar.lastVisibleTime
