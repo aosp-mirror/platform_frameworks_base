@@ -86,7 +86,7 @@ fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): Settings
     )
 }
 
-object NullPageProvider : SettingsPageProvider {
+internal object NullPageProvider : SettingsPageProvider {
     override val name = NULL_PAGE_NAME
 }
 
