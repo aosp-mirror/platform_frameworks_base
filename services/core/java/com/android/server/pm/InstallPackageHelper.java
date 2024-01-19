@@ -46,10 +46,7 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
 import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.APP_METADATA_FILE_NAME;
-import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
-import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
-import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
@@ -173,7 +170,6 @@ import com.android.server.EventLogTags;
 import com.android.server.SystemConfig;
 import com.android.server.art.model.DexoptResult;
 import com.android.server.criticalevents.CriticalEventLog;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
@@ -272,8 +268,6 @@ final class InstallPackageHelper {
         final PackageSetting oldPkgSetting = request.getScanRequestOldPackageSetting();
         final PackageSetting originalPkgSetting = request.getScanRequestOriginalPackageSetting();
         final String realPkgName = request.getRealPackageName();
-        final List<String> changedAbiCodePath =
-                useArtService() ? null : request.getChangedAbiCodePath();
         final PackageSetting pkgSetting;
         if (request.getScanRequestPackageSetting() != null) {
             SharedUserSetting requestSharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(
@@ -448,23 +442,6 @@ final class InstallPackageHelper {
             sharedUserSetting.signatures.mSigningDetails = reconciledPkg.mSigningDetails;
         }
         pkgSetting.setSigningDetails(reconciledPkg.mSigningDetails);
-
-        // The conditional on useArtService() for changedAbiCodePath above means this is skipped
-        // when ART Service is in use, since it has its own dex file GC.
-        if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
-            for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
-                final String codePathString = changedAbiCodePath.get(i);
-                try {
-                    synchronized (mPm.mInstallLock) {
-                        mPm.mInstaller.rmdex(codePathString,
-                                getDexCodeInstructionSet(getPreferredInstructionSet()));
-                    }
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
-                } catch (Installer.InstallerException ignored) {
-                }
-            }
-        }
 
         final int userId = request.getUserId();
         // Modify state for the given package setting
@@ -2538,20 +2515,6 @@ final class InstallPackageHelper {
                         pkg.getBaseApkPath(), pkg.getSplitCodePaths());
             }
 
-            // ART Service handles this on demand instead.
-            if (!useArtService() && pkg != null) {
-                // Prepare the application profiles for the new code paths.
-                // This needs to be done before invoking dexopt so that any install-time profile
-                // can be used for optimizations.
-                try {
-                    mArtManagerService.prepareAppProfiles(pkg,
-                            mPm.resolveUserIds(installRequest.getUserId()),
-                            /* updateReferenceProfileContent= */ true);
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
             // Construct the DexoptOptions early to see if we should skip running dexopt.
             //
             // Do not run PackageDexOptimizer through the local performDexOpt
@@ -2602,35 +2565,10 @@ final class InstallPackageHelper {
 
                 realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
 
-                if (useArtService()) {
-                    DexoptResult dexOptResult = DexOptHelper.dexoptPackageUsingArtService(
-                            installRequest, dexoptOptions);
-                    installRequest.onDexoptFinished(dexOptResult);
-                } else {
-                    try {
-                        mPackageDexOptimizer.performDexOpt(pkg, realPkgSetting,
-                                null /* instructionSets */,
-                                mPm.getOrCreateCompilerPackageStats(pkg),
-                                mDexManager.getPackageUseInfoOrDefault(packageName), dexoptOptions);
-                    } catch (LegacyDexoptDisabledException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                DexoptResult dexOptResult =
+                        DexOptHelper.dexoptPackageUsingArtService(installRequest, dexoptOptions);
+                installRequest.onDexoptFinished(dexOptResult);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
-
-            if (!useArtService()) {
-                // Notify BackgroundDexOptService that the package has been changed.
-                // If this is an update of a package which used to fail to compile,
-                // BackgroundDexOptService will remove it from its denylist.
-                // ART Service currently doesn't support this and will retry packages in every
-                // background dexopt.
-                // TODO: Layering violation
-                try {
-                    BackgroundDexOptService.getService().notifyPackageChanged(packageName);
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
-                }
             }
         }
         PackageManagerServiceUtils.waitForNativeBinariesExtractionForIncremental(

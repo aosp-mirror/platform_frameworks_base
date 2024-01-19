@@ -22,13 +22,11 @@ import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILATI
 import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK;
 import static com.android.internal.art.ArtStatsLog.ART_DATUM_REPORTED__COMPILE_FILTER__ART_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK;
 
-import android.app.job.JobParameters;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.jar.StrictJarFile;
 
 import com.android.internal.art.ArtStatsLog;
-import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.PackageManagerService;
 
 import java.io.IOException;
@@ -301,44 +299,6 @@ public class ArtStatsLogUtils {
                             ArtStatsLog.ART_DATUM_REPORTED__ISA__ART_ISA_UNKNOWN),
                     ArtStatsLog.ART_DATUM_REPORTED__GC__ART_GC_COLLECTOR_TYPE_UNKNOWN,
                     ArtStatsLog.ART_DATUM_REPORTED__UFFD_SUPPORT__ART_UFFD_SUPPORT_UNKNOWN);
-        }
-    }
-
-    private static final Map<Integer, Integer> STATUS_MAP =
-            Map.of(BackgroundDexOptService.STATUS_UNSPECIFIED,
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_UNKNOWN,
-                    BackgroundDexOptService.STATUS_OK,
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_JOB_FINISHED,
-                    BackgroundDexOptService.STATUS_ABORT_BY_CANCELLATION,
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_ABORT_BY_CANCELLATION,
-                    BackgroundDexOptService.STATUS_ABORT_NO_SPACE_LEFT,
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_ABORT_NO_SPACE_LEFT,
-                    BackgroundDexOptService.STATUS_ABORT_THERMAL,
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_ABORT_THERMAL,
-                    BackgroundDexOptService.STATUS_ABORT_BATTERY,
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_ABORT_BATTERY,
-                    BackgroundDexOptService.STATUS_DEX_OPT_FAILED,
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_JOB_FINISHED,
-                    BackgroundDexOptService.STATUS_FATAL_ERROR,
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_FATAL_ERROR);
-
-    /** Helper class to write background dexopt job stats to statsd. */
-    public static class BackgroundDexoptJobStatsLogger {
-        /** Writes background dexopt job stats to statsd. */
-        public void write(@BackgroundDexOptService.Status int status,
-                          @JobParameters.StopReason int cancellationReason,
-                          long durationMs) {
-            ArtStatsLog.write(
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED,
-                    STATUS_MAP.getOrDefault(status,
-                            ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_UNKNOWN),
-                    cancellationReason,
-                    durationMs,
-                    0, // deprecated, used to be durationIncludingSleepMs
-                    0, // optimizedPackagesCount
-                    0, // packagesDependingOnBootClasspathCount
-                    0, // totalPackagesCount
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__PASS__PASS_UNKNOWN);
         }
     }
 }

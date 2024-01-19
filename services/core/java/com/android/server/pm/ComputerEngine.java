@@ -137,7 +137,6 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -419,7 +418,6 @@ public class ComputerEngine implements Computer {
     private final PackageDexOptimizer mPackageDexOptimizer;
     private final DexManager mDexManager;
     private final CompilerStats mCompilerStats;
-    private final BackgroundDexOptService mBackgroundDexOptService;
     private final PackageManagerInternal.ExternalSourcesPolicy mExternalSourcesPolicy;
     private final CrossProfileIntentResolverEngine mCrossProfileIntentResolverEngine;
 
@@ -472,7 +470,6 @@ public class ComputerEngine implements Computer {
         mPackageDexOptimizer = args.service.mPackageDexOptimizer;
         mDexManager = args.service.getDexManager();
         mCompilerStats = args.service.mCompilerStats;
-        mBackgroundDexOptService = args.service.mBackgroundDexOptService;
         mExternalSourcesPolicy = args.service.mExternalSourcesPolicy;
         mCrossProfileIntentResolverEngine = new CrossProfileIntentResolverEngine(
                 mUserManager, mDomainVerificationManager, mDefaultAppProvider, mContext);
@@ -3093,40 +3090,7 @@ public class ComputerEngine implements Computer {
                 }
                 ipw.println("Dexopt state:");
                 ipw.increaseIndent();
-                if (DexOptHelper.useArtService()) {
-                    DexOptHelper.dumpDexoptState(ipw, packageName);
-                } else {
-                    Collection<? extends PackageStateInternal> pkgSettings;
-                    if (setting != null) {
-                        pkgSettings = Collections.singletonList(setting);
-                    } else {
-                        pkgSettings = mSettings.getPackages().values();
-                    }
-
-                    for (PackageStateInternal pkgSetting : pkgSettings) {
-                        final AndroidPackage pkg = pkgSetting.getPkg();
-                        if (pkg == null || pkg.isApex()) {
-                            // Skip APEX which is not dex-optimized
-                            continue;
-                        }
-                        final String pkgName = pkg.getPackageName();
-                        ipw.println("[" + pkgName + "]");
-                        ipw.increaseIndent();
-
-                        // TODO(b/251903639): Call into ART Service.
-                        try {
-                            mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
-                                    mDexManager.getPackageUseInfoOrDefault(pkgName));
-                        } catch (LegacyDexoptDisabledException e) {
-                            throw new RuntimeException(e);
-                        }
-                        ipw.decreaseIndent();
-                    }
-                    ipw.println("BgDexopt state:");
-                    ipw.increaseIndent();
-                    mBackgroundDexOptService.dump(ipw);
-                    ipw.decreaseIndent();
-                }
+                DexOptHelper.dumpDexoptState(ipw, packageName);
                 ipw.decreaseIndent();
                 break;
             }
