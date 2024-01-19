@@ -363,7 +363,7 @@
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"繪圖時在視窗中閃爍顯示畫面"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"顯示硬體層更新"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"在硬體層更新時閃綠燈"</string>
-    <string name="debug_hw_overdraw" msgid="8944851091008756796">"針對 GPU 重複繪圖進行偵錯"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"針對 GPU 過度繪製進行偵錯"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"停用硬體重疊圖層"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"一律使用 GPU 進行畫面合成"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"模擬色彩空間"</string>
@@ -505,7 +505,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"最大"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"自訂 (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"選單"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"如要在示範模式中恢復原廠設定，請輸入密碼"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"如要在展示模式中恢復原廠設定，請輸入密碼"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"下一步"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"請輸入密碼"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"啟用的輸入法"</string>
