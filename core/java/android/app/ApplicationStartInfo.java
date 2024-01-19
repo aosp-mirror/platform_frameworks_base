@@ -413,7 +413,9 @@ public final class ApplicationStartInfo implements Parcelable {
      * @hide
      */
     public void setIntent(Intent startIntent) {
-        mStartIntent = startIntent;
+        if (startIntent != null) {
+            mStartIntent = startIntent.maybeStripForHistory();
+        }
     }
 
     /**
@@ -548,6 +550,8 @@ public final class ApplicationStartInfo implements Parcelable {
     /**
      * The intent used to launch the application.
      *
+     * <p class="note"> Note: Intent is stripped and does not include extras.</p>
+     *
      * <p class="note"> Note: field will be set for any {@link #getStartupState} value.</p>
      */
     @SuppressLint("IntentBuilderName")
@@ -662,6 +666,7 @@ public final class ApplicationStartInfo implements Parcelable {
     private static final String PROTO_SERIALIZER_ATTRIBUTE_TIMESTAMP = "timestamp";
     private static final String PROTO_SERIALIZER_ATTRIBUTE_KEY = "key";
     private static final String PROTO_SERIALIZER_ATTRIBUTE_TS = "ts";
+    private static final String PROTO_SERIALIZER_ATTRIBUTE_INTENT = "intent";
 
     /**
      * Write to a protocol buffer output stream. Protocol buffer message definition at {@link
@@ -702,10 +707,17 @@ public final class ApplicationStartInfo implements Parcelable {
         }
         proto.write(ApplicationStartInfoProto.START_TYPE, mStartType);
         if (mStartIntent != null) {
-            Parcel parcel = Parcel.obtain();
-            mStartIntent.writeToParcel(parcel, 0);
-            proto.write(ApplicationStartInfoProto.START_INTENT, parcel.marshall());
-            parcel.recycle();
+            ByteArrayOutputStream intentBytes = new ByteArrayOutputStream();
+            ObjectOutputStream intentOut = new ObjectOutputStream(intentBytes);
+            TypedXmlSerializer serializer = Xml.resolveSerializer(intentOut);
+            serializer.startDocument(null, true);
+            serializer.startTag(null, PROTO_SERIALIZER_ATTRIBUTE_INTENT);
+            mStartIntent.saveToXml(serializer);
+            serializer.endTag(null, PROTO_SERIALIZER_ATTRIBUTE_INTENT);
+            serializer.endDocument();
+            proto.write(ApplicationStartInfoProto.START_INTENT,
+                    intentBytes.toByteArray());
+            intentOut.close();
         }
         proto.write(ApplicationStartInfoProto.LAUNCH_MODE, mLaunchMode);
         proto.end(token);
@@ -772,15 +784,17 @@ public final class ApplicationStartInfo implements Parcelable {
                     mStartType = proto.readInt(ApplicationStartInfoProto.START_TYPE);
                     break;
                 case (int) ApplicationStartInfoProto.START_INTENT:
-                    byte[] startIntentBytes = proto.readBytes(
-                        ApplicationStartInfoProto.START_INTENT);
-                    if (startIntentBytes.length > 0) {
-                        Parcel parcel = Parcel.obtain();
-                        parcel.unmarshall(startIntentBytes, 0, startIntentBytes.length);
-                        parcel.setDataPosition(0);
-                        mStartIntent = Intent.CREATOR.createFromParcel(parcel);
-                        parcel.recycle();
+                    ByteArrayInputStream intentBytes = new ByteArrayInputStream(proto.readBytes(
+                            ApplicationStartInfoProto.START_INTENT));
+                    ObjectInputStream intentIn = new ObjectInputStream(intentBytes);
+                    try {
+                        TypedXmlPullParser parser = Xml.resolvePullParser(intentIn);
+                        XmlUtils.beginDocument(parser, PROTO_SERIALIZER_ATTRIBUTE_INTENT);
+                        mStartIntent = Intent.restoreFromXml(parser);
+                    } catch (XmlPullParserException e) {
+                        // Intent lost
                     }
+                    intentIn.close();
                     break;
                 case (int) ApplicationStartInfoProto.LAUNCH_MODE:
                     mLaunchMode = proto.readInt(ApplicationStartInfoProto.LAUNCH_MODE);
