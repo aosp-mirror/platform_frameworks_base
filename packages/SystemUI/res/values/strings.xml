@@ -3254,7 +3254,7 @@
     <string name="install_app">Install app</string>
 
     <!-- Instructions informing the user they can swipe up on the lockscreen to dismiss [CHAR LIMIT=48]-->
-    <string name="dismissible_keyguard_swipe">Swipe to continue</string>
+    <string name="dismissible_keyguard_swipe">Swipe up to continue</string>
 
     <!--- Title of the dialog appearing when an external display is connected, asking whether to start mirroring [CHAR LIMIT=NONE]-->
     <string name="connected_display_dialog_start_mirroring">Mirror to external display?</string>
