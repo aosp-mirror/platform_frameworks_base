@@ -47,5 +47,19 @@ public abstract class GrammaticalInflectionManagerInternal {
      * @see Configuration#getGrammaticalGender
      */
     public abstract @Configuration.GrammaticalGender int getSystemGrammaticalGender(int userId);
+
+    /**
+     * Retrieve the system grammatical gender.
+     *
+     * @return the value of grammatical gender
+     *
+     */
+    public abstract @Configuration.GrammaticalGender int retrieveSystemGrammaticalGender(
+            Configuration configuration);
+
+    /**
+     * Whether the package can get the system grammatical gender or not.
+     */
+    public abstract boolean canGetSystemGrammaticalGender(int uid, String packageName);
 }
 
