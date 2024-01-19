@@ -3475,6 +3475,10 @@ public class InputManagerService extends IInputManager.Stub
     private void applyAdditionalDisplayInputPropertiesLocked(
             AdditionalDisplayInputProperties properties) {
         // Handle changes to each of the individual properties.
+        // TODO(b/293587049): This approach for updating pointer display properties is only for when
+        //  PointerChoreographer is disabled. Remove this logic when PointerChoreographer is
+        //  permanently enabled.
+
         if (properties.pointerIconVisible != mCurrentDisplayProperties.pointerIconVisible) {
             mCurrentDisplayProperties.pointerIconVisible = properties.pointerIconVisible;
             if (properties.pointerIconVisible) {
@@ -3493,7 +3497,6 @@ public class InputManagerService extends IInputManager.Stub
                 != mCurrentDisplayProperties.mousePointerAccelerationEnabled) {
             mCurrentDisplayProperties.mousePointerAccelerationEnabled =
                     properties.mousePointerAccelerationEnabled;
-            mNative.setMousePointerAccelerationEnabled(properties.mousePointerAccelerationEnabled);
         }
     }
 
@@ -3507,9 +3510,14 @@ public class InputManagerService extends IInputManager.Stub
                 mAdditionalDisplayInputProperties.put(displayId, properties);
             }
             final boolean oldPointerIconVisible = properties.pointerIconVisible;
+            final boolean oldMouseAccelerationEnabled = properties.mousePointerAccelerationEnabled;
             updater.accept(properties);
             if (oldPointerIconVisible != properties.pointerIconVisible) {
                 mNative.setPointerIconVisibility(displayId, properties.pointerIconVisible);
+            }
+            if (oldMouseAccelerationEnabled != properties.mousePointerAccelerationEnabled) {
+                mNative.setMousePointerAccelerationEnabled(displayId,
+                        properties.mousePointerAccelerationEnabled);
             }
             if (properties.allDefaults()) {
                 mAdditionalDisplayInputProperties.remove(displayId);
