@@ -22,16 +22,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.widgets.WidgetConfigurator
 
 @Composable
 fun rememberContentListState(
+    widgetConfigurator: WidgetConfigurator?,
     communalContent: List<CommunalContentModel>,
     viewModel: BaseCommunalViewModel,
 ): ContentListState {
     return remember(communalContent) {
         ContentListState(
             communalContent,
-            viewModel::onAddWidget,
+            { componentName, priority ->
+                viewModel.onAddWidget(
+                    componentName,
+                    priority,
+                    widgetConfigurator,
+                )
+            },
             viewModel::onDeleteWidget,
             viewModel::onReorderWidgets,
         )
