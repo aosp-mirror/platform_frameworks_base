@@ -16,6 +16,7 @@
 
 package android.media.tv.ad;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -24,6 +25,11 @@ import android.content.res.XmlResourceParser;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.media.tv.TvInputManager;
+import android.media.tv.TvTrackInfo;
+import android.media.tv.TvView;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -34,6 +40,9 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+import java.util.concurrent.Executor;
+
 /**
  * Displays contents of TV AD services.
  * @hide
@@ -42,11 +51,22 @@ public class TvAdView extends ViewGroup {
     private static final String TAG = "TvAdView";
     private static final boolean DEBUG = false;
 
+    /**
+     * The name of the method where the error happened, if applicable. For example, if there is an
+     * error during signing, the request name is "onRequestSigning".
+     * @see #notifyError(String, Bundle)
+     * @hide
+     */
+    public static final String ERROR_KEY_METHOD_NAME = "method_name";
+
     private final TvAdManager mTvAdManager;
 
     private final Handler mHandler = new Handler();
+    private final Object mCallbackLock = new Object();
     private TvAdManager.Session mSession;
     private MySessionCallback mSessionCallback;
+    private TvAdCallback mCallback;
+    private Executor mCallbackExecutor;
 
     private final AttributeSet mAttrs;
     private final int mDefStyleAttr;
@@ -124,6 +144,37 @@ public class TvAdView extends ViewGroup {
         mDefStyleAttr = defStyleAttr;
         resetSurfaceView();
         mTvAdManager = (TvAdManager) getContext().getSystemService(Context.TV_AD_SERVICE);
+    }
+
+    /**
+     * Sets the TvAdView to receive events from TvInputService. This method links the session of
+     * TvAdManager to TvInputManager session, so the TvAdService can get the TvInputService events.
+     *
+     * @param tvView the TvView to be linked to this TvAdView via linking of Sessions. {@code null}
+     *               to unlink the TvView.
+     * @return {@code true} if it's linked successfully; {@code false} otherwise.
+     * @hide
+     */
+    public boolean setTvView(@Nullable TvView tvView) {
+        if (tvView == null) {
+            return unsetTvView();
+        }
+        TvInputManager.Session inputSession = tvView.getInputSession();
+        if (inputSession == null || mSession == null) {
+            return false;
+        }
+        mSession.setInputSession(inputSession);
+        inputSession.setAdSession(mSession);
+        return true;
+    }
+
+    private boolean unsetTvView() {
+        if (mSession == null || mSession.getInputSession() == null) {
+            return false;
+        }
+        mSession.getInputSession().setAdSession(null);
+        mSession.setInputSession(null);
+        return true;
     }
 
     /** @hide */
@@ -293,13 +344,193 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Starts the AD service.
+     * @hide
      */
     public void startAdService() {
         if (DEBUG) {
-            Log.d(TAG, "start");
+            Log.d(TAG, "startAdService");
         }
         if (mSession != null) {
             mSession.startAdService();
+        }
+    }
+
+    /**
+     * Stops the AD service.
+     */
+    public void stopAdService() {
+        if (DEBUG) {
+            Log.d(TAG, "stopAdService");
+        }
+        if (mSession != null) {
+            mSession.stopAdService();
+        }
+    }
+
+    /**
+     * Resets the AD service.
+     *
+     * <p>This releases the resources of the corresponding {@link TvAdService.Session}.
+     */
+    public void resetAdService() {
+        if (DEBUG) {
+            Log.d(TAG, "resetAdService");
+        }
+        if (mSession != null) {
+            mSession.resetAdService();
+        }
+    }
+
+    /**
+     * Sends current video bounds to related TV AD service.
+     *
+     * @param bounds the rectangle area for rendering the current video.
+     */
+    public void sendCurrentVideoBounds(@NonNull Rect bounds) {
+        if (DEBUG) {
+            Log.d(TAG, "sendCurrentVideoBounds");
+        }
+        if (mSession != null) {
+            mSession.sendCurrentVideoBounds(bounds);
+        }
+    }
+
+    /**
+     * Sends current channel URI to related TV AD service.
+     *
+     * @param channelUri The current channel URI; {@code null} if there is no currently tuned
+     *                   channel.
+     */
+    public void sendCurrentChannelUri(@Nullable Uri channelUri) {
+        if (DEBUG) {
+            Log.d(TAG, "sendCurrentChannelUri");
+        }
+        if (mSession != null) {
+            mSession.sendCurrentChannelUri(channelUri);
+        }
+    }
+
+    /**
+     * Sends track info list to related TV AD service.
+     */
+    public void sendTrackInfoList(@Nullable List<TvTrackInfo> tracks) {
+        if (DEBUG) {
+            Log.d(TAG, "sendTrackInfoList");
+        }
+        if (mSession != null) {
+            mSession.sendTrackInfoList(tracks);
+        }
+    }
+
+    /**
+     * Sends current TV input ID to related TV AD service.
+     *
+     * @param inputId The current TV input ID whose channel is tuned. {@code null} if no channel is
+     *                tuned.
+     * @see android.media.tv.TvInputInfo
+     */
+    public void sendCurrentTvInputId(@Nullable String inputId) {
+        if (DEBUG) {
+            Log.d(TAG, "sendCurrentTvInputId");
+        }
+        if (mSession != null) {
+            mSession.sendCurrentTvInputId(inputId);
+        }
+    }
+
+    /**
+     * Sends signing result to related TV AD service.
+     *
+     * <p>This is used when the corresponding server of the ADs requires signing during handshaking,
+     * and the AD service doesn't have the built-in private key. The private key is provided by the
+     * content providers and pre-built in the related app, such as TV app.
+     *
+     * @param signingId the ID to identify the request. It's the same as the corresponding ID in
+     *        {@link TvAdService.Session#requestSigning(String, String, String, byte[])}
+     * @param result the signed result.
+     * @hide
+     */
+    public void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+        if (DEBUG) {
+            Log.d(TAG, "sendSigningResult");
+        }
+        if (mSession != null) {
+            mSession.sendSigningResult(signingId, result);
+        }
+    }
+
+    /**
+     * Notifies the corresponding {@link TvAdService} when there is an error.
+     *
+     * @param errMsg the message of the error.
+     * @param params additional parameters of the error. For example, the signingId of {@link
+     *     TvAdView.TvAdCallback#onRequestSigning(String, String, String, String, byte[])} can be
+     *     included to identify the related signing request, and the method name "onRequestSigning"
+     *     can also be added to the params.
+     *
+     * @see #ERROR_KEY_METHOD_NAME
+     */
+    public void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
+        if (DEBUG) {
+            Log.d(TAG, "notifyError msg=" + errMsg + "; params=" + params);
+        }
+        if (mSession != null) {
+            mSession.notifyError(errMsg, params);
+        }
+    }
+
+    /**
+     * This is called to notify the corresponding TV AD service when a new TV message is received.
+     *
+     * @param type The type of message received, such as
+     * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+     * @param data The raw data of the message. The bundle keys are:
+     *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+     *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
+     *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+     *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+     *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+     *             how to parse this data.
+     */
+    public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType int type,
+            @NonNull Bundle data) {
+        if (DEBUG) {
+            Log.d(TAG, "notifyTvMessage type=" + type
+                    + "; data=" + data);
+        }
+        if (mSession != null) {
+            mSession.notifyTvMessage(type, data);
+        }
+    }
+
+    /**
+     * Sets the callback to be invoked when an event is dispatched to this TvAdView.
+     *
+     * @param callback the callback to receive events. MUST NOT be {@code null}.
+     *
+     * @see #clearCallback()
+     * @hide
+     */
+    public void setCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull TvAdCallback callback) {
+        com.android.internal.util.AnnotationValidations.validate(NonNull.class, null, callback);
+        synchronized (mCallbackLock) {
+            mCallbackExecutor = executor;
+            mCallback = callback;
+        }
+    }
+
+    /**
+     * Clears the callback.
+     *
+     * @see #setCallback(Executor, TvAdCallback)
+     * @hide
+     */
+    public void clearCallback() {
+        synchronized (mCallbackLock) {
+            mCallback = null;
+            mCallbackExecutor = null;
         }
     }
 
@@ -375,5 +606,12 @@ public class TvAdView extends ViewGroup {
             mUseRequestedSurfaceLayout = true;
             requestLayout();
         }
+    }
+
+    /**
+     * Callback used to receive various status updates on the {@link TvAdView}.
+     * @hide
+     */
+    public abstract static class TvAdCallback {
     }
 }

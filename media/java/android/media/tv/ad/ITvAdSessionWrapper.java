@@ -16,8 +16,13 @@
 
 package android.media.tv.ad;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.tv.TvTrackInfo;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -30,6 +35,8 @@ import android.view.Surface;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+
+import java.util.List;
 
 /**
  * Implements the internal ITvAdSession interface.
@@ -48,6 +55,16 @@ public class ITvAdSessionWrapper
     private static final int DO_CREATE_MEDIA_VIEW = 4;
     private static final int DO_RELAYOUT_MEDIA_VIEW = 5;
     private static final int DO_REMOVE_MEDIA_VIEW = 6;
+    private static final int DO_START_AD_SERVICE = 7;
+    private static final int DO_STOP_AD_SERVICE = 8;
+    private static final int DO_RESET_AD_SERVICE = 9;
+    private static final int DO_SEND_CURRENT_VIDEO_BOUNDS = 10;
+    private static final int DO_SEND_CURRENT_CHANNEL_URI = 11;
+    private static final int DO_SEND_TRACK_INFO_LIST = 12;
+    private static final int DO_SEND_CURRENT_TV_INPUT_ID = 13;
+    private static final int DO_SEND_SIGNING_RESULT = 14;
+    private static final int DO_NOTIFY_ERROR = 15;
+    private static final int DO_NOTIFY_TV_MESSAGE = 16;
 
     private final HandlerCaller mCaller;
     private TvAdService.Session mSessionImpl;
@@ -117,6 +134,52 @@ public class ITvAdSessionWrapper
                 mSessionImpl.removeMediaView(true);
                 break;
             }
+            case DO_START_AD_SERVICE: {
+                mSessionImpl.startAdService();
+                break;
+            }
+            case DO_STOP_AD_SERVICE: {
+                mSessionImpl.stopAdService();
+                break;
+            }
+            case DO_RESET_AD_SERVICE: {
+                mSessionImpl.resetAdService();
+                break;
+            }
+            case DO_SEND_CURRENT_VIDEO_BOUNDS: {
+                mSessionImpl.sendCurrentVideoBounds((Rect) msg.obj);
+                break;
+            }
+            case DO_SEND_CURRENT_CHANNEL_URI: {
+                mSessionImpl.sendCurrentChannelUri((Uri) msg.obj);
+                break;
+            }
+            case DO_SEND_TRACK_INFO_LIST: {
+                mSessionImpl.sendTrackInfoList((List<TvTrackInfo>) msg.obj);
+                break;
+            }
+            case DO_SEND_CURRENT_TV_INPUT_ID: {
+                mSessionImpl.sendCurrentTvInputId((String) msg.obj);
+                break;
+            }
+            case DO_SEND_SIGNING_RESULT: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.sendSigningResult((String) args.arg1, (byte[]) args.arg2);
+                args.recycle();
+                break;
+            }
+            case DO_NOTIFY_ERROR: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.notifyError((String) args.arg1, (Bundle) args.arg2);
+                args.recycle();
+                break;
+            }
+            case DO_NOTIFY_TV_MESSAGE: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.notifyTvMessage((Integer) args.arg1, (Bundle) args.arg2);
+                args.recycle();
+                break;
+            }
             default: {
                 Log.w(TAG, "Unhandled message code: " + msg.what);
                 break;
@@ -135,7 +198,17 @@ public class ITvAdSessionWrapper
 
     @Override
     public void startAdService() throws RemoteException {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_START_AD_SERVICE));
+    }
 
+    @Override
+    public void stopAdService() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_STOP_AD_SERVICE));
+    }
+
+    @Override
+    public void resetAdService() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_RESET_AD_SERVICE));
     }
 
     @Override
@@ -147,6 +220,48 @@ public class ITvAdSessionWrapper
     public void dispatchSurfaceChanged(int format, int width, int height) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageIIII(DO_DISPATCH_SURFACE_CHANGED, format, width, height, 0));
+    }
+
+    @Override
+    public void sendCurrentVideoBounds(@Nullable Rect bounds) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_CURRENT_VIDEO_BOUNDS, bounds));
+    }
+
+    @Override
+    public void sendCurrentChannelUri(@Nullable Uri channelUri) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_CURRENT_CHANNEL_URI, channelUri));
+    }
+
+    @Override
+    public void sendTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_TRACK_INFO_LIST, tracks));
+    }
+
+    @Override
+    public void sendCurrentTvInputId(@Nullable String inputId) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageO(DO_SEND_CURRENT_TV_INPUT_ID, inputId));
+    }
+
+    @Override
+    public void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_SEND_SIGNING_RESULT, signingId, result));
+    }
+
+    @Override
+    public void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_NOTIFY_ERROR, errMsg, params));
+    }
+
+    @Override
+    public void notifyTvMessage(int type, Bundle data) {
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_NOTIFY_TV_MESSAGE, type, data));
     }
 
     @Override

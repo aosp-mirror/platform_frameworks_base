@@ -23,7 +23,10 @@ import android.annotation.SystemService;
 import android.content.Context;
 import android.graphics.Rect;
 import android.media.tv.TvInputManager;
+import android.media.tv.TvTrackInfo;
 import android.media.tv.flags.Flags;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -252,6 +255,14 @@ public class TvAdManager {
             mSessionCallbackRecordMap = sessionCallbackRecordMap;
         }
 
+        public TvInputManager.Session getInputSession() {
+            return mInputSession;
+        }
+
+        public void setInputSession(TvInputManager.Session inputSession) {
+            mInputSession = inputSession;
+        }
+
         /**
          * Releases this session.
          */
@@ -406,6 +417,117 @@ public class TvAdManager {
             }
             try {
                 mService.startAdService(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void stopAdService() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.stopAdService(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void resetAdService() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.resetAdService(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendCurrentVideoBounds(@NonNull Rect bounds) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendCurrentVideoBounds(mToken, bounds, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendCurrentChannelUri(@Nullable Uri channelUri) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendCurrentChannelUri(mToken, channelUri, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendTrackInfoList(mToken, tracks, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendCurrentTvInputId(@Nullable String inputId) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendCurrentTvInputId(mToken, inputId, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void sendSigningResult(@NonNull String signingId, @NonNull byte[] result) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.sendSigningResult(mToken, signingId, result, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void notifyError(@NonNull String errMsg, @NonNull Bundle params) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyError(mToken, errMsg, params, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Notifies AD service session when a new TV message is received.
+         */
+        public void notifyTvMessage(int type, Bundle data) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.notifyTvMessage(mToken, type, data, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
