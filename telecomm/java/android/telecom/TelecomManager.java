@@ -1360,7 +1360,7 @@ public class TelecomManager {
     /**
      * Returns a list of {@link PhoneAccountHandle}s which can be used to make and receive phone
      * calls. The returned list includes those accounts which have been explicitly enabled by
-     * the user or other users visible to the user.
+     * the user or enabled by other users but visible to the user.
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @return A list of {@code PhoneAccountHandle} objects.
@@ -1486,7 +1486,7 @@ public class TelecomManager {
             return service.getCallCapablePhoneAccounts(includeDisabledAccounts,
                     mContext.getOpPackageName(), mContext.getAttributionTag(), true).getList();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
