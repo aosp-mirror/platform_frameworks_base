@@ -24,6 +24,7 @@ import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
 import android.os.Handler
 import android.util.Size
 import android.view.DisplayInfo
+import com.android.app.tracing.traceSection
 import com.android.internal.util.ArrayUtils
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.toDisplayRotation
@@ -130,12 +131,17 @@ constructor(
                         override fun onDisplayAdded(displayId: Int) {}
 
                         override fun onDisplayChanged(displayId: Int) {
-                            val displayInfo = getDisplayInfo()
-                            trySendWithFailureLogging(
-                                displayInfo,
-                                TAG,
-                                "Error sending displayInfo to $displayInfo"
-                            )
+                            traceSection(
+                                "DisplayStateRepository" +
+                                    ".currentRotationDisplayListener#onDisplayChanged"
+                            ) {
+                                val displayInfo = getDisplayInfo()
+                                trySendWithFailureLogging(
+                                    displayInfo,
+                                    TAG,
+                                    "Error sending displayInfo to $displayInfo"
+                                )
+                            }
                         }
                     }
                 displayManager.registerDisplayListener(
