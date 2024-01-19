@@ -406,7 +406,7 @@ public class SettingsProvider extends ContentProvider {
                     Process.THREAD_PRIORITY_BACKGROUND);
             mHandlerThread.start();
             mHandler = new Handler(mHandlerThread.getLooper());
-            mSettingsRegistry = new SettingsRegistry();
+            mSettingsRegistry = new SettingsRegistry(mHandlerThread.getLooper());
         }
         SettingsState.cacheSystemPackageNamesAndSystemSignature(getContext());
         synchronized (mLock) {
@@ -2876,8 +2876,8 @@ public class SettingsProvider extends ContentProvider {
 
         private String mSettingsCreationBuildId;
 
-        public SettingsRegistry() {
-            mHandler = new MyHandler(getContext().getMainLooper());
+        SettingsRegistry(Looper looper) {
+            mHandler = new MyHandler(looper);
             mGenerationRegistry = new GenerationRegistry(UserManager.getMaxSupportedUsers());
             mBackupManager = new BackupManager(getContext());
         }
