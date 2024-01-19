@@ -8373,6 +8373,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Broadcast Receiver listens to sufficient verifier broadcast from Package Manager
+            when installing new SDK. Verification of SDK code during installation time is run
+            to determine compatibility with privacy sandbox restrictions. -->
+        <receiver android:name="com.android.server.sdksandbox.SdkSandboxVerifierReceiver"
+                 android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_NEEDS_VERIFICATION"/>
+            </intent-filter>
+        </receiver>
+
         <service android:name="android.hardware.location.GeofenceHardwareService"
             android:permission="android.permission.LOCATION_HARDWARE"
             android:exported="false" />
