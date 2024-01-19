@@ -121,6 +121,7 @@ applications that come with the platform
         <permission name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"/>
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <permission name="android.permission.BIND_CELL_BROADCAST_SERVICE"/>
+        <permission name="android.permission.BIND_DOMAIN_SELECTION_SERVICE"/>
         <permission name="android.permission.BIND_IMS_SERVICE"/>
         <permission name="android.permission.BIND_SATELLITE_GATEWAY_SERVICE"/>
         <permission name="android.permission.BIND_SATELLITE_SERVICE"/>
