@@ -1699,6 +1699,37 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
+    @Parameters({
+        "true, true, 60",
+        "false, true, 50",
+        "true, false, 50"
+    })
+    public void testExternalDisplayMaxRefreshRate(boolean isRefreshRateSynchronizationEnabled,
+            boolean isExternalDisplay, float expectedMaxRenderFrameRate) {
+        when(mDisplayManagerFlags.isDisplaysRefreshRatesSynchronizationEnabled())
+                .thenReturn(isRefreshRateSynchronizationEnabled);
+        when(mResources.getBoolean(R.bool.config_refreshRateSynchronizationEnabled))
+                .thenReturn(isRefreshRateSynchronizationEnabled);
+        mInjector.mDisplayInfo.type =
+                isExternalDisplay ? Display.TYPE_EXTERNAL : Display.TYPE_INTERNAL;
+        mInjector.mDisplayInfo.displayId = DISPLAY_ID_2;
+
+        DisplayModeDirector director = createDirectorFromModeArray(TEST_MODES, DEFAULT_MODE_60);
+
+        SparseArray<Vote> votes = new SparseArray<>();
+        votes.put(Vote.PRIORITY_LOW_POWER_MODE, Vote.forRenderFrameRates(0, 50f));
+
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID_2, votes);
+
+        director.getDisplayObserver().onDisplayAdded(DISPLAY_ID_2);
+        director.injectVotesByDisplay(votesByDisplay);
+
+        var desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID_2);
+        assertThat(desiredSpecs.primary.render.max).isEqualTo(expectedMaxRenderFrameRate);
+    }
+
+    @Test
     public void testMinRefreshRate_FlagEnabled() {
         when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
                 .thenReturn(true);
