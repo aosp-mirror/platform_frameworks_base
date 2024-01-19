@@ -98,11 +98,15 @@ file evalutes to `true`.
 
     $ adb shell cmd statusbar echo -b SceneFramework:verbose
 
-# Look for the log statements from the framework:
+### Checking if the framework is enabled
+
+Look for the log statements from the framework:
 
 ```console
 $ adb logcat -v time SceneFramework:* *:S
 ```
+
+### Disabling the framework
 
 To **disable** the framework, simply turn off the main aconfig flag:
 
@@ -111,6 +115,11 @@ $ adb shell device_config put systemui com.android.systemui.scene_container fals
 ```
 
 ## Defining a scene
+
+By default, the framework ships with fully functional scenes as enumarated
+[here](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/src/com/android/systemui/scene/shared/model/SceneKey.kt).
+Should a variant owner or OEM want to replace or add a new scene, they could
+do so by defining their own scene. This section describes how to do that.
 
 Each scene is defined as an implementation of the
 [`ComposableScene`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/ComposableScene.kt)
@@ -305,3 +314,52 @@ top-level Dagger module at
 this puts together the scenes from `SceneModule`, the configuration from
 `SceneContainerConfigModule`, and the startable from
 `SceneContainerStartableModule`.
+
+## Integration Notes
+
+### Relationship to Jetpack Compose
+
+The scene framework depends on Jetpack Compose; therefore, compiling System UI with
+Jetpack Compose is required. However, because Jetpack Compose and Android Views
+[interoperate](https://developer.android.com/jetpack/compose/migrate/interoperability-apis/views-in-compose),
+the UI in each scene doesn't necessarily need to be a pure hierarchy of `@Composable`
+functions; instead, it's acceptable to use an `AndroidView` somewhere in the
+hierarchy of composable functions to include a `View` or `ViewGroup` subtree.
+
+#### Interoperability with Views
+The scene framework comes with built-in functionality to animate the entire scene and/or
+elements within the scene in-tandem with the actual scene transition progress.
+
+For example, as the user drags their finger down rom the top of the lockscreen,
+the shade scene becomes visible and gradually expands, the amount of expansion tracks
+the movement of the finger.
+
+That feature of the framework uses a custom `element(ElementKey)` Jetpack Compose
+`Modifier` to refer to elements within a scene.
+The transition builders then use the same `ElementKey` objects to refer to those elements
+and describe how they animate in-tandem with scene transitions. Because this is a
+Jetpack Compose `Modifier`, it means that, in order for an element in a scene to be
+animated automatically by the framework, that element must be nested within a pure
+`@Composable` hierarchy. The element itself is allowed to be a classic Android `View`
+(nested within a Jetpack Compose `AndroidView`) but all ancestors must be `@Composable`
+functions.
+
+### Notifications
+
+As of January 2024, the integration of notifications and heads-up notifications (HUNs)
+into the scene framework follows an unusual pattern. We chose this pattern due to migration
+risk and performance concerns but will eventually replace it with the more common element
+placement pattern that all other elements are following.
+
+The special pattern for notifications is that, instead of the notification list
+(`NotificationStackScrollLayout` or "NSSL", which also displays HUNs) being placed in the element
+hierarchy within the scenes that display notifications, the NSSL (which continues to be an Android View)
+"floats" above the scene container, rendering on top of everything. This is very similar to
+how NSSL is integrated with the legacy shade, prior to the scene framework.
+
+In order to render the NSSL as if it's part of the organic hierarchy of elements within its
+scenes, we control the NSSL's self-imposed effective bounds (e.g. position offsets, clip path,
+size) from `@Composable` elements within the normal scene hierarchy. These special
+"placeholder" elements can be found
+[here](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/notifications/ui/composable/Notifications.kt).
+
