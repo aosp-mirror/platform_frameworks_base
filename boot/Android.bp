@@ -29,6 +29,7 @@ soong_config_module_type {
     config_namespace: "AUTO",
     bool_variables: [
         "car_bootclasspath_fragment",
+        "release_crashrecovery_module",
     ],
     properties: [
         "fragments",
@@ -152,6 +153,15 @@ custom_platform_bootclasspath {
                 {
                     apex: "com.android.car.framework",
                     module: "com.android.car.framework-bootclasspath-fragment",
+                },
+            ],
+        },
+        release_crashrecovery_module: {
+            fragments: [
+                // only used when crashrecovery is enabled
+                {
+                    apex: "com.android.crashrecovery",
+                    module: "com.android.crashrecovery-bootclasspath-fragment",
                 },
             ],
         },
